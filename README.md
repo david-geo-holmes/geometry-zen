@@ -2,7 +2,7 @@
 
 Geometry Zen is an online application for learning and researching Physics and Engineering using Geometric Algebra with Python programming and WebGL.
 
-## Install
+## Install and Development
 
 ```sh
   $ git clone git://github.com/david-geo-holmes/geometry-zen.git
@@ -19,6 +19,14 @@ _(Coming soon)_
 Geometry Zen is a single-page application that is run in a web browser.
 
 A WebGL-compliant browser such as Chrome is recommended.
+
+## Production
+
+```sh
+  $ lineman clean
+  
+  $ lineman build
+```
 
 ## Documentation
 _(Coming soon)_
@@ -46,10 +54,11 @@ _(Nothing yet)_
 
   $ lineman build
 
-  $lineman clean
+  $ lineman clean
 
   $ lineman spec
 ```
+### Lineman Features
 
 * local development server
 * compiles CoffeeScript
