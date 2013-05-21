@@ -35,17 +35,21 @@ _(Nothing yet)_
 ## Developer Notes
 
 ### Lineman Primer
+```sh
+  $ npm install -g lineman (sudo)
 
-npm install -g lineman (sudo)
+  $ lineman new <project name>
 
-lineman new <project name>
+  $ cd <project name>
 
-cd <project name>
+  $ lineman run
 
-lineman run
-lineman build
-lineman clean
-lineman spec
+  $ lineman build
+
+  $lineman clean
+
+  $ lineman spec
+```
 
 * local development server
 * compiles CoffeeScript
@@ -59,7 +63,11 @@ lineman spec
 * CI
 
 ## Tests
-_(Coming soon)_
+
+```sh
+  $ lineman spec
+```
+
 
 ## License
 (The MIT License)
