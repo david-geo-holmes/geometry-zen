@@ -1,0 +1,176 @@
+<div id="editor">
+  <header>
+    <div class="navbar">
+      <nav class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="#">Geometry Zen</a>
+          <ul class="nav pull-left">
+            <li class="divider-vertical"></li>
+            <li>
+              <button ng-click="save()" class="btn btn-primary">
+                Save
+              </button>
+            </li>
+            <li class="divider-vertical"></li>
+            <li>
+              <button ng-click="new()" class="btn btn-success">
+                <i class="icon-file icon-white"></i>&nbsp;New
+              </button>
+            </li>
+            <li class="divider-vertical"></li>
+            <li>
+              <button ng-click="run()" class="btn btn-inverse">
+                <i class="icon-play icon-white"></i>&nbsp;Run
+              </button>
+            </li>
+          </ul>
+          <ul class="nav pull-right">
+            <li class="divider-vertical"></li>
+            <li>
+              <button ng-click="login()" class="btn btn-link">Log In</button>
+            </li>
+            <li class="divider-vertical"></li>
+            <li>
+              <button ng-click="signup()" class="btn btn-link">Sign Up</button>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container-fluid">
+
+    <div class="row-fluid">
+      <div class="span5">
+        <ul class="nav nav-tabs" id="my-editor-tabs">
+          <li><a href="#program" data-toggle="tab">Program</a></li>
+        </ul>
+        <div class="tab-content">
+          <div class="tab-pane" id="program">
+            <textarea id="code" cols="80" rows="5" ng-model="program"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="span7">
+        <ul class="nav nav-tabs" id="my-tabs">
+          <li><a href="#geometry" data-toggle="tab">Geometry</a></li>
+          <li><a href="#printer" data-toggle="tab">Printer</a></li>
+        </ul>
+        <div class="tab-content">
+          <div class="tab-pane" id="geometry">
+            <canvas id="my-canvas" width="800" height="600">
+              Your browser does not support the <a href="http://www.w3.org/html/wg/html5/">HTML5</a> canvas element.
+            </canvas>
+          </div>
+          <div class="tab-pane" id="printer">
+            <pre id="my-output" ></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    $('#my-editor-tabs a[href="#program"]').tab('show');
+    $('#my-tabs a[href="#geometry"]').tab('show');
+  </script>
+  <script>
+  var editor = null;
+    function outputHandler(text) {
+      var mypre = document.getElementById("my-output");
+      mypre.innerHTML = mypre.innerHTML + text;
+    }
+
+    function builtinRead(x) {
+      if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined) {
+        throw "File not found: '" + x + "'";
+      }
+      return Sk.builtinFiles["files"][x];
+    }
+
+    function run() {
+      var prog = $.trim(editor.getValue());
+      // Clear the output
+      document.getElementById("my-output").innerHTML = '';
+      Sk.canvas = "my-canvas";
+      Sk.pre = "my-output";
+      Sk.configure({"output":outputHandler, "read":builtinRead});
+      try {
+        if (prog.trim().length > 0) {
+          eval(Sk.importMainWithBody("<stdin>", false, prog.trim()));
+        }
+      }
+      catch(e) {
+        alert(e.message);
+      }
+    }
+    function save() {
+      alert("Save is not yet implemented.");
+    }
+    function login() {
+      alert("Login is not yet implemented.");
+    }
+  </script>
+  <script>
+    function winHeight() {
+      return window.innerHeight || (document.documentElement || document.body).clientHeight;
+    }
+    function isFullScreen(cm) {
+      return /\bCodeMirror-fullscreen\b/.test(cm.getWrapperElement().className);
+    }
+    function setFullScreen(cm, full) {
+      var wrapperElement = cm.getWrapperElement();
+      if (full) {
+        wrapperElement.className += " CodeMirror-fullscreen";
+        wrapperElement.style.height = winHeight() + "px";
+        document.documentElement.style.overflow = "hidden";
+      }
+      else {
+        wrapperElement.className = wrapperElement.className.replace(" CodeMirror-fullscreen", "");
+        wrapperElement.style.height = "600px";
+        document.documentElement.style.overflow = "";
+      }
+      cm.refresh();
+    }
+    CodeMirror.on(window, "resize", function() {
+      var showing = document.body.getElementsByClassName("CodeMirror-fullscreen")[0];
+      if (!showing) return;
+      showing.CodeMirror.getWrapperElement().style.height = winHeight() + "px";
+    });
+  </script>
+  <script>
+    $(document).ready(function() {
+      console.log("Loading the editor...");
+      editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+        "autofocus": true,
+        "indentUnit": 2,
+        "lineNumbers": true,
+        "lineWrapping": true,
+        "autoMatchParens": true,
+        "parserConfig": {"pythonVersion": 2, "strictErrors": true},
+        "theme": "twilight",
+        "extraKeys" : {
+          "Tab": function(cm) {
+            var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
+            cm.replaceSelection(spaces, "end", "+input");
+          },
+          "Ctrl-Enter": function(cm) {
+            run();
+          },
+          "Ctrl-S": function(cm) {
+            save();
+          },
+          "F11": function(cm) {
+            // Toggle the editor full screen mode.
+            setFullScreen(cm, !isFullScreen(cm));
+          },
+          "Esc": function(cm) {
+            // Return from full screen mode.
+            if (isFullScreen(cm)) setFullScreen(cm, false);
+          }
+        }
+      });
+      setFullScreen(editor, false);
+    });
+  </script>
+</div>

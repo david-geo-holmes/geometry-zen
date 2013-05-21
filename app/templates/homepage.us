@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <title>Geometry Zen - Looking at the universe from a Geometric Algebra perspective</title>
+
+    <meta name="author" edit="David Holmes"></meta>
+    <meta name="copyright" content=""></meta>
+    <meta name="description" content=""></meta>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
+
+    <link rel="stylesheet" type="text/css" href="<%= css %>" media="all" />
+  </head>
+  <!--body oncontextmenu="return false;" style="cursor: default;"-->
+  <body>
+    <script type="text/javascript" src="<%= js %>"></script>
+    <div id="view" ng-view></div>
+  </body>
+</html>
