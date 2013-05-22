@@ -1,6 +1,6 @@
 angular.module("app").config(['$routeProvider', ($routeProvider) ->
 
-  $routeProvider.when '/home',
+  $routeProvider.when '/',
     templateUrl: 'angular/home.html'
     controller: 'HomeController'
 
@@ -12,5 +12,5 @@ angular.module("app").config(['$routeProvider', ($routeProvider) ->
     templateUrl: 'angular/browse.html'
     controller: 'BrowseController'
 
-  $routeProvider.otherwise redirectTo: '/home'
+  $routeProvider.otherwise redirectTo: '/'
 ])

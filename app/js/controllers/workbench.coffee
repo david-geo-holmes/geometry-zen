@@ -1,4 +1,4 @@
-angular.module("app").controller 'WorkbenchController', ['$scope', '$location', 'Authentication', ($scope, $location, authentication) ->
+angular.module("app").controller 'WorkbenchController', ['$scope', '$location', ($scope, $location) ->
 
   $scope.program = "from geometricalgebra import *\nstart()"
 
@@ -10,8 +10,4 @@ angular.module("app").controller 'WorkbenchController', ['$scope', '$location', 
 
   $scope.run = () ->
     alert("I'm sorry, Dave. I'm afraid I can't do that.")
-
-  $scope.login = () -> authentication.login()
-
-  $scope.logout = () -> authentication.logout()
 ]
