@@ -1,1 +1,0 @@
-angular.module("app").controller 'ProjectsController', ['$scope', '$location', ($scope, $location) -> $scope.title = "Projects"]
