@@ -1,6 +1,4 @@
-angular.module("app", ['underscore']).run(['$rootScope', 'Models', ($rootScope, models) ->
-
-  $rootScope.anonymous = true
+angular.module("app", ['jquery', 'underscore']).run(['$rootScope', 'Models', 'Authentication', ($rootScope, models, auth) ->
 
   $rootScope.log = (thing) ->
     console.log thing
@@ -8,10 +6,9 @@ angular.module("app", ['underscore']).run(['$rootScope', 'Models', ($rootScope, 
   $rootScope.alert = (thing) ->
     alert(thing)
 
-  $rootScope.login = (authenticate) ->
-    if (authenticate)
-      models.authenticate()
-    else
-      models.logout()
-    $rootScope.anonymous = not authenticate
+  $rootScope.isLoggedIn = () -> models.isLoggedIn()
+
+  $rootScope.loginEnabled = () -> not models.isLoggedIn()
+
+  $rootScope.logout = () -> models.logout()
 ])

@@ -7,6 +7,7 @@
 //     http://documentcloud.github.com/underscore
 
 (function() {
+console.log("Loading Underscore 1.3.3 []");
 
   // Baseline setup
   // --------------

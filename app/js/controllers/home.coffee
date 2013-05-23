@@ -1,7 +1,9 @@
-angular.module("app").controller('HomeController', ['$scope', '$location', 'Models', ($scope, $location, models) ->
+angular.module("app").controller('HomeCtrl', ['$scope', '$location', 'Models','cookie', ($scope, $location, models, cookie) ->
 
   # The controller scope is instantiated for each page load.
-  $scope.anonymous = not models.authenticate()
+  models.handleGitHubCallback (err, token) ->
+    if err
+      alert err.message
 
   $scope.workbench = () -> $location.path('/workbench')
 

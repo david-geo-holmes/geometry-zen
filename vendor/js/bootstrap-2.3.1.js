@@ -19,6 +19,7 @@
 
 
 !function ($) {
+console.log("Loading Bootstrap 2.3.1 [jQuery]");
 
   "use strict"; // jshint ;_;
 

@@ -5,6 +5,7 @@
  */
 (function(window, document, undefined) {
 'use strict';
+console.log("Loading AngularJS 1.1.4");
 
 ////////////////////////////////////
 

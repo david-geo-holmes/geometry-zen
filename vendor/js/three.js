@@ -4,6 +4,7 @@
  */
 
 var THREE = THREE || { REVISION: '58' };
+console.log("Loading THREE 58");
 
 self.console = self.console || {
 

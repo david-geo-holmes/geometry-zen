@@ -12,6 +12,7 @@
  * Date: 2013-04-18
  */
 (function( window, undefined ) {
+console.log("Loading jQuery 2.0.0");
 
 // Can't do this because several apps including ASP.NET trace
 // the stack via arguments.caller.callee and Firefox dies if

@@ -1,7 +1,8 @@
 {
   "name"        : "geometry-zen",
-  "title"       : "Geomeytry Zen is an online application for learning Physics and Engineering using Geometric Algebra, Python programming, and WebGL visualization.",
   "version"     : "0.0.1",
+  "description" : "",
+  "title"       : "Geometry Zen is an online application for learning Physics and Engineering using Geometric Algebra, Python programming, and WebGL visualization.",
   "private"     : true,
   "author"      : {"name": "David Holmes"},
   "dependencies": {"lineman": "~0.6.x", "grunt-angular-templates": "0.3.x"},

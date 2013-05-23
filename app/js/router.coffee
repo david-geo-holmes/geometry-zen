@@ -1,16 +1,20 @@
-angular.module("app").config(['$routeProvider', ($routeProvider) ->
+angular.module("app").config(['$routeProvider', '$locationProvider', ($routeProvider, $locationProvider) ->
 
   $routeProvider.when '/',
     templateUrl: 'angular/home.html'
-    controller: 'HomeController'
+    controller: 'HomeCtrl'
 
-  $routeProvider.when '/workbench',
+  $routeProvider.when '/workbench/',
     templateUrl: 'angular/workbench.html'
-    controller: 'WorkbenchController'
+    controller: 'WorkbenchCtrl'
 
   $routeProvider.when '/browse',
     templateUrl: 'angular/browse.html'
-    controller: 'BrowseController'
+    controller: 'BrowseCtrl'
 
   $routeProvider.otherwise redirectTo: '/'
+
+  # If you don't do this, your URLs will be contain '#'.
+  # But there's also a problem refreshing the browser from the workbench or browse pages.
+  # $locationProvider.html5Mode(true)
 ])
