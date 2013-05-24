@@ -42,10 +42,16 @@ angular.module("app").controller('HomeCtrl', ['$rootScope','$scope', '$http', '$
       return
 
   $scope.workbench = ->
-    $location.path('/workbench')
+    $location.path("/workbench")
     return
 
   $scope.browse = ->
-    $location.path('/browse')
+    $location.path("/browse")
+    return
+
+  $scope.user = ->
+    path = "/users/#{$scope.username()}"
+    console.log path
+    $location.path(path)
     return
 ])
