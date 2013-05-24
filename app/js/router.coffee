@@ -12,9 +12,9 @@ angular.module("app").config(['$routeProvider', '$locationProvider', ($routeProv
     templateUrl: 'angular/browse.html'
     controller: 'BrowseCtrl'
 
-#  $routeProvider.when '/callback',
-#    templateUrl: 'angular/callback.html'
-#    controller: 'CallbackCtrl'
+  $routeProvider.when '/users/:userName/repositories/:repoName',
+    templateUrl: 'angular/workbench.html'
+    controller: 'WorkbenchCtrl'
 
   $routeProvider.when '/users/:username',
     templateUrl: 'angular/user.html'
