@@ -79,8 +79,6 @@ angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window','$', '_',
       alert(e.message)
     finally
 
-#  layout.hide('south')
-
   if editor
     setFullScreen(editor, false)
   else

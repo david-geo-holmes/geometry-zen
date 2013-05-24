@@ -1,4 +1,8 @@
-angular.module("app", ['jquery', 'underscore']).run(['$rootScope', 'Models', 'Authentication', ($rootScope, models, auth) ->
+angular.module("app", ['async', 'jquery', 'underscore']).run(['$rootScope','$location', 'GitHub', 'Authentication', ($rootScope, $location, github, auth) ->
+
+  $rootScope.user = 
+    name: "Dav Hol"
+    login: "d-g-h"
 
   $rootScope.log = (thing) ->
     console.log thing
@@ -6,9 +10,11 @@ angular.module("app", ['jquery', 'underscore']).run(['$rootScope', 'Models', 'Au
   $rootScope.alert = (thing) ->
     alert(thing)
 
-  $rootScope.isLoggedIn = () -> models.isLoggedIn()
+  $rootScope.isLoggedIn = () -> github.isLoggedIn()
 
-  $rootScope.loginEnabled = () -> not models.isLoggedIn()
+  $rootScope.loginEnabled = () -> not github.isLoggedIn()
 
-  $rootScope.logout = () -> models.logout()
+  $rootScope.logout = () -> github.logout()
+
+  $rootScope.username = () -> github.username()
 ])

@@ -32,6 +32,7 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
   },
   js: {
     vendor: [
+      "vendor/js/async.js",
       "vendor/js/jquery-1.9.1.js",
       "vendor/js/jquery-ui-1.9.1.js",
       "vendor/js/jquery.layout-1.3.0.js",

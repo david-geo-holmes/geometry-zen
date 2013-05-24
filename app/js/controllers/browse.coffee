@@ -1,2 +1,2 @@
-angular.module("app").controller 'BrowseCtrl', ['$scope', '$location', ($scope, $location) ->
+angular.module("app").controller 'BrowseCtrl', ['$scope', '$window', '$location', ($scope, $window, $location) ->
 ]

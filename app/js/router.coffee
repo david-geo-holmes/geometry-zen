@@ -4,7 +4,7 @@ angular.module("app").config(['$routeProvider', '$locationProvider', ($routeProv
     templateUrl: 'angular/home.html'
     controller: 'HomeCtrl'
 
-  $routeProvider.when '/workbench/',
+  $routeProvider.when '/workbench',
     templateUrl: 'angular/workbench.html'
     controller: 'WorkbenchCtrl'
 
@@ -12,9 +12,15 @@ angular.module("app").config(['$routeProvider', '$locationProvider', ($routeProv
     templateUrl: 'angular/browse.html'
     controller: 'BrowseCtrl'
 
+#  $routeProvider.when '/callback',
+#    templateUrl: 'angular/callback.html'
+#    controller: 'CallbackCtrl'
+
+  $routeProvider.when '/users/:username',
+    templateUrl: 'angular/user.html'
+    controller: 'UserCtrl'
+
   $routeProvider.otherwise redirectTo: '/'
 
-  # If you don't do this, your URLs will be contain '#'.
-  # But there's also a problem refreshing the browser from the workbench or browse pages.
-  # $locationProvider.html5Mode(true)
+  $locationProvider.html5Mode(true)
 ])

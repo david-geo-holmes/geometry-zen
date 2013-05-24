@@ -1,4 +1,4 @@
 <div ng-switch="isLoggedIn()">
-  <a ng-switch-when="false" class="btn btn-success" href="https://github.com/login/oauth/authorize?client_id=c74d72a5b57bba9d5118&scope=repo,user,gist">Log in to GitHub</a>
-  <button ng-switch-default class="btn btn-inverse" ng-click="logout()"><i class="icon-off icon-white"></i>&nbsp;Log out</button>
+  <a ng-switch-when="false" class="btn btn-success" href="https://github.com/login/oauth/authorize?client_id=c74d72a5b57bba9d5118&scope=repo,user,gist">Authorize with GitHub</a>
+  <button ng-switch-default class="btn btn-danger" ng-click="logout()"><i class="icon-off icon-white"></i>&nbsp;{{username()}}</button>
 </div>

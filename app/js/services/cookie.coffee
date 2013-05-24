@@ -21,7 +21,7 @@ angular.module("app").factory('cookie', [() ->
 
   setItem: (name, value, end, path, domain, secure) ->
     if not name or /^(?:expires|max\-age|path|domain|secure)$/i.test(name)
-      return false
+      throw new Error("Illegal name")
 
     if end
       switch end.constructor
@@ -40,7 +40,7 @@ angular.module("app").factory('cookie', [() ->
     secure = if secure then "; secure" else ""
     cookie = "#{escape(name)}=#{escape(value)}#{expires}#{domain}#{path}#{secure}"
     document.cookie = cookie
-    return true;
+    return
 
   removeItem: (name, path) ->
     if not name or not this.hasItem name
