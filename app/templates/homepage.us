@@ -13,8 +13,13 @@
 
     <link rel="stylesheet" type="text/css" href="<%= css %>" media="all" />
   </head>
-  <body oncontextmenu="return false;" style="cursor: default;">
+  <body>
     <script type="text/javascript" src="<%= js %>"></script>
     <div id="view" ng-view></div>
+    <footer class="footer">
+      <div class="container">
+        <p>Designed and built for the next generation by <a href="http://twitter.com/geoalgebra" target="_blank">@geoalgebra</a>.</p>
+      </div>
+    </footer>
   </body>
 </html>

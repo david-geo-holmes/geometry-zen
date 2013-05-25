@@ -1,6 +1,8 @@
 /*
  * Default Layout Theme
  *
+ * THIS HAS BEEN MODIFIED TO REMOVE THE body STYLING.
+ *
  * Created for jquery.layout 
  *
  * Copyright (c) 2010 
@@ -13,16 +15,6 @@
  * Last Updated: 2010-02-10
  * NOTE: For best code readability, view this with a fixed-space font and tabs equal to 4-chars
  */
-
-/*
- *	DEFAULT FONT
- *	Just to make demo-pages look better - not actually relevant to Layout!
- */
-body {
-	font-family: Geneva, Arial, Helvetica, sans-serif;
-	font-size:   100%;
-	*font-size:  80%;
-}
 
 /*
  *	PANES & CONTENT-DIVs
