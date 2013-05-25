@@ -77,36 +77,14 @@
         </div>
         <div class="span9">
           <table class="table table-striped">
-            <tr>
+            <tr ng-repeat="repo in repos">
               <td>
-                <h3><a href="/users/david-geo-holmes/repositories/geometry-zen">geometry-zen</a></h3>
-                <p>Geometry Zen is an online application for learning and researching Physics and Engineering using Geometric Algebra with Python programming and WebGL.</p>
+                <h3><a href="/users/david-geo-holmes/repos/{{repo.name}}">{{repo.name}}</a></h3>
+                <p>{{repo.description}}</p>
               </td>
               <td>
                 <ul>
-                  <li>JavaScript</li>
-                </ul>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <h3><a href="/users/david-geo-holmes/repositories/geometry-zen-examples">geometry-zen-examples</a></h3>
-                <p>Geometry Zen Examples</p>
-              </td>
-              <td>
-                <ul>
-                  <li>Python</li>
-                </ul>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <h3><a href="/users/david-geo-holmes/repositories/geometry-gatekeeper">geometry-zen-gatekeeper</a></h3>
-                <p>Geometry Zen Gatekeeper</p>
-              </td>
-              <td>
-                <ul>
-                  <li>JavaScript</li>
+                  <li>{{repo.language}}</li>
                 </ul>
               </td>
             </tr>

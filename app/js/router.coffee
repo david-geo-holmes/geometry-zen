@@ -12,7 +12,7 @@ angular.module("app").config(['$routeProvider', '$locationProvider', ($routeProv
     templateUrl: 'angular/browse.html'
     controller: 'BrowseCtrl'
 
-  $routeProvider.when '/users/:userName/repositories/:repoName',
+  $routeProvider.when '/users/:owner/repos/:repo',
     templateUrl: 'angular/workbench.html'
     controller: 'WorkbenchCtrl'
 

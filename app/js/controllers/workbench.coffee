@@ -1,6 +1,9 @@
-angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window','$', '_', ($scope, $window, $, _) ->
+angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window', '$routeParams', '$', '_', ($scope, $window, $routeParams, $, _) ->
 
-  console.log("Entering WorkbenchCtrl");
+  if ($routeParams.owner and $routeParams.repo)
+    # We were invoked by specifying an existing repository
+  else
+    # We were invoked without specifying a repository.
 
   outputHandler = (text) ->
     mypre = $window.document.getElementById("my-output")
@@ -90,7 +93,6 @@ angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window','$', '_',
       showing.CodeMirror.getWrapperElement().style.height = winHeight() + "px"
 
   $scope.new()
-
-  console.log "Leaving WorkbenchCtrl"
+  
   return
 ]

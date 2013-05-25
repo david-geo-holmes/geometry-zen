@@ -1,8 +1,7 @@
-angular.module("app", ['async', 'jquery', 'underscore']).run(['$rootScope','$location', 'GitHub', 'Authentication', ($rootScope, $location, github, auth) ->
+angular.module("app", ['async', 'jquery', 'underscore']).run(['$rootScope','$location', 'GitHub', 'cookie', ($rootScope, $location, github, cookie) ->
 
-  $rootScope.user = 
-    name: "Dav Hol"
-    login: "d-g-h"
+  GITHUB_TOKEN_COOKIE_NAME = 'github-token'
+  GITHUB_LOGIN_COOKIE_NAME = 'github-login'
 
   $rootScope.log = (thing) ->
     console.log thing
@@ -10,11 +9,11 @@ angular.module("app", ['async', 'jquery', 'underscore']).run(['$rootScope','$loc
   $rootScope.alert = (thing) ->
     alert(thing)
 
-  $rootScope.isLoggedIn = () -> github.isLoggedIn()
+  $rootScope.isLoggedIn = () -> cookie.hasItem(GITHUB_TOKEN_COOKIE_NAME)
 
-  $rootScope.loginEnabled = () -> not github.isLoggedIn()
+  $rootScope.loginEnabled = () -> not cookie.hasItem(GITHUB_TOKEN_COOKIE_NAME)
 
-  $rootScope.logout = () -> github.logout()
+  $rootScope.logout = () -> cookie.removeItem(GITHUB_TOKEN_COOKIE_NAME)
 
-  $rootScope.username = () -> github.username()
+  $rootScope.username = () -> cookie.getItem(GITHUB_LOGIN_COOKIE_NAME)
 ])

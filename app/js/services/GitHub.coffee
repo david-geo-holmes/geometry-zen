@@ -1,25 +1,32 @@
-angular.module("app").factory('GitHub', ['$http', '$window', '$location', 'cookie', '$', ($http, $window, $location, cookie, $) ->
+angular.module("app").factory('GitHub', ['$http', '$', '_', ($http, $, _) ->
 
-  GITHUB_TOKEN_COOKIE_NAME = 'github-token'
-  GITHUB_LOGIN_COOKIE_NAME = 'github-login'
+  GITHUB_PROTOCOL = 'https'
+  GITHUB_DOMAIN = 'api.github.com'
+
+  class User
+    constructor: (name, login) ->
+      @name = name
+      @login = login
+
+  class Repo
+    constructor: (name, description, language) ->
+      @name = name
+      @description = description
+      @language = language
 
   getUser: (token, done) ->
-    $.ajax(
-      type: 'GET'
-      url: 'https://api.github.com/user'
-      dataType: 'json'
-      contentType: 'application/x-www-form-urlencoded'
-      headers: Authorization: "token #{token}"
-      success: (user) ->
-        # There's lots of other stuff that we might want to cache, but for now just keep the username.
-        done(null, {name: user.name, login: user.login})
-      error: (err) ->
-        done(new Error("I'm sorry Dave..."))
-    )
+    $http(method: 'GET', url: "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/user", headers: Authorization: "token #{token}")
+    .success (user, status, headers, config) ->
+      done(null, new User(user.name, user.login))
+    .error (data, status, headers, config) ->
+      done(new Error("Something is rotten in Denmark"))
 
-  isLoggedIn: () -> cookie.hasItem(GITHUB_TOKEN_COOKIE_NAME)
-
-  logout: () -> cookie.removeItem(GITHUB_TOKEN_COOKIE_NAME)
-
-  username: () -> cookie.getItem(GITHUB_LOGIN_COOKIE_NAME)
+  getUserRepos: (token, done) ->
+    $http(method: 'GET', url: "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/user/repos", headers: Authorization: "token #{token}")
+    .success (repos, status, headers, config) ->
+      console.log JSON.stringify(repos[0], undefined, 2)
+      repos = _.map(repos, (repo) -> new Repo(repo.name, repo.description, repo.language))
+      done(null, repos)
+    .error (data, status, headers, config) ->
+      done(new Error("Something is rotten in Denmark"))
 ])
