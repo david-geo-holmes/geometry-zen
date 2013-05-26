@@ -1,6 +1,8 @@
 angular.module("app").controller('HomeCtrl', ['$rootScope','$scope', '$http', '$location', '$window', 'GitHub','cookie', ($rootScope, $scope, $http, $location, $window, github, cookie) ->
 
-  GATEKEEPER_DOMAIN = "http://localhost:9999"
+  # The Gatekeeper is being served from the same server as this code.
+  GATEKEEPER_DOMAIN = "#{$location.protocol()}://#{$location.host()}:#{$location.port()}"
+
   # TODO: This symbolic constant also appears in the GitHub service (DRY).
   GITHUB_TOKEN_COOKIE_NAME = 'github-token'
   GITHUB_LOGIN_COOKIE_NAME = 'github-login'

@@ -1,10 +1,33 @@
 {
-  "name"        : "geometry-zen",
-  "version"     : "0.0.1",
-  "description" : "",
-  "title"       : "Geometry Zen is an online application for learning Physics and Engineering using Geometric Algebra, Python programming, and WebGL visualization.",
-  "private"     : true,
-  "author"      : {"name": "David Holmes"},
-  "dependencies": {"lineman": "~0.6.x", "grunt-angular-templates": "0.3.x"},
-  "engines"     : {"node": "~>0.10.5", "npm": "~>1.2.18"}
+  "name": "geometry-zen",
+  "version": "0.0.1",
+  "description": "Geometry Zen is an online application for learning Physics and Engineering using Geometric Algebra, Python programming, and WebGL visualization.",
+  "url": "http://github.com/david-geo-holmes/geometry-zen",
+  "keywords": ["geometric", "algebra", "geometry", "zen"],
+  "author": {
+    "name": "David Holmes"
+  },
+  "contributors": [],
+  "scripts": {
+    "start": "NODE_ENV=development nodemon server.js"
+  },
+  "dependencies": {
+    "coffee-script": "~1.6.x",
+    "express": "~3.2.x",
+    "jade": "~0.30.x",
+    "lactate": "~0.13.x",
+    "nconf": "~0.6.x",
+    "lineman": "~0.7.x",
+    "grunt-angular-templates": "~0.3.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/david-geo-holmes/geometry-zen.git"
+  },
+  "readmeFilename": "README.md",
+  "engines": {
+    "node": "~>0.10.x",
+    "npm": "~>1.2.x"
+  },
+  "main": "server.js"
 }
