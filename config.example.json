@@ -1,10 +1,10 @@
 {
-  "host": "localhost",
-  "port": 8080,
-  "oauth_client_id": "GITHUB_APPLICATION_CLIENT_ID",
-  "oauth_client_secret": "GITHUB_APPLICATION_CLIENT_SECRET",
-  "oauth_host": "github.com",
-  "oauth_port": 443,
-  "oauth_path": "/login/oauth/access_token",
-  "oauth_method": "POST"
+  "HOST": "localhost",
+  "PORT": 8080,
+  "GITHUB_APPLICATION_CLIENT_ID": "???",
+  "GITHUB_APPLICATION_CLIENT_SECRET": "???",
+  "GITHUB_HOST": "github.com",
+  "GITHUB_PORT": 443,
+  "GITHUB_PATH": "/login/oauth/access_token",
+  "GITHUB_METHOD": "POST"
 }

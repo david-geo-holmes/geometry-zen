@@ -6,3 +6,6 @@
 /dist
 /generated
 config.development.json
+config.local.json
+config.production.json
+config.json

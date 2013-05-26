@@ -1,17 +1,15 @@
 nconf = require("nconf")
 
-env = process.env.NODE_ENV or "development"
+defaultConfig =
+  PORT: 8080,
+  GITHUB_HOST: "github.com",
+  GITHUB_PORT: 443,
+  GITHUB_PATH: "/login/oauth/access_token",
+  GITHUB_METHOD: "POST"
 
-console.log "env: #{env}"
 
-nconf.use("memory")
-  .argv()
-  .env()
-  .file({file: "config.#{env}.json"})
-  .defaults({
-    port: 8080
-  })
+nconf.use("memory").argv().env().defaults(defaultConfig)
 
-unless host = nconf.get("host")
-  console.error "The 'host' option is required."
-  process.exit(1)
+#env = process.env.NODE_ENV or "local"
+#console.log "using NODE_ENV=#{env}"
+#nconf.use("memory").argv().env().file(file: "config.#{env}.json").defaults(defaultConfig)
