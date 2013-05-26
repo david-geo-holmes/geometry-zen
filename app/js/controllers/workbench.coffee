@@ -27,7 +27,7 @@ angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window', '$routeP
       document.documentElement.style.overflow = "hidden"
     else
       wrapperElement.className = wrapperElement.className.replace(" CodeMirror-fullscreen", "")
-      wrapperElement.style.height = "600px"
+      wrapperElement.style.height = "800px"
       document.documentElement.style.overflow = ""
     cm.refresh()
 
@@ -62,7 +62,10 @@ angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window', '$routeP
       editor.setValue("from geometricalgebra import *\n\n# Configuration\nball = Sphere(5)\n\n# Simulation\ndef tick():\n  global ball\n  ball.position = Vector3(0, 0, 0)\n\nstart()")
     # The layout is created in the directive, which happens after the controller has been initialized.
     if $scope.layout
-      $scope.layout.show('west')
+      if ($scope.hasFeature('gz:feature:github'))
+        $scope.layout.show('west')
+      else
+        $scope.layout.hide('west')
       $scope.layout.hide('east')
       $scope.layout.hide('south')
 

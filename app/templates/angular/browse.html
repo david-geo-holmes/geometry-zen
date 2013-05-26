@@ -8,11 +8,11 @@
             <li class="divider-vertical"></li>
           </ul>
           <ul class="nav pull-right">
-            <li class="divider-vertical"></li>
+            <li ng-show="hasFeature('gz:feature:search')" class="divider-vertical"></li>
             <li>
               <form-search></form-search>
             </li>
-            <li class="divider-vertical"></li>
+            <li ng-show="hasFeature('gz:feature:github')" class="divider-vertical"></li>
             <li>
               <github-authorize></github-authorize>
             </li>
