@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     
-    <title>Geometry Zen - Looking at the universe from a Geometric Algebra perspective</title>
+    <title>Geometry Zen - Looking at the multiverse from a Geometric Algebra perspective</title>
 
     <meta name="author" edit="David Holmes"></meta>
     <meta name="copyright" content=""></meta>
@@ -18,10 +18,7 @@
     <script type="text/javascript" src="<%= js %>"></script>
     <div id="holder">
       <div id="view" ng-view></div>
-      <footer class="footer">
-        <div class="container">
-          <p>Designed and built for the next generation by <a href="http://twitter.com/geoalgebra" target="_blank">@geoalgebra</a></p>
-        </div>
+      <footer>
       </footer>
     </div>
   </body>

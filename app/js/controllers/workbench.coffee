@@ -1,9 +1,17 @@
-angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window', '$routeParams', '$', '_', ($scope, $window, $routeParams, $, _) ->
+angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window', '$routeParams', '$', '_', 'GitHub', 'Base64', 'cookie', ($scope, $window, $routeParams, $, _, github, base64, cookie) ->
+
+  GITHUB_TOKEN_COOKIE_NAME = 'github-token'
+  token = cookie.getItem(GITHUB_TOKEN_COOKIE_NAME)
 
   if ($routeParams.owner and $routeParams.repo)
-    # We were invoked by specifying an existing repository
+    $scope.repo = name: $routeParams.repo
+    github.getContentsOfRepoByOwner token, $routeParams.owner, $routeParams.repo, (err, contents) ->
+      if not err
+        $scope.repo.files = contents
+      else
+        alert("Error retrieving repository contents")
   else
-    # We were invoked without specifying a repository.
+    $scope.repo = undefined
 
   outputHandler = (text) ->
     mypre = $window.document.getElementById("my-output")
@@ -84,6 +92,15 @@ angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window', '$routeP
     catch e
       alert(e.message)
     finally
+
+  $scope.edit = (path) ->
+    if editor
+      github.getFile token, $routeParams.owner, $routeParams.repo, path, (err, file) ->
+        if not err
+          editor.setValue base64.decode(file.content)
+        else
+          alert("Error retrieving the file")
+
 
   if editor
     setFullScreen(editor, false)

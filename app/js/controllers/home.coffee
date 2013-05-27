@@ -53,7 +53,6 @@ angular.module("app").controller('HomeCtrl', ['$rootScope','$scope', '$http', '$
 
   $scope.user = ->
     path = "/users/#{$scope.username()}"
-    console.log path
     $location.path(path)
     return
 ])
