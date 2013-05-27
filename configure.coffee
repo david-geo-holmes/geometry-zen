@@ -8,8 +8,8 @@ defaultConfig =
   GITHUB_METHOD: "POST"
 
 
-nconf.use("memory").argv().env().defaults(defaultConfig)
+#nconf.use("memory").argv().env().defaults(defaultConfig)
 
-#env = process.env.NODE_ENV or "local"
-#console.log "using NODE_ENV=#{env}"
-#nconf.use("memory").argv().env().file(file: "config.#{env}.json").defaults(defaultConfig)
+env = process.env.NODE_ENV or "local"
+console.log "using NODE_ENV=#{env}"
+nconf.use("memory").argv().env().file(file: "config.#{env}.json").defaults(defaultConfig)

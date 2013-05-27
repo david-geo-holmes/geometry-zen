@@ -8,6 +8,13 @@ qs = require("querystring")
 
 require "./configure"
 
+isProductionMode = () ->
+  switch process.env.NODE_ENV or "local"
+    when "local"
+      false
+    else
+      true
+
 app = module.exports = express()
 
 app.set "views", "#{__dirname}/views"
@@ -16,7 +23,8 @@ app.set "view options", layout: false
 
 app.use express.logger()
 
-app.use lactate.static "#{__dirname}/dist", "max age": "one week"
+# Serve out of dist or generated, depending upon the environment.
+app.use lactate.static "#{__dirname}/#{if isProductionMode() then 'dist' else 'generated'}", "max age": "one week"
 
 app.use express.cookieParser()
 app.use express.bodyParser()
@@ -64,4 +72,8 @@ app.get '/authenticate/:code', (req, res) ->
     res.json(if token then "token": token else "error": "bad_code");
 
 app.get "/*", (req, res) ->
-  res.render "index"
+  # Set a cookie to communicate the GitHub Client ID back to the client.
+  res.cookie('github-application-client-id', nconf.get("GITHUB_APPLICATION_CLIENT_ID"))
+  res.render "index",
+    css: "#{if isProductionMode() then 'css/app.min.css' else 'css/app.css'}"
+    js: "#{if isProductionMode() then 'js/app.min.js' else 'js/app.js'}"

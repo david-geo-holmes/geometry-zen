@@ -76,7 +76,7 @@
                 <large>{{marketing.name}}</large>
               </h1>
               <h1>
-                <small><em>Looking at the universe from a Geometric Algebra perspective</em></small>
+                <small><em>Looking at the multiverse from a Geometric Algebra perspective</em></small>
               </h1>
               <br/>
               <p><em>{{marketing.name}}</em> is an online tool providing <em>Hands-on Learning</em> of <em>Geometric Algebra and Geometric Calculus</em> to students and researchers in <em>Physics, Engineering, and Computer Graphics</em> using <em>Python programming</em> and <em>WebGL 3D Visualization</em>. It is the goal of this tool to make Geometric Algebra familiar to young science students and academia so that Geometric Algebra becomes the <em>standard</em> <em>Unified Mathematical Language for Physics and Engineering in the 21st Century</em>.</p>
@@ -84,7 +84,7 @@
             </div>
             <div class="text-right">
               <blockquote>
-                <p class="muted">...for geometry, you know, is the gate of science, and the gate is so low and small that one can only enter it as a little child.</p>
+                <p class="muted">...for geometry, you know, is the gate of science,<br/>and the gate is so low and small<br/>that one can only enter it as a little child.</p>
                 <small>William K. Clifford <cite title="Source Title"></cite></small>
               </blockquote>
             </div>
@@ -95,8 +95,8 @@
               <button ng-show="hasFeature('gz:feature:examples')" ng-click="browse()" class="btn btn-info">
                 <i class="icon-th icon-white"></i>&nbsp;Browse Examples
               </button>
-              <a ng-hide="!hasFeature('gz:feature:github') || isLoggedIn()" class="btn btn-success" href="https://github.com/login/oauth/authorize?client_id=c74d72a5b57bba9d5118&scope=repo,user,gist"><i class="icon-check icon-white"></i>&nbsp;Authorize with GitHub</a>
-              <button ng-show="hasFeature('gz:feature:github') && isLoggedIn()" ng-click="user()" class="btn btn-success">
+              <a ng-hide="!hasFeature('gz:feature:github') || isLoggedIn()" class="btn btn-success" href="https://github.com/login/oauth/authorize?client_id={{clientId()}}&amp;scope=repo,user,gist"><i class="icon-check icon-white"></i>&nbsp;Authorize with GitHub</a>
+              <button ng-show="hasFeature('gz:feature:github') &amp;&amp; isLoggedIn()" ng-click="user()" class="btn btn-success">
                 <i class="icon-list icon-white"></i>&nbsp;My {{marketing.name}} ({{username()}})
               </button>
             </div>
