@@ -4,6 +4,7 @@ angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window', '$routeP
   token = cookie.getItem(GITHUB_TOKEN_COOKIE_NAME)
 
   if ($routeParams.owner and $routeParams.repo)
+    $scope.owner = name: $routeParams.owner
     $scope.repo = name: $routeParams.repo
     github.getContentsOfRepoByOwner token, $routeParams.owner, $routeParams.repo, (err, contents) ->
       if not err
@@ -60,6 +61,12 @@ angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window', '$routeP
     console.log "The code element could not be found"
 
   $scope.save = () ->
+    content = base64.encode(editor.getValue())
+    github.putFile token, $routeParams.owner, $scope.repo.name, $scope.file.path, "My commit message.", content, $scope.file.sha, (err, response) ->
+      if not err
+        $scope.file.sha = response.content.sha
+      else
+        alert("Error saving file to repository: #{err}")
     $scope.layout.show('west')
     $scope.layout.hide('east')
     $scope.layout.hide('south')
@@ -97,6 +104,7 @@ angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window', '$routeP
     if editor
       github.getFile token, $routeParams.owner, $routeParams.repo, path, (err, file) ->
         if not err
+          $scope.file = file
           editor.setValue base64.decode(file.content)
         else
           alert("Error retrieving the file")

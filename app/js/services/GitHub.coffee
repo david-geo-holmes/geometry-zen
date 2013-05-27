@@ -42,4 +42,13 @@ angular.module("app").factory('GitHub', ['$http', '$', '_', ($http, $, _) ->
       done(null, file)
     .error (data, status, headers, config) ->
       done(new Error("Error getting the contents of the file"))
+
+  putFile: (token, owner, repo, path, message, content, sha, done) ->
+    url = "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/repos/#{owner}/#{repo}/contents/#{path}"
+    data = message: message, content: content, sha: sha
+    $http(method: 'PUT', url: url, data: data, headers: Authorization: "token #{token}")
+    .success (file, status, headers, config) ->
+      done(null, file)
+    .error (data, status, headers, config) ->
+      done(new Error("Error getting the contents of the file"))
 ])
