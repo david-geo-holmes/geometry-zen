@@ -25,11 +25,10 @@ app.all '*', (req, res, next) ->
 
 authenticate = (code, cb) ->
 
-  data = qs.stringify(
+  data = qs.stringify
     client_id: nconf.get("GITHUB_APPLICATION_CLIENT_ID"),
     client_secret: nconf.get("GITHUB_APPLICATION_CLIENT_SECRET"),
-    code: code)
-  console.log "data: #{data}"
+    code: code
 
   options =
     host: nconf.get("GITHUB_HOST")
@@ -37,7 +36,6 @@ authenticate = (code, cb) ->
     path: nconf.get("GITHUB_PATH")
     method: nconf.get("GITHUB_METHOD")
     headers: 'content-length': data.length
-  console.log "options: #{JSON.stringify(options)}"
 
   body = ""
   req = https.request options, (res) ->

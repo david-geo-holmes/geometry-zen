@@ -1,7 +1,6 @@
 // CodeMirror is the only global var we claim
 window.CodeMirror = (function() {
   "use strict";
-console.log("Loading CodeMirror");
 
   // BROWSER SNIFFING
 

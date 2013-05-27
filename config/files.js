@@ -32,18 +32,18 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
   },
   js: {
     vendor: [
-      "vendor/js/async.js",
-      "vendor/js/jquery-1.9.1.js",
-      "vendor/js/jquery-ui-1.9.1.js",
+      "vendor/async/lib/async.js",
+      "vendor/jquery/jquery.js",
+      "vendor/jquery-ui/ui/jquery-ui.js",
       "vendor/js/jquery.layout-1.3.0.js",
       "vendor/js/bootstrap-2.3.1.js",
-      "vendor/js/angular-1.1.4.js",
-      "vendor/js/underscore-1.3.3.js",
+      "vendor/angular/angular.js",
+      "vendor/underscore/underscore.js",
       "vendor/js/codemirror.js",
       "vendor/codemirror/mode/python/python.js",
       "vendor/js/skulpt.js",
       "vendor/js/builtin.js",
-      "vendor/js/three.js"
+      "vendor/threejs/build/three.js"
     ],
     app: [
       "app/js/app.js",

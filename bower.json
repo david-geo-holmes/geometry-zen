@@ -1,0 +1,32 @@
+{
+  "name": "geometry-zen",
+  "version": "0.0.1",
+  "main": "./app/js/main.js",
+  "description": "Geometry Zen is the way of looking at nature through a Geometric Algebra perspective.",
+  "author": {
+    "name": "David Holmes",
+    "email": "david.geo.holmes@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/david-geo-holmes/geometry-zen.git"
+  },
+  "bugs": {
+    "url": "https://github.com/david-geo-holmes/geometryzen/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/david-geo-holmes/geometryzen/LICENSE-MIT"
+    }
+  ],
+  "dependencies": {
+    "angular": "latest",
+    "async": "~0.2.5",
+    "bootstrap": "~2.3.2",
+    "jquery": "~2.0.1",
+    "jquery-ui": "~1.10.3",
+    "threejs": "latest",
+    "underscore": "~1.4.4"
+  }
+}

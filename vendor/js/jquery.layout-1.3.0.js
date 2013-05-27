@@ -33,7 +33,6 @@
 // NOTE: For best readability, view with a fixed-width font and tabs equal to 4-chars
 
 ;(function ($) {
-console.log("Loading jQuery Layout 1.3.0 [jQuery]");
 
 // alias Math methods - used a lot!
 var	min		= Math.min
