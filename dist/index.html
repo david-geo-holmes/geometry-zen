@@ -16,11 +16,13 @@
   </head>
   <body>
     <script type="text/javascript" src="js/app.min.js"></script>
-    <div id="view" ng-view></div>
-    <footer class="footer">
-      <div class="container">
-        <p>Designed and built for the next generation by <a href="http://twitter.com/geoalgebra" target="_blank">@geoalgebra</a></p>
-      </div>
-    </footer>
+    <div id="holder">
+      <div id="view" ng-view></div>
+      <footer class="footer">
+        <div class="container">
+          <p>Designed and built for the next generation by <a href="http://twitter.com/geoalgebra" target="_blank">@geoalgebra</a></p>
+        </div>
+      </footer>
+    </div>
   </body>
 </html>

@@ -6,6 +6,8 @@ nconf = require("nconf")
 https = require("https")
 qs = require("querystring")
 
+marketing = require("./marketing.json")
+
 require "./configure"
 
 isProductionMode = () ->
@@ -71,9 +73,10 @@ app.get '/authenticate/:code', (req, res) ->
     else
     res.json(if token then "token": token else "error": "bad_code");
 
-app.get "/*", (req, res) ->
+app.get "/*", (req, res, next) ->
   # Set a cookie to communicate the GitHub Client ID back to the client.
   res.cookie('github-application-client-id', nconf.get("GITHUB_APPLICATION_CLIENT_ID"))
   res.render "index",
     css: "#{if isProductionMode() then 'css/app.min.css' else 'css/app.css'}"
     js: "#{if isProductionMode() then 'js/app.min.js' else 'js/app.js'}"
+    marketing: marketing
