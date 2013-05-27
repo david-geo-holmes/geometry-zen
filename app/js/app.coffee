@@ -24,7 +24,7 @@ angular.module("app", ['async', 'jquery', 'underscore']).run(['$rootScope','$loc
       when 'gz:feature:examples'
         false
       when 'gz:feature:github'
-        true
+        false
       when 'gz:feature:real-time-collaboration'
         false
       when 'gz:feature:search'
