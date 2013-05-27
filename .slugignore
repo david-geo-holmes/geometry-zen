@@ -1,21 +1,28 @@
 # The app folder is source code, we currently pre-build to dist/
+
 app/
 
 # The attic is just a space for storing stuff we might want later.
+
 attic/
 
 # The config folder is source code, we currently pre-build to dist/
+
 config/
 
 # The generated folder is a temporary folder used for local development.
+
 generated/
 
 # We won't be running any tests on the Heroku server.
+
 spec/
 
 # Not sure what this is going to be used for.
+
 tasks/
 
-# Ignore the vendor folder because everything we need is extracted and minified to dist/
+# Ignore the vendor folder because everything we need is extracted and minified to dist/.
+
 vendor/
 

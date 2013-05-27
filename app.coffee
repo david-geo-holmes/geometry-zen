@@ -14,7 +14,16 @@ app.set "views", "#{__dirname}/views"
 app.set "view engine", "jade"
 app.set "view options", layout: false
 
+app.use express.logger()
+
 app.use lactate.static "#{__dirname}/dist", "max age": "one week"
+
+app.use express.cookieParser()
+app.use express.bodyParser()
+
+app.use app.router
+
+app.use express.errorHandler()
 
 # Convenience for allowing CORS on routes - GET only
 app.all '*', (req, res, next) ->
