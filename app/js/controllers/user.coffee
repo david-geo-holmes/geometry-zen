@@ -1,4 +1,4 @@
-angular.module("app").controller 'UserCtrl', ['$scope', 'GitHub', 'cookie', '_', '$async', ($scope, github, cookie, _, $async) ->
+angular.module("app").controller 'UserCtrl', ['$scope', 'GitHub', 'cookie', '$', '_', '$async', ($scope, github, cookie, $, _, $async) ->
   # We'll do this here for now, but it may make sense to do this by resolve(ing) in the routeProvider.
   GITHUB_TOKEN_COOKIE_NAME = 'github-token'
   token = cookie.getItem(GITHUB_TOKEN_COOKIE_NAME)
@@ -21,4 +21,7 @@ angular.module("app").controller 'UserCtrl', ['$scope', 'GitHub', 'cookie', '_',
     ],
     (err, results) ->
   )
+
+  $scope.newRepository = () ->
+    $('#myModal').modal('show')
 ]
