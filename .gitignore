@@ -6,3 +6,6 @@ config.development.json
 config.local.json
 config.production.json
 config.json
+
+vendor/threejs/editor
+vendor/threejs/examples

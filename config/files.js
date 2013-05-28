@@ -19,12 +19,6 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
     compile: {
       options: {
         paths: [
-          "vendor/css/boostrap-2.3.1.css",
-          "vendor/css/boostrap-responsive-2.3.1.css",
-          "vendor/css/codemirror.css",
-          "vendor/codemirror/theme/twilight.css",
-          "vendor/codemirror/theme/night.css",
-          "vendor/css/layout.css",
           "app/css/**/*.less"
         ]
       }

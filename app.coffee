@@ -26,7 +26,9 @@ app.set "view options", layout: false
 app.use express.logger()
 
 # Serve out of dist or generated, depending upon the environment.
-app.use lactate.static "#{__dirname}/#{if isProductionMode() then 'dist' else 'generated'}", "max age": "one week"
+folder = "#{if isProductionMode() then 'dist' else 'generated'}"
+app.use "/font", lactate.static("#{__dirname}/#{folder}/img", "max age": "one week")
+app.use lactate.static "#{__dirname}/#{folder}", "max age": "one week"
 
 app.use express.cookieParser()
 app.use express.bodyParser()

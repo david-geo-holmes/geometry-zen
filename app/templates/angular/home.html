@@ -95,7 +95,7 @@
               <button ng-show="hasFeature('gz:feature:examples')" ng-click="browse()" class="btn btn-info">
                 <i class="icon-th icon-white"></i>&nbsp;Browse Examples
               </button>
-              <a ng-hide="!hasFeature('gz:feature:github') || isLoggedIn()" class="btn btn-success" href="https://github.com/login/oauth/authorize?client_id={{clientId()}}&amp;scope=repo,user,gist"><i class="icon-check icon-white"></i>&nbsp;Authorize with GitHub</a>
+              <a ng-hide="!hasFeature('gz:feature:github') || isLoggedIn()" class="btn btn-success" href="https://github.com/login/oauth/authorize?client_id={{clientId()}}&amp;scope=repo,user,gist"><i class="icon-signin icon-white"></i>&nbsp;Authorize with GitHub</a>
               <button ng-show="hasFeature('gz:feature:github') &amp;&amp; isLoggedIn()" ng-click="user()" class="btn btn-success">
                 <i class="icon-list icon-white"></i>&nbsp;My {{marketing.name}} ({{username()}})
               </button>
