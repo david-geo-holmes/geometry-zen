@@ -135,17 +135,46 @@
         </script>
         <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
           <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h3 id="myModalLabel">Create a New Repository</h3>
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3 id="myModalLabel"><i class="icon-book muted"></i> Create a New Repository</h3>
           </div>
-          <div class="modal-body">
-            <p></p>
-          </div>
-          <div class="modal-footer">
-            <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-            <button class="btn btn-primary">Create repository</button>
-          </div>
+          <form ng-controller="NewRepoCtrl">
+            <fieldset>
+              <div class="modal-body">
+                <label>Repository name</label>
+                <input type="text" name="repo" ng-model="repo.name"></input>
+                <span class="help-block">Great repository names are short and memorable.</span>
+                <label>Description<span class="muted"> (optional)</span></label>
+                <input type="text" name="description" ng-model="repo.description"></input>
+                <!--
+                <hr/>
+                <input type="radio" ng-model="repo.private" value="false"> <i class="icon-book muted"></i> Public<br/>
+                <span class="help-block">Anyone can see this repository. You choose who can commit.</span>
+                <input type="radio" ng-model="repo.private" value="true"> Private <br/>
+                <span class="help-block">You choose who can see and commit to this repository.</span>
+                -->
+                <hr/>
+                <label class="checkbox">
+                  <input type="checkbox" name="readme" ng-model="repo.auto_init"> Initialize this repository with a README</input>
+                </label>
+                <span class="help-block">This will allow you to <code>git clone</code> the repository immediately.</span>
+              </div>
+              <div class="modal-footer">
+                <button id="btnCancel" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                <button type="submit" ng-click="onOK()" id="btnOK" class="btn btn-primary">Create repository</button>
+              </div>
+            </fieldset>
+          </form>
         </div>
+        <script>
+          $(function() {
+//            var domModal = $("#myModal");
+//            $('#btnOK').on('click', function() {
+//              alert("OK clicked");
+//              domModal.modal('hide');
+//            });
+          });
+        </script>
       </div>
     </div>
   </div>

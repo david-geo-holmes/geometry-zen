@@ -14,7 +14,8 @@ angular.module("app").controller 'UserCtrl', ['$scope', 'GitHub', 'cookie', '$',
     (callback) ->
       github.getUserRepos token, (err, repos) ->
         if not err
-          $scope.repos = _.filter(repos, (repo) -> repo.language is 'Python')
+          # $scope.repos = _.filter(repos, (repo) -> repo.language is 'Python')
+          $scope.repos = repos
         else
           alert("Error retrieving user repositories")
         callback err, repos
@@ -23,5 +24,5 @@ angular.module("app").controller 'UserCtrl', ['$scope', 'GitHub', 'cookie', '$',
   )
 
   $scope.newRepository = () ->
-    $('#myModal').modal('show')
+    $('#myModal').modal show: true, backdrop: true
 ]

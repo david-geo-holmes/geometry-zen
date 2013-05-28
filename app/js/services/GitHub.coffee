@@ -51,4 +51,13 @@ angular.module("app").factory('GitHub', ['$http', '$', '_', ($http, $, _) ->
       done(null, file)
     .error (data, status, headers, config) ->
       done(new Error("Error getting the contents of the file"))
+
+  postRepoForAuthenticatedUser: (token, name, description, priv, autoInit, done) ->
+    url = "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/user/repos"
+    data = name: name, description: description, "private": priv, auto_init: autoInit
+    $http(method: 'POST', url: url, data: data, headers: Authorization: "token #{token}")
+    .success (response, status, headers, config) ->
+      done(null, response)
+    .error (data, status, headers, config) ->
+      done(new Error("Error posting the repository"), data)
 ])
