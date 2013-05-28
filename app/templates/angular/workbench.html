@@ -39,14 +39,14 @@
   <div id="my-stuff" layout style="height: 800px">
     <div id="repository" class="ui-layout-west">
       <div>
-        <span>{{repo.name}}</span>
-        <a href="https://github.com/{{owner.name}}/{{repo.name}}" target="_blank">GitHub</a>
+        <a href="https://github.com/{{owner.name}}/{{repo.name}}" target="_blank" class="btn"><i class="icon-external-link"></i>&nbsp;<i class="icon-github"></i>&nbsp;{{repo.name}}</a>
       </div>
+      <hr/>
       <table class="table table-bordered table-condensed">
         <tbody>
           <tr ng-repeat="file in repo.files">
             <td>{{file.name}}</td>
-            <td><button ng-click="edit(file.path)" class="btn">Edit</button></td>
+            <td><button ng-click="edit(file.path)" class="btn btn-primary"><i class="icon-edit"></i></button></td>
           </tr>
         </tbody>
       </table>

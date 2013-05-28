@@ -22,7 +22,7 @@
               </ul>
             </li>
             <li class="divider-vertical"></li>
-            <li class="dropdown active">
+            <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                 <i class="icon-book icon-white"></i> Develop <b class="caret"></b>
               </a>
@@ -66,26 +66,61 @@
       </div>
     </div>
   </header>
-  <div class="container">
-    <div class="row">
-      <div style="padding-top: 80px" class="row">
-        <div class="span3">
-          <div>
-            <h1>{{user.name}}</h1>
-            <em>{{user.login}}</em>
-            <a href="https://github.com/{{user.login}}?tab=repositories" target="_blank">GitHub</a>
+  <div class="container-fluid" style="padding-top: 80px">
+    <div class="row-fluid">
+      <div class="span3">
+        <h1>{{user.name}}</h1>
+        <a href="https://github.com/{{user.login}}?tab=repositories" target="_blank" class="btn"><i class="icon-external-link"></i> <i class="icon-github"></i> {{user.login}}</a>
+      </div>
+      <div class="span9">
+        <ul class="nav nav-tabs" id="myTab">
+          <!--li><a data-target="#contributions" data-toggle="tab">Contributions</a></li-->
+          <li><a data-target="#repositories" data-toggle="tab">Repositories</a></li>
+          <!--li><a data-target="#activity" data-toggle="tab">Public Activity</a></li-->
+        </ul>
+        <div class="tab-content">
+          <div class="tab-pane" id="contributions">
+            <p>Under Construction: Contributions</p>
+          </div>
+          <div class="tab-pane" id="repositories">
+            <table class="table">
+              <tbody>
+                <tr ng-repeat="repo in repos">
+                  <td>
+                    <h3><i class="icon-book muted"></i><a href="/users/{{user.login}}/repos/{{repo.name}}"> {{repo.name}}</a></h3>
+                    <p>{{repo.description}}</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tab-pane" id="activity">
+            <p>Under Construction: Public Activity</p>
           </div>
         </div>
-        <div class="span9">
-          <table class="table table-striped">
-            <tr ng-repeat="repo in repos">
-              <td>
-                <h3><a href="/users/{{user.login}}/repos/{{repo.name}}">{{repo.name}}</a></h3>
-                <p>{{repo.description}}</p>
-              </td>
-            </tr>
-          </table>
-        </div>
+        <script>
+          $(function () {
+            $('#myTab a[data-target="#repositories"]').tab('show');
+          })
+        </script>
+        <script>
+          $('#myTab a[data-target="#contributions"]').click(function(e) {
+            e.preventDefault();
+            $(this).tab('show');
+          });
+        </script>
+        <script>
+          $('#myTab a[data-target="#repositories"]').click(function(e) {
+            e.preventDefault();
+            $(this).tab('show');
+          });
+        </script>
+        <script>
+          $('#myTab a[data-target="#activity"]').click(function(e) {
+            e.preventDefault();
+            $(this).tab('show');
+          });
+        </script>
       </div>
     </div>
   </div>

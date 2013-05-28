@@ -30,7 +30,7 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
       "vendor/jquery/jquery.js",
       "vendor/jquery-ui/ui/jquery-ui.js",
       "vendor/js/jquery.layout-1.3.0.js",
-      "vendor/js/bootstrap-2.3.1.js",
+      "vendor/bootstrap/js/bootstrap-tab.js",
       "vendor/angular/angular.js",
       "vendor/underscore/underscore.js",
       "vendor/js/codemirror.js",

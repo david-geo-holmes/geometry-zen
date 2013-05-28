@@ -22,7 +22,7 @@
               </ul>
             </li>
             <li class="divider-vertical"></li>
-            <li class="dropdown active">
+            <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                 <i class="icon-book icon-white"></i> Develop <b class="caret"></b>
               </a>
@@ -90,14 +90,13 @@
             </div>
             <div class="text-center">
               <button ng-click="workbench()" class="btn btn-primary">
-                <i class="icon-edit icon-white"></i>&nbsp;Launch the Modeling Workbench
+                <i class="icon-edit icon-white"></i> Launch the Modeling Workbench
               </button>
               <button ng-show="hasFeature('gz:feature:examples')" ng-click="browse()" class="btn btn-info">
-                <i class="icon-th icon-white"></i>&nbsp;Browse Examples
+                <i class="icon-th icon-white"></i> Browse Examples
               </button>
-              <a ng-hide="!hasFeature('gz:feature:github') || isLoggedIn()" class="btn btn-success" href="https://github.com/login/oauth/authorize?client_id={{clientId()}}&amp;scope=repo,user,gist"><i class="icon-signin icon-white"></i>&nbsp;Authorize with GitHub</a>
-              <button ng-show="hasFeature('gz:feature:github') &amp;&amp; isLoggedIn()" ng-click="user()" class="btn btn-success">
-                <i class="icon-list icon-white"></i>&nbsp;My {{marketing.name}} ({{username()}})
+              <button ng-show="hasFeature('gz:feature:github') &amp;&amp; isLoggedIn()" ng-click="user()" class="btn btn-primary">
+                <i class="icon-level-down icon-white"></i> {{username()}}
               </button>
             </div>
           </div>
