@@ -35,13 +35,18 @@
   <div id="my-stuff" layout style="height: 800px">
     <div id="repository" class="ui-layout-west">
       <div>
-        <h3>
+        <i class="icon-user muted"></i>
+        <span><a href="/users/{{owner.name}}">{{owner.name}}</a></span>
+        <a href="https://github.com/{{owner.name}}" target="_blank" class="muted">
+          <i class="icon-external-link"></i>
+        </a>
+        <h4>
           <i class="icon-book muted"></i>
           <span>{{repo.name}}</span>
           <a href="https://github.com/{{owner.name}}/{{repo.name}}" target="_blank" class="muted">
             <i class="icon-external-link"></i>
           </a>
-        </h3>
+        </h4>
         <span>{{repo.description}}</span>
       </div>
       <ul class="nav nav-tabs" id="myTab">
@@ -56,12 +61,9 @@
               <tbody>
                 <tr>
                   <td nowrap=nowrap>
-                    <i class="icon-book muted"></i>
-                    <button ng-click="refresh()" class="btn btn-link">
-                      <span>.</span>
-                    </button>
+                    <!--input type="text" placeHolder="Filter..."></input-->
                   </td>
-                  <td>
+                  <td nowrap=nowrap>
                     <button ng-click="newFile()" class="btn btn-link">
                       <i class="icon-plus-sign-alt muted"></i> <i class="icon-file-alt muted"></i>
                     </button>
@@ -75,9 +77,6 @@
                     </button>
                   </td>
                   <td nowrap=nowrap>
-                    <button ng-click="editFile(file.path)" class="btn btn-link">
-                      <i class="icon-edit muted"></i>
-                    </button>
                     <a href="https://github.com/{{owner.name}}/{{repo.name}}/blob/master/{{file.path}}" target="_blank" class="muted">
                       <i class="icon-external-link"></i>
                     </a>

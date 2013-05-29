@@ -23,6 +23,6 @@ angular.module("app").controller 'UserCtrl', ['$scope', 'GitHub', 'cookie', '$',
     (err, results) ->
   )
 
-  $scope.newRepository = () ->
+  $scope.newRepo = () ->
     $('#myModal').modal show: true, backdrop: true
 ]
