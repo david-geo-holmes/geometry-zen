@@ -71,18 +71,21 @@ angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window', '$routeP
     $scope.layout.hide('east')
     $scope.layout.hide('south')
 
-  $scope.new = () ->
-    $scope.title = "New Model"
-    if editor
-      editor.setValue("from geometricalgebra import *\n\n# Configuration\nball = Sphere(5)\n\n# Simulation\ndef tick():\n  global ball\n  ball.position = Vector3(0, 0, 0)\n\nstart()")
-    # The layout is created in the directive, which happens after the controller has been initialized.
-    if $scope.layout
-      if ($scope.hasFeature('gz:feature:github'))
-        $scope.layout.show('west')
-      else
-        $scope.layout.hide('west')
-      $scope.layout.hide('east')
-      $scope.layout.hide('south')
+  $scope.newFile = () ->
+    $('#myModal').modal show: true, backdrop: true
+
+#  $scope.newFile = () ->
+#    $scope.title = "New Model"
+#    if editor
+#      editor.setValue("from geometricalgebra import *\n\n# Configuration\nball = Sphere(5)\n\n# Simulation\ndef tick():\n  global ball\n  ball.position = Vector3(0, 0, 0)\n\nstart()")
+#    # The layout is created in the directive, which happens after the controller has been initialized.
+#    if $scope.layout
+#      if ($scope.hasFeature('gz:feature:github'))
+#        $scope.layout.show('west')
+#      else
+#        $scope.layout.hide('west')
+#      $scope.layout.hide('east')
+#      $scope.layout.hide('south')
 
   $scope.run = () ->
     $scope.layout.hide('west')
@@ -120,7 +123,7 @@ angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window', '$routeP
     if (showing)
       showing.CodeMirror.getWrapperElement().style.height = winHeight() + "px"
 
-  $scope.new()
+#  $scope.newFile()
   
   return
 ]

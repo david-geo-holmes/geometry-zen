@@ -13,9 +13,6 @@ angular.module("app").controller 'NewRepoCtrl', ['$scope', 'GitHub', 'cookie', '
 
   $('#myModal').on 'hidden', ->
 
-  $scope.newRepository = () ->
-    $('#myModal').modal show: true, backdrop: true
-
   $scope.onOK = () ->
     github.postRepoForAuthenticatedUser token, $scope.repo.name, $scope.repo.description, false, $scope.repo.auto_init, (err, response) ->
       if not err

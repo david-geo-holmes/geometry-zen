@@ -12,14 +12,8 @@
             </li>
             <li class="divider-vertical"></li>
             <li>
-              <button ng-click="new()" class="btn btn-success">
-                <i class="icon-file icon-white"></i>&nbsp;New
-              </button>
-            </li>
-            <li class="divider-vertical"></li>
-            <li>
               <button ng-click="run()" class="btn btn-inverse">
-                <i class="icon-play icon-white"></i>&nbsp;Run
+                <i class="icon-play icon-white"></i> Run
               </button>
             </li>
           </ul>
@@ -39,17 +33,68 @@
   <div id="my-stuff" layout style="height: 800px">
     <div id="repository" class="ui-layout-west">
       <div>
-        <a href="https://github.com/{{owner.name}}/{{repo.name}}" target="_blank" class="btn"><i class="icon-external-link"></i>&nbsp;<i class="icon-github"></i>&nbsp;{{repo.name}}</a>
+        <h3>
+          <i class="icon-book muted"></i>
+          <span>{{repo.name}}</span>
+          <a href="https://github.com/{{owner.name}}/{{repo.name}}" target="_blank" class="muted"><i class="icon-external-link"></i> <i class="icon-github"></i></a>
+      </h3>
       </div>
-      <hr/>
-      <table class="table table-bordered table-condensed">
-        <tbody>
-          <tr ng-repeat="file in repo.files">
-            <td>{{file.name}}</td>
-            <td><button ng-click="edit(file.path)" class="btn btn-primary"><i class="icon-edit"></i></button></td>
-          </tr>
-        </tbody>
-      </table>
+      <ul class="nav nav-tabs" id="myTab">
+        <li><a data-target="#files" data-toggle="tab">Files</a></li>
+        <!--li><a data-target="#commits" data-toggle="tab">Commits</a></li-->
+        <!--li><a data-target="#branches" data-toggle="tab">Branches</a></li-->
+      </ul>
+      <div class="tab-content">
+        <div class="tab-pane" id="files">
+          <div class="row-fluid">
+            <span>{{repo.name}}</span>
+            <span class="muted"> / </span>
+            <button ng-click="newFile()" class="btn">
+              <i class="icon-file icon-white"></i> New
+            </button>
+          </div>
+          <hr/>
+          <div class ="row-fluid">
+            <table class="table table-bordered table-condensed">
+              <tbody>
+                <tr ng-repeat="file in repo.files">
+                  <td>{{file.name}}</td>
+                  <td><button ng-click="edit(file.path)" class="btn btn-primary"><i class="icon-edit"></i></button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="tab-pane" id="commits">
+          <p>Under Construction: Commits</p>
+        </div>
+        <div class="tab-pane" id="branches">
+          <p>Under Construction: Branches</p>
+        </div>
+      </div>
+      <script>
+        $(function () {
+          $('#myTab a[data-target="#files"]').tab('show');
+        })
+      </script>
+      <script>
+        $('#myTab a[data-target="#files"]').click(function(e) {
+          e.preventDefault();
+          $(this).tab('show');
+        });
+      </script>
+      <script>
+        $('#myTab a[data-target="#commits"]').click(function(e) {
+          e.preventDefault();
+          $(this).tab('show');
+        });
+      </script>
+      <script>
+        $('#myTab a[data-target="#branches"]').click(function(e) {
+          e.preventDefault();
+          $(this).tab('show');
+        });
+      </script>
     </div>
     <div id="algebra" class="ui-layout-center">
       <textarea id="code"></textarea>
@@ -61,4 +106,25 @@
       <pre id="my-output"></pre>
     </div>
   </div>
+  <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3 id="myModalLabel"><i class="icon-book muted"></i> Create a New File</h3>
+    </div>
+    <form ng-controller="NewFileCtrl">
+      <fieldset>
+        <div class="modal-body">
+          <label>File name</label>
+          <input type="text" name="name" ng-model="file.name"></input>
+          <label>Commit message:</label>
+          <input type="text" name="message" ng-model="file.message" placeholder="Create new file"></input>
+        </div>
+        <div class="modal-footer">
+          <button id="btnCancel" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+          <button type="submit" ng-click="onOK()" id="btnOK" class="btn btn-primary">Create file</button>
+        </div>
+      </fieldset>
+    </form>
+  </div>
+
 </div>

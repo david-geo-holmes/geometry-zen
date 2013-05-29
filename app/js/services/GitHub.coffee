@@ -43,21 +43,29 @@ angular.module("app").factory('GitHub', ['$http', '$', '_', ($http, $, _) ->
     .error (data, status, headers, config) ->
       done(new Error("Error getting the contents of the file"))
 
+  ###
+  The GitHub API uses the same method (PUT) and URL (/repos/:owner/:repo/contents/:path)
+  for Creating a file as for updating a file. The key difference is that the update
+  requires the blob SHA of the file being replaced. In effect, the existence of the sha
+  determines whether the intention is to create a new file or update and existing one.
+  ###
   putFile: (token, owner, repo, path, message, content, sha, done) ->
     url = "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/repos/#{owner}/#{repo}/contents/#{path}"
-    data = message: message, content: content, sha: sha
+    data = message: message, content: content
+    if sha
+      data.sha = sha
     $http(method: 'PUT', url: url, data: data, headers: Authorization: "token #{token}")
     .success (file, status, headers, config) ->
       done(null, file)
-    .error (data, status, headers, config) ->
-      done(new Error("Error getting the contents of the file"))
+    .error (response, status, headers, config) ->
+      done(new Error("Error getting the contents of the file"), response)
 
   postRepoForAuthenticatedUser: (token, name, description, priv, autoInit, done) ->
     url = "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/user/repos"
     data = name: name, description: description, "private": priv, auto_init: autoInit
     $http(method: 'POST', url: url, data: data, headers: Authorization: "token #{token}")
-    .success (response, status, headers, config) ->
-      done(null, response)
-    .error (data, status, headers, config) ->
-      done(new Error("Error posting the repository"), data)
+    .success (repo, status, headers, config) ->
+      done(null, repo)
+    .error (response, status, headers, config) ->
+      done(new Error("Error posting the repository"), response)
 ])
