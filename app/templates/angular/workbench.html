@@ -38,8 +38,11 @@
         <h3>
           <i class="icon-book muted"></i>
           <span>{{repo.name}}</span>
-          <a href="https://github.com/{{owner.name}}/{{repo.name}}" target="_blank" class="muted"><i class="icon-external-link"></i> <i class="icon-github"></i></a>
-      </h3>
+          <a href="https://github.com/{{owner.name}}/{{repo.name}}" target="_blank" class="muted">
+            <i class="icon-external-link"></i>
+          </a>
+        </h3>
+        <span>{{repo.description}}</span>
       </div>
       <ul class="nav nav-tabs" id="myTab">
         <li><a data-target="#files" data-toggle="tab">Files</a></li>
@@ -48,26 +51,38 @@
       </ul>
       <div class="tab-content">
         <div class="tab-pane" id="files">
-          <div class="row-fluid">
-            <h3>
-              <button ng-click="newFile()" class="btn btn-link">
-                <i class="icon-plus muted"></i> <i class="icon-file muted"></i>
-              </button>
-            </h3>
-          </div>
           <div class ="row-fluid">
             <table class="table table-condensed">
               <tbody>
-                <tr ng-repeat="file in repo.files">
-                  <td>
-                    <i class="icon-file muted"></i>
-                    <button ng-click="editFile(file.path)" class="btn btn-link">
-                      {{file.name}}
+                <tr>
+                  <td nowrap=nowrap>
+                    <i class="icon-book muted"></i>
+                    <button ng-click="refresh()" class="btn btn-link">
+                      <span>.</span>
                     </button>
                   </td>
                   <td>
-                    <button ng-click="removeFile($index)" class="btn btn-link">
-                      <i class="icon-minus muted"></i>
+                    <button ng-click="newFile()" class="btn btn-link">
+                      <i class="icon-plus-sign-alt muted"></i> <i class="icon-file-alt muted"></i>
+                    </button>
+                  </td>
+                </tr>
+                <tr ng-repeat="file in repo.files">
+                  <td nowrap=nowrap>
+                    <i class="icon-file-alt muted"></i>
+                    <button ng-click="editFile(file.path)" class="btn btn-link">
+                      <span>{{file.name}}</span>
+                    </button>
+                  </td>
+                  <td nowrap=nowrap>
+                    <button ng-click="editFile(file.path)" class="btn btn-link">
+                      <i class="icon-edit muted"></i>
+                    </button>
+                    <a href="https://github.com/{{owner.name}}/{{repo.name}}/blob/master/{{file.path}}" target="_blank" class="muted">
+                      <i class="icon-external-link"></i>
+                    </a>
+                    <button ng-click="deleteFile($index)" class="btn btn-link">
+                      <i class="icon-minus-sign-alt muted"></i>
                     </button>
                   </td>
                 </tr>
@@ -119,7 +134,7 @@
   <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h3 id="myModalLabel"><i class="icon-plus muted"></i> <i class="icon-file muted"></i> Create a New File</h3>
+      <h3 id="myModalLabel"><i class="icon-plus-sign-alt muted"></i> <i class="icon-file-alt muted"></i> Create a New File</h3>
     </div>
     <form ng-controller="NewFileCtrl">
       <fieldset>

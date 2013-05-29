@@ -81,10 +81,12 @@ angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window', '$routeP
   $scope.newFile = () ->
     $('#myModal').modal show: true, backdrop: true
 
+  $scope.$on "commit", (e, owner, repo, file, commit) ->
+    $scope.repo.files.push(file)
+    $scope.editFile(file.path)
+
 #  $scope.newFile = () ->
 #    $scope.title = "New Model"
-#    if editor
-#      editor.setValue("from geometricalgebra import *\n\n# Configuration\nball = Sphere(5)\n\n# Simulation\ndef tick():\n  global ball\n  ball.position = Vector3(0, 0, 0)\n\nstart()")
 #    # The layout is created in the directive, which happens after the controller has been initialized.
 #    if $scope.layout
 #      if ($scope.hasFeature('gz:feature:github'))
@@ -95,7 +97,7 @@ angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window', '$routeP
 #      $scope.layout.hide('south')
 
   $scope.editFile = (path) ->
-    console.log "path: #{path}"
+    # TODO: Use the $index technique as in deleteFile
     if editor
       github.getFile token, $routeParams.owner, $routeParams.repo, path, (err, file) ->
         if not err
@@ -116,7 +118,7 @@ angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window', '$routeP
     $scope.layout.hide('east')
     $scope.layout.hide('south')
 
-  $scope.removeFile = (idx) ->
+  $scope.deleteFile = (idx) ->
     # Note that we should use indexOf on the array if the list has been filtered.
     file = $scope.repo.files[idx]
     github.deleteFile token, $routeParams.owner, $scope.repo.name, file.path, "Delete file.", file.sha, (err, response) ->

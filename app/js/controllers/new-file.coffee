@@ -18,7 +18,9 @@ angular.module("app").controller 'NewFileCtrl', ['$scope', 'GitHub', 'Base64', '
     content = base64.encode("# #{$scope.file.name}\n")
     github.putFile token, $scope.owner.name, $scope.repo.name, $scope.file.name, $scope.file.message, content, undefined, (err, response) ->
       if not err
-        # console.log "#{JSON.stringify(response, null, 2)}"
+        file = response.content
+        commit = response.commit
+        $scope.$emit("commit", $scope.owner, $scope.repo, file, commit)
         $('#myModal').modal('hide')
       else
         messages = _.map(response.errors, (error) -> error.message).join()
