@@ -60,6 +60,15 @@ angular.module("app").factory('GitHub', ['$http', '$', '_', ($http, $, _) ->
     .error (response, status, headers, config) ->
       done(new Error("Error getting the contents of the file"), response)
 
+  deleteFile: (token, owner, repo, path, message, sha, done) ->
+    url = "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/repos/#{owner}/#{repo}/contents/#{path}"
+    data = message: message, sha: sha
+    $http(method: 'DELETE', url: url, data: data, headers: Authorization: "token #{token}")
+    .success (file, status, headers, config) ->
+      done(null, file)
+    .error (response, status, headers, config) ->
+      done(new Error("Error deleting the file"), response)
+
   postRepoForAuthenticatedUser: (token, name, description, priv, autoInit, done) ->
     url = "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/user/repos"
     data = name: name, description: description, "private": priv, auto_init: autoInit
