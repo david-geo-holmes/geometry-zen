@@ -103,7 +103,7 @@ angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window', '$routeP
       alert(e.message)
     finally
 
-  $scope.edit = (path) ->
+  $scope.editFile = (path) ->
     if editor
       github.getFile token, $routeParams.owner, $routeParams.repo, path, (err, file) ->
         if not err
@@ -111,6 +111,9 @@ angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window', '$routeP
           editor.setValue base64.decode(file.content)
         else
           alert("Error retrieving the file")
+
+  $scope.removeFile = (path) ->
+    alert "remove: #{path}"
 
 
   if editor

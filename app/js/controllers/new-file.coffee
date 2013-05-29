@@ -14,13 +14,11 @@ angular.module("app").controller 'NewFileCtrl', ['$scope', 'GitHub', 'Base64', '
   $('#myModal').on 'hidden', ->
 
   $scope.onOK = () ->
-    console.log "owner: #{JSON.stringify($scope.owner, undefined, 2)}"
-    console.log "repo: #{JSON.stringify($scope.repo, undefined, 2)}"
-    console.log "file: #{JSON.stringify($scope.file, undefined, 2)}"
-    content = base64.encode("# #{$scope.file.name}")
+    # Notice the newline at end of file!
+    content = base64.encode("# #{$scope.file.name}\n")
     github.putFile token, $scope.owner.name, $scope.repo.name, $scope.file.name, $scope.file.message, content, undefined, (err, response) ->
       if not err
-        console.log "#{JSON.stringify(response, null, 2)}"
+        # console.log "#{JSON.stringify(response, null, 2)}"
         $('#myModal').modal('hide')
       else
         messages = _.map(response.errors, (error) -> error.message).join()

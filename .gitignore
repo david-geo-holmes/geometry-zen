@@ -1,11 +1,22 @@
 .DS_Store
 
+# Include node_modules because the project is "deployed".
+# See http://www.mikealrogers.com/posts/nodemodules-in-git.html
+#/node_modules
+
+# Include /dist because we don't know how to build it yet on Heroku.
+#/dist
+
+# Ignore the generated files, which are only there for development.
 /generated
 
+# Ignnore configuration files.
+# We don't use configuration files anyway in production.
 config.development.json
 config.local.json
 config.production.json
 config.json
 
+# Ignore the non-essential THREE.js baggage.
 vendor/threejs/editor
 vendor/threejs/examples

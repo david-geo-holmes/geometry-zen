@@ -1,15 +1,18 @@
 {
   "name": "geometry-zen",
+  "title": "Geometry Zen",
   "version": "0.0.1",
-  "description": "Geometry Zen is an online application for learning Physics and Engineering using Geometric Algebra, Python programming, and WebGL visualization.",
-  "url": "http://github.com/david-geo-holmes/geometry-zen",
-  "keywords": ["geometric", "algebra", "geometry", "zen"],
+  "private": false,
   "author": {
     "name": "David Holmes"
   },
+  "description": "Geometry Zen is an online application for learning Physics and Engineering using Geometric Algebra, Python programming, and WebGL visualization.",
+  "url": "http://github.com/david-geo-holmes/geometry-zen",
+  "keywords": ["geometric", "algebra", "geometry", "zen"],
   "contributors": [],
   "scripts": {
-    "start": "NODE_ENV=local nodemon web.js"
+    "start": "NODE_ENV=local nodemon web.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "coffee-script": "~1.6.x",
@@ -20,6 +23,7 @@
     "lineman": "~0.7.x",
     "grunt-angular-templates": "~0.3.x"
   },
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/david-geo-holmes/geometry-zen.git"
@@ -29,5 +33,5 @@
     "node": "~>0.10.x",
     "npm": "~>1.2.x"
   },
-  "main": "server.js"
+  "main": "web.js"
 }

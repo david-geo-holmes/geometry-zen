@@ -6,14 +6,16 @@
           <ul class="nav pull-left">
             <li ng-show="hasFeature('gz:feature:github')" class="divider-vertical"></li>
             <li ng-show="hasFeature('gz:feature:github')">
-              <button ng-click="save()" class="btn btn-primary">
-                Save
+              <button ng-click="save()" class="btn btn-inverse">
+                <!-- TODO: Conditionnaly mute according to dirty state -->
+                <span class="muted"><i class="icon-save icon-white"></i> Save</span>
               </button>
             </li>
             <li class="divider-vertical"></li>
             <li>
               <button ng-click="run()" class="btn btn-inverse">
-                <i class="icon-play icon-white"></i> Run
+                <!-- TODO: Conditionnaly mute according to playable state -->
+                <span class="muted"><i class="icon-play icon-white"></i> Run</span>
               </button>
             </li>
           </ul>
@@ -47,19 +49,27 @@
       <div class="tab-content">
         <div class="tab-pane" id="files">
           <div class="row-fluid">
-            <span>{{repo.name}}</span>
-            <span class="muted"> / </span>
-            <button ng-click="newFile()" class="btn">
-              <i class="icon-file icon-white"></i> New
-            </button>
+            <h3>
+              <button ng-click="newFile()" class="btn btn-link">
+                <i class="icon-plus muted"></i> <i class="icon-file muted"></i>
+              </button>
+            </h3>
           </div>
-          <hr/>
           <div class ="row-fluid">
-            <table class="table table-bordered table-condensed">
+            <table class="table table-condensed">
               <tbody>
                 <tr ng-repeat="file in repo.files">
-                  <td>{{file.name}}</td>
-                  <td><button ng-click="edit(file.path)" class="btn btn-primary"><i class="icon-edit"></i></button></td>
+                  <td>
+                    <i class="icon-file muted"></i>
+                    <button ng-click="editFile(file.path)" class="btn btn-link">
+                      {{file.name}}
+                    </button>
+                  </td>
+                  <td>
+                    <button ng-click="removeFile(file.path)" class="btn btn-link">
+                      <i class="icon-remove muted"></i>
+                    </button>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -109,7 +119,7 @@
   <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h3 id="myModalLabel"><i class="icon-book muted"></i> Create a New File</h3>
+      <h3 id="myModalLabel"><i class="icon-plus muted"></i> <i class="icon-file muted"></i> Create a New File</h3>
     </div>
     <form ng-controller="NewFileCtrl">
       <fieldset>
