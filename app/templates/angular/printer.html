@@ -1,1 +1,12 @@
-<pre id="my-output"></pre>
+<div ng-controller="PrinterCtrl">
+  <table class="table table-striped table-condensed">
+    <tbody>
+      <tr ng-repeat="line in printer.lines">
+        <td>
+          <span>{{line}}</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+

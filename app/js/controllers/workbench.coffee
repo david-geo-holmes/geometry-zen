@@ -1,6 +1,6 @@
 
 
-angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window', '$routeParams', '$', '_', 'GitHub', 'Base64', 'cookie', ($scope, $window, $routeParams, $, _, github, base64, cookie) ->
+angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$window', '$routeParams', '$', '_', 'GitHub', 'Base64', 'cookie', ($rootScope, $scope, $window, $routeParams, $, _, github, base64, cookie) ->
 
   GITHUB_TOKEN_COOKIE_NAME = 'github-token'
   token = cookie.getItem(GITHUB_TOKEN_COOKIE_NAME)
@@ -15,10 +15,6 @@ angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window', '$routeP
         alert("Error retrieving repository files")
   else
     $scope.repo = undefined
-
-  outputHandler = (text) ->
-    mypre = $window.document.getElementById("my-output")
-    mypre.innerHTML = mypre.innerHTML + text
 
   builtinRead = (x) ->
     if (Sk.builtinFiles == undefined || Sk.builtinFiles["files"][x] == undefined)
@@ -46,7 +42,7 @@ angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window', '$routeP
   if code
     editor = CodeMirror.fromTextArea(code,
       "autofocus": true,
-      "indentUnit": 2,
+      "indentUnit": 4, # Python guys like to use 4 spaces
       "lineNumbers": true,
       "lineWrapping": true,
       "autoMatchParens": true,
@@ -63,12 +59,15 @@ angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window', '$routeP
     console.log "The code element could not be found"
 
   $scope.run = () ->
+    $rootScope.$broadcast 'reset'
+
     $scope.layout.hide('west')
     prog = editor.getValue()
-    $window.document.getElementById("my-output").innerHTML = ''
     Sk.canvas = "my-canvas"
     Sk.pre = "my-output"
-    Sk.configure({"output":outputHandler, "read":builtinRead})
+    Sk.configure
+      "output": (text) -> $rootScope.$broadcast('print', text)
+      "read": builtinRead
 #    try
     if prog.trim().length > 0
       $scope.layout.show('east')
@@ -80,7 +79,7 @@ angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window', '$routeP
   $scope.newFile = () ->
     $('#myModal').modal show: true, backdrop: true
 
-  $scope.$on "commit", (e, owner, repo, file, commit) ->
+  $scope.$on 'commit', (e, owner, repo, file, commit) ->
     $scope.repo.files.push(file)
     $scope.editFile(file.path)
 
