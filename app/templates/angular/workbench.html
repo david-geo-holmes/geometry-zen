@@ -1,37 +1,40 @@
 <div id="workbench-view">
-    <div class="navbar navbar-inverse">
-      <div class="navbar-inner">
-        <div class="container">
-          <a-brand></a-brand>
-          <ul class="nav pull-left">
-            <li ng-show="hasFeature('gz:feature:github') &amp;&amp; isLoggedIn()" class="divider-vertical"></li>
-            <li ng-show="hasFeature('gz:feature:github') &amp;&amp; isLoggedIn()">
-              <button ng-click="save()" class="btn btn-inverse">
-                <!-- TODO: Conditionnaly mute according to dirty state -->
-                <span class="muted"><i class="icon-save icon-white"></i> Save</span>
-              </button>
-            </li>
-            <li class="divider-vertical"></li>
-            <li>
-              <button ng-click="run()" class="btn btn-inverse">
-                <!-- TODO: Conditionnaly mute according to playable state -->
-                <span class="muted"><i class="icon-play icon-white"></i> Run</span>
-              </button>
-            </li>
-          </ul>
-          <ul class="nav pull-right">
-            <li ng-show="hasFeature('gz:feature:search')" class="divider-vertical"></li>
-            <li>
-              <form-search></form-search>
-            </li>
-            <li ng-show="hasFeature('gz:feature:github')" class="divider-vertical"></li>
-            <li>
-              <github-authorize></github-authorize>
-            </li>
-          </ul>
-        </div>
+  <div class="navbar navbar-inverse">
+    <div class="navbar-inner">
+      <div class="container">
+        <ul class="nav pull-left">
+          <li>
+            <button ng-click="left()" class="btn btn-inverse">
+              <span class="muted"><i class="icon-chevron-left icon-white"></i> </span>
+            </button>
+          </li>
+          <li class="divider-vertical"></li>
+          <li ng-show="hasFeature('gz:feature:github') &amp;&amp; isLoggedIn()">
+            <button ng-click="save()" class="btn btn-inverse">
+              <!-- TODO: Conditionnaly mute according to dirty state -->
+              <span class="muted"><i class="icon-save icon-white"></i> Save</span>
+            </button>
+          </li>
+          <li ng-show="hasFeature('gz:feature:github') &amp;&amp; isLoggedIn()" class="divider-vertical"></li>
+          <li>
+            <button ng-click="run()" class="btn btn-inverse">
+              <!-- TODO: Conditionnaly mute according to playable state -->
+              <span class="muted"><i class="icon-play icon-white"></i> Run</span>
+            </button>
+          </li>
+          <li class="divider-vertical"></li>
+        </ul>
+        <ul class="nav pull-right">
+          <li class="divider-vertical"></li>
+          <li>
+            <button ng-click="right()" class="btn btn-inverse">
+              <span class="muted"><i class="icon-chevron-right icon-white"></i> </span>
+            </button>
+          </li>
+        </ul>
       </div>
     </div>
+  </div>
   <div id="workbench-layout" layout style="height: 800px">
     <div id="repository-layout-pane" class="ui-layout-west">
       <div class="container-fluid" id="repository">
@@ -130,9 +133,45 @@
       <textarea id="code"></textarea>
     </div>
     <div id="geometry" class="ui-layout-east">
-      <canvas id="canvasWebGL" width="800" height="600"></canvas>
-      <canvas id="canvas2d" width="800" height="600"></canvas>
-      <printer></printer>
+      <ul class="nav nav-tabs" id="xyz">
+        <li><a data-target="#x">Canvas 3D</a></li>
+        <li><a data-target="#y">Canvas 2D</a></li>
+        <li><a data-target="#z">Printer</a></li>
+      </ul>
+      <div class="tab-content">
+        <div class="tab-pane" id="x">
+          <canvas id="canvasWebGL" width="800" height="600"></canvas>
+        </div>
+        <div class="tab-pane" id="y">
+          <canvas id="canvas2d" width="800" height="600"></canvas>
+        </div>
+        <div class="tab-pane" id="z">
+          <printer></printer>
+        </div>
+      </div>
+      <script>
+        $(function () {
+          $('#xyz a:first').tab('show');
+        })
+      </script>
+      <script>
+        $('#xyz a[data-target="#x"]').click(function(e) {
+          e.preventDefault();
+          $(this).tab('show');
+        });
+      </script>
+      <script>
+        $('#xyz a[data-target="#y"]').click(function(e) {
+          e.preventDefault();
+          $(this).tab('show');
+        });
+      </script>
+      <script>
+        $('#xyz a[data-target="#z"]').click(function(e) {
+          e.preventDefault();
+          $(this).tab('show');
+        });
+      </script>
     </div>
   </div>
   <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

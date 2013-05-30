@@ -60,6 +60,7 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
 
   $scope.run = () ->
     $rootScope.$broadcast 'reset'
+    $scope.right()
 
     prog = editor.getValue()
     Sk.canvasWebGL = "canvasWebGL"
@@ -107,6 +108,13 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
       else
         alert("Error saving file to repository: #{err}")
 
+  $scope.left = () ->
+    $scope.layout.show('west')
+    $scope.layout.hide('east')
+
+  $scope.right = () ->
+    $scope.layout.hide('west')
+    $scope.layout.show('east')
 
   if editor
     setFullScreen(editor, false)
