@@ -69,14 +69,13 @@ angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window', '$routeP
     Sk.canvas = "my-canvas"
     Sk.pre = "my-output"
     Sk.configure({"output":outputHandler, "read":builtinRead})
-    try
-      if prog.trim().length > 0
-        $scope.layout.show('east')
-        $scope.layout.show('south')
-        eval(Sk.importMainWithBody("<stdin>", false, prog.trim()))
-    catch e
-      alert(e.message)
-    finally
+#    try
+    if prog.trim().length > 0
+      $scope.layout.show('east')
+      eval(Sk.importMainWithBody("<stdin>", false, prog.trim()))
+#    catch e
+#      alert(e.message)
+#    finally
 
   $scope.newFile = () ->
     $('#myModal').modal show: true, backdrop: true
@@ -94,7 +93,6 @@ angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window', '$routeP
 #      else
 #        $scope.layout.hide('west')
 #      $scope.layout.hide('east')
-#      $scope.layout.hide('south')
 
   $scope.editFile = (path) ->
     # TODO: Use the $index technique as in deleteFile
@@ -116,7 +114,6 @@ angular.module("app").controller 'WorkbenchCtrl', ['$scope', '$window', '$routeP
         alert("Error saving file to repository: #{err}")
     $scope.layout.show('west')
     $scope.layout.hide('east')
-    $scope.layout.hide('south')
 
   $scope.deleteFile = (idx) ->
     # Note that we should use indexOf on the array if the list has been filtered.

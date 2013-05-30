@@ -4,8 +4,8 @@
         <div class="container">
           <a-brand></a-brand>
           <ul class="nav pull-left">
-            <li ng-show="hasFeature('gz:feature:github')" class="divider-vertical"></li>
-            <li ng-show="hasFeature('gz:feature:github')">
+            <li ng-show="hasFeature('gz:feature:github') &amp;&amp; isLoggedIn()" class="divider-vertical"></li>
+            <li ng-show="hasFeature('gz:feature:github') &amp;&amp; isLoggedIn()">
               <button ng-click="save()" class="btn btn-inverse">
                 <!-- TODO: Conditionnaly mute according to dirty state -->
                 <span class="muted"><i class="icon-save icon-white"></i> Save</span>
@@ -51,8 +51,8 @@
       </div>
       <ul class="nav nav-tabs" id="myTab">
         <li><a data-target="#files" data-toggle="tab">Files</a></li>
-        <!--li><a data-target="#commits" data-toggle="tab">Commits</a></li-->
-        <!--li><a data-target="#branches" data-toggle="tab">Branches</a></li-->
+        <li><a data-target="#commits" data-toggle="tab">Commits</a></li>
+        <li><a data-target="#branches" data-toggle="tab">Branches</a></li>
       </ul>
       <div class="tab-content">
         <div class="tab-pane" id="files">
@@ -124,10 +124,45 @@
       <textarea id="code"></textarea>
     </div>
     <div id="geometry" class="ui-layout-east">
-      <canvas id="my-canvas" width="1280" height="800"></canvas>
-    </div>
-    <div id="console" class="ui-layout-south">
-      <pre id="my-output"></pre>
+      <ul class="nav nav-tabs" id="abc">
+        <!--li><a data-target="#a" data-toggle="tab">A</a></li-->
+        <li><a data-target="#b" data-toggle="tab">Printer</a></li>
+        <li><a data-target="#c" data-toggle="tab">Canvas</a></li>
+      </ul>
+      <div class="tab-content">
+        <div class="tab-pane" id="a">
+          <p>Under Construction: A</p>
+        </div>
+        <div class="tab-pane" id="b">
+          <printer></printer>
+        </div>
+        <div class="tab-pane" id="c">
+          <canvas id="my-canvas" width="1280" height="800"></canvas>
+        </div>
+      </div>
+      <script>
+        $(function () {
+          $('#abc a[data-target="#b"]').tab('show');
+        })
+      </script>
+      <script>
+        $('#abc a[data-target="#a"]').click(function(e) {
+          e.preventDefault();
+          $(this).tab('show');
+        });
+      </script>
+      <script>
+        $('#abc a[data-target="#b"]').click(function(e) {
+          e.preventDefault();
+          $(this).tab('show');
+        });
+      </script>
+      <script>
+        $('#abc a[data-target="#c"]').click(function(e) {
+          e.preventDefault();
+          $(this).tab('show');
+        });
+      </script>
     </div>
   </div>
   <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -150,5 +185,4 @@
       </fieldset>
     </form>
   </div>
-
 </div>

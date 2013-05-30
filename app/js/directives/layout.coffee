@@ -8,5 +8,4 @@ angular.module("app").directive "layout", [() ->
     else
       scope.layout.hide('west')
     scope.layout.hide('east')
-    scope.layout.hide('south')
 ]
