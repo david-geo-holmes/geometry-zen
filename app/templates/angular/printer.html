@@ -1,12 +1,10 @@
-<div ng-controller="PrinterCtrl">
-  <table class="table table-striped table-condensed">
-    <tbody>
-      <tr ng-repeat="line in printer.lines">
-        <td>
-          <span>{{line}}</span>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+<div ng-controller="PrinterCtrl" class="container-fluid">
+  <div class="row-fluid">
+    <div class="span12">
+      <!-- Using anything other than a pre(serve) element is likely too be slow -->
+      <!-- PRESERVE_ELEMENT_ID is defined in the printer controller -->
+      <pre id="a5f435e0-c92e-11e2-8b8b-0800200c9a66" class="printer"></pre>
+    </div>
+  </div>
 </div>
 

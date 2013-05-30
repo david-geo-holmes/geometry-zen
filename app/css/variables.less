@@ -7,15 +7,34 @@
 // --------------------------------------------------
 
 
-// Grays
+// Gray Scale and Grays
 // -------------------------
-@black:                 #000;
-@grayDarker:            #222;
-@grayDark:              #333;
-@gray:                  #555;
-@grayLight:             #999;
-@grayLighter:           #eee;
-@white:                 #fff;
+@gray0:                 #000;
+@gray1:                 #111;
+@gray2:                 #222;
+@gray3:                 #333;
+@gray4:                 #444;
+@gray5:                 #555;
+@gray6:                 #666;
+@gray7:                 #777;
+@gray8:                 #888;
+@gray9:                 #999;
+@grayA:                 #aaa;
+@grayB:                 #bbb;
+@grayC:                 #ccc;
+@grayD:                 #ddd;
+@grayE:                 #eee;
+@grayF:                 #fff;
+
+@black:                 @gray0;
+@grayDarkest:           @gray1;
+@grayDarker:            @gray2;
+@grayDark:              @gray3;
+@gray:                  @gray5;
+@grayLight:             @gray9;
+@grayLighter:           @grayD;
+@grayLightest:          @grayE;
+@white:                 @grayF;
 
 
 // Accent colors
@@ -82,6 +101,15 @@
 @tableBackgroundHover:              #f5f5f5; // for hover
 @tableBorder:                       #ddd; // table and cell border
 
+// Layout
+// -------------------------
+@paneBackground:                    transparent; // overall background
+@paneBorderColor:                   @grayB; // there is no word for this
+@resizerBackground:                 @grayLighter;
+@resizerHoverBackgroundColor:       @white;
+@resizerDraggingBackground:         @grayLightest;
+@resizerDraggingLimitBackground:    @resizerDraggingBackground;
+
 // Buttons
 // -------------------------
 @btnBackground:                     @white;
@@ -112,7 +140,7 @@
 @inputBackground:               @white;
 @inputBorder:                   #ccc;
 @inputBorderRadius:             @baseBorderRadius;
-@inputDisabledBackground:       @grayLighter;
+@inputDisabledBackground:       @grayLightest;
 @formActionsBackground:         #f5f5f5;
 @inputHeight:                   @baseLineHeight + 10px; // base line-height + 8px vertical padding + 2px top/bottom border
 
@@ -162,7 +190,7 @@
 
 // Hr border color
 // -------------------------
-@hrBorder:                @grayLighter;
+@hrBorder:                @grayLightest;
 
 
 // Horizontal forms & lists
@@ -223,7 +251,7 @@
 
 // Hero unit
 // -------------------------
-@heroUnitBackground:              @grayLighter;
+@heroUnitBackground:              @grayLightest;
 @heroUnitHeadingColor:            inherit;
 @heroUnitLeadColor:               inherit;
 

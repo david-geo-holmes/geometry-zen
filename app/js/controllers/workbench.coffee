@@ -61,20 +61,19 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
   $scope.run = () ->
     $rootScope.$broadcast 'reset'
 
-    $scope.layout.hide('west')
     prog = editor.getValue()
     Sk.canvas = "my-canvas"
-    Sk.pre = "my-output"
+
     Sk.configure
       "output": (text) -> $rootScope.$broadcast('print', text)
       "read": builtinRead
-#    try
+
     if prog.trim().length > 0
-      $scope.layout.show('east')
-      eval(Sk.importMainWithBody("<stdin>", false, prog.trim()))
-#    catch e
-#      alert(e.message)
-#    finally
+      try
+        eval(Sk.importMainWithBody("<stdin>", false, prog.trim()))
+      catch e
+        alert(e.message)
+      finally
 
   $scope.newFile = () ->
     $('#myModal').modal show: true, backdrop: true
@@ -82,16 +81,6 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
   $scope.$on 'commit', (e, owner, repo, file, commit) ->
     $scope.repo.files.push(file)
     $scope.editFile(file.path)
-
-#  $scope.newFile = () ->
-#    $scope.title = "New Model"
-#    # The layout is created in the directive, which happens after the controller has been initialized.
-#    if $scope.layout
-#      if ($scope.hasFeature('gz:feature:github'))
-#        $scope.layout.show('west')
-#      else
-#        $scope.layout.hide('west')
-#      $scope.layout.hide('east')
 
   $scope.editFile = (path) ->
     # TODO: Use the $index technique as in deleteFile
@@ -111,8 +100,6 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
         $scope.file.sha = response.content.sha
       else
         alert("Error saving file to repository: #{err}")
-    $scope.layout.show('west')
-    $scope.layout.hide('east')
 
   $scope.deleteFile = (idx) ->
     # Note that we should use indexOf on the array if the list has been filtered.

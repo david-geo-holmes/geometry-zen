@@ -2,6 +2,7 @@
  * Default Layout Theme
  *
  * THIS HAS BEEN MODIFIED TO REMOVE THE body STYLING.
+ * SOME HARD-CODED VALUES HAVE BEEN EXTERNALIZED AS VARIABLES.
  *
  * Created for jquery.layout 
  *
@@ -15,14 +16,15 @@
  * Last Updated: 2010-02-10
  * NOTE: For best code readability, view this with a fixed-space font and tabs equal to 4-chars
  */
+@import "variables.less";
 
 /*
  *	PANES & CONTENT-DIVs
  */
 .ui-layout-pane { /* all 'panes' */
-	background:	#FFF; 
-	border:		1px solid #BBB;
-	padding:	10px; 
+	background:	@paneBackground; 
+	border:		1px solid @paneBorderColor;
+	padding:	0px; 
 	overflow:	auto;
 	/* DO NOT add scrolling (or padding) to 'panes' that have a content-div,
 	   otherwise you may get double-scrollbars - on the pane AND on the content-div
@@ -32,7 +34,7 @@
 	}
 	/* (scrolling) content-div inside pane allows for fixed header(s) and/or footer(s) */
 	.ui-layout-content {
-		padding:	10px;
+		padding:	0px;
 		position:	relative; /* contain floated or positioned elements */
 		overflow:	auto; /* add scrolling to content-div */
 	}
@@ -61,8 +63,8 @@
  *	RESIZER-BARS
  */
 .ui-layout-resizer	{ /* all 'resizer-bars' */
-	background:		#DDD;
-	border:			1px solid #BBB;
+	background:		@resizerBackground;
+	border:			1px solid @paneBorderColor;
 	border-width:	0;
 	}
 	.ui-layout-resizer-drag {		/* REAL resizer while resize in progress */
@@ -73,10 +75,10 @@
 		otherwise color shifts while dragging when bar can't keep up with mouse */
 	.ui-layout-resizer-open-hover ,	/* hover-color to 'resize' */
 	.ui-layout-resizer-dragging {	/* resizer beging 'dragging' */
-		background: #C4E1A4;
+		background: @resizerDraggingBackground;
 	}
 	.ui-layout-resizer-dragging {	/* CLONED resizer being dragged */
-		border: 	 1px solid #BBB;
+		border: 	 1px solid @paneBorderColor;
 	}
 	.ui-layout-resizer-north-dragging,
 	.ui-layout-resizer-south-dragging {
@@ -88,7 +90,7 @@
 	}
 	/* NOTE: Add a 'dragging-limit' color to provide visual feedback when resizer hits min/max size limits */
 	.ui-layout-resizer-dragging-limit {	/* CLONED resizer at min or max size-limit */
-		background: #E1A4A4; /* red */
+		background: @resizerDraggingLimitBackground;
 	}
 
 	.ui-layout-resizer-closed-hover	{ /* hover-color to 'slide open' */
@@ -113,7 +115,7 @@
  *	TOGGLER-BUTTONS
  */
 .ui-layout-toggler {
-	border: 1px solid #BBB; /* match pane-border */
+	border: 1px solid @paneBorderColor; /* match pane-border */
 	background-color: #BBB;
 	}
 	.ui-layout-resizer-hover .ui-layout-toggler {
@@ -122,7 +124,7 @@
 	}
 	.ui-layout-toggler-hover , /* need when NOT resizable */
 	.ui-layout-resizer-hover .ui-layout-toggler-hover { /* need specificity when IS resizable */
-		background-color: #FC6;
+		background-color: @resizerHoverBackgroundColor;
 		opacity: 1.00;
 		filter:  alpha(opacity=100);
 	}
