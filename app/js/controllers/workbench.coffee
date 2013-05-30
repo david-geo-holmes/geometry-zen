@@ -62,18 +62,15 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
     $rootScope.$broadcast 'reset'
 
     prog = editor.getValue()
-    Sk.canvas = "my-canvas"
+    Sk.canvasWebGL = "canvasWebGL"
+    Sk.canvas = "canvas2d"
 
     Sk.configure
       "output": (text) -> $rootScope.$broadcast('print', text)
       "read": builtinRead
 
     if prog.trim().length > 0
-      try
-        eval(Sk.importMainWithBody("<stdin>", false, prog.trim()))
-      catch e
-        alert(e.message)
-      finally
+      eval(Sk.importMainWithBody("<stdin>", false, prog.trim()))
 
   $scope.newFile = () ->
     $('#myModal').modal show: true, backdrop: true
