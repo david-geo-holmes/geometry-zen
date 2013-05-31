@@ -1,12 +1,13 @@
-<div ng-switch="isLoggedIn()">
-
-  <!-- When looged out, present the user with an OAuth link-->
-  <a ng-switch-when="false" class="btn btn-inverse" href="https://github.com/login/oauth/authorize?client_id={{clientId()}}&amp;scope=repo,user,gist">
-    <span class="muted"><i class="icon-signin icon-white"></i> Authorize with GitHub</span>
+<li>
+  <!-- When logged out, present the user with an OAuth link-->
+  <a ng-hide="isLoggedIn()" ng-href="https://github.com/login/oauth/authorize?client_id={{clientId()}}&amp;scope=repo,user,gist">
+    <i class="icon-signin"></i>
+    <span>Log In</span>
   </a>
 
   <!-- TODO: When logged in, we would like to have a dropdown menu-->
-  <button ng-switch-default class="btn btn-inverse" ng-click="logout()">
-    <span class="muted"><i class="icon-signout icon-white"></i> {{username()}}</span>
-  </button>
-</div>
+  <a ng-show="isLoggedIn()" ng-click="logout()" href="#">
+    <i class="icon-signout icon-white"></i>
+    <span>{{username()}}</span>
+  </a>
+</li>
