@@ -20,3 +20,7 @@ config.json
 # Ignore the non-essential THREE.js baggage.
 vendor/threejs/editor
 vendor/threejs/examples
+
+# Be sure that we have only one variables.less
+vendor/bootstrap/less/variables.less
+

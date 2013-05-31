@@ -120,47 +120,232 @@
                 <h3>Features and Benefits</h3>
               </div>
               <div class="widget-content">
-                <dl class="dl-horizontal">
-                  <dt>Web Browser Platform</dt>
-                  <dd>Nothing to install. Just use a WebGL compliant browser such as Chrome or Firefox.</dd>
-                  <dt>Modeling Workbench</dt>
-                  <dd>Juxtaposes an analytical programming editor with a 3D geometry view reinforcing the learning of the mathematical notation as well as the geometric interpretation.</dd>
-                  <dt>Python Language</dt>
-                  <dd>Mathematical binary operators are natural to use. Easy to learn. Widely used in academia.</dd>
-                  <dt>WebGL 3D rendering</dt>
-                  <dd>Fast GPU-based rendering provides smooth animation of simulations.</dd>
-                  <dt>Geometric Algebra(s)</dt>
-                  <dd>Support for 2D and 3D Euclidean (Now), Spacetime and Conformal algebras (Coming soon).</dd>
-                  <dt>Dimensional Analysis</dt>
-                  <dd>Automatic verification of the correctness of physical expressions (Coming soon).</dd>
-                  <dt>Units of Measure</dt>
-                  <dd>Permits algebraic manipulations, even if the units differ, with automatic conversion (Coming soon).</dd>
-                  <dt>Coordinate Systems</dt>
-                  <dd>Enter initial configuration in a coordinate system that reflects the symmetry of the system.</dd>
-                  <dt>Tutorials</dt>
-                  <dd>A comprehensive introduction to {{marketing.name}} and Geometric Algebra (Coming soon).</dd>
-                  <dt>Examples</dt>
-                  <dd>Allow you to explore the capabilities and potential of {{marketing.name}}.</dd>
-                  <dt ng-show="hasFeature('gz:feature:real-time-collaboration')">Collaboration</dt>
-                  <dd ng-show="hasFeature('gz:feature:real-time-collaboration')">Real-time editor sharing over distributed locations (Coming soon)</dd>
-                  <dt>Works disconnected</dt>
-                  <dd>No need to be connected to the internet unless you want to share your work with others.</dd>
-                  <dt ng-show="hasFeature('gz:feature:github')">OAuth authentication</dt>
-                  <dd ng-show="hasFeature('gz:feature:github')">Secure authentication and authorization using GitHub. No extra passwords to memorize.</dd>
-                  <dt ng-show="hasFeature('gz:feature:github')">GitHub repository</dt>
-                  <dd ng-show="hasFeature('gz:feature:github')">Save and share your models in public repositories or use private repositories for assignments and problems. Search for public Geometry Zen models by other authors, improve on them, return the favor by offering back your changes<span ng-hide="hasFeature('gz:feature:github')" class="muted"> (Coming soon)</span>.</dd>
-                  <dt>Issue Tracking</dt>
-                  <dd>Want something incorporated, fixed or improved? <a href="https://github.com/david-geo-holmes/geometry-zen/issues">Discuss your issue</a> with the {{marketing.name}} community!</dd>
-                  <dt>100% freedom</dt>
-                  <dd>Freedom to run, copy, distribute, study, improve and change the software.</dd>
-                  <dt>100% free</dt>
-                  <dd>That's right.</dd>
-                  <dt>Open Source Software</dt>
-                  <dd>What else would it be? Just head over to the <a href="https://github.com/david-geo-holmes/geometry-zen">{{marketing.name}} GitHub project.</a></dd>
-                </dl>
-              </div>
-            </div>
-          </div>
+                <div class="accordion" id="fabAccordion">
+                  <!-- Web Browser Platform -->
+                  <div class="accordion-group">
+                    <div class="accordion-heading">
+                      <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse0">
+                        Web Browser Platform
+                      </a>
+                    </div>
+                    <div id="fabCollapse0" class="accordion-body in collapse">
+                      <div class="accordion-inner">
+                        <p>Nothing to install. Just use a WebGL compliant browser such as Chrome or Firefox.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Modeling Workbench -->
+                  <div class="accordion-group">
+                    <div class="accordion-heading">
+                      <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse1">
+                        Modeling Workbench
+                      </a>
+                    </div>
+                    <div id="fabCollapse1" class="accordion-body collapse">
+                      <div class="accordion-inner">
+                        <p>Juxtaposes an analytical programming editor with a 3D geometry view reinforcing the learning of the mathematical notation as well as the geometric interpretation.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Python Language -->
+                  <div class="accordion-group">
+                    <div class="accordion-heading">
+                      <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse3">
+                        Python Language
+                      </a>
+                    </div>
+                    <div id="fabCollapse3" class="accordion-body collapse">
+                      <div class="accordion-inner">
+                        <p>Mathematical binary operators are natural to use. Easy to learn. Widely used in academia.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- WebGL rendering -->
+                  <div class="accordion-group">
+                    <div class="accordion-heading">
+                      <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse4">
+                        WebGL 3D rendering
+                      </a>
+                    </div>
+                    <div id="fabCollapse4" class="accordion-body collapse">
+                      <div class="accordion-inner">
+                        <p>Fast GPU-based rendering provides smooth animation of simulations.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Geometric Algebra-->
+                  <div class="accordion-group">
+                    <div class="accordion-heading">
+                      <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse5">
+                        Geometric Algebra(s)
+                      </a>
+                    </div>
+                    <div id="fabCollapse5" class="accordion-body collapse">
+                      <div class="accordion-inner">
+                        <p>Support for 2D and 3D Euclidean (Now), Spacetime and Conformal algebras (Coming soon).</p>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Dimensional Analysis-->
+                  <div class="accordion-group">
+                    <div class="accordion-heading">
+                      <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse6">
+                        Dimensional Analysis
+                      </a>
+                    </div>
+                    <div id="fabCollapse6" class="accordion-body collapse">
+                      <div class="accordion-inner">
+                        <p>Automatic verification of the correctness of physical expressions (Coming soon).</p>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Units of Measure-->
+                  <div class="accordion-group">
+                    <div class="accordion-heading">
+                      <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse7">
+                        Units of Measure
+                      </a>
+                    </div>
+                    <div id="fabCollapse7" class="accordion-body collapse">
+                      <div class="accordion-inner">
+                        <p>Permits algebraic manipulations, even if the units differ, with automatic conversion (Coming soon).</p>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Coordinate Systems-->
+                  <div class="accordion-group">
+                    <div class="accordion-heading">
+                      <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse8">
+                        Coordinate Systems
+                      </a>
+                    </div>
+                    <div id="fabCollapse8" class="accordion-body collapse">
+                      <div class="accordion-inner">
+                        <p>Enter initial configuration in a coordinate system that reflects the symmetry of the system.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Tutorials-->
+                  <div class="accordion-group">
+                    <div class="accordion-heading">
+                      <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse9">
+                        Tutorials
+                      </a>
+                    </div>
+                    <div id="fabCollapse9" class="accordion-body collapse">
+                      <div class="accordion-inner">
+                        <p>A comprehensive introduction to {{marketing.name}} and Geometric Algebra (Coming soon).</p>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Examples-->
+                  <div class="accordion-group">
+                    <div class="accordion-heading">
+                      <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse10">
+                        Examples
+                      </a>
+                    </div>
+                    <div id="fabCollapse10" class="accordion-body collapse">
+                      <div class="accordion-inner">
+                        <p>Allow you to explore the capabilities and potential of {{marketing.name}}.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Works disconnected-->
+                  <div class="accordion-group">
+                    <div class="accordion-heading">
+                      <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse11">
+                        Works disconnected
+                      </a>
+                    </div>
+                    <div id="fabCollapse11" class="accordion-body collapse">
+                      <div class="accordion-inner">
+                        <p>No need to be connected to the internet unless you want to share your work with others.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- OAuth authentication-->
+                  <div class="accordion-group">
+                    <div class="accordion-heading">
+                      <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse12">
+                        OAuth authentication
+                      </a>
+                    </div>
+                    <div id="fabCollapse12" class="accordion-body collapse">
+                      <div class="accordion-inner">
+                        <p>Secure authentication and authorization using GitHub. No extra passwords to memorize.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- GitHub repository-->
+                  <div class="accordion-group">
+                    <div class="accordion-heading">
+                      <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse13">
+                        GitHub repository
+                      </a>
+                    </div>
+                    <div id="fabCollapse13" class="accordion-body collapse">
+                      <div class="accordion-inner">
+                        <p>Save and share your models in public repositories or use private repositories for assignments and problems. Search for public Geometry Zen models by other authors, improve on them, return the favor by offering back your changes.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Issue Tracking-->
+                  <div class="accordion-group">
+                    <div class="accordion-heading">
+                      <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse14">
+                        Issue Tracking
+                      </a>
+                    </div>
+                    <div id="fabCollapse14" class="accordion-body collapse">
+                      <div class="accordion-inner">
+                        <p>Want something incorporated, fixed or improved? <a href="https://github.com/david-geo-holmes/geometry-zen/issues">Discuss your issue</a> with the {{marketing.name}} community!</p>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- 100% freedom-->
+                  <div class="accordion-group">
+                    <div class="accordion-heading">
+                      <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse15">
+                        100% freedom
+                      </a>
+                    </div>
+                    <div id="fabCollapse15" class="accordion-body collapse">
+                      <div class="accordion-inner">
+                        <p>Freedom to run, copy, distribute, study, improve and change the software.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- 100% free-->
+                  <div class="accordion-group">
+                    <div class="accordion-heading">
+                      <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse16">
+                        100% free
+                      </a>
+                    </div>
+                    <div id="fabCollapse16" class="accordion-body collapse">
+                      <div class="accordion-inner">
+                        <p>That's right.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Open Source Software-->
+                  <div class="accordion-group">
+                    <div class="accordion-heading">
+                      <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse17">
+                        Open Source Software
+                      </a>
+                    </div>
+                    <div id="fabCollapse17" class="accordion-body collapse">
+                      <div class="accordion-inner">
+                        <p>What else would it be? Just head over to the <a href="https://github.com/david-geo-holmes/geometry-zen">{{marketing.name}} GitHub project.</a></p>
+                      </div>
+                    </div>
+                  </div>
+                </div> <!-- accordion -->
+              </div> <!-- widget-content-->
+            </div> <!-- widget -->
+          </div> <!-- span -->
           <div class="span4">
             <div class="widget stacked">
               <div class="widget-header">

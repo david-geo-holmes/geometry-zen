@@ -22,11 +22,12 @@
   ],
   "dependencies": {
     "angular": "latest",
-    "async": "~0.2.5",
-    "bootstrap": "~2.3.2",
+    "angular-bootstrap": "latest",
+    "async": "latest",
+    "bootstrap": "latest",
     "jquery": "~2.0.1",
-    "jquery-ui": "~1.10.3",
+    "jquery-ui": "latest",
     "threejs": "latest",
-    "underscore": "~1.4.4"
+    "underscore": "latest"
   }
 }
