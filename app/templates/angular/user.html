@@ -7,8 +7,14 @@
         </a>
         <div class="subnav-collapse collapse">
           <ul class="mainnav">
-            <li class="active">
+            <li>
               <a-home></a-home>
+            </li>
+            <li class="active">
+              <a ng-href="/users/{{user.login}}">
+                <i class="icon-user"></i>
+                <span>Me</span>
+              </a>
             </li>
           </ul>
         </div> <!-- /.subnav-collapse -->

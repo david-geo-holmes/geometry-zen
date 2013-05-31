@@ -10,6 +10,12 @@
             <li class="active">
               <a-home></a-home>
             </li>
+            <li ng-show="isLoggedIn()">
+              <a ng-href="/users/{{username()}}">
+                <i class="icon-user"></i>
+                <span>Me</span>
+              </a>
+            </li>
             <li class="dropdown">
               <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">
                 <i class="icon-eye-open"></i>
@@ -101,9 +107,6 @@
                   </button>
                   <button ng-show="hasFeature('gz:feature:examples')" ng-click="browse()" class="btn btn-info">
                     <i class="icon-th icon-white"></i> Browse Examples
-                  </button>
-                  <button ng-show="hasFeature('gz:feature:github') &amp;&amp; isLoggedIn()" ng-click="user()" class="btn btn-primary">
-                    <i class="icon-level-down icon-white"></i> {{username()}}
                   </button>
                 </div>
               <!--/div-->

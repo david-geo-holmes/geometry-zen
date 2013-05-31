@@ -7,36 +7,38 @@
         </a>
         <div class="subnav-collapse collapse">
           <ul class="mainnav">
-            <li class="active">
+            <li>
               <a-home></a-home>
             </li>
-            <li>
-              <button ng-click="left()" class="btn btn-inverse">
-                <span class="muted"><i class="icon-chevron-left icon-white"></i> </span>
-              </button>
+            <li ng-show="isLoggedIn()">
+              <a ng-href="/users/{{owner.name}}">
+                <i class="icon-user"></i>
+                <span>Me</span>
+              </a>
             </li>
-            <li class="divider-vertical"></li>
-            <li ng-show="hasFeature('gz:feature:github') &amp;&amp; isLoggedIn()">
-              <button ng-click="save()" class="btn btn-inverse">
-                <!-- TODO: Conditionnaly mute according to dirty state -->
-                <span class="muted"><i class="icon-save icon-white"></i> Save</span>
-              </button>
+            <li class="active" ng-show="isLoggedIn()">
+              <a ng-click="left()" href="#">
+                <i class="icon-book"></i>
+                <span>Book</span>
+              </a>
             </li>
-            <li ng-show="hasFeature('gz:feature:github') &amp;&amp; isLoggedIn()" class="divider-vertical"></li>
-            <li>
-              <button ng-click="run()" class="btn btn-inverse">
-                <!-- TODO: Conditionnaly mute according to playable state -->
-                <span class="muted"><i class="icon-play icon-white"></i> Run</span>
-              </button>
+            <li class="active">
+              <a ng-click="right()" href="#">
+                <i class="icon-file-alt"></i>
+                <span>File</span>
+              </a>
             </li>
-            <li class="divider-vertical"></li>
-          </ul>
-          <ul class="nav pull-right">
-            <li class="divider-vertical"></li>
+            <li ng-show="isLoggedIn()">
+              <a ng-click="save()" href="#">
+                <i class="icon-save"></i>
+                <span>Save</span>
+              </a>
+            </li>
             <li>
-              <button ng-click="right()" class="btn btn-inverse">
-                <span class="muted"><i class="icon-chevron-right icon-white"></i> </span>
-              </button>
+              <a ng-click="run()" href="#">
+                <i class="icon-cogs"></i>
+                <span>Run</span>
+              </a>
             </li>
           </ul>
         </div> <!-- /.subnav-collapse -->
@@ -52,14 +54,14 @@
         <div class="widget-content">
           <div>
             <i class="icon-user muted"></i>
-            <span><a href="/users/{{owner.name}}">{{owner.name}}</a></span>
-            <a href="https://github.com/{{owner.name}}" target="_blank" class="muted">
+            <span><a ng-href="/users/{{owner.name}}">{{owner.name}}</a></span>
+            <a ng-href="https://github.com/{{owner.name}}" target="_blank" class="muted">
               <i class="icon-external-link"></i>
             </a>
             <h4>
               <i class="icon-book muted"></i>
               <span>{{repo.name}}</span>
-              <a href="https://github.com/{{owner.name}}/{{repo.name}}" target="_blank" class="muted">
+              <a ng-href="https://github.com/{{owner.name}}/{{repo.name}}" target="_blank" class="muted">
                 <i class="icon-external-link"></i>
               </a>
             </h4>
@@ -93,7 +95,7 @@
                         </button>
                       </td>
                       <td nowrap=nowrap>
-                        <a href="https://github.com/{{owner.name}}/{{repo.name}}/blob/master/{{file.path}}" target="_blank" class="muted">
+                        <a ng-href="https://github.com/{{owner.name}}/{{repo.name}}/blob/master/{{file.path}}" target="_blank" class="muted">
                           <i class="icon-external-link"></i>
                         </a>
                         <button ng-click="deleteFile($index)" class="btn btn-link">
