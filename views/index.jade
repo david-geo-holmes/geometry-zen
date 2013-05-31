@@ -11,19 +11,37 @@ html(lang="en", data-ng-app="app")
     meta(name="author", edit="David Holmes")
     meta(name="copyright", content="")
     meta(name="description", content="")
-    link(rel="stylesheet", type="text/css", href=css, media="all")
+    link(rel="stylesheet", href=css, media="all")
     link(rel="icon", type="image/png", href="img/favicon-48x48.png")
   body
-    script(type="text/javascript", src=js)
+    script(src=js)
     div.navbar.navbar-inverse.navbar-fixed-top
       div.navbar-inner
         div.container
+          a.btn.btn-navbar(data-toggle="collapse", data-target=".nav-collapse")
+            i.icon-cog
           a-brand
-          ul.nav.pull-left
-          ul.nav.pull-right
-            li(ng-show="hasFeature('gz:feature:search')", class="divider-vertical")
-              form-search
-            li(ng-show="hasFeature('gz:feature:github')", class="divider-vertical")
-              github-authorize
+          div.nav-collapse.collapse
+            ul.nav.pull-right
+              li.dropdown
+                a.dropdown-toggle(href="#", data-toggle="dropdown")
+                  i.icon-cog
+                  span Settings
+                  b.caret
+                ul.dropdown-menu
+                  li
+                    a(href="javascript:;")
+                    | Account Settings
+                  li
+                    a(href="javascript:;")
+                    | Privacy Settings
+                  li.divider
+                  li
+                    a(href="javascript:;")
+                    | Help
+
+              li
+                github-authorize
+            form-search
     div#view(ng-view)
     footer

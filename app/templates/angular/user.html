@@ -1,153 +1,101 @@
 <div id="user-view">
-  <div class="navbar navbar-inverse">
-    <div class="navbar-inner">
-      <div class="container">
-        <button type="button" data-toggle="collapse" data-target=".nav-collapse" class="btn btn-navbar">
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a-brand></a-brand>
-        <ul class="nav pull-left">
-          <li class="divider-vertical"></li>
-          <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-              <i class="icon-eye-open icon-white"></i> Learn <b class="caret"></b>
-            </a>
-            <ul class="dropdown-menu">
-              <li><a href="http://www.youtube.com/user/geometryzen">Watch</a></li>
-              <li><a href="tutorial">Tutorial</a></li>
-              <li><a href="misc/faq">FAQ</a></li>
-            </ul>
-          </li>
-          <li class="divider-vertical"></li>
-          <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-              <i class="icon-book icon-white"></i> Develop <b class="caret"></b>
-            </a>
-            <ul class="dropdown-menu">
-              <li><a href="http://docs.geometryzen.org/tutorial">Tutorial</a></li>
-              <li><a href="http://docs.geometryzen.org/guide/">Developer Guide</a></li>
-              <li><a href="http://docs.geometryzen.org/api/">API Reference</a></li>
-              <li><a href="http://docs.geometryzen.org/misc/contribute">Contribute</a></li>
-              <li><a href="http://code.geometryzen.org/">Download</a></li>
-            </ul>
-          </li>
-          <li class="divider-vertical"></li>
-          <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-              <i class="icon-comment icon-white"></i> Discuss <b class="caret"></b>
-            </a>
-            <ul class="dropdown-menu">
-              <li><a href="http://groups.google.com/group/geometryzen">Mailing List</a></li>
-              <li><a href="http://webchat.freenode.net/?channels=geometryzen&amp;uio=d4">Chat Room</a></li>
-              <li class="divider"></li>
-              <li><a href="https://twitter.com/#!/geometryzen">Twitter</a></li>
-              <li><a href="https://plus.google.com/110323587230527980117">Google+</a></li>
-              <li class="divider"></li>
-              <li><a href="https://github.com/david-geo-holmes/geometry-zen">GitHub</a></li>
-              <li><a href="https://github.com/david-geo-holmes/geometry-zen/issues">Issue Tracker</a></li>
-            </ul>
-          </li>
-          <li class="divider-vertical"></li>
-        </ul>
-        <ul class="nav pull-right">
-          <li class="divider-vertical"></li>
-          <li>
-            <form-search></form-search>
-          </li>
-          <li class="divider-vertical"></li>
-          <li>
-            <github-authorize></github-authorize>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </div>
   <div class="container-fluid" style="padding-top: 80px">
     <div class="row-fluid">
       <div class="span3">
-        <h3>
-          <span>{{user.name}}</span>
-        </h3>
-        <h4>
-          <i class="icon-user muted"></i>
-          <span>{{user.login}}</span>
-          <a href="https://github.com/{{user.login}}?tab=repositories" target="_blank" class="muted">
-            <i class="icon-external-link"></i>
-          </a>
-        </h4>
-      </div>
-      <div class="span9">
-        <ul class="nav nav-tabs" id="myTab">
-          <!--li><a data-target="#contributions" data-toggle="tab">Contributions</a></li-->
-          <li><a data-target="#repositories" data-toggle="tab">Repositories</a></li>
-          <!--li><a data-target="#activity" data-toggle="tab">Public Activity</a></li-->
-        </ul>
-        <div class="tab-content">
-          <div class="tab-pane" id="contributions">
-            <p>Under Construction: Contributions</p>
+        <div class="widget stacked">
+          <div class="widget-header">
           </div>
-          <div class="tab-pane" id="repositories">
-            <div class ="row-fluid">
-              <table class="table table-condensed">
-                <tbody>
-                  <tr>
-                    <td nowrap=nowrap>
-                      <!--input type="text" placeHolder="Filter..."></input-->
-                    </td>
-                    <td nowrap=nowrap>
-                      <button ng-click="newRepo()" class="btn btn-link">
-                        <i class="icon-plus-sign-alt muted"></i> <i class="icon-book muted"></i>
-                      </button>
-                    </td>
-                  </tr>
-                  <tr ng-repeat="repo in repos">
-                    <td nowrap=nowrap>
-                      <i class="icon-book muted"></i>
-                      <a href="/users/{{user.login}}/repos/{{repo.name}}"> {{repo.name}}</a>
-                      <p>{{repo.description}}</p>
-                    </td>
-                    <td nowrap=nowrap>
-                      <a href="https://github.com/{{user.login}}/{{repo.name}}" target="_blank" class="muted">
-                        <i class="icon-external-link"></i>
-                      </a>
-                      <button ng-click="deleteRepo($index)" class="btn btn-link">
-                        <i class="icon-minus-sign-alt muted"></i>
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div class="tab-pane" id="activity">
-            <p>Under Construction: Public Activity</p>
+          <div class="widget-content">
+            <h3>
+              <span>{{user.name}}</span>
+            </h3>
+            <h4>
+              <i class="icon-user muted"></i>
+              <span>{{user.login}}</span>
+              <a href="https://github.com/{{user.login}}?tab=repositories" target="_blank" class="muted">
+                <i class="icon-external-link"></i>
+              </a>
+            </h4>
           </div>
         </div>
-        <script>
-          $(function () {
-            $('#myTab a[data-target="#repositories"]').tab('show');
-          })
-        </script>
-        <script>
-          $('#myTab a[data-target="#contributions"]').click(function(e) {
-            e.preventDefault();
-            $(this).tab('show');
-          });
-        </script>
-        <script>
-          $('#myTab a[data-target="#repositories"]').click(function(e) {
-            e.preventDefault();
-            $(this).tab('show');
-          });
-        </script>
-        <script>
-          $('#myTab a[data-target="#activity"]').click(function(e) {
-            e.preventDefault();
-            $(this).tab('show');
-          });
-        </script>
+      </div>
+      <div class="span9">
+        <div class="widget stacked">
+          <div class="widget-header">
+          </div>
+          <div class="widget-content">
+            <ul class="nav nav-tabs" id="myTab">
+              <!--li><a data-target="#contributions" data-toggle="tab">Contributions</a></li-->
+              <li><a data-target="#repositories" data-toggle="tab">Repositories</a></li>
+              <!--li><a data-target="#activity" data-toggle="tab">Public Activity</a></li-->
+            </ul>
+            <div class="tab-content">
+              <div class="tab-pane" id="contributions">
+                <p>Under Construction: Contributions</p>
+              </div>
+              <div class="tab-pane" id="repositories">
+                <div class ="row-fluid">
+                  <table class="table table-condensed">
+                    <tbody>
+                      <tr>
+                        <td nowrap=nowrap>
+                          <!--input type="text" placeHolder="Filter..."></input-->
+                        </td>
+                        <td nowrap=nowrap>
+                          <button ng-click="newRepo()" class="btn btn-link">
+                            <i class="icon-plus-sign-alt muted"></i> <i class="icon-book muted"></i>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr ng-repeat="repo in repos">
+                        <td nowrap=nowrap>
+                          <i class="icon-book muted"></i>
+                          <a href="/users/{{user.login}}/repos/{{repo.name}}"> {{repo.name}}</a>
+                          <p>{{repo.description}}</p>
+                        </td>
+                        <td nowrap=nowrap>
+                          <a href="https://github.com/{{user.login}}/{{repo.name}}" target="_blank" class="muted">
+                            <i class="icon-external-link"></i>
+                          </a>
+                          <button ng-click="deleteRepo($index)" class="btn btn-link">
+                            <i class="icon-minus-sign-alt muted"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="tab-pane" id="activity">
+                <p>Under Construction: Public Activity</p>
+              </div>
+            </div>
+            <script>
+              $(function () {
+                $('#myTab a[data-target="#repositories"]').tab('show');
+              })
+            </script>
+            <script>
+              $('#myTab a[data-target="#contributions"]').click(function(e) {
+                e.preventDefault();
+                $(this).tab('show');
+              });
+            </script>
+            <script>
+              $('#myTab a[data-target="#repositories"]').click(function(e) {
+                e.preventDefault();
+                $(this).tab('show');
+              });
+            </script>
+            <script>
+              $('#myTab a[data-target="#activity"]').click(function(e) {
+                e.preventDefault();
+                $(this).tab('show');
+              });
+            </script>
+          </div>
+        </div>
+
         <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>

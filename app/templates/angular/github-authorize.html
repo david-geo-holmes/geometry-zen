@@ -1,7 +1,11 @@
-<div ng-show="hasFeature('gz:feature:github')" ng-switch="isLoggedIn()">
+<div ng-switch="isLoggedIn()">
+
+  <!-- When looged out, present the user with an OAuth link-->
   <a ng-switch-when="false" class="btn btn-inverse" href="https://github.com/login/oauth/authorize?client_id={{clientId()}}&amp;scope=repo,user,gist">
     <span class="muted"><i class="icon-signin icon-white"></i> Authorize with GitHub</span>
   </a>
+
+  <!-- TODO: When logged in, we would like to have a dropdown menu-->
   <button ng-switch-default class="btn btn-inverse" ng-click="logout()">
     <span class="muted"><i class="icon-signout icon-white"></i> {{username()}}</span>
   </button>

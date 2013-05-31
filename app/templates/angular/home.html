@@ -1,6 +1,6 @@
 <div id="home-view">
-  <div class="navbar navbar-inverse">
-    <div class="navbar-inner">
+  <!--div class="subnavbar subnavbar-inverse">
+    <div class="subnavbar-inner">
       <div class="container">
         <button type="button" data-toggle="collapse" data-target=".nav-collapse" class="btn btn-navbar">
           <span class="icon-bar"></span>
@@ -63,39 +63,49 @@
         </ul>
       </div>
     </div>
-  </div>
+  </div-->
   <div class="container-fluid">
     <div class="row-fluid">
       <div style="padding-top: 80px" class="row">
-        <div class="span12">
-          <div class="hero-unit">
-            <div class="text-center">
-              <h1>
-                <large>{{marketing.name}}</large>
-              </h1>
-              <h1>
-                <small><em>Looking at the multiverse from a Geometric Algebra perspective</em></small>
-              </h1>
-              <br/>
-              <p><em>{{marketing.name}}</em> is an online tool providing <em>Hands-on Learning</em> of <em>Geometric Algebra and Geometric Calculus</em> to students and researchers in <em>Physics, Engineering, and Computer Graphics</em> using <em>Python programming</em> and <em>WebGL 3D Visualization</em>. It is the goal of this tool to make Geometric Algebra familiar to young science students and academia so that Geometric Algebra becomes the <em>standard</em> <em>Unified Mathematical Language for Physics and Engineering in the 21st Century</em>.</p>
-              <br/>
+        <div class="span1">
+        </div>
+        <div class="span10">
+          <div class="widget stacked">
+            <div class="widget-header">
+              <i class="icon-cogs"></i>
+              <h3>Geometry Zen</h3>
             </div>
-            <div class="text-right">
-              <blockquote>
-                <p class="muted">...for geometry, you know, is the gate of science,<br/>and the gate is so low and small<br/>that one can only enter it as a little child.</p>
-                <small>William K. Clifford <cite title="Source Title"></cite></small>
-              </blockquote>
-            </div>
-            <div class="text-center">
-              <button ng-click="workbench()" class="btn btn-primary">
-                <i class="icon-edit icon-white"></i> Launch the Modeling Workbench
-              </button>
-              <button ng-show="hasFeature('gz:feature:examples')" ng-click="browse()" class="btn btn-info">
-                <i class="icon-th icon-white"></i> Browse Examples
-              </button>
-              <button ng-show="hasFeature('gz:feature:github') &amp;&amp; isLoggedIn()" ng-click="user()" class="btn btn-primary">
-                <i class="icon-level-down icon-white"></i> {{username()}}
-              </button>
+            <div class="widget-content">
+              <!--div class="hero-unit"-->
+                <div class="text-center">
+                  <h1>
+                    <large>{{marketing.name}}</large>
+                  </h1>
+                  <h1>
+                    <small><em>Looking at the multiverse from a Geometric Algebra perspective</em></small>
+                  </h1>
+                  <br/>
+                  <p><em>{{marketing.name}}</em> is an online tool providing <em>Hands-on Learning</em> of <em>Geometric Algebra and Geometric Calculus</em> to students and researchers in <em>Physics, Engineering, and Computer Graphics</em> using <em>Python programming</em> and <em>WebGL 3D Visualization</em>. It is the goal of this tool to make Geometric Algebra familiar to young science students and academia so that Geometric Algebra becomes the <em>standard</em> <em>Unified Mathematical Language for Physics and Engineering in the 21st Century</em>.</p>
+                  <br/>
+                </div>
+                <div class="text-right">
+                  <blockquote>
+                    <p class="muted">...for geometry, you know, is the gate of science,<br/>and the gate is so low and small<br/>that one can only enter it as a little child.</p>
+                    <small>William K. Clifford <cite title="Source Title"></cite></small>
+                  </blockquote>
+                </div>
+                <div class="text-center">
+                  <button ng-click="workbench()" class="btn btn-primary">
+                    <i class="icon-edit icon-white"></i> Launch the Modeling Workbench
+                  </button>
+                  <button ng-show="hasFeature('gz:feature:examples')" ng-click="browse()" class="btn btn-info">
+                    <i class="icon-th icon-white"></i> Browse Examples
+                  </button>
+                  <button ng-show="hasFeature('gz:feature:github') &amp;&amp; isLoggedIn()" ng-click="user()" class="btn btn-primary">
+                    <i class="icon-level-down icon-white"></i> {{username()}}
+                  </button>
+                </div>
+              <!--/div-->
             </div>
           </div>
         </div>
@@ -103,111 +113,132 @@
       <div role="content" class="container">
         <div class="row first">
           <div class="span4">
-            <h1>Features and Benefits</h1>
-              <dl class="dl-horizontal">
-                <dt>Web Browser Platform</dt>
-                <dd>Nothing to install. Just use a WebGL compliant browser such as Chrome or Firefox.</dd>
-                <dt>Modeling Workbench</dt>
-                <dd>Juxtaposes an analytical programming editor with a 3D geometry view reinforcing the learning of the mathematical notation as well as the geometric interpretation.</dd>
-                <dt>Python Language</dt>
-                <dd>Mathematical binary operators are natural to use. Easy to learn. Widely used in academia.</dd>
-                <dt>WebGL 3D rendering</dt>
-                <dd>Fast GPU-based rendering provides smooth animation of simulations.</dd>
-                <dt>Geometric Algebra(s)</dt>
-                <dd>Support for 2D and 3D Euclidean (Now), Spacetime and Conformal algebras (Coming soon).</dd>
-                <dt>Dimensional Analysis</dt>
-                <dd>Automatic verification of the correctness of physical expressions (Coming soon).</dd>
-                <dt>Units of Measure</dt>
-                <dd>Permits algebraic manipulations, even if the units differ, with automatic conversion (Coming soon).</dd>
-                <dt>Coordinate Systems</dt>
-                <dd>Enter initial configuration in a coordinate system that reflects the symmetry of the system.</dd>
-                <dt>Tutorials</dt>
-                <dd>A comprehensive introduction to {{marketing.name}} and Geometric Algebra (Coming soon).</dd>
-                <dt>Examples</dt>
-                <dd>Allow you to explore the capabilities and potential of {{marketing.name}}.</dd>
-                <dt ng-show="hasFeature('gz:feature:real-time-collaboration')">Collaboration</dt>
-                <dd ng-show="hasFeature('gz:feature:real-time-collaboration')">Real-time editor sharing over distributed locations (Coming soon)</dd>
-                <dt>Works disconnected</dt>
-                <dd>No need to be connected to the internet unless you want to share your work with others.</dd>
-                <dt ng-show="hasFeature('gz:feature:github')">OAuth authentication</dt>
-                <dd ng-show="hasFeature('gz:feature:github')">Secure authentication and authorization using GitHub. No extra passwords to memorize.</dd>
-                <dt ng-show="hasFeature('gz:feature:github')">GitHub repository</dt>
-                <dd ng-show="hasFeature('gz:feature:github')">Save and share your models in public repositories or use private repositories for assignments and problems. Search for public Geometry Zen models by other authors, improve on them, return the favor by offering back your changes<span ng-hide="hasFeature('gz:feature:github')" class="muted"> (Coming soon)</span>.</dd>
-                <dt>Issue Tracking</dt>
-                <dd>Want something incorporated, fixed or improved? <a href="https://github.com/david-geo-holmes/geometry-zen/issues">Discuss your issue</a> with the {{marketing.name}} community!</dd>
-                <dt>100% freedom</dt>
-                <dd>Freedom to run, copy, distribute, study, improve and change the software.</dd>
-                <dt>100% free</dt>
-                <dd>That's right.</dd>
-                <dt>Open Source Software</dt>
-                <dd>What else would it be? Just head over to the <a href="https://github.com/david-geo-holmes/geometry-zen">{{marketing.name}} GitHub project.</a></dd>
-              </dl>
+            <div class="widget stacked">
+              <div class="widget-header">
+                <i class="icon-thumbs-up"></i>
+                <h3>Features and Benefits</h3>
+              </div>
+              <div class="widget-content">
+                <dl class="dl-horizontal">
+                  <dt>Web Browser Platform</dt>
+                  <dd>Nothing to install. Just use a WebGL compliant browser such as Chrome or Firefox.</dd>
+                  <dt>Modeling Workbench</dt>
+                  <dd>Juxtaposes an analytical programming editor with a 3D geometry view reinforcing the learning of the mathematical notation as well as the geometric interpretation.</dd>
+                  <dt>Python Language</dt>
+                  <dd>Mathematical binary operators are natural to use. Easy to learn. Widely used in academia.</dd>
+                  <dt>WebGL 3D rendering</dt>
+                  <dd>Fast GPU-based rendering provides smooth animation of simulations.</dd>
+                  <dt>Geometric Algebra(s)</dt>
+                  <dd>Support for 2D and 3D Euclidean (Now), Spacetime and Conformal algebras (Coming soon).</dd>
+                  <dt>Dimensional Analysis</dt>
+                  <dd>Automatic verification of the correctness of physical expressions (Coming soon).</dd>
+                  <dt>Units of Measure</dt>
+                  <dd>Permits algebraic manipulations, even if the units differ, with automatic conversion (Coming soon).</dd>
+                  <dt>Coordinate Systems</dt>
+                  <dd>Enter initial configuration in a coordinate system that reflects the symmetry of the system.</dd>
+                  <dt>Tutorials</dt>
+                  <dd>A comprehensive introduction to {{marketing.name}} and Geometric Algebra (Coming soon).</dd>
+                  <dt>Examples</dt>
+                  <dd>Allow you to explore the capabilities and potential of {{marketing.name}}.</dd>
+                  <dt ng-show="hasFeature('gz:feature:real-time-collaboration')">Collaboration</dt>
+                  <dd ng-show="hasFeature('gz:feature:real-time-collaboration')">Real-time editor sharing over distributed locations (Coming soon)</dd>
+                  <dt>Works disconnected</dt>
+                  <dd>No need to be connected to the internet unless you want to share your work with others.</dd>
+                  <dt ng-show="hasFeature('gz:feature:github')">OAuth authentication</dt>
+                  <dd ng-show="hasFeature('gz:feature:github')">Secure authentication and authorization using GitHub. No extra passwords to memorize.</dd>
+                  <dt ng-show="hasFeature('gz:feature:github')">GitHub repository</dt>
+                  <dd ng-show="hasFeature('gz:feature:github')">Save and share your models in public repositories or use private repositories for assignments and problems. Search for public Geometry Zen models by other authors, improve on them, return the favor by offering back your changes<span ng-hide="hasFeature('gz:feature:github')" class="muted"> (Coming soon)</span>.</dd>
+                  <dt>Issue Tracking</dt>
+                  <dd>Want something incorporated, fixed or improved? <a href="https://github.com/david-geo-holmes/geometry-zen/issues">Discuss your issue</a> with the {{marketing.name}} community!</dd>
+                  <dt>100% freedom</dt>
+                  <dd>Freedom to run, copy, distribute, study, improve and change the software.</dd>
+                  <dt>100% free</dt>
+                  <dd>That's right.</dd>
+                  <dt>Open Source Software</dt>
+                  <dd>What else would it be? Just head over to the <a href="https://github.com/david-geo-holmes/geometry-zen">{{marketing.name}} GitHub project.</a></dd>
+                </dl>
+              </div>
+            </div>
           </div>
           <div class="span4">
-            <h1>Geometric Algebra</h1>
-            <p>Geometric Algebra is the generalization of the concept of a number to describe geometric quantities and defines the rules for manipulating those numbers. In essence, Geometric Algebra is about learning how to correctly multiply and interpret Geometric Numbers.</p>
-            <p>Many of the Physical Laws that describe the phenomena of nature are Geometric and Algebraic in Character. That is to say, the laws have a precise mathematical structure that is amenable to a geometric interpretation. Geometric Algebra unifies these two aspects in a single mathematical tool. By learning and using Geometric Algebra (and Geometric Calculus) the student gains a new perspective and a lasting foundation for understanding the universe and making new discoveries.</p>
+            <div class="widget stacked">
+              <div class="widget-header">
+                <i class="icon-cogs"></i>
+                <h3>Geometric Algebra</h3>
+              </div>
+              <div class="widget-content">
+                <p>Geometric Algebra is the generalization of the concept of a number to describe geometric quantities and defines the rules for manipulating those numbers. In essence, Geometric Algebra is about learning how to correctly multiply and interpret Geometric Numbers.</p>
+                <p>Many of the Physical Laws that describe the phenomena of nature are Geometric and Algebraic in Character. That is to say, the laws have a precise mathematical structure that is amenable to a geometric interpretation. Geometric Algebra unifies these two aspects in a single mathematical tool. By learning and using Geometric Algebra (and Geometric Calculus) the student gains a new perspective and a lasting foundation for understanding the universe and making new discoveries.</p>
+              </div>
+            </div>
           </div>
           <div class="span4">
-            <h1>Timeline</h1>
-            <dl class="dl-horizontal">
-              <dt>300BC Euclid</dt>
-              <dd><em>Geometry</em></dd>
+            <div class="widget stacked">
+              <div class="widget-header">
+                <i class="icon-time"></i>
+                <h3>Timeline</h3>
+              </div>
+              <div class="widget-content">
+                <dl class="dl-horizontal">
+                  <dt>300BC Euclid</dt>
+                  <dd><em>Geometry</em></dd>
 
-              <dt>250 AD Diophantes</dt>
-              <dd><em>Algebra</em></dd>
-              
-              <dt>1545 Cardano</dt>
-              <dd><em>Imaginary numbers</em></dd>
-              
-              <dt>1637 Descartes</dt>
-              <dd>Initiates the union of geometry and algebra, introduces <em>Coordinates</em>.</dd>
-              
-              <dt>1798 Gauss</dt>
-              <dd><em>Complex Algebra</em></dd>
+                  <dt>250 AD Diophantes</dt>
+                  <dd><em>Algebra</em></dd>
+                  
+                  <dt>1545 Cardano</dt>
+                  <dd><em>Imaginary numbers</em></dd>
+                  
+                  <dt>1637 Descartes</dt>
+                  <dd>Initiates the union of geometry and algebra, introduces <em>Coordinates</em>.</dd>
+                  
+                  <dt>1798 Gauss</dt>
+                  <dd><em>Complex Algebra</em></dd>
 
-              <dt>1840 Grassman</dt>
-              <dd>submits essay containing the first known appearance of <em>Linear Algebra</em> and the concept of a <em>Vector Space</em>.</dd>
+                  <dt>1840 Grassman</dt>
+                  <dd>submits essay containing the first known appearance of <em>Linear Algebra</em> and the concept of a <em>Vector Space</em>.</dd>
 
-              <dt>1843 Hamilton</dt>
-              <dd><em>Quaternions</em></dd>
+                  <dt>1843 Hamilton</dt>
+                  <dd><em>Quaternions</em></dd>
 
-              <dt>1844 Grassman</dt>
-              <dd>publishes Die Lineale Ausdenungslehre, ein neuer Zweig der Mathematik (The Theory of Linear Extension, a New Branch of Mathematics). <em>Extensive Algebra</em></dd>
+                  <dt>1844 Grassman</dt>
+                  <dd>publishes Die Lineale Ausdenungslehre, ein neuer Zweig der Mathematik (The Theory of Linear Extension, a New Branch of Mathematics). <em>Extensive Algebra</em></dd>
 
-              <dt>1854 Cayley</dt>
-              <dd><em>Matrix Algebra</em></dd>
+                  <dt>1854 Cayley</dt>
+                  <dd><em>Matrix Algebra</em></dd>
 
-              <dt>1870 Gibbs/Heaviside</dt>
-              <dd>idependently invent <em>Vector Calculus</em>.</dd>
+                  <dt>1870 Gibbs/Heaviside</dt>
+                  <dd>idependently invent <em>Vector Calculus</em>.</dd>
 
-              <dt>1878 Clifford</dt>
-              <dd>expands Grassman's Ausdehnungslehre and Hamilton's quaternions by defining the geometric product. <em>Geometric Algebra</em></dd>
+                  <dt>1878 Clifford</dt>
+                  <dd>expands Grassman's Ausdehnungslehre and Hamilton's quaternions by defining the geometric product. <em>Geometric Algebra</em></dd>
 
-              <dt>1879 Clifford</dt>
-              <dd>dies at age 33.</dd>
+                  <dt>1879 Clifford</dt>
+                  <dd>dies at age 33.</dd>
 
-              <dt>1880 Gibbs</dt>
-              <dd>advocates use of 3D Vector analysis over quaternions.</dd>
+                  <dt>1880 Gibbs</dt>
+                  <dd>advocates use of 3D Vector analysis over quaternions.</dd>
 
-              <dt>1890 Ricci</dt>
-              <dd><em>Tensors</em></dd>
+                  <dt>1890 Ricci</dt>
+                  <dd><em>Tensors</em></dd>
 
-              <dt>1899 Cartan</dt>
-              <dd><em>Differential Forms</em></dd>
+                  <dt>1899 Cartan</dt>
+                  <dd><em>Differential Forms</em></dd>
 
-              <dt>1928 Dirac</dt>
-              <dd><em>Spin Algebra</em></dd>
+                  <dt>1928 Dirac</dt>
+                  <dd><em>Spin Algebra</em></dd>
 
-              <dt>1957 Riesz</dt>
-              <dd><em>Clifford Numbers, Spinors</em></dd>
+                  <dt>1957 Riesz</dt>
+                  <dd><em>Clifford Numbers, Spinors</em></dd>
 
-              <dt>1966 Hestenes</dt>
-              <dd>publishes <em>Space Time Algebra</em>, reinterprets the Pauli and Dirac matrices, and develops <em>Geometric Calculus</em>.</dd>
+                  <dt>1966 Hestenes</dt>
+                  <dd>publishes <em>Space Time Algebra</em>, reinterprets the Pauli and Dirac matrices, and develops <em>Geometric Calculus</em>.</dd>
 
-              <dt>2013</dt>
-              <dd><em>Geometry Zen Software</em></dd>
-            </dl>
+                  <dt>2013</dt>
+                  <dd><em>Geometry Zen Software</em></dd>
+                </dl>
+              </div>
+            </div>
           </div>
         </div>
       </div>

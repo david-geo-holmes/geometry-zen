@@ -1,130 +1,141 @@
 <div id="workbench-view">
-  <div class="navbar navbar-inverse">
-    <div class="navbar-inner">
+  <div class="subnavbar">
+    <div class="subnavbar-inner">
       <div class="container">
-        <ul class="nav pull-left">
-          <li>
-            <button ng-click="left()" class="btn btn-inverse">
-              <span class="muted"><i class="icon-chevron-left icon-white"></i> </span>
-            </button>
-          </li>
-          <li class="divider-vertical"></li>
-          <li ng-show="hasFeature('gz:feature:github') &amp;&amp; isLoggedIn()">
-            <button ng-click="save()" class="btn btn-inverse">
-              <!-- TODO: Conditionnaly mute according to dirty state -->
-              <span class="muted"><i class="icon-save icon-white"></i> Save</span>
-            </button>
-          </li>
-          <li ng-show="hasFeature('gz:feature:github') &amp;&amp; isLoggedIn()" class="divider-vertical"></li>
-          <li>
-            <button ng-click="run()" class="btn btn-inverse">
-              <!-- TODO: Conditionnaly mute according to playable state -->
-              <span class="muted"><i class="icon-play icon-white"></i> Run</span>
-            </button>
-          </li>
-          <li class="divider-vertical"></li>
-        </ul>
-        <ul class="nav pull-right">
-          <li class="divider-vertical"></li>
-          <li>
-            <button ng-click="right()" class="btn btn-inverse">
-              <span class="muted"><i class="icon-chevron-right icon-white"></i> </span>
-            </button>
-          </li>
-        </ul>
+        <a class="btn-subnavbar collapsed" data-toggle="collapse" data-target=".subnav-collapse">
+          <i class="icon-reorder"></i>
+        </a>
+        <div class="subnav-collapse collapse">
+          <ul class="mainnav">
+            <li>
+              <button ng-click="left()" class="btn btn-inverse">
+                <span class="muted"><i class="icon-chevron-left icon-white"></i> </span>
+              </button>
+            </li>
+            <li class="divider-vertical"></li>
+            <li ng-show="hasFeature('gz:feature:github') &amp;&amp; isLoggedIn()">
+              <button ng-click="save()" class="btn btn-inverse">
+                <!-- TODO: Conditionnaly mute according to dirty state -->
+                <span class="muted"><i class="icon-save icon-white"></i> Save</span>
+              </button>
+            </li>
+            <li ng-show="hasFeature('gz:feature:github') &amp;&amp; isLoggedIn()" class="divider-vertical"></li>
+            <li>
+              <button ng-click="run()" class="btn btn-inverse">
+                <!-- TODO: Conditionnaly mute according to playable state -->
+                <span class="muted"><i class="icon-play icon-white"></i> Run</span>
+              </button>
+            </li>
+            <li class="divider-vertical"></li>
+          </ul>
+          <ul class="nav pull-right">
+            <li class="divider-vertical"></li>
+            <li>
+              <button ng-click="right()" class="btn btn-inverse">
+                <span class="muted"><i class="icon-chevron-right icon-white"></i> </span>
+              </button>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
   <div id="workbench-layout" layout style="height: 800px">
     <div id="repository-layout-pane" class="ui-layout-west">
+      <div class="widget stacked">
+        <div class="widget-header">
+        </div>
+        <div class="widget-content">
+          <div>
+            <i class="icon-user muted"></i>
+            <span><a href="/users/{{owner.name}}">{{owner.name}}</a></span>
+            <a href="https://github.com/{{owner.name}}" target="_blank" class="muted">
+              <i class="icon-external-link"></i>
+            </a>
+            <h4>
+              <i class="icon-book muted"></i>
+              <span>{{repo.name}}</span>
+              <a href="https://github.com/{{owner.name}}/{{repo.name}}" target="_blank" class="muted">
+                <i class="icon-external-link"></i>
+              </a>
+            </h4>
+            <span>{{repo.description}}</span>
+          </div>
+          <ul class="nav nav-tabs" id="myTab">
+            <li><a data-target="#files" data-toggle="tab">Files</a></li>
+            <!--li><a data-target="#commits" data-toggle="tab">Commits</a></li-->
+            <!--li><a data-target="#branches" data-toggle="tab">Branches</a></li-->
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane" id="files">
+              <div class ="row-fluid">
+                <table class="table table-condensed">
+                  <tbody>
+                    <tr>
+                      <td nowrap=nowrap>
+                        <!--input type="text" placeHolder="Filter..."></input-->
+                      </td>
+                      <td nowrap=nowrap>
+                        <button ng-click="newFile()" class="btn btn-link">
+                          <i class="icon-plus-sign-alt muted"></i> <i class="icon-file-alt muted"></i>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr ng-repeat="file in repo.files">
+                      <td nowrap=nowrap>
+                        <i class="icon-file-alt muted"></i>
+                        <button ng-click="editFile(file.path)" class="btn btn-link">
+                          <span>{{file.name}}</span>
+                        </button>
+                      </td>
+                      <td nowrap=nowrap>
+                        <a href="https://github.com/{{owner.name}}/{{repo.name}}/blob/master/{{file.path}}" target="_blank" class="muted">
+                          <i class="icon-external-link"></i>
+                        </a>
+                        <button ng-click="deleteFile($index)" class="btn btn-link">
+                          <i class="icon-minus-sign-alt muted"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="tab-pane" id="commits">
+              <p>Under Construction: Commits</p>
+            </div>
+            <div class="tab-pane" id="branches">
+              <p>Under Construction: Branches</p>
+            </div>
+          </div>
+          <script>
+            $(function () {
+              $('#myTab a[data-target="#files"]').tab('show');
+            })
+          </script>
+          <script>
+            $('#myTab a[data-target="#files"]').click(function(e) {
+              e.preventDefault();
+              $(this).tab('show');
+            });
+          </script>
+          <script>
+            $('#myTab a[data-target="#commits"]').click(function(e) {
+              e.preventDefault();
+              $(this).tab('show');
+            });
+          </script>
+          <script>
+            $('#myTab a[data-target="#branches"]').click(function(e) {
+              e.preventDefault();
+              $(this).tab('show');
+            });
+          </script>
+        </div>
+      </div>
       <div class="container-fluid" id="repository">
         <div class="row-fluid">
           <div class="span12">
-            <div>
-              <i class="icon-user muted"></i>
-              <span><a href="/users/{{owner.name}}">{{owner.name}}</a></span>
-              <a href="https://github.com/{{owner.name}}" target="_blank" class="muted">
-                <i class="icon-external-link"></i>
-              </a>
-              <h4>
-                <i class="icon-book muted"></i>
-                <span>{{repo.name}}</span>
-                <a href="https://github.com/{{owner.name}}/{{repo.name}}" target="_blank" class="muted">
-                  <i class="icon-external-link"></i>
-                </a>
-              </h4>
-              <span>{{repo.description}}</span>
-            </div>
-            <ul class="nav nav-tabs" id="myTab">
-              <li><a data-target="#files" data-toggle="tab">Files</a></li>
-              <!--li><a data-target="#commits" data-toggle="tab">Commits</a></li-->
-              <!--li><a data-target="#branches" data-toggle="tab">Branches</a></li-->
-            </ul>
-            <div class="tab-content">
-              <div class="tab-pane" id="files">
-                <div class ="row-fluid">
-                  <table class="table table-condensed">
-                    <tbody>
-                      <tr>
-                        <td nowrap=nowrap>
-                          <!--input type="text" placeHolder="Filter..."></input-->
-                        </td>
-                        <td nowrap=nowrap>
-                          <button ng-click="newFile()" class="btn btn-link">
-                            <i class="icon-plus-sign-alt muted"></i> <i class="icon-file-alt muted"></i>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr ng-repeat="file in repo.files">
-                        <td nowrap=nowrap>
-                          <i class="icon-file-alt muted"></i>
-                          <button ng-click="editFile(file.path)" class="btn btn-link">
-                            <span>{{file.name}}</span>
-                          </button>
-                        </td>
-                        <td nowrap=nowrap>
-                          <a href="https://github.com/{{owner.name}}/{{repo.name}}/blob/master/{{file.path}}" target="_blank" class="muted">
-                            <i class="icon-external-link"></i>
-                          </a>
-                          <button ng-click="deleteFile($index)" class="btn btn-link">
-                            <i class="icon-minus-sign-alt muted"></i>
-                          </button>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              <div class="tab-pane" id="commits">
-                <p>Under Construction: Commits</p>
-              </div>
-              <div class="tab-pane" id="branches">
-                <p>Under Construction: Branches</p>
-              </div>
-            </div>
-            <script>
-              $(function () {
-                $('#myTab a[data-target="#files"]').tab('show');
-              })
-            </script>
-            <script>
-              $('#myTab a[data-target="#files"]').click(function(e) {
-                e.preventDefault();
-                $(this).tab('show');
-              });
-            </script>
-            <script>
-              $('#myTab a[data-target="#commits"]').click(function(e) {
-                e.preventDefault();
-                $(this).tab('show');
-              });
-            </script>
-            <script>
-              $('#myTab a[data-target="#branches"]').click(function(e) {
-                e.preventDefault();
-                $(this).tab('show');
-              });
-            </script>
           </div>
         </div>
       </div>
