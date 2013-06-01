@@ -1,10 +1,11 @@
-angular.module("app", ['async', 'jquery', 'underscore']).run(['$rootScope','$location', 'GitHub', 'cookie', ($rootScope, $location, github, cookie) ->
+angular.module("app", ['async', 'jquery', 'underscore']).run(['$rootScope','$location', 'GitHub', 'cookie','i18n', ($rootScope, $location, github, cookie, i18n) ->
 
   GITHUB_APPLICATION_CLIENT_ID_COOKIE_NAME = 'github-application-client-id'
   GITHUB_TOKEN_COOKIE_NAME = 'github-token'
   GITHUB_LOGIN_COOKIE_NAME = 'github-login'
 
-  $rootScope.marketing = name: "Geometry Zen", version: "Genesis"
+  $rootScope.marketing = name: i18n.marketing.name(), version: i18n.marketing.version(), tagLine: i18n.marketing.tagLine()
+
   # The server drops this cookie so that we can make the GitHub autorization request.
   $rootScope.clientId = -> cookie.getItem(GITHUB_APPLICATION_CLIENT_ID_COOKIE_NAME)
 
