@@ -41,7 +41,7 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
   code = document.getElementById("code")
   if code
     editor = CodeMirror.fromTextArea(code,
-      "autofocus": true,
+      "autofocus": false,
       "indentUnit": 4, # Python guys like to use 4 spaces
       "lineNumbers": true,
       "lineWrapping": true,
