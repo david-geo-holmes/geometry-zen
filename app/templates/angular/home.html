@@ -11,7 +11,7 @@
               <a-home></a-home>
             </li>
             <li ng-show="isLoggedIn()">
-              <a ng-href="/users/{{username()}}" ng-cloak>
+              <a ng-href="/users/{{username()}}">
                 <i class="icon-user"></i>
                 <span>Me</span>
               </a>
@@ -80,18 +80,18 @@
         <div class="widget">
           <div class="widget-header">
             <i class="icon-cogs"></i>
-            <h3>{{marketing.name}}</h3>
+            <h3>Geometry Zen</h3>
           </div>
           <div class="widget-content">
             <div class="text-center">
               <h1>
-                <large ng-cloak>{{marketing.name}}</large>
+                <large>Geometry Zen</large>
               </h1>
               <h1>
-                <small><em>{{marketing.tagLine}}</em></small>
+                <small><em>Looking at the multiverse from a Geometric Algebra perspective</em></small>
               </h1>
               <br/>
-              <p><em>{{marketing.name}}</em> is an online tool providing <em>Hands-on Learning</em> of <em>Geometric Algebra and Geometric Calculus</em> to students and researchers in <em>Physics, Engineering, and Computer Graphics</em> using <em>Python programming</em> and <em>WebGL 3D Visualization</em>. It is the goal of this tool to make Geometric Algebra familiar to young science students and academia so that Geometric Algebra becomes the <em>standard</em> <em>Unified Mathematical Language for Physics and Engineering in the 21st Century</em>.</p>
+              <p><em>Geometry Zen</em> is an online tool providing <em>Hands-on Learning</em> of <em>Geometric Algebra and Geometric Calculus</em> to students and researchers in <em>Physics, Engineering, and Computer Graphics</em> using <em>Python programming</em> and <em>WebGL 3D Visualization</em>. It is the goal of this tool to make Geometric Algebra familiar to young science students and academia so that Geometric Algebra becomes the <em>standard</em> <em>Unified Mathematical Language for Physics and Engineering in the 21st Century</em>.</p>
               <br/>
             </div>
             <div class="text-right">
@@ -104,9 +104,9 @@
               <button ng-click="workbench()" class="btn btn-primary">
                 <i class="icon-edit icon-white"></i> Launch the Modeling Workbench
               </button>
-              <button ng-show="hasFeature('gz:feature:examples')" ng-click="browse()" class="btn btn-info" ng-cloak>
+              <!--button ng-show="hasFeature('gz:feature:examples')" ng-click="browse()" class="btn btn-info">
                 <i class="icon-th icon-white"></i> Browse Examples
-              </button>
+              </button-->
             </div>
           </div> <!-- div.widget-content -->
         </div> <!-- div.widget -->
