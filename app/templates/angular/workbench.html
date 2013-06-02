@@ -16,13 +16,19 @@
                 <span>Me</span>
               </a>
             </li>
-            <li class="active" ng-show="isLoggedIn()">
+            <li class="active">
+              <a ng-click="reload()" href="#">
+                <i class="icon-edit"></i>
+                <span>Workbench</span>
+              </a>
+            </li>
+            <li ng-show="isLoggedIn()">
               <a ng-click="left()" href="#">
                 <i class="icon-book"></i>
                 <span>Book</span>
               </a>
             </li>
-            <li class="active">
+            <li ng-show="repo.name">
               <a ng-click="right()" href="#">
                 <i class="icon-file-alt"></i>
                 <span>File</span>
@@ -46,151 +52,170 @@
     </div> <!-- /subnavbar-inner -->
   </div> <!-- /subnavbar -->
   
-  <div id="workbench-layout" layout style="height: 800px">
-    <div id="repository-layout-pane" class="ui-layout-west">
-      <div class="widget stacked">
-        <div class="widget-header">
-        </div>
-        <div class="widget-content">
-          <div>
-            <i class="icon-user muted"></i>
-            <span><a ng-href="/users/{{owner.name}}">{{owner.name}}</a></span>
-            <a ng-href="https://github.com/{{owner.name}}" target="_blank" class="muted">
-              <i class="icon-external-link"></i>
-            </a>
-            <h4>
-              <i class="icon-book muted"></i>
-              <span>{{repo.name}}</span>
-              <a ng-href="https://github.com/{{owner.name}}/{{repo.name}}" target="_blank" class="muted">
-                <i class="icon-external-link"></i>
-              </a>
-            </h4>
-            <span>{{repo.description}}</span>
-          </div>
-          <ul class="nav nav-tabs" id="myTab">
-            <li><a data-target="#files" data-toggle="tab">Files</a></li>
-            <!--li><a data-target="#commits" data-toggle="tab">Commits</a></li-->
-            <!--li><a data-target="#branches" data-toggle="tab">Branches</a></li-->
-          </ul>
-          <div class="tab-content">
-            <div class="tab-pane" id="files">
-              <div class ="row-fluid">
-                <table class="table table-condensed">
-                  <tbody>
-                    <tr>
-                      <td nowrap=nowrap>
-                        <!--input type="text" placeHolder="Filter..."></input-->
-                      </td>
-                      <td nowrap=nowrap>
-                        <button ng-click="newFile()" class="btn btn-link">
-                          <i class="icon-plus-sign-alt muted"></i> <i class="icon-file-alt muted"></i>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr ng-repeat="file in repo.files">
-                      <td nowrap=nowrap>
-                        <i class="icon-file-alt muted"></i>
-                        <button ng-click="editFile(file.path)" class="btn btn-link">
-                          <span>{{file.name}}</span>
-                        </button>
-                      </td>
-                      <td nowrap=nowrap>
-                        <a ng-href="https://github.com/{{owner.name}}/{{repo.name}}/blob/master/{{file.path}}" target="_blank" class="muted">
-                          <i class="icon-external-link"></i>
-                        </a>
-                        <button ng-click="deleteFile($index)" class="btn btn-link">
-                          <i class="icon-minus-sign-alt muted"></i>
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+  <div id="workbench-layout" class="container-fluid">
+    <div class="row-fluid">
+      <div id="myCarousel" class="carousel slide" data-interval="false">
+        <!--
+        <ol class="carousel-indicators">
+          <li data-target="#myCarousel" data-slide-to="0"></li>
+          <li data-target="#myCarousel" data-slide-to="1"></li>
+        </ol>
+        -->
+        <!-- Carousel items -->
+        <div class="carousel-inner">
+          <div class="item">
+            <div class="widget">
+              <div class="widget-header">
               </div>
-            </div>
-            <div class="tab-pane" id="commits">
-              <p>Under Construction: Commits</p>
-            </div>
-            <div class="tab-pane" id="branches">
-              <p>Under Construction: Branches</p>
-            </div>
-          </div>
-          <script>
-            $(function () {
-              $('#myTab a[data-target="#files"]').tab('show');
-            })
-          </script>
-          <script>
-            $('#myTab a[data-target="#files"]').click(function(e) {
-              e.preventDefault();
-              $(this).tab('show');
-            });
-          </script>
-          <script>
-            $('#myTab a[data-target="#commits"]').click(function(e) {
-              e.preventDefault();
-              $(this).tab('show');
-            });
-          </script>
-          <script>
-            $('#myTab a[data-target="#branches"]').click(function(e) {
-              e.preventDefault();
-              $(this).tab('show');
-            });
-          </script>
+              <div class="widget-content">
+                <div>
+                  <i class="icon-user muted"></i>
+                  <span><a ng-href="/users/{{owner.name}}">{{owner.name}}</a></span>
+                  <a ng-href="https://github.com/{{owner.name}}" target="_blank" class="muted">
+                    <i class="icon-external-link"></i>
+                  </a>
+                  <h4>
+                    <i class="icon-book muted"></i>
+                    <span>{{repo.name}}</span>
+                    <a ng-href="https://github.com/{{owner.name}}/{{repo.name}}" target="_blank" class="muted">
+                      <i class="icon-external-link"></i>
+                    </a>
+                  </h4>
+                  <span>{{repo.description}}</span>
+                </div>
+                <ul class="nav nav-tabs" id="myTab">
+                  <li><a data-target="#files" data-toggle="tab">Files</a></li>
+                  <!--li><a data-target="#commits" data-toggle="tab">Commits</a></li-->
+                  <!--li><a data-target="#branches" data-toggle="tab">Branches</a></li-->
+                </ul>
+                <div class="tab-content">
+                  <div class="tab-pane" id="files">
+                    <div class ="row-fluid">
+                      <table class="table table-condensed">
+                        <tbody>
+                          <tr>
+                            <td nowrap=nowrap>
+                              <!--input type="text" placeHolder="Filter..."></input-->
+                            </td>
+                            <td nowrap=nowrap>
+                              <button ng-click="newFile()" class="btn btn-primary">
+                                <i class="icon-plus-sign-alt"></i> <i class="icon-file-alt"></i>
+                                <span>Create a New File</span>
+                              </button>
+                            </td>
+                          </tr>
+                          <tr ng-repeat="file in repo.files">
+                            <td nowrap=nowrap>
+                              <button ng-click="editFile(file.path)" class="btn btn-primary">
+                                <i class="icon-file-alt"></i>
+                                <span>{{file.name}}</span>
+                              </button>
+                            </td>
+                            <td nowrap=nowrap>
+                              <a ng-href="https://github.com/{{owner.name}}/{{repo.name}}/blob/master/{{file.path}}" target="_blank" class="btn btn-secondary">
+                                <i class="icon-external-link"></i>
+                                <span>GitHub</span>
+                              </a>
+                              <button ng-click="deleteFile($index)" class="btn btn-tertiary">
+                                <i class="icon-minus-sign-alt"></i>
+                                <span>Delete</span>
+                              </button>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div class="tab-pane" id="commits">
+                    <p>Under Construction: Commits</p>
+                  </div>
+                  <div class="tab-pane" id="branches">
+                    <p>Under Construction: Branches</p>
+                  </div>
+                </div>
+                <script>
+                  $(function () {
+                    $('#myTab a[data-target="#files"]').tab('show');
+                  })
+                </script>
+                <script>
+                  $('#myTab a[data-target="#files"]').click(function(e) {
+                    e.preventDefault();
+                    $(this).tab('show');
+                  });
+                </script>
+                <script>
+                  $('#myTab a[data-target="#commits"]').click(function(e) {
+                    e.preventDefault();
+                    $(this).tab('show');
+                  });
+                </script>
+                <script>
+                  $('#myTab a[data-target="#branches"]').click(function(e) {
+                    e.preventDefault();
+                    $(this).tab('show');
+                  });
+                </script>
+              </div> <!-- div.widget-content -->
+            </div> <!-- div.widget -->
+          </div> <!-- div.item -->
+          <div class=" active item">
+            <div class="container-fluid">
+              <div class="row-fluid">
+                <div class="span6">
+                  <textarea id="code"></textarea>
+                </div> <!-- div.span6 -->
+                <div class="span6">
+                  <ul class="nav nav-tabs" id="xyz">
+                    <li><a data-target="#x">Canvas 3D</a></li>
+                    <li><a data-target="#y">Canvas 2D</a></li>
+                    <li><a data-target="#z">Printer</a></li>
+                  </ul>
+                  <div class="tab-content">
+                    <div class="tab-pane" id="x">
+                      <canvas id="canvasWebGL" width="800" height="600"></canvas>
+                    </div>
+                    <div class="tab-pane" id="y">
+                      <canvas id="canvas2d" width="800" height="600"></canvas>
+                    </div>
+                    <div class="tab-pane" id="z">
+                      <printer></printer>
+                    </div>
+                  </div>
+                  <script>
+                    $(function () {
+                      $('#xyz a:first').tab('show');
+                    })
+                  </script>
+                  <script>
+                    $('#xyz a[data-target="#x"]').click(function(e) {
+                      e.preventDefault();
+                      $(this).tab('show');
+                    });
+                  </script>
+                  <script>
+                    $('#xyz a[data-target="#y"]').click(function(e) {
+                      e.preventDefault();
+                      $(this).tab('show');
+                    });
+                  </script>
+                  <script>
+                    $('#xyz a[data-target="#z"]').click(function(e) {
+                      e.preventDefault();
+                      $(this).tab('show');
+                    });
+                  </script>
+                </div> <!-- div.span6 -->
+              </div> <!-- div.row-fluid -->
+            </div> <!-- div.container-fluid -->
+          </div> <!-- div.item -->
         </div>
+        <!-- Carousel nav -->
+        <!--a class="carousel-control left" href="#myCarousel" data-slide="prev">&lsaquo;</a-->
+        <!--a class="carousel-control right" href="#myCarousel" data-slide="next">&rsaquo;</a-->
       </div>
-      <div class="container-fluid" id="repository">
-        <div class="row-fluid">
-          <div class="span12">
-          </div>
-        </div>
-      </div>
-    </div>
-    <div id="algebra" class="ui-layout-center" style="padding: 0px;">
-      <textarea id="code"></textarea>
-    </div>
-    <div id="geometry" class="ui-layout-east">
-      <ul class="nav nav-tabs" id="xyz">
-        <li><a data-target="#x">Canvas 3D</a></li>
-        <li><a data-target="#y">Canvas 2D</a></li>
-        <li><a data-target="#z">Printer</a></li>
-      </ul>
-      <div class="tab-content">
-        <div class="tab-pane" id="x">
-          <canvas id="canvasWebGL" width="800" height="600"></canvas>
-        </div>
-        <div class="tab-pane" id="y">
-          <canvas id="canvas2d" width="800" height="600"></canvas>
-        </div>
-        <div class="tab-pane" id="z">
-          <printer></printer>
-        </div>
-      </div>
-      <script>
-        $(function () {
-          $('#xyz a:first').tab('show');
-        })
-      </script>
-      <script>
-        $('#xyz a[data-target="#x"]').click(function(e) {
-          e.preventDefault();
-          $(this).tab('show');
-        });
-      </script>
-      <script>
-        $('#xyz a[data-target="#y"]').click(function(e) {
-          e.preventDefault();
-          $(this).tab('show');
-        });
-      </script>
-      <script>
-        $('#xyz a[data-target="#z"]').click(function(e) {
-          e.preventDefault();
-          $(this).tab('show');
-        });
-      </script>
-    </div>
-  </div>
+    </div> <!-- div.row-fluid -->
+  </div> <!-- div.container-fluid -->
   <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>

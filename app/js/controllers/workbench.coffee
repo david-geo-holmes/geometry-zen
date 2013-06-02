@@ -5,6 +5,8 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
   GITHUB_TOKEN_COOKIE_NAME = 'github-token'
   token = cookie.getItem(GITHUB_TOKEN_COOKIE_NAME)
 
+  $('.carousel').carousel({interval: false})
+
   if ($routeParams.owner and $routeParams.repo)
     $scope.owner = name: $routeParams.owner
     $scope.repo = name: $routeParams.repo
@@ -14,7 +16,7 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
       else
         alert("Error retrieving repository files")
   else
-    $scope.repo = undefined
+    $scope.repo = {}
 
   builtinRead = (x) ->
     if (Sk.builtinFiles == undefined || Sk.builtinFiles["files"][x] == undefined)
@@ -109,12 +111,10 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
         alert("Error saving file to repository: #{err}")
 
   $scope.left = () ->
-    $scope.layout.show('west')
-    $scope.layout.hide('east')
+    $('.carousel').carousel(0)
 
   $scope.right = () ->
-    $scope.layout.hide('west')
-    $scope.layout.show('east')
+    $('.carousel').carousel(1)
 
   if editor
     setFullScreen(editor, false)
@@ -126,7 +126,10 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
     if (showing)
       showing.CodeMirror.getWrapperElement().style.height = winHeight() + "px"
 
-#  $scope.newFile()
-  
+  if $scope.repo.name
+    $scope.left()
+  else
+    $scope.right()
+
   return
 ]

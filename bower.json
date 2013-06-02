@@ -25,6 +25,7 @@
     "angular-bootstrap": "latest",
     "async": "latest",
     "bootstrap": "latest",
+    "jed": "latest",
     "jquery": "~2.0.1",
     "jquery-ui": "latest",
     "threejs": "latest",

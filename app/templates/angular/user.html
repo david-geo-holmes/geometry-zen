@@ -65,23 +65,28 @@
                           <!--input type="text" placeHolder="Filter..."></input-->
                         </td>
                         <td nowrap=nowrap>
-                          <button ng-click="newRepo()" class="btn btn-link">
-                            <i class="icon-plus-sign-alt muted"></i> <i class="icon-book muted"></i>
+                          <button ng-click="newRepo()" class="btn btn-primary">
+                            <i class="icon-plus-sign-alt"></i> <i class="icon-book"></i>
+                            <span>Create a New Repo</span>
                           </button>
                         </td>
                       </tr>
                       <tr ng-repeat="repo in repos">
                         <td nowrap=nowrap>
-                          <i class="icon-book muted"></i>
-                          <a href="/users/{{user.login}}/repos/{{repo.name}}"> {{repo.name}}</a>
+                          <a href="/users/{{user.login}}/repos/{{repo.name}}" class="btn btn-primary">
+                            <i class="icon-edit"></i>
+                            <span>{{repo.name}}</span>
+                          </a>
                           <p>{{repo.description}}</p>
                         </td>
                         <td nowrap=nowrap>
-                          <a href="https://github.com/{{user.login}}/{{repo.name}}" target="_blank" class="muted">
+                          <a href="https://github.com/{{user.login}}/{{repo.name}}" target="_blank" class="btn btn-secondary">
                             <i class="icon-external-link"></i>
+                            <span>GitHub</span>
                           </a>
-                          <button ng-click="deleteRepo($index)" class="btn btn-link">
-                            <i class="icon-minus-sign-alt muted"></i>
+                          <button ng-click="deleteRepo($index)" class="btn btn-tertiary">
+                            <i class="icon-minus-sign-alt"></i>
+                            <span>Delete</span>
                           </button>
                         </td>
                       </tr>
