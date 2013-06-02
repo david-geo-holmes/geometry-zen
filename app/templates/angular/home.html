@@ -11,7 +11,7 @@
               <a-home></a-home>
             </li>
             <li ng-show="isLoggedIn()">
-              <a ng-href="/users/{{username()}}">
+              <a ng-href="/users/{{username()}}" ng-cloak>
                 <i class="icon-user"></i>
                 <span>Me</span>
               </a>
