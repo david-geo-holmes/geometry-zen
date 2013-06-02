@@ -24,8 +24,8 @@
 
   <div class="container-fluid" style="padding-top: 80px">
     <div class="row-fluid">
-      <div class="span3">
-        <div class="widget stacked">
+      <div class="span4">
+        <div class="widget">
           <div class="widget-header">
           </div>
           <div class="widget-content">
@@ -35,14 +35,15 @@
             <h4>
               <i class="icon-user muted"></i>
               <span>{{user.login}}</span>
-              <a href="https://github.com/{{user.login}}?tab=repositories" target="_blank" class="muted">
+              <a href="https://github.com/{{user.login}}?tab=repositories" target="_blank" class="btn btn-secondary">
                 <i class="icon-external-link"></i>
+                <span>GitHub</span>
               </a>
             </h4>
           </div>
         </div>
       </div>
-      <div class="span9">
+      <div class="span8">
         <div class="widget stacked">
           <div class="widget-header">
           </div>
@@ -73,13 +74,17 @@
                       </tr>
                       <tr ng-repeat="repo in repos">
                         <td nowrap=nowrap>
-                          <a href="/users/{{user.login}}/repos/{{repo.name}}" class="btn btn-primary">
-                            <i class="icon-edit"></i>
+                          <h3>
+                            <i class="icon-book muted"></i>
                             <span>{{repo.name}}</span>
-                          </a>
+                          </h3>
                           <p>{{repo.description}}</p>
                         </td>
                         <td nowrap=nowrap>
+                          <a href="/users/{{user.login}}/repos/{{repo.name}}" class="btn btn-primary">
+                            <i class="icon-edit"></i>
+                            <span>Edit</span>
+                          </a>
                           <a href="https://github.com/{{user.login}}/{{repo.name}}" target="_blank" class="btn btn-secondary">
                             <i class="icon-external-link"></i>
                             <span>GitHub</span>
