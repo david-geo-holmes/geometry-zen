@@ -106,12 +106,16 @@
                           </tr>
                           <tr ng-repeat="file in repo.files">
                             <td nowrap=nowrap>
-                              <button ng-click="editFile(file.path)" class="btn btn-primary">
-                                <i class="icon-file-alt"></i>
+                              <i class="icon-file-alt"></i>
+                              <button ng-click="editFile(file.path)" class="btn btn-link">
                                 <span>{{file.name}}</span>
                               </button>
                             </td>
                             <td nowrap=nowrap>
+                              <button ng-click="editFile(file.path)" class="btn btn-primary">
+                                <i class="icon-edit"></i>
+                                <span>Edit</span>
+                              </button>
                               <a ng-href="https://github.com/{{owner.name}}/{{repo.name}}/blob/master/{{file.path}}" target="_blank" class="btn btn-secondary">
                                 <i class="icon-external-link"></i>
                                 <span>GitHub</span>

@@ -38,6 +38,7 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
       "vendor/bootstrap/js/bootstrap-transition.js",
       "vendor/angular/angular.js",
       "vendor/underscore/underscore.js",
+      "vendor/jed/jed.js",
       "vendor/js/codemirror.js",
       "vendor/codemirror/mode/python/python.js",
       "../../gzhome/skulpt/dist/skulpt.js",

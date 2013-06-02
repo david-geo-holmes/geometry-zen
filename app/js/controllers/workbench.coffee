@@ -91,6 +91,7 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
           editor.setValue base64.decode(file.content)
         else
           alert("Error retrieving the file")
+    $scope.right()
 
   # This is the save event handler for an existing file, as evident by the provision of the SHA.
   $scope.save = () ->
