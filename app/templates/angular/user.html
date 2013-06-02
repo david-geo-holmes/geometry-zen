@@ -50,7 +50,7 @@
           <div class="widget-content">
             <ul class="nav nav-tabs" id="myTab">
               <!--li><a data-target="#contributions" data-toggle="tab">Contributions</a></li-->
-              <li><a data-target="#repositories" data-toggle="tab">Repositories</a></li>
+              <li><a data-target="#repositories" data-toggle="tab">Books</a></li>
               <!--li><a data-target="#activity" data-toggle="tab">Public Activity</a></li-->
             </ul>
             <div class="tab-content">
@@ -68,7 +68,7 @@
                         <td nowrap=nowrap>
                           <button ng-click="newRepo()" class="btn btn-primary">
                             <i class="icon-plus-sign-alt"></i> <i class="icon-book"></i>
-                            <span>Create a New Repo</span>
+                            <span>Create a New Book</span>
                           </button>
                         </td>
                       </tr>
@@ -76,7 +76,9 @@
                         <td nowrap=nowrap>
                           <h3>
                             <i class="icon-book muted"></i>
-                            <span>{{repo.name}}</span>
+                            <a href="/users/{{user.login}}/repos/{{repo.name}}" class="btn btn-link">
+                              <span>{{repo.name}}</span>
+                            </a>
                           </h3>
                           <p>{{repo.description}}</p>
                         </td>
@@ -132,14 +134,14 @@
         <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h3 id="myModalLabel"><i class="icon-plus-sign-alt muted"></i> <i class="icon-book muted"></i> Create a New Repository</h3>
+            <h3 id="myModalLabel"><i class="icon-plus-sign-alt muted"></i> <i class="icon-book muted"></i> Create a New Book</h3>
           </div>
           <form ng-controller="NewRepoCtrl">
             <fieldset>
               <div class="modal-body">
-                <label>Repository name</label>
+                <label>Book name</label>
                 <input type="text" name="repo" ng-model="repo.name"></input>
-                <span class="help-block">Great repository names are short and memorable.</span>
+                <span class="help-block">Great book names are short and memorable.</span>
                 <label>Description<span class="muted"> (optional)</span></label>
                 <input type="text" name="description" ng-model="repo.description"></input>
                 <!--
@@ -151,13 +153,13 @@
                 -->
                 <hr/>
                 <label class="checkbox">
-                  <input type="checkbox" name="readme" ng-model="repo.auto_init"> Initialize this repository with a README</input>
+                  <input type="checkbox" name="readme" ng-model="repo.auto_init"> Initialize this book with a README</input>
                 </label>
-                <span class="help-block">This will allow you to <code>git clone</code> the repository immediately.</span>
+                <span class="help-block">This will allow you to clone the book immediately in GitHub.</span>
               </div>
               <div class="modal-footer">
                 <button id="btnCancel" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-                <button type="submit" ng-click="onOK()" id="btnOK" class="btn btn-primary">Create repository</button>
+                <button type="submit" ng-click="onOK()" id="btnOK" class="btn btn-primary">Create book</button>
               </div>
             </fieldset>
           </form>

@@ -106,10 +106,12 @@
                           </tr>
                           <tr ng-repeat="file in repo.files">
                             <td nowrap=nowrap>
-                              <i class="icon-file-alt"></i>
-                              <button ng-click="editFile(file.path)" class="btn btn-link">
-                                <span>{{file.name}}</span>
-                              </button>
+                              <h3>
+                                <i class="icon-file-alt muted"></i>
+                                <button ng-click="editFile(file.path)" class="btn btn-link">
+                                  <span>{{file.name}}</span>
+                                </button>
+                              </h3>
                             </td>
                             <td nowrap=nowrap>
                               <button ng-click="editFile(file.path)" class="btn btn-primary">
