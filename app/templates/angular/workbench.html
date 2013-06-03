@@ -167,59 +167,54 @@
           </div> <!-- div.item -->
           <div class=" active item">
             <div class="container-fluid">
+              
               <div class="row-fluid">
-                <div class="span6">
-                  <textarea id="code"></textarea>
-                </div> <!-- div.span6 -->
-                <div class="span6">
-                  <ul class="nav nav-tabs" id="xyz">
-                    <li><a data-target="#x">Canvas 3D</a></li>
-                    <li><a data-target="#y">Canvas 2D</a></li>
-                    <li><a data-target="#z">Printer</a></li>
-                  </ul>
-                  <div class="tab-content">
-                    <div class="tab-pane" id="x">
+                <div class="span12">
+                  <div class="widget">
+                    <div class="widget-header">
+                      <i class="icon-file-alt"></i>
+                      <span>File</span>
+                    </div>
+                    <div class="widget-content">
+                      <textarea id="code"></textarea>
+                    </div> <!-- div.widget-content -->
+                  </div> <!-- div.widget -->
+                </div> <!-- div.span12 -->
+              </div> <!-- row-fluid -->
+
+              <div class="row-fluid">
+                <div class="span12">
+                  <div class="widget">
+                    <div class="widget-header">
+                      <i class="icon-camera"></i>
+                      <span>Canvas 3D</span>
+                    </div>
+                    <div class="widget-content">
                       <canvas id="canvasWebGL" width="800" height="600"></canvas>
+                      <!-- canvas id="canvas2d" width="800" height="600"></canvas -->
+                    </div> <!-- div.widget-content -->
+                  </div> <!-- div.widget -->
+                </div> <!-- div.span12 -->
+              </div> <!-- row-fluid -->
+
+              <div class="row-fluid">
+                <div class="span12">
+                  <div class="widget">
+                    <div class="widget-header">
+                      <i class="icon-print"></i>
+                      <span>Printer</span>
                     </div>
-                    <div class="tab-pane" id="y">
-                      <canvas id="canvas2d" width="800" height="600"></canvas>
-                    </div>
-                    <div class="tab-pane" id="z">
+                    <div class="widget-content">
                       <printer></printer>
-                    </div>
-                  </div>
-                  <script>
-                    $(function () {
-                      $('#xyz a:first').tab('show');
-                    })
-                  </script>
-                  <script>
-                    $('#xyz a[data-target="#x"]').click(function(e) {
-                      e.preventDefault();
-                      $(this).tab('show');
-                    });
-                  </script>
-                  <script>
-                    $('#xyz a[data-target="#y"]').click(function(e) {
-                      e.preventDefault();
-                      $(this).tab('show');
-                    });
-                  </script>
-                  <script>
-                    $('#xyz a[data-target="#z"]').click(function(e) {
-                      e.preventDefault();
-                      $(this).tab('show');
-                    });
-                  </script>
-                </div> <!-- div.span6 -->
-              </div> <!-- div.row-fluid -->
+                    </div> <!-- div.widget-content -->
+                  </div> <!-- div.widget -->
+                </div> <!-- div.span12 -->
+              </div> <!-- row-fluid -->
+            
             </div> <!-- div.container-fluid -->
           </div> <!-- div.item -->
-        </div>
-        <!-- Carousel nav -->
-        <!--a class="carousel-control left" href="#myCarousel" data-slide="prev">&lsaquo;</a-->
-        <!--a class="carousel-control right" href="#myCarousel" data-slide="next">&rsaquo;</a-->
-      </div>
+        </div> <!-- div.carousel-inner -->
+      </div> <!-- div.carousel -->
     </div> <!-- div.row-fluid -->
   </div> <!-- div.container-fluid -->
   <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
