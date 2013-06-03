@@ -1,3 +1,4 @@
+
 /* Exports an object that defines
  *  all of the paths & globs that the project
  *  is concerned with.

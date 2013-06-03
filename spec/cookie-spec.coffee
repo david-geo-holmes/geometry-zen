@@ -85,8 +85,8 @@ describe "Mozilla Example usage:", () ->
     return
 
   it "BROKEN Expiration String and Path", () ->
-#    cookie.setItem("expire-string-home", "Hello world!", "Tue, 06 Dec 2022 13:11:07 GMT")
-    cookie.setItem("expire-string-home", "Hello world!", "Tue, 06 Dec 2022 13:11:07 GMT", "/home")
+    cookie.setItem("expire-string-home", "Hello world!", "Tue, 06 Dec 2022 13:11:07 GMT")
+#    cookie.setItem("expire-string-home", "Hello world!", "Tue, 06 Dec 2022 13:11:07 GMT", "/home")
     expect(cookie.getItem("expire-string-home")).toEqual("Hello world!")
     return
 
