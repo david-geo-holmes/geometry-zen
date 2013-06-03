@@ -93,6 +93,9 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
           alert("Error retrieving the file")
     $scope.right()
 
+  $scope.saveEnabled = () ->
+    return $scope.file and $scope.file.name
+
   # This is the save event handler for an existing file, as evident by the provision of the SHA.
   $scope.save = () ->
     content = base64.encode(editor.getValue())
@@ -110,6 +113,9 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
         $scope.repo.files.splice(idx, 1)
       else
         alert("Error saving file to repository: #{err}")
+
+  $scope.leftEnabled = () ->
+    return $scope.repo and $scope.repo.name
 
   $scope.left = () ->
     $('.carousel').carousel(0)

@@ -22,7 +22,7 @@
                 <span>Workbench</span>
               </a>
             </li>
-            <li ng-show="isLoggedIn()">
+            <li ng-show="leftEnabled()">
               <a ng-click="left()" href="#">
                 <i class="icon-book"></i>
                 <span>Book</span>
@@ -34,7 +34,7 @@
                 <span>File</span>
               </a>
             </li>
-            <li ng-show="isLoggedIn()">
+            <li ng-show="saveEnabled()">
               <a ng-click="save()" href="#">
                 <i class="icon-save"></i>
                 <span>Save</span>
