@@ -6,7 +6,7 @@ angular.module("app", ['async', 'jed', 'jquery', 'underscore']).run(['$rootScope
 
   $rootScope.marketing =
     name: "Geometry Zen"
-    version: "Helium"
+    version: "Hydrogen"
     tagLine: "Looking at the multiverse from a Geometric Algebra perspective"
     Repos: i18n.translate("Repo").ifPlural(2, "Repos").fetch()
 
