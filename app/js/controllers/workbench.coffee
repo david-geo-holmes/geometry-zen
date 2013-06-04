@@ -135,14 +135,14 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
   else
     console.log "The editor does not exist."
 
-  # Install a handler for window resize - although this does not appear to be called!
   CodeMirror.on $window, "resize", () ->
     showing = $window.document.body.getElementsByClassName("CodeMirror-fullscreen")[0]
     if (showing)
       console.log "Editor IS in full screen mode."
       showing.CodeMirror.getWrapperElement().style.height = winHeight() + "px"
     else
-      console.log "Editor is NOT in full screen mode."
+      # We seem to end up down here.
+      #console.log "Editor is NOT in full screen mode."
 
   # Initialize the Workbench perspective to either left (Book) or right (Page).
   if $scope.repo.name
