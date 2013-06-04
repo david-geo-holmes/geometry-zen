@@ -66,11 +66,18 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
     Sk.configure
       "output": (text) ->
         $rootScope.$broadcast('print', text)
-      "read": (x) ->
-        console.log "x: #{x}"
-        if Sk.builtinFiles is undefined or Sk.builtinFiles["files"][x] is undefined
-          throw new Error("File not found: '#{x}'")
-        return Sk.builtinFiles["files"][x]
+      "read": (searchPath) ->
+        if Sk.builtinFiles is undefined or Sk.builtinFiles["files"][searchPath] is undefined
+          # It is important that we throw an exception here to say "this is not the right path".
+          canGetFromElsewhere = false # Maybe we decide we can
+          if canGetFromElsewhere
+            # We should get it.
+            throw new Error("File not found: '#{searchPath}'")
+          else
+            throw new Error("File not found: '#{searchPath}'")
+        else
+          # The second time we will be asked for the contents.
+          return Sk.builtinFiles["files"][searchPath]
 
     if prog.trim().length > 0
       eval(Sk.importMainWithBody("<stdin>", false, prog.trim()))
