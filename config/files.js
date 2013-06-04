@@ -44,7 +44,8 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
       "vendor/codemirror/mode/python/python.js",
       "../../gzhome/skulpt/dist/skulpt-uncomp.js",
       "../../gzhome/skulpt/dist/builtin.js",
-      "vendor/threejs/build/three.js"
+      "vendor/threejs/build/three.js",
+      "vendor/stats.js/src/Stats.js"
     ],
     app: [
       "app/js/app.js",

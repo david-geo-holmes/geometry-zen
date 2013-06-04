@@ -29,6 +29,7 @@
     "jquery": "~2.0.1",
     "jquery-ui": "latest",
     "threejs": "latest",
+    "stats.js": "latest",
     "underscore": "latest"
   }
 }
