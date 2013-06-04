@@ -1266,16 +1266,16 @@ body:not(:-moz-handler-blocked) .dropdown-submenu > a:after {
   color: #ffffff;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
   background-color: #ed940f;
-  background-image: -moz-linear-gradient(top, #ffa31a, #d17d00);
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffa31a), to(#d17d00));
-  background-image: -webkit-linear-gradient(top, #ffa31a, #d17d00);
-  background-image: -o-linear-gradient(top, #ffa31a, #d17d00);
-  background-image: linear-gradient(to bottom, #ffa31a, #d17d00);
+  background-image: -moz-linear-gradient(top, @themeDistance1Color, @themeDistance2Color);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(@themeDistance1Color), to(@themeDistance2Color));
+  background-image: -webkit-linear-gradient(top, @themeDistance1Color, @themeDistance2Color);
+  background-image: -o-linear-gradient(top, @themeDistance1Color, @themeDistance2Color);
+  background-image: linear-gradient(to bottom, @themeDistance1Color, @themeDistance2Color);
   background-repeat: repeat-x;
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffa31a', endColorstr='#ffd17d00', GradientType=0);
-  border-color: #d17d00 #d17d00 #855000;
+  border-color: @themeDistance2Color @themeDistance2Color #855000;
   border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
-  *background-color: #d17d00;
+  *background-color: @themeDistance2Color;
   /* Darken IE7 buttons by default so they stand out more given they won't have borders */
 
   filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
@@ -1286,7 +1286,7 @@ body:not(:-moz-handler-blocked) .dropdown-submenu > a:after {
 .btn-primary.disabled,
 .btn-primary[disabled] {
   color: #ffffff;
-  background-color: #d17d00;
+  background-color: @themeDistance2Color;
   *background-color: #b86e00;
 }
 .btn-primary:active,

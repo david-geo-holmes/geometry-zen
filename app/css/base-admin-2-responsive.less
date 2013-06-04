@@ -20,6 +20,8 @@ stylesheet in order to separate your customizations and make
 upgrading in the future easier. ***
 
 -------------------------------------------------------------------*/
+@import "variables.less";
+
 .clearfix {
   *zoom: 1;
 }
@@ -130,7 +132,7 @@ upgrading in the future easier. ***
     margin-top: 8px;
   }
   .subnavbar .mainnav > li.active > a {
-    color: #F90;
+    color: @themeBaseColor;
     background: transparent;
   }
   .subnavbar .dropdown .dropdown-menu {

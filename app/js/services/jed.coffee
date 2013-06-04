@@ -34,5 +34,7 @@ angular.module('jed', []).factory 'i18n', ['$window', (w) ->
           domain: "the_domain"
           lang: "en"
           "plural-forms": "nplurals=2; plural=(n != 1);"
-        "Repo": [null, "Book", "Books"]
+        "Repo": [null, "Book", "Books"],
+        "Library": [null, "Thing", "Things"],
+        "My Repo": [null, "My Book", "My Books"]
 ]

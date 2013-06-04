@@ -5,6 +5,9 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
   GITHUB_TOKEN_COOKIE_NAME = 'github-token'
   token = cookie.getItem(GITHUB_TOKEN_COOKIE_NAME)
 
+  # A message object has name, text and severity (error, warning, info, success)
+  $scope.messages = []
+
   $('.carousel').carousel({interval: false})
 
   if ($routeParams.owner and $routeParams.repo)
@@ -57,6 +60,7 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
 
   $scope.run = () ->
     $rootScope.$broadcast 'reset'
+    $scope.messages.length = 0
     $scope.right()
 
     prog = editor.getValue()
@@ -80,7 +84,14 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
           return Sk.builtinFiles["files"][searchPath]
 
     if prog.trim().length > 0
-      eval(Sk.importMainWithBody("<stdin>", false, prog.trim()))
+      try
+        eval(Sk.importMainWithBody("<stdin>", false, prog.trim()))
+      catch e
+        # Unfortunately, we have to parse the string representation of the message.
+        message = e.toString()
+        name = message.substring(0, message.indexOf(":"))
+        text = message.substring(message.indexOf(":") + 1)
+        $scope.messages.push name: name, text: text, severity: 'error'
 
   $scope.newFile = () ->
     $('#myModal').modal show: true, backdrop: true
@@ -89,6 +100,7 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
     $scope.repo.files.push(file)
     $scope.editFile(file.path)
 
+    # TODO: Need to change the URL?
   $scope.editFile = (path) ->
     # TODO: Use the $index technique as in deleteFile
     if editor
@@ -99,9 +111,6 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
         else
           alert("Error retrieving the file")
     $scope.right()
-
-  $scope.saveEnabled = () ->
-    return $scope.file and $scope.file.name
 
   # This is the save event handler for an existing file, as evident by the provision of the SHA.
   $scope.save = () ->
@@ -121,11 +130,32 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
       else
         alert("Error saving file to repository: #{err}")
 
-  $scope.leftEnabled = () ->
+  $scope.homeBreadcrumbClass = () ->
+    if $rootScope.breadcrumbStrategy.progressive then "active" else ""
+
+  $scope.userBreadcrumbClass = () ->
+    if $rootScope.breadcrumbStrategy.progressive then "active" else ""
+
+  $scope.repoEnabled = () ->
     return $scope.repo and $scope.repo.name
 
-  $scope.left = () ->
+  $scope.repoView = () ->
+    # TODO: Need to cofirm continuing with this action.
+    $scope.file = {}
     $('.carousel').carousel(0)
+
+  $scope.repoBreadcrumbClass = () ->
+    if $rootScope.breadcrumbStrategy.progressive then "active" else (if $scope.workEnabled() then "" else "active")
+
+  $scope.workEnabled = () ->
+    return ($scope.file and $scope.file.name) or not ($scope.repo and $scope.repo.name)
+
+  $scope.saveEnabled = () ->
+    return $scope.file and $scope.file.name
+
+  $scope.runEnabled = () ->
+    return $scope.workEnabled()
+
 
   $scope.right = () ->
     $('.carousel').carousel(1)
@@ -144,9 +174,9 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
       # We seem to end up down here.
       #console.log "Editor is NOT in full screen mode."
 
-  # Initialize the Workbench perspective to either left (Book) or right (Page).
+  # Initialize the Workbench perspective to either Repo or right (Page).
   if $scope.repo.name
-    $scope.left()
+    $scope.repoView()
   else
     $scope.right()
 

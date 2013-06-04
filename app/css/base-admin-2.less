@@ -13,6 +13,7 @@ stylesheet in order to separate your customizations and make
 upgrading in the future easier. ***
 
 -------------------------------------------------------------------*/
+@import "variables.less";
 /*------------------------------------------------------------------
 [ Global ]
 */
@@ -115,7 +116,7 @@ h6 {
   top: 2px;
 }
 .navbar .brand:hover {
-  color: #FFF;
+  color: @navbarInverseLinkColorHover;
 }
 .navbar.navbar-inverse .navbar-search .search-query {
   background-color: #333;
@@ -175,7 +176,7 @@ h6 {
 .subnavbar .btn-subnavbar {
   display: none;
   padding: 10px 0 8px;
-  color: #F90;
+  color: @themeBaseColor;
   font-size: 16px;
   text-align: center;
   cursor: pointer;
@@ -243,8 +244,8 @@ h6 {
   text-decoration: none;
 }
 .subnavbar .mainnav > li.active > a {
-  background: #333;
-  color: #F90;
+  background: @grayDark;
+  color: @themeBaseColor;
 }
 .subnavbar .dropdown > .dropdown-menu {
   top: 97%;
@@ -403,7 +404,7 @@ h6 {
   margin-bottom: 0px;
   color: #ffffff;
   font-size: normal;
-  background: #ff9900;
+  background: @themeBaseColor;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
 }
 .ui-datepicker .ui-state-hover,
@@ -417,7 +418,7 @@ h6 {
 }
 .ui-datepicker-today a:hover {
   color: #ffffff;
-  background-color: #ff9900;
+  background-color: @themeBaseColor;
 }
 .ui-datepicker-today a {
   padding: 0 1px;
@@ -878,7 +879,7 @@ h6 {
 }
 #back-to-top:hover {
   text-decoration: none;
-  background-color: #F90;
+  background-color: @themeBaseColor;
   background: rgba(255, 153, 0, 0.75);
 }
 #back-to-top i {
@@ -1193,15 +1194,15 @@ h6 {
 .dropdown-menu li > a:focus,
 .dropdown-menu:hover > a {
   color: #ffffff;
-  background-color: #ff9900;
-  background-image: -moz-linear-gradient(top, #ff9900, #ff9900);
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ff9900), to(#ff9900));
-  background-image: -webkit-linear-gradient(top, #ff9900, #ff9900);
-  background-image: -o-linear-gradient(top, #ff9900, #ff9900);
-  background-image: linear-gradient(to bottom, #ff9900, #ff9900);
+  background-color: @themeBaseColor;
+  background-image: -moz-linear-gradient(top, @themeBaseColor, @themeBaseColor);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(@themeBaseColor), to(@themeBaseColor));
+  background-image: -webkit-linear-gradient(top, @themeBaseColor, @themeBaseColor);
+  background-image: -o-linear-gradient(top, @themeBaseColor, @themeBaseColor);
+  background-image: linear-gradient(to bottom, @themeBaseColor, @themeBaseColor);
   background-repeat: repeat-x;
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffff9900', endColorstr='#ffff9900', GradientType=0);
-  background: #ff9900;
+  background: @themeBaseColor;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
 }
 .dropdown-menu .active > a,
@@ -1219,15 +1220,15 @@ body:not(:-moz-handler-blocked) .dropdown-submenu > a:after {
 .dropdown-menu li > a:hover,
 .dropdown-menu li > a:focus,
 .dropdown-submenu:hover > a {
-  background-color: #ff9900;
-  background-image: -moz-linear-gradient(top, #ff9900, #ff9900);
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ff9900), to(#ff9900));
-  background-image: -webkit-linear-gradient(top, #ff9900, #ff9900);
-  background-image: -o-linear-gradient(top, #ff9900, #ff9900);
-  background-image: linear-gradient(to bottom, #ff9900, #ff9900);
+  background-color: @themeBaseColor;
+  background-image: -moz-linear-gradient(top, @themeBaseColor, @themeBaseColor);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(@themeBaseColor), to(@themeBaseColor));
+  background-image: -webkit-linear-gradient(top, @themeBaseColor, @themeBaseColor);
+  background-image: -o-linear-gradient(top, @themeBaseColor, @themeBaseColor);
+  background-image: linear-gradient(to bottom, @themeBaseColor, @themeBaseColor);
   background-repeat: repeat-x;
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffff9900', endColorstr='#ffff9900', GradientType=0);
-  background: #ff9900;
+  background: @themeBaseColor;
 }
 /*------------------------------------------------------------------
 [ Buttons / .btn ]
@@ -1236,16 +1237,16 @@ body:not(:-moz-handler-blocked) .dropdown-submenu > a:after {
   color: #ffffff;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
   background-color: #ed940f;
-  background-image: -moz-linear-gradient(top, #ffa31a, #d17d00);
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffa31a), to(#d17d00));
-  background-image: -webkit-linear-gradient(top, #ffa31a, #d17d00);
-  background-image: -o-linear-gradient(top, #ffa31a, #d17d00);
-  background-image: linear-gradient(to bottom, #ffa31a, #d17d00);
+  background-image: -moz-linear-gradient(top, @themeDistance1Color, @themeDistance2Color);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(@themeDistance1Color), to(@themeDistance2Color));
+  background-image: -webkit-linear-gradient(top, @themeDistance1Color, @themeDistance2Color);
+  background-image: -o-linear-gradient(top, @themeDistance1Color, @themeDistance2Color);
+  background-image: linear-gradient(to bottom, @themeDistance1Color, @themeDistance2Color);
   background-repeat: repeat-x;
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffa31a', endColorstr='#ffd17d00', GradientType=0);
-  border-color: #d17d00 #d17d00 #855000;
+  border-color: @themeDistance2Color @themeDistance2Color #855000;
   border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
-  *background-color: #d17d00;
+  *background-color: @themeDistance2Color;
   /* Darken IE7 buttons by default so they stand out more given they won't have borders */
 
   filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
@@ -1256,7 +1257,7 @@ body:not(:-moz-handler-blocked) .dropdown-submenu > a:after {
 .btn-primary.disabled,
 .btn-primary[disabled] {
   color: #ffffff;
-  background-color: #d17d00;
+  background-color: @themeDistance2Color;
   *background-color: #b86e00;
 }
 .btn-primary:active,
@@ -1348,18 +1349,18 @@ body:not(:-moz-handler-blocked) .dropdown-submenu > a:after {
   color: #ffffff;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
   background-color: #e78a00;
-  background-image: -moz-linear-gradient(top, #ff9900, #c27400);
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ff9900), to(#c27400));
-  background-image: -webkit-linear-gradient(top, #ff9900, #c27400);
-  background-image: -o-linear-gradient(top, #ff9900, #c27400);
-  background-image: linear-gradient(to bottom, #ff9900, #c27400);
+  background-image: -moz-linear-gradient(top, @themeBaseColor, #c27400);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(@themeBaseColor), to(#c27400));
+  background-image: -webkit-linear-gradient(top, @themeBaseColor, #c27400);
+  background-image: -o-linear-gradient(top, @themeBaseColor, #c27400);
+  background-image: linear-gradient(to bottom, @themeBaseColor, #c27400);
   background-repeat: repeat-x;
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffff9900', endColorstr='#ffc27400', GradientType=0);
   border-color: #c27400 #c27400 #754600;
   border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
 }
 .progress-primary.progress-striped .bar {
-  background-color: #ff9900;
+  background-color: @themeBaseColor;
   background-image: -webkit-gradient(linear, 0 100%, 100% 0, color-stop(0.25, rgba(255, 255, 255, 0.15)), color-stop(0.25, transparent), color-stop(0.5, transparent), color-stop(0.5, rgba(255, 255, 255, 0.15)), color-stop(0.75, rgba(255, 255, 255, 0.15)), color-stop(0.75, transparent), to(transparent));
   background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
   background-image: -moz-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
@@ -1455,11 +1456,11 @@ body:not(:-moz-handler-blocked) .dropdown-submenu > a:after {
   color: #ffffff;
   text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
   background-color: #eb8d00;
-  background-image: -moz-linear-gradient(top, #ff9900, #cc7a00);
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ff9900), to(#cc7a00));
-  background-image: -webkit-linear-gradient(top, #ff9900, #cc7a00);
-  background-image: -o-linear-gradient(top, #ff9900, #cc7a00);
-  background-image: linear-gradient(to bottom, #ff9900, #cc7a00);
+  background-image: -moz-linear-gradient(top, @themeBaseColor, #cc7a00);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(@themeBaseColor), to(#cc7a00));
+  background-image: -webkit-linear-gradient(top, @themeBaseColor, #cc7a00);
+  background-image: -o-linear-gradient(top, @themeBaseColor, #cc7a00);
+  background-image: linear-gradient(to bottom, @themeBaseColor, #cc7a00);
   background-repeat: repeat-x;
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffff9900', endColorstr='#ffcc7a00', GradientType=0);
   border-color: #cc7a00 #cc7a00 #804d00;

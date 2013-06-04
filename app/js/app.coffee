@@ -11,6 +11,7 @@ angular.module("app", ['async', 'jed', 'jquery', 'underscore']).run(['$rootScope
     Repos: i18n.translate("Repo").ifPlural(2, "Repos").fetch()
 
   $rootScope.i18n = i18n
+  $rootScope.breadcrumbStrategy = progressive: false
 
   # The server drops this cookie so that we can make the GitHub autorization request.
   $rootScope.clientId = -> cookie.getItem(GITHUB_APPLICATION_CLIENT_ID_COOKIE_NAME)

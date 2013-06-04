@@ -7,31 +7,26 @@
         </a>
         <div class="subnav-collapse collapse">
           <ul class="mainnav">
-            <li>
+            <li class="{{homeBreadcrumbClass()}}">
               <a-home></a-home>
             </li>
-            <li ng-show="isLoggedIn()">
+            <li ng-show="isLoggedIn()" class="{{userBreadcrumbClass()}}">
               <a ng-href="/users/{{owner.name}}">
                 <i class="icon-user"></i>
-                <span>Me</span>
+                <span>{{i18n.translate("My Repo").ifPlural(2, "My Repos").fetch()}}</span>
               </a>
             </li>
-            <li class="active">
+            <li ng-show="repoEnabled()" class="{{repoBreadcrumbClass()}}">
+              <a ng-click="repoView()" href="#">
+                <i class="icon-book"></i>
+                <span>{{i18n.translate("Repo").fetch()}}</span>
+              </a>
+            </li>
+            <!-- Workbench is always active because it is the right-most breadcrumb -->
+            <li ng-show="workEnabled()" class="active">
               <a ng-click="reload()" href="#">
                 <i class="icon-edit"></i>
                 <span>Workbench</span>
-              </a>
-            </li>
-            <li ng-show="leftEnabled()">
-              <a ng-click="left()" href="#">
-                <i class="icon-book"></i>
-                <span>Book</span>
-              </a>
-            </li>
-            <li ng-show="repo.name">
-              <a ng-click="right()" href="#">
-                <i class="icon-file-alt"></i>
-                <span>File</span>
               </a>
             </li>
             <li ng-show="saveEnabled()">
@@ -40,7 +35,7 @@
                 <span>Save</span>
               </a>
             </li>
-            <li>
+            <li ng-show="runEnabled()">
               <a ng-click="run()" href="#">
                 <i class="icon-cogs"></i>
                 <span>Run</span>
@@ -163,6 +158,26 @@
           <div class=" active item">
             <div class="container-fluid">
               
+              <!-- Messages -->
+              <!-- We only show the Message widget if there are messages to be shown -->
+              <div class="row-fluid" ng-show="messages.length &gt; 0">
+                <div class="span12">
+                  <div class="widget">
+                    <div class="widget-header">
+                      <i class="icon-inbox"></i>
+                      <h3>Message</h3>
+                    </div>
+                    <div class="widget-content">
+                      <div class="alert alert-block alert-{{message.severity}}" ng-repeat="message in messages">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <h4>{{message.name}}</h4>
+                        {{message.text}}
+                      </div>
+                    </div> <!-- div.widget-content -->
+                  </div> <!-- div.widget -->
+                </div> <!-- div.span12 -->
+              </div> <!-- row-fluid -->
+
               <div class="row-fluid">
                 <div class="span6">
                   <div class="widget">
@@ -189,6 +204,7 @@
                 </div> <!-- div.span -->
               </div> <!-- row-fluid -->
 
+              <!-- Printer -->
               <div class="row-fluid">
                 <div class="span12">
                   <div class="widget">

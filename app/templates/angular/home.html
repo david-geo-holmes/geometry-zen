@@ -13,7 +13,7 @@
             <li ng-show="isLoggedIn()">
               <a ng-href="/users/{{username()}}">
                 <i class="icon-user"></i>
-                <span>Me</span>
+                <span>{{i18n.translate("My Repo").ifPlural(2, "My Repos").fetch()}}</span>
               </a>
             </li>
             <li class="dropdown">
