@@ -18,11 +18,6 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
   else
     $scope.repo = {}
 
-  builtinRead = (x) ->
-    if (Sk.builtinFiles == undefined || Sk.builtinFiles["files"][x] == undefined)
-      throw "File not found: '" + x + "'"
-    return Sk.builtinFiles["files"][x]
-
   winHeight = () -> $window.innerHeight || ($window.document.documentElement || $window.document.body).clientHeight
   winWidth  = () -> $window.innerWidth  || ($window.document.documentElement || $window.document.body).clientWidth
 
@@ -69,8 +64,13 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
     Sk.canvas = "canvas2d"
 
     Sk.configure
-      "output": (text) -> $rootScope.$broadcast('print', text)
-      "read": builtinRead
+      "output": (text) ->
+        $rootScope.$broadcast('print', text)
+      "read": (x) ->
+        console.log "x: #{x}"
+        if Sk.builtinFiles is undefined or Sk.builtinFiles["files"][x] is undefined
+          throw new Error("File not found: '#{x}'")
+        return Sk.builtinFiles["files"][x]
 
     if prog.trim().length > 0
       eval(Sk.importMainWithBody("<stdin>", false, prog.trim()))
@@ -128,11 +128,16 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
   else
     console.log "The editor does not exist."
 
+  # Install a handler for window resize - although this does not appear to be called!
   CodeMirror.on $window, "resize", () ->
     showing = $window.document.body.getElementsByClassName("CodeMirror-fullscreen")[0]
     if (showing)
+      console.log "Editor IS in full screen mode."
       showing.CodeMirror.getWrapperElement().style.height = winHeight() + "px"
+    else
+      console.log "Editor is NOT in full screen mode."
 
+  # Initialize the Workbench perspective to either left (Book) or right (Page).
   if $scope.repo.name
     $scope.left()
   else
