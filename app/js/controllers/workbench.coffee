@@ -5,6 +5,9 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
   GITHUB_TOKEN_COOKIE_NAME = 'github-token'
   token = cookie.getItem(GITHUB_TOKEN_COOKIE_NAME)
 
+  ga('set', 'page', '/workbench')
+  ga('send', 'pageview')
+
   # A message object has name, text and severity (error, warning, info, success)
   $scope.messages = []
 
