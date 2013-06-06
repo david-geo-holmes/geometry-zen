@@ -42,7 +42,7 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
       "vendor/jed/jed.js",
       "vendor/js/codemirror.js",
       "vendor/codemirror/mode/python/python.js",
-      "../../gzhome/skulpt/dist/skulpt.js",
+      "../../gzhome/skulpt/dist/skulpt.min.js",
       "../../gzhome/skulpt/dist/builtin.js",
       "vendor/threejs/build/three.js",
       "vendor/stats.js/src/Stats.js"
