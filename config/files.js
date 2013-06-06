@@ -45,6 +45,7 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
       "../../gzhome/skulpt/dist/skulpt.min.js",
       "../../gzhome/skulpt/dist/builtin.js",
       "vendor/threejs/build/three.js",
+      "vendor/google-analytics/tracking-code.js",
       "vendor/stats.js/src/Stats.js"
     ],
     app: [
