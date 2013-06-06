@@ -62,6 +62,7 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
     console.log "The code element could not be found"
 
   $scope.run = () ->
+    ga('send', 'event', 'workbench', 'run')
     $rootScope.$broadcast 'reset'
     $scope.messages.length = 0
     $scope.right()
