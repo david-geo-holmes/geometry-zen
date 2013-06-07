@@ -1,4 +1,4 @@
-<div id="workbench-view">
+<div id="work-view">
   <div class="subnavbar">
     <div class="subnavbar-inner">
       <div class="container">
@@ -22,7 +22,6 @@
                 <span>{{i18n.translate("Repo").fetch()}}</span>
               </a>
             </li>
-            <!-- Workbench is always active because it is the right-most breadcrumb -->
             <li ng-show="workEnabled()" class="active">
               <a ng-click="reload()" href="#">
                 <i class="icon-edit"></i>
@@ -47,10 +46,10 @@
     </div> <!-- /subnavbar-inner -->
   </div> <!-- /subnavbar -->
   
-  <div id="workbench-layout" class="container-fluid">
+  <div id="work-layout" class="container-fluid">
     <div class="row-fluid">
       <!-- The 'slide' class has been removed. -->
-      <div id="workbench-carousel" class="carousel" data-interval="false">
+      <div id="work-carousel" class="carousel" data-interval="false">
         <!-- Carousel items -->
         <div class="carousel-inner">
           <div class="item">
@@ -240,7 +239,7 @@
         </div>
         <div class="modal-footer">
           <button id="btnCancel" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-          <button type="submit" ng-click="onOK()" id="btnOK" class="btn btn-primary">Create file</button>
+          <button type="submit" ng-click="createFile()" id="btnOK" class="btn btn-primary">Create file</button>
         </div>
       </fieldset>
     </form>

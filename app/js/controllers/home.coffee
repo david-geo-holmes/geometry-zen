@@ -1,16 +1,16 @@
 angular.module("app").controller('HomeCtrl', ['$rootScope','$scope', '$http', '$location', '$window', 'GitHub','cookie', ($rootScope, $scope, $http, $location, $window, github, cookie) ->
 
+  EVENT_CATEGORY = "home"
+  ga('create', 'UA-41504069-1', 'geometryzen.org');
+  ga('set', 'page', '/home')
+  ga('send', 'pageview')
+
   # The Gatekeeper is being served from the same server as this code.
   GATEKEEPER_DOMAIN = "#{$location.protocol()}://#{$location.host()}:#{$location.port()}"
 
   # TODO: This symbolic constant also appears in the GitHub service (DRY).
   GITHUB_TOKEN_COOKIE_NAME = 'github-token'
   GITHUB_LOGIN_COOKIE_NAME = 'github-login'
-
-  console.log "host: #{$location.host()}"
-  ga('create', 'UA-41504069-1', 'geometryzen.org');
-  ga('set', 'page', '/home')
-  ga('send', 'pageview')
 
   # Trap callback from GitHub. Note that the HTTP call is actually asynchronous.
 # match = $location.path().match(/\?code=([a-z0-9]*)/)
@@ -48,15 +48,18 @@ angular.module("app").controller('HomeCtrl', ['$rootScope','$scope', '$http', '$
       alert("Something is rotten in Denmark.")
       return
 
-  $scope.workbench = ->
-    $location.path("/workbench")
+  $scope.work = ->
+    ga('send', 'event', EVENT_CATEGORY, 'work')
+    $location.path("/work")
     return
 
   $scope.browse = ->
+    ga('send', 'event', EVENT_CATEGORY, 'browse')
     $location.path("/browse")
     return
 
   $scope.user = ->
+    ga('send', 'event', EVENT_CATEGORY, 'user')
     path = "/users/#{$scope.username()}"
     $location.path(path)
     return

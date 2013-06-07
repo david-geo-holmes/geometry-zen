@@ -4,17 +4,17 @@ angular.module("app").config(['$routeProvider', '$locationProvider', ($routeProv
     templateUrl: 'angular/home.html'
     controller: 'HomeCtrl'
 
-  $routeProvider.when '/workbench',
-    templateUrl: 'angular/workbench.html'
-    controller: 'WorkbenchCtrl'
+  $routeProvider.when '/work',
+    templateUrl: 'angular/work.html'
+    controller: 'WorkCtrl'
 
   $routeProvider.when '/browse',
     templateUrl: 'angular/browse.html'
     controller: 'BrowseCtrl'
 
   $routeProvider.when '/users/:owner/repos/:repo',
-    templateUrl: 'angular/workbench.html'
-    controller: 'WorkbenchCtrl'
+    templateUrl: 'angular/work.html'
+    controller: 'WorkCtrl'
 
   $routeProvider.when '/users/:username',
     templateUrl: 'angular/user.html'

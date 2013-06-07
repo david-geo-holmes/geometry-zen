@@ -1,13 +1,14 @@
 
 
-angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$window', '$routeParams', '$', '_', 'GitHub', 'Base64', 'cookie', ($rootScope, $scope, $window, $routeParams, $, _, github, base64, cookie) ->
+angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$window', '$routeParams', '$', '_', 'GitHub', 'Base64', 'cookie', ($rootScope, $scope, $window, $routeParams, $, _, github, base64, cookie) ->
+
+  EVENT_CATEGORY = "work"
+  ga('create', 'UA-41504069-1', 'geometryzen.org');
+  ga('set', 'page', '/work')
+  ga('send', 'pageview')
 
   GITHUB_TOKEN_COOKIE_NAME = 'github-token'
   token = cookie.getItem(GITHUB_TOKEN_COOKIE_NAME)
-
-  ga('create', 'UA-41504069-1', 'geometryzen.org');
-  ga('set', 'page', '/workbench')
-  ga('send', 'pageview')
 
   # A message object has name, text and severity (error, warning, info, success)
   $scope.messages = []
@@ -64,11 +65,11 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
 
   $scope.run = () ->
 
-    ga('send', 'event', 'workbench', 'run')
+    ga('send', 'event', EVENT_CATEGORY, 'run')
 
     $rootScope.$broadcast 'reset'
     $scope.messages.length = 0
-    $scope.right()
+    $scope.fileView()
 
     prog = editor.getValue()
     Sk.canvasWebGL = "canvasWebGL"
@@ -79,15 +80,8 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
         $rootScope.$broadcast('print', text)
       "read": (searchPath) ->
         if Sk.builtinFiles is undefined or Sk.builtinFiles["files"][searchPath] is undefined
-          # It is important that we throw an exception here to say "this is not the right path".
-          canGetFromElsewhere = false # Maybe we decide we can
-          if canGetFromElsewhere
-            # We should get it.
-            throw new Error("File not found: '#{searchPath}'")
-          else
-            throw new Error("File not found: '#{searchPath}'")
+          throw new Error("File not found: '#{searchPath}'")
         else
-          # The second time we will be asked for the contents.
           return Sk.builtinFiles["files"][searchPath]
 
     if prog.trim().length > 0
@@ -101,6 +95,7 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
         $scope.messages.push name: name, text: text, severity: 'error'
 
   $scope.newFile = () ->
+    ga('send', 'event', EVENT_CATEGORY, 'newFile')
     $('#myModal').modal show: true, backdrop: true
 
   $scope.$on 'commit', (e, owner, repo, file, commit) ->
@@ -109,6 +104,7 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
 
     # TODO: Need to change the URL?
   $scope.editFile = (path) ->
+    ga('send', 'event', EVENT_CATEGORY, 'editFile')
     # TODO: Use the $index technique as in deleteFile
     if editor
       github.getFile token, $routeParams.owner, $routeParams.repo, path, (err, file) ->
@@ -117,10 +113,11 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
           editor.setValue base64.decode(file.content)
         else
           alert("Error retrieving the file")
-    $scope.right()
+    $scope.fileView()
 
   # This is the save event handler for an existing file, as evident by the provision of the SHA.
   $scope.save = () ->
+    ga('send', 'event', EVENT_CATEGORY, 'saveFile')
     content = base64.encode(editor.getValue())
     github.putFile token, $routeParams.owner, $scope.repo.name, $scope.file.path, "Save file.", content, $scope.file.sha, (err, response) ->
       if not err
@@ -129,6 +126,7 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
         alert("Error saving file to repository: #{err}")
 
   $scope.deleteFile = (idx) ->
+    ga('send', 'event', EVENT_CATEGORY, 'deleteFile')
     # Note that we should use indexOf on the array if the list has been filtered.
     file = $scope.repo.files[idx]
     github.deleteFile token, $routeParams.owner, $scope.repo.name, file.path, "Delete file.", file.sha, (err, response) ->
@@ -137,22 +135,27 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
       else
         alert("Error saving file to repository: #{err}")
 
+  $scope.repoView = () ->
+    ga('send', 'event', EVENT_CATEGORY, 'repoView')
+    # TODO: Need to cofirm continuing with this action.
+    $scope.file = {}
+    $('.carousel').carousel(0)
+
+  $scope.fileView = () ->
+    ga('send', 'event', EVENT_CATEGORY, 'fileView')
+    $('.carousel').carousel(1)
+
   $scope.homeBreadcrumbClass = () ->
     if $rootScope.breadcrumbStrategy.progressive then "active" else ""
 
   $scope.userBreadcrumbClass = () ->
     if $rootScope.breadcrumbStrategy.progressive then "active" else ""
 
-  $scope.repoEnabled = () ->
-    return $scope.repo and $scope.repo.name
-
-  $scope.repoView = () ->
-    # TODO: Need to cofirm continuing with this action.
-    $scope.file = {}
-    $('.carousel').carousel(0)
-
   $scope.repoBreadcrumbClass = () ->
     if $rootScope.breadcrumbStrategy.progressive then "active" else (if $scope.workEnabled() then "" else "active")
+
+  $scope.repoEnabled = () ->
+    return $scope.repo and $scope.repo.name
 
   $scope.workEnabled = () ->
     return ($scope.file and $scope.file.name) or not ($scope.repo and $scope.repo.name)
@@ -162,10 +165,6 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
 
   $scope.runEnabled = () ->
     return $scope.workEnabled()
-
-
-  $scope.right = () ->
-    $('.carousel').carousel(1)
 
   if editor
     setFullScreen(editor, false)
@@ -181,11 +180,11 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
       # We seem to end up down here.
       #console.log "Editor is NOT in full screen mode."
 
-  # Initialize the Workbench perspective to either Repo or right (Page).
+  # Initialize the Workbench perspective to either Repo ("Book") or File ("Page").
   if $scope.repo.name
     $scope.repoView()
   else
-    $scope.right()
+    $scope.fileView()
 
   return
 ]

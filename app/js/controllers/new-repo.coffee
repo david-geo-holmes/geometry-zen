@@ -1,4 +1,10 @@
 angular.module("app").controller 'NewRepoCtrl', ['$scope', 'GitHub', 'cookie', '$', '_', '$async', ($scope, github, cookie, $, _, $async) ->
+
+  EVENT_CATEGORY = "new-repo"
+  ga('create', 'UA-41504069-1', 'geometryzen.org');
+  ga('set', 'page', '/new-repo')
+  ga('send', 'pageview')
+
   # We'll do this here for now, but it may make sense to do this by resolve(ing) in the routeProvider.
   GITHUB_TOKEN_COOKIE_NAME = 'github-token'
   token = cookie.getItem(GITHUB_TOKEN_COOKIE_NAME)
@@ -13,7 +19,8 @@ angular.module("app").controller 'NewRepoCtrl', ['$scope', 'GitHub', 'cookie', '
 
   $('#myModal').on 'hidden', ->
 
-  $scope.onOK = () ->
+  $scope.createRepo = () ->
+    ga('send', 'event', EVENT_CATEGORY, 'createRepo')
     github.postRepo token, $scope.repo.name, $scope.repo.description, false, $scope.repo.auto_init, (err, response) ->
       if not err
         $('#myModal').modal('hide')

@@ -1,11 +1,13 @@
 angular.module("app").controller 'UserCtrl', ['$rootScope','$scope', 'GitHub', 'cookie', '$', '_', '$async', ($rootScope, $scope, github, cookie, $, _, $async) ->
-  # We'll do this here for now, but it may make sense to do this by resolve(ing) in the routeProvider.
-  GITHUB_TOKEN_COOKIE_NAME = 'github-token'
-  token = cookie.getItem(GITHUB_TOKEN_COOKIE_NAME)
 
+  EVENT_CATEGORY = "work"
   ga('create', 'UA-41504069-1', 'geometryzen.org');
   ga('set', 'page', '/user')
   ga('send', 'pageview')
+
+  # We'll do this here for now, but it may make sense to do this by resolve(ing) in the routeProvider.
+  GITHUB_TOKEN_COOKIE_NAME = 'github-token'
+  token = cookie.getItem(GITHUB_TOKEN_COOKIE_NAME)
 
   $async.parallel([
     (callback) ->
@@ -34,5 +36,6 @@ angular.module("app").controller 'UserCtrl', ['$rootScope','$scope', 'GitHub', '
     if $rootScope.breadcrumbStrategy.progressive then "active distance-0" else "active distance-0"
 
   $scope.newRepo = () ->
+    ga('send', 'event', 'user', 'newRepo')
     $('#myModal').modal show: true, backdrop: true
 ]
