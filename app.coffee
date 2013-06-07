@@ -68,6 +68,14 @@ authenticate = (code, cb) ->
   req.end()
   req.on 'error', (e) -> cb(e.message)
 
+# Forward geometryzen.herokuapp.com to www.geometryzen.org
+# Notice that we use HTTP status 301 Moved Permanently (best for SEO purposes).
+app.get "/*", (req, res, next) ->
+    if req.headers.host.match(/^geometryzen.herokuapp.com/)
+      res.redirect("http://www.geometryzen.org#{req.url}", 301)
+    else
+      next()
+
 app.get '/authenticate/:code', (req, res) ->
   authenticate req.params.code, (err, token) ->
     if (err)
