@@ -5,6 +5,7 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
   GITHUB_TOKEN_COOKIE_NAME = 'github-token'
   token = cookie.getItem(GITHUB_TOKEN_COOKIE_NAME)
 
+  ga('create', 'UA-41504069-1', 'geometryzen.org');
   ga('set', 'page', '/workbench')
   ga('send', 'pageview')
 
@@ -62,7 +63,9 @@ angular.module("app").controller 'WorkbenchCtrl', ['$rootScope','$scope', '$wind
     console.log "The code element could not be found"
 
   $scope.run = () ->
+
     ga('send', 'event', 'workbench', 'run')
+
     $rootScope.$broadcast 'reset'
     $scope.messages.length = 0
     $scope.right()

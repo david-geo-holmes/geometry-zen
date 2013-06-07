@@ -17,6 +17,3 @@
     $refNode.parentNode.insertBefore($newNode,$refNode)
   }
 )(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
-
-ga('create', 'UA-41504069-1', 'geometryzen.org');
-ga('send', 'pageview');

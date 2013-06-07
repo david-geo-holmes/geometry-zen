@@ -3,6 +3,10 @@ angular.module("app").controller 'UserCtrl', ['$rootScope','$scope', 'GitHub', '
   GITHUB_TOKEN_COOKIE_NAME = 'github-token'
   token = cookie.getItem(GITHUB_TOKEN_COOKIE_NAME)
 
+  ga('create', 'UA-41504069-1', 'geometryzen.org');
+  ga('set', 'page', '/user')
+  ga('send', 'pageview')
+
   $async.parallel([
     (callback) ->
       github.getUser token, (err, user) ->

@@ -7,6 +7,11 @@ angular.module("app").controller('HomeCtrl', ['$rootScope','$scope', '$http', '$
   GITHUB_TOKEN_COOKIE_NAME = 'github-token'
   GITHUB_LOGIN_COOKIE_NAME = 'github-login'
 
+  console.log "host: #{$location.host()}"
+  ga('create', 'UA-41504069-1', 'geometryzen.org');
+  ga('set', 'page', '/home')
+  ga('send', 'pageview')
+
   # Trap callback from GitHub. Note that the HTTP call is actually asynchronous.
 # match = $location.path().match(/\?code=([a-z0-9]*)/)
   match = $window.location.href.match(/\?code=([a-z0-9]*)/)
