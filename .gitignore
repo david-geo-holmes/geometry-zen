@@ -9,8 +9,6 @@
 
 # Ignore the generated files, which are only there for development.
 /generated
-# Ignore the transfer folder, which holds stuff common to master and gh-pages branch.
-/transfer
 
 # Ignnore configuration files.
 # We don't use configuration files anyway in production.
