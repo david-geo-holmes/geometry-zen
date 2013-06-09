@@ -161,7 +161,7 @@
               <!-- We only show the Message widget if there are messages to be shown -->
               <div class="row-fluid" ng-show="messages.length &gt; 0">
                 <div class="span12">
-                  <div class="widget">
+                  <div class="widget stacked">
                     <div class="widget-header">
                       <i class="icon-inbox"></i>
                       <h3>Message</h3>
@@ -190,34 +190,39 @@
                   </div> <!-- div.widget -->
                 </div> <!-- div.span -->
                 <div class="span6">
-                  <div class="widget">
-                    <div class="widget-header">
-                      <i class="icon-film"></i>
-                      <h3>Canvas 3D</h3>
-                    </div> <!-- div.widget-header -->
-                    <div id="canvas-container" class="widget-content">
-                      <!-- canvas id="canvasWebGL" width="800" height="600"></canvas -->
-                      <!-- canvas id="canvas2d" width="800" height="600"></canvas -->
-                    </div> <!-- div.widget-content -->
-                  </div> <!-- div.widget -->
+                  <div class="row-fluid">
+                    <!-- Canvas -->
+                    <div class="span12">
+                      <div class="widget">
+                        <div class="widget-header">
+                          <i class="icon-film"></i>
+                          <h3>Canvas 3D</h3>
+                        </div> <!-- div.widget-header -->
+                        <div id="canvas-container" class="widget-content">
+                          <canvas id="canvas" width="800" height="600"></canvas>
+                          <!-- canvas id="canvas2d" width="800" height="600"></canvas -->
+                        </div> <!-- div.widget-content -->
+                      </div> <!-- div.widget -->
+                    </div>
+                  </div> <!-- row-fluid -->
+                  <div class="row-fluid">
+                    <!-- Printer -->
+                    <div class="span12">
+                      <div class="widget">
+                        <div class="widget-header">
+                          <i class="icon-print"></i>
+                          <h3>Printer</h3>
+                        </div>
+                        <div id="printer-container" class="widget-content">
+                          <printer></printer>
+                        </div> <!-- div.widget-content -->
+                      </div> <!-- div.widget -->
+                    </div> <!-- div.span12 -->
+                  </div> <!-- row-fluid -->
+
                 </div> <!-- div.span -->
               </div> <!-- row-fluid -->
 
-              <!-- Printer -->
-              <div class="row-fluid">
-                <div class="span12">
-                  <div class="widget">
-                    <div class="widget-header">
-                      <i class="icon-print"></i>
-                      <h3>Printer</h3>
-                    </div>
-                    <div id="printer-container" class="widget-content">
-                      <printer></printer>
-                    </div> <!-- div.widget-content -->
-                  </div> <!-- div.widget -->
-                </div> <!-- div.span12 -->
-              </div> <!-- row-fluid -->
-            
             </div> <!-- div.container-fluid -->
           </div> <!-- div.item -->
         </div> <!-- div.carousel-inner -->

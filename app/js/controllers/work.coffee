@@ -72,8 +72,7 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$window', 
     $scope.fileView()
 
     prog = editor.getValue()
-    Sk.canvasWebGL = "canvasWebGL"
-    Sk.canvas = "canvas2d"
+    Sk.canvas = "canvas"
 
     Sk.configure
       "output": (text) ->
