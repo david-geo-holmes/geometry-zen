@@ -46,6 +46,7 @@ app.all '*', (req, res, next) ->
 
 authenticate = (code, cb) ->
 
+  # POST https://github.com/login/oauth/access_token
   data = qs.stringify
     client_id: nconf.get("GITHUB_APPLICATION_CLIENT_ID"),
     client_secret: nconf.get("GITHUB_APPLICATION_CLIENT_SECRET"),
@@ -76,6 +77,7 @@ app.get "/*", (req, res, next) ->
     else
       next()
 
+# Exchange the session code fot an access token.
 app.get '/authenticate/:code', (req, res) ->
   authenticate req.params.code, (err, token) ->
     if (err)

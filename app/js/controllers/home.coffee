@@ -12,8 +12,7 @@ angular.module("app").controller('HomeCtrl', ['$rootScope','$scope', '$http', '$
   GITHUB_TOKEN_COOKIE_NAME = 'github-token'
   GITHUB_LOGIN_COOKIE_NAME = 'github-login'
 
-  # Trap callback from GitHub. Note that the HTTP call is actually asynchronous.
-# match = $location.path().match(/\?code=([a-z0-9]*)/)
+  # Trap OAuth Application callback from GitHub. Note that the HTTP call is actually asynchronous.
   match = $window.location.href.match(/\?code=([a-z0-9]*)/)
   if match
     # We've scraped the code from the URL so let's clear the URL now, synchronously.
@@ -47,6 +46,10 @@ angular.module("app").controller('HomeCtrl', ['$rootScope','$scope', '$http', '$
     .error (data, status, headers, config) ->
       alert("Something is rotten in Denmark.")
       return
+  # If the user denies authorization to this application, clean up the browser URL.
+  match = $window.location.href.match(/\?error=access_denied/)
+  if match
+    $location.search({})
 
   $scope.work = ->
     ga('send', 'event', EVENT_CATEGORY, 'work')

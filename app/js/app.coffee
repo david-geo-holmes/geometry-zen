@@ -26,7 +26,9 @@ angular.module("app", ['async', 'jed', 'jquery', 'underscore']).run(['$rootScope
 
   $rootScope.loginEnabled = () -> not cookie.hasItem(GITHUB_TOKEN_COOKIE_NAME)
 
-  $rootScope.logout = () -> cookie.removeItem(GITHUB_TOKEN_COOKIE_NAME)
+  $rootScope.logout = ->
+    cookie.removeItem(GITHUB_TOKEN_COOKIE_NAME)
+    cookie.removeItem(GITHUB_LOGIN_COOKIE_NAME)
 
   $rootScope.username = () -> cookie.getItem(GITHUB_LOGIN_COOKIE_NAME)
 
