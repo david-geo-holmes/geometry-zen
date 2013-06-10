@@ -53,10 +53,10 @@ authenticate = (code, cb) ->
     code: code
 
   options =
-    host: nconf.get("GITHUB_HOST")
-    port: nconf.get("GITHUB_PORT")
-    path: nconf.get("GITHUB_PATH")
-    method: nconf.get("GITHUB_METHOD")
+    host: nconf.get("GITHUB_HOST")     # github.com
+    port: nconf.get("GITHUB_PORT")     # 443
+    path: nconf.get("GITHUB_PATH")     # /login/oath/access_token
+    method: nconf.get("GITHUB_METHOD") # POST
     headers: 'content-length': data.length
 
   body = ""
