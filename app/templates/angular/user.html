@@ -37,7 +37,7 @@
               <span>{{user.login}}</span>
             </h4>
             <a href="https://github.com/{{user.login}}?tab=repositories" target="_blank" class="btn btn-secondary">
-              <i class="icon-external-link"></i>
+              <i class="icon-github"></i>
               <span>GitHub</span>
             </a>
           </div>
@@ -63,7 +63,7 @@
                     <tbody>
                       <tr>
                         <td nowrap=nowrap>
-                          <!--input type="text" placeHolder="Filter..."></input-->
+                          <input type="text" placeHolder="Filter..."></input>
                         </td>
                         <td nowrap=nowrap>
                           <button ng-click="newRepo()" class="btn btn-primary">
@@ -76,19 +76,16 @@
                         <td nowrap=nowrap>
                           <h3>
                             <i class="icon-book muted"></i>
-                            <a href="/users/{{user.login}}/repos/{{repo.name}}" class="btn btn-link">
+                            <a href="/users/{{user.login}}/repos/{{repo.name}}/tree/master" class="btn btn-link">
                               <span>{{repo.name}}</span>
                             </a>
                           </h3>
                           <p>{{repo.description}}</p>
                         </td>
                         <td nowrap=nowrap>
-                          <a href="/users/{{user.login}}/repos/{{repo.name}}" class="btn btn-primary">
-                            <i class="icon-edit"></i>
-                            <span>Edit</span>
-                          </a>
-                          <a href="https://github.com/{{user.login}}/{{repo.name}}" target="_blank" class="btn btn-secondary">
-                            <i class="icon-external-link"></i>
+                          <!-- HATEOAS GitHub link-->
+                          <a href="{{repo.github_html_url}}" target="_blank" class="btn btn-secondary">
+                            <i class="icon-github"></i>
                             <span>GitHub</span>
                           </a>
                           <button ng-click="deleteRepo($index)" class="btn btn-tertiary">
@@ -131,10 +128,10 @@
           </div>
         </div>
 
-        <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div id="new-repo-dialog" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="new-repo-dialog-label" aria-hidden="true">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h3 id="myModalLabel"><i class="icon-plus-sign-alt muted"></i> <i class="icon-book muted"></i> Create a New Book</h3>
+            <h3 id="new-repo-dialog-label"><i class="icon-plus-sign-alt muted"></i> <i class="icon-book muted"></i> Create a New Book</h3>
           </div>
           <form ng-controller="NewRepoCtrl">
             <fieldset>
@@ -166,7 +163,7 @@
         </div>
         <script>
           $(function() {
-//            var domModal = $("#myModal");
+//            var domModal = $("#new-repo-dialog");
 //            $('#btnOK').on('click', function() {
 //              alert("OK clicked");
 //              domModal.modal('hide');

@@ -9,10 +9,11 @@ angular.module("app").factory('GitHub', ['$http', '$', '_', ($http, $, _) ->
       @login = login
 
   class Repo
-    constructor: (name, description, language) ->
+    constructor: (name, description, language, github_html_url) ->
       @name = name
       @description = description
       @language = language
+      @github_html_url = github_html_url
 
   getUser: (token, done) ->
     $http(method: 'GET', url: "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/user", headers: Authorization: "token #{token}")
@@ -24,24 +25,28 @@ angular.module("app").factory('GitHub', ['$http', '$', '_', ($http, $, _) ->
   getUserRepos: (token, done) ->
     $http(method: 'GET', url: "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/user/repos", headers: Authorization: "token #{token}")
     .success (repos, status, headers, config) ->
-      repos = _.map(repos, (repo) -> new Repo(repo.name, repo.description, repo.language))
+      repos = _.map(repos, (repo) -> new Repo(repo.name, repo.description, repo.language, repo.html_url))
       done(null, repos)
     .error (data, status, headers, config) ->
       done(new Error("Error getting the user repositories"))
 
-  getContentsOfRepoByOwner: (token, owner, repo, done) ->
-    $http(method: 'GET', url: "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/repos/#{owner}/#{repo}/contents", headers: Authorization: "token #{token}")
+  getRepoContents: (token, user, repo, done) ->
+    url = "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/repos/#{user}/#{repo}/contents"
+    $http("method": 'GET', "url": url, "headers": Authorization: "token #{token}")
     .success (contents, status, headers, config) ->
       done(null, contents)
     .error (data, status, headers, config) ->
-      done(new Error("Error getting the contents of the repo"))
+      done(new Error("Error getting the contents of the repo with URL #{url}"))
 
-  getFile: (token, owner, repo, path, done) ->
-    $http(method: 'GET', url: "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/repos/#{owner}/#{repo}/contents/#{path}", headers: Authorization: "token #{token}")
-    .success (file, status, headers, config) ->
-      done(null, file)
+  getPathContents: (token, user, repo, path, done) ->
+    url = "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/repos/#{user}/#{repo}/contents"
+    if path
+      url = "#{url}/#{path}"
+    $http("method": 'GET', "url": url, "headers": Authorization: "token #{token}")
+    .success (contents, status, headers, config) ->
+      done(null, contents)
     .error (data, status, headers, config) ->
-      done(new Error("Error getting the contents of the file"))
+      done(new Error("Error getting the contents of the path with URL #{url}"))
 
   ###
   The GitHub API uses the same method (PUT) and URL (/repos/:owner/:repo/contents/:path)

@@ -1,6 +1,6 @@
 angular.module("app").controller 'UserCtrl', ['$rootScope','$scope', 'GitHub', 'cookie', '$', '_', '$async', ($rootScope, $scope, github, cookie, $, _, $async) ->
 
-  EVENT_CATEGORY = "work"
+  EVENT_CATEGORY = "user"
   ga('create', 'UA-41504069-1', 'geometryzen.org');
   ga('set', 'page', '/user')
   ga('send', 'pageview')
@@ -18,10 +18,10 @@ angular.module("app").controller 'UserCtrl', ['$rootScope','$scope', 'GitHub', '
           alert("Error retrieving user profile")
         callback err, user
     (callback) ->
+      # We're getting my repos, but we should be URL-driven by the user.
       github.getUserRepos token, (err, repos) ->
         if not err
           $scope.repos = _.filter(repos, (repo) -> repo.language is 'Python')
-          #$scope.repos = repos
         else
           alert("Error retrieving user repositories")
         callback err, repos
@@ -36,6 +36,10 @@ angular.module("app").controller 'UserCtrl', ['$rootScope','$scope', 'GitHub', '
     if $rootScope.breadcrumbStrategy.progressive then "active distance-0" else "active distance-0"
 
   $scope.newRepo = () ->
-    ga('send', 'event', 'user', 'newRepo')
-    $('#myModal').modal show: true, backdrop: true
+    $('#new-repo-dialog').modal show: true, backdrop: true
+
+  $scope.$on 'createdRepo', (e, user, repo) ->
+    console.log "user receiving createdRepo message"
+    $scope.repos.push(repo)
+    # TODO: Should we navigate to the new repository?
 ]

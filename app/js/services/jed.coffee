@@ -36,5 +36,8 @@ angular.module('jed', []).factory 'i18n', ['$window', (w) ->
           "plural-forms": "nplurals=2; plural=(n != 1);"
         "Repo": [null, "Book", "Books"],
         "Library": [null, "Thing", "Things"],
-        "My Repo": [null, "My Book", "My Books"]
+        "My Repo": [null, "My Book", "My Books"],
+        "icon-page": [null, "icon-file-alt"],
+        "icon-book": [null, "icon-book"],
+        "icon-question": [null, "icon-question"]
 ]

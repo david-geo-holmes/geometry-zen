@@ -1,5 +1,3 @@
-
-
 angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$window', '$routeParams', '$', '_', 'GitHub', 'Base64', 'cookie', ($rootScope, $scope, $window, $routeParams, $, _, github, base64, cookie) ->
 
   EVENT_CATEGORY = "work"
@@ -15,16 +13,31 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$window', 
 
   $('.carousel').carousel({interval: false})
 
-  if ($routeParams.owner and $routeParams.repo)
-    $scope.owner = name: $routeParams.owner
+  $scope.contextItem = {}
+  if ($routeParams.user and $routeParams.repo)
+    $scope.user = login: $routeParams.user
     $scope.repo = name: $routeParams.repo
-    github.getContentsOfRepoByOwner token, $routeParams.owner, $routeParams.repo, (err, files) ->
+    $scope.branch = name: $routeParams.branch
+    steps = []
+    for n in [0..6]
+      if $routeParams["step#{n}"]
+        steps.push($routeParams["step#{n}"])
+    $scope.path = steps.join("/")
+    $scope.contextItem.name = $routeParams.repo
+    $scope.contextItem.type = "repo"
+    github.getPathContents token, $scope.user.login, $scope.repo.name, $scope.path, (err, file) ->
       if not err
-        $scope.repo.files = files
+        contextItem = name: file.name, path: file.path, sha: file.sha, type: file.type, parentItem: $scope.contextItem, childItems: []
+        $scope.contextItem = contextItem
+        if file.encoding is "base64"
+          editor.setValue base64.decode(file.content)
+        else
+          alert "Unknown encoding: #{file.encoding}"
       else
-        alert("Error retrieving repository files")
+        alert("Error retrieving the page")
   else
-    $scope.repo = {}
+    $scope.contextItem.name = ""
+    $scope.contextItem.type = undefined
 
   winHeight = () -> $window.innerHeight || ($window.document.documentElement || $window.document.body).clientHeight
   winWidth  = () -> $window.innerWidth  || ($window.document.documentElement || $window.document.body).clientWidth
@@ -61,7 +74,7 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$window', 
         "Ctrl-Enter": (cm) -> $scope.run()
     )
   else
-    console.log "The code element could not be found"
+    alert "The code element could not be found"
 
   $scope.run = () ->
 
@@ -69,7 +82,6 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$window', 
 
     $rootScope.$broadcast 'reset'
     $scope.messages.length = 0
-    $scope.fileView()
 
     prog = editor.getValue()
     Sk.canvas = "canvas"
@@ -93,56 +105,24 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$window', 
         text = message.substring(message.indexOf(":") + 1)
         $scope.messages.push name: name, text: text, severity: 'error'
 
-  $scope.newFile = () ->
-    ga('send', 'event', EVENT_CATEGORY, 'newFile')
-    $('#myModal').modal show: true, backdrop: true
-
-  $scope.$on 'commit', (e, owner, repo, file, commit) ->
-    $scope.repo.files.push(file)
-    $scope.editFile(file.path)
-
-    # TODO: Need to change the URL?
-  $scope.editFile = (path) ->
-    ga('send', 'event', EVENT_CATEGORY, 'editFile')
-    # TODO: Use the $index technique as in deleteFile
-    if editor
-      github.getFile token, $routeParams.owner, $routeParams.repo, path, (err, file) ->
-        if not err
-          $scope.file = file
-          editor.setValue base64.decode(file.content)
-        else
-          alert("Error retrieving the file")
-    $scope.fileView()
-
-  # This is the save event handler for an existing file, as evident by the provision of the SHA.
-  $scope.save = () ->
-    ga('send', 'event', EVENT_CATEGORY, 'saveFile')
+  # This is the save event handler for an existing page, as evident by the provision of the SHA.
+  $scope.saveFile = () ->
+    ga('send', 'event', EVENT_CATEGORY, 'savePage')
     content = base64.encode(editor.getValue())
-    github.putFile token, $routeParams.owner, $scope.repo.name, $scope.file.path, "Save file.", content, $scope.file.sha, (err, response) ->
+    github.putFile token, $scope.user.login, $scope.repo.name, $scope.contextItem.path, "Save file.", content, $scope.contextItem.sha, (err, response) ->
       if not err
-        $scope.file.sha = response.content.sha
+        $scope.contextItem.sha = response.content.sha
       else
-        alert("Error saving file to repository: #{err}")
+        alert("Error saving page to repository: #{err}")
 
-  $scope.deleteFile = (idx) ->
-    ga('send', 'event', EVENT_CATEGORY, 'deleteFile')
-    # Note that we should use indexOf on the array if the list has been filtered.
-    file = $scope.repo.files[idx]
-    github.deleteFile token, $routeParams.owner, $scope.repo.name, file.path, "Delete file.", file.sha, (err, response) ->
+  $scope.deleteItem = (idx) ->
+    ga('send', 'event', EVENT_CATEGORY, 'deleteItem')
+    childItem = $scope.contextItem.childItems[idx]
+    github.deleteFile token, $routeParams.owner, $scope.repo.name, childItem.path, "Delete item.", childItem.sha, (err, response) ->
       if not err
-        $scope.repo.files.splice(idx, 1)
+        $scope.contextItem.childItems.splice(idx, 1)
       else
-        alert("Error saving file to repository: #{err}")
-
-  $scope.repoView = () ->
-    ga('send', 'event', EVENT_CATEGORY, 'repoView')
-    # TODO: Need to cofirm continuing with this action.
-    $scope.file = {}
-    $('.carousel').carousel(0)
-
-  $scope.fileView = () ->
-    ga('send', 'event', EVENT_CATEGORY, 'fileView')
-    $('.carousel').carousel(1)
+        alert("Error deleting item: #{err}")
 
   $scope.homeBreadcrumbClass = () ->
     if $rootScope.breadcrumbStrategy.progressive then "active" else ""
@@ -157,33 +137,34 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$window', 
     return $scope.repo and $scope.repo.name
 
   $scope.workEnabled = () ->
-    return ($scope.file and $scope.file.name) or not ($scope.repo and $scope.repo.name)
+    return ($scope.contextItem and $scope.contextItem.type is "file") or not ($scope.repo and $scope.repo.name)
 
   $scope.saveEnabled = () ->
-    return $scope.file and $scope.file.name
+    return $scope.contextItem and $scope.contextItem.type is "file"
 
   $scope.runEnabled = () ->
     return $scope.workEnabled()
 
+  # convert from the GitHub content.type ("file" or "dir") to the locale-independent icon.
+  # i18n will then take care of localization.
+  $scope.iconFromItem = (item) ->
+    switch item.type
+      when "file"
+        return "icon-page"
+      when "dir"
+        return "icon-book"
+      else
+        return "icon-question"
+
   if editor
     setFullScreen(editor, false)
-  else
-    console.log "The editor does not exist."
 
   CodeMirror.on $window, "resize", () ->
     showing = $window.document.body.getElementsByClassName("CodeMirror-fullscreen")[0]
     if (showing)
-      console.log "Editor IS in full screen mode."
       showing.CodeMirror.getWrapperElement().style.height = winHeight() + "px"
     else
       # We seem to end up down here.
-      #console.log "Editor is NOT in full screen mode."
-
-  # Initialize the Workbench perspective to either Repo ("Book") or File ("Page").
-  if $scope.repo.name
-    $scope.repoView()
-  else
-    $scope.fileView()
 
   return
 ]

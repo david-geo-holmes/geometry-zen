@@ -9,26 +9,24 @@ angular.module("app").controller 'NewFileCtrl', ['$scope', 'GitHub', 'Base64', '
   GITHUB_TOKEN_COOKIE_NAME = 'github-token'
   token = cookie.getItem(GITHUB_TOKEN_COOKIE_NAME)
 
-  $('#myModal').on 'show', ->
-    # Notice that the privacy value has to be set using a string for radio input types.
+  $('#new-file-dialog').on 'show', ->
     $scope.file = name: "", message: ""
 
-  $('#myModal').on 'shown', ->
+  $('#new-file-dialog').on 'shown', ->
 
-  $('#myModal').on 'hide', ->
+  $('#new-file-dialog').on 'hide', ->
 
-  $('#myModal').on 'hidden', ->
+  $('#new-file-dialog').on 'hidden', ->
 
   $scope.createFile = () ->
     ga('send', 'event', EVENT_CATEGORY, 'createFile')
-    # Notice the newline at end of file!
+    # Notice the newline at end of file to keep GitHub happy!
     content = base64.encode("# #{$scope.file.name}\n")
-    github.putFile token, $scope.owner.name, $scope.repo.name, $scope.file.name, $scope.file.message, content, undefined, (err, response) ->
+    github.putFile token, $scope.user.login, $scope.repo.name, $scope.file.name, $scope.file.message, content, undefined, (err, response) ->
       if not err
-        file = response.content
-        commit = response.commit
-        $scope.$emit("commit", $scope.owner, $scope.repo, file, commit)
-        $('#myModal').modal('hide')
+        console.log "response: #{JSON.stringify(response, null, 2)}"
+        $scope.$emit("createdFile", $scope.user, $scope.repo, response.content, response.commit)
+        $('#new-file-dialog').modal('hide')
       else
         messages = _.map(response.errors, (error) -> error.message).join()
         alert(messages)

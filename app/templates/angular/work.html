@@ -11,25 +11,27 @@
               <a-home></a-home>
             </li>
             <li ng-show="isLoggedIn()" class="{{userBreadcrumbClass()}}">
-              <a ng-href="/users/{{owner.name}}">
+              <a ng-href="/users/{{user.name}}">
                 <i class="icon-user"></i>
                 <span>{{i18n.translate("My Repo").ifPlural(2, "My Repos").fetch()}}</span>
               </a>
             </li>
+            <!--
             <li ng-show="repoEnabled()" class="{{repoBreadcrumbClass()}}">
-              <a ng-click="repoView()" href="#">
+              <a ng-click="bookView()" href="#">
                 <i class="icon-book"></i>
                 <span>{{i18n.translate("Repo").fetch()}}</span>
               </a>
             </li>
-            <li ng-show="workEnabled()" class="active">
+            -->
+            <li class="active">
               <a ng-click="reload()" href="#">
                 <i class="icon-edit"></i>
                 <span>Workbench</span>
               </a>
             </li>
             <li ng-show="saveEnabled()">
-              <a ng-click="save()" href="#">
+              <a ng-click="saveFile()" href="#">
                 <i class="icon-save"></i>
                 <span>Save</span>
               </a>
@@ -47,205 +49,70 @@
   </div> <!-- /subnavbar -->
   
   <div id="work-layout" class="container-fluid">
+    <!-- Messages -->
+    <!-- We only show the Message widget if there are messages to be shown -->
+    <div class="row-fluid" ng-show="messages.length &gt; 0">
+      <div class="span12">
+        <div class="widget stacked">
+          <div class="widget-header">
+            <i class="icon-inbox"></i>
+            <h3>Message</h3>
+          </div>
+          <div class="widget-content">
+            <div class="alert alert-block alert-{{message.severity}}" ng-repeat="message in messages">
+              <button type="button" class="close" data-dismiss="alert">&times;</button>
+              <h4>{{message.name}}</h4>
+              {{message.text}}
+            </div>
+          </div> <!-- div.widget-content -->
+        </div> <!-- div.widget -->
+      </div> <!-- div.span12 -->
+    </div> <!-- row-fluid -->
+
     <div class="row-fluid">
-      <!-- The 'slide' class has been removed. -->
-      <div id="work-carousel" class="carousel" data-interval="false">
-        <!-- Carousel items -->
-        <div class="carousel-inner">
-          <div class="item">
+      <div class="span6">
+        <div class="widget">
+          <div class="widget-header">
+            <i class="icon-file-alt muted"></i>
+            <h3>{{contextItem.name}}</h3>
+          </div>
+          <div id="textarea-container" class="widget-content">
+            <textarea id="code"></textarea>
+          </div> <!-- div.widget-content -->
+        </div> <!-- div.widget -->
+      </div> <!-- div.span -->
+      <div class="span6">
+        <div class="row-fluid">
+          <!-- Canvas -->
+          <div class="span12">
             <div class="widget">
               <div class="widget-header">
-              </div>
-              <div class="widget-content">
-                <div>
-                  <i class="icon-user muted"></i>
-                  <span><a ng-href="/users/{{owner.name}}">{{owner.name}}</a></span>
-                  <a ng-href="https://github.com/{{owner.name}}" target="_blank" class="muted">
-                    <i class="icon-external-link"></i>
-                  </a>
-                  <h4>
-                    <i class="icon-book muted"></i>
-                    <span>{{repo.name}}</span>
-                    <a ng-href="https://github.com/{{owner.name}}/{{repo.name}}" target="_blank" class="muted">
-                      <i class="icon-external-link"></i>
-                    </a>
-                  </h4>
-                  <span>{{repo.description}}</span>
-                </div>
-                <ul class="nav nav-tabs" id="myTab">
-                  <li><a data-target="#files" data-toggle="tab">Files</a></li>
-                  <!--li><a data-target="#commits" data-toggle="tab">Commits</a></li-->
-                  <!--li><a data-target="#branches" data-toggle="tab">Branches</a></li-->
-                </ul>
-                <div class="tab-content">
-                  <div class="tab-pane" id="files">
-                    <div class ="row-fluid">
-                      <table class="table table-condensed">
-                        <tbody>
-                          <tr>
-                            <td nowrap=nowrap>
-                              <!--input type="text" placeHolder="Filter..."></input-->
-                            </td>
-                            <td nowrap=nowrap>
-                              <button ng-click="newFile()" class="btn btn-primary">
-                                <i class="icon-plus-sign-alt"></i> <i class="icon-file-alt"></i>
-                                <span>Create a New File</span>
-                              </button>
-                            </td>
-                          </tr>
-                          <tr ng-repeat="file in repo.files">
-                            <td nowrap=nowrap>
-                              <h3>
-                                <i class="icon-file-alt muted"></i>
-                                <button ng-click="editFile(file.path)" class="btn btn-link">
-                                  <span>{{file.name}}</span>
-                                </button>
-                              </h3>
-                            </td>
-                            <td nowrap=nowrap>
-                              <button ng-click="editFile(file.path)" class="btn btn-primary">
-                                <i class="icon-edit"></i>
-                                <span>Edit</span>
-                              </button>
-                              <a ng-href="https://github.com/{{owner.name}}/{{repo.name}}/blob/master/{{file.path}}" target="_blank" class="btn btn-secondary">
-                                <i class="icon-external-link"></i>
-                                <span>GitHub</span>
-                              </a>
-                              <button ng-click="deleteFile($index)" class="btn btn-tertiary">
-                                <i class="icon-minus-sign-alt"></i>
-                                <span>Delete</span>
-                              </button>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                  <div class="tab-pane" id="commits">
-                    <p>Under Construction: Commits</p>
-                  </div>
-                  <div class="tab-pane" id="branches">
-                    <p>Under Construction: Branches</p>
-                  </div>
-                </div>
-                <script>
-                  $(function () {
-                    $('#myTab a[data-target="#files"]').tab('show');
-                  })
-                </script>
-                <script>
-                  $('#myTab a[data-target="#files"]').click(function(e) {
-                    e.preventDefault();
-                    $(this).tab('show');
-                  });
-                </script>
-                <script>
-                  $('#myTab a[data-target="#commits"]').click(function(e) {
-                    e.preventDefault();
-                    $(this).tab('show');
-                  });
-                </script>
-                <script>
-                  $('#myTab a[data-target="#branches"]').click(function(e) {
-                    e.preventDefault();
-                    $(this).tab('show');
-                  });
-                </script>
+                <i class="icon-film"></i>
+                <h3>Canvas</h3>
+              </div> <!-- div.widget-header -->
+              <div id="canvas-container" class="widget-content">
+                <!-- This is a placeholder for visual simulations -->
               </div> <!-- div.widget-content -->
             </div> <!-- div.widget -->
-          </div> <!-- div.item -->
-          <div class=" active item">
-            <div class="container-fluid">
-              
-              <!-- Messages -->
-              <!-- We only show the Message widget if there are messages to be shown -->
-              <div class="row-fluid" ng-show="messages.length &gt; 0">
-                <div class="span12">
-                  <div class="widget stacked">
-                    <div class="widget-header">
-                      <i class="icon-inbox"></i>
-                      <h3>Message</h3>
-                    </div>
-                    <div class="widget-content">
-                      <div class="alert alert-block alert-{{message.severity}}" ng-repeat="message in messages">
-                        <button type="button" class="close" data-dismiss="alert">&times;</button>
-                        <h4>{{message.name}}</h4>
-                        {{message.text}}
-                      </div>
-                    </div> <!-- div.widget-content -->
-                  </div> <!-- div.widget -->
-                </div> <!-- div.span12 -->
-              </div> <!-- row-fluid -->
+          </div>
+        </div> <!-- row-fluid -->
+        <div class="row-fluid">
+          <!-- Printer -->
+          <div class="span12">
+            <div class="widget">
+              <div class="widget-header">
+                <i class="icon-print"></i>
+                <h3>Printer</h3>
+              </div>
+              <div id="printer-container" class="widget-content">
+                <printer></printer>
+              </div> <!-- div.widget-content -->
+            </div> <!-- div.widget -->
+          </div> <!-- div.span12 -->
+        </div> <!-- row-fluid -->
 
-              <div class="row-fluid">
-                <div class="span6">
-                  <div class="widget">
-                    <div class="widget-header">
-                      <i class="icon-file-alt muted"></i>
-                      <h3>{{file.name}}</h3>
-                    </div>
-                    <div id="textarea-container" class="widget-content">
-                      <textarea id="code"></textarea>
-                    </div> <!-- div.widget-content -->
-                  </div> <!-- div.widget -->
-                </div> <!-- div.span -->
-                <div class="span6">
-                  <div class="row-fluid">
-                    <!-- Canvas -->
-                    <div class="span12">
-                      <div class="widget">
-                        <div class="widget-header">
-                          <i class="icon-film"></i>
-                          <h3>Canvas</h3>
-                        </div> <!-- div.widget-header -->
-                        <div id="canvas-container" class="widget-content">
-                          <!-- This is a placeholder for visual simulations -->
-                        </div> <!-- div.widget-content -->
-                      </div> <!-- div.widget -->
-                    </div>
-                  </div> <!-- row-fluid -->
-                  <div class="row-fluid">
-                    <!-- Printer -->
-                    <div class="span12">
-                      <div class="widget">
-                        <div class="widget-header">
-                          <i class="icon-print"></i>
-                          <h3>Printer</h3>
-                        </div>
-                        <div id="printer-container" class="widget-content">
-                          <printer></printer>
-                        </div> <!-- div.widget-content -->
-                      </div> <!-- div.widget -->
-                    </div> <!-- div.span12 -->
-                  </div> <!-- row-fluid -->
+      </div> <!-- div.span -->
+    </div> <!-- row-fluid -->
 
-                </div> <!-- div.span -->
-              </div> <!-- row-fluid -->
-
-            </div> <!-- div.container-fluid -->
-          </div> <!-- div.item -->
-        </div> <!-- div.carousel-inner -->
-      </div> <!-- div.carousel -->
-    </div> <!-- div.row-fluid -->
   </div> <!-- div.container-fluid -->
-  <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h3 id="myModalLabel"><i class="icon-plus-sign-alt muted"></i> <i class="icon-file-alt muted"></i> Create a New File</h3>
-    </div>
-    <form ng-controller="NewFileCtrl">
-      <fieldset>
-        <div class="modal-body">
-          <label>File name</label>
-          <input type="text" name="name" ng-model="file.name"></input>
-          <label>Commit message:</label>
-          <input type="text" name="message" ng-model="file.message" placeholder="Create new file"></input>
-        </div>
-        <div class="modal-footer">
-          <button id="btnCancel" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-          <button type="submit" ng-click="createFile()" id="btnOK" class="btn btn-primary">Create file</button>
-        </div>
-      </fieldset>
-    </form>
-  </div>
 </div>
