@@ -33,13 +33,13 @@ html(lang="en", data-ng-app="app")
                 a(href="javascript:;")
                   | About Us
               li
-                a(href="javascript:;")
+                a(href="https://twitter.com/#!/geometryzen", target="_blank")
                   | Twitter
               li
                 a(href="javascript:;")
                   | Facebook
               li
-                a(href="javascript:;")
+                a(href="https://plus.google.com/u/0/s/Geometry%20Zen/communities", target="_blank")
                   | Google+
           div.span4
             h4 Support
@@ -72,10 +72,20 @@ html(lang="en", data-ng-app="app")
                 a(href="javascript:;")
                   | Security
     footer
-      div.container
-        div.row
+      div.container-fluid
+        div.row-fluid
+          div#footer-contributors.span6
+            | By 
+            a(href="http://github.com/david-geo-holmes", target="_blank")
+              | David Geo Holmes
+            | , and many more 
+            a(href="https://github.com/geometryzen/geometryzen.github.io/graphs/contributors", target="_blank")
+              | awesome&nbsp;contributors
+            | .
+          div#footer-terms.span6
+        div.row-fluid
           div#footer-copyright.span6
-            | &copy; 2013 David Holmes
+            | &copy; 2013 David Geo Holmes
           div#footer-terms.span6
             | Dedicated to Geo
     script(src=js)
