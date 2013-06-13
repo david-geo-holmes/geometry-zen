@@ -13,7 +13,7 @@
             <li class="{{userBreadcrumbClass()}}">
               <a ng-href="/users/{{user.login}}">
                 <i class="icon-user"></i>
-                <span>{{i18n.translate("My Repo").ifPlural(2, "My Repos").fetch()}}</span>
+                <span>{{i18n.translate("My Space").fetch()}}</span>
               </a>
             </li>
           </ul>
@@ -27,19 +27,23 @@
       <div class="span4">
         <div class="widget">
           <div class="widget-header">
+              <i class="icon-user"></i>
+              <h3>Profile</h3>
           </div>
           <div class="widget-content">
             <h3>
               <span>{{user.name}}</span>
             </h3>
             <h4>
-              <i class="icon-user muted"></i>
               <span>{{user.login}}</span>
             </h4>
+            <!-- HATEOAS GitHub link? -->
+            <!--
             <a href="https://github.com/{{user.login}}?tab=repositories" target="_blank" class="btn btn-secondary">
               <i class="icon-github"></i>
               <span>GitHub</span>
             </a>
+            -->
           </div>
         </div>
       </div>
@@ -63,7 +67,7 @@
                     <tbody>
                       <tr>
                         <td nowrap=nowrap>
-                          <input type="text" placeHolder="Filter..."></input>
+                          <!--input type="text" placeHolder="Filter..."></input-->
                         </td>
                         <td nowrap=nowrap>
                           <button ng-click="newRepo()" class="btn btn-primary">
@@ -84,10 +88,12 @@
                         </td>
                         <td nowrap=nowrap>
                           <!-- HATEOAS GitHub link-->
+                          <!--
                           <a href="{{repo.github_html_url}}" target="_blank" class="btn btn-secondary">
                             <i class="icon-github"></i>
                             <span>GitHub</span>
                           </a>
+                          -->
                           <button ng-click="deleteRepo($index)" class="btn btn-tertiary">
                             <i class="icon-minus-sign-alt"></i>
                             <span>Delete</span>
@@ -150,9 +156,15 @@
                 -->
                 <hr/>
                 <label class="checkbox">
-                  <input type="checkbox" name="readme" ng-model="repo.auto_init"> Initialize this book with a README</input>
+                  <input type="checkbox" name="markdown-readme" ng-model="repo.markdownReadme"> Initialize this book with a README.md</input>
                 </label>
-                <span class="help-block">This will allow you to clone the book immediately in GitHub.</span>
+                <span class="help-block">This will allow you to clone the repository immediately in GitHub.</span>
+                <!--
+                <label class="checkbox">
+                  <input type="checkbox" name="python-readme" ng-model="repo.pythonReadme"> Initialize this book with a README.py</input>
+                </label>
+                <span class="help-block">Having at least one Python file will ensure that the GitHub repository is visible to Geometry Zen.</span>
+                -->
               </div>
               <div class="modal-footer">
                 <button id="btnCancel" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
@@ -161,15 +173,6 @@
             </fieldset>
           </form>
         </div>
-        <script>
-          $(function() {
-//            var domModal = $("#new-repo-dialog");
-//            $('#btnOK').on('click', function() {
-//              alert("OK clicked");
-//              domModal.modal('hide');
-//            });
-          });
-        </script>
       </div>
     </div>
   </div>

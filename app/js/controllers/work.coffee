@@ -109,20 +109,12 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$window', 
   $scope.saveFile = () ->
     ga('send', 'event', EVENT_CATEGORY, 'savePage')
     content = base64.encode(editor.getValue())
-    github.putFile token, $scope.user.login, $scope.repo.name, $scope.contextItem.path, "Save file.", content, $scope.contextItem.sha, (err, response) ->
+    github.putFile token, $scope.user.login, $scope.repo.name, $scope.contextItem.path, "Save file.", content, $scope.contextItem.sha, (err, response, status, headers, config) ->
       if not err
         $scope.contextItem.sha = response.content.sha
       else
-        alert("Error saving page to repository: #{err}")
-
-  $scope.deleteItem = (idx) ->
-    ga('send', 'event', EVENT_CATEGORY, 'deleteItem')
-    childItem = $scope.contextItem.childItems[idx]
-    github.deleteFile token, $routeParams.owner, $scope.repo.name, childItem.path, "Delete item.", childItem.sha, (err, response) ->
-      if not err
-        $scope.contextItem.childItems.splice(idx, 1)
-      else
-        alert("Error deleting item: #{err}")
+        # The cause given by the err is really for developer use only.
+        alert("Error saving file to repository. Cause: #{err.message}")
 
   $scope.homeBreadcrumbClass = () ->
     if $rootScope.breadcrumbStrategy.progressive then "active" else ""
@@ -140,7 +132,8 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$window', 
     return ($scope.contextItem and $scope.contextItem.type is "file") or not ($scope.repo and $scope.repo.name)
 
   $scope.saveEnabled = () ->
-    return $scope.contextItem and $scope.contextItem.type is "file"
+    # TODO: Rename so that the context and authenticated user are clearer.
+    return $scope.isLoggedIn() and $scope.userLogin() is $scope.user.login and $scope.contextItem and $scope.contextItem.type is "file"
 
   $scope.runEnabled = () ->
     return $scope.workEnabled()

@@ -22,12 +22,13 @@ angular.module("app").controller 'NewFileCtrl', ['$scope', 'GitHub', 'Base64', '
     ga('send', 'event', EVENT_CATEGORY, 'createFile')
     # Notice the newline at end of file to keep GitHub happy!
     content = base64.encode("# #{$scope.file.name}\n")
-    github.putFile token, $scope.user.login, $scope.repo.name, $scope.file.name, $scope.file.message, content, undefined, (err, response) ->
+    github.putFile token, $scope.user.login, $scope.repo.name, $scope.file.name, $scope.file.message, content, undefined, (err, response, status, headers, config) ->
       if not err
         console.log "response: #{JSON.stringify(response, null, 2)}"
         $scope.$emit("createdFile", $scope.user, $scope.repo, response.content, response.commit)
         $('#new-file-dialog').modal('hide')
       else
+        console.log "err: #{err}, response: #{JSON.stringify(response, null, 2)}, status: #{status}, headers: #{JSON.stringify(headers(), null, 2)}, config: #{JSON.stringify(config, null, 2)}"
         messages = _.map(response.errors, (error) -> error.message).join()
         alert(messages)
 ]

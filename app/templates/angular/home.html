@@ -11,9 +11,9 @@
               <a-home></a-home>
             </li>
             <li ng-show="isLoggedIn()">
-              <a ng-href="/users/{{username()}}">
+              <a ng-href="/users/{{userLogin()}}">
                 <i class="icon-user"></i>
-                <span>{{i18n.translate("My Repo").ifPlural(2, "My Repos").fetch()}}</span>
+                <span>{{i18n.translate("My Space").fetch()}}</span>
               </a>
             </li>
             <li class="dropdown">
@@ -24,8 +24,8 @@
               </a>
               <ul class="dropdown-menu">
                 <!--li><a href="http://www.youtube.com/user/geometryzen">Watch</a></li-->
-                <li><a href="http://geometryzen.github.io/examples/" target="_blank">Examples</a></li>
-                <li><a href="http://geometryzen.github.io/tutorials/" target="_blank">Tutorial</a></li>
+                <li><a href="/users/geometryzen/repos/demos/tree/master">Browse Examples</a></li>
+                <!--li><a href="http://geometryzen.github.io/tutorials/" target="_blank">Tutorial</a></li-->
                 <li><a href="http://geometryzen.github.io/faq/" target="_blank">FAQ</a></li>
               </ul>
             </li>
@@ -57,10 +57,10 @@
           <ul class="mainnav pull-right">
             <github-authorize></github-authorize>
           </ul>
-        </div> <!-- /.subnav-collapse -->
-      </div> <!-- /container -->
-    </div> <!-- /subnavbar-inner -->
-  </div> <!-- /subnavbar -->
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="container-fluid">
     <div class="row-fluid">
@@ -89,12 +89,13 @@
               </blockquote>
             </div>
             <div class="text-center">
-              <button ng-click="work()" class="btn btn-primary">
-                <i class="icon-edit icon-white"></i> Launch the Modeling Workbench
-              </button>
-              <!--button ng-click="browse()" class="btn btn-info">
-                <i class="icon-th icon-white"></i> Browse Examples
-              </button-->
+              <a href="/users/geometryzen/repos/demos/tree/master" class="btn btn-secondary">
+                <i class="icon-th"></i>
+                <span>Browse Examples</span>
+              </a>
+              <a href="http://geometryzen.github.io/start/" class="btn btn-primary" target="_blank">
+                <i class="icon-thumbs-up"></i> Start Me Up!
+              </a>
             </div>
           </div> <!-- div.widget-content -->
         </div> <!-- div.widget -->
@@ -102,7 +103,7 @@
     </div>  <!-- div.row-fluid -->
     <div class="row-fluid">
       <div class="span6">
-        <div class="widget widget-nopad stacked">
+        <div class="widget stacked">
           <div class="widget-header">
             <i class="icon-bullhorn"></i>
             <h3>Tell me More!</h3>
@@ -450,41 +451,11 @@
           <ul class="news-items">
             <li>
               <div class="news-item-detail">
-                <a href="http://geometryzen.github.io/pages/examples.html" target="_blank" class="news-item-title">Examples</a>
-                <p class="news-item-preview">Examples of basic Geometry Zen usage aimed at the pioneers.</p>
-              </div>
-              <div class="news-item-date">
-                <span class="news-item-day">09</span>
-                <span class="news-item-month">Jun</span>
-              </div>
-            </li>
-            <li>
-              <div class="news-item-detail">
-                <a href="http://geometryzen.github.io/faq" target="_blank" class="news-item-title">FAQ</a>
-                <p class="news-item-preview">Things enquiring minds want to know about Geometry Zen. You'll find them here very soon.</p>
-              </div>
-              <div class="news-item-date">
-                <span class="news-item-day">09</span>
-                <span class="news-item-month">Jun</span>
-              </div>
-            </li>
-            <li>
-              <div class="news-item-detail">
-                <a href="http://geometryzen.github.io/tutorials" target="_blank" class="news-item-title">Tutorials</a>
+                <a href="javascript:void(0);" target="_blank" class="news-item-title">Tutorials</a>
                 <p class="news-item-preview">A more gentle and thorough introduction to Geometry Zen.</p>
               </div>
               <div class="news-item-date">
-                <span class="news-item-day">09</span>
-                <span class="news-item-month">Jun</span>
-              </div>
-            </li>
-            <li>
-              <div class="news-item-detail">
-                <a href="https://github.com/david-geo-holmes/geometry-zen/issues" target="_blank" class="news-item-title">Issue Tracker</a>
-                <p class="news-item-preview">It's already here! Let us know what else you would like to see. We look forward to hearing from you! Just folow the link.</p>
-              </div>
-              <div class="news-item-date">
-                <span class="news-item-day">09</span>
+                <span class="news-item-day">13</span>
                 <span class="news-item-month">Jun</span>
               </div>
             </li>

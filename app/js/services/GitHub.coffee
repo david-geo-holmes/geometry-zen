@@ -2,6 +2,10 @@ angular.module("app").factory('GitHub', ['$http', '$', '_', ($http, $, _) ->
 
   GITHUB_PROTOCOL = 'https'
   GITHUB_DOMAIN = 'api.github.com'
+  HTTP_METHOD_DELETE = 'DELETE'
+  HTTP_METHOD_GET = 'GET'
+  HTTP_METHOD_POST = 'POST'
+  HTTP_METHOD_PUT = 'PUT'
 
   class User
     constructor: (name, login) ->
@@ -16,37 +20,40 @@ angular.module("app").factory('GitHub', ['$http', '$', '_', ($http, $, _) ->
       @github_html_url = github_html_url
 
   getUser: (token, done) ->
-    $http(method: 'GET', url: "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/user", headers: Authorization: "token #{token}")
+    headers = if (token) then "Authorization": "token #{token}" else {}
+    $http(method: HTTP_METHOD_GET, url: "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/user", headers: headers)
     .success (user, status, headers, config) ->
-      done(null, new User(user.name, user.login))
-    .error (data, status, headers, config) ->
-      done(new Error("Error getting the user profile"))
+      done(null, new User(user.name, user.login), status, headers, config)
+    .error (response, status, headers, config) ->
+      done(new Error(response.message), response, status, headers, config)
 
   getUserRepos: (token, done) ->
-    $http(method: 'GET', url: "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/user/repos", headers: Authorization: "token #{token}")
+    headers = if (token) then "Authorization": "token #{token}" else {}
+    $http(method: HTTP_METHOD_GET, url: "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/user/repos", headers: headers)
     .success (repos, status, headers, config) ->
       repos = _.map(repos, (repo) -> new Repo(repo.name, repo.description, repo.language, repo.html_url))
-      done(null, repos)
-    .error (data, status, headers, config) ->
-      done(new Error("Error getting the user repositories"))
+      done(null, repos, status, headers, config)
+    .error (response, status, headers, config) ->
+      done(new Error(response.message), response, status, headers, config)
 
   getRepoContents: (token, user, repo, done) ->
     url = "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/repos/#{user}/#{repo}/contents"
-    $http("method": 'GET', "url": url, "headers": Authorization: "token #{token}")
+    $http("method": HTTP_METHOD_GET, "url": url, "headers": Authorization: "token #{token}")
     .success (contents, status, headers, config) ->
-      done(null, contents)
-    .error (data, status, headers, config) ->
-      done(new Error("Error getting the contents of the repo with URL #{url}"))
+      done(null, contents, status, headers, config)
+    .error (response, status, headers, config) ->
+      done(new Error(response.message), response, status, headers, config)
 
   getPathContents: (token, user, repo, path, done) ->
     url = "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/repos/#{user}/#{repo}/contents"
     if path
       url = "#{url}/#{path}"
-    $http("method": 'GET', "url": url, "headers": Authorization: "token #{token}")
+    headers = if (token) then "Authorization": "token #{token}" else {}
+    $http("method": HTTP_METHOD_GET, "url": url, "headers": headers)
     .success (contents, status, headers, config) ->
-      done(null, contents)
-    .error (data, status, headers, config) ->
-      done(new Error("Error getting the contents of the path with URL #{url}"))
+      done(null, contents, status, headers, config)
+    .error (response, status, headers, config) ->
+      done(new Error(response.message), response, status, headers, config)
 
   ###
   The GitHub API uses the same method (PUT) and URL (/repos/:owner/:repo/contents/:path)
@@ -59,27 +66,29 @@ angular.module("app").factory('GitHub', ['$http', '$', '_', ($http, $, _) ->
     data = message: message, content: content
     if sha
       data.sha = sha
-    $http(method: 'PUT', url: url, data: data, headers: Authorization: "token #{token}")
+    headers = if (token) then "Authorization": "token #{token}" else {}
+    $http(method: HTTP_METHOD_PUT, url: url, data: data, headers: headers)
     .success (file, status, headers, config) ->
-      done(null, file)
+      done(null, file, status, headers, config)
     .error (response, status, headers, config) ->
-      done(new Error("Error getting the contents of the file"), response)
+      done(new Error(response.message), response, status, headers, config)
 
   deleteFile: (token, owner, repo, path, message, sha, done) ->
     url = "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/repos/#{owner}/#{repo}/contents/#{path}"
     data = message: message, sha: sha
-    $http(method: 'DELETE', url: url, data: data, headers: Authorization: "token #{token}")
+    $http(method: HTTP_METHOD_DELETE, url: url, data: data, headers: Authorization: "token #{token}")
     .success (file, status, headers, config) ->
-      done(null, file)
+      done(null, file, status, headers, config)
     .error (response, status, headers, config) ->
-      done(new Error("Error deleting the file"), response)
+      done(new Error(response.message), response, status, headers, config)
 
   postRepo: (token, name, description, priv, autoInit, done) ->
     url = "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/user/repos"
     data = name: name, description: description, "private": priv, auto_init: autoInit
-    $http(method: 'POST', url: url, data: data, headers: Authorization: "token #{token}")
+    headers = if (token) then "Authorization": "token #{token}" else {}
+    $http(method: HTTP_METHOD_POST, url: url, data: data, headers: headers)
     .success (repo, status, headers, config) ->
-      done(null, repo)
+      done(null, repo, status, headers, config)
     .error (response, status, headers, config) ->
-      done(new Error("Error posting the repository"), response)
+      done(new Error(response.message), response, status, headers, config)
 ])

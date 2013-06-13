@@ -1,4 +1,5 @@
 <div id="repo-view">
+
   <div class="subnavbar">
     <div class="subnavbar-inner">
       <div class="container">
@@ -13,39 +14,40 @@
             <li ng-show="isLoggedIn()" class="{{userBreadcrumbClass()}}">
               <a ng-href="/users/{{user.login}}">
                 <i class="icon-user"></i>
-                <span>{{i18n.translate("My Repo").ifPlural(2, "My Repos").fetch()}}</span>
+                <span>{{i18n.translate("My Space").fetch()}}</span>
               </a>
             </li>
-            <li ng-show="repoEnabled()" class="{{repoBreadcrumbClass()}}">
+            <li class="{{repoBreadcrumbClass()}}">
               <a ng-click="bookView()" href="#">
                 <i class="icon-book"></i>
                 <span>{{i18n.translate("Repo").fetch()}}</span>
               </a>
             </li>
-            <li ng-show="saveEnabled()">
-              <a ng-click="save()" href="#">
-                <i class="icon-save"></i>
-                <span>Save</span>
-              </a>
-            </li>
           </ul>
-        </div> <!-- /.subnav-collapse -->
-      </div> <!-- /container -->
-    </div> <!-- /subnavbar-inner -->
-  </div> <!-- /subnavbar -->
+        </div>
+      </div>
+    </div>
+  </div>
   
   <div id="work-layout" class="container-fluid">
     <div class="row-fluid">
       <div class="widget">
         <div class="widget-header">
+          <i class="icon-book"></i>
+          <h3>{{repo.name}}</h3>
         </div>
         <div class="widget-content">
           <div>
+            <!--
             <i class="icon-user muted"></i>
             <span><a ng-href="/users/{{user.login}}">{{user.login}}</a></span>
+            -->
+            <!--
             <a ng-href="https://github.com/{{user.login}}" target="_blank" class="muted">
               <i class="icon-github"></i>
             </a>
+            -->
+            <!--
             <h4>
               <i class="icon-book muted"></i>
               <span>{{repo.name}}</span>
@@ -53,10 +55,11 @@
                 <i class="icon-github"></i>
               </a>
             </h4>
+            -->
             <span>{{repo.description}}</span>
           </div>
           <ul class="nav nav-tabs" id="myTab">
-            <li><a data-target="#items" data-toggle="tab">Items</a></li>
+            <li><a data-target="#items" data-toggle="tab">Files</a></li>
             <!--li><a data-target="#commits" data-toggle="tab">Commits</a></li-->
             <!--li><a data-target="#branches" data-toggle="tab">Branches</a></li-->
           </ul>
@@ -65,12 +68,12 @@
               <div class ="row-fluid">
                 <table class="table table-condensed">
                   <tbody>
-                    <tr>
+                    <tr ng-show="isNewFileEnabled()">
                       <td nowrap=nowrap>
                         <!--input type="text" placeHolder="Filter..."></input-->
                       </td>
                       <td nowrap=nowrap>
-                        <button ng-click="newFile()" class="btn btn-primary">
+                        <button ng-click="newFile()" ng-show="isNewFileEnabled()" class="btn btn-primary">
                           <i class="icon-plus-sign-alt"></i> <i class="icon-file-alt"></i>
                           <span>Create a New File</span>
                         </button>
@@ -88,11 +91,15 @@
                       </td>
                       <td nowrap=nowrap>
                         <!-- Make use of the HATEOAS links -->
-                        <a ng-href="{{item.html_url}}" target="_blank" class="btn btn-secondary">
-                          <i class="icon-github"></i>
-                          <span>GitHub</span>
-                        </a>
-                        <button ng-click="deleteItem($index)" class="btn btn-tertiary">
+                        <!--
+                        <h3>
+                          <i class="icon-github muted"></i>
+                          <a ng-href="{{item.html_url}}" target="_blank" class="btn btn-link">
+                            <span>GitHub</span>
+                          </a>
+                        </h3>
+                        -->
+                        <button ng-click="deleteItem($index)" ng-show="isDeleteItemEnabled()" class="btn btn-tertiary">
                           <i class="icon-minus-sign-alt"></i>
                           <span>Delete</span>
                         </button>

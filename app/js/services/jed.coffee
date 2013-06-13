@@ -37,6 +37,7 @@ angular.module('jed', []).factory 'i18n', ['$window', (w) ->
         "Repo": [null, "Book", "Books"],
         "Library": [null, "Thing", "Things"],
         "My Repo": [null, "My Book", "My Books"],
+        "My Space": [null, "My Universe"],
         "icon-page": [null, "icon-file-alt"],
         "icon-book": [null, "icon-book"],
         "icon-question": [null, "icon-question"]

@@ -30,5 +30,5 @@ angular.module("app", ['async', 'jed', 'jquery', 'underscore']).run(['$rootScope
     cookie.removeItem(GITHUB_TOKEN_COOKIE_NAME)
     cookie.removeItem(GITHUB_LOGIN_COOKIE_NAME)
 
-  $rootScope.username = () -> cookie.getItem(GITHUB_LOGIN_COOKIE_NAME)
+  $rootScope.userLogin = () -> cookie.getItem(GITHUB_LOGIN_COOKIE_NAME)
 ])

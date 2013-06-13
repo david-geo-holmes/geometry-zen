@@ -28,7 +28,7 @@ angular.module("app").controller('HomeCtrl', ['$rootScope','$scope', '$http', '$
     $http.get("#{GATEKEEPER_DOMAIN}/authenticate/#{code}")
     .success (data, status, headers, config) ->
       # Here we chop of the extra, but we could go fetch the user using the auth token then
-      # redirect to our own /users/:username.
+      # redirect to our own /users/:user.
       # Also, lets not have the library making the decision.
       token = data.token
       # TODO: We should at least make this a secure token or something.
@@ -39,8 +39,8 @@ angular.module("app").controller('HomeCtrl', ['$rootScope','$scope', '$http', '$
         if not error
           cookie.setItem(GITHUB_LOGIN_COOKIE_NAME, user.login)
         else
-          # Note, we do have the auth token so it could be that we don't actually need the username.
-          alert("Error retrieving your username!")
+          # Note, we do have the auth token so it could be that we don't actually need the user login.
+          alert("Error retrieving your user login!")
         return
       return
     .error (data, status, headers, config) ->
@@ -63,7 +63,7 @@ angular.module("app").controller('HomeCtrl', ['$rootScope','$scope', '$http', '$
 
   $scope.user = ->
     ga('send', 'event', EVENT_CATEGORY, 'user')
-    path = "/users/#{$scope.username()}"
+    path = "/users/#{$scope.userLogin()}"
     $location.path(path)
     return
 ])

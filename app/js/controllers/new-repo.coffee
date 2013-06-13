@@ -11,7 +11,7 @@ angular.module("app").controller 'NewRepoCtrl', ['$scope', 'GitHub', 'cookie', '
 
   $('#new-repo-dialog').on 'show', ->
     # Notice that the privacy value has to be set using a string for radio input types.
-    $scope.repo = path: "", description: "", "private": "false", auto_init: true
+    $scope.repo = path: "", description: "", "private": "false", markdownReadme: true, pythonReadme: true
 
   $('#new-repo-dialog').on 'shown', ->
 
@@ -21,7 +21,7 @@ angular.module("app").controller 'NewRepoCtrl', ['$scope', 'GitHub', 'cookie', '
 
   $scope.createRepo = () ->
     ga('send', 'event', EVENT_CATEGORY, 'createRepo')
-    github.postRepo token, $scope.repo.name, $scope.repo.description, false, $scope.repo.auto_init, (err, repo) ->
+    github.postRepo token, $scope.repo.name, $scope.repo.description, false, $scope.repo.markdownReadme, (err, repo) ->
       if not err
         console.log "repo: #{JSON.stringify(repo, null, 2)}"
         $scope.$emit("createdRepo", $scope.user, repo)

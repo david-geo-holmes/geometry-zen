@@ -27,31 +27,43 @@ angular.module("app").controller 'TreeCtrl', ['$rootScope','$scope', '$window', 
 
     $scope.contextItem.name = $scope.repo.name
     $scope.contextItem.type = "repo"
-    github.getPathContents token, $scope.user.login, $scope.repo.name, $scope.path, (err, items) ->
+    # TODO: We are already on this page if this call fails. We should try to do this access in the router?
+    # TODO: This call uses etag. Can we use that to minimize network traffic?
+    github.getPathContents token, $scope.user.login, $scope.repo.name, $scope.path, (err, response, status, headers, config) ->
       if not err
-        $scope.contextItem.childItems = items
+        # status is 2xx
+        # console.log "err: #{err}, response: #{JSON.stringify(response, null, 2)}, status: #{status}, headers: #{JSON.stringify(headers(), null, 2)}, config: #{JSON.stringify(config, null, 2)}"
+        $scope.contextItem.childItems = response
       else
-        alert("Error retrieving path contents")
+        # TODO: Log this message to analytics as an exception.
+        # status may be 401, 403
+        console.log "err: #{err}, response: #{JSON.stringify(response, null, 2)}, status: #{status}, headers: #{JSON.stringify(headers(), null, 2)}, config: #{JSON.stringify(config, null, 2)}"
+        alert "#{err.message}. Cause: #{response.message}."
   else
     $scope.contextItem.name = ""
     $scope.contextItem.type = undefined
 
+  $scope.isNewFileEnabled = () ->
+    # TODO: Rename so that the context and authenticated user are clearer.
+    return $scope.isLoggedIn() and $scope.userLogin() is $scope.user.login
+
   $scope.newFile = () ->
-    ga('send', 'event', EVENT_CATEGORY, 'newFile')
-    $('#new-file-dialog').modal show: true, backdrop: true
+    if $scope.isNewFileEnabled()
+      $('#new-file-dialog').modal show: true, backdrop: true
+    else
+      alert "Create a New File is not enabled."
 
   $scope.$on 'createdFile', (e, user, repo, item, commit) ->
-    console.log "tree receiving createdFile message"
     $scope.contextItem.childItems.push(item)
 
-  # This is the save event handler for an existing page, as evident by the provision of the SHA.
-  $scope.save = () ->
-    ga('send', 'event', EVENT_CATEGORY, 'savePage')
+  $scope.isDeleteItemEnabled = () ->
+    # TODO: Rename so that the context and authenticated user are clearer.
+    return $scope.isLoggedIn() and $scope.userLogin() is $scope.user.login
 
   $scope.deleteItem = (idx) ->
     ga('send', 'event', EVENT_CATEGORY, 'deleteItem')
     childItem = $scope.contextItem.childItems[idx]
-    github.deleteFile token, $scope.user.login, $scope.repo.name, childItem.path, "Delete item.", childItem.sha, (err, response) ->
+    github.deleteFile token, $scope.user.login, $scope.repo.name, childItem.path, "Delete item.", childItem.sha, (err, response, status, headers, config) ->
       if not err
         $scope.contextItem.childItems.splice(idx, 1)
       else
@@ -64,19 +76,7 @@ angular.module("app").controller 'TreeCtrl', ['$rootScope','$scope', '$window', 
     if $rootScope.breadcrumbStrategy.progressive then "active" else ""
 
   $scope.repoBreadcrumbClass = () ->
-    if $rootScope.breadcrumbStrategy.progressive then "active" else (if $scope.workEnabled() then "" else "active")
-
-  $scope.repoEnabled = () ->
-    return $scope.repo and $scope.repo.name
-
-  $scope.workEnabled = () ->
-    return ($scope.contextItem and $scope.contextItem.type is "file") or not ($scope.repo and $scope.repo.name)
-
-  $scope.saveEnabled = () ->
-    return $scope.contextItem and $scope.contextItem.type is "file"
-
-  $scope.runEnabled = () ->
-    return $scope.workEnabled()
+    return "active"
 
   # Compute the href for the item specified.
   $scope.hrefFromItem = (item) ->

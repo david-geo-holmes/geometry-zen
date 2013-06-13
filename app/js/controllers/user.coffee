@@ -39,7 +39,6 @@ angular.module("app").controller 'UserCtrl', ['$rootScope','$scope', 'GitHub', '
     $('#new-repo-dialog').modal show: true, backdrop: true
 
   $scope.$on 'createdRepo', (e, user, repo) ->
-    console.log "user receiving createdRepo message"
     $scope.repos.push(repo)
     # TODO: Should we navigate to the new repository?
 ]
