@@ -16,14 +16,6 @@
                 <span>{{i18n.translate("My Space").fetch()}}</span>
               </a>
             </li>
-            <!--
-            <li ng-show="repoEnabled()" class="{{repoBreadcrumbClass()}}">
-              <a ng-click="bookView()" href="#">
-                <i class="icon-book"></i>
-                <span>{{i18n.translate("Repo").fetch()}}</span>
-              </a>
-            </li>
-            -->
             <li class="active">
               <a ng-click="reload()" href="#">
                 <i class="icon-edit"></i>
@@ -73,7 +65,7 @@
       <div class="span6">
         <div class="widget">
           <div class="widget-header">
-            <i class="icon-file-alt muted"></i>
+            <i class="{{i18n.translate('icon-file').fetch()}} muted"></i>
             <h3>{{contextItem.name}}</h3>
           </div>
           <div id="textarea-container" class="widget-content">

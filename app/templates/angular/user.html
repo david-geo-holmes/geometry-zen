@@ -49,8 +49,6 @@
       </div>
       <div class="span8">
         <div class="widget stacked">
-          <div class="widget-header">
-          </div>
           <div class="widget-content">
             <ul class="nav nav-tabs" id="myTab">
               <!--li><a data-target="#contributions" data-toggle="tab">Contributions</a></li-->
@@ -71,15 +69,15 @@
                         </td>
                         <td nowrap=nowrap>
                           <button ng-click="newRepo()" class="btn btn-primary">
-                            <i class="icon-plus-sign-alt"></i> <i class="icon-book"></i>
-                            <span>Create a New Book</span>
+                            <i class="icon-plus-sign-alt"></i> <i class="{{i18n.translate('icon-repo').fetch()}}"></i>
+                            <span>{{i18n.translate("Create a New Repo").fetch()}}</span>
                           </button>
                         </td>
                       </tr>
                       <tr ng-repeat="repo in repos">
                         <td nowrap=nowrap>
                           <h3>
-                            <i class="icon-book muted"></i>
+                            <i class="{{i18n.translate('icon-repo').fetch()}} muted"></i>
                             <a href="/users/{{user.login}}/repos/{{repo.name}}/tree/master" class="btn btn-link">
                               <span>{{repo.name}}</span>
                             </a>
@@ -137,28 +135,28 @@
         <div id="new-repo-dialog" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="new-repo-dialog-label" aria-hidden="true">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            <h3 id="new-repo-dialog-label"><i class="icon-plus-sign-alt muted"></i> <i class="icon-book muted"></i> Create a New Book</h3>
+            <h3 id="new-repo-dialog-label"><i class="icon-plus-sign-alt muted"></i> <i class="{{i18n.translate('icon-repo').fetch()}} muted"></i> {{i18n.translate("Create a New Repo").fetch()}}</h3>
           </div>
           <form ng-controller="NewRepoCtrl">
             <fieldset>
               <div class="modal-body">
-                <label>Book name</label>
+                <label>{{i18n.translate("Repo name").fetch()}}</label>
                 <input type="text" name="repo" ng-model="repo.name"></input>
-                <span class="help-block">Great book names are short and memorable.</span>
+                <span class="help-block">{{i18n.translate("Great repo names are short and memorable.").fetch()}}</span>
                 <label>Description<span class="muted"> (optional)</span></label>
                 <input type="text" name="description" ng-model="repo.description"></input>
                 <!--
                 <hr/>
-                <input type="radio" ng-model="repo.private" value="false"> <i class="icon-book muted"></i> Public<br/>
+                <input type="radio" ng-model="repo.private" value="false"> <i class="{{i18n.translate('icon-repo').fetch()}} muted"></i> Public<br/>
                 <span class="help-block">Anyone can see this repository. You choose who can commit.</span>
                 <input type="radio" ng-model="repo.private" value="true"> Private <br/>
                 <span class="help-block">You choose who can see and commit to this repository.</span>
                 -->
                 <hr/>
                 <label class="checkbox">
-                  <input type="checkbox" name="markdown-readme" ng-model="repo.markdownReadme"> Initialize this book with a README.md</input>
+                  <input type="checkbox" name="markdown-readme" ng-model="repo.markdownReadme"> {{i18n.translate("Initialize this repo with a README.md").fetch()}}</input>
                 </label>
-                <span class="help-block">This will allow you to clone the repository immediately in GitHub.</span>
+                <span class="help-block">{{i18n.translate("This will allow you to clone the repo immediately in GitHub.").fetch()}}</span>
                 <!--
                 <label class="checkbox">
                   <input type="checkbox" name="python-readme" ng-model="repo.pythonReadme"> Initialize this book with a README.py</input>
@@ -168,7 +166,7 @@
               </div>
               <div class="modal-footer">
                 <button id="btnCancel" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-                <button type="submit" ng-click="createRepo()" id="btnOK" class="btn btn-primary">Create book</button>
+                <button type="submit" ng-click="createRepo()" id="btnOK" class="btn btn-primary">{{i18n.translate("Create repo").fetch()}}</button>
               </div>
             </fieldset>
           </form>

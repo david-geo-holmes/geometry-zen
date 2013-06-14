@@ -34,11 +34,24 @@ angular.module('jed', []).factory 'i18n', ['$window', (w) ->
           domain: "the_domain"
           lang: "en"
           "plural-forms": "nplurals=2; plural=(n != 1);"
-        "Repo": [null, "Book", "Books"],
-        "Library": [null, "Thing", "Things"],
-        "My Repo": [null, "My Book", "My Books"],
+        "Create a New Repo": [null, "Create a New Project"],
+        "Create repo": [null, "Create project"],
+        "Repo": [null, "Project", "Projects"],
+        "Repo name": [null, "Project name"],
+        "My Repo": [null, "My Project", "My Projects"],
+        "Great repo names are short and memorable.": [null, "Great project names are short and memorable."],
+        "Initialize this repo with a README.md": [null, "Initialize this project with a README.md"],
+        "This will allow you to clone the repo immediately in GitHub.": [null, "This will allow you to clone the project immediately in GitHub."],
+
+        "Create a New File": [null, "Create a New File"],
+        "Create file": [null, "Create file"],
+        "File": [null, "File", "Files"],
+        "File name": [null, "File name"],
+
         "My Space": [null, "My Universe"],
-        "icon-page": [null, "icon-file-alt"],
-        "icon-book": [null, "icon-book"],
+
+        "icon-repo": [null, "icon-briefcase"],
+        "icon-dir": [null, "icon-book"],
+        "icon-file": [null, "icon-file-alt"],
         "icon-question": [null, "icon-question"]
 ]

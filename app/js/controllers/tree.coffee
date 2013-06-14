@@ -88,9 +88,9 @@ angular.module("app").controller 'TreeCtrl', ['$rootScope','$scope', '$window', 
   $scope.iconFromItem = (item) ->
     switch item.type
       when "file"
-        return "icon-page"
+        return "icon-file"
       when "dir"
-        return "icon-book"
+        return "icon-dir"
       else
         return "icon-question"
 

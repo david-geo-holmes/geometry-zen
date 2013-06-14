@@ -140,12 +140,13 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$window', 
 
   # convert from the GitHub content.type ("file" or "dir") to the locale-independent icon.
   # i18n will then take care of localization.
+  # TODO: DRY This is the same as in tree.coffee
   $scope.iconFromItem = (item) ->
     switch item.type
       when "file"
-        return "icon-page"
+        return "icon-file"
       when "dir"
-        return "icon-book"
+        return "icon-dir"
       else
         return "icon-question"
 

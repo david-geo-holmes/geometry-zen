@@ -21,6 +21,9 @@ config.json
 vendor/threejs/editor
 vendor/threejs/examples
 
+# Ignore the non-essential TWEEN.js baggage.
+vendor/tweenjs/examples
+
 # Be sure that we have only one variables.less
 vendor/bootstrap/less/variables.less
 
