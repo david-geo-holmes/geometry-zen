@@ -70,7 +70,7 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$window', 
         "Tab": (cm) ->
           spaces = Array(cm.getOption("indentUnit") + 1).join(" ")
           cm.replaceSelection(spaces, "end", "+input")
-        "Ctrl-S": (cm) -> $scope.save()
+        "Ctrl-S": (cm) -> $scope.saveFile()
         "Ctrl-Enter": (cm) -> $scope.run()
     )
   else
