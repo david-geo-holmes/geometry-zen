@@ -7,7 +7,7 @@
     "name": "David Holmes"
   },
   "description": "Geometry Zen is an online application for learning Physics and Engineering using Geometric Algebra, Python programming, and WebGL visualization.",
-  "url": "http://github.com/david-geo-holmes/geometry-zen",
+  "url": "http://github.com/geometryzen/geometryzen",
   "keywords": ["geometric", "algebra", "geometry", "zen"],
   "contributors": [],
   "scripts": {
@@ -26,7 +26,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/david-geo-holmes/geometry-zen.git"
+    "url": "https://github.com/geometryzen/geometryzen.git"
   },
   "readmeFilename": "README.md",
   "engines": {

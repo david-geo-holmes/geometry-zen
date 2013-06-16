@@ -10,7 +10,7 @@ is to provide some extra flexibility over a CDN solution, circumvent CORS issues
 ## API
 
 ```
-GET http://localhost:9999/authenticate/TEMPORARY_CODE
+GET http://localhost:8080/authenticate/TEMPORARY_CODE
 ```
 
 ## OAuth Steps
@@ -34,7 +34,7 @@ Also see the [documentation on Github](http://developer.github.com/v3/oauth/).
 3. Request the actual token using your instance of Gatekeeper, which knows your `client_secret`.
    
    ```js
-   $.getJSON('http://localhost:9999/authenticate/'+code, function(data) {
+   $.getJSON('http://localhost:8080/authenticate/'+code, function(data) {
      console.log(data.token);
    });
    ```
@@ -42,33 +42,32 @@ Also see the [documentation on Github](http://developer.github.com/v3/oauth/).
 ## Installation
 
 ```sh
-  $ git clone git://github.com/david-geo-holmes/geometry-zen.git
-  $ cd geometry-zen
+  $ git clone git://github.com/geometryzen/geometryzen.git
+  $ cd geometryzen
   $ sudo npm install -g lineman (if you don't already have lineman installed)
   $ npm install
 ```
 
 ## Configuration
 
-1. Copy config.example.json to config.json
+1. Copy config.example.json to config.local.json
 
    ```sh
-   $ cp config.example.json config.json
+   $ cp config.example.json config.local.json
    ```
 
-2. Adjust config.json
+2. Adjust config.local.json
 
    ```js
    {
-     "client_id": "GITHUB_APPLICATION_CLIENT_ID",
-     "client_secret": "GITHUB_APPLICATION_CLIENT_SECRET",
-     "host": "github.com",
-     "port": 443,
-     "path": "/login/oauth/access_token",
-     "method": "POST",
-     "server": {
-       "port": 9999
-     }
+    "HOST": "localhost",
+    "PORT": 8080,
+    "GITHUB_APPLICATION_CLIENT_ID": "???",
+    "GITHUB_APPLICATION_CLIENT_SECRET": "???",
+    "GITHUB_HOST": "github.com",
+    "GITHUB_PORT": 443,
+    "GITHUB_PATH": "/login/oauth/access_token",
+    "GITHUB_METHOD": "POST"
    }
    ```
 
@@ -76,10 +75,15 @@ Also see the [documentation on Github](http://developer.github.com/v3/oauth/).
 
 ## Execution (Using Lineman)
 
+   The purpose of running Lineman is to watch and rebuild the server.
+   Lineman is not the the best server to use for development.
+
 ```sh
   $ lineman run --force
   $ open your web browser to localhost:8000
 ```
+   With Lineman, the following functionality will not work:
+   * the icons will not be displayed correctly.
 
 ## Execution (Using Node)
 
@@ -121,12 +125,14 @@ Geometry Zen is a single-page application that is run in a web browser.
 
 A WebGL-compliant browser such as Chrome is recommended.
 
-## Production
+## Development
 
 ```sh
   $ lineman clean
-  
+
   $ lineman build
+
+  $ lineman run
 ```
 
 ## Documentation

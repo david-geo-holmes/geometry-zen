@@ -1,3 +1,4 @@
+// This is the entry point for the Geometry Zen server.
 require("coffee-script");
 
 var nconf = require("nconf");

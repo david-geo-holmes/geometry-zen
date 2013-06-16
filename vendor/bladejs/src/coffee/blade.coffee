@@ -3,9 +3,9 @@
   CARTESIAN_2 = "Cartesian2"
   CARTESIAN_3 = "Cartesian3"
 
-  BLADE = VERSION: "0.0.0" 
-  
-  strFromCartesian2 = (w, x, y, xy) ->
+  BLADE = version: "0.0.9", description: "JavaScript Geometric Algebra library"
+
+  stringFromMultivector = (m, labels) ->
     sb = []
     append = (number, label) ->
       if number isnt 0
@@ -25,10 +25,8 @@
           if label isnt "1"
             sb.push "*"
             sb.push label
-    append(w,  "1")
-    append(x,  "i")
-    append(y,  "j")
-    append(xy, "I")
+    for i in [0..m.length - 1]
+      append m.coordinate(i), labels[i]
     if sb.length > 0
       str = sb.join ""
     else
@@ -40,10 +38,100 @@
     The even subalgebra of this Geometric Algebra is isomorphic to the complex numbers.
   ###
   class Cartesian2
-    constructor: (@w, @x, @y, @xy) ->
+    constructor: (w, x, y, xy) ->
+      @xs = [w, x, y, xy]
+      @length = 4
 
-    toString: () ->
-      strFromCartesian2(@w, @x, @y, @xy)
+    coordinates: -> [@xs[0], @xs[1], @xs[2], @xs[3]]
+
+    coordinate: (index) ->
+      switch(index)
+        when 0
+          return @xs[0]
+        when 1
+          return @xs[1]
+        when 2
+          return @xs[2]
+        when 3
+          return @xs[3]
+        else
+          throw new Error "index must be in the range [0..3]"
+
+    @add: (a, b) ->
+      xs = [0, 0, 0, 0]
+      xs[0] = a[0] + b[0]
+      xs[1] = a[1] + b[1]
+      xs[2] = a[2] + b[2]
+      xs[3] = a[3] + b[3]
+      return xs
+
+    add: (rhs) ->
+      xs = Cartesian2.add(@.xs, rhs.xs)
+      return new Cartesian2(xs[0], xs[1], xs[2], xs[3])
+
+    @sub: (a, b) ->
+      xs = [0, 0, 0, 0]
+      xs[0] = a[0] - b[0]
+      xs[1] = a[1] - b[1]
+      xs[2] = a[2] - b[2]
+      xs[3] = a[3] - b[3]
+      return xs
+
+    sub: (rhs) ->
+      xs = Cartesian2.sub(@.xs, rhs.xs)
+      return new Cartesian2(xs[0], xs[1], xs[2], xs[3])
+
+    @mul: (a, b) ->
+      xs = [0, 0, 0, 0]
+      xs[0] = a[0] * b[0] + a[1] * b[1] + a[2] * b[2] - a[3] * b[3]
+      xs[1] = a[0] * b[1] + a[1] * b[0] - a[2] * b[3] + a[3] * b[2]
+      xs[2] = a[0] * b[2] + a[1] * b[3] + a[2] * b[0] - a[3] * b[1]
+      xs[3] = a[0] * b[3] + a[1] * b[2] - a[2] * b[1] + a[3] * b[0]
+      return xs
+
+    mul: (rhs) ->
+      xs = Cartesian2.mul(@.xs, rhs.xs)
+      return new Cartesian2(xs[0], xs[1], xs[2], xs[3])
+
+    @wedge: (a, b) ->
+      xs = [0, 0, 0, 0]
+      xs[0] = a[0] * b[0]
+      xs[1] = a[0] * b[1] + a[1] * b[0]
+      xs[2] = a[0] * b[2]               + a[2] * b[0]
+      xs[3] = a[0] * b[3] + a[1] * b[2] - a[2] * b[1] + a[3] * b[0]
+      return xs
+
+    wedge: (rhs) ->
+      xs = Cartesian2.wedge(@.xs, rhs.xs)
+      return new Cartesian2(xs[0], xs[1], xs[2], xs[3])
+
+    @lshift: (a, b) ->
+      xs = [0, 0, 0, 0]
+      xs[0] = a[0] * b[0] + a[1] * b[1] + a[2] * b[2] - a[3] * b[3]
+      xs[1] = a[0] * b[1]               - a[2] * b[3]
+      xs[2] = a[0] * b[2] + a[1] * b[3]
+      xs[3] = a[0] * b[3]
+      return xs
+
+    lshift: (rhs) ->
+      xs = Cartesian2.lshift(@.xs, rhs.xs)
+      return new Cartesian2(xs[0], xs[1], xs[2], xs[3])
+
+    @rshift: (a, b) ->
+      xs = [0, 0, 0, 0]
+      xs[0] = a[0] * b[0] + a[1] * b[1] + a[2] * b[2] - a[3] * b[3]
+      xs[1] =             - a[1] * b[0]               - a[3] * b[2]
+      xs[2] =                           - a[2] * b[0] + a[3] * b[1]
+      xs[3] =                                           a[3] * b[0]
+      return xs
+
+    rshift: (rhs) ->
+      xs = Cartesian2.rshift(@.xs, rhs.xs)
+      return new Cartesian2(xs[0], xs[1], xs[2], xs[3])
+
+    toString: () -> stringFromMultivector(@, ["1", "e1", "e2", "e12"])
+    toStringIJK: () -> stringFromMultivector(@, ["1", "i", "j", "I"])
+    toStringLATEX: () -> stringFromMultivector(@, ["1", "e_{1}", "e_{2}", "e_{12}"])
 
   BLADE[CARTESIAN_2] = Cartesian2
 
@@ -51,7 +139,56 @@
     Cartesian3 is a multivector for the Geometric Algebra of 3D Euclidean space with Cartesian coordinates.
   ###
   class Cartesian3
-    constructor: (@w, @x, @y, @z, @xy, @yz, @zx, @xyz) ->
+    constructor: (w, x, y, z, xy, yz, zx, xyz) ->
+      @xs = [w, x, y, z, xy, yz, zx, xyz]
+      @length = 8
+
+    coordinate: (index) ->
+      switch(index)
+        when 0
+          return @xs[0]
+        when 1
+          return @xs[1]
+        when 2
+          return @xs[2]
+        when 3
+          return @xs[3]
+        when 4
+          return @xs[4]
+        when 5
+          return @xs[5]
+        when 6
+          return @xs[6]
+        when 7
+          return @xs[7]
+        else
+          throw new Error "index must be in the range [0..7]"
+
+    add: (rhs) -> new Cartesian3(
+      @coordinate(0) + rhs.coordinate(0),
+      @coordinate(1) + rhs.coordinate(1),
+      @coordinate(2) + rhs.coordinate(2),
+      @coordinate(3) + rhs.coordinate(3),
+      @coordinate(4) + rhs.coordinate(4),
+      @coordinate(5) + rhs.coordinate(5),
+      @coordinate(6) + rhs.coordinate(6),
+      @coordinate(7) + rhs.coordinate(7)
+    )
+
+    sub: (rhs) -> new Cartesian3(
+      @coordinate(0) - rhs.coordinate(0),
+      @coordinate(1) - rhs.coordinate(1),
+      @coordinate(2) - rhs.coordinate(2),
+      @coordinate(3) - rhs.coordinate(3),
+      @coordinate(4) - rhs.coordinate(4),
+      @coordinate(5) - rhs.coordinate(5),
+      @coordinate(6) - rhs.coordinate(6),
+      @coordinate(7) - rhs.coordinate(7)
+    )
+
+    toString: () -> stringFromMultivector(@, ["1", "e1", "e2", "e3", "e12", "e23", "e31", "e123"])
+    toStringIJK: () -> stringFromMultivector(@, ["1", "i", "j", "k", "ij", "jk", "ki", "I"])
+    toStringLATEX: () -> stringFromMultivector(@, ["1", "e_{1}", "e_{2}", "e_{3}", "e_{12}", "e_{23}", "e_{31}", "e_{123}"])
 
   BLADE[CARTESIAN_3] = Cartesian3
 

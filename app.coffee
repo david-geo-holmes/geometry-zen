@@ -10,7 +10,7 @@ marketing = require("./marketing.json")
 
 require "./configure"
 
-isProductionMode = () ->
+isProductionMode = ->
   switch process.env.NODE_ENV or "local"
     when "local"
       false
