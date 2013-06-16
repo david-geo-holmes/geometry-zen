@@ -1,4 +1,4 @@
-angular.module("app").factory('GitHub', ['$http', '$', '_', ($http, $, _) ->
+angular.module("app").factory('GitHub', ['$http', ($http) ->
 
   GITHUB_PROTOCOL = 'https'
   GITHUB_DOMAIN = 'api.github.com'
