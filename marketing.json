@@ -1,6 +1,6 @@
 {
   "name": "Geometry Zen",
-  "version": "Hydrogen 0.0.1",
+  "version": "Hydrogen",
   "tagLine": "Looking at the multiverse from a Geometric Algebra perspective",
   "description": "Geometry Zen is an online tool providing Hands-on Learning of Geometric Algebra and Geometric Calculus to students and researchers in Physics, Engineering, and Computer Graphics using Python programming and WebGL 3D Visualization. It is the goal of this tool to make Geometric Algebra familiar to young science students and academia so that Geometric Algebra becomes the standard Unified Mathematical Language for Physics and Engineering in the 21st Century. It is 100% free, Open Source Software, and no registration is required."
 }

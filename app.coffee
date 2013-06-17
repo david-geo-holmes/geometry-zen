@@ -7,6 +7,7 @@ https = require("https")
 qs = require("querystring")
 
 marketing = require("./marketing.json")
+npm       = require("./package.json")
 
 require "./configure"
 
@@ -92,3 +93,4 @@ app.get "/*", (req, res, next) ->
     css: "#{if isProductionMode() then 'css/app.min.css' else 'css/app.css'}"
     js: "#{if isProductionMode() then 'js/app.min.js' else 'js/app.js'}"
     marketing: marketing
+    npm: npm

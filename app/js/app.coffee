@@ -4,12 +4,6 @@ angular.module("app", ['async', 'jed', 'jquery', 'underscore']).run(['$rootScope
   GITHUB_TOKEN_COOKIE_NAME = 'github-token'
   GITHUB_LOGIN_COOKIE_NAME = 'github-login'
 
-  $rootScope.marketing =
-    name: "Geometry Zen"
-    version: "Hydrogen"
-    tagLine: "Looking at the multiverse from a Geometric Algebra perspective"
-    Repos: i18n.translate("Repo").ifPlural(2, "Repos").fetch()
-
   $rootScope.i18n = i18n
   $rootScope.breadcrumbStrategy = progressive: false
 
