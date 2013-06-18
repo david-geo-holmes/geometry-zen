@@ -1,6 +1,6 @@
 {
   "name": "bladejs",
-  "version": "0.0.17",
+  "version": "0.0.19",
   "main": "./build/blade.min.js",
   "description": "JavaScript Geometric Algebra library",
   "author": {
@@ -24,8 +24,8 @@
   "ignore": [
     "node_modules"
   ],
-  "gitHead": "55d6cf6810a15efc079ed55916f3f6a477f9b8c5",
+  "gitHead": "e3110e8fdbf9760362ea35b94bb5fc35c6ab53a1",
   "readme": "# blade.js\n\nJavaScript Geometric Algebra library\n\n## Getting Started\n\nInstall nodejs\n\nInstall grunt-cli globally via npm install grunt-cli\n\ngit clone git@github.com:geometryzen/bladejs.git\n\ncd bladejs\n\n### Install project dependencies.\nbower install\n\n### Install local tools.\nnpm install\n\n### Perform the build\ngrunt\n\n## Documentation\n_(Coming soon)_\n\n## Examples\n_(Coming soon)_\n\n## Contributing\nIn lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).\n\n_Also, please don't edit files in the \"build\" subdirectory as they are generated via Grunt. You'll find source code in the \"src\" subdirectory!_\n\n## Release History\n_(Nothing yet)_\n\n## License\nCopyright (c) 2013 David Holmes  \nLicensed under the MIT license.\n\n## Developer Notes\n",
   "readmeFilename": "README.md",
-  "_id": "bladejs@0.0.17"
+  "_id": "bladejs@0.0.19"
 }

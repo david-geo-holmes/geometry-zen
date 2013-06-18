@@ -1,10 +1,10 @@
 (function(scope, objName, modName) {
   'use strict';
-  var BLADE, EUCLIDEAN_2, EUCLIDEAN_3, Euclidean2, Euclidean3, stringFromMultivector;
+  var BLADE, EUCLIDEAN_2, EUCLIDEAN_3, Euclidean2, Euclidean3, stringFromCoordinates;
   EUCLIDEAN_2 = "Euclidean2";
   EUCLIDEAN_3 = "Euclidean3";
   BLADE = BLADE || {};
-  stringFromMultivector = function(m, labels) {
+  stringFromCoordinates = function(coordinates, labels) {
     var append, i, sb, str, _i, _ref;
     sb = [];
     append = function(number, label) {
@@ -29,8 +29,8 @@
         }
       }
     };
-    for (i = _i = 0, _ref = m.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
-      append(m.coordinate(i), labels[i]);
+    for (i = _i = 0, _ref = coordinates.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+      append(coordinates[i], labels[i]);
     }
     if (sb.length > 0) {
       str = sb.join("");
@@ -46,8 +46,7 @@
 
   Euclidean2 = (function() {
     function Euclidean2(w, x, y, xy) {
-      this.xs = [w, x, y, xy];
-      this.length = 4;
+      this._coordinates = [w, x, y, xy];
     }
 
     Euclidean2.fromCartesian = function(w, x, y, xy) {
@@ -59,19 +58,19 @@
     };
 
     Euclidean2.prototype.coordinates = function() {
-      return [this.xs[0], this.xs[1], this.xs[2], this.xs[3]];
+      return [this._coordinates[0], this._coordinates[1], this._coordinates[2], this._coordinates[3]];
     };
 
     Euclidean2.prototype.coordinate = function(index) {
       switch (index) {
         case 0:
-          return this.xs[0];
+          return this._coordinates[0];
         case 1:
-          return this.xs[1];
+          return this._coordinates[1];
         case 2:
-          return this.xs[2];
+          return this._coordinates[2];
         case 3:
-          return this.xs[3];
+          return this._coordinates[3];
         default:
           throw new Error("index must be in the range [0..3]");
       }
@@ -89,7 +88,7 @@
 
     Euclidean2.prototype.add = function(rhs) {
       var xs;
-      xs = Euclidean2.add(this.xs, rhs.xs);
+      xs = Euclidean2.add(this._coordinates, rhs._coordinates);
       return Euclidean2.fromCartesian(xs[0], xs[1], xs[2], xs[3]);
     };
 
@@ -105,7 +104,7 @@
 
     Euclidean2.prototype.sub = function(rhs) {
       var xs;
-      xs = Euclidean2.sub(this.xs, rhs.xs);
+      xs = Euclidean2.sub(this._coordinates, rhs._coordinates);
       return Euclidean2.fromCartesian(xs[0], xs[1], xs[2], xs[3]);
     };
 
@@ -121,7 +120,7 @@
 
     Euclidean2.prototype.mul = function(rhs) {
       var xs;
-      xs = Euclidean2.mul(this.xs, rhs.xs);
+      xs = Euclidean2.mul(this._coordinates, rhs._coordinates);
       return Euclidean2.fromCartesian(xs[0], xs[1], xs[2], xs[3]);
     };
 
@@ -137,7 +136,7 @@
 
     Euclidean2.prototype.wedge = function(rhs) {
       var xs;
-      xs = Euclidean2.wedge(this.xs, rhs.xs);
+      xs = Euclidean2.wedge(this._coordinates, rhs._coordinates);
       return Euclidean2.fromCartesian(xs[0], xs[1], xs[2], xs[3]);
     };
 
@@ -153,7 +152,7 @@
 
     Euclidean2.prototype.lshift = function(rhs) {
       var xs;
-      xs = Euclidean2.lshift(this.xs, rhs.xs);
+      xs = Euclidean2.lshift(this._coordinates, rhs._coordinates);
       return Euclidean2.fromCartesian(xs[0], xs[1], xs[2], xs[3]);
     };
 
@@ -169,20 +168,33 @@
 
     Euclidean2.prototype.rshift = function(rhs) {
       var xs;
-      xs = Euclidean2.rshift(this.xs, rhs.xs);
+      xs = Euclidean2.rshift(this._coordinates, rhs._coordinates);
       return Euclidean2.fromCartesian(xs[0], xs[1], xs[2], xs[3]);
     };
 
+    Euclidean2.prototype.grade = function(index) {
+      switch (index) {
+        case 0:
+          return Euclidean2.fromCartesian(this._coordinates[0], 0, 0, 0);
+        case 1:
+          return Euclidean2.fromCartesian(0, this._coordinates[1], this._coordinates[2], 0);
+        case 2:
+          return Euclidean2.fromCartesian(0, 0, 0, this._coordinates[3]);
+        default:
+          return Euclidean2.fromCartesian(0, 0, 0, 0);
+      }
+    };
+
     Euclidean2.prototype.toString = function() {
-      return stringFromMultivector(this, ["1", "e1", "e2", "e12"]);
+      return stringFromCoordinates(this._coordinates, ["1", "e1", "e2", "e12"]);
     };
 
     Euclidean2.prototype.toStringIJK = function() {
-      return stringFromMultivector(this, ["1", "i", "j", "I"]);
+      return stringFromCoordinates(this._coordinates, ["1", "i", "j", "I"]);
     };
 
     Euclidean2.prototype.toStringLATEX = function() {
-      return stringFromMultivector(this, ["1", "e_{1}", "e_{2}", "e_{12}"]);
+      return stringFromCoordinates(this._coordinates, ["1", "e_{1}", "e_{2}", "e_{12}"]);
     };
 
     return Euclidean2;
@@ -195,8 +207,7 @@
 
   Euclidean3 = (function() {
     function Euclidean3(w, x, y, z, xy, yz, zx, xyz) {
-      this.xs = [w, x, y, z, xy, yz, zx, xyz];
-      this.length = 8;
+      this._coordinates = [w, x, y, z, xy, yz, zx, xyz];
     }
 
     Euclidean3.fromCartesian = function(w, x, y, z, xy, yz, zx, xyz) {
@@ -204,27 +215,27 @@
     };
 
     Euclidean3.prototype.coordinates = function() {
-      return [this.xs[0], this.xs[1], this.xs[2], this.xs[3], this.xs[4], this.xs[5], this.xs[6], this.xs[7]];
+      return [this._coordinates[0], this._coordinates[1], this._coordinates[2], this._coordinates[3], this._coordinates[4], this._coordinates[5], this._coordinates[6], this._coordinates[7]];
     };
 
     Euclidean3.prototype.coordinate = function(index) {
       switch (index) {
         case 0:
-          return this.xs[0];
+          return this._coordinates[0];
         case 1:
-          return this.xs[1];
+          return this._coordinates[1];
         case 2:
-          return this.xs[2];
+          return this._coordinates[2];
         case 3:
-          return this.xs[3];
+          return this._coordinates[3];
         case 4:
-          return this.xs[4];
+          return this._coordinates[4];
         case 5:
-          return this.xs[5];
+          return this._coordinates[5];
         case 6:
-          return this.xs[6];
+          return this._coordinates[6];
         case 7:
-          return this.xs[7];
+          return this._coordinates[7];
         default:
           throw new Error("index must be in the range [0..7]");
       }
@@ -246,7 +257,7 @@
 
     Euclidean3.prototype.add = function(rhs) {
       var xs;
-      xs = Euclidean3.add(this.xs, rhs.xs);
+      xs = Euclidean3.add(this._coordinates, rhs._coordinates);
       return Euclidean3.fromCartesian(xs[0], xs[1], xs[2], xs[3], xs[4], xs[5], xs[6], xs[7]);
     };
 
@@ -266,7 +277,7 @@
 
     Euclidean3.prototype.sub = function(rhs) {
       var xs;
-      xs = Euclidean3.sub(this.xs, rhs.xs);
+      xs = Euclidean3.sub(this._coordinates, rhs._coordinates);
       return Euclidean3.fromCartesian(xs[0], xs[1], xs[2], xs[3], xs[4], xs[5], xs[6], xs[7]);
     };
 
@@ -286,7 +297,7 @@
 
     Euclidean3.prototype.mul = function(rhs) {
       var xs;
-      xs = Euclidean3.mul(this.xs, rhs.xs);
+      xs = Euclidean3.mul(this._coordinates, rhs._coordinates);
       return Euclidean3.fromCartesian(xs[0], xs[1], xs[2], xs[3], xs[4], xs[5], xs[6], xs[7]);
     };
 
@@ -306,7 +317,7 @@
 
     Euclidean3.prototype.wedge = function(rhs) {
       var xs;
-      xs = Euclidean3.wedge(this.xs, rhs.xs);
+      xs = Euclidean3.wedge(this._coordinates, rhs._coordinates);
       return Euclidean3.fromCartesian(xs[0], xs[1], xs[2], xs[3], xs[4], xs[5], xs[6], xs[7]);
     };
 
@@ -326,7 +337,7 @@
 
     Euclidean3.prototype.lshift = function(rhs) {
       var xs;
-      xs = Euclidean3.lshift(this.xs, rhs.xs);
+      xs = Euclidean3.lshift(this._coordinates, rhs._coordinates);
       return Euclidean3.fromCartesian(xs[0], xs[1], xs[2], xs[3], xs[4], xs[5], xs[6], xs[7]);
     };
 
@@ -346,35 +357,35 @@
 
     Euclidean3.prototype.rshift = function(rhs) {
       var xs;
-      xs = Euclidean3.rshift(this.xs, rhs.xs);
+      xs = Euclidean3.rshift(this._coordinates, rhs._coordinates);
       return Euclidean3.fromCartesian(xs[0], xs[1], xs[2], xs[3], xs[4], xs[5], xs[6], xs[7]);
     };
 
     Euclidean3.prototype.grade = function(index) {
       switch (index) {
         case 0:
-          return Euclidean3.fromCartesian(this.xs[0], 0, 0, 0, 0, 0, 0, 0);
+          return Euclidean3.fromCartesian(this._coordinates[0], 0, 0, 0, 0, 0, 0, 0);
         case 1:
-          return Euclidean3.fromCartesian(0, this.xs[1], this.xs[2], this.xs[3], 0, 0, 0, 0);
+          return Euclidean3.fromCartesian(0, this._coordinates[1], this._coordinates[2], this._coordinates[3], 0, 0, 0, 0);
         case 2:
-          return Euclidean3.fromCartesian(0, 0, 0, 0, this.xs[4], this.xs[5], this.xs[6], 0);
+          return Euclidean3.fromCartesian(0, 0, 0, 0, this._coordinates[4], this._coordinates[5], this._coordinates[6], 0);
         case 3:
-          return Euclidean3.fromCartesian(0, 0, 0, 0, 0, 0, 0, this.xs[7]);
+          return Euclidean3.fromCartesian(0, 0, 0, 0, 0, 0, 0, this._coordinates[7]);
         default:
           return Euclidean3.fromCartesian(0, 0, 0, 0, 0, 0, 0, 0, 0);
       }
     };
 
     Euclidean3.prototype.toString = function() {
-      return stringFromMultivector(this, ["1", "e1", "e2", "e3", "e12", "e23", "e31", "e123"]);
+      return stringFromCoordinates(this._coordinates, ["1", "e1", "e2", "e3", "e12", "e23", "e31", "e123"]);
     };
 
     Euclidean3.prototype.toStringIJK = function() {
-      return stringFromMultivector(this, ["1", "i", "j", "k", "ij", "jk", "ki", "I"]);
+      return stringFromCoordinates(this._coordinates, ["1", "i", "j", "k", "ij", "jk", "ki", "I"]);
     };
 
     Euclidean3.prototype.toStringLATEX = function() {
-      return stringFromMultivector(this, ["1", "e_{1}", "e_{2}", "e_{3}", "e_{12}", "e_{23}", "e_{31}", "e_{123}"]);
+      return stringFromCoordinates(this._coordinates, ["1", "e_{1}", "e_{2}", "e_{3}", "e_{12}", "e_{23}", "e_{31}", "e_{123}"]);
     };
 
     return Euclidean3;
