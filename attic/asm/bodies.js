@@ -44,7 +44,7 @@
 
     // bulk of the physics engine
     bodies.include(function(stdlib, coln, heap){
-        "use asm";
+        "useHIDEMEFROMSEARCHasm";
 
         var sqrt = stdlib.Math.sqrt;
         // set up our view to look into the heap

@@ -92,5 +92,6 @@ app.get "/*", (req, res, next) ->
   res.render "index",
     css: "#{if isProductionMode() then 'css/app.min.css' else 'css/app.css'}"
     js: "#{if isProductionMode() then 'js/app.min.js' else 'js/app.js'}"
+    bladeASM: "js/bladeASM.js"
     marketing: marketing
     npm: npm

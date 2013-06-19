@@ -19,9 +19,25 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('application
     }
   },
 
+  copy: {
+    dev: {
+      files: [
+        {src: "vendor/bladejs/build/bladeASM.js", dest: "generated/js/bladeASM.js"}
+      ]
+    },
+    dist: {
+      files: [
+        {src: "vendor/bladejs/build/bladeASM.js", dest: "dist/js/bladeASM.js"}
+      ]
+    }
+  },
+
   // replaces linemans common lifecycle "handlebars" task with "ngtemplates"
+  // copies the bladeASM.js script (that we don't want to be compressed) to the appropriate js folder.
   appTasks: {
-    common: ["coffee", "less", "jshint", "ngtemplates", "jst", "configure", "concat:js", "concat:spec", "concat:css", "images:dev", "webfonts:dev", "homepage:dev"]
+    common: ["coffee", "less", "jshint", "ngtemplates", "jst", "configure", "concat:js", "concat:spec", "concat:css", "images:dev", "webfonts:dev", "homepage:dev"],
+    dev: ["copy:dev", "server", "watch"],
+    dist: ["uglify", "cssmin", "images:dist", "webfonts:dist", "homepage:dist", "copy:dist"]
   },
 
   // grunt-angular-templates expects that a module already be defined to inject into
