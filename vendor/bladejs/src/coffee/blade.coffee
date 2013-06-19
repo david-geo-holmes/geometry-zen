@@ -63,12 +63,11 @@
           throw new Error "index must be in the range [0..3]"
 
     @add: (a, b) ->
-      xs = [0, 0, 0, 0]
-      xs[0] = a[0] + b[0]
-      xs[1] = a[1] + b[1]
-      xs[2] = a[2] + b[2]
-      xs[3] = a[3] + b[3]
-      return xs
+      x0 = e2ga.add(a[0], a[1], a[2], a[3], b[0], b[1], b[2], b[3], 0)
+      x1 = e2ga.add(a[0], a[1], a[2], a[3], b[0], b[1], b[2], b[3], 1)
+      x2 = e2ga.add(a[0], a[1], a[2], a[3], b[0], b[1], b[2], b[3], 2)
+      x3 = e2ga.add(a[0], a[1], a[2], a[3], b[0], b[1], b[2], b[3], 3)
+      return [x0, x1, x2, x3]
 
     add: (rhs) ->
       xs = Euclidean2.add(@_coordinates, rhs._coordinates)
