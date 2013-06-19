@@ -1,7 +1,7 @@
 {
   "name": "geometryzen",
   "title": "Geometry Zen",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": false,
   "author": {
     "name": "David Geo Holmes"
@@ -15,13 +15,13 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "coffee-script": "~1.6.x",
-    "express": "~3.2.x",
-    "jade": "~0.30.x",
-    "lactate": "~0.13.x",
-    "nconf": "~0.6.x",
-    "lineman": "~0.7.x",
-    "grunt-angular-templates": "~0.3.x"
+    "coffee-script": "1.6.3",
+    "express": "3.2.6",
+    "jade": "0.31.2",
+    "lactate": "0.13.12",
+    "nconf": "0.6.7",
+    "lineman": "0.8.2",
+    "grunt-angular-templates": "0.3.8"
   },
   "license": "MIT",
   "repository": {

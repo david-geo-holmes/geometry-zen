@@ -37,7 +37,7 @@ angular.module("app").controller 'TreeCtrl', ['$rootScope','$scope', '$window', 
       else
         # TODO: Log this message to analytics as an exception.
         # status may be 401, 403
-        console.log "err: #{err}, response: #{JSON.stringify(response, null, 2)}, status: #{status}, headers: #{JSON.stringify(headers(), null, 2)}, config: #{JSON.stringify(config, null, 2)}"
+        # console.log "err: #{err}, response: #{JSON.stringify(response, null, 2)}, status: #{status}, headers: #{JSON.stringify(headers(), null, 2)}, config: #{JSON.stringify(config, null, 2)}"
         alert "#{err.message}. Cause: #{response.message}."
   else
     $scope.contextItem.name = ""
