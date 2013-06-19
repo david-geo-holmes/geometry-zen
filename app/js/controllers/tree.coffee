@@ -54,6 +54,7 @@ angular.module("app").controller 'TreeCtrl', ['$rootScope','$scope', '$window', 
       alert "Create a New File is not enabled."
 
   $scope.$on 'createdFile', (e, user, repo, item, commit) ->
+    # console.log "#{JSON.stringify(item, undefined, 2)}"
     $scope.contextItem.childItems.push(item)
 
   $scope.isDeleteItemEnabled = () ->
