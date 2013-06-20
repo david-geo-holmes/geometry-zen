@@ -37,6 +37,21 @@ Sk.ffi.remapToPy = function(obj) {
 };
 goog.exportSymbol("Sk.ffi.remapToPy", Sk.ffi.remapToPy);
 
+/*
+ * Wraps a JavaScript object in the standard wrapper so the initializers by referemce work correctly.
+ *
+ * This is used in conjuction with invocations of Sk.misceval.callsim.
+ */
+Sk.ffi.referenceToPy = function(obj) {
+  if (typeof obj === 'object') {
+    return {"v": obj};
+  }
+  else {
+    goog.asserts.fail("unhandled reference type " + typeof(obj));
+  }
+};
+goog.exportSymbol("Sk.ffi.referenceToPy", Sk.ffi.referenceToPy);
+
 /**
  * maps from Python to Javascript.
  *

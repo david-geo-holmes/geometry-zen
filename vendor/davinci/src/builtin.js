@@ -16,13 +16,11 @@ Sk.builtin.asnum$ = function(a) {
 
   return a;
 }
-
 goog.exportSymbol("Sk.builtin.asnum$", Sk.builtin.asnum$);
 
 Sk.builtin.assk$ = function(a, b) {
   return new Sk.builtin.nmber(a, b);
 }
-
 goog.exportSymbol("Sk.builtin.assk$", Sk.builtin.assk$);
 
 Sk.builtin.asnum$nofloat = function(a) {
