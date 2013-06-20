@@ -1,0 +1,10 @@
+support/tmp/
+doc/static/davinci.js
+doc/static/davinci.min.js
+doc/static/davinciLib.js
+node_modules/
+
+*.pyc
+.DS_Store
+
+/.d8_history

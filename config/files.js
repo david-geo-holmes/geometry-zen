@@ -10,6 +10,8 @@
  *  lifecycle.
  *
  * You can find the parent object in: node_modules/lineman/config/files.coffee
+ *
+ * You can change 'vendor' to '..' to work on davinci locally.
  */
 
 module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
@@ -32,6 +34,8 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
       "vendor/jquery-ui/ui/jquery-ui.js",
       "vendor/js/jquery.layout-1.3.0.js",
       "vendor/bladejs/build/blade.js",
+      "vendor/davinci/build/davinci.min.js",
+      "vendor/davinci/build/davinciLib.js",
       "vendor/bootstrap/js/bootstrap-carousel.js",
       "vendor/bootstrap/js/bootstrap-collapse.js",
       "vendor/bootstrap/js/bootstrap-dropdown.js",
@@ -43,8 +47,6 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
       "vendor/jed/jed.js",
       "vendor/js/codemirror.js",
       "vendor/codemirror/mode/python/python.js",
-      "../../geometryzen/skulpt/dist/skulpt.min.js",
-      "../../geometryzen/skulpt/dist/builtin.js",
       "vendor/threejs/build/three.js",
       "vendor/tweenjs/build/tween.min.js",
       "vendor/google-analytics/tracking-code.js",
