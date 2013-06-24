@@ -396,7 +396,7 @@
       return BLADE;
     });
   }
-  if (typeof scope === "object" && typeof scope.document === "object") {
+  if (typeof scope === "object" && scope.document && typeof scope.document === "object") {
     scope[objName] = BLADE;
   }
-})(window, 'BLADE', 'blade');
+})((typeof window === 'object' ? window : void 0), 'BLADE', 'blade');
