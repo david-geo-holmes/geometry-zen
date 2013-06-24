@@ -79,7 +79,6 @@ TestFiles = [
         'support/closure-library/closure/goog/math/vec2.js',
         'support/closure-library/closure/goog/json/json.js',
         'support/jsbeautify/beautify.js',
-        'vendor/bladejs/build/blade.js',
         'vendor/bladejs/build/bladeASM.js',
         'test/sprintf.js',
         "test/json2.js",
@@ -581,7 +580,7 @@ def nrt():
             if 'EDITOR' in os.environ:
                 editor = os.environ['EDITOR']
             else:
-                editor = 'sublime'
+                editor = 'vim'
             os.system(editor + ' ' + fn)
             if os.path.exists(fn):
                 print "Generating tests for %s" % fn
