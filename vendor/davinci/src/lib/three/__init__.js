@@ -5,16 +5,24 @@
  */
 var $builtinmodule = function(name) {
   
-  var VECTOR_3 = "Vector3";
-  var EUCLIDEAN_3 = "Euclidean3";
+  var VECTOR_3              = "Vector3";
+  var METHOD_CLONE          = "clone";
+  var METHOD_LENGTH         = "length";
+  var EUCLIDEAN_3           = "Euclidean3";
 
   var SCENE                 = "Scene";
   var WEBGL_RENDERER        = "WebGLRenderer";
   var COLOR                 = "Color";
+  var ORTHOGRAPHIC_CAMERA   = "OrthographicCamera";
   var PERSPECTIVE_CAMERA    = "PerspectiveCamera";
+  var METHOD_LOOK_AT        = "lookAt";
 
   var GEOMETRY              = "Geometry";
   var OBJECT_3D             = "Object3D";
+  var PROP_POSITION         = "position";
+  var PROP_ROTATION         = "rotation";
+  var METHOD_ADD            = "add";
+  var METHOD_REMOVE         = "remove";
 
   var POINT_LIGHT           = "PointLight";
 
@@ -43,6 +51,42 @@ var $builtinmodule = function(name) {
   function isNull(x)      { return typeof x === 'object' && x === null; }
   function isUndefined(x) { return typeof x === 'undefined'; }
   function isDefined(x)   { return typeof x !== 'undefined'; }
+
+  function methodAdd(target) {
+    return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+      $loc.__init__ = new Sk.builtin.func(function(self) {
+        self.tp$name = METHOD_ADD;
+      });
+      $loc.__call__ = new Sk.builtin.func(function(self, childPy) {
+        var child = Sk.ffi.remapToJs(childPy);
+        target[METHOD_ADD](child);
+      });
+      $loc.__str__ = new Sk.builtin.func(function(self) {
+        return new Sk.builtin.str(METHOD_ADD)
+      })
+      $loc.__repr__ = new Sk.builtin.func(function(self) {
+        return new Sk.builtin.str(METHOD_ADD)
+      })
+    }, METHOD_ADD, []));
+  }
+
+  function methodRemove(target) {
+    return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+      $loc.__init__ = new Sk.builtin.func(function(self) {
+        self.tp$name = METHOD_REMOVE;
+      });
+      $loc.__call__ = new Sk.builtin.func(function(self, childPy) {
+        var child = Sk.ffi.remapToJs(childPy);
+        target[METHOD_REMOVE](child);
+      });
+      $loc.__str__ = new Sk.builtin.func(function(self) {
+        return new Sk.builtin.str(METHOD_REMOVE)
+      })
+      $loc.__repr__ = new Sk.builtin.func(function(self) {
+        return new Sk.builtin.str(METHOD_REMOVE)
+      })
+    }, METHOD_REMOVE, []));
+  }
 
   /*
    * Deterines whether the argument is a genuine THREE.Color reference.
@@ -429,6 +473,38 @@ var $builtinmodule = function(name) {
             })
           }, METHOD_SET, []));
         }
+        case METHOD_CLONE: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_CLONE;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self) {
+              return Sk.misceval.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(vector[METHOD_CLONE]()));
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_CLONE);
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_CLONE);
+            })
+          }, METHOD_CLONE, []));
+        }
+        case METHOD_LENGTH: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_LENGTH;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self) {
+              return Sk.builtin.assk$(vector[METHOD_LENGTH](), Sk.builtin.nmber.float$);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_LENGTH);
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_LENGTH);
+            })
+          }, METHOD_LENGTH, []));
+        }
         default: {
           // Framework will handle it.
         }
@@ -506,19 +582,30 @@ var $builtinmodule = function(name) {
   }((typeof window === 'object') ? window : void 0));
 
    mod[SCENE] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
-
     $loc.__init__ = new Sk.builtin.func(function(self) {
       self.v = new THREE[SCENE]();
+      self.tp$name = SCENE;
     });
-
-    $loc.add = new Sk.builtin.func(function(self, mesh) {
-      self.v.add(mesh.v);
+    $loc.__getattr__ = new Sk.builtin.func(function(scene, name) {
+      scene = Sk.ffi.remapToJs(scene);
+      switch(name) {
+        case PROP_POSITION: {
+          return Sk.misceval.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(scene[PROP_POSITION]));
+        }
+        case PROP_ROTATION: {
+          return Sk.misceval.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(scene[PROP_ROTATION]));
+        }
+        case METHOD_ADD: {
+          return methodAdd(scene);
+        }
+        case METHOD_REMOVE: {
+          return methodRemove(scene);
+        }
+      }
     });
-
     $loc.__str__ = new Sk.builtin.func(function(self) {
       return new Sk.builtin.str(SCENE);
     });
-
   }, SCENE, []);
 
    mod[WEBGL_RENDERER] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
@@ -756,18 +843,18 @@ var $builtinmodule = function(name) {
   }, COLOR, []);
 
    mod[PERSPECTIVE_CAMERA] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
-    var PROP_POSITION = "position";
-    var PROP_ROTATION = "rotation";
+    var PROP_UP       = "up";
     $loc.__init__ = new Sk.builtin.func(function(self, fov, aspect, near, far) {
       var fieldOfView = Sk.builtin.asnum$(fov)
       var aspectRatio = Sk.builtin.asnum$(aspect)
       var nearPlane = Sk.builtin.asnum$(near)
       var farPlane = Sk.builtin.asnum$(far)
       self.v = new THREE[PERSPECTIVE_CAMERA](fieldOfView, aspectRatio, nearPlane, farPlane);
+      self.tp$name = PERSPECTIVE_CAMERA;
     });
 
-    $loc.__getattr__ = new Sk.builtin.func(function(camera, name) {
-      camera = Sk.ffi.remapToJs(camera);
+    $loc.__getattr__ = new Sk.builtin.func(function(cameraPy, name) {
+      camera = Sk.ffi.remapToJs(cameraPy);
       var UPDATE_PROJECTION_MATRIX = "updateProjectionMatrix"
       switch(name) {
         case "aspect": {
@@ -778,6 +865,27 @@ var $builtinmodule = function(name) {
         }
         case PROP_ROTATION: {
           return Sk.misceval.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(camera[PROP_ROTATION]));
+        }
+        case PROP_UP: {
+          return Sk.misceval.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(camera[PROP_UP]));
+        }
+        case METHOD_LOOK_AT: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_LOOK_AT;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, vector) {
+              vector  = Sk.ffi.remapToJs(vector);
+              camera.lookAt(vector);
+              return cameraPy;
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_LOOK_AT);
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_LOOK_AT);
+            })
+          }, METHOD_LOOK_AT, []));
         }
         case UPDATE_PROJECTION_MATRIX: {
           return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
@@ -805,11 +913,16 @@ var $builtinmodule = function(name) {
         }
       }
     });
-
-    $loc.__setattr__ = new Sk.builtin.func(function(self, name, value) {
+    $loc.__setattr__ = new Sk.builtin.func(function(cameraPy, name, valuePy) {
+      var camera = Sk.ffi.remapToJs(cameraPy);
+      var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
         case "aspect": {
-          self.v.aspect = numberFromArg(value, "rhs", name, false);
+          camera.aspect = value;
+        }
+        break;
+        case PROP_POSITION: {
+          camera[PROP_POSITION] = value;
         }
         break;
         default: {
@@ -817,11 +930,9 @@ var $builtinmodule = function(name) {
         }
       }
     });
-
     $loc.__str__ = new Sk.builtin.func(function(self) {
       return new Sk.builtin.str(PERSPECTIVE_CAMERA);
     });
-
   }, PERSPECTIVE_CAMERA, []);
 
    mod[CUBE_GEOMETRY] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
@@ -1379,27 +1490,12 @@ var $builtinmodule = function(name) {
     });
     $loc.__getattr__ = new Sk.builtin.func(function(objPy, name) {
       var obj = Sk.ffi.remapToJs(objPy);
-      var METHOD_ADD = "add";
       switch(name) {
         case METHOD_ADD: {
-          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = new Sk.builtin.func(function(self) {
-              self.tp$name = METHOD_ADD;
-            });
-            $loc.__call__ = new Sk.builtin.func(function(self, childPy) {
-              var child = Sk.ffi.remapToJs(childPy);
-              obj.add(child);
-            });
-            $loc.__str__ = new Sk.builtin.func(function(self) {
-              return new Sk.builtin.str(METHOD_ADD)
-            })
-            $loc.__repr__ = new Sk.builtin.func(function(self) {
-              return new Sk.builtin.str(METHOD_ADD)
-            })
-          }, METHOD_ADD, []));
+          return methodAdd(obj);
         }
-        default: {
-          // Framework will handle it.
+        case METHOD_REMOVE: {
+          return methodRemove(obj);
         }
       }
     });
@@ -1433,8 +1529,6 @@ var $builtinmodule = function(name) {
     var PROP_COLOR = "color";
     var PROP_INTENSITY = "intensity";
     var PROP_DISTANCE = "distance";
-    var PROP_POSITION = "position";
-    var PROP_ROTATION = "rotation";
     $loc.__init__ = new Sk.builtin.func(function(self, color, intensity, distance) {
       self.tp$name = POINT_LIGHT;
       color = Sk.ffi.remapToJs(color);
@@ -1665,8 +1759,6 @@ var $builtinmodule = function(name) {
 
   mod[MESH] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
     var PROP_OVERDRAW = "overdraw";
-    var PROP_POSITION = "position";
-    var PROP_ROTATION = "rotation";
     $loc.__init__ = new Sk.builtin.func(function(self, geometry, material) {
       self.v = new THREE[MESH](geometry.v, material.v);
     });
