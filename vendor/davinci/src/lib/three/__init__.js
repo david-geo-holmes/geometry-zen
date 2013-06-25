@@ -614,6 +614,7 @@ var $builtinmodule = function(name) {
     var PROP_DOM_ELEMENT  = "domElement";
     var PROP_GAMMA_INPUT  = "gammaInput";
     var PROP_GAMMA_OUTPUT = "gammaOutput";
+    var PROP_SORT_OBJECTS = "sortObjects";
     $loc.__init__ = new Sk.builtin.func(function(self, parameters) {
       self.tp$name = WEBGL_RENDERER;
       parameters = Sk.ffi.remapToJs(parameters);
@@ -636,6 +637,9 @@ var $builtinmodule = function(name) {
         }
         case PROP_GAMMA_OUTPUT: {
           return renderer[PROP_GAMMA_OUTPUT];
+        }
+        case PROP_SORT_OBJECTS: {
+          return renderer[PROP_SORT_OBJECTS];
         }
         case PROP_DOM_ELEMENT: {
           // TODO: I think duck-typing means that this will work as long as we don't
@@ -729,6 +733,15 @@ var $builtinmodule = function(name) {
           }
           else {
             throw new Sk.builtin.TypeError("'" + PROP_GAMMA_OUTPUT + "' attribute must be a <type 'bool'>.");
+          }
+        }
+        break;
+        case PROP_SORT_OBJECTS: {
+          if (isBoolean(value)) {
+            renderer[PROP_SORT_OBJECTS] = value;
+          }
+          else {
+            throw new Sk.builtin.TypeError("'" + PROP_SORT_OBJECTS + "' attribute must be a <type 'bool'>.");
           }
         }
         break;
