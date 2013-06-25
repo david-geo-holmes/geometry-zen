@@ -8,30 +8,32 @@ var $builtinmodule = function(name) {
   var VECTOR_3 = "Vector3";
   var EUCLIDEAN_3 = "Euclidean3";
 
-  var SCENE                = "Scene";
-  var WEBGL_RENDERER       = "WebGLRenderer";
-  var COLOR                = "Color";
-  var PERSPECTIVE_CAMERA   = "PerspectiveCamera";
+  var SCENE                 = "Scene";
+  var WEBGL_RENDERER        = "WebGLRenderer";
+  var COLOR                 = "Color";
+  var PERSPECTIVE_CAMERA    = "PerspectiveCamera";
 
-  var GEOMETRY             = "Geometry";
-  var OBJECT_3D            = "Object3D";
+  var GEOMETRY              = "Geometry";
+  var OBJECT_3D             = "Object3D";
 
-  var POINT_LIGHT          = "PointLight";
+  var POINT_LIGHT           = "PointLight";
 
-  var LINE_BASIC_MATERIAL  = "LineBasicMaterial";
-  var MESH_NORMAL_MATERIAL = "MeshNormalMaterial";
+  var LINE_BASIC_MATERIAL   = "LineBasicMaterial";
+  var MESH_LAMBERT_MATERIAL = "MeshLambertMaterial";
+  var MESH_NORMAL_MATERIAL  = "MeshNormalMaterial";
+  var MESH_PHONG_MATERIAL   = "MeshPhongMaterial";
 
-  var LINE                 = "Line";
-  var MESH                 = "Mesh";
+  var LINE                  = "Line";
+  var MESH                  = "Mesh";
 
-  var CUBE_GEOMETRY        = "CubeGeometry";
-  var CYLINDER_GEOMETRY    = "CylinderGeometry";
-  var ICOSAHEDRON_GEOMETRY = "IcosahedronGeometry";
-  var OCTAHEDRON_GEOMETRY  = "OctahedronGeometry";
-  var PLANE_GEOMETRY       = "PlaneGeometry";
-  var SPHERE_GEOMETRY      = "SphereGeometry";
-  var TETRAHEDRON_GEOMETRY = "TetrahedronGeometry";
-  var TORUS_GEOMETRY       = "TorusGeometry";
+  var CUBE_GEOMETRY         = "CubeGeometry";
+  var CYLINDER_GEOMETRY     = "CylinderGeometry";
+  var ICOSAHEDRON_GEOMETRY  = "IcosahedronGeometry";
+  var OCTAHEDRON_GEOMETRY   = "OctahedronGeometry";
+  var PLANE_GEOMETRY        = "PlaneGeometry";
+  var SPHERE_GEOMETRY       = "SphereGeometry";
+  var TETRAHEDRON_GEOMETRY  = "TetrahedronGeometry";
+  var TORUS_GEOMETRY        = "TorusGeometry";
 
   var mod = {};
 
@@ -306,6 +308,7 @@ var $builtinmodule = function(name) {
       var METHOD_SET_Z = "setZ";
       var METHOD_GET_COMPONENT = "getComponent";
       var METHOD_SET_COMPONENT = "setComponent";
+      var METHOD_SET = "set";
       vector = Sk.ffi.remapToJs(vectorPy);
       switch(name) {
         case PROP_X: {
@@ -397,6 +400,7 @@ var $builtinmodule = function(name) {
               index  = Sk.ffi.remapToJs(index);
               value  = Sk.ffi.remapToJs(value);
               vector.setComponent(index, value);
+              return vectorPy;
             });
             $loc.__str__ = new Sk.builtin.func(function(self) {
               return new Sk.builtin.str(METHOD_SET_COMPONENT);
@@ -405,6 +409,25 @@ var $builtinmodule = function(name) {
               return new Sk.builtin.str(METHOD_SET_COMPONENT);
             })
           }, METHOD_SET_COMPONENT, []));
+        }
+        case METHOD_SET: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_SET;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, x, y, z) {
+              x  = Sk.ffi.remapToJs(x);
+              y  = Sk.ffi.remapToJs(y);
+              z  = Sk.ffi.remapToJs(z);
+              vector.set(x, y, z);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET);
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET);
+            })
+          }, METHOD_SET, []));
         }
         default: {
           // Framework will handle it.
@@ -1564,7 +1587,32 @@ var $builtinmodule = function(name) {
     });
   }, LINE_BASIC_MATERIAL, []);
 
-   mod[MESH_NORMAL_MATERIAL] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
+  mod[MESH_LAMBERT_MATERIAL] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
+    $loc.__init__ = new Sk.builtin.func(function(self, parameters) {
+      self.tp$name = MESH_LAMBERT_MATERIAL;
+      parameters = Sk.ffi.remapToJs(parameters);
+      self.v = new THREE[MESH_LAMBERT_MATERIAL](parameters);
+    });
+    $loc.__getattr__ = new Sk.builtin.func(function(self, name) {
+      switch(name) {
+        default: {
+          throw new Error(name + " is not an attribute of " + MESH_LAMBERT_MATERIAL);
+        }
+      }
+    });
+    $loc.__str__ = new Sk.builtin.func(function(material) {
+      material = Sk.ffi.remapToJs(material);
+      var args = {};
+      return new Sk.builtin.str(MESH_LAMBERT_MATERIAL + "(" + JSON.stringify(args) + ")");
+    });
+    $loc.__repr__ = new Sk.builtin.func(function(material) {
+      material = Sk.ffi.remapToJs(material);
+      var args = [{}];
+      return new Sk.builtin.str(MESH_LAMBERT_MATERIAL + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
+    });
+  }, MESH_LAMBERT_MATERIAL, []);
+
+  mod[MESH_NORMAL_MATERIAL] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = new Sk.builtin.func(function(self, parameters) {
       self.tp$name = MESH_NORMAL_MATERIAL;
       parameters = Sk.ffi.remapToJs(parameters);
@@ -1580,7 +1628,6 @@ var $builtinmodule = function(name) {
     $loc.__str__ = new Sk.builtin.func(function(material) {
       material = Sk.ffi.remapToJs(material);
       var args = {};
-//      args[PROP_AUTO_CLEAR] = material[PROP_AUTO_CLEAR];
       return new Sk.builtin.str(MESH_NORMAL_MATERIAL + "(" + JSON.stringify(args) + ")");
     });
     $loc.__repr__ = new Sk.builtin.func(function(material) {
@@ -1589,6 +1636,32 @@ var $builtinmodule = function(name) {
       return new Sk.builtin.str(MESH_NORMAL_MATERIAL + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
     });
   }, MESH_NORMAL_MATERIAL, []);
+
+  mod[MESH_PHONG_MATERIAL] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
+    $loc.__init__ = new Sk.builtin.func(function(self, parameters) {
+      self.tp$name = MESH_PHONG_MATERIAL;
+      parameters = Sk.ffi.remapToJs(parameters);
+      self.v = new THREE[MESH_PHONG_MATERIAL](parameters);
+    });
+    $loc.__getattr__ = new Sk.builtin.func(function(self, name) {
+      switch(name) {
+        default: {
+          throw new Error(name + " is not an attribute of " + MESH_PHONG_MATERIAL);
+        }
+      }
+    });
+    $loc.__str__ = new Sk.builtin.func(function(material) {
+      material = Sk.ffi.remapToJs(material);
+      var args = {};
+//      args[PROP_AUTO_CLEAR] = material[PROP_AUTO_CLEAR];
+      return new Sk.builtin.str(MESH_PHONG_MATERIAL + "(" + JSON.stringify(args) + ")");
+    });
+    $loc.__repr__ = new Sk.builtin.func(function(material) {
+      material = Sk.ffi.remapToJs(material);
+      var args = [{}];
+      return new Sk.builtin.str(MESH_PHONG_MATERIAL + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
+    });
+  }, MESH_PHONG_MATERIAL, []);
 
   mod[MESH] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
     var PROP_OVERDRAW = "overdraw";
