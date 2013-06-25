@@ -125,12 +125,12 @@ Sk.builtin.range = function(start, stop, step) {
 };
 
 Sk.builtin.len = function(item) {
-  if (item.sq$length)
-    return new Sk.builtin.nmber(item.sq$length(),undefined);
-
-  if (item.mp$length)
-    return new Sk.builtin.nmber(item.mp$length(),undefined);
-
+  if (item.sq$length) {
+    return new Sk.builtin.nmber(item.sq$length(), undefined);
+  }
+  if (item.mp$length) {
+    return new Sk.builtin.nmber(item.mp$length(), undefined);
+  }
   throw new Sk.builtin.TypeError("object of type '" + item.tp$name + "' has no len()");
 };
 

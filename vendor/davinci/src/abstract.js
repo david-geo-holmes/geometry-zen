@@ -429,16 +429,19 @@ Sk.abstr.objectDelItem = function(o, key)
 };
 goog.exportSymbol("Sk.abstr.objectDelItem", Sk.abstr.objectDelItem);
 
-Sk.abstr.objectGetItem = function(o, key)
-{
-    if (o.mp$subscript)
-        return o.mp$subscript(key);
-    else if (Sk.misceval.isIndex(key) && o.sq$item)
-        return Sk.abstr.sequenceGetItem(o, Sk.misceval.asIndex(key));
-    else if (o.__getitem__ !== undefined) {
-        return Sk.misceval.callsim(o.__getitem__,o,key);
-    }
+Sk.abstr.objectGetItem = function(o, key) {
+  if (o.mp$subscript) {
+    return o.mp$subscript(key);
+  }
+  else if (Sk.misceval.isIndex(key) && o.sq$item) {
+    return Sk.abstr.sequenceGetItem(o, Sk.misceval.asIndex(key));
+  }
+  else if (o.__getitem__ !== undefined) {
+    return Sk.misceval.callsim(o.__getitem__, o, key);
+  }
+  else {
     throw new TypeError("'" + o.tp$name + "' does not support indexing");
+  }
 };
 goog.exportSymbol("Sk.abstr.objectGetItem", Sk.abstr.objectGetItem);
 

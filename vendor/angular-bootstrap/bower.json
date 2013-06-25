@@ -3,9 +3,16 @@
     "name": "https://github.com/angular-ui/bootstrap/graphs/contributors"
   },
   "name": "angular-bootstrap",
-  "version": "0.3.0",
-  "gitHead": "e5b3c8ec2c349c5c6c4943fc4a4c7566e781513b",
-  "_id": "angular-bootstrap@0.3.0",
+  "version": "0.4.0",
+  "main": [
+    "./ui-bootstrap-tpls.js"
+  ],
+  "dependencies": {
+    "bootstrap": ">=2",
+    "angular": ">=1"
+  },
+  "gitHead": "cdeb5e18044128c961c000ba29037d2fa53ea994",
+  "_id": "angular-bootstrap@0.4.0",
   "readme": "ERROR: No README.md file found!",
   "description": "ERROR: No README.md file found!",
   "repository": {

@@ -13,12 +13,17 @@ var $builtinmodule = function(name) {
   var COLOR                = "Color";
   var PERSPECTIVE_CAMERA   = "PerspectiveCamera";
 
+  var GEOMETRY             = "Geometry";
+  var OBJECT_3D            = "Object3D";
+
   var POINT_LIGHT          = "PointLight";
 
   var LINE_BASIC_MATERIAL  = "LineBasicMaterial";
   var MESH_NORMAL_MATERIAL = "MeshNormalMaterial";
 
+  var LINE                 = "Line";
   var MESH                 = "Mesh";
+
   var CUBE_GEOMETRY        = "CubeGeometry";
   var CYLINDER_GEOMETRY    = "CylinderGeometry";
   var ICOSAHEDRON_GEOMETRY = "IcosahedronGeometry";
@@ -271,20 +276,28 @@ var $builtinmodule = function(name) {
       return Sk.misceval.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(vector));
     });
 
-    $loc.__mul__ = new Sk.builtin.func(function(a, b) {
-      var x = 0;
-      var y = 0;
-      var z = 0;
-      var vector = new THREE.Vector3(x, y, z);
-      return Sk.misceval.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(vector));
+    $loc.__mul__ = new Sk.builtin.func(function(lhs, rhs) {
+      lhs = Sk.ffi.remapToJs(lhs);
+      rhs = Sk.ffi.remapToJs(rhs);
+      if (isNumber(rhs)) {
+        var vector = new THREE.Vector3(lhs.x * rhs, lhs.y * rhs, lhs.z * rhs);
+        return Sk.misceval.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(vector));
+      }
+      else {
+        throw new Sk.builtin.AssertionError("rhs is not a number");
+      }
     });
 
     $loc.__rmul__ = new Sk.builtin.func(function(rhs, lhs) {
-      var x = 0;
-      var y = 0;
-      var z = 0;
-      var vector = new THREE.Vector3(x, y, z);
-      return Sk.misceval.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(vector));
+      lhs = Sk.ffi.remapToJs(lhs);
+      rhs = Sk.ffi.remapToJs(rhs);
+      if (isNumber(lhs)) {
+        var vector = new THREE.Vector3(lhs * rhs.x, lhs * rhs.y, lhs * rhs.z);
+        return Sk.misceval.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(vector));
+      }
+      else {
+        throw new Sk.builtin.AssertionError("lhs is not a number");
+      }
     });
 
     $loc.__getattr__ = new Sk.builtin.func(function(vectorPy, name) {
@@ -1256,6 +1269,143 @@ var $builtinmodule = function(name) {
 
   }, TORUS_GEOMETRY, []);
 
+   mod[GEOMETRY] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
+    var PROP_VERTICES = "vertices";
+    $loc.__init__ = new Sk.builtin.func(function(self) {
+      self.v = new THREE[GEOMETRY]();
+    });
+
+    $loc.__getattr__ = new Sk.builtin.func(function(geometry, name) {
+      geometry = Sk.ffi.remapToJs(geometry);
+      switch(name) {
+        case PROP_VERTICES: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = PROP_VERTICES;
+              self.v = geometry.vertices;
+            });
+            $loc.__getattr__ = new Sk.builtin.func(function(vertices, name) {
+              vertices = Sk.ffi.remapToJs(vertices);
+              var METHOD_APPEND = "append";
+              switch(name) {
+                case METHOD_APPEND: {
+                  return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                    $loc.__init__ = new Sk.builtin.func(function(self) {
+                      self.tp$name = METHOD_APPEND;
+                    });
+                    $loc.__call__ = new Sk.builtin.func(function(self, x) {
+                      x = Sk.ffi.remapToJs(x);
+                      vertices.push(x);
+                    });
+                    $loc.__str__ = new Sk.builtin.func(function(self) {
+                      return new Sk.builtin.str(METHOD_APPEND)
+                    })
+                    $loc.__repr__ = new Sk.builtin.func(function(self) {
+                      return new Sk.builtin.str(METHOD_APPEND)
+                    })
+                  }, METHOD_APPEND, []));
+                }
+                default: {
+                  // Framework will take care of the error message.
+                }
+              }
+            });
+            $loc.__getitem__ = new Sk.builtin.func(function(verticesPy, indexPy) {
+              var vertices = Sk.ffi.remapToJs(verticesPy);
+              var index = Sk.ffi.remapToJs(indexPy);
+              return Sk.misceval.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(vertices[index]));
+            });
+            $loc.mp$length = function() {return geometry.vertices.length;};
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(PROP_VERTICES)
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(PROP_VERTICES)
+            })
+          }, PROP_VERTICES, []));
+        }
+        default: {
+          // Framework will take care of the error message.
+        }
+      }
+    });
+
+    $loc.__str__ = new Sk.builtin.func(function(geometry) {
+      geometry = Sk.ffi.remapToJs(geometry);
+      if (isDefined(geometry)) {
+        var args = {};
+        return new Sk.builtin.str(GEOMETRY + "(" + JSON.stringify(args) + ")");
+      }
+      else {
+        return new Sk.builtin.str("<type '" + GEOMETRY + "'>");
+      }
+    });
+
+    $loc.__repr__ = new Sk.builtin.func(function(geometry) {
+      geometry = Sk.ffi.remapToJs(geometry);
+      var args = [];
+      return new Sk.builtin.str(GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
+    });
+
+  }, GEOMETRY, []);
+
+  mod[OBJECT_3D] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
+    $loc.__init__ = new Sk.builtin.func(function(self) {
+      self.tp$name = OBJECT_3D;
+      self.v = new THREE[OBJECT_3D]();
+    });
+    $loc.__getattr__ = new Sk.builtin.func(function(objPy, name) {
+      var obj = Sk.ffi.remapToJs(objPy);
+      var METHOD_ADD = "add";
+      switch(name) {
+        case METHOD_ADD: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_ADD;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, childPy) {
+              var child = Sk.ffi.remapToJs(childPy);
+              obj.add(child);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_ADD)
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_ADD)
+            })
+          }, METHOD_ADD, []));
+        }
+        default: {
+          // Framework will handle it.
+        }
+      }
+    });
+    $loc.__setattr__ = new Sk.builtin.func(function(obj, name, value) {
+      obj = Sk.ffi.remapToJs(obj);
+      value = Sk.ffi.remapToJs(value);
+      switch(name) {
+        default: {
+          throw new Error(name + " is not an settable attribute of " + OBJECT_3D);
+        }
+      }
+    });
+    $loc.__str__ = new Sk.builtin.func(function(obj) {
+      obj = Sk.ffi.remapToJs(obj);
+      if (isDefined(obj)) {
+        var args = {};
+        return new Sk.builtin.str(OBJECT_3D + "(" + JSON.stringify(args) + ")");
+      }
+      else {
+        return new Sk.builtin.str("<type '" + OBJECT_3D + "'>");
+      }
+    });
+    $loc.__repr__ = new Sk.builtin.func(function(obj) {
+      obj = Sk.ffi.remapToJs(obj);
+      var args = [];
+      return new Sk.builtin.str(OBJECT_3D + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
+    });
+  }, OBJECT_3D, []);
+
   mod[POINT_LIGHT] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
     var PROP_COLOR = "color";
     var PROP_INTENSITY = "intensity";
@@ -1440,7 +1590,7 @@ var $builtinmodule = function(name) {
     });
   }, MESH_NORMAL_MATERIAL, []);
 
-   mod[MESH] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
+  mod[MESH] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
     var PROP_OVERDRAW = "overdraw";
     var PROP_POSITION = "position";
     var PROP_ROTATION = "rotation";
@@ -1503,6 +1653,38 @@ var $builtinmodule = function(name) {
       return new Sk.builtin.str(MESH);
     });
   }, MESH, []);
+
+  mod[LINE] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
+    $loc.__init__ = new Sk.builtin.func(function(self, geometryPy, materialPy, typePy) {
+      var geometry = Sk.ffi.remapToJs(geometryPy)
+      var material = Sk.ffi.remapToJs(materialPy)
+      var type = Sk.ffi.remapToJs(typePy)
+      self.v = new THREE[LINE](geometry, material, type);
+    });
+    $loc.__getattr__ = new Sk.builtin.func(function(linePy, name) {
+      var line = Sk.ffi.remapToJs(linePy);
+      switch(name) {
+        default: {
+          throw new Error(name + " is not an attribute of " + LINE);
+        }
+      }
+    });
+    $loc.__setattr__ = new Sk.builtin.func(function(linePy, name, value) {
+      var line = Sk.ffi.remapToJs(linePy);
+      value = Sk.ffi.remapToJs(value);
+      switch(name) {
+        default: {
+          throw new Error(name + " is not an attribute of " + LINE);
+        }
+      }
+    });
+    $loc.__str__ = new Sk.builtin.func(function(self) {
+      return new Sk.builtin.str(LINE);
+    });
+    $loc.__repr__ = new Sk.builtin.func(function(self) {
+      return new Sk.builtin.str(LINE);
+    });
+  }, LINE, []);
 
   return mod;
 }

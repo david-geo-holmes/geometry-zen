@@ -3634,12 +3634,12 @@ Sk.builtin.range = function(start, stop, step) {
 };
 
 Sk.builtin.len = function(item) {
-  if (item.sq$length)
-    return new Sk.builtin.nmber(item.sq$length(),undefined);
-
-  if (item.mp$length)
-    return new Sk.builtin.nmber(item.mp$length(),undefined);
-
+  if (item.sq$length) {
+    return new Sk.builtin.nmber(item.sq$length(), undefined);
+  }
+  if (item.mp$length) {
+    return new Sk.builtin.nmber(item.mp$length(), undefined);
+  }
   throw new Sk.builtin.TypeError("object of type '" + item.tp$name + "' has no len()");
 };
 
@@ -5075,15 +5075,14 @@ goog.exportSymbol("Sk.misceval.print_", Sk.misceval.print_);
  * @param {string} name
  * @param {Object=} other generally globals
  */
- Sk.misceval.loadname = function(name, other)
- {
-    var v = other[name];
-    if (v !== undefined) return v;
+ Sk.misceval.loadname = function(name, other) {
+  var v = other[name];
+  if (v !== undefined) return v;
 
-    var bi = Sk.builtins[name];
-    if (bi !== undefined) return bi;
+  var bi = Sk.builtins[name];
+  if (bi !== undefined) return bi;
 
-    throw new Sk.builtin.NameError("name '" + name + "' is not defined");
+  throw new Sk.builtin.NameError("name '" + name + "' is not defined");
 };
 goog.exportSymbol("Sk.misceval.loadname", Sk.misceval.loadname);
 
@@ -5697,16 +5696,19 @@ Sk.abstr.objectDelItem = function(o, key)
 };
 goog.exportSymbol("Sk.abstr.objectDelItem", Sk.abstr.objectDelItem);
 
-Sk.abstr.objectGetItem = function(o, key)
-{
-    if (o.mp$subscript)
-        return o.mp$subscript(key);
-    else if (Sk.misceval.isIndex(key) && o.sq$item)
-        return Sk.abstr.sequenceGetItem(o, Sk.misceval.asIndex(key));
-    else if (o.__getitem__ !== undefined) {
-        return Sk.misceval.callsim(o.__getitem__,o,key);
-    }
+Sk.abstr.objectGetItem = function(o, key) {
+  if (o.mp$subscript) {
+    return o.mp$subscript(key);
+  }
+  else if (Sk.misceval.isIndex(key) && o.sq$item) {
+    return Sk.abstr.sequenceGetItem(o, Sk.misceval.asIndex(key));
+  }
+  else if (o.__getitem__ !== undefined) {
+    return Sk.misceval.callsim(o.__getitem__, o, key);
+  }
+  else {
     throw new TypeError("'" + o.tp$name + "' does not support indexing");
+  }
 };
 goog.exportSymbol("Sk.abstr.objectGetItem", Sk.abstr.objectGetItem);
 
@@ -5938,52 +5940,44 @@ Sk.mergeSort.stdCmp = new Sk.builtin.func(function(k0, k1)
  * @param {Array.<Object>} L
  * @extends Sk.builtin.object
  */
-Sk.builtin.list = function(L)
-{
-    if (!(this instanceof Sk.builtin.list)) return new Sk.builtin.list(L);
+Sk.builtin.list = function(L) {
+  if (!(this instanceof Sk.builtin.list)) return new Sk.builtin.list(L);
 
-    if ( L === undefined ) 
-    {
-            this.v = [];
+  if (L === undefined) {
+    this.v = [];
+  }
+  else if (Object.prototype.toString.apply(L) === '[object Array]') {
+    this.v = L;
+  }
+  else {
+    if (L.tp$iter) {
+      this.v = [];
+      for (var it = L.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext()) {
+        this.v.push(i);
+      }
     }
-    else if (Object.prototype.toString.apply(L) === '[object Array]')
-    {
-        this.v = L;
+    else {
+      throw new Sk.builtin.ValueError("expecting Array or iterable");
     }
-    else
-    {
-        if (L.tp$iter)
-        {
-            this.v = [];
-            for (var it = L.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext())
-                this.v.push(i);
-        }
-        else
-            throw new Sk.builtin.ValueError("expecting Array or iterable");
-    }
-
-    this["v"] = this.v;
-    return this;
+  }
+  this["v"] = this.v;
+  return this;
 };
-
 
 Sk.builtin.list.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('list', Sk.builtin.list);
 
-Sk.builtin.list.prototype.list_iter_ = function()
-{
-    var ret =
-    {
-        tp$iter: function() { return ret; },
-        $obj: this,
-        $index: 0,
-        tp$iternext: function()
-        {
-            // todo; StopIteration
-            if (ret.$index >= ret.$obj.v.length) return undefined;
-            return ret.$obj.v[ret.$index++];
-        }
-    };
-    return ret;
+Sk.builtin.list.prototype.list_iter_ = function() {
+  var ret = {
+    tp$iter: function() { return ret; },
+    $obj: this,
+    $index: 0,
+    tp$iternext: function() {
+      // todo; StopIteration
+      if (ret.$index >= ret.$obj.v.length) return undefined;
+      return ret.$obj.v[ret.$index++];
+    }
+  };
+  return ret;
 };
 
 Sk.builtin.list.prototype.list_concat_ = function(other)
@@ -5998,7 +5992,7 @@ Sk.builtin.list.prototype.list_concat_ = function(other)
 
 Sk.builtin.list.prototype.list_ass_item_ = function(i, v)
 {
-	i = Sk.builtin.asnum$(i);
+    i = Sk.builtin.asnum$(i);
     if (i < 0 || i >= this.v.length)
         throw new Sk.builtin.IndexError("list assignment index out of range");
     if (v === null)
@@ -6008,8 +6002,8 @@ Sk.builtin.list.prototype.list_ass_item_ = function(i, v)
 
 Sk.builtin.list.prototype.list_ass_slice_ = function(ilow, ihigh, v)
 {
-	ilow = Sk.builtin.asnum$(ilow);
-	ihigh = Sk.builtin.asnum$(ihigh);
+    ilow = Sk.builtin.asnum$(ilow);
+    ihigh = Sk.builtin.asnum$(ihigh);
 
     // todo; item rather list/null
     var args = v === null ? [] : v.v.slice(0);
@@ -6083,7 +6077,7 @@ Sk.builtin.list.prototype.sq$length = function() { return this.v.length; };
 Sk.builtin.list.prototype.sq$concat = Sk.builtin.list.prototype.list_concat_;
 Sk.builtin.list.prototype.sq$repeat = function(n)
 {
-	n = Sk.builtin.asnum$(n);
+    n = Sk.builtin.asnum$(n);
     var ret = [];
     for (var i = 0; i < n; ++i)
         for (var j = 0; j < this.v.length; ++j)
@@ -6104,7 +6098,7 @@ Sk.builtin.list.prototype.sq$inplace_repeat = list_inplace_repeat;
 
 Sk.builtin.list.prototype.list_subscript_ = function(index)
 {
-	index = Sk.builtin.asnum$(index);
+    index = Sk.builtin.asnum$(index);
     if (typeof index === "number")
     {
         if (index < 0) index = this.v.length + index;
@@ -6126,7 +6120,7 @@ Sk.builtin.list.prototype.list_subscript_ = function(index)
 
 Sk.builtin.list.prototype.list_ass_item_ = function(i, value)
 {
-	i = Sk.builtin.asnum$(i);
+    i = Sk.builtin.asnum$(i);
     if (i < 0 || i >= this.v.length) throw new Sk.builtin.IndexError("list index out of range");
     if (value === null)
         this.list_ass_slice_(i, i+1, value);
@@ -6180,23 +6174,20 @@ Sk.builtin.list.prototype.list_ass_subscript_ = function(index, value)
 Sk.builtin.list.prototype.mp$subscript = Sk.builtin.list.prototype.list_subscript_;
 Sk.builtin.list.prototype.mp$ass_subscript = Sk.builtin.list.prototype.list_ass_subscript_;
 
-Sk.builtin.list.prototype.__getitem__ = new Sk.builtin.func(function(self, index)
-        {
-            return Sk.builtin.list.prototype.list_subscript_.call(self, index);
-        });
+Sk.builtin.list.prototype.__getitem__ = new Sk.builtin.func(function(self, index) {
+  return Sk.builtin.list.prototype.list_subscript_.call(self, index);
+});
 //Sk.builtin.list.prototype.__reversed__ = todo;
-Sk.builtin.list.prototype['append'] = new Sk.builtin.func(function(self, item)
-{
-    self.v.push(item);
-    return null;
+Sk.builtin.list.prototype['append'] = new Sk.builtin.func(function(self, item) {
+  self.v.push(item);
+  return null;
 });
 
-Sk.builtin.list.prototype['insert'] = new Sk.builtin.func(function(self, i, x)
-{
-	i = Sk.builtin.asnum$(i);
-    if (i < 0) i = 0;
-    else if (i > self.v.length) i = self.v.length - 1;
-    self.v.splice(i, 0, x);
+Sk.builtin.list.prototype['insert'] = new Sk.builtin.func(function(self, i, x) {
+  i = Sk.builtin.asnum$(i);
+  if (i < 0) i = 0;
+  else if (i > self.v.length) i = self.v.length - 1;
+  self.v.splice(i, 0, x);
 });
 
 Sk.builtin.list.prototype['extend'] = new Sk.builtin.func(function(self, b)
@@ -6209,9 +6200,9 @@ Sk.builtin.list.prototype['extend'] = new Sk.builtin.func(function(self, b)
 Sk.builtin.list.prototype['pop'] = new Sk.builtin.func(function(self, i)
 {
     if (i === undefined)
-		i = self.v.length - 1;
-	else	
-		i = Sk.builtin.asnum$(i);
+        i = self.v.length - 1;
+    else    
+        i = Sk.builtin.asnum$(i);
     var ret = self.v[i];
     self.v.splice(i, 1);
     return ret;
