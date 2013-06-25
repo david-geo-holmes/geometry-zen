@@ -1829,6 +1829,12 @@ var $builtinmodule = function(name) {
     $loc.__getattr__ = new Sk.builtin.func(function(linePy, name) {
       var line = Sk.ffi.remapToJs(linePy);
       switch(name) {
+        case PROP_POSITION: {
+          return Sk.misceval.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(line[PROP_POSITION]));
+        }
+        case PROP_ROTATION: {
+          return Sk.misceval.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(line[PROP_ROTATION]));
+        }
         default: {
           throw new Error(name + " is not an attribute of " + LINE);
         }
