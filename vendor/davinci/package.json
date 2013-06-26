@@ -1,6 +1,6 @@
 {
   "name": "davinci",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "main": "./build/davinci.min.js",
   "description": "Python to JavaScript cross compiler",
   "author": {

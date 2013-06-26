@@ -627,6 +627,7 @@ var $builtinmodule = function(name) {
       var METHOD_RENDER = "render";
       var METHOD_GET_CLEAR_COLOR = "getClearColor";
       var METHOD_SET_CLEAR_COLOR = "setClearColor";
+      var METHOD_SET_SIZE        = "setSize";
       var renderer  = Sk.ffi.remapToJs(self);
       switch(name) {
         case PROP_AUTO_CLEAR: {
@@ -675,10 +676,10 @@ var $builtinmodule = function(name) {
             });
             $loc.__str__ = new Sk.builtin.func(function(self) {
               return new Sk.builtin.str(METHOD_GET_CLEAR_COLOR);
-            })
+            });
             $loc.__repr__ = new Sk.builtin.func(function(self) {
               return new Sk.builtin.str(METHOD_GET_CLEAR_COLOR);
-            })
+            });
           }, METHOD_GET_CLEAR_COLOR, []));
         }
         case METHOD_SET_CLEAR_COLOR: {
@@ -693,11 +694,30 @@ var $builtinmodule = function(name) {
             });
             $loc.__str__ = new Sk.builtin.func(function(self) {
               return new Sk.builtin.str(METHOD_SET_CLEAR_COLOR);
-            })
+            });
             $loc.__repr__ = new Sk.builtin.func(function(self) {
               return new Sk.builtin.str(METHOD_SET_CLEAR_COLOR);
-            })
+            });
           }, METHOD_SET_CLEAR_COLOR, []));
+        }
+        case METHOD_SET_SIZE: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_SET_SIZE;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, width, height, updateStyle) {
+              width  = Sk.ffi.remapToJs(width);
+              height = Sk.ffi.remapToJs(height);
+              updateStyle = Sk.ffi.remapToJs(updateStyle);
+              renderer.setSize(width, height, updateStyle);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET_SIZE);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET_SIZE);
+            });
+          }, METHOD_SET_SIZE, []));
         }
         default: {
           // The framework will raise an AttributeError exception.
