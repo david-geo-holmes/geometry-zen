@@ -34,7 +34,7 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
       "vendor/jquery-ui/ui/jquery-ui.js",
       "vendor/js/jquery.layout-1.3.0.js",
       "vendor/bladejs/build/blade.js",
-      "../davinci/build/davinci.min.js",
+      "../davinci/build/davinci.js",
       "../davinci/build/davinciLib.js",
       "vendor/bootstrap/js/bootstrap-carousel.js",
       "vendor/bootstrap/js/bootstrap-collapse.js",
