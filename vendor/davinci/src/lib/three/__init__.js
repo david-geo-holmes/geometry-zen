@@ -19,14 +19,11 @@ var $builtinmodule = function(name) {
 
   var GEOMETRY              = "Geometry";
   var OBJECT_3D             = "Object3D";
-  var PROP_POSITION         = "position";
-  var PROP_ROTATION         = "rotation";
-  var METHOD_ADD            = "add";
-  var METHOD_REMOVE         = "remove";
 
   var POINT_LIGHT           = "PointLight";
 
   var LINE_BASIC_MATERIAL   = "LineBasicMaterial";
+  var MESH_BASIC_MATERIAL   = "MeshBasicMaterial";
   var MESH_LAMBERT_MATERIAL = "MeshLambertMaterial";
   var MESH_NORMAL_MATERIAL  = "MeshNormalMaterial";
   var MESH_PHONG_MATERIAL   = "MeshPhongMaterial";
@@ -42,6 +39,21 @@ var $builtinmodule = function(name) {
   var SPHERE_GEOMETRY       = "SphereGeometry";
   var TETRAHEDRON_GEOMETRY  = "TetrahedronGeometry";
   var TORUS_GEOMETRY        = "TorusGeometry";
+
+  var PROP_COLOR               = "color";
+  var PROP_ID                  = "id";
+  var PROP_NAME                = "name";
+  var PROP_NEEDS_UPDATE        = "needsUpdate";
+  var PROP_OPACITY             = "opacity";
+  var PROP_OVERDRAW            = "overdraw";
+  var PROP_POSITION            = "position";
+  var PROP_ROTATION            = "rotation";
+  var PROP_TRANSPARENT         = "transparent";
+  var PROP_VISIBLE             = "visible";
+  var PROP_WIREFRAME           = "wireframe";
+  var PROP_WIREFRAME_LINEWIDTH = "wireframeLinewidth";
+  var METHOD_ADD               = "add";
+  var METHOD_REMOVE            = "remove";
 
   var mod = {};
 
@@ -1559,7 +1571,6 @@ var $builtinmodule = function(name) {
   }, OBJECT_3D, []);
 
   mod[POINT_LIGHT] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
-    var PROP_COLOR = "color";
     var PROP_INTENSITY = "intensity";
     var PROP_DISTANCE = "distance";
     $loc.__init__ = new Sk.builtin.func(function(self, color, intensity, distance) {
@@ -1652,8 +1663,6 @@ var $builtinmodule = function(name) {
   }, POINT_LIGHT, []);
 
   mod[LINE_BASIC_MATERIAL] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
-    var PROP_COLOR = "color";
-    var PROP_OPACITY = "opacity";
     $loc.__init__ = new Sk.builtin.func(function(self, parameters) {
       self.tp$name = LINE_BASIC_MATERIAL;
       parameters = Sk.ffi.remapToJs(parameters);
@@ -1666,7 +1675,7 @@ var $builtinmodule = function(name) {
           return Sk.misceval.callsim(mod[COLOR], Sk.ffi.referenceToPy(material.color));
         }
         case PROP_OPACITY: {
-          return Sk.builtin.nmber(material.opacity, Sk.builtin.nmber.float$);
+          return Sk.builtin.nmber(material[PROP_OPACITY], Sk.builtin.nmber.float$);
         }
         default: {
           throw new Error(name + " is not an attribute of " + LINE_BASIC_MATERIAL);
@@ -1713,6 +1722,151 @@ var $builtinmodule = function(name) {
       return new Sk.builtin.str(LINE_BASIC_MATERIAL + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
     });
   }, LINE_BASIC_MATERIAL, []);
+
+  mod[MESH_BASIC_MATERIAL] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
+    $loc.__init__ = new Sk.builtin.func(function(self, parameters) {
+      self.tp$name = MESH_BASIC_MATERIAL;
+      parameters = Sk.ffi.remapToJs(parameters);
+      self.v = new THREE[MESH_BASIC_MATERIAL](parameters);
+    });
+    $loc.__getattr__ = new Sk.builtin.func(function(materialPy, name) {
+      var material = Sk.ffi.remapToJs(materialPy);
+      switch(name) {
+        case PROP_ID: {
+          return Sk.builtin.nmber(material[PROP_ID], Sk.builtin.nmber.int$);
+        }
+        case PROP_NAME: {
+          return new Sk.builtin.str(material[PROP_NAME]);
+        }
+        case PROP_COLOR: {
+          return Sk.misceval.callsim(mod[COLOR], Sk.ffi.referenceToPy(material[PROP_COLOR]));
+        }
+        case PROP_NEEDS_UPDATE: {
+          return material[PROP_NEEDS_UPDATE];
+        }
+        case PROP_OPACITY: {
+          return Sk.builtin.nmber(material[PROP_OPACITY], Sk.builtin.nmber.float$);
+        }
+        case PROP_OVERDRAW: {
+          return material[PROP_OVERDRAW];
+        }
+        case PROP_TRANSPARENT: {
+          return material[PROP_TRANSPARENT];
+        }
+        case PROP_WIREFRAME: {
+          return material[PROP_WIREFRAME];
+        }
+        case PROP_WIREFRAME_LINEWIDTH: {
+          return Sk.builtin.nmber(material[PROP_WIREFRAME_LINEWIDTH], Sk.builtin.nmber.float$);
+        }
+        case PROP_VISIBLE: {
+          return material[PROP_VISIBLE];
+        }
+      }
+    });
+    $loc.__setattr__ = new Sk.builtin.func(function(materialPy, name, valuePy) {
+      var material = Sk.ffi.remapToJs(materialPy);
+      var value = Sk.ffi.remapToJs(valuePy);
+      switch(name) {
+        case PROP_COLOR: {
+          material[PROP_COLOR] = new THREE.Color(value);
+        }
+        break;
+        case PROP_NAME: {
+          if (isString(value)) {
+            material[PROP_NAME] = value;
+          }
+          else {
+            throw new Error(name + " must be a string");
+          }
+        }
+        break;
+        case PROP_NEEDS_UPDATE: {
+          if (isBoolean(value)) {
+            material[PROP_NEEDS_UPDATE] = value;
+          }
+          else {
+            throw new Error(name + " must be Boolean");
+          }
+        }
+        break;
+        case PROP_OPACITY: {
+          if (isNumber(value)) {
+            material.opacity = value;
+          }
+          else {
+            throw new Sk.builtin.TypeError("'" + PROP_OPACITY + "' attribute must be a <type 'float'>.");
+          }
+        }
+        break;
+        case PROP_OVERDRAW: {
+          if (isBoolean(value)) {
+            material[PROP_OVERDRAW] = value;
+          }
+          else {
+            throw new Error(name + " must be Boolean");
+          }
+        }
+        break;
+        case PROP_TRANSPARENT: {
+          if (isBoolean(value)) {
+            material[PROP_TRANSPARENT] = value;
+          }
+          else {
+            throw new Error(name + " must be Boolean");
+          }
+        }
+        break;
+        case PROP_WIREFRAME: {
+          if (isBoolean(value)) {
+            material[PROP_WIREFRAME] = value;
+          }
+          else {
+            throw new Error(name + " must be Boolean");
+          }
+        }
+        break;
+        case PROP_WIREFRAME_LINEWIDTH: {
+          if (isNumber(value)) {
+            material[PROP_WIREFRAME_LINEWIDTH] = value;
+          }
+          else {
+            throw new Error(name + " must be a number");
+          }
+        }
+        break;
+        case PROP_VISIBLE: {
+          if (isBoolean(value)) {
+            material[PROP_VISIBLE] = value;
+          }
+          else {
+            throw new Error(name + " must be Boolean");
+          }
+        }
+        break;
+        default: {
+          throw new Error(name + " is not an attribute of " + MESH_BASIC_MATERIAL);
+        }
+      }
+    });
+    $loc.__str__ = new Sk.builtin.func(function(materialPy) {
+      var material = Sk.ffi.remapToJs(materialPy);
+      var args = {};
+      args[PROP_COLOR] = material[PROP_COLOR];
+      args[PROP_WIREFRAME] = material[PROP_WIREFRAME];
+      args[PROP_WIREFRAME_LINEWIDTH] = material[PROP_WIREFRAME_LINEWIDTH];
+      return new Sk.builtin.str(MESH_BASIC_MATERIAL + "(" + JSON.stringify(args) + ")");
+    });
+    $loc.__repr__ = new Sk.builtin.func(function(material) {
+      material = Sk.ffi.remapToJs(material);
+      var parameters = {};
+      parameters[PROP_COLOR] = material[PROP_COLOR];
+      parameters[PROP_WIREFRAME] = material[PROP_WIREFRAME];
+      parameters[PROP_WIREFRAME_LINEWIDTH] = material[PROP_WIREFRAME_LINEWIDTH];
+      var args = [parameters];
+      return new Sk.builtin.str(MESH_BASIC_MATERIAL + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
+    });
+  }, MESH_BASIC_MATERIAL, []);
 
   mod[MESH_LAMBERT_MATERIAL] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = new Sk.builtin.func(function(self, parameters) {

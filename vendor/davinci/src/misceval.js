@@ -88,16 +88,16 @@ goog.exportSymbol("Sk.misceval.arrayFromArguments", Sk.misceval.arrayFromArgumen
  * for reversed comparison: Lt -> GtE, etc.
  */
  Sk.misceval.swappedOp_ = {
-    'Eq': 'Eq',			//
-    'NotEq': 'NotEq',	//
+    'Eq': 'Eq',         //
+    'NotEq': 'NotEq',   //
     'Lt': 'GtE',
     'LtE': 'Gt',
     'Gt': 'LtE',
     'GtE': 'Lt',
-    'Is': 'Is',			//
-    'IsNot': 'IsNot',	//	
-    'In_': undefined,	//	No swap equivalent (equivalent = "contains")
-    'NotIn': undefined	//	No swap equivalent (equivalent = "does not contain")
+    'Is': 'Is',         //
+    'IsNot': 'IsNot',   //  
+    'In_': undefined,   //  No swap equivalent (equivalent = "contains")
+    'NotIn': undefined  //  No swap equivalent (equivalent = "does not contain")
 };
 
 
@@ -197,7 +197,7 @@ Sk.misceval.richCompareBool = function(v, w, op)
                     return Sk.misceval.callsim(w['__gt__'], w, v);
             }
 
-/*	Fix by BM -- old version
+/*  Fix by BM -- old version
             if (op === 'Eq')
                 if (v && v['__eq__'])
                     return Sk.misceval.callsim(v['__eq__'], v, w);
@@ -444,55 +444,44 @@ goog.exportSymbol("Sk.misceval.call", Sk.misceval.call);
 goog.exportSymbol("Sk.misceval.callsim", Sk.misceval.callsim);
 
 /**
- * same as Sk.misceval.call except args is an actual array, rather than
- * varargs.
+ * same as Sk.misceval.call except args is an actual array, rather than varargs.
  */
- Sk.misceval.apply = function(func, kwdict, varargseq, kws, args)
- {
+ Sk.misceval.apply = function(func, kwdict, varargseq, kws, args) {
+  if (typeof func === "function") {
+    // todo; i believe the only time this happens is the wrapper
+    // function around generators (that creates the iterator).
+    // should just make that a real function object and get rid
+    // of this case.
+    // alternatively, put it to more use, and perhaps use
+    // descriptors to create builtin.func's in other places.
 
-    if (typeof func === "function")
-    {
-        // todo; i believe the only time this happens is the wrapper
-        // function around generators (that creates the iterator).
-        // should just make that a real function object and get rid
-        // of this case.
-        // alternatively, put it to more use, and perhaps use
-        // descriptors to create builtin.func's in other places.
-
-        goog.asserts.assert(kws === undefined);
-        return func.apply(null, args);
-    }
-    else
-    {
-        var fcall = func.tp$call;
-        if (fcall !== undefined)
-        {
-            if (varargseq)
-            {
-                for (var it = varargseq.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext())
-                {
-                    args.push(i);
-                }
-            }
-            if (kwdict)
-            {
-                goog.asserts.fail("todo;");
-            }
-            return fcall.call(func, args, kws, kwdict);
+    goog.asserts.assert(kws === undefined);
+    return func.apply(null, args);
+  }
+  else {
+    var fcall = func.tp$call;
+    if (fcall !== undefined) {
+      if (varargseq) {
+        for (var it = varargseq.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext()) {
+          args.push(i);
         }
-
-        // todo; can we push this into a tp$call somewhere so there's
-        // not redundant checks everywhere for all of these __x__ ones?
-        fcall = func.__call__;
-        if (fcall !== undefined)
-        {
-            // func is actually the object here because we got __call__
-            // from it. todo; should probably use descr_get here
-            args.unshift(func);
-            return Sk.misceval.apply(fcall, kws, args, kwdict, varargseq);
-        }
-        throw new TypeError("'" + func.tp$name + "' object is not callable.");
+      }
+      if (kwdict) {
+        goog.asserts.fail("todo;");
+      }
+      return fcall.call(func, args, kws, kwdict);
     }
+    // todo; can we push this into a tp$call somewhere so there's
+    // not redundant checks everywhere for all of these __x__ ones?
+    fcall = func.__call__;
+    if (fcall !== undefined) {
+      // func is actually the object here because we got __call__
+      // from it. todo; should probably use descr_get here
+      args.unshift(func);
+      return Sk.misceval.apply(fcall, kws, args, kwdict, varargseq);
+    }
+    throw new TypeError("'" + func.tp$name + "' object is not callable.");
+  }
 };
 goog.exportSymbol("Sk.misceval.apply", Sk.misceval.apply);
 

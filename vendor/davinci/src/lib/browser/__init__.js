@@ -13,6 +13,7 @@ var $builtinmodule = function(name) {
   var EVENT_CLASS    = "Event";
   var WINDOW_CLASS   = "Window";
   
+  var PROP_DEVICE_PIXEL_RATIO      = "devicePixelRatio";
   var PROP_FILL_STYLE              = "fillStyle";
   var PROP_HEIGHT                  = "height";
   var PROP_KEY_CODE                = "keyCode";
@@ -24,6 +25,7 @@ var $builtinmodule = function(name) {
   var PROP_TOP                     = "top";
   var METHOD_ADD_EVENT_LISTENER    = "addEventListener";
   var METHOD_APPEND_CHILD          = "appendChild";
+  var METHOD_ARC                   = "arc";
   var METHOD_BEGIN_PATH            = "beginPath";
   var METHOD_CLEAR_RECT            = "clearRect";
   var METHOD_CLOSE_PATH            = "closePath";
@@ -250,6 +252,28 @@ var $builtinmodule = function(name) {
                     }
                     case PROP_STROKE_STYLE: {
                       return new Sk.builtin.str(context[PROP_STROKE_STYLE]);
+                    }
+                    case METHOD_ARC: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_ARC;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, x, y, radius, startAngle, endAngle, anticlockwise) {
+                          x = Sk.ffi.remapToJs(x);
+                          y = Sk.ffi.remapToJs(y);
+                          radius = Sk.ffi.remapToJs(radius);
+                          startAngle = Sk.ffi.remapToJs(startAngle);
+                          endAngle = Sk.ffi.remapToJs(endAngle);
+                          anticlockwise = Sk.ffi.remapToJs(anticlockwise);
+                          context[METHOD_ARC](x, y, radius, startAngle, endAngle, anticlockwise);
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_ARC);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_ARC);
+                        });
+                      }, METHOD_ARC, []));
                     }
                     case METHOD_BEGIN_PATH: {
                       return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
@@ -640,6 +664,9 @@ var $builtinmodule = function(name) {
           return wrapNumber(window[name]);
         }
         case "innerWidth": {
+          return wrapNumber(window[name]);
+        }
+        case PROP_DEVICE_PIXEL_RATIO: {
           return wrapNumber(window[name]);
         }
         case METHOD_ADD_EVENT_LISTENER: {
