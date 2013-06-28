@@ -26,8 +26,8 @@ var $builtinmodule = function(name) {
     $loc.__add__ = new Sk.builtin.func(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
-      var x = bladeASM.addEuclidean2(a.re, 0, 0, a.im, b.re, 0, 0, b.im, 0);
-      var y = bladeASM.addEuclidean2(a.re, 0, 0, a.im, b.re, 0, 0, b.im, 3);
+      var x = bladeASM.addE2(a.re, 0, 0, a.im, b.re, 0, 0, b.im, 0);
+      var y = bladeASM.addE2(a.re, 0, 0, a.im, b.re, 0, 0, b.im, 3);
       return Sk.misceval.callsim(
         mod[COMPLEX_CONSTRUCTOR_NAME],
         Sk.builtin.assk$(x, Sk.builtin.nmber.float$),
@@ -37,8 +37,8 @@ var $builtinmodule = function(name) {
     $loc.__sub__ = new Sk.builtin.func(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
-      var x = bladeASM.subEuclidean2(a.re, 0, 0, a.im, b.re, 0, 0, b.im, 0);
-      var y = bladeASM.subEuclidean2(a.re, 0, 0, a.im, b.re, 0, 0, b.im, 3);
+      var x = bladeASM.subE2(a.re, 0, 0, a.im, b.re, 0, 0, b.im, 0);
+      var y = bladeASM.subE2(a.re, 0, 0, a.im, b.re, 0, 0, b.im, 3);
       return Sk.misceval.callsim(
         mod[COMPLEX_CONSTRUCTOR_NAME],
         Sk.builtin.assk$(x, Sk.builtin.nmber.float$),
@@ -48,8 +48,8 @@ var $builtinmodule = function(name) {
     $loc.__mul__ = new Sk.builtin.func(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
-      var x = bladeASM.mulEuclidean2(a.re, 0, 0, a.im, b.re, 0, 0, b.im, 0);
-      var y = bladeASM.mulEuclidean2(a.re, 0, 0, a.im, b.re, 0, 0, b.im, 3);
+      var x = bladeASM.mulE2(a.re, 0, 0, a.im, b.re, 0, 0, b.im, 0);
+      var y = bladeASM.mulE2(a.re, 0, 0, a.im, b.re, 0, 0, b.im, 3);
       return Sk.misceval.callsim(
         mod[COMPLEX_CONSTRUCTOR_NAME],
         Sk.builtin.assk$(x, Sk.builtin.nmber.float$),

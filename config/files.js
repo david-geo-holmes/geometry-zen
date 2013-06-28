@@ -9,9 +9,9 @@
  *  regardless of the point you're at in the build
  *  lifecycle.
  *
- * You can find the parent object in: node_modules/lineman/config/files.coffee
+ * You will find the parent object in: node_modules/lineman/config/files.coffee
  *
- * You can change 'vendor' to '..' to work on davinci locally.
+ * You may change 'vendor' to '..' to work on davinci locally.
  */
 
 module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
