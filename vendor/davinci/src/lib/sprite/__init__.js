@@ -1787,7 +1787,7 @@ var $builtinmodule = function(name) {
         case POSITION: {
           if (value) {
             checkArgs(3, arguments.length, SHAPE);
-            self.v.goto(value.v.coordinate(1), value.v.coordinate(2));
+            self.v.goto(value.v[1], value.v[2]);
           }
         }
         break;
