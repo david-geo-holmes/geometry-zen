@@ -15,10 +15,15 @@ var $builtinmodule = function(name) {
   
   var PROP_DEVICE_PIXEL_RATIO      = "devicePixelRatio";
   var PROP_FILL_STYLE              = "fillStyle";
+  var PROP_FIRST_CHILD             = "firstChild";
   var PROP_HEIGHT                  = "height";
   var PROP_KEY_CODE                = "keyCode";
+  var PROP_LAST_CHILD              = "lastChild";
   var PROP_LEFT                    = "left";
+  var PROP_NEXT_SIBLING            = "nextSibling";
+  var PROP_PARENT_NODE             = "parentNode";
   var PROP_POSITION                = "position";
+  var PROP_PREVIOUS_SIBLING        = "previousSibling";
   var PROP_WIDTH                   = "width";
   var PROP_STROKE_STYLE            = "strokeStyle";
   var PROP_STYLE                   = "style";
@@ -144,8 +149,20 @@ var $builtinmodule = function(name) {
         case 'clientWidth': {
           return wrapNumber(node[name]);
         }
-        case 'parentNode': {
-          return wrapNode(node.parentNode);
+        case PROP_FIRST_CHILD: {
+          return wrapNode(node[PROP_FIRST_CHILD]);
+        }
+        case PROP_LAST_CHILD: {
+          return wrapNode(node[PROP_LAST_CHILD]);
+        }
+        case PROP_NEXT_SIBLING: {
+          return wrapNode(node[PROP_NEXT_SIBLING]);
+        }
+        case PROP_PARENT_NODE: {
+          return wrapNode(node[PROP_PARENT_NODE]);
+        }
+        case PROP_PREVIOUS_SIBLING: {
+          return wrapNode(node[PROP_PREVIOUS_SIBLING]);
         }
         case PROP_HEIGHT: {
           return Sk.builtin.assk$(node[PROP_HEIGHT], Sk.builtin.nmber.int$);
@@ -160,7 +177,7 @@ var $builtinmodule = function(name) {
               self.v = node.style;
             });
             $loc.__getattr__ = new Sk.builtin.func(function(stylePy, name) {
-              style = Sk.ffi.remapToJs(stylePy);
+              var style = Sk.ffi.remapToJs(stylePy);
               switch(name) {
                 case PROP_HEIGHT: {
                   return new Sk.builtin.str(style[PROP_HEIGHT]);
@@ -210,10 +227,10 @@ var $builtinmodule = function(name) {
             })
             $loc.__str__ = new Sk.builtin.func(function(self) {
               return new Sk.builtin.str(PROP_STYLE);
-            })
+            });
             $loc.__repr__ = new Sk.builtin.func(function(self) {
               return new Sk.builtin.str(PROP_STYLE);
-            })
+            });
           }, PROP_STYLE, []));
         }
         case METHOD_APPEND_CHILD: {
@@ -226,10 +243,10 @@ var $builtinmodule = function(name) {
             });
             $loc.__str__ = new Sk.builtin.func(function(self) {
               return new Sk.builtin.str(METHOD_APPEND_CHILD);
-            })
+            });
             $loc.__repr__ = new Sk.builtin.func(function(self) {
               return new Sk.builtin.str(METHOD_APPEND_CHILD);
-            })
+            });
           }, METHOD_APPEND_CHILD, []));
         }
         case METHOD_GET_CONTEXT: {
