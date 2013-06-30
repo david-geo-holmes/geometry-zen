@@ -7,48 +7,56 @@ var $builtinmodule = function(name) {
 
   var mod = {};
 
-  var NODE           = "Node";
-  var CONTEXT_CLASS  = "Context";
-  var DOCUMENT_CLASS = "Document";
-  var EVENT_CLASS    = "Event";
-  var WINDOW_CLASS   = "Window";
+  var NODE              = "Node";
+  var CONTEXT_CLASS     = "Context";
+  var DOCUMENT_CLASS    = "Document";
+  var EVENT_CLASS       = "Event";
+  var WINDOW_CLASS      = "Window";
   
-  var PROP_DEVICE_PIXEL_RATIO      = "devicePixelRatio";
-  var PROP_FILL_STYLE              = "fillStyle";
-  var PROP_FIRST_CHILD             = "firstChild";
-  var PROP_HEIGHT                  = "height";
-  var PROP_KEY_CODE                = "keyCode";
-  var PROP_LAST_CHILD              = "lastChild";
-  var PROP_LEFT                    = "left";
-  var PROP_NEXT_SIBLING            = "nextSibling";
-  var PROP_PARENT_NODE             = "parentNode";
-  var PROP_POSITION                = "position";
-  var PROP_PREVIOUS_SIBLING        = "previousSibling";
-  var PROP_WIDTH                   = "width";
-  var PROP_STROKE_STYLE            = "strokeStyle";
-  var PROP_STYLE                   = "style";
-  var PROP_TOP                     = "top";
-  var METHOD_ADD_EVENT_LISTENER    = "addEventListener";
-  var METHOD_APPEND_CHILD          = "appendChild";
-  var METHOD_ARC                   = "arc";
-  var METHOD_BEGIN_PATH            = "beginPath";
-  var METHOD_CLEAR_RECT            = "clearRect";
-  var METHOD_CLOSE_PATH            = "closePath";
-  var METHOD_FILL                  = "fill";
-  var METHOD_FILL_RECT             = "fillRect";
-  var METHOD_FILL_TEXT             = "fillText";
-  var METHOD_GET_CONTEXT           = "getContext";
-  var METHOD_INSERT_BEFORE         = "insertBefore";
-  var METHOD_LINE_TO               = "lineTo";
-  var METHOD_MOVE_TO               = "moveTo";
-  var METHOD_RECT                  = "rect";
-  var METHOD_REMOVE_CHILD          = "removeChild";
-  var METHOD_REMOVE_EVENT_LISTENER = "removeEventListener";
-  var METHOD_SET_ATTRIBUTE         = "setAttribute";
-  var METHOD_SET_TRANSFORM         = "setTransform";
-  var METHOD_STROKE                = "stroke";
-  var METHOD_STROKE_RECT           = "strokeRect";
-  var METHOD_STROKE_TEXT           = "strokeText";
+  var PROP_ANIMATION_TIME            = "animationTime";
+  var PROP_BODY                      = "body";
+  var PROP_DEVICE_PIXEL_RATIO        = "devicePixelRatio";
+  var PROP_DOCUMENT                  = "document";
+  var PROP_FILL_STYLE                = "fillStyle";
+  var PROP_FIRST_CHILD               = "firstChild";
+  var PROP_HEIGHT                    = "height";
+  var PROP_KEY_CODE                  = "keyCode";
+  var PROP_LAST_CHILD                = "lastChild";
+  var PROP_LEFT                      = "left";
+  var PROP_NEXT_SIBLING              = "nextSibling";
+  var PROP_PARENT_NODE               = "parentNode";
+  var PROP_POSITION                  = "position";
+  var PROP_PREVIOUS_SIBLING          = "previousSibling";
+  var PROP_STROKE_STYLE              = "strokeStyle";
+  var PROP_STYLE                     = "style";
+  var PROP_TOP                       = "top";
+  var PROP_WEBKIT_HIDDEN             = "webkitHidden";
+  var PROP_WIDTH                     = "width";
+  var PROP_WINDOW                    = "window";
+  var METHOD_ADD_EVENT_LISTENER      = "addEventListener";
+  var METHOD_APPEND_CHILD            = "appendChild";
+  var METHOD_ARC                     = "arc";
+  var METHOD_BEGIN_PATH              = "beginPath";
+  var METHOD_CANCEL_ANIMATION_FRAME  = "cancelAnimationFrame";
+  var METHOD_CLEAR_RECT              = "clearRect";
+  var METHOD_CLOSE_PATH              = "closePath";
+  var METHOD_FILL                    = "fill";
+  var METHOD_FILL_RECT               = "fillRect";
+  var METHOD_FILL_TEXT               = "fillText";
+  var METHOD_GET_CONTEXT             = "getContext";
+  var METHOD_INSERT_BEFORE           = "insertBefore";
+  var METHOD_LINE_TO                 = "lineTo";
+  var METHOD_MOVE_TO                 = "moveTo";
+  var METHOD_RECT                    = "rect";
+  var METHOD_REMOVE_CHILD            = "removeChild";
+  var METHOD_REMOVE_EVENT_LISTENER   = "removeEventListener";
+  var METHOD_REQUEST_ANIMATION_FRAME = "requestAnimationFrame";
+  var METHOD_SET_ATTRIBUTE           = "setAttribute";
+  var METHOD_SET_TIMEOUT             = "setTimeout";
+  var METHOD_SET_TRANSFORM           = "setTransform";
+  var METHOD_STROKE                  = "stroke";
+  var METHOD_STROKE_RECT             = "strokeRect";
+  var METHOD_STROKE_TEXT             = "strokeText";
   // We must be able to track the JavaScript listener functions.
   // TODO: This should include both the typoe and the useCapture flag.
   var winListeners = {};
@@ -666,16 +674,17 @@ var $builtinmodule = function(name) {
     })
   }, NODE, []);
 
-  mod["window"] = Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+  mod[PROP_WINDOW] = Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = new Sk.builtin.func(function(self) {
       self.tp$name = WINDOW_CLASS;
     });
     $loc.__getattr__ = new Sk.builtin.func(function(self, name) {
-      var REQUEST_ANIMATION_FRAME = "requestAnimationFrame";
-      var CANCEL_ANIMATION_FRAME = "cancelAnimationFrame";
       switch(name) {
-        case "document": {
-          return mod[name];
+        case PROP_ANIMATION_TIME: {
+          return wrapNumber(window[PROP_ANIMATION_TIME]);
+        }
+        case PROP_DOCUMENT: {
+          return mod[PROP_DOCUMENT];
         }
         case "innerHeight": {
           return wrapNumber(window[name]);
@@ -705,43 +714,63 @@ var $builtinmodule = function(name) {
             })
           }, METHOD_ADD_EVENT_LISTENER, []));
         }
-        case REQUEST_ANIMATION_FRAME: {
+        case METHOD_CANCEL_ANIMATION_FRAME: {
           return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
             $loc.__init__ = new Sk.builtin.func(function(self) {
-              self.tp$name = REQUEST_ANIMATION_FRAME;
+              self.tp$name = METHOD_CANCEL_ANIMATION_FRAME;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, requestID) {
+              if (requestID) {
+                window[METHOD_CANCEL_ANIMATION_FRAME](numberFromArg(requestID));
+              }
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_CANCEL_ANIMATION_FRAME)
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_CANCEL_ANIMATION_FRAME)
+            })
+          }, METHOD_CANCEL_ANIMATION_FRAME, []));
+        }
+        case METHOD_REQUEST_ANIMATION_FRAME: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_REQUEST_ANIMATION_FRAME;
             });
             $loc.__call__ = new Sk.builtin.func(function(self, callback) {
-              var requestID = window.requestAnimationFrame(function(timestamp) {
-                // TODO: is it consistent to be wrapping here?
+              var requestID = window[METHOD_REQUEST_ANIMATION_FRAME](function(timestamp) {
                 Sk.misceval.callsim(callback, wrapNumber(timestamp));
               });
               return wrapNumber(requestID);
             });
             $loc.__str__ = new Sk.builtin.func(function(self) {
-              return new Sk.builtin.str(REQUEST_ANIMATION_FRAME)
+              return new Sk.builtin.str(METHOD_REQUEST_ANIMATION_FRAME)
             })
             $loc.__repr__ = new Sk.builtin.func(function(self) {
-              return new Sk.builtin.str(REQUEST_ANIMATION_FRAME)
+              return new Sk.builtin.str(METHOD_REQUEST_ANIMATION_FRAME)
             })
-          }, REQUEST_ANIMATION_FRAME, []));
+          }, METHOD_REQUEST_ANIMATION_FRAME, []));
         }
-        case CANCEL_ANIMATION_FRAME: {
+        case METHOD_SET_TIMEOUT: {
           return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
             $loc.__init__ = new Sk.builtin.func(function(self) {
-              self.tp$name = CANCEL_ANIMATION_FRAME;
+              self.tp$name = METHOD_SET_TIMEOUT;
             });
-            $loc.__call__ = new Sk.builtin.func(function(self, requestID) {
-              if (requestID) {
-                window.cancelAnimationFrame(numberFromArg(requestID));
-              }
+            $loc.__call__ = new Sk.builtin.func(function(self, funcPy, delayPy, paramsPy) {
+              var delay = Sk.ffi.remapToJs(delayPy);
+              var params = Sk.ffi.remapToJs(paramsPy);
+              var timeoutID = window[METHOD_SET_TIMEOUT](function() {
+                Sk.misceval.callsim(funcPy);
+              }, delay, params);
+              return wrapNumber(timeoutID);
             });
             $loc.__str__ = new Sk.builtin.func(function(self) {
-              return new Sk.builtin.str(CANCEL_ANIMATION_FRAME)
+              return new Sk.builtin.str(METHOD_SET_TIMEOUT)
             })
             $loc.__repr__ = new Sk.builtin.func(function(self) {
-              return new Sk.builtin.str(CANCEL_ANIMATION_FRAME)
+              return new Sk.builtin.str(METHOD_SET_TIMEOUT)
             })
-          }, CANCEL_ANIMATION_FRAME, []));
+          }, METHOD_SET_TIMEOUT, []));
         }
       }
     });
@@ -753,7 +782,7 @@ var $builtinmodule = function(name) {
     })
   }, WINDOW_CLASS, []));
 
-  mod["document"] = Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+  mod[PROP_DOCUMENT] = Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = new Sk.builtin.func(function(self) {
       self.tp$name = DOCUMENT_CLASS;
     });
@@ -763,8 +792,11 @@ var $builtinmodule = function(name) {
       var METHOD_GET_ELEMENT_BY_ID = "getElementById";
       var GET_ELEMENTS_BY_TAG_NAME = "getElementsByTagName";
       switch(name) {
-        case "body": {
-          return Sk.misceval.callsim(mod[NODE], document.body);
+        case PROP_BODY: {
+          return Sk.misceval.callsim(mod[NODE], document[PROP_BODY]);
+        }
+        case PROP_WEBKIT_HIDDEN: {
+          return document[PROP_WEBKIT_HIDDEN];
         }
         case METHOD_ADD_EVENT_LISTENER: {
           return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
