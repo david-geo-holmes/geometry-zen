@@ -92,6 +92,8 @@ var $builtinmodule = function(name) {
 
   var METHOD_ADD               = "add";
   var METHOD_CLONE             = "clone";
+  var METHOD_CROSS             = "cross";
+  var METHOD_DOT               = "dot";
   var METHOD_LENGTH            = "length";
   var METHOD_LOOK_AT           = "lookAt";
   var METHOD_NORMALIZE         = "normalize";
@@ -698,7 +700,7 @@ var $builtinmodule = function(name) {
             });
             $loc.__call__ = new Sk.builtin.func(function(self, arg) {
               arg  = Sk.ffi.remapToJs(arg);
-              mv.w += arg.w
+              mv.w += arg.w;
               mv.x += arg.x;
               mv.y += arg.y;
               mv.z += arg.z;
@@ -715,6 +717,46 @@ var $builtinmodule = function(name) {
               return new Sk.builtin.str(METHOD_ADD);
             });
           }, METHOD_ADD, []));
+        }
+        case METHOD_CROSS: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_CROSS;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, vPy) {
+              var v  = Sk.ffi.remapToJs(vPy);
+              mv.w = 0
+              mv[METHOD_CROSS](v);
+              mv.xy = 0;
+              mv.yz = 0;
+              mv.zx = 0;
+              mv.xyz = 0;
+              return mvPy;
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_CROSS);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_CROSS);
+            });
+          }, METHOD_CROSS, []));
+        }
+        case METHOD_DOT: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_DOT;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, vPy) {
+              var v  = Sk.ffi.remapToJs(vPy);
+              return Sk.builtin.assk$(mv[METHOD_DOT](v), Sk.builtin.nmber.float$);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_DOT);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_DOT);
+            });
+          }, METHOD_DOT, []));
         }
         case METHOD_SET_X: {
           return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
