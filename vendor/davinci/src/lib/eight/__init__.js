@@ -41,6 +41,7 @@ var $builtinmodule = function(name) {
   var CUBE_GEOMETRY         = "CubeGeometry";
   var CYLINDER_GEOMETRY     = "CylinderGeometry";
   var ICOSAHEDRON_GEOMETRY  = "IcosahedronGeometry";
+  var LATHE_GEOMETRY        = "LatheGeometry";
   var OCTAHEDRON_GEOMETRY   = "OctahedronGeometry";
   var PLANE_GEOMETRY        = "PlaneGeometry";
   var SPHERE_GEOMETRY       = "SphereGeometry";
@@ -49,6 +50,7 @@ var $builtinmodule = function(name) {
 
   var PROP_BOTTOM              = "bottom";
   var PROP_COLOR               = "color";
+  var PROP_DETAIL              = "detail";
   var PROP_FAR                 = "far";
   var PROP_ID                  = "id";
   var PROP_LEFT                = "left";
@@ -58,15 +60,32 @@ var $builtinmodule = function(name) {
   var PROP_OPACITY             = "opacity";
   var PROP_OVERDRAW            = "overdraw";
   var PROP_POSITION            = "position";
+  var PROP_RADIUS              = "radius";
   var PROP_RIGHT               = "right";
   var PROP_ROTATION            = "rotation";
   var PROP_SCALE               = "scale";
   var PROP_TOP                 = "top";
   var PROP_TRANSPARENT         = "transparent";
   var PROP_TYPE                = "type";
+  var PROP_VERTICES            = "vertices";
   var PROP_VISIBLE             = "visible";
   var PROP_WIREFRAME           = "wireframe";
   var PROP_WIREFRAME_LINEWIDTH = "wireframeLinewidth";
+
+  var PROP_W                   = "w";
+  var PROP_X                   = "x";
+  var PROP_Y                   = "y";
+  var PROP_Z                   = "z";
+  var PROP_XY                  = "xy";
+  var PROP_YZ                  = "yz";
+  var PROP_ZX                  = "zx";
+  var PROP_XYZ                 = "xyz";
+  var METHOD_SET_X             = "setX";
+  var METHOD_SET_Y             = "setY";
+  var METHOD_SET_Z             = "setZ";
+  var METHOD_GET_COMPONENT     = "getComponent";
+  var METHOD_SET_COMPONENT     = "setComponent";
+  var METHOD_SET               = "set";
 
   var METHOD_ADD               = "add";
   var METHOD_CLONE             = "clone";
@@ -78,14 +97,23 @@ var $builtinmodule = function(name) {
 
   var mod = {};
 
-  function isNumber(x)    { return typeof x === 'number'; }
-  function isString(x)    { return typeof x === 'string'; }
   function isBoolean(x)   { return typeof x === 'boolean'; }
-  function isNull(x)      { return typeof x === 'object' && x === null; }
+  function isFunction(x)  { return typeof x === 'function'; }
+  function isNumber(x)    { return typeof x === 'number'; }
+  function isObject(x)    { return typeof x === 'object'; }
+  function isString(x)    { return typeof x === 'string'; }
   function isUndefined(x) { return typeof x === 'undefined'; }
+
   function isDefined(x)   { return typeof x !== 'undefined'; }
+  function isNull(x)      { return typeof x === 'object' && x === null; }
 
   function methodAdd(target) {
+    if (!isObject(target)) {
+      throw new Sk.builtin.AssertionError("target must be an object.");
+    }
+    if (!isFunction(target[METHOD_ADD])) {
+      throw new Sk.builtin.AssertionError("target must have an 'add' function.");
+    }
     return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
       $loc.__init__ = new Sk.builtin.func(function(self) {
         self.tp$name = METHOD_ADD;
@@ -104,6 +132,12 @@ var $builtinmodule = function(name) {
   }
 
   function methodRemove(target) {
+    if (!isObject(target)) {
+      throw new Sk.builtin.AssertionError("target must be an object.");
+    }
+    if (!isFunction(target[METHOD_REMOVE])) {
+      throw new Sk.builtin.AssertionError("target must have a 'remove' function.");
+    }
     return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
       $loc.__init__ = new Sk.builtin.func(function(self) {
         self.tp$name = METHOD_REMOVE;
@@ -119,6 +153,47 @@ var $builtinmodule = function(name) {
         return new Sk.builtin.str(METHOD_REMOVE)
       })
     }, METHOD_REMOVE, []));
+  }
+
+  function verticesPy(vertices) {
+    return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+      $loc.__init__ = new Sk.builtin.func(function(self) {
+        self.tp$name = PROP_VERTICES;
+        self.v = vertices;
+      });
+      $loc.__getattr__ = new Sk.builtin.func(function(verticesPy, name) {
+        var METHOD_APPEND = "append";
+        switch(name) {
+          case METHOD_APPEND: {
+            return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+              $loc.__init__ = new Sk.builtin.func(function(self) {
+                self.tp$name = METHOD_APPEND;
+              });
+              $loc.__call__ = new Sk.builtin.func(function(self, vectorPy) {
+                vertices.push(Sk.ffi.remapToJs(vectorPy));
+              });
+              $loc.__str__ = new Sk.builtin.func(function(self) {
+                return new Sk.builtin.str(METHOD_APPEND)
+              });
+              $loc.__repr__ = new Sk.builtin.func(function(self) {
+                return new Sk.builtin.str(METHOD_APPEND)
+              });
+            }, METHOD_APPEND, []));
+          }
+        }
+      });
+      $loc.__getitem__ = new Sk.builtin.func(function(verticesPy, indexPy) {
+        var index = Sk.ffi.remapToJs(indexPy);
+        return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(vertices[index]));
+      });
+      $loc.mp$length = function() {return vertices.length;};
+      $loc.__str__ = new Sk.builtin.func(function(self) {
+        return new Sk.builtin.str(PROP_VERTICES)
+      });
+      $loc.__repr__ = new Sk.builtin.func(function(self) {
+        return new Sk.builtin.str(PROP_VERTICES)
+      });
+    }, PROP_VERTICES, []));
   }
 
   /*
@@ -314,31 +389,40 @@ var $builtinmodule = function(name) {
     return Sk.misceval.callsim(mod[MULTI_VECTOR_3], w, x, y, z, xy, yz, zx, xyz);
   }
 
+  function enhanceVector3(w, vector, xy, yz, zx, xyz) {
+    vector.w = w;
+    vector.xy = xy;
+    vector.yz = yz;
+    vector.zx = zx;
+    vector.xyz = xyz;
+    return vector;
+  }
+
   function coord(mv, index) {
     switch(index) {
       case 0: {
-        return mv[0];
+        return mv.w;
       }
       case 1: {
-        return mv[1].x;
+        return mv.x;
       }
       case 2: {
-        return mv[1].y;
+        return mv.y;
       }
       case 3: {
-        return mv[1].z;
+        return mv.z;
       }
       case 4: {
-        return mv[2][0];
+        return mv.xy;
       }
       case 5: {
-        return mv[2][1];
+        return mv.yz;
       }
       case 6: {
-        return mv[2][2];
+        return mv.zx;
       }
       case 7: {
-        return mv[3];
+        return mv.xyz;
       }
       default: {
         throw new Sk.builtin.AssertionError("" + index + " is not a valid multivector coordinate index");
@@ -348,22 +432,22 @@ var $builtinmodule = function(name) {
   
   function compute(f, a, b, coord, pack) {
     var a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, x0, x1, x2, x3, x4, x5, x6, x7;
-    a0 = coord(a, 0);
-    a1 = coord(a, 1);
-    a2 = coord(a, 2);
-    a3 = coord(a, 3);
-    a4 = coord(a, 4);
-    a5 = coord(a, 5);
-    a6 = coord(a, 6);
-    a7 = coord(a, 7);
-    b0 = coord(b, 0);
-    b1 = coord(b, 1);
-    b2 = coord(b, 2);
-    b3 = coord(b, 3);
-    b4 = coord(b, 4);
-    b5 = coord(b, 5);
-    b6 = coord(b, 6);
-    b7 = coord(b, 7);
+    a0 = a.w;
+    a1 = a.x;
+    a2 = a.y;
+    a3 = a.z;
+    a4 = a.xy;
+    a5 = a.yz;
+    a6 = a.zx;
+    a7 = a.xyz;
+    b0 = b.w;
+    b1 = b.x;
+    b2 = b.y;
+    b3 = b.z;
+    b4 = b.xy;
+    b5 = b.yz;
+    b6 = b.zx;
+    b7 = b.xyz;
     x0 = f(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 0);
     x1 = f(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 1);
     x2 = f(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 2);
@@ -375,19 +459,7 @@ var $builtinmodule = function(name) {
     return pack(x0, x1, x2, x3, x4, x5, x6, x7);
   }
 
-  /*
-   * It is important to note that this wrapper class keeps a reference to
-   * the original argument which is expected to have come from the THREE.Vector3
-   */
-   mod[MULTI_VECTOR_3] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
-    var PROP_W = "w";
-    var PROP_X = "x";
-    var PROP_Y = "y";
-    var PROP_Z = "z";
-    var PROP_XY = "xy";
-    var PROP_YZ = "yz";
-    var PROP_ZX = "zx";
-    var PROP_XYZ = "xyz";
+  mod[MULTI_VECTOR_3] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = new Sk.builtin.func(function(self, w, x, y, z, xy, yz, zx, xyz) {
       w = Sk.ffi.remapToJs(w);
       x = Sk.ffi.remapToJs(x);
@@ -398,16 +470,16 @@ var $builtinmodule = function(name) {
       zx = Sk.ffi.remapToJs(zx);
       xyz = Sk.ffi.remapToJs(xyz);
       if (isNumber(w) && isNumber(x) && isNumber(y) && isNumber(z) && isNumber(xy) && isNumber(yz) && isNumber(zx) && isNumber(xyz)) {
-        self.v = [w, new THREE.Vector3(x, y, z), [xy, yz, zx], xyz];
+        self.v = enhanceVector3(w, new THREE.Vector3(x, y, z), xy, yz, zx, xyz);
       }
       else if (isDefined(w) && isUndefined(x) && isUndefined(y) && isUndefined(z) && isUndefined(xy) && isUndefined(yz) && isUndefined(zx) && isUndefined(xyz)) {
-        self.v = [0, w, [0, 0, 0], 0];
+        self.v = enhanceVector3(0, w, 0, 0, 0, 0);
       }
       else if (isDefined(w) && isUndefined(x) && isUndefined(y) && isUndefined(z) && isDefined(xy) && isDefined(yz) && isDefined(zx) && isDefined(xyz)) {
-        self.v = [w, new THREE.Vector3(), [xy, yz, zx], xyz];
+        self.v = enhanceVector3(w, new THREE.Vector3(), xy, yz, zx, xyz);
       }
       else if (isUndefined(w) && isUndefined(x) && isUndefined(y) && isUndefined(z) && isUndefined(xy) && isUndefined(yz) && isUndefined(zx) && isUndefined(xyz)) {
-        self.v = [0, new THREE.Vector3(), [0, 0, 0], 0];
+        self.v = enhanceVector3(0, new THREE.Vector3(), 0, 0, 0, 0);
       }
       else {
         console.log("w: " + JSON.stringify(w, null, 2));
@@ -418,213 +490,203 @@ var $builtinmodule = function(name) {
       }
       self.tp$name = MULTI_VECTOR_3;
     });
-
-    $loc.__add__ = new Sk.builtin.func(function(lhs, rhs) {
-      lhs = Sk.ffi.remapToJs(lhs);
-      rhs = Sk.ffi.remapToJs(rhs);
-      var w = lhs[0] + rhs[0]
-      var x = lhs[1][PROP_X] + rhs[1][PROP_X];
-      var y = lhs[1][PROP_Y] + rhs[1][PROP_Y];
-      var z = lhs[1][PROP_Z] + rhs[1][PROP_Z];
-      var xy = lhs[2][0] + rhs[2][0];
-      var yz = lhs[2][1] + rhs[2][1];
-      var zx = lhs[2][2] + rhs[2][2];
-      var xyz = lhs[3] + rhs[3];
-      return remapToPy(w, x, y, z, xy, yz, zx, xyz);
-    });
-
-    $loc.__radd__ = new Sk.builtin.func(function(rhs, lhs) {
-      lhs = Sk.ffi.remapToJs(lhs);
-      rhs = Sk.ffi.remapToJs(rhs);
-      if (isNumber(lhs)) {
-        return remapToPy(lhs + rhs[0], rhs[1][PROP_X], rhs[1][PROP_Y], rhs[1][PROP_Z], rhs[2][0], rhs[2][1], rhs[2][2], rhs[3]);
+    $loc.__add__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(b)) {
+        return remapToPy(a.w + b, a.x, a.y, a.z, a.xy, a.yz, a.zx, a.xyz);
       }
       else {
-        var w = lhs[0] + rhs[0]
-        var x = lhs[1][PROP_X] + rhs[1][PROP_X];
-        var y = lhs[1][PROP_Y] + rhs[1][PROP_Y];
-        var z = lhs[1][PROP_Z] + rhs[1][PROP_Z];
-        var xy = lhs[2][0] + rhs[2][0];
-        var yz = lhs[2][1] + rhs[2][1];
-        var zx = lhs[2][2] + rhs[2][2];
-        var xyz = lhs[3] + rhs[3];
+        var w = a.w + b.w;
+        var x = a.x + b.x;
+        var y = a.y + b.y;
+        var z = a.z + b.z;
+        var xy = a.xy + b.xy;
+        var yz = a.yz + b.yz;
+        var zx = a.zx + b.zx;
+        var xyz = a.xyz + b.xyz;
         return remapToPy(w, x, y, z, xy, yz, zx, xyz);
       }
     });
-
-    $loc.__sub__ = new Sk.builtin.func(function(lhs, rhs) {
-      lhs = Sk.ffi.remapToJs(lhs);
-      rhs = Sk.ffi.remapToJs(rhs);
-      var w = lhs[0] - rhs[0]
-      var x = lhs[1][PROP_X] - rhs[1][PROP_X];
-      var y = lhs[1][PROP_Y] - rhs[1][PROP_Y];
-      var z = lhs[1][PROP_Z] - rhs[1][PROP_Z];
-      var xy = lhs[2][0] - rhs[2][0];
-      var yz = lhs[2][1] - rhs[2][1];
-      var zx = lhs[2][2] - rhs[2][2];
-      var xyz = lhs[3] - rhs[3];
-      return remapToPy(w, x, y, z, xy, yz, zx, xyz);
-    });
-
-    $loc.__rsub__ = new Sk.builtin.func(function(rhs, lhs) {
-      lhs = Sk.ffi.remapToJs(lhs);
-      rhs = Sk.ffi.remapToJs(rhs);
-      if (isNumber(lhs)) {
-        return remapToPy(lhs - rhs[0], -rhs[1][PROP_X], -rhs[1][PROP_Y], -rhs[1][PROP_Z], -rhs[2][0], -rhs[2][1], -rhs[2][2], -rhs[3]);
+    $loc.__radd__ = new Sk.builtin.func(function(b, a) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(a)) {
+        return remapToPy(a + b.w, b.x, b.y, b.z, b.xy, b.yz, b.zx, b.xyz);
       }
       else {
-        var w = lhs[0] - rhs[0]
-        var x = lhs[1][PROP_X] - rhs[1][PROP_X];
-        var y = lhs[1][PROP_Y] - rhs[1][PROP_Y];
-        var z = lhs[1][PROP_Z] - rhs[1][PROP_Z];
-        var xy = lhs[2][0] - rhs[2][0];
-        var yz = lhs[2][1] - rhs[2][1];
-        var zx = lhs[2][2] - rhs[2][2];
-        var xyz = lhs[3] - rhs[3];
+        throw new Sk.builtin.AssertionError();
+      }
+    });
+    $loc.__sub__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(b)) {
+        return remapToPy(a.w - b, a.x, a.y, a.z, a.xy, a.yz, a.zx, a.xyz);
+      }
+      else {
+        var w = a.w - b.w;
+        var x = a.x - b.x;
+        var y = a.y - b.y;
+        var z = a.z - b.z;
+        var xy = a.xy - b.xy;
+        var yz = a.yz - b.yz;
+        var zx = a.zx - b.zx;
+        var xyz = a.xyz - b.xyz;
         return remapToPy(w, x, y, z, xy, yz, zx, xyz);
       }
     });
-
-    $loc.__mul__ = new Sk.builtin.func(function(lhs, rhs) {
-      lhs = Sk.ffi.remapToJs(lhs);
-      rhs = Sk.ffi.remapToJs(rhs);
-      if (isNumber(rhs)) {
-        return remapToPy(lhs[0] * rhs, lhs[1][PROP_X] * rhs, lhs[1][PROP_Y] * rhs, lhs[1][PROP_Z] * rhs, lhs[2][0] * rhs, lhs[2][1] * rhs, lhs[2][2] * rhs, lhs[3] * rhs);
+    $loc.__rsub__ = new Sk.builtin.func(function(b, a) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(a)) {
+        return remapToPy(a - b.w, -b.x, -b.y, -b.z, -b.xy, -b.yz, -b.zx, -b.xyz);
       }
       else {
-        return compute(bladeASM.mulE3, lhs, rhs, coord, remapToPy);
+        throw new Sk.builtin.AssertionError();
       }
     });
-
-    $loc.__rmul__ = new Sk.builtin.func(function(rhs, lhs) {
-      lhs = Sk.ffi.remapToJs(lhs);
-      rhs = Sk.ffi.remapToJs(rhs);
-      if (isNumber(lhs)) {
-        return remapToPy(lhs * rhs[0], lhs * rhs[1][PROP_X], lhs * rhs[1][PROP_Y], lhs * rhs[1][PROP_Z], lhs * rhs[2][0], lhs * rhs[2][1], lhs * rhs[2][2], lhs * rhs[3]);
+    $loc.__mul__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(b)) {
+        return remapToPy(a.w * b, a.x * b, a.y * b, a.z * b, a.xy * b, a.yz * b, a.zx * b, a.xyz * b);
       }
       else {
-        throw new Sk.builtin.AssertionError("lhs is not a number");
+        return compute(bladeASM.mulE3, a, b, coord, remapToPy);
       }
     });
-
-    $loc.__xor__ = new Sk.builtin.func(function(lhs, rhs) {
-      lhs = Sk.ffi.remapToJs(lhs);
-      rhs = Sk.ffi.remapToJs(rhs);
-      if (isNumber(rhs)) {
-        return remapToPy(lhs[0] * rhs, lhs[1][PROP_X] * rhs, lhs[1][PROP_Y] * rhs, lhs[1][PROP_Z] * rhs, lhs[2][0] * rhs, lhs[2][1] * rhs, lhs[2][2] * rhs, lhs[3] * rhs);
+    $loc.__rmul__ = new Sk.builtin.func(function(b, a) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(a)) {
+        return remapToPy(a * b.w, a * b.x, a * b.y, a * b.z, a * b.xy, a * b.yz, a * b.zx, a * b.xyz);
       }
       else {
-        return compute(bladeASM.extE3, lhs, rhs, coord, remapToPy);
+        throw new Sk.builtin.AssertionError();
       }
     });
-
-    $loc.__rxor__ = new Sk.builtin.func(function(rhs, lhs) {
-      lhs = Sk.ffi.remapToJs(lhs);
-      rhs = Sk.ffi.remapToJs(rhs);
-      if (isNumber(lhs)) {
-        return remapToPy(lhs * rhs[0], lhs * rhs[1][PROP_X], lhs * rhs[1][PROP_Y], lhs * rhs[1][PROP_Z], lhs * rhs[2][0], lhs * rhs[2][1], lhs * rhs[2][2], lhs * rhs[3]);
+    $loc.__xor__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(b)) {
+        return remapToPy(a.w * b, a.x * b, a.y * b, a.z * b, a.xy * b, a.yz * b, a.zx * b, a.xyz * b);
       }
       else {
-        throw new Sk.builtin.AssertionError("lhs is not a number");
+        return compute(bladeASM.extE3, a, b, coord, remapToPy);
       }
     });
-
-    $loc.__lshift__ = new Sk.builtin.func(function(lhs, rhs) {
-      lhs = Sk.ffi.remapToJs(lhs);
-      rhs = Sk.ffi.remapToJs(rhs);
-      if (isNumber(rhs)) {
-        return remapToPy(lhs[0] * rhs, lhs[1][PROP_X] * rhs, lhs[1][PROP_Y] * rhs, lhs[1][PROP_Z] * rhs, lhs[2][0] * rhs, lhs[2][1] * rhs, lhs[2][2] * rhs, lhs[3] * rhs);
+    $loc.__rxor__ = new Sk.builtin.func(function(b, a) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(a)) {
+        return remapToPy(a * b.w, a * b.x, a * b.y, a * b.z, a * b.xy, a * b.yz, a * b.zx, a * b.xyz);
       }
       else {
-        return compute(bladeASM.lcoE3, lhs, rhs, coord, remapToPy);
+        throw new Sk.builtin.AssertionError();
       }
     });
-
-    $loc.__rshift__ = new Sk.builtin.func(function(lhs, rhs) {
-      lhs = Sk.ffi.remapToJs(lhs);
-      rhs = Sk.ffi.remapToJs(rhs);
-      if (isNumber(rhs)) {
-        return remapToPy(lhs[0] * rhs, lhs[1][PROP_X] * rhs, lhs[1][PROP_Y] * rhs, lhs[1][PROP_Z] * rhs, lhs[2][0] * rhs, lhs[2][1] * rhs, lhs[2][2] * rhs, lhs[3] * rhs);
+    $loc.__lshift__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(b)) {
+        return remapToPy(a.w * b, 0, 0, 0, 0, 0, 0, 0);
       }
       else {
-        return compute(bladeASM.rcoE3, lhs, rhs, coord, remapToPy);
+        return compute(bladeASM.lcoE3, a, b, coord, remapToPy);
       }
     });
-
-    // Unary plus.
+    $loc.__rlshift__ = new Sk.builtin.func(function(b, a) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(a)) {
+        return remapToPy(a * b.w, a * b.x, a * b.y, a * b.z, a * b.xy, a * b.yz, a * b.zx, a * b.xyz);
+      }
+      else {
+        throw new Sk.builtin.AssertionError();
+      }
+    });
+    $loc.__rshift__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(b)) {
+        return remapToPy(a.w * b, a.x * b, a.y * b, a.z * b, a.xy * b, a.yz * b, a.zx * b, a.xyz * b);
+      }
+      else {
+        return compute(bladeASM.rcoE3, a, b, coord, remapToPy);
+      }
+    });
+    $loc.__rrshift__ = new Sk.builtin.func(function(b, a) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(a)) {
+        return remapToPy(a * b.w, 0, 0, 0, 0, 0, 0, 0);
+      }
+      else {
+        throw new Sk.builtin.AssertionError();
+      }
+    });
     $loc.nb$positive = function() {
       return this;
     };
-
-    // Unary minus.
     $loc.nb$negative = function() {
       mv = Sk.ffi.remapToJs(this);
-      return remapToPy(-mv[0], -mv[1][PROP_X], -mv[1][PROP_Y], -mv[1][PROP_Z], -mv[2][0], -mv[2][1], -mv[2][2], -mv[3]);
+      return remapToPy(-mv.w, -mv.x, -mv.y, -mv.z, -mv.xy, -mv.yz, -mv.zx, -mv.xyz);
     };
-
     $loc.__eq__ = new Sk.builtin.func(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
-      return a[0] === b[0] && a[1].x === b[1].x && a[1].y === b[1].y && a[1].z === b[1].z && a[2][0] === b[2][0] && a[2][1] === b[2][1] && a[2][2] === b[2][2] && a[3] === b[3];
+      return a.w === b.w && a.x === b.x && a.y === b.y && a.z === b.z && a.xy === b.xy && a.yz === b.yz && a.zx === b.zx && a.xyz === b.xyz;
     });
-
     $loc.__ne__ = new Sk.builtin.func(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
-      return a[0] !== b[0] || a[1].x !== b[1].x || a[1].y !== b[1].y || a[1].z !== b[1].z || a[2][0] !== b[2][0] || a[2][1] !== b[2][1] || a[2][2] !== b[2][2] || a[3] !== b[3];
+      return a.w !== b.w || a.x !== b.x || a.y !== b.y || a.z !== b.z || a.xy !== b.xy || a.yz !== b.yz || a.zx !== b.zx || a.xyz !== b.xyz;
     });
-
     $loc.__getitem__ = new Sk.builtin.func(function(mv, index) {
       mv = Sk.ffi.remapToJs(mv);
       index = Sk.builtin.asnum$(index);
       switch(index) {
         case 0: {
-          return remapToPy(mv[0], 0, 0, 0, 0, 0, 0, 0);
+          return remapToPy(mv.w, 0, 0, 0, 0, 0, 0, 0);
         }
         case 1: {
-          return remapToPy(0, mv[1][PROP_X], mv[1][PROP_Y], mv[1][PROP_Z], 0, 0, 0, 0);
+          return remapToPy(0, mv.x, mv.y, mv.z, 0, 0, 0, 0);
         }
         case 2: {
-          return remapToPy(0, 0, 0, 0, mv[2][0], mv[2][1], mv[2][2], 0);
+          return remapToPy(0, 0, 0, 0, mv.xy, mv.yz, mv.zx, 0);
         }
         case 3: {
-          return remapToPy(0, 0, 0, 0, 0, 0, 0, mv[3]);
+          return remapToPy(0, 0, 0, 0, 0, 0, 0, mv.xyz);
         }
       }
     });
-
     $loc.__getattr__ = new Sk.builtin.func(function(mvPy, name) {
-      var METHOD_SET_X = "setX";
-      var METHOD_SET_Y = "setY";
-      var METHOD_SET_Z = "setZ";
-      var METHOD_GET_COMPONENT = "getComponent";
-      var METHOD_SET_COMPONENT = "setComponent";
-      var METHOD_SET = "set";
       var mv = Sk.ffi.remapToJs(mvPy);
       switch(name) {
         case PROP_W: {
-          return Sk.builtin.assk$(mv[0], Sk.builtin.nmber.float$);
+          return Sk.builtin.assk$(mv.w, Sk.builtin.nmber.float$);
         }
         case PROP_X: {
-          return Sk.builtin.assk$(mv[1][PROP_X], Sk.builtin.nmber.float$);
+          return Sk.builtin.assk$(mv.x, Sk.builtin.nmber.float$);
         }
         case PROP_Y: {
-          return Sk.builtin.assk$(mv[1][PROP_Y], Sk.builtin.nmber.float$);
+          return Sk.builtin.assk$(mv.y, Sk.builtin.nmber.float$);
         }
         case PROP_Z: {
-          return Sk.builtin.assk$(mv[1][PROP_Z], Sk.builtin.nmber.float$);
+          return Sk.builtin.assk$(mv.z, Sk.builtin.nmber.float$);
         }
         case PROP_XY: {
-          return Sk.builtin.assk$(mv[2][0], Sk.builtin.nmber.float$);
+          return Sk.builtin.assk$(mv.xy, Sk.builtin.nmber.float$);
         }
         case PROP_YZ: {
-          return Sk.builtin.assk$(mv[2][1], Sk.builtin.nmber.float$);
+          return Sk.builtin.assk$(mv.yz, Sk.builtin.nmber.float$);
         }
         case PROP_ZX: {
-          return Sk.builtin.assk$(mv[2][2], Sk.builtin.nmber.float$);
+          return Sk.builtin.assk$(mv.zx, Sk.builtin.nmber.float$);
         }
         case PROP_XYZ: {
-          return Sk.builtin.assk$(mv[3], Sk.builtin.nmber.float$);
+          return Sk.builtin.assk$(mv.xyz, Sk.builtin.nmber.float$);
         }
         case METHOD_ADD: {
           return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
@@ -633,14 +695,14 @@ var $builtinmodule = function(name) {
             });
             $loc.__call__ = new Sk.builtin.func(function(self, arg) {
               arg  = Sk.ffi.remapToJs(arg);
-              mv[0] += arg[0]
-              mv[1][PROP_X] += arg[1][PROP_X];
-              mv[1][PROP_Y] += arg[1][PROP_Y];
-              mv[1][PROP_Z] += arg[1][PROP_Z];
-              mv[2][0] += arg[2][0];
-              mv[2][1] += arg[2][1];
-              mv[2][2] += arg[2][2];
-              mv[3] += arg[3]
+              mv.w += arg.w
+              mv.x += arg.x;
+              mv.y += arg.y;
+              mv.z += arg.z;
+              mv.xy += arg.xy;
+              mv.yz += arg.yz;
+              mv.zx += arg.zx;
+              mv.xyz += arg.xyz;
               return mvPy;
             });
             $loc.__str__ = new Sk.builtin.func(function(self) {
@@ -658,7 +720,7 @@ var $builtinmodule = function(name) {
             });
             $loc.__call__ = new Sk.builtin.func(function(self, x) {
               x  = Sk.ffi.remapToJs(x);
-              mv[1][METHOD_SET_X](x);
+              mv[METHOD_SET_X](x);
               return mvPy;
             });
             $loc.__str__ = new Sk.builtin.func(function(self) {
@@ -676,7 +738,7 @@ var $builtinmodule = function(name) {
             });
             $loc.__call__ = new Sk.builtin.func(function(self, y) {
               y  = Sk.ffi.remapToJs(y);
-              mv[1][METHOD_SET_Y](y);
+              mv[METHOD_SET_Y](y);
               return mvPy;
             });
             $loc.__str__ = new Sk.builtin.func(function(self) {
@@ -694,7 +756,7 @@ var $builtinmodule = function(name) {
             });
             $loc.__call__ = new Sk.builtin.func(function(self, z) {
               z  = Sk.ffi.remapToJs(z);
-              mv[1][METHOD_SET_Z](z);
+              mv[METHOD_SET_Z](z);
               return mvPy;
             });
             $loc.__str__ = new Sk.builtin.func(function(self) {
@@ -712,7 +774,7 @@ var $builtinmodule = function(name) {
             });
             $loc.__call__ = new Sk.builtin.func(function(self, index) {
               index  = Sk.ffi.remapToJs(index);
-              return Sk.builtin.assk$(mv[1][METHOD_GET_COMPONENT](index), Sk.builtin.nmber.float$);
+              return Sk.builtin.assk$(mv[METHOD_GET_COMPONENT](index), Sk.builtin.nmber.float$);
             });
             $loc.__str__ = new Sk.builtin.func(function(self) {
               return new Sk.builtin.str(METHOD_GET_COMPONENT);
@@ -730,7 +792,7 @@ var $builtinmodule = function(name) {
             $loc.__call__ = new Sk.builtin.func(function(self, index, value) {
               index  = Sk.ffi.remapToJs(index);
               value  = Sk.ffi.remapToJs(value);
-              mv[1][METHOD_SET_COMPONENT](index, value);
+              mv[METHOD_SET_COMPONENT](index, value);
               return mvPy;
             });
             $loc.__str__ = new Sk.builtin.func(function(self) {
@@ -750,7 +812,7 @@ var $builtinmodule = function(name) {
               x  = Sk.ffi.remapToJs(x);
               y  = Sk.ffi.remapToJs(y);
               z  = Sk.ffi.remapToJs(z);
-              mv[1][METHOD_SET](x, y, z);
+              mv[METHOD_SET](x, y, z);
               return mvPy;
             });
             $loc.__str__ = new Sk.builtin.func(function(self) {
@@ -767,7 +829,7 @@ var $builtinmodule = function(name) {
               self.tp$name = METHOD_CLONE;
             });
             $loc.__call__ = new Sk.builtin.func(function(self) {
-              return remapToPy(mv[0], mv[1][PROP_X], mv[1][PROP_Y], mv[1][PROP_Z], mv[2][0], mv[2][1], mv[2][2], mv[3]);
+              return remapToPy(mv.w, mv.x, mv.y, mv.z, mv.xy, mv.yz, mv.zx, mv.xyz);
             });
             $loc.__str__ = new Sk.builtin.func(function(self) {
               return new Sk.builtin.str(METHOD_CLONE);
@@ -783,7 +845,7 @@ var $builtinmodule = function(name) {
               self.tp$name = METHOD_LENGTH;
             });
             $loc.__call__ = new Sk.builtin.func(function(self) {
-              return Sk.builtin.assk$(mv[1][METHOD_LENGTH](), Sk.builtin.nmber.float$);
+              return Sk.builtin.assk$(mv[METHOD_LENGTH](), Sk.builtin.nmber.float$);
             });
             $loc.__str__ = new Sk.builtin.func(function(self) {
               return new Sk.builtin.str(METHOD_LENGTH);
@@ -799,7 +861,7 @@ var $builtinmodule = function(name) {
               self.tp$name = METHOD_NORMALIZE;
             });
             $loc.__call__ = new Sk.builtin.func(function(self) {
-              mv[1][METHOD_NORMALIZE]();
+              mv[METHOD_NORMALIZE]();
               return mvPy;
             });
             $loc.__str__ = new Sk.builtin.func(function(self) {
@@ -812,41 +874,40 @@ var $builtinmodule = function(name) {
         }
       }
     });
-
     $loc.__setattr__ = new Sk.builtin.func(function(mv, name, value) {
       mv = Sk.ffi.remapToJs(mv);
       value = Sk.ffi.remapToJs(value);
       switch(name) {
         case PROP_W: {
-          mv[0] = value;
+          mv.w = value;
         }
         break;
         case PROP_X: {
-          mv[1][PROP_X] = value;
+          mv.x = value;
         }
         break;
         case PROP_Y: {
-          mv[1][PROP_Y] = value;
+          mv.y = value;
         }
         break;
         case PROP_Z: {
-          mv[1][PROP_Z] = value;
+          mv.z = value;
         }
         break;
         case PROP_XY: {
-          mv[2][0] = value;
+          mv.xy = value;
         }
         break;
         case PROP_YZ: {
-          mv[2][1] = value;
+          mv.yz = value;
         }
         break;
         case PROP_ZX: {
-          mv[2][2] = value;
+          mv.zx = value;
         }
         break;
         case PROP_XYZ: {
-          mv[3] = value;
+          mv.xyz = value;
         }
         break;
         default: {
@@ -854,15 +915,15 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__repr__ = new Sk.builtin.func(function(mv) {
-      mv = Sk.ffi.remapToJs(mv);
-      var args = [mv[0], mv[1][PROP_X], mv[1][PROP_Y], mv[1][PROP_Z], mv[2][0], mv[2][1], mv[2][2], mv[3]];
+    $loc.__repr__ = new Sk.builtin.func(function(m) {
+      m = Sk.ffi.remapToJs(m);
+      var args = [m.w, m.x, m.y, m.z, m.xy, m.yz, m.zx, m.xyz];
       return new Sk.builtin.str(MULTI_VECTOR_3 + "(" + args.join(", ") + ")");
     });
-    $loc.__str__ = new Sk.builtin.func(function(m) {
-      m = Sk.ffi.remapToJs(m);
-      if (isDefined(m)) {
-        return new Sk.builtin.str(BLADE.Euclidean3.fromCartesian(m[0], m[1][PROP_X], m[1][PROP_Y], m[1][PROP_Z], m[2][0], m[2][1], m[2][2], m[3]).toStringIJK());
+    $loc.__str__ = new Sk.builtin.func(function(mv) {
+      mv = Sk.ffi.remapToJs(mv);
+      if (isDefined(mv)) {
+        return new Sk.builtin.str(BLADE.Euclidean3.fromCartesian(mv.w, mv.x, mv.y, mv.z, mv.xy, mv.yz, mv.zx, mv.xyz).toStringIJK());
       }
       else {
         return new Sk.builtin.str("<type '" + MULTI_VECTOR_3 + "'>");
@@ -1086,7 +1147,6 @@ var $builtinmodule = function(name) {
         }
         break;
         case "size": {
-          // TODO: Unwrapping should be recursive.
           var width  = Sk.builtin.asnum$(value[0]);
           var height = Sk.builtin.asnum$(value[1]);
           renderer.setSize(width, height);
@@ -1241,9 +1301,8 @@ var $builtinmodule = function(name) {
             $loc.__init__ = new Sk.builtin.func(function(self) {
               self.tp$name = METHOD_LOOK_AT;
             });
-            $loc.__call__ = new Sk.builtin.func(function(self, mv) {
-              mv  = Sk.ffi.remapToJs(mv);
-              camera.lookAt(mv[1]);
+            $loc.__call__ = new Sk.builtin.func(function(self, vectorPy) {
+              camera.lookAt(Sk.ffi.remapToJs(vectorPy));
               return cameraPy;
             });
             $loc.__str__ = new Sk.builtin.func(function(self) {
@@ -1289,7 +1348,11 @@ var $builtinmodule = function(name) {
         }
         break;
         case PROP_POSITION: {
-          camera[PROP_POSITION] = value[1];
+          camera[PROP_POSITION] = value;
+        }
+        break;
+        case PROP_ROTATION: {
+          camera[PROP_ROTATION] = value;
         }
         break;
         default: {
@@ -1336,9 +1399,8 @@ var $builtinmodule = function(name) {
             $loc.__init__ = new Sk.builtin.func(function(self) {
               self.tp$name = METHOD_LOOK_AT;
             });
-            $loc.__call__ = new Sk.builtin.func(function(self, mv) {
-              mv  = Sk.ffi.remapToJs(mv);
-              camera.lookAt(mv[1]);
+            $loc.__call__ = new Sk.builtin.func(function(self, vectorPy) {
+              camera.lookAt(Sk.ffi.remapToJs(vectorPy));
               return cameraPy;
             });
             $loc.__str__ = new Sk.builtin.func(function(self) {
@@ -1396,7 +1458,11 @@ var $builtinmodule = function(name) {
         }
         break;
         case PROP_POSITION: {
-          camera[PROP_POSITION] = value[1];
+          camera[PROP_POSITION] = value;
+        }
+        break;
+        case PROP_ROTATION: {
+          camera[PROP_ROTATION] = value;
         }
         break;
         default: {
@@ -1554,18 +1620,42 @@ var $builtinmodule = function(name) {
 
   }, CYLINDER_GEOMETRY, []);
 
+  mod[LATHE_GEOMETRY] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
+    $loc.__init__ = new Sk.builtin.func(function(self, pointsPy, segmentsPy, phiStart, phiLength) {
+      var points = Sk.ffi.remapToJs(pointsPy);
+      var segments = Sk.ffi.remapToJs(segmentsPy);
+      phiStart = Sk.ffi.remapToJs(phiStart);
+      phiLength = Sk.ffi.remapToJs(phiLength);
+      self.v = new THREE[LATHE_GEOMETRY](points, segments, phiStart, phiLength);
+      self.tp$name = LATHE_GEOMETRY;
+    });
+    $loc.__getattr__ = new Sk.builtin.func(function(geometryPy, name) {
+      var geometry = Sk.ffi.remapToJs(geometryPy);
+      switch(name) {
+        case PROP_VERTICES: {
+          return verticesPy(geometry.vertices);
+        }
+      }
+    });
+    $loc.__str__ = new Sk.builtin.func(function(self) {
+      var latheGeometry = self.v;
+      var args = {};
+      return new Sk.builtin.str(LATHE_GEOMETRY + "(" + JSON.stringify(args) + ")");
+    });
+    $loc.__repr__ = new Sk.builtin.func(function(self) {
+      var latheGeometry = self.v;
+      var args = [];
+      return new Sk.builtin.str(LATHE_GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
+    });
+  }, LATHE_GEOMETRY, []);
+
   mod[ICOSAHEDRON_GEOMETRY] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
-
-    var PROP_RADIUS = "radius";
-    var PROP_DETAIL = "detail";
-
     $loc.__init__ = new Sk.builtin.func(function(self, radius, detail) {
       radius = numberFromArg(radius,        PROP_RADIUS, ICOSAHEDRON_GEOMETRY);
       detail = numberFromIntegerArg(detail, PROP_DETAIL, ICOSAHEDRON_GEOMETRY);
       self.v = new THREE[ICOSAHEDRON_GEOMETRY](radius, detail);
       self.tp$name = ICOSAHEDRON_GEOMETRY;
     });
-
     $loc.__getattr__ = new Sk.builtin.func(function(self, name) {
       switch(name) {
         case PROP_RADIUS: {
@@ -1579,7 +1669,6 @@ var $builtinmodule = function(name) {
         }
       }
     });
-
     $loc.__str__ = new Sk.builtin.func(function(self) {
       var icosahedron = self.v;
       var args = {};
@@ -1587,7 +1676,6 @@ var $builtinmodule = function(name) {
       args[PROP_DETAIL] = icosahedron[PROP_DETAIL];
       return new Sk.builtin.str(ICOSAHEDRON_GEOMETRY + "(" + JSON.stringify(args) + ")");
     });
-
     $loc.__repr__ = new Sk.builtin.func(function(self) {
       var icosahedron = self.v;
       var radius = icosahedron[PROP_RADIUS];
@@ -1595,7 +1683,6 @@ var $builtinmodule = function(name) {
       var args = [radius, detail];
       return new Sk.builtin.str(ICOSAHEDRON_GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
     });
-
   }, ICOSAHEDRON_GEOMETRY, []);
 
   mod[OCTAHEDRON_GEOMETRY] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
@@ -1883,66 +1970,18 @@ var $builtinmodule = function(name) {
   }, TORUS_GEOMETRY, []);
 
    mod[GEOMETRY] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
-    var PROP_VERTICES = "vertices";
     $loc.__init__ = new Sk.builtin.func(function(self) {
       self.v = new THREE[GEOMETRY]();
+      self.tp$name = GEOMETRY;
     });
-
-    $loc.__getattr__ = new Sk.builtin.func(function(geometry, name) {
-      geometry = Sk.ffi.remapToJs(geometry);
+    $loc.__getattr__ = new Sk.builtin.func(function(geometryPy, name) {
+      var geometry = Sk.ffi.remapToJs(geometryPy);
       switch(name) {
         case PROP_VERTICES: {
-          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = new Sk.builtin.func(function(self) {
-              self.tp$name = PROP_VERTICES;
-              self.v = geometry.vertices;
-            });
-            $loc.__getattr__ = new Sk.builtin.func(function(vertices, name) {
-              vertices = Sk.ffi.remapToJs(vertices);
-              var METHOD_APPEND = "append";
-              switch(name) {
-                case METHOD_APPEND: {
-                  return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
-                    $loc.__init__ = new Sk.builtin.func(function(self) {
-                      self.tp$name = METHOD_APPEND;
-                    });
-                    $loc.__call__ = new Sk.builtin.func(function(self, mv) {
-                      mv = Sk.ffi.remapToJs(mv);
-                      vertices.push(mv[1]);
-                    });
-                    $loc.__str__ = new Sk.builtin.func(function(self) {
-                      return new Sk.builtin.str(METHOD_APPEND)
-                    })
-                    $loc.__repr__ = new Sk.builtin.func(function(self) {
-                      return new Sk.builtin.str(METHOD_APPEND)
-                    })
-                  }, METHOD_APPEND, []));
-                }
-                default: {
-                  // Framework will take care of the error message.
-                }
-              }
-            });
-            $loc.__getitem__ = new Sk.builtin.func(function(verticesPy, indexPy) {
-              var vertices = Sk.ffi.remapToJs(verticesPy);
-              var index = Sk.ffi.remapToJs(indexPy);
-              return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(vertices[index]));
-            });
-            $loc.mp$length = function() {return geometry.vertices.length;};
-            $loc.__str__ = new Sk.builtin.func(function(self) {
-              return new Sk.builtin.str(PROP_VERTICES)
-            })
-            $loc.__repr__ = new Sk.builtin.func(function(self) {
-              return new Sk.builtin.str(PROP_VERTICES)
-            })
-          }, PROP_VERTICES, []));
-        }
-        default: {
-          // Framework will take care of the error message.
+          return verticesPy(geometry.vertices);
         }
       }
     });
-
     $loc.__str__ = new Sk.builtin.func(function(geometry) {
       geometry = Sk.ffi.remapToJs(geometry);
       if (isDefined(geometry)) {
@@ -1953,13 +1992,11 @@ var $builtinmodule = function(name) {
         return new Sk.builtin.str("<type '" + GEOMETRY + "'>");
       }
     });
-
     $loc.__repr__ = new Sk.builtin.func(function(geometry) {
       geometry = Sk.ffi.remapToJs(geometry);
       var args = [];
       return new Sk.builtin.str(GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
     });
-
   }, GEOMETRY, []);
 
   mod[OBJECT_3D] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
@@ -2109,11 +2146,11 @@ var $builtinmodule = function(name) {
         }
         break;
         case PROP_POSITION: {
-          light[PROP_POSITION] = value[1];
+          light[PROP_POSITION] = value;
         }
         break;
         case PROP_ROTATION: {
-          light[PROP_ROTATION] = value[1];
+          light[PROP_ROTATION] = value;
         }
         break;
         default: {
@@ -2201,11 +2238,11 @@ var $builtinmodule = function(name) {
         }
         break;
         case PROP_POSITION: {
-          light[PROP_POSITION] = value[1];
+          light[PROP_POSITION] = value;
         }
         break;
         case PROP_ROTATION: {
-          light[PROP_ROTATION] = value[1];
+          light[PROP_ROTATION] = value;
         }
         break;
         default: {
@@ -2721,11 +2758,11 @@ var $builtinmodule = function(name) {
         }
         break;
         case PROP_POSITION: {
-          mesh[PROP_POSITION] = value[1];
+          mesh[PROP_POSITION] = value;
         }
         break;
         case PROP_ROTATION: {
-          mesh[PROP_ROTATION] = value[1];
+          mesh[PROP_ROTATION] = value;
         }
         break;
         default: {
