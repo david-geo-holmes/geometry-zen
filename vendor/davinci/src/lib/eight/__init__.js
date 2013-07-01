@@ -52,8 +52,10 @@ var $builtinmodule = function(name) {
   var PROP_COLOR               = "color";
   var PROP_DETAIL              = "detail";
   var PROP_FAR                 = "far";
+  var PROP_GEOMETRY            = "geometry";
   var PROP_ID                  = "id";
   var PROP_LEFT                = "left";
+  var PROP_MATERIAL            = "material";
   var PROP_NAME                = "name";
   var PROP_NEAR                = "near";
   var PROP_NEEDS_UPDATE        = "needsUpdate";
@@ -86,6 +88,7 @@ var $builtinmodule = function(name) {
   var METHOD_GET_COMPONENT     = "getComponent";
   var METHOD_SET_COMPONENT     = "setComponent";
   var METHOD_SET               = "set";
+  var METHOD_SET_GEOMETRY      = "setGeometry";
 
   var METHOD_ADD               = "add";
   var METHOD_CLONE             = "clone";
@@ -106,6 +109,10 @@ var $builtinmodule = function(name) {
 
   function isDefined(x)   { return typeof x !== 'undefined'; }
   function isNull(x)      { return typeof x === 'object' && x === null; }
+
+  function getClassName(object) {
+    return Object.prototype.toString.call(object).match(/^\[object\s(.*)\]$/)[1];
+  }
 
   function methodAdd(target) {
     if (!isObject(target)) {
@@ -482,11 +489,7 @@ var $builtinmodule = function(name) {
         self.v = enhanceVector3(0, new THREE.Vector3(), 0, 0, 0, 0);
       }
       else {
-        console.log("w: " + JSON.stringify(w, null, 2));
-        console.log("x: " + JSON.stringify(x, null, 2));
-        console.log("y: " + JSON.stringify(y, null, 2));
-        console.log("z: " + JSON.stringify(z, null, 2));
-        throw new Sk.builtin.AssertionError("constructor arguments for " + MULTI_VECTOR_3);
+        throw new Sk.builtin.AssertionError(MULTI_VECTOR_3);
       }
       self.tp$name = MULTI_VECTOR_3;
     });
@@ -967,8 +970,8 @@ var $builtinmodule = function(name) {
       self.v = new THREE[SCENE]();
       self.tp$name = SCENE;
     });
-    $loc.__getattr__ = new Sk.builtin.func(function(scene, name) {
-      scene = Sk.ffi.remapToJs(scene);
+    $loc.__getattr__ = new Sk.builtin.func(function(scenePy, name) {
+      var scene = Sk.ffi.remapToJs(scenePy);
       switch(name) {
         case PROP_POSITION: {
           return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(scene[PROP_POSITION]));
@@ -981,6 +984,15 @@ var $builtinmodule = function(name) {
         }
         case METHOD_REMOVE: {
           return methodRemove(scene);
+        }
+      }
+    });
+    $loc.__setattr__ = new Sk.builtin.func(function(scenePy, name, valuePy) {
+      var scene = Sk.ffi.remapToJs(scenePy);
+      var value = Sk.ffi.remapToJs(valuePy);
+      switch(name) {
+        default: {
+          throw new Error(name + " is not an attribute of " + SCENE);
         }
       }
     });
@@ -1481,14 +1493,12 @@ var $builtinmodule = function(name) {
   }, ORTHOGRAPHIC_CAMERA, []);
 
    mod[CUBE_GEOMETRY] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
-
     var PROP_WIDTH           = "width";
     var PROP_HEIGHT          = "height";
     var PROP_DEPTH           = "depth";
     var PROP_WIDTH_SEGMENTS  = "widthSegments";
     var PROP_HEIGHT_SEGMENTS = "heightSegments";
     var PROP_DEPTH_SEGMENTS  = "depthSegments";
-
     $loc.__init__ = new Sk.builtin.func(function(self, width, height, depth, widthSegments, heightSegments, depthSegments) {
       width          = numberFromArg(width,                 PROP_WIDTH,           CUBE_GEOMETRY);
       height         = numberFromArg(height,                PROP_HEIGHT,          CUBE_GEOMETRY);
@@ -1499,7 +1509,6 @@ var $builtinmodule = function(name) {
       self.v = new THREE[CUBE_GEOMETRY](width, height, depth, widthSegments, heightSegments, depthSegments);
       self.tp$name = CUBE_GEOMETRY;
     });
-
     $loc.__getattr__ = new Sk.builtin.func(function(self, name) {
       switch(name) {
         case PROP_WIDTH: {
@@ -1520,12 +1529,17 @@ var $builtinmodule = function(name) {
         case PROP_DEPTH_SEGMENTS: {
           return Sk.builtin.assk$(self.v[PROP_DEPTH_SEGMENTS], Sk.builtin.nmber.int$);
         }
+      }
+    });
+    $loc.__setattr__ = new Sk.builtin.func(function(geometryPy, name, valuePy) {
+      var geometry = Sk.ffi.remapToJs(geometryPy);
+      var value = Sk.ffi.remapToJs(valuePy);
+      switch(name) {
         default: {
-          // Framework will take care of the error message.
+          throw new Error(name + " is not an attribute of " + CUBE_GEOMETRY);
         }
       }
     });
-
     $loc.__str__ = new Sk.builtin.func(function(self) {
       var cube = self.v;
       var args = {};
@@ -1534,7 +1548,6 @@ var $builtinmodule = function(name) {
       args[PROP_DEPTH]  = cube[PROP_DEPTH];
       return new Sk.builtin.str(CUBE_GEOMETRY + "(" + JSON.stringify(args) + ")");
     });
-
     $loc.__repr__ = new Sk.builtin.func(function(self) {
       var cube = self.v;
       var width          = cube[PROP_WIDTH];
@@ -1546,18 +1559,15 @@ var $builtinmodule = function(name) {
       var args = [width, height, depth, widthSegments, heightSegments, depthSegments];
       return new Sk.builtin.str(CUBE_GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
     });
-
   }, CUBE_GEOMETRY, []);
 
   mod[CYLINDER_GEOMETRY] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
-
     var PROP_RADIUS_TOP      = "radiusTop";
     var PROP_RADIUS_BOTTOM   = "radiusBottom";
     var PROP_HEIGHT          = "height";
     var PROP_RADIUS_SEGMENTS = "radiusSegments";
     var PROP_HEIGHT_SEGMENTS = "heightSegments";
     var PROP_OPEN_ENDED      = "openEnded";
-
     $loc.__init__ = new Sk.builtin.func(function(self, radiusTop, radiusBottom, height, radiusSegments, heightSegments, openEnded) {
       radiusTop      = numberFromArg(radiusTop,             PROP_RADIUS_TOP,      CYLINDER_GEOMETRY);
       radiusBottom   = numberFromArg(radiusBottom,          PROP_RADIUS_BOTTOM,   CYLINDER_GEOMETRY);
@@ -1568,7 +1578,6 @@ var $builtinmodule = function(name) {
       self.v = new THREE[CYLINDER_GEOMETRY](radiusTop, radiusBottom, height, radiusSegments, heightSegments, openEnded);
       self.tp$name = CYLINDER_GEOMETRY;
     });
-
     $loc.__getattr__ = new Sk.builtin.func(function(self, name) {
       switch(name) {
         case PROP_RADIUS_TOP: {
@@ -1594,7 +1603,15 @@ var $builtinmodule = function(name) {
         }
       }
     });
-
+    $loc.__setattr__ = new Sk.builtin.func(function(geometryPy, name, valuePy) {
+      var geometry = Sk.ffi.remapToJs(geometryPy);
+      var value = Sk.ffi.remapToJs(valuePy);
+      switch(name) {
+        default: {
+          throw new Error(name + " is not an attribute of " + CYLINDER_GEOMETRY);
+        }
+      }
+    });
     $loc.__str__ = new Sk.builtin.func(function(self) {
       var cylinder = self.v;
       var args = {};
@@ -1605,7 +1622,6 @@ var $builtinmodule = function(name) {
       // TODO: Need a Python.stringify because Boolean is {True, False} etc.
       return new Sk.builtin.str(CYLINDER_GEOMETRY + "(" + JSON.stringify(args) + ")");
     });
-
     $loc.__repr__ = new Sk.builtin.func(function(self) {
       var cylinder = self.v;
       var radiusTop      = cylinder[PROP_RADIUS_TOP];
@@ -1617,7 +1633,6 @@ var $builtinmodule = function(name) {
       var args = [radiusTop, radiusBottom, height, radiusSegments, heightSegments, openEnded];
       return new Sk.builtin.str(CYLINDER_GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
     });
-
   }, CYLINDER_GEOMETRY, []);
 
   mod[LATHE_GEOMETRY] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
@@ -1632,8 +1647,32 @@ var $builtinmodule = function(name) {
     $loc.__getattr__ = new Sk.builtin.func(function(geometryPy, name) {
       var geometry = Sk.ffi.remapToJs(geometryPy);
       switch(name) {
+        case PROP_ID: {
+          return Sk.builtin.nmber(geometry[PROP_ID], Sk.builtin.nmber.int$);
+        }
+        case PROP_NAME: {
+          return new Sk.builtin.str(geometry[PROP_NAME]);
+        }
         case PROP_VERTICES: {
           return verticesPy(geometry.vertices);
+        }
+      }
+    });
+    $loc.__setattr__ = new Sk.builtin.func(function(geometryPy, name, valuePy) {
+      var geometry = Sk.ffi.remapToJs(geometryPy);
+      var value = Sk.ffi.remapToJs(valuePy);
+      switch(name) {
+        case PROP_NAME: {
+          if (isString(value)) {
+            geometry[PROP_NAME] = value;
+          }
+          else {
+            throw new Error(name + " must be a string");
+          }
+        }
+        break;
+        default: {
+          throw new Error(name + " is not an attribute of " + LATHE_GEOMETRY);
         }
       }
     });
@@ -1669,6 +1708,15 @@ var $builtinmodule = function(name) {
         }
       }
     });
+    $loc.__setattr__ = new Sk.builtin.func(function(geometryPy, name, valuePy) {
+      var geometry = Sk.ffi.remapToJs(geometryPy);
+      var value = Sk.ffi.remapToJs(valuePy);
+      switch(name) {
+        default: {
+          throw new Error(name + " is not an attribute of " + ICOSAHEDRON_GEOMETRY);
+        }
+      }
+    });
     $loc.__str__ = new Sk.builtin.func(function(self) {
       var icosahedron = self.v;
       var args = {};
@@ -1686,10 +1734,8 @@ var $builtinmodule = function(name) {
   }, ICOSAHEDRON_GEOMETRY, []);
 
   mod[OCTAHEDRON_GEOMETRY] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
-
     var PROP_RADIUS = "radius";
     var PROP_DETAIL = "detail";
-
     $loc.__init__ = new Sk.builtin.func(function(self, radius, detail) {
       radius = numberFromArg(radius,        PROP_RADIUS, OCTAHEDRON_GEOMETRY);
       detail = numberFromIntegerArg(detail, PROP_DETAIL, OCTAHEDRON_GEOMETRY);
@@ -1698,7 +1744,6 @@ var $builtinmodule = function(name) {
       self.v.detail = detail; // workaround for THREE not caching detail.
       self.tp$name = OCTAHEDRON_GEOMETRY;
     });
-
     $loc.__getattr__ = new Sk.builtin.func(function(self, name) {
       switch(name) {
         case PROP_RADIUS: {
@@ -1712,7 +1757,15 @@ var $builtinmodule = function(name) {
         }
       }
     });
-
+    $loc.__setattr__ = new Sk.builtin.func(function(geometryPy, name, valuePy) {
+      var geometry = Sk.ffi.remapToJs(geometryPy);
+      var value = Sk.ffi.remapToJs(valuePy);
+      switch(name) {
+        default: {
+          throw new Error(name + " is not an attribute of " + OCTAHEDRON_GEOMETRY);
+        }
+      }
+    });
     $loc.__str__ = new Sk.builtin.func(function(self) {
       var octahedron = self.v;
       var args = {};
@@ -1720,7 +1773,6 @@ var $builtinmodule = function(name) {
       args[PROP_DETAIL] = octahedron[PROP_DETAIL];
       return new Sk.builtin.str(OCTAHEDRON_GEOMETRY + "(" + JSON.stringify(args) + ")");
     });
-
     $loc.__repr__ = new Sk.builtin.func(function(self) {
       var octahedron = self.v;
       var radius = octahedron[PROP_RADIUS];
@@ -1728,16 +1780,13 @@ var $builtinmodule = function(name) {
       var args = [radius, detail];
       return new Sk.builtin.str(OCTAHEDRON_GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
     });
-
   }, OCTAHEDRON_GEOMETRY, []);
 
    mod[PLANE_GEOMETRY] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
-
     var PROP_WIDTH           = "width";
     var PROP_HEIGHT          = "height";
     var PROP_WIDTH_SEGMENTS  = "widthSegments";
     var PROP_HEIGHT_SEGMENTS = "heightSegments";
-
     $loc.__init__ = new Sk.builtin.func(function(self, width, height, widthSegments, heightSegments) {
       width          = numberFromArg(width,                 PROP_WIDTH,           PLANE_GEOMETRY);
       height         = numberFromArg(height,                PROP_HEIGHT,          PLANE_GEOMETRY);
@@ -1746,7 +1795,6 @@ var $builtinmodule = function(name) {
       self.v = new THREE[PLANE_GEOMETRY](width, height, widthSegments, heightSegments);
       self.tp$name = PLANE_GEOMETRY;
     });
-
     $loc.__getattr__ = new Sk.builtin.func(function(self, name) {
       switch(name) {
         case PROP_WIDTH: {
@@ -1761,12 +1809,17 @@ var $builtinmodule = function(name) {
         case PROP_HEIGHT_SEGMENTS: {
           return Sk.builtin.assk$(self.v[PROP_HEIGHT_SEGMENTS], Sk.builtin.nmber.int$);
         }
+      }
+    });
+    $loc.__setattr__ = new Sk.builtin.func(function(geometryPy, name, valuePy) {
+      var geometry = Sk.ffi.remapToJs(geometryPy);
+      var value = Sk.ffi.remapToJs(valuePy);
+      switch(name) {
         default: {
-          // Framework will take care of the error message.
+          throw new Error(name + " is not an attribute of " + PLANE_GEOMETRY);
         }
       }
     });
-
     $loc.__str__ = new Sk.builtin.func(function(self) {
       var plane = self.v;
       var args = {};
@@ -1774,7 +1827,6 @@ var $builtinmodule = function(name) {
       args[PROP_HEIGHT] = plane[PROP_HEIGHT];
       return new Sk.builtin.str(PLANE_GEOMETRY + "(" + JSON.stringify(args) + ")");
     });
-
     $loc.__repr__ = new Sk.builtin.func(function(self) {
       var plane = self.v;
       var width          = plane[PROP_WIDTH];
@@ -1784,11 +1836,9 @@ var $builtinmodule = function(name) {
       var args = [width, height, widthSegments, heightSegments];
       return new Sk.builtin.str(PLANE_GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
     });
-
   }, PLANE_GEOMETRY, []);
 
    mod[SPHERE_GEOMETRY] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
-
     var PROP_RADIUS          = "radius";
     var PROP_WIDTH_SEGMENTS  = "widthSegments";
     var PROP_HEIGHT_SEGMENTS = "heightSegments";
@@ -1796,7 +1846,6 @@ var $builtinmodule = function(name) {
     var PROP_PHI_LENGTH      = "phiLength";
     var PROP_THETA_START     = "thetaStart";
     var PROP_THETA_LENGTH    = "thetaLength";
-
     $loc.__init__ = new Sk.builtin.func(function(self, radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
       radius         = numberFromArg(radius,                PROP_RADIUS,          SPHERE_GEOMETRY);
       widthSegments  = numberFromIntegerArg(widthSegments,  PROP_WIDTH_SEGMENTS,  SPHERE_GEOMETRY);
@@ -1808,7 +1857,6 @@ var $builtinmodule = function(name) {
       self.v = new THREE[SPHERE_GEOMETRY](radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength);
       self.tp$name = SPHERE_GEOMETRY;
     });
-
     $loc.__getattr__ = new Sk.builtin.func(function(self, name) {
       switch(name) {
         case PROP_RADIUS: {
@@ -1832,12 +1880,17 @@ var $builtinmodule = function(name) {
         case PROP_THETA_LENGTH: {
           return Sk.builtin.assk$(self.v[PROP_THETA_LENGTH], Sk.builtin.nmber.float$);
         }
+      }
+    });
+    $loc.__setattr__ = new Sk.builtin.func(function(geometryPy, name, valuePy) {
+      var geometry = Sk.ffi.remapToJs(geometryPy);
+      var value = Sk.ffi.remapToJs(valuePy);
+      switch(name) {
         default: {
-          // Framework will take care of the error message.
+          throw new Error(name + " is not an attribute of " + SPHERE_GEOMETRY);
         }
       }
     });
-
     $loc.__str__ = new Sk.builtin.func(function(self) {
       var sphere = self.v;
       var radius         = sphere[PROP_RADIUS];
@@ -1845,7 +1898,6 @@ var $builtinmodule = function(name) {
       args[PROP_RADIUS] = radius;
       return new Sk.builtin.str(SPHERE_GEOMETRY + "(" + JSON.stringify(args) + ")");
     });
-
     $loc.__repr__ = new Sk.builtin.func(function(self) {
       var sphere = self.v;
       var radius         = sphere[PROP_RADIUS];
@@ -1858,14 +1910,11 @@ var $builtinmodule = function(name) {
       var args = [radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength];
       return new Sk.builtin.str(SPHERE_GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
     });
-
   }, SPHERE_GEOMETRY, []);
 
   mod[TETRAHEDRON_GEOMETRY] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
-
     var PROP_RADIUS = "radius";
     var PROP_DETAIL = "detail";
-
     $loc.__init__ = new Sk.builtin.func(function(self, radius, detail) {
       radius = numberFromArg(radius,        PROP_RADIUS, TETRAHEDRON_GEOMETRY);
       detail = numberFromIntegerArg(detail, PROP_DETAIL, TETRAHEDRON_GEOMETRY);
@@ -1874,7 +1923,6 @@ var $builtinmodule = function(name) {
       self.v.detail = detail; // workaround for THREE not caching detail.
       self.tp$name = TETRAHEDRON_GEOMETRY;
     });
-
     $loc.__getattr__ = new Sk.builtin.func(function(self, name) {
       switch(name) {
         case PROP_RADIUS: {
@@ -1883,12 +1931,17 @@ var $builtinmodule = function(name) {
         case PROP_DETAIL: {
           return Sk.builtin.assk$(self.v[PROP_DETAIL], Sk.builtin.nmber.int$);
         }
+      }
+    });
+    $loc.__setattr__ = new Sk.builtin.func(function(geometryPy, name, valuePy) {
+      var geometry = Sk.ffi.remapToJs(geometryPy);
+      var value = Sk.ffi.remapToJs(valuePy);
+      switch(name) {
         default: {
-          // Framework will take care of the error message.
+          throw new Error(name + " is not an attribute of " + TETRAHEDRON_GEOMETRY);
         }
       }
     });
-
     $loc.__str__ = new Sk.builtin.func(function(self) {
       var tetrahedron = self.v;
       var args = {};
@@ -1896,7 +1949,6 @@ var $builtinmodule = function(name) {
       args[PROP_DETAIL] = tetrahedron[PROP_DETAIL];
       return new Sk.builtin.str(TETRAHEDRON_GEOMETRY + "(" + JSON.stringify(args) + ")");
     });
-
     $loc.__repr__ = new Sk.builtin.func(function(self) {
       var tetrahedron = self.v;
       var radius = tetrahedron[PROP_RADIUS];
@@ -1904,17 +1956,14 @@ var $builtinmodule = function(name) {
       var args = [radius, detail];
       return new Sk.builtin.str(TETRAHEDRON_GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
     });
-
   }, TETRAHEDRON_GEOMETRY, []);
 
    mod[TORUS_GEOMETRY] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
-
     var PROP_RADIUS           = "radius";
     var PROP_TUBE             = "tube";
     var PROP_RADIAL_SEGMENTS  = "radialSegments";
     var PROP_TUBULAR_SEGMENTS = "tubularSegments";
     var PROP_ARC              = "arc";
-
     $loc.__init__ = new Sk.builtin.func(function(self, radius, tube, radialSegments, tubularSegments, arc) {
       radius = numberFromArg(radius,                          PROP_RADIUS,           TORUS_GEOMETRY);
       tube = numberFromArg(tube,                              PROP_TUBE,             TORUS_GEOMETRY);
@@ -1923,7 +1972,6 @@ var $builtinmodule = function(name) {
       arc = numberFromArg(arc,                                PROP_ARC,              TORUS_GEOMETRY);
       self.v = new THREE[TORUS_GEOMETRY](radius, tube, radialSegments, tubularSegments, arc);
     });
-
     $loc.__getattr__ = new Sk.builtin.func(function(self, name) {
       switch(name) {
         case PROP_RADIUS: {
@@ -1941,12 +1989,17 @@ var $builtinmodule = function(name) {
         case PROP_ARC: {
           return Sk.builtin.assk$(self.v[PROP_ARC], Sk.builtin.nmber.float$);
         }
+      }
+    });
+    $loc.__setattr__ = new Sk.builtin.func(function(geometryPy, name, valuePy) {
+      var geometry = Sk.ffi.remapToJs(geometryPy);
+      var value = Sk.ffi.remapToJs(valuePy);
+      switch(name) {
         default: {
-          // Framework will take care of the error message.
+          throw new Error(name + " is not an attribute of " + TORUS_GEOMETRY);
         }
       }
     });
-
     $loc.__str__ = new Sk.builtin.func(function(self) {
       var torus = self.v;
       var args = {};
@@ -1955,7 +2008,6 @@ var $builtinmodule = function(name) {
       args[PROP_ARC]    = torus[PROP_ARC];
       return new Sk.builtin.str(TORUS_GEOMETRY + "(" + JSON.stringify(args) + ")");
     });
-
     $loc.__repr__ = new Sk.builtin.func(function(self) {
       var torus = self.v;
       var radius          = torus[PROP_RADIUS];
@@ -1966,24 +2018,44 @@ var $builtinmodule = function(name) {
       var args = [radius, tube, radialSegments, tubularSegments, arc];
       return new Sk.builtin.str(TORUS_GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
     });
-
   }, TORUS_GEOMETRY, []);
 
    mod[GEOMETRY] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = new Sk.builtin.func(function(self) {
-      self.v = new THREE[GEOMETRY]();
-      self.tp$name = GEOMETRY;
+    $loc.__init__ = new Sk.builtin.func(function(self, geometryPy) {
+      if (isDefined(geometryPy)) {
+        self.v = Sk.ffi.remapToJs(geometryPy);
+        self.tp$name = geometryPy.tp$name;
+      }
+      else {
+        self.v = new THREE[GEOMETRY]();
+        self.tp$name = GEOMETRY;
+      }
     });
     $loc.__getattr__ = new Sk.builtin.func(function(geometryPy, name) {
       var geometry = Sk.ffi.remapToJs(geometryPy);
       switch(name) {
+        case PROP_ID: {
+          return Sk.builtin.nmber(geometry[PROP_ID], Sk.builtin.nmber.int$);
+        }
+        case PROP_NAME: {
+          return new Sk.builtin.str(geometry[PROP_NAME]);
+        }
         case PROP_VERTICES: {
           return verticesPy(geometry.vertices);
         }
       }
     });
-    $loc.__str__ = new Sk.builtin.func(function(geometry) {
-      geometry = Sk.ffi.remapToJs(geometry);
+    $loc.__setattr__ = new Sk.builtin.func(function(geometryPy, name, valuePy) {
+      var geometry = Sk.ffi.remapToJs(geometryPy);
+      var value = Sk.ffi.remapToJs(valuePy);
+      switch(name) {
+        default: {
+          throw new Error(name + " is not an attribute of " + GEOMETRY);
+        }
+      }
+    });
+    $loc.__str__ = new Sk.builtin.func(function(geometryPy) {
+      var geometry = Sk.ffi.remapToJs(geometryPy);
       if (isDefined(geometry)) {
         var args = {};
         return new Sk.builtin.str(GEOMETRY + "(" + JSON.stringify(args) + ")");
@@ -2114,9 +2186,6 @@ var $builtinmodule = function(name) {
         case PROP_ROTATION: {
           return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(light[PROP_ROTATION]));
         }
-        default: {
-          // Framework will handle it.
-        }
       }
     });
     $loc.__setattr__ = new Sk.builtin.func(function(light, name, value) {
@@ -2205,9 +2274,6 @@ var $builtinmodule = function(name) {
         }
         case PROP_ROTATION: {
           return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(light[PROP_ROTATION]));
-        }
-        default: {
-          // Framework will handle it.
         }
       }
     });
@@ -2331,9 +2397,6 @@ var $builtinmodule = function(name) {
         }
         case PROP_OPACITY: {
           return Sk.builtin.nmber(material[PROP_OPACITY], Sk.builtin.nmber.float$);
-        }
-        default: {
-          throw new Error(name + " is not an attribute of " + LINE_BASIC_MATERIAL);
         }
       }
     });
@@ -2556,9 +2619,6 @@ var $builtinmodule = function(name) {
         case PROP_VISIBLE: {
           return material[PROP_VISIBLE];
         }
-        default: {
-          throw new Error(name + " is not an attribute of " + MESH_LAMBERT_MATERIAL);
-        }
       }
     });
     $loc.__setattr__ = new Sk.builtin.func(function(materialPy, name, valuePy) {
@@ -2698,10 +2758,18 @@ var $builtinmodule = function(name) {
         }
       }
     });
+    $loc.__setattr__ = new Sk.builtin.func(function(materialPy, name, valuePy) {
+      var material = Sk.ffi.remapToJs(materialPy);
+      var value = Sk.ffi.remapToJs(valuePy);
+      switch(name) {
+        default: {
+          throw new Error(name + " is not an attribute of " + MESH_PHONG_MATERIAL);
+        }
+      }
+    });
     $loc.__str__ = new Sk.builtin.func(function(material) {
       material = Sk.ffi.remapToJs(material);
       var args = {};
-//      args[PROP_AUTO_CLEAR] = material[PROP_AUTO_CLEAR];
       return new Sk.builtin.str(MESH_PHONG_MATERIAL + "(" + JSON.stringify(args) + ")");
     });
     $loc.__repr__ = new Sk.builtin.func(function(material) {
@@ -2712,13 +2780,22 @@ var $builtinmodule = function(name) {
   }, MESH_PHONG_MATERIAL, []);
 
   mod[MESH] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
-    var PROP_OVERDRAW = "overdraw";
-    $loc.__init__ = new Sk.builtin.func(function(self, geometry, material) {
-      self.v = new THREE[MESH](geometry.v, material.v);
+    $loc.__init__ = new Sk.builtin.func(function(self, geometryPy, materialPy) {
+      self.v = new THREE[MESH](Sk.ffi.remapToJs(geometryPy), Sk.ffi.remapToJs(materialPy));
     });
-    $loc.__getattr__ = new Sk.builtin.func(function(mesh, name) {
-      mesh = Sk.ffi.remapToJs(mesh);
+    $loc.__getattr__ = new Sk.builtin.func(function(meshPy, name) {
+      var mesh = Sk.ffi.remapToJs(meshPy);
       switch(name) {
+        case PROP_ID: {
+          return Sk.builtin.nmber(mesh[PROP_ID], Sk.builtin.nmber.int$);
+        }
+        case PROP_NAME: {
+          return new Sk.builtin.str(mesh[PROP_NAME]);
+        }
+        case PROP_GEOMETRY: {
+          var geometry = mesh[PROP_GEOMETRY];
+          return Sk.misceval.callsim(mod[GEOMETRY], Sk.ffi.referenceToPy(mesh[PROP_GEOMETRY]));
+        }
         case PROP_OVERDRAW: {
           if (isBoolean(mesh[PROP_OVERDRAW])) {
             return mesh[PROP_OVERDRAW];
@@ -2735,6 +2812,23 @@ var $builtinmodule = function(name) {
         }
         case PROP_SCALE: {
           return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(mesh[PROP_SCALE]));
+        }
+        case METHOD_SET_GEOMETRY: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_SET_GEOMETRY;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, geometryPy) {
+              var geometry = Sk.ffi.remapToJs(geometryPy);
+              mesh[METHOD_SET_GEOMETRY](geometry);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET_GEOMETRY)
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET_GEOMETRY)
+            })
+          }, METHOD_SET_GEOMETRY, []));
         }
         default: {
           throw new Error(name + " is not an attribute of " + MESH);
@@ -2757,6 +2851,15 @@ var $builtinmodule = function(name) {
           }
         }
         break;
+        case PROP_NAME: {
+          if (isString(value)) {
+            mesh[PROP_NAME] = value;
+          }
+          else {
+            throw new Error(name + " must be a string");
+          }
+        }
+        break;
         case PROP_POSITION: {
           mesh[PROP_POSITION] = value;
         }
@@ -2770,11 +2873,17 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = new Sk.builtin.func(function(self) {
-      return new Sk.builtin.str(MESH);
+    $loc.__str__ = new Sk.builtin.func(function(mesh) {
+      mesh = Sk.ffi.remapToJs(mesh);
+      var args = {};
+      args[PROP_ID] = mesh[PROP_ID];
+      args[PROP_NAME] = mesh[PROP_NAME];
+      return new Sk.builtin.str(MESH + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = new Sk.builtin.func(function(self) {
-      return new Sk.builtin.str(MESH);
+    $loc.__repr__ = new Sk.builtin.func(function(mesh) {
+      mesh = Sk.ffi.remapToJs(mesh);
+      var args = [/*mesh[PROP_GEOMETRY], mesh[PROP_MATERIAL]*/];
+      return new Sk.builtin.str(MESH + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
     });
   }, MESH, []);
 
