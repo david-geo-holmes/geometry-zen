@@ -90,8 +90,8 @@ app.get "/*", (req, res, next) ->
   # Set a cookie to communicate the GitHub Client ID back to the client.
   res.cookie('github-application-client-id', nconf.get("GITHUB_APPLICATION_CLIENT_ID"))
   res.render "index",
-    css: "#{if isProductionMode() then 'css/app.min.css' else 'css/app.css'}"
-    js: "#{if isProductionMode() then 'js/app.min.js' else 'js/app.js'}"
-    bladeASM: "js/bladeASM.js"
+    css: if isProductionMode() then "css/app.min.css?version=#{npm.version}" else "css/app.css?version=#{npm.version}"
+    js:  if isProductionMode() then "js/app.min.js?version=#{npm.version}" else "js/app.js?version=#{npm.version}"
+    bladeASM: "js/bladeASM.js?version=#{npm.version}"
     marketing: marketing
     npm: npm
