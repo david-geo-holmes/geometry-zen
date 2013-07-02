@@ -27,6 +27,7 @@
     "bootstrap": "latest",
     "bladejs": "latest",
     "davinci": "latest",
+    "font-awesome": "latest",
     "jed": "latest",
     "jquery": "~2.0.1",
     "jquery-ui": "latest",

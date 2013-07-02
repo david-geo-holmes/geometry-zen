@@ -52,6 +52,7 @@ var $builtinmodule = function(name) {
   var PROP_BOTTOM              = "bottom";
   var PROP_COLOR               = "color";
   var PROP_DETAIL              = "detail";
+  var PROP_EULER_ORDER         = "eulerOrder";
   var PROP_FAR                 = "far";
   var PROP_GEOMETRY            = "geometry";
   var PROP_ID                  = "id";
@@ -70,6 +71,7 @@ var $builtinmodule = function(name) {
   var PROP_TOP                 = "top";
   var PROP_TRANSPARENT         = "transparent";
   var PROP_TYPE                = "type";
+  var PROP_UP                  = "up";
   var PROP_VERTICES            = "vertices";
   var PROP_VISIBLE             = "visible";
   var PROP_WIREFRAME           = "wireframe";
@@ -1022,6 +1024,32 @@ var $builtinmodule = function(name) {
         case PROP_ROTATION: {
           return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(scene[PROP_ROTATION]));
         }
+        case PROP_EULER_ORDER: {
+          return new Sk.builtin.str(scene[PROP_EULER_ORDER]);
+        }
+        case PROP_SCALE: {
+          return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(scene[PROP_SCALE]));
+        }
+        case PROP_UP: {
+          return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(scene[PROP_UP]));
+        }
+        case METHOD_LOOK_AT: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_LOOK_AT;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, vectorPy) {
+              scene.lookAt(Sk.ffi.remapToJs(vectorPy));
+              return scenePy;
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_LOOK_AT);
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_LOOK_AT);
+            })
+          }, METHOD_LOOK_AT, []));
+        }
         case METHOD_ADD: {
           return methodAdd(scene);
         }
@@ -1034,8 +1062,33 @@ var $builtinmodule = function(name) {
       var scene = Sk.ffi.remapToJs(scenePy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
+        case PROP_POSITION: {
+          scene[PROP_POSITION] = value;
+        }
+        break;
+        case PROP_ROTATION: {
+          scene[PROP_ROTATION] = value;
+        }
+        break;
+        case PROP_EULER_ORDER: {
+          if (isString(value)) {
+            scene[PROP_EULER_ORDER] = value;
+          }
+          else {
+            throw new Error(name + " must be a string");
+          }
+        }
+        break;
+        case PROP_SCALE: {
+          scene[PROP_SCALE] = value;
+        }
+        break;
+        case PROP_UP: {
+          scene[PROP_UP] = value;
+        }
+        break;
         default: {
-          throw new Error(name + " is not an attribute of " + SCENE);
+          throw new Error(name + " is not a write attribute of " + SCENE);
         }
       }
     });
@@ -1325,7 +1378,6 @@ var $builtinmodule = function(name) {
   }, COLOR, []);
 
   mod[PERSPECTIVE_CAMERA] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
-    var PROP_UP       = "up";
     $loc.__init__ = new Sk.builtin.func(function(self, fov, aspect, near, far) {
       var fieldOfView = Sk.builtin.asnum$(fov)
       var aspectRatio = Sk.builtin.asnum$(aspect)
@@ -1347,6 +1399,12 @@ var $builtinmodule = function(name) {
         }
         case PROP_ROTATION: {
           return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(camera[PROP_ROTATION]));
+        }
+        case PROP_EULER_ORDER: {
+          return new Sk.builtin.str(camera[PROP_EULER_ORDER]);
+        }
+        case PROP_SCALE: {
+          return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(camera[PROP_SCALE]));
         }
         case PROP_UP: {
           return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(camera[PROP_UP]));
@@ -1410,6 +1468,23 @@ var $builtinmodule = function(name) {
           camera[PROP_ROTATION] = value;
         }
         break;
+        case PROP_EULER_ORDER: {
+          if (isString(value)) {
+            camera[PROP_EULER_ORDER] = value;
+          }
+          else {
+            throw new Error(name + " must be a string");
+          }
+        }
+        break;
+        case PROP_SCALE: {
+          camera[PROP_SCALE] = value;
+        }
+        break;
+        case PROP_UP: {
+          camera[PROP_UP] = value;
+        }
+        break;
         default: {
           throw new Sk.builtin.AssertionError(name + " is not an attribute of " + PERSPECTIVE_CAMERA);
         }
@@ -1445,6 +1520,12 @@ var $builtinmodule = function(name) {
         }
         case PROP_ROTATION: {
           return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(camera[PROP_ROTATION]));
+        }
+        case PROP_EULER_ORDER: {
+          return new Sk.builtin.str(camera[PROP_EULER_ORDER]);
+        }
+        case PROP_SCALE: {
+          return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(camera[PROP_SCALE]));
         }
         case PROP_UP: {
           return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(camera[PROP_UP]));
@@ -1518,6 +1599,23 @@ var $builtinmodule = function(name) {
         break;
         case PROP_ROTATION: {
           camera[PROP_ROTATION] = value;
+        }
+        break;
+        case PROP_EULER_ORDER: {
+          if (isString(value)) {
+            camera[PROP_EULER_ORDER] = value;
+          }
+          else {
+            throw new Error(name + " must be a string");
+          }
+        }
+        break;
+        case PROP_SCALE: {
+          camera[PROP_SCALE] = value;
+        }
+        break;
+        case PROP_UP: {
+          camera[PROP_UP] = value;
         }
         break;
         default: {
@@ -2272,8 +2370,8 @@ var $builtinmodule = function(name) {
       distance = Sk.ffi.remapToJs(distance);
       self.v = new THREE[DIRECTIONAL_LIGHT](color, intensity, distance);
     });
-    $loc.__getattr__ = new Sk.builtin.func(function(light, name) {
-      light = Sk.ffi.remapToJs(light);
+    $loc.__getattr__ = new Sk.builtin.func(function(lightPy, name) {
+      var light = Sk.ffi.remapToJs(lightPy);
       switch(name) {
         case PROP_COLOR: {
           return Sk.misceval.callsim(mod[COLOR], Sk.ffi.referenceToPy(light[PROP_COLOR]));
@@ -2289,6 +2387,32 @@ var $builtinmodule = function(name) {
         }
         case PROP_ROTATION: {
           return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(light[PROP_ROTATION]));
+        }
+        case PROP_EULER_ORDER: {
+          return new Sk.builtin.str(light[PROP_EULER_ORDER]);
+        }
+        case PROP_SCALE: {
+          return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(light[PROP_SCALE]));
+        }
+        case PROP_UP: {
+          return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(light[PROP_UP]));
+        }
+        case METHOD_LOOK_AT: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_LOOK_AT;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, vectorPy) {
+              light.lookAt(Sk.ffi.remapToJs(vectorPy));
+              return lightPy;
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_LOOK_AT);
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_LOOK_AT);
+            })
+          }, METHOD_LOOK_AT, []));
         }
       }
     });
@@ -2324,6 +2448,23 @@ var $builtinmodule = function(name) {
         break;
         case PROP_ROTATION: {
           light[PROP_ROTATION] = value;
+        }
+        break;
+        case PROP_EULER_ORDER: {
+          if (isString(value)) {
+            light[PROP_EULER_ORDER] = value;
+          }
+          else {
+            throw new Error(name + " must be a string");
+          }
+        }
+        break;
+        case PROP_SCALE: {
+          light[PROP_SCALE] = value;
+        }
+        break;
+        case PROP_UP: {
+          light[PROP_UP] = value;
         }
         break;
         default: {
@@ -2361,8 +2502,8 @@ var $builtinmodule = function(name) {
       distance = Sk.ffi.remapToJs(distance);
       self.v = new THREE[POINT_LIGHT](color, intensity, distance);
     });
-    $loc.__getattr__ = new Sk.builtin.func(function(light, name) {
-      light = Sk.ffi.remapToJs(light);
+    $loc.__getattr__ = new Sk.builtin.func(function(lightPy, name) {
+      var light = Sk.ffi.remapToJs(lightPy);
       switch(name) {
         case PROP_COLOR: {
           return Sk.misceval.callsim(mod[COLOR], Sk.ffi.referenceToPy(light[PROP_COLOR]));
@@ -2378,6 +2519,32 @@ var $builtinmodule = function(name) {
         }
         case PROP_ROTATION: {
           return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(light[PROP_ROTATION]));
+        }
+        case PROP_EULER_ORDER: {
+          return new Sk.builtin.str(light[PROP_EULER_ORDER]);
+        }
+        case PROP_SCALE: {
+          return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(light[PROP_SCALE]));
+        }
+        case PROP_UP: {
+          return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(light[PROP_UP]));
+        }
+        case METHOD_LOOK_AT: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_LOOK_AT;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, vectorPy) {
+              light.lookAt(Sk.ffi.remapToJs(vectorPy));
+              return lightPy;
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_LOOK_AT);
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_LOOK_AT);
+            })
+          }, METHOD_LOOK_AT, []));
         }
       }
     });
@@ -2413,6 +2580,23 @@ var $builtinmodule = function(name) {
         break;
         case PROP_ROTATION: {
           light[PROP_ROTATION] = value;
+        }
+        break;
+        case PROP_EULER_ORDER: {
+          if (isString(value)) {
+            light[PROP_EULER_ORDER] = value;
+          }
+          else {
+            throw new Error(name + " must be a string");
+          }
+        }
+        break;
+        case PROP_SCALE: {
+          light[PROP_SCALE] = value;
+        }
+        break;
+        case PROP_UP: {
+          light[PROP_UP] = value;
         }
         break;
         default: {
@@ -2455,6 +2639,32 @@ var $builtinmodule = function(name) {
         }
         case PROP_ROTATION: {
           return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(line[PROP_ROTATION]));
+        }
+        case PROP_EULER_ORDER: {
+          return new Sk.builtin.str(line[PROP_EULER_ORDER]);
+        }
+        case PROP_SCALE: {
+          return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(line[PROP_SCALE]));
+        }
+        case PROP_UP: {
+          return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(line[PROP_UP]));
+        }
+        case METHOD_LOOK_AT: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_LOOK_AT;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, vectorPy) {
+              line.lookAt(Sk.ffi.remapToJs(vectorPy));
+              return linePy;
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_LOOK_AT);
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_LOOK_AT);
+            })
+          }, METHOD_LOOK_AT, []));
         }
         case PROP_TYPE: {
           return Sk.builtin.nmber(line[PROP_TYPE], Sk.builtin.nmber.int$);
@@ -2914,8 +3124,34 @@ var $builtinmodule = function(name) {
         case PROP_ROTATION: {
           return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(mesh[PROP_ROTATION]));
         }
+        case PROP_EULER_ORDER: {
+          return new Sk.builtin.str(mesh[PROP_EULER_ORDER]);
+        }
         case PROP_SCALE: {
           return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(mesh[PROP_SCALE]));
+        }
+        case PROP_UP: {
+          return Sk.misceval.callsim(mod[MULTI_VECTOR_3], Sk.ffi.referenceToPy(mesh[PROP_UP]));
+        }
+        case PROP_VISIBLE: {
+          return mesh[PROP_VISIBLE];
+        }
+        case METHOD_LOOK_AT: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_LOOK_AT;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, vectorPy) {
+              mesh.lookAt(Sk.ffi.remapToJs(vectorPy));
+              return meshPy;
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_LOOK_AT);
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_LOOK_AT);
+            })
+          }, METHOD_LOOK_AT, []));
         }
         case METHOD_SET_GEOMETRY: {
           return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
@@ -2970,6 +3206,32 @@ var $builtinmodule = function(name) {
         break;
         case PROP_ROTATION: {
           mesh[PROP_ROTATION] = value;
+        }
+        break;
+        case PROP_EULER_ORDER: {
+          if (isString(value)) {
+            mesh[PROP_EULER_ORDER] = value;
+          }
+          else {
+            throw new Error(name + " must be a string");
+          }
+        }
+        break;
+        case PROP_SCALE: {
+          mesh[PROP_SCALE] = value;
+        }
+        break;
+        case PROP_UP: {
+          mesh[PROP_UP] = value;
+        }
+        break;
+        case PROP_VISIBLE: {
+          if (isBoolean(value)) {
+            mesh[PROP_VISIBLE] = value;
+          }
+          else {
+            throw new Error(PROP_VISIBLE + " must be Boolean");
+          }
         }
         break;
         default: {
