@@ -38,6 +38,7 @@ var $builtinmodule = function(name) {
   var LINE                  = "Line";
   var MESH                  = "Mesh";
 
+  var ARROW_GEOMETRY        = "ArrowGeometry";
   var CUBE_GEOMETRY         = "CubeGeometry";
   var CYLINDER_GEOMETRY     = "CylinderGeometry";
   var ICOSAHEDRON_GEOMETRY  = "IcosahedronGeometry";
@@ -1533,6 +1534,67 @@ var $builtinmodule = function(name) {
       return new Sk.builtin.str(ORTHOGRAPHIC_CAMERA);
     });
   }, ORTHOGRAPHIC_CAMERA, []);
+
+  mod[ARROW_GEOMETRY] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
+    $loc.__init__ = new Sk.builtin.func(function(self, length, segments, radiusShaft, radiusCone, lengthCone) {
+      length = Sk.ffi.remapToJs(length) || 1;
+      segments = Sk.ffi.remapToJs(segments);
+      radiusShaft = Sk.ffi.remapToJs(radiusShaft) || 0.01;
+      radiusCone = Sk.ffi.remapToJs(radiusCone) || 0.08;
+      lengthCone = Sk.ffi.remapToJs(lengthCone) || 0.2;
+      var lengthShaft = 1 - lengthCone;
+      var a = new THREE.Vector3(0, 0, length);
+      var b = new THREE.Vector3(radiusCone, 0, lengthShaft);
+      var c = new THREE.Vector3(radiusShaft, 0, lengthShaft);
+      var d = new THREE.Vector3(radiusShaft, 0, 0);
+      var e = new THREE.Vector3(0, 0, 0);
+      var points = [a, b, c, d, e];
+      self.v = new THREE.LatheGeometry(points, segments);
+      self.tp$name = ARROW_GEOMETRY;
+    });
+    $loc.__getattr__ = new Sk.builtin.func(function(geometryPy, name) {
+      var geometry = Sk.ffi.remapToJs(geometryPy);
+      switch(name) {
+        case PROP_ID: {
+          return Sk.builtin.nmber(geometry[PROP_ID], Sk.builtin.nmber.int$);
+        }
+        case PROP_NAME: {
+          return new Sk.builtin.str(geometry[PROP_NAME]);
+        }
+        case PROP_VERTICES: {
+          return verticesPy(geometry.vertices);
+        }
+      }
+    });
+    $loc.__setattr__ = new Sk.builtin.func(function(geometryPy, name, valuePy) {
+      var geometry = Sk.ffi.remapToJs(geometryPy);
+      var value = Sk.ffi.remapToJs(valuePy);
+      switch(name) {
+        case PROP_NAME: {
+          if (isString(value)) {
+            geometry[PROP_NAME] = value;
+          }
+          else {
+            throw new Error(name + " must be a string");
+          }
+        }
+        break;
+        default: {
+          throw new Error(name + " is not an attribute of " + ARROW_GEOMETRY);
+        }
+      }
+    });
+    $loc.__str__ = new Sk.builtin.func(function(self) {
+      var geometry = Sk.ffi.remapToJs(self);
+      var args = {};
+      return new Sk.builtin.str(ARROW_GEOMETRY + "(" + JSON.stringify(args) + ")");
+    });
+    $loc.__repr__ = new Sk.builtin.func(function(self) {
+      var geometry = Sk.ffi.remapToJs(self);
+      var args = [];
+      return new Sk.builtin.str(ARROW_GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
+    });
+  }, ARROW_GEOMETRY, []);
 
    mod[CUBE_GEOMETRY] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
     var PROP_WIDTH           = "width";
