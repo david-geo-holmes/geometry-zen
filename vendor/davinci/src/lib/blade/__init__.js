@@ -108,6 +108,40 @@ var $builtinmodule = function(name) {
         throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " + " + JSON.stringify(rhs, null, 2));
       }
     });
+    $loc.__iadd__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var self = Sk.ffi.remapToJs(selfPy);
+      var other = Sk.ffi.remapToJs(otherPy);
+      if (isNumber(other)) {
+        var a0 = self[0];
+        var a1 = self[1];
+        var a2 = self[2];
+        var a3 = self[3];
+        var b0 = other;
+        var b1 = 0;
+        var b2 = 0;
+        var b3 = 0;
+        self[0] = bladeASM.addE2(a0, a1, a2, a3, b0, b1, b2, b3, 0);
+        self[1] = bladeASM.addE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
+        self[2] = bladeASM.addE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
+        self[3] = bladeASM.addE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
+        return selfPy;
+      }
+      else {
+        var a0 = self[0];
+        var a1 = self[1];
+        var a2 = self[2];
+        var a3 = self[3];
+        var b0 = other[0];
+        var b1 = other[1];
+        var b2 = other[2];
+        var b3 = other[3];
+        self[0] = bladeASM.addE2(a0, a1, a2, a3, b0, b1, b2, b3, 0);
+        self[1] = bladeASM.addE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
+        self[2] = bladeASM.addE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
+        self[3] = bladeASM.addE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
+        return selfPy;
+      }
+    });
     $loc.__sub__ = new Sk.builtin.func(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
@@ -162,6 +196,40 @@ var $builtinmodule = function(name) {
       }
       else {
         throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " - " + JSON.stringify(rhs, null, 2));
+      }
+    });
+    $loc.__isub__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var self = Sk.ffi.remapToJs(selfPy);
+      var other = Sk.ffi.remapToJs(otherPy);
+      if (isNumber(other)) {
+        var a0 = self[0];
+        var a1 = self[1];
+        var a2 = self[2];
+        var a3 = self[3];
+        var b0 = other;
+        var b1 = 0;
+        var b2 = 0;
+        var b3 = 0;
+        self[0] = bladeASM.subE2(a0, a1, a2, a3, b0, b1, b2, b3, 0);
+        self[1] = bladeASM.subE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
+        self[2] = bladeASM.subE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
+        self[3] = bladeASM.subE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
+        return selfPy;
+      }
+      else {
+        var a0 = self[0];
+        var a1 = self[1];
+        var a2 = self[2];
+        var a3 = self[3];
+        var b0 = other[0];
+        var b1 = other[1];
+        var b2 = other[2];
+        var b3 = other[3];
+        self[0] = bladeASM.subE2(a0, a1, a2, a3, b0, b1, b2, b3, 0);
+        self[1] = bladeASM.subE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
+        self[2] = bladeASM.subE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
+        self[3] = bladeASM.subE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
+        return selfPy;
       }
     });
     $loc.__mul__ = new Sk.builtin.func(function(a, b) {
@@ -220,6 +288,40 @@ var $builtinmodule = function(name) {
         throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " * " + JSON.stringify(rhs, null, 2));
       }
     });
+    $loc.__imul__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var self = Sk.ffi.remapToJs(selfPy);
+      var other = Sk.ffi.remapToJs(otherPy);
+      if (isNumber(other)) {
+        var a0 = self[0];
+        var a1 = self[1];
+        var a2 = self[2];
+        var a3 = self[3];
+        var b0 = other;
+        var b1 = 0;
+        var b2 = 0;
+        var b3 = 0;
+        self[0] = bladeASM.mulE2(a0, a1, a2, a3, b0, b1, b2, b3, 0);
+        self[1] = bladeASM.mulE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
+        self[2] = bladeASM.mulE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
+        self[3] = bladeASM.mulE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
+        return selfPy;
+      }
+      else {
+        var a0 = self[0];
+        var a1 = self[1];
+        var a2 = self[2];
+        var a3 = self[3];
+        var b0 = other[0];
+        var b1 = other[1];
+        var b2 = other[2];
+        var b3 = other[3];
+        self[0] = bladeASM.mulE2(a0, a1, a2, a3, b0, b1, b2, b3, 0);
+        self[1] = bladeASM.mulE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
+        self[2] = bladeASM.mulE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
+        self[3] = bladeASM.mulE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
+        return selfPy;
+      }
+    });
     $loc.__xor__ = new Sk.builtin.func(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
@@ -274,6 +376,40 @@ var $builtinmodule = function(name) {
       }
       else {
         throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " ^ " + JSON.stringify(rhs, null, 2));
+      }
+    });
+    $loc.__ixor__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var self = Sk.ffi.remapToJs(selfPy);
+      var other = Sk.ffi.remapToJs(otherPy);
+      if (isNumber(other)) {
+        var a0 = self[0];
+        var a1 = self[1];
+        var a2 = self[2];
+        var a3 = self[3];
+        var b0 = other;
+        var b1 = 0;
+        var b2 = 0;
+        var b3 = 0;
+        self[0] = bladeASM.extE2(a0, a1, a2, a3, b0, b1, b2, b3, 0);
+        self[1] = bladeASM.extE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
+        self[2] = bladeASM.extE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
+        self[3] = bladeASM.extE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
+        return selfPy;
+      }
+      else {
+        var a0 = self[0];
+        var a1 = self[1];
+        var a2 = self[2];
+        var a3 = self[3];
+        var b0 = other[0];
+        var b1 = other[1];
+        var b2 = other[2];
+        var b3 = other[3];
+        self[0] = bladeASM.extE2(a0, a1, a2, a3, b0, b1, b2, b3, 0);
+        self[1] = bladeASM.extE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
+        self[2] = bladeASM.extE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
+        self[3] = bladeASM.extE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
+        return selfPy;
       }
     });
     $loc.__lshift__ = new Sk.builtin.func(function(a, b) {
@@ -332,6 +468,40 @@ var $builtinmodule = function(name) {
         throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " << " + JSON.stringify(rhs, null, 2));
       }
     });
+    $loc.__ilshift__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var self = Sk.ffi.remapToJs(selfPy);
+      var other = Sk.ffi.remapToJs(otherPy);
+      if (isNumber(other)) {
+        var a0 = self[0];
+        var a1 = self[1];
+        var a2 = self[2];
+        var a3 = self[3];
+        var b0 = other;
+        var b1 = 0;
+        var b2 = 0;
+        var b3 = 0;
+        self[0] = bladeASM.lcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 0);
+        self[1] = bladeASM.lcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
+        self[2] = bladeASM.lcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
+        self[3] = bladeASM.lcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
+        return selfPy;
+      }
+      else {
+        var a0 = self[0];
+        var a1 = self[1];
+        var a2 = self[2];
+        var a3 = self[3];
+        var b0 = other[0];
+        var b1 = other[1];
+        var b2 = other[2];
+        var b3 = other[3];
+        self[0] = bladeASM.lcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 0);
+        self[1] = bladeASM.lcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
+        self[2] = bladeASM.lcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
+        self[3] = bladeASM.lcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
+        return selfPy;
+      }
+    });
     $loc.__rshift__ = new Sk.builtin.func(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
@@ -386,6 +556,40 @@ var $builtinmodule = function(name) {
       }
       else {
         throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " >> " + JSON.stringify(rhs, null, 2));
+      }
+    });
+    $loc.__irshift__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var self = Sk.ffi.remapToJs(selfPy);
+      var other = Sk.ffi.remapToJs(otherPy);
+      if (isNumber(other)) {
+        var a0 = self[0];
+        var a1 = self[1];
+        var a2 = self[2];
+        var a3 = self[3];
+        var b0 = other;
+        var b1 = 0;
+        var b2 = 0;
+        var b3 = 0;
+        self[0] = bladeASM.rcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 0);
+        self[1] = bladeASM.rcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
+        self[2] = bladeASM.rcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
+        self[3] = bladeASM.rcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
+        return selfPy;
+      }
+      else {
+        var a0 = self[0];
+        var a1 = self[1];
+        var a2 = self[2];
+        var a3 = self[3];
+        var b0 = other[0];
+        var b1 = other[1];
+        var b2 = other[2];
+        var b3 = other[3];
+        self[0] = bladeASM.rcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 0);
+        self[1] = bladeASM.rcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
+        self[2] = bladeASM.rcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
+        self[3] = bladeASM.rcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
+        return selfPy;
       }
     });
     $loc.__or__ = new Sk.builtin.func(function(a, b) {

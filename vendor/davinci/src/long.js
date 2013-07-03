@@ -356,9 +356,9 @@ Sk.builtin.lng.prototype.nb$power = function(n)
 
 Sk.builtin.lng.prototype.nb$inplace_add = Sk.builtin.lng.prototype.nb$add;
 
-Sk.builtin.lng.prototype.nb$inplace_subtract = Sk.builtin.lng.prototype.nb$subtract;
+Sk.builtin.lng.prototype.nb$inplace_sub = Sk.builtin.lng.prototype.nb$subtract;
 
-Sk.builtin.lng.prototype.nb$inplace_multiply = Sk.builtin.lng.prototype.nb$multiply;
+Sk.builtin.lng.prototype.nb$inplace_mul = Sk.builtin.lng.prototype.nb$multiply;
 
 Sk.builtin.lng.prototype.nb$inplace_divide = Sk.builtin.lng.prototype.nb$divide;
 

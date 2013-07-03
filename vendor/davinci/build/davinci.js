@@ -5289,35 +5289,35 @@ Sk.abstr.boNameToSlotFuncLhs_ = function(obj, name) {
 
 Sk.abstr.boNameToSlotFuncRhs_ = function(obj, name) {
   switch (name) {
-    case "Add":      return obj.nb$add ? obj.nb$add :                   obj['__radd__'];
-    case "Sub":      return obj.nb$subtract ? obj.nb$subtract :         obj['__rsub__'];
-    case "Mult":     return obj.nb$multiply ? obj.nb$multiply :         obj['__rmul__'];
-    case "Div":      return obj.nb$divide ? obj.nb$divide :             obj['__rdiv__'];
+    case "Add":      return obj.nb$add          ? obj.nb$add :          obj['__radd__'];
+    case "Sub":      return obj.nb$subtract     ? obj.nb$subtract :     obj['__rsub__'];
+    case "Mult":     return obj.nb$multiply     ? obj.nb$multiply :     obj['__rmul__'];
+    case "Div":      return obj.nb$divide       ? obj.nb$divide :       obj['__rdiv__'];
     case "FloorDiv": return obj.nb$floor_divide ? obj.nb$floor_divide : obj['__rfloordiv__'];
-    case "Mod":      return obj.nb$remainder ? obj.nb$remainder :       obj['__rmod__'];
-    case "Pow":      return obj.nb$power ? obj.nb$power :               obj['__rpow__'];
-    case "LShift":   return obj.nb$lshift ? obj.nb$lshift :             obj['__rlshift__'];
-    case "RShift":   return obj.nb$rshift ? obj.nb$rshift :             obj['__rrshift__'];
-    case "BitAnd":   return obj.nb$and ? obj.nb$and :                   obj['__rand__'];
-    case "BitXor":   return obj.nb$xor ? obj.nb$xor :                   obj['__rxor__'];
-    case "BitOr":    return obj.nb$or ? obj.nb$or :                     obj['__ror__'];
+    case "Mod":      return obj.nb$remainder    ? obj.nb$remainder :    obj['__rmod__'];
+    case "Pow":      return obj.nb$power        ? obj.nb$power :        obj['__rpow__'];
+    case "LShift":   return obj.nb$lshift       ? obj.nb$lshift :       obj['__rlshift__'];
+    case "RShift":   return obj.nb$rshift       ? obj.nb$rshift :       obj['__rrshift__'];
+    case "BitAnd":   return obj.nb$and          ? obj.nb$and :          obj['__rand__'];
+    case "BitXor":   return obj.nb$xor          ? obj.nb$xor :          obj['__rxor__'];
+    case "BitOr":    return obj.nb$or           ? obj.nb$or :           obj['__ror__'];
   }
 };
 
 Sk.abstr.iboNameToSlotFunc_ = function(obj, name) {
   switch (name) {
-    case "Add": return obj.nb$inplace_add;
-    case "Sub": return obj.nb$inplace_subtract;
-    case "Mult": return obj.nb$inplace_multiply;
-    case "Div": return obj.nb$inplace_divide;
-    case "FloorDiv": return obj.nb$inplace_floor_divide;
-    case "Mod": return obj.nb$inplace_remainder;
-    case "Pow": return obj.nb$inplace_power;
-    case "LShift": return obj.nb$lshift;
-    case "RShift": return obj.nb$rshift;
-    case "BitAnd": return obj.nb$and;
-    case "BitOr": return obj.nb$or;
-    case "BitXor": return obj.nb$xor;
+    case "Add":      return obj.nb$inplace_add          ? obj.nb$inplace_add          : obj['__iadd__'];
+    case "Sub":      return obj.nb$inplace_sub          ? obj.nb$inplace_sub          : obj['__isub__'];
+    case "Mult":     return obj.nb$inplace_mul          ? obj.nb$inplace_mul          : obj['__imul__'];
+    case "Div":      return obj.nb$inplace_divide;
+    case "FloorDiv": return obj.nb$inplace_floor_divide ? obj.nb$inplace_floor_divide : obj['__ifloordiv__'];
+    case "Mod":      return obj.nb$inplace_remainder;
+    case "Pow":      return obj.nb$inplace_power;
+    case "LShift":   return obj.nb$lshift               ? obj.nb$lshift               : obj['__lshift__'];
+    case "RShift":   return obj.nb$rshift               ? obj.nb$rshift               : obj['__rshift__'];
+    case "BitAnd":   return obj.nb$and;
+    case "BitOr":    return obj.nb$or;
+    case "BitXor":   return obj.nb$xor                  ? obj.nb$xor                  : obj['__ixor__'];
   }
 };
 
@@ -5329,7 +5329,6 @@ Sk.abstr.binary_op_ = function(v, w, opname) {
       ret = vop.call(v, w);
     }
     else {
-      // assume that vop is an __xxx__ type method
       ret = Sk.misceval.callsim(vop, v, w)
     }
     if (ret !== undefined) return ret;
@@ -5340,7 +5339,6 @@ Sk.abstr.binary_op_ = function(v, w, opname) {
       ret = wop.call(w, v);
     }
     else {
-      // assume that wop is an __xxx__ type method
       ret = Sk.misceval.callsim(wop, w, v)
     }
     if (ret !== undefined) return ret;
@@ -8567,53 +8565,53 @@ Sk.builtin.biginteger.prototype.isProbablePrime = Sk.builtin.biginteger.prototyp
 /**
  * @constructor
  */
-Sk.builtin.nmber = function(x, skType)	/* number is a reserved word */
+Sk.builtin.nmber = function(x, skType)  /* number is a reserved word */
 {
     if (!(this instanceof Sk.builtin.nmber)) return new Sk.builtin.nmber(x, undefined);
 
-	if (x instanceof Sk.builtin.str)
-		x = x.v;
+  if (x instanceof Sk.builtin.str)
+    x = x.v;
 
-	if (x instanceof Sk.builtin.nmber) {
-		this.v = x.v;
-		this.skType = x.skType;
-	} else if (typeof x === "number") {
-		this.v = x;
-		if (skType === undefined) {
-			if (x > Sk.builtin.nmber.threshold$ || x < -Sk.builtin.nmber.threshold$ || x % 1 != 0)
-				this.skType = Sk.builtin.nmber.float$;
-			else
-				this.skType = Sk.builtin.nmber.int$;
-		} else {
-			this.skType = skType;
-			if (skType === Sk.builtin.nmber.int$)
-			if (x > Sk.builtin.nmber.threshold$ || x < -Sk.builtin.nmber.threshold$)
-				return new Sk.builtin.lng(x);
-		}
-	} else if (typeof x === "string") {
-		var result = Sk.numberFromStr(x);
-		if (skType !== undefined)
-			result.skType = skType;
-		if (skType === Sk.builtin.nmber.int$)
-			if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$)
-				return new Sk.builtin.lng(x);
-		return result;
-	} else if (x instanceof Sk.builtin.lng) {
-		return Sk.numberFromStr(x.str$(10, true));
-	} else if (x instanceof Sk.builtin.biginteger) {
-		var result = Sk.numberFromStr(x.toString());
-		if (skType !== undefined)
-			result.skType = skType;
-		if (skType === Sk.builtin.nmber.int$)
-			if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$)
-				return new Sk.builtin.lng(x);
-	} else {
-		this.v = 0;
-		if (skType === undefined)
-			this.skType = Sk.builtin.nmber.int$;
-		else
-			this.skType = skType;
-	}
+  if (x instanceof Sk.builtin.nmber) {
+    this.v = x.v;
+    this.skType = x.skType;
+  } else if (typeof x === "number") {
+    this.v = x;
+    if (skType === undefined) {
+      if (x > Sk.builtin.nmber.threshold$ || x < -Sk.builtin.nmber.threshold$ || x % 1 != 0)
+        this.skType = Sk.builtin.nmber.float$;
+      else
+        this.skType = Sk.builtin.nmber.int$;
+    } else {
+      this.skType = skType;
+      if (skType === Sk.builtin.nmber.int$)
+      if (x > Sk.builtin.nmber.threshold$ || x < -Sk.builtin.nmber.threshold$)
+        return new Sk.builtin.lng(x);
+    }
+  } else if (typeof x === "string") {
+    var result = Sk.numberFromStr(x);
+    if (skType !== undefined)
+      result.skType = skType;
+    if (skType === Sk.builtin.nmber.int$)
+      if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$)
+        return new Sk.builtin.lng(x);
+    return result;
+  } else if (x instanceof Sk.builtin.lng) {
+    return Sk.numberFromStr(x.str$(10, true));
+  } else if (x instanceof Sk.builtin.biginteger) {
+    var result = Sk.numberFromStr(x.toString());
+    if (skType !== undefined)
+      result.skType = skType;
+    if (skType === Sk.builtin.nmber.int$)
+      if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$)
+        return new Sk.builtin.lng(x);
+  } else {
+    this.v = 0;
+    if (skType === undefined)
+      this.skType = Sk.builtin.nmber.int$;
+    else
+      this.skType = skType;
+  }
 
     return this;
 };
@@ -8631,41 +8629,41 @@ Sk.builtin.nmber.prototype.tp$hash = function()
 Sk.builtin.nmber.prototype.tp$name = "number";
 Sk.builtin.nmber.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('number', Sk.builtin.nmber);
 
-//	Threshold to determine when types should be converted to long
+//  Threshold to determine when types should be converted to long
 Sk.builtin.nmber.threshold$ = Math.pow(2, 53);
 Sk.builtin.nmber.float$ = "float";
 Sk.builtin.nmber.int$ = "int";
 
 Sk.builtin.nmber.fromInt$ = function(ival)
 {
-	return new Sk.builtin.nmber(ival, undefined);
+  return new Sk.builtin.nmber(ival, undefined);
 };
 
 // js string (not Sk.builtin.str) -> long. used to create longs in transformer, respects
 // 0x, 0o, 0b, etc.
 Sk.numberFromStr = function(s)
 {
-	if (s == 'inf')
-		return new Sk.builtin.nmber(Infinity, undefined);
-	if (s == '-inf')
-		return new Sk.builtin.nmber(-Infinity, undefined);
+  if (s == 'inf')
+    return new Sk.builtin.nmber(Infinity, undefined);
+  if (s == '-inf')
+    return new Sk.builtin.nmber(-Infinity, undefined);
 
-	var res = new Sk.builtin.nmber(0, undefined);
+  var res = new Sk.builtin.nmber(0, undefined);
 
-	 if (s.indexOf('.') !== -1
+   if (s.indexOf('.') !== -1
             || s.indexOf('e') !== -1
             || s.indexOf('E') !== -1)
     {
         res.v = parseFloat(s);
-		res.skType = Sk.builtin.nmber.float$;
-		return res;
+    res.skType = Sk.builtin.nmber.float$;
+    return res;
     }
 
     // ugly gunk to placate an overly-nanny closure-compiler:
     // http://code.google.com/p/closure-compiler/issues/detail?id=111
     // this is all just to emulate "parseInt(s)" with no radix.
     var tmp = s;
-	var s1;
+  var s1;
     if (s.charAt(0) === '-') tmp = s.substr(1);
     if (tmp.charAt(0) === '0' && (tmp.charAt(1) === 'x' || tmp.charAt(1) === 'X'))
         s1 = parseInt(s, 16);
@@ -8676,444 +8674,444 @@ Sk.numberFromStr = function(s)
     else
         s1 = parseInt(s, 10);
 
-	res.v = s1;
-	res.skType = Sk.builtin.nmber.int$;
-	return res;
+  res.v = s1;
+  res.skType = Sk.builtin.nmber.int$;
+  return res;
 };
 goog.exportSymbol("Sk.numberFromStr", Sk.numberFromStr);
 
 Sk.builtin.nmber.prototype.clone = function()
 {
-	return new Sk.builtin.nmber(this, undefined);
+  return new Sk.builtin.nmber(this, undefined);
 };
 
 Sk.builtin.nmber.prototype.toFixed = function(x) {
-	x = Sk.builtin.asnum$(x);
-	return this.v.toFixed(x)
+  x = Sk.builtin.asnum$(x);
+  return this.v.toFixed(x)
 }
 
 Sk.builtin.nmber.prototype.nb$add = function(other)
 {
-	var result;
+  var result;
 
-	if (typeof other === "number")
-		other = new Sk.builtin.nmber(other, undefined);
+  if (typeof other === "number")
+    other = new Sk.builtin.nmber(other, undefined);
 
-	if (other instanceof Sk.builtin.nmber) {
-		result = new Sk.builtin.nmber(this.v + other.v, undefined);
-		if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$)
-			result.skType = Sk.builtin.nmber.float$;
-		else {
-			result.skType = Sk.builtin.nmber.int$;
-			if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
-				//	Promote to long
-				result = new Sk.builtin.lng(this.v).nb$add(other.v);
-			}
-		}
-		return result;
-	}
+  if (other instanceof Sk.builtin.nmber) {
+    result = new Sk.builtin.nmber(this.v + other.v, undefined);
+    if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$)
+      result.skType = Sk.builtin.nmber.float$;
+    else {
+      result.skType = Sk.builtin.nmber.int$;
+      if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
+        //  Promote to long
+        result = new Sk.builtin.lng(this.v).nb$add(other.v);
+      }
+    }
+    return result;
+  }
 
-	if (other instanceof Sk.builtin.lng) {
-		if (this.skType === Sk.builtin.nmber.float$) {  // float + long --> float
-			result = new Sk.builtin.nmber(this.v + parseFloat(other.str$(10, true)), Sk.builtin.nmber.float$);
-		} else {	//	int + long --> long
-			var thisAsLong = new Sk.builtin.lng(this.v);
-			result = thisAsLong.nb$add(other);
-		}
-		return result;
-	}
+  if (other instanceof Sk.builtin.lng) {
+    if (this.skType === Sk.builtin.nmber.float$) {  // float + long --> float
+      result = new Sk.builtin.nmber(this.v + parseFloat(other.str$(10, true)), Sk.builtin.nmber.float$);
+    } else {  //  int + long --> long
+      var thisAsLong = new Sk.builtin.lng(this.v);
+      result = thisAsLong.nb$add(other);
+    }
+    return result;
+  }
 
-	return undefined;
+  return undefined;
 };
 
 
 Sk.builtin.nmber.prototype.nb$subtract = function(other)
 {
-	var result;
+  var result;
 
-	if (typeof other === "number") {
-		other = new Sk.builtin.nmber(other, undefined);
-	}
+  if (typeof other === "number") {
+    other = new Sk.builtin.nmber(other, undefined);
+  }
 
-	if (other instanceof Sk.builtin.nmber) {
-		result = new Sk.builtin.nmber(this.v - other.v, undefined);
-		if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$)
-			result.skType = Sk.builtin.nmber.float$;
-		else {
-			result.skType = Sk.builtin.nmber.int$;
-			if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
-				//	Promote to long
-				result = new Sk.builtin.lng(this.v).nb$subtract(other.v);
-			}
-		}
-		return result;
-	}
+  if (other instanceof Sk.builtin.nmber) {
+    result = new Sk.builtin.nmber(this.v - other.v, undefined);
+    if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$)
+      result.skType = Sk.builtin.nmber.float$;
+    else {
+      result.skType = Sk.builtin.nmber.int$;
+      if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
+        //  Promote to long
+        result = new Sk.builtin.lng(this.v).nb$subtract(other.v);
+      }
+    }
+    return result;
+  }
 
-	if (other instanceof Sk.builtin.lng) {
-		if (this.skType === Sk.builtin.nmber.float$) {  // float + long --> float
-			result = new Sk.builtin.nmber(this.v - parseFloat(other.str$(10, true)), Sk.builtin.nmber.float$);
-		} else {	//	int - long --> long
-			var thisAsLong = new Sk.builtin.lng(this.v);
-			result = thisAsLong.nb$subtract(other);
-		}
-		return result;
-	}
+  if (other instanceof Sk.builtin.lng) {
+    if (this.skType === Sk.builtin.nmber.float$) {  // float + long --> float
+      result = new Sk.builtin.nmber(this.v - parseFloat(other.str$(10, true)), Sk.builtin.nmber.float$);
+    } else {  //  int - long --> long
+      var thisAsLong = new Sk.builtin.lng(this.v);
+      result = thisAsLong.nb$subtract(other);
+    }
+    return result;
+  }
 
-	return undefined;
+  return undefined;
 };
 
 Sk.builtin.nmber.prototype.nb$multiply = function(other)
 {
-	var result;
+  var result;
 
-	if (typeof other === "number")
-		other = new Sk.builtin.nmber(other, undefined);
+  if (typeof other === "number")
+    other = new Sk.builtin.nmber(other, undefined);
 
-	if (other instanceof Sk.builtin.nmber) {
-		result = new Sk.builtin.nmber(this.v * other.v, undefined);
-		if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$)
-			result.skType = Sk.builtin.nmber.float$;
-		else {
-			result.skType = Sk.builtin.nmber.int$;
-			if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
-				//	Promote to long
-				result = new Sk.builtin.lng(this.v).nb$multiply(other.v);
-			}
-		}
-		return result;
-	}
+  if (other instanceof Sk.builtin.nmber) {
+    result = new Sk.builtin.nmber(this.v * other.v, undefined);
+    if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$)
+      result.skType = Sk.builtin.nmber.float$;
+    else {
+      result.skType = Sk.builtin.nmber.int$;
+      if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
+        //  Promote to long
+        result = new Sk.builtin.lng(this.v).nb$multiply(other.v);
+      }
+    }
+    return result;
+  }
 
-	if (other instanceof Sk.builtin.lng) {
-		if (this.skType === Sk.builtin.nmber.float$) {  // float + long --> float
-			result = new Sk.builtin.nmber(this.v * parseFloat(other.str$(10, true)), Sk.builtin.nmber.float$);
-		} else {	//	int - long --> long
-			var thisAsLong = new Sk.builtin.lng(this.v);
-			result = thisAsLong.nb$multiply(other);
-		}
-		return result;
-	}
+  if (other instanceof Sk.builtin.lng) {
+    if (this.skType === Sk.builtin.nmber.float$) {  // float + long --> float
+      result = new Sk.builtin.nmber(this.v * parseFloat(other.str$(10, true)), Sk.builtin.nmber.float$);
+    } else {  //  int - long --> long
+      var thisAsLong = new Sk.builtin.lng(this.v);
+      result = thisAsLong.nb$multiply(other);
+    }
+    return result;
+  }
 
-	return undefined;
+  return undefined;
 };
 
 Sk.builtin.nmber.prototype.nb$divide = function(other)
 {
-	var result;
+  var result;
 
-	if (typeof other === "number")
-		other = new Sk.builtin.nmber(other, undefined);
+  if (typeof other === "number")
+    other = new Sk.builtin.nmber(other, undefined);
 
-	if (other instanceof Sk.builtin.nmber) {
-		if (other.v == 0)
-			throw new Sk.builtin.ZeroDivisionError("integer division or modulo by zero");
+  if (other instanceof Sk.builtin.nmber) {
+    if (other.v == 0)
+      throw new Sk.builtin.ZeroDivisionError("integer division or modulo by zero");
 
-		if (this.v === Infinity)
-			if (other.v === Infinity || other.v === -Infinity)
-				return new Sk.builtin.nmber(NaN, Sk.builtin.nmber.float$);
-			else if (other.nb$isnegative())
-				return new Sk.builtin.nmber(-Infinity, Sk.builtin.nmber.float$);
-			else
-				return new Sk.builtin.nmber(Infinity, Sk.builtin.nmber.float$);
-		if (this.v === -Infinity)
-			if (other.v === Infinity || other.v === -Infinity)
-				return new Sk.builtin.nmber(NaN, Sk.builtin.nmber.float$);
-			else if (other.nb$isnegative())
-				return new Sk.builtin.nmber(Infinity, Sk.builtin.nmber.float$);
-			else
-				return new Sk.builtin.nmber(-Infinity, Sk.builtin.nmber.float$);
+    if (this.v === Infinity)
+      if (other.v === Infinity || other.v === -Infinity)
+        return new Sk.builtin.nmber(NaN, Sk.builtin.nmber.float$);
+      else if (other.nb$isnegative())
+        return new Sk.builtin.nmber(-Infinity, Sk.builtin.nmber.float$);
+      else
+        return new Sk.builtin.nmber(Infinity, Sk.builtin.nmber.float$);
+    if (this.v === -Infinity)
+      if (other.v === Infinity || other.v === -Infinity)
+        return new Sk.builtin.nmber(NaN, Sk.builtin.nmber.float$);
+      else if (other.nb$isnegative())
+        return new Sk.builtin.nmber(Infinity, Sk.builtin.nmber.float$);
+      else
+        return new Sk.builtin.nmber(-Infinity, Sk.builtin.nmber.float$);
 
-		result = new Sk.builtin.nmber(this.v / other.v, undefined);
-		if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$ || Sk.python3)
-			result.skType = Sk.builtin.nmber.float$;
-		else {
-			result.v = Math.floor(result.v);
-			result.skType = Sk.builtin.nmber.int$;
-			if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
-				//	Promote to long
-				result = new Sk.builtin.lng(this.v).nb$divide(other.v);
-			}
-		}
-		return result;
-	}
+    result = new Sk.builtin.nmber(this.v / other.v, undefined);
+    if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$ || Sk.python3)
+      result.skType = Sk.builtin.nmber.float$;
+    else {
+      result.v = Math.floor(result.v);
+      result.skType = Sk.builtin.nmber.int$;
+      if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
+        //  Promote to long
+        result = new Sk.builtin.lng(this.v).nb$divide(other.v);
+      }
+    }
+    return result;
+  }
 
-	if (other instanceof Sk.builtin.lng) {
-		if (other.longCompare(Sk.builtin.biginteger.ZERO) == 0)
-			throw new Sk.builtin.ZeroDivisionError("integer division or modulo by zero");
+  if (other instanceof Sk.builtin.lng) {
+    if (other.longCompare(Sk.builtin.biginteger.ZERO) == 0)
+      throw new Sk.builtin.ZeroDivisionError("integer division or modulo by zero");
 
-		if (this.v === Infinity)
-			if (other.nb$isnegative())
-				return new Sk.builtin.nmber(-Infinity, Sk.builtin.nmber.float$);
-			else
-				return new Sk.builtin.nmber(Infinity, Sk.builtin.nmber.float$);
-		if (this.v === -Infinity)
-			if (other.nb$isnegative())
-				return new Sk.builtin.nmber(Infinity, Sk.builtin.nmber.float$);
-			else
-				return new Sk.builtin.nmber(-Infinity, Sk.builtin.nmber.float$);
+    if (this.v === Infinity)
+      if (other.nb$isnegative())
+        return new Sk.builtin.nmber(-Infinity, Sk.builtin.nmber.float$);
+      else
+        return new Sk.builtin.nmber(Infinity, Sk.builtin.nmber.float$);
+    if (this.v === -Infinity)
+      if (other.nb$isnegative())
+        return new Sk.builtin.nmber(Infinity, Sk.builtin.nmber.float$);
+      else
+        return new Sk.builtin.nmber(-Infinity, Sk.builtin.nmber.float$);
 
-		if (this.skType === Sk.builtin.nmber.float$) {  // float / long --> float
-			result = new Sk.builtin.nmber(this.v / parseFloat(other.str$(10, true)), Sk.builtin.nmber.float$);
-		} else {	//	int - long --> long
-			var thisAsLong = new Sk.builtin.lng(this.v);
-			result = thisAsLong.nb$divide(other);
-		}
-		return result;
-	}
+    if (this.skType === Sk.builtin.nmber.float$) {  // float / long --> float
+      result = new Sk.builtin.nmber(this.v / parseFloat(other.str$(10, true)), Sk.builtin.nmber.float$);
+    } else {  //  int - long --> long
+      var thisAsLong = new Sk.builtin.lng(this.v);
+      result = thisAsLong.nb$divide(other);
+    }
+    return result;
+  }
 
-	return undefined;
+  return undefined;
 };
 
 Sk.builtin.nmber.prototype.nb$floor_divide = function(other)
 {
-	var result;
+  var result;
 
-	if (typeof other === "number")
-		other = new Sk.builtin.nmber(other, undefined);
+  if (typeof other === "number")
+    other = new Sk.builtin.nmber(other, undefined);
 
-	if (this.v === Infinity || this.v === -Infinity)
-		return new Sk.builtin.nmber(NaN, Sk.builtin.nmber.float$);
+  if (this.v === Infinity || this.v === -Infinity)
+    return new Sk.builtin.nmber(NaN, Sk.builtin.nmber.float$);
 
-	if (other instanceof Sk.builtin.nmber) {
-		if (other.v == 0)
-			throw new Sk.builtin.ZeroDivisionError("integer division or modulo by zero");
+  if (other instanceof Sk.builtin.nmber) {
+    if (other.v == 0)
+      throw new Sk.builtin.ZeroDivisionError("integer division or modulo by zero");
 
-		if (other.v === Infinity)
-			if (this.nb$isnegative())
-				return new Sk.builtin.nmber(-1, Sk.builtin.nmber.float$);
-			else
-				return new Sk.builtin.nmber(0, Sk.builtin.nmber.float$);
-		if (other.v === -Infinity)
-			if (this.nb$isnegative() || !this.nb$nonzero())
-				return new Sk.builtin.nmber(0, Sk.builtin.nmber.float$);
-			else
-				return new Sk.builtin.nmber(-1, Sk.builtin.nmber.float$);
+    if (other.v === Infinity)
+      if (this.nb$isnegative())
+        return new Sk.builtin.nmber(-1, Sk.builtin.nmber.float$);
+      else
+        return new Sk.builtin.nmber(0, Sk.builtin.nmber.float$);
+    if (other.v === -Infinity)
+      if (this.nb$isnegative() || !this.nb$nonzero())
+        return new Sk.builtin.nmber(0, Sk.builtin.nmber.float$);
+      else
+        return new Sk.builtin.nmber(-1, Sk.builtin.nmber.float$);
 
-		result = new Sk.builtin.nmber(Math.floor(this.v / other.v), undefined);
-		if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$)
-			result.skType = Sk.builtin.nmber.float$;
-		else {
-			result.v = Math.floor(result.v);
-			result.skType = Sk.builtin.nmber.int$;
-			if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
-				//	Promote to long
-				result = new Sk.builtin.lng(this.v).nb$floor_divide(other.v);
-			}
-		}
-		return result;
-	}
+    result = new Sk.builtin.nmber(Math.floor(this.v / other.v), undefined);
+    if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$)
+      result.skType = Sk.builtin.nmber.float$;
+    else {
+      result.v = Math.floor(result.v);
+      result.skType = Sk.builtin.nmber.int$;
+      if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
+        //  Promote to long
+        result = new Sk.builtin.lng(this.v).nb$floor_divide(other.v);
+      }
+    }
+    return result;
+  }
 
-	if (other instanceof Sk.builtin.lng) {
-		if (other.longCompare(Sk.builtin.biginteger.ZERO) == 0)
-			throw new Sk.builtin.ZeroDivisionError("integer division or modulo by zero");
-		if (this.skType === Sk.builtin.nmber.float$) {  // float / long --> float
-			result = Math.floor(this.v / parseFloat(other.str$(10, true)));
-			result = new Sk.builtin.nmber(result, Sk.builtin.nmber.float$);
-		} else {	//	int - long --> long
-			var thisAsLong = new Sk.builtin.lng(this.v);
-			result = thisAsLong.nb$floor_divide(other);
-		}
-		return result;
-	}
+  if (other instanceof Sk.builtin.lng) {
+    if (other.longCompare(Sk.builtin.biginteger.ZERO) == 0)
+      throw new Sk.builtin.ZeroDivisionError("integer division or modulo by zero");
+    if (this.skType === Sk.builtin.nmber.float$) {  // float / long --> float
+      result = Math.floor(this.v / parseFloat(other.str$(10, true)));
+      result = new Sk.builtin.nmber(result, Sk.builtin.nmber.float$);
+    } else {  //  int - long --> long
+      var thisAsLong = new Sk.builtin.lng(this.v);
+      result = thisAsLong.nb$floor_divide(other);
+    }
+    return result;
+  }
 
-	return undefined;
+  return undefined;
 };
 
 Sk.builtin.nmber.prototype.nb$remainder = function(other)
 {
-	var result;
+  var result;
 
-	if (typeof other === "number")
-		other = new Sk.builtin.nmber(other, undefined);
+  if (typeof other === "number")
+    other = new Sk.builtin.nmber(other, undefined);
 
-	if (other instanceof Sk.builtin.nmber) {
-		if (other.v == 0)
-			throw new Sk.builtin.ZeroDivisionError("integer division or modulo by zero");
+  if (other instanceof Sk.builtin.nmber) {
+    if (other.v == 0)
+      throw new Sk.builtin.ZeroDivisionError("integer division or modulo by zero");
 
-		if (this.v == 0)
-			if (this.skType == Sk.builtin.nmber.float$ || other.skType == Sk.builtin.nmber.float$)
-				return new Sk.builtin.nmber(0, Sk.builtin.nmber.float$);
-			else
-				return new Sk.builtin.nmber(0, Sk.builtin.nmber.int$);
+    if (this.v == 0)
+      if (this.skType == Sk.builtin.nmber.float$ || other.skType == Sk.builtin.nmber.float$)
+        return new Sk.builtin.nmber(0, Sk.builtin.nmber.float$);
+      else
+        return new Sk.builtin.nmber(0, Sk.builtin.nmber.int$);
 
-		if (other.v === Infinity)
-			if (this.v === Infinity || this.v === -Infinity)
-				return new Sk.builtin.nmber(NaN, Sk.builtin.nmber.float$);
-			else if (this.nb$ispositive())
-				return new Sk.builtin.nmber(this.v, Sk.builtin.nmber.float$);
-			else
-				return new Sk.builtin.nmber(Infinity, Sk.builtin.nmber.float$);
+    if (other.v === Infinity)
+      if (this.v === Infinity || this.v === -Infinity)
+        return new Sk.builtin.nmber(NaN, Sk.builtin.nmber.float$);
+      else if (this.nb$ispositive())
+        return new Sk.builtin.nmber(this.v, Sk.builtin.nmber.float$);
+      else
+        return new Sk.builtin.nmber(Infinity, Sk.builtin.nmber.float$);
 
-		//	Javacript logic on negatives doesn't work for Python... do this instead
-		var tmp = this.v % other.v;
-		if (this.v < 0) {
-			if (other.v > 0 && tmp < 0)
-				tmp = tmp + other.v;
-		} else {
-			if (other.v < 0 && tmp != 0)
-				tmp = tmp + other.v;
-		}
-		if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$)
-			result = new Sk.builtin.nmber(tmp, Sk.builtin.nmber.float$);
-		else {
-		//	tmp = Math.floor(tmp);
-			result = new Sk.builtin.nmber(tmp, Sk.builtin.nmber.int$);
-			if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
-				//	Promote to long
-				result = new Sk.builtin.lng(this.v).nb$remainder(other.v);
-			}
-		}
-		return result;
-	}
+    //  Javacript logic on negatives doesn't work for Python... do this instead
+    var tmp = this.v % other.v;
+    if (this.v < 0) {
+      if (other.v > 0 && tmp < 0)
+        tmp = tmp + other.v;
+    } else {
+      if (other.v < 0 && tmp != 0)
+        tmp = tmp + other.v;
+    }
+    if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$)
+      result = new Sk.builtin.nmber(tmp, Sk.builtin.nmber.float$);
+    else {
+    //  tmp = Math.floor(tmp);
+      result = new Sk.builtin.nmber(tmp, Sk.builtin.nmber.int$);
+      if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
+        //  Promote to long
+        result = new Sk.builtin.lng(this.v).nb$remainder(other.v);
+      }
+    }
+    return result;
+  }
 
-	if (other instanceof Sk.builtin.lng) {
-		if (other.longCompare(Sk.builtin.biginteger.ZERO) == 0)
-			throw new Sk.builtin.ZeroDivisionError("integer division or modulo by zero");
+  if (other instanceof Sk.builtin.lng) {
+    if (other.longCompare(Sk.builtin.biginteger.ZERO) == 0)
+      throw new Sk.builtin.ZeroDivisionError("integer division or modulo by zero");
 
-		if (this.v == 0)
-			if (this.skType === Sk.builtin.nmber.int$)
-				return new Sk.builtin.lng(0);
-			else
-				return new Sk.builtin.nmber(0, this.skType);
+    if (this.v == 0)
+      if (this.skType === Sk.builtin.nmber.int$)
+        return new Sk.builtin.lng(0);
+      else
+        return new Sk.builtin.nmber(0, this.skType);
 
-		if (this.skType === Sk.builtin.nmber.float$) {  // float / long --> float
-			var op2 = parseFloat(other.str$(10, true))
-			var tmp = this.v % op2;
-			if (tmp < 0) {
-				if (op2 > 0 && tmp != 0)
-					tmp = tmp + op2;
-			} else {
-				if (op2 < 0 && tmp != 0)
-					tmp = tmp + op2;
-			}
-			result = new Sk.builtin.nmber(tmp, Sk.builtin.nmber.float$);
-		} else {	//	int - long --> long
-			var thisAsLong = new Sk.builtin.lng(this.v);
-			result = thisAsLong.nb$remainder(other);
-		}
-		return result;
-	}
+    if (this.skType === Sk.builtin.nmber.float$) {  // float / long --> float
+      var op2 = parseFloat(other.str$(10, true))
+      var tmp = this.v % op2;
+      if (tmp < 0) {
+        if (op2 > 0 && tmp != 0)
+          tmp = tmp + op2;
+      } else {
+        if (op2 < 0 && tmp != 0)
+          tmp = tmp + op2;
+      }
+      result = new Sk.builtin.nmber(tmp, Sk.builtin.nmber.float$);
+    } else {  //  int - long --> long
+      var thisAsLong = new Sk.builtin.lng(this.v);
+      result = thisAsLong.nb$remainder(other);
+    }
+    return result;
+  }
 
-	return undefined;
+  return undefined;
 };
 
 Sk.builtin.nmber.prototype.nb$power = function(other)
 {
-	var result;
+  var result;
 
-	if (typeof other === "number")
-		other = new Sk.builtin.nmber(other, undefined);
+  if (typeof other === "number")
+    other = new Sk.builtin.nmber(other, undefined);
 
-	if (other instanceof Sk.builtin.nmber) {
-		if (this.v < 0 && other.v % 1 != 0)
-			throw new Sk.builtin.NegativePowerError("cannot raise a negative number to a fractional power");
-		if (this.v == 0 && other.v < 0) {
-			throw new Sk.builtin.NegativePowerError("cannot raise zero to a negative power");
-		}
+  if (other instanceof Sk.builtin.nmber) {
+    if (this.v < 0 && other.v % 1 != 0)
+      throw new Sk.builtin.NegativePowerError("cannot raise a negative number to a fractional power");
+    if (this.v == 0 && other.v < 0) {
+      throw new Sk.builtin.NegativePowerError("cannot raise zero to a negative power");
+    }
 
-		result = new Sk.builtin.nmber(Math.pow(this.v, other.v), undefined);
-		if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$ || other.v < 0)
-			result.skType = Sk.builtin.nmber.float$;
-		else {
-			result.v = Math.floor(result.v);
-			result.skType = Sk.builtin.nmber.int$;
-			if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
-				//	Promote to long
-				result = new Sk.builtin.lng(this.v).nb$power(other.v);
-			}
-		}
-		return result;
-	}
+    result = new Sk.builtin.nmber(Math.pow(this.v, other.v), undefined);
+    if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$ || other.v < 0)
+      result.skType = Sk.builtin.nmber.float$;
+    else {
+      result.v = Math.floor(result.v);
+      result.skType = Sk.builtin.nmber.int$;
+      if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
+        //  Promote to long
+        result = new Sk.builtin.lng(this.v).nb$power(other.v);
+      }
+    }
+    return result;
+  }
 
-	if (other instanceof Sk.builtin.lng) {
-		if (this.v == 0 && other.longCompare(Sk.builtin.biginteger.ZERO) < 0)
-			throw new Sk.builtin.NegativePowerError("cannot raise zero to a negative power");
-		if (this.skType === Sk.builtin.nmber.float$ || other.nb$isnegative()) {  // float / long --> float
-			result = new Sk.builtin.nmber(Math.pow(this.v, parseFloat(other.str$(10, true))), Sk.builtin.nmber.float$);
-		} else {	//	int - long --> long
-			var thisAsLong = new Sk.builtin.lng(this.v);
-			result = thisAsLong.nb$power(other);
-		}
-		return result;
-	}
+  if (other instanceof Sk.builtin.lng) {
+    if (this.v == 0 && other.longCompare(Sk.builtin.biginteger.ZERO) < 0)
+      throw new Sk.builtin.NegativePowerError("cannot raise zero to a negative power");
+    if (this.skType === Sk.builtin.nmber.float$ || other.nb$isnegative()) {  // float / long --> float
+      result = new Sk.builtin.nmber(Math.pow(this.v, parseFloat(other.str$(10, true))), Sk.builtin.nmber.float$);
+    } else {  //  int - long --> long
+      var thisAsLong = new Sk.builtin.lng(this.v);
+      result = thisAsLong.nb$power(other);
+    }
+    return result;
+  }
 
-	return undefined;
+  return undefined;
 };
 
 Sk.builtin.nmber.prototype.nb$and = function(other)
 {
-	var tmp;
-	if (typeof other === "number")
-		tmp = this.v & other;
-	else if (other instanceof Sk.builtin.nmber)
-		tmp = this.v & other.v
+  var tmp;
+  if (typeof other === "number")
+    tmp = this.v & other;
+  else if (other instanceof Sk.builtin.nmber)
+    tmp = this.v & other.v
 
-	if (tmp !== undefined)
-		return new Sk.builtin.nmber(tmp, undefined);
+  if (tmp !== undefined)
+    return new Sk.builtin.nmber(tmp, undefined);
 
-	return undefined;
+  return undefined;
 }
 
 Sk.builtin.nmber.prototype.nb$or = function(other)
 {
-	var tmp;
-	if (typeof other === "number")
-		tmp = this.v | other;
-	else if (other instanceof Sk.builtin.nmber)
-		tmp = this.v | other.v
+  var tmp;
+  if (typeof other === "number")
+    tmp = this.v | other;
+  else if (other instanceof Sk.builtin.nmber)
+    tmp = this.v | other.v
 
-	if (tmp !== undefined)
-		return new Sk.builtin.nmber(tmp, undefined);
+  if (tmp !== undefined)
+    return new Sk.builtin.nmber(tmp, undefined);
 
-	return undefined;
+  return undefined;
 }
 
 Sk.builtin.nmber.prototype.nb$xor = function(other)
 {
-	var tmp;
-	if (typeof other === "number")
-		tmp = this.v ^ other;
-	else if (other instanceof Sk.builtin.nmber)
-		tmp = this.v ^ other.v
+  var tmp;
+  if (typeof other === "number")
+    tmp = this.v ^ other;
+  else if (other instanceof Sk.builtin.nmber)
+    tmp = this.v ^ other.v
 
-	if (tmp !== undefined)
-		return new Sk.builtin.nmber(tmp, undefined);
+  if (tmp !== undefined)
+    return new Sk.builtin.nmber(tmp, undefined);
 
-	return undefined;
+  return undefined;
 }
 
 Sk.builtin.nmber.prototype.nb$lshift = function(other)
 {
-	var tmp;
-	if (typeof other === "number")
-		tmp = this.v << other;
-	else if (other instanceof Sk.builtin.nmber)
-		tmp = this.v << other.v
+  var tmp;
+  if (typeof other === "number")
+    tmp = this.v << other;
+  else if (other instanceof Sk.builtin.nmber)
+    tmp = this.v << other.v
 
-	if (tmp !== undefined)
-		return new Sk.builtin.nmber(tmp, undefined);
+  if (tmp !== undefined)
+    return new Sk.builtin.nmber(tmp, undefined);
 
-	return undefined;
+  return undefined;
 }
 
 Sk.builtin.nmber.prototype.nb$rshift = function(other)
 {
-	var tmp;
-	if (typeof other === "number")
-		tmp = this.v >> other;
-	else if (other instanceof Sk.builtin.nmber)
-		tmp = this.v >> other.v
+  var tmp;
+  if (typeof other === "number")
+    tmp = this.v >> other;
+  else if (other instanceof Sk.builtin.nmber)
+    tmp = this.v >> other.v
 
-	if (tmp !== undefined)
-		return new Sk.builtin.nmber(tmp, undefined);
+  if (tmp !== undefined)
+    return new Sk.builtin.nmber(tmp, undefined);
 
-	return undefined;
+  return undefined;
 }
 
 Sk.builtin.nmber.prototype.nb$inplace_add = Sk.builtin.nmber.prototype.nb$add;
 
-Sk.builtin.nmber.prototype.nb$inplace_subtract = Sk.builtin.nmber.prototype.nb$subtract;
+Sk.builtin.nmber.prototype.nb$inplace_sub = Sk.builtin.nmber.prototype.nb$subtract;
 
-Sk.builtin.nmber.prototype.nb$inplace_multiply = Sk.builtin.nmber.prototype.nb$multiply;
+Sk.builtin.nmber.prototype.nb$inplace_mul = Sk.builtin.nmber.prototype.nb$multiply;
 
 Sk.builtin.nmber.prototype.nb$inplace_divide = Sk.builtin.nmber.prototype.nb$divide;
 
@@ -9125,14 +9123,14 @@ Sk.builtin.nmber.prototype.nb$inplace_power = Sk.builtin.nmber.prototype.nb$powe
 
 Sk.builtin.nmber.prototype.nb$negative = function()
 {
-	return new Sk.builtin.nmber(-this.v, undefined);
+  return new Sk.builtin.nmber(-this.v, undefined);
 };
 
 Sk.builtin.nmber.prototype.nb$positive = function() { return this.clone(); };
 
 Sk.builtin.nmber.prototype.nb$nonzero = function()
 {
-	return this.v !== 0;
+  return this.v !== 0;
 };
 
 Sk.builtin.nmber.prototype.nb$isnegative = function() { return this.v < 0 };
@@ -9141,61 +9139,61 @@ Sk.builtin.nmber.prototype.nb$ispositive = function() { return this.v >= 0 };
 
 Sk.builtin.nmber.prototype.numberCompare = function(other)
 {
-	if (typeof other === "boolean")
-		if (other)
-			other = 1;
-		else
-			other = 0;
+  if (typeof other === "boolean")
+    if (other)
+      other = 1;
+    else
+      other = 0;
 
-	if (typeof other === "number") {
-		return this.v - other;
-	}
+  if (typeof other === "number") {
+    return this.v - other;
+  }
 
-	if (other instanceof Sk.builtin.nmber) {
-		if (this.v == Infinity && other.v == Infinity) return 0;
-		if (this.v == -Infinity && other.v == -Infinity) return 0;
-		return this.v - other.v;
-	}
+  if (other instanceof Sk.builtin.nmber) {
+    if (this.v == Infinity && other.v == Infinity) return 0;
+    if (this.v == -Infinity && other.v == -Infinity) return 0;
+    return this.v - other.v;
+  }
 
-	if (other instanceof Sk.builtin.lng) {
-		if (this.skType === Sk.builtin.nmber.int$ || this.v % 1 == 0) {
-			var thisAsLong = new Sk.builtin.lng(this.v);
-			var tmp = thisAsLong.longCompare(other);
-			return tmp;
-		}
-		var diff = this.nb$subtract(other);
-		if (diff instanceof Sk.builtin.nmber) {
-			return diff.v;
-		} else if (diff instanceof Sk.builtin.lng) {
-			return diff.longCompare(Sk.builtin.biginteger.ZERO);
-		}
-	}
+  if (other instanceof Sk.builtin.lng) {
+    if (this.skType === Sk.builtin.nmber.int$ || this.v % 1 == 0) {
+      var thisAsLong = new Sk.builtin.lng(this.v);
+      var tmp = thisAsLong.longCompare(other);
+      return tmp;
+    }
+    var diff = this.nb$subtract(other);
+    if (diff instanceof Sk.builtin.nmber) {
+      return diff.v;
+    } else if (diff instanceof Sk.builtin.lng) {
+      return diff.longCompare(Sk.builtin.biginteger.ZERO);
+    }
+  }
 
-	return undefined;
+  return undefined;
 }
 
 Sk.builtin.nmber.prototype.__eq__ = function(me, other) {
-	return me.numberCompare(other) == 0;
+  return me.numberCompare(other) == 0;
 };
 
 Sk.builtin.nmber.prototype.__ne__ = function(me, other) {
-	return me.numberCompare(other) != 0;
+  return me.numberCompare(other) != 0;
 };
 
 Sk.builtin.nmber.prototype.__lt__ = function(me, other) {
-	return me.numberCompare(other) < 0;
+  return me.numberCompare(other) < 0;
 };
 
 Sk.builtin.nmber.prototype.__le__ = function(me, other) {
-	return me.numberCompare(other) <= 0;
+  return me.numberCompare(other) <= 0;
 };
 
 Sk.builtin.nmber.prototype.__gt__ = function(me, other) {
-	return me.numberCompare(other) > 0;
+  return me.numberCompare(other) > 0;
 };
 
 Sk.builtin.nmber.prototype.__ge__ = function(me, other) {
-	return me.numberCompare(other) >= 0;
+  return me.numberCompare(other) >= 0;
 };
 
 Sk.builtin.nmber.prototype['$r'] = function()
@@ -9210,33 +9208,33 @@ Sk.builtin.nmber.prototype.tp$str = function()
 
 Sk.builtin.nmber.prototype.str$ = function(base, sign)
 {
-	if (isNaN(this.v))
-		return "nan";
+  if (isNaN(this.v))
+    return "nan";
 
-	if (sign === undefined) sign = true;
+  if (sign === undefined) sign = true;
 
-	if (this.v == Infinity)
-		return 'inf';
-	if (this.v == -Infinity && sign)
-		return '-inf';
-	if (this.v == -Infinity && !sign)
-		return 'inf';
+  if (this.v == Infinity)
+    return 'inf';
+  if (this.v == -Infinity && sign)
+    return '-inf';
+  if (this.v == -Infinity && !sign)
+    return 'inf';
 
-	var work = sign ? this.v : Math.abs(this.v);
+  var work = sign ? this.v : Math.abs(this.v);
 
 
-	var tmp;
-	if (base === undefined || base === 10) {
-		tmp = work.toString();
-	} else {
-		tmp = work.toString(base);
-	}
+  var tmp;
+  if (base === undefined || base === 10) {
+    tmp = work.toString();
+  } else {
+    tmp = work.toString(base);
+  }
 
-	if (this.skType !== Sk.builtin.nmber.float$)
-		return tmp;
-	if (tmp.indexOf('.') < 0 && tmp.indexOf('E') < 0 && tmp.indexOf('e') < 0)
-		tmp = tmp + '.0';
-	return tmp;
+  if (this.skType !== Sk.builtin.nmber.float$)
+    return tmp;
+  if (tmp.indexOf('.') < 0 && tmp.indexOf('E') < 0 && tmp.indexOf('e') < 0)
+    tmp = tmp + '.0';
+  return tmp;
 };
 
 goog.exportSymbol("Sk.builtin.nmber", Sk.builtin.nmber);// long aka "bignumber" implementation
@@ -9597,9 +9595,9 @@ Sk.builtin.lng.prototype.nb$power = function(n)
 
 Sk.builtin.lng.prototype.nb$inplace_add = Sk.builtin.lng.prototype.nb$add;
 
-Sk.builtin.lng.prototype.nb$inplace_subtract = Sk.builtin.lng.prototype.nb$subtract;
+Sk.builtin.lng.prototype.nb$inplace_sub = Sk.builtin.lng.prototype.nb$subtract;
 
-Sk.builtin.lng.prototype.nb$inplace_multiply = Sk.builtin.lng.prototype.nb$multiply;
+Sk.builtin.lng.prototype.nb$inplace_mul = Sk.builtin.lng.prototype.nb$multiply;
 
 Sk.builtin.lng.prototype.nb$inplace_divide = Sk.builtin.lng.prototype.nb$divide;
 

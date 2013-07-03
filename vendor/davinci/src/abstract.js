@@ -33,35 +33,35 @@ Sk.abstr.boNameToSlotFuncLhs_ = function(obj, name) {
 
 Sk.abstr.boNameToSlotFuncRhs_ = function(obj, name) {
   switch (name) {
-    case "Add":      return obj.nb$add ? obj.nb$add :                   obj['__radd__'];
-    case "Sub":      return obj.nb$subtract ? obj.nb$subtract :         obj['__rsub__'];
-    case "Mult":     return obj.nb$multiply ? obj.nb$multiply :         obj['__rmul__'];
-    case "Div":      return obj.nb$divide ? obj.nb$divide :             obj['__rdiv__'];
+    case "Add":      return obj.nb$add          ? obj.nb$add :          obj['__radd__'];
+    case "Sub":      return obj.nb$subtract     ? obj.nb$subtract :     obj['__rsub__'];
+    case "Mult":     return obj.nb$multiply     ? obj.nb$multiply :     obj['__rmul__'];
+    case "Div":      return obj.nb$divide       ? obj.nb$divide :       obj['__rdiv__'];
     case "FloorDiv": return obj.nb$floor_divide ? obj.nb$floor_divide : obj['__rfloordiv__'];
-    case "Mod":      return obj.nb$remainder ? obj.nb$remainder :       obj['__rmod__'];
-    case "Pow":      return obj.nb$power ? obj.nb$power :               obj['__rpow__'];
-    case "LShift":   return obj.nb$lshift ? obj.nb$lshift :             obj['__rlshift__'];
-    case "RShift":   return obj.nb$rshift ? obj.nb$rshift :             obj['__rrshift__'];
-    case "BitAnd":   return obj.nb$and ? obj.nb$and :                   obj['__rand__'];
-    case "BitXor":   return obj.nb$xor ? obj.nb$xor :                   obj['__rxor__'];
-    case "BitOr":    return obj.nb$or ? obj.nb$or :                     obj['__ror__'];
+    case "Mod":      return obj.nb$remainder    ? obj.nb$remainder :    obj['__rmod__'];
+    case "Pow":      return obj.nb$power        ? obj.nb$power :        obj['__rpow__'];
+    case "LShift":   return obj.nb$lshift       ? obj.nb$lshift :       obj['__rlshift__'];
+    case "RShift":   return obj.nb$rshift       ? obj.nb$rshift :       obj['__rrshift__'];
+    case "BitAnd":   return obj.nb$and          ? obj.nb$and :          obj['__rand__'];
+    case "BitXor":   return obj.nb$xor          ? obj.nb$xor :          obj['__rxor__'];
+    case "BitOr":    return obj.nb$or           ? obj.nb$or :           obj['__ror__'];
   }
 };
 
 Sk.abstr.iboNameToSlotFunc_ = function(obj, name) {
   switch (name) {
-    case "Add": return obj.nb$inplace_add;
-    case "Sub": return obj.nb$inplace_subtract;
-    case "Mult": return obj.nb$inplace_multiply;
-    case "Div": return obj.nb$inplace_divide;
-    case "FloorDiv": return obj.nb$inplace_floor_divide;
-    case "Mod": return obj.nb$inplace_remainder;
-    case "Pow": return obj.nb$inplace_power;
-    case "LShift": return obj.nb$lshift;
-    case "RShift": return obj.nb$rshift;
-    case "BitAnd": return obj.nb$and;
-    case "BitOr": return obj.nb$or;
-    case "BitXor": return obj.nb$xor;
+    case "Add":      return obj.nb$inplace_add          ? obj.nb$inplace_add          : obj['__iadd__'];
+    case "Sub":      return obj.nb$inplace_sub          ? obj.nb$inplace_sub          : obj['__isub__'];
+    case "Mult":     return obj.nb$inplace_mul          ? obj.nb$inplace_mul          : obj['__imul__'];
+    case "Div":      return obj.nb$inplace_divide;
+    case "FloorDiv": return obj.nb$inplace_floor_divide ? obj.nb$inplace_floor_divide : obj['__ifloordiv__'];
+    case "Mod":      return obj.nb$inplace_remainder;
+    case "Pow":      return obj.nb$inplace_power;
+    case "LShift":   return obj.nb$lshift               ? obj.nb$lshift               : obj['__lshift__'];
+    case "RShift":   return obj.nb$rshift               ? obj.nb$rshift               : obj['__rshift__'];
+    case "BitAnd":   return obj.nb$and;
+    case "BitOr":    return obj.nb$or;
+    case "BitXor":   return obj.nb$xor                  ? obj.nb$xor                  : obj['__ixor__'];
   }
 };
 
@@ -73,7 +73,6 @@ Sk.abstr.binary_op_ = function(v, w, opname) {
       ret = vop.call(v, w);
     }
     else {
-      // assume that vop is an __xxx__ type method
       ret = Sk.misceval.callsim(vop, v, w)
     }
     if (ret !== undefined) return ret;
@@ -84,7 +83,6 @@ Sk.abstr.binary_op_ = function(v, w, opname) {
       ret = wop.call(w, v);
     }
     else {
-      // assume that wop is an __xxx__ type method
       ret = Sk.misceval.callsim(wop, w, v)
     }
     if (ret !== undefined) return ret;
