@@ -672,6 +672,48 @@ var $builtinmodule = function(name) {
         throw new Sk.builtin.AssertionError();
       }
     });
+    $loc.__ixor__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var a = Sk.ffi.remapToJs(selfPy);
+      var b = Sk.ffi.remapToJs(otherPy);
+      var a0 = a.w;
+      var a1 = a.x;
+      var a2 = a.y;
+      var a3 = a.z;
+      var a4 = a.xy;
+      var a5 = a.yz;
+      var a6 = a.zx;
+      var a7 = a.xyz;
+      var b0, b1, b2, b3, b4, b5, b6, b7;
+      if (isNumber(b)) {
+        b0 = b;
+        b1 = 0;
+        b2 = 0;
+        b3 = 0;
+        b4 = 0;
+        b5 = 0;
+        b6 = 0;
+        b7 = 0;
+      }
+      else {
+        b0 = b.w;
+        b1 = b.x;
+        b2 = b.y;
+        b3 = b.z;
+        b4 = b.xy;
+        b5 = b.yz;
+        b6 = b.zx;
+        b7 = b.xyz;
+      }
+      a.w   = bladeASM.extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 0);
+      a.x   = bladeASM.extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 1);
+      a.y   = bladeASM.extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 2);
+      a.z   = bladeASM.extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 3);
+      a.xy  = bladeASM.extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 4);
+      a.yz  = bladeASM.extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 5);
+      a.zx  = bladeASM.extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 6);
+      a.xyz = bladeASM.extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 7);
+      return selfPy;
+    });
     $loc.__lshift__ = new Sk.builtin.func(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
@@ -692,6 +734,48 @@ var $builtinmodule = function(name) {
         throw new Sk.builtin.AssertionError();
       }
     });
+    $loc.__ilshift__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var a = Sk.ffi.remapToJs(selfPy);
+      var b = Sk.ffi.remapToJs(otherPy);
+      var a0 = a.w;
+      var a1 = a.x;
+      var a2 = a.y;
+      var a3 = a.z;
+      var a4 = a.xy;
+      var a5 = a.yz;
+      var a6 = a.zx;
+      var a7 = a.xyz;
+      var b0, b1, b2, b3, b4, b5, b6, b7;
+      if (isNumber(b)) {
+        b0 = b;
+        b1 = 0;
+        b2 = 0;
+        b3 = 0;
+        b4 = 0;
+        b5 = 0;
+        b6 = 0;
+        b7 = 0;
+      }
+      else {
+        b0 = b.w;
+        b1 = b.x;
+        b2 = b.y;
+        b3 = b.z;
+        b4 = b.xy;
+        b5 = b.yz;
+        b6 = b.zx;
+        b7 = b.xyz;
+      }
+      a.w   = bladeASM.lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 0);
+      a.x   = bladeASM.lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 1);
+      a.y   = bladeASM.lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 2);
+      a.z   = bladeASM.lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 3);
+      a.xy  = bladeASM.lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 4);
+      a.yz  = bladeASM.lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 5);
+      a.zx  = bladeASM.lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 6);
+      a.xyz = bladeASM.lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 7);
+      return selfPy;
+    });
     $loc.__rshift__ = new Sk.builtin.func(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
@@ -711,6 +795,48 @@ var $builtinmodule = function(name) {
       else {
         throw new Sk.builtin.AssertionError();
       }
+    });
+    $loc.__irshift__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var a = Sk.ffi.remapToJs(selfPy);
+      var b = Sk.ffi.remapToJs(otherPy);
+      var a0 = a.w;
+      var a1 = a.x;
+      var a2 = a.y;
+      var a3 = a.z;
+      var a4 = a.xy;
+      var a5 = a.yz;
+      var a6 = a.zx;
+      var a7 = a.xyz;
+      var b0, b1, b2, b3, b4, b5, b6, b7;
+      if (isNumber(b)) {
+        b0 = b;
+        b1 = 0;
+        b2 = 0;
+        b3 = 0;
+        b4 = 0;
+        b5 = 0;
+        b6 = 0;
+        b7 = 0;
+      }
+      else {
+        b0 = b.w;
+        b1 = b.x;
+        b2 = b.y;
+        b3 = b.z;
+        b4 = b.xy;
+        b5 = b.yz;
+        b6 = b.zx;
+        b7 = b.xyz;
+      }
+      a.w   = bladeASM.rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 0);
+      a.x   = bladeASM.rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 1);
+      a.y   = bladeASM.rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 2);
+      a.z   = bladeASM.rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 3);
+      a.xy  = bladeASM.rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 4);
+      a.yz  = bladeASM.rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 5);
+      a.zx  = bladeASM.rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 6);
+      a.xyz = bladeASM.rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 7);
+      return selfPy;
     });
     $loc.nb$positive = function() {
       return this;

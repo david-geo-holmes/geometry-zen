@@ -5313,8 +5313,8 @@ Sk.abstr.iboNameToSlotFunc_ = function(obj, name) {
     case "FloorDiv": return obj.nb$inplace_floor_divide ? obj.nb$inplace_floor_divide : obj['__ifloordiv__'];
     case "Mod":      return obj.nb$inplace_remainder;
     case "Pow":      return obj.nb$inplace_power;
-    case "LShift":   return obj.nb$lshift               ? obj.nb$lshift               : obj['__lshift__'];
-    case "RShift":   return obj.nb$rshift               ? obj.nb$rshift               : obj['__rshift__'];
+    case "LShift":   return obj.nb$lshift               ? obj.nb$lshift               : obj['__ilshift__'];
+    case "RShift":   return obj.nb$rshift               ? obj.nb$rshift               : obj['__irshift__'];
     case "BitAnd":   return obj.nb$and;
     case "BitOr":    return obj.nb$or;
     case "BitXor":   return obj.nb$xor                  ? obj.nb$xor                  : obj['__ixor__'];
