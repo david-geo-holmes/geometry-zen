@@ -597,18 +597,20 @@ var $builtinmodule = function(name) {
       b = Sk.ffi.remapToJs(b);
       throw new Error("Under construction or");
     });
-
     // Unary minus.
-    $loc.nb$negative = function() {
-      var v = this.v;
-      throw new Error("Under construction unary minus");
+    $loc.nu$neg = function() {
+      var self = Sk.ffi.remapToJs(this);
+      return remapE2ToPy(-self[0], -self[1], -self[2], -self[3]);
     };
-
     // Unary plus.
-    $loc.nb$positive = function() {
+    $loc.nu$pos = function() {
       return this;
     };
-
+    // Python invert will be used for Geometric Algebra reversion.
+    $loc.nu$inv = function() {
+      var self = Sk.ffi.remapToJs(this);
+      return remapE2ToPy(self[0], self[1], self[2], -self[3]);
+    };
     $loc.__div__ = new Sk.builtin.func(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
@@ -1237,35 +1239,23 @@ var $builtinmodule = function(name) {
       var xyz = 0.0;
       return remapE3ToPy(w, x, y, z, xy, yz, zx, xyz);
     });
-
-    // Unary minus.
-    $loc.nb$negative = function() {
+    $loc.nu$neg = function() {
       var m = Sk.ffi.remapToJs(this);
-      var cs = m.coordinates();
-      var xs = [ARG_ZERO, ARG_ZERO, ARG_ZERO, ARG_ZERO, ARG_ZERO, ARG_ZERO, ARG_ZERO, ARG_ZERO];
-      xs[0] = Sk.builtin.assk$(-cs[0], Sk.builtin.nmber.float$);
-      xs[1] = Sk.builtin.assk$(-cs[1], Sk.builtin.nmber.float$);
-      xs[2] = Sk.builtin.assk$(-cs[2], Sk.builtin.nmber.float$);
-      xs[3] = Sk.builtin.assk$(-cs[3], Sk.builtin.nmber.float$);
-      xs[4] = Sk.builtin.assk$(-cs[4], Sk.builtin.nmber.float$);
-      xs[5] = Sk.builtin.assk$(-cs[5], Sk.builtin.nmber.float$);
-      xs[6] = Sk.builtin.assk$(-cs[6], Sk.builtin.nmber.float$);
-      xs[7] = Sk.builtin.assk$(-cs[7], Sk.builtin.nmber.float$);
-      return Sk.misceval.callsim(mod[EUCLIDEAN_3], xs[0], xs[1], xs[2], xs[3], xs[4], xs[5], xs[6], xs[7]);
+      return remapE3ToPy(-m[0], -m[1], -m[2], -m[3], -m[4], -m[5], -m[6], -m[7]);
     };
-
-    // Unary plus.
-    $loc.nb$positive = function() {
+    $loc.nu$pos = function() {
       return this;
     };
-
+    $loc.nu$inv = function() {
+      var m = Sk.ffi.remapToJs(this);
+      return remapE3ToPy(m[0], m[1], m[2], m[3], -m[4], -m[5], -m[6], -m[7]);
+    };
     $loc.__div__ = new Sk.builtin.func(function(v, w) {
       var factor = w.x * w.x + w.y * w.y;
       var x = (v.x * w.x + v.y * w.y) / factor;
       var y = (v.y * w.x - v.x * w.y) / factor;
       return remapE3ToPy(x, y);
     });
-
     $loc.__getitem__ = new Sk.builtin.func(function(self, index) {
       index = Sk.builtin.asnum$(index);
       var m = Sk.ffi.remapToJs(self);

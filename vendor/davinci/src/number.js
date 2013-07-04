@@ -560,17 +560,11 @@ Sk.builtin.nmber.prototype.nb$inplace_floor_divide = Sk.builtin.nmber.prototype.
 
 Sk.builtin.nmber.prototype.nb$inplace_power = Sk.builtin.nmber.prototype.nb$power;
 
-Sk.builtin.nmber.prototype.nb$negative = function()
-{
-  return new Sk.builtin.nmber(-this.v, undefined);
-};
+Sk.builtin.nmber.prototype.nu$neg = function() { return new Sk.builtin.nmber(-this.v, undefined); };
 
-Sk.builtin.nmber.prototype.nb$positive = function() { return this.clone(); };
+Sk.builtin.nmber.prototype.nu$pos = function() { return this.clone(); };
 
-Sk.builtin.nmber.prototype.nb$nonzero = function()
-{
-  return this.v !== 0;
-};
+Sk.builtin.nmber.prototype.nb$nonzero = function() { return this.v !== 0; };
 
 Sk.builtin.nmber.prototype.nb$isnegative = function() { return this.v < 0 };
 

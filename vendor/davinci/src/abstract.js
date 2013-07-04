@@ -259,22 +259,21 @@ Sk.abstr.numberInplaceBinOp = function(v, w, op)
 };
 goog.exportSymbol("Sk.abstr.numberInplaceBinOp", Sk.abstr.numberInplaceBinOp);
 
-Sk.abstr.numberUnaryOp = function(v, op)
-{
-    if (op === "Not") return Sk.misceval.isTrue(v) ? false : true;
-    else if (typeof v === "number" || typeof v === "boolean")
-    {
-        if (op === "USub") return -v;
-        if (op === "UAdd") return v;
-        if (op === "Invert") return ~v;
-    }
-    else
-    {
-        if (op === "USub" && v.nb$negative) return v.nb$negative();
-        if (op === "UAdd" && v.nb$positive) return v.nb$positive();
-        //todo; if (op === "Invert" && v.nb$positive) return v.nb$invert();
-    }
-    throw new TypeError("unsupported operand type for " + op + " '" + v.tp$name + "'");
+Sk.abstr.numberUnaryOp = function(v, opname) {
+  if (opname === "Not") {
+    return Sk.misceval.isTrue(v) ? false : true;
+  }
+  else if (typeof v === "number" || typeof v === "boolean") {
+    if (opname === "USub") return -v;
+    if (opname === "UAdd") return v;
+    if (opname === "Invert") return ~v;
+  }
+  else {
+    if (opname === "USub"   && v.nu$neg) return v.nu$neg();
+    if (opname === "UAdd"   && v.nu$pos) return v.nu$pos();
+    if (opname === "Invert" && v.nu$inv) return v.nu$inv();
+  }
+  throw new TypeError("unsupported operand type for " + opname + " '" + v.tp$name + "'");
 };
 goog.exportSymbol("Sk.abstr.numberUnaryOp", Sk.abstr.numberUnaryOp);
 
