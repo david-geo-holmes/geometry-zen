@@ -1367,7 +1367,6 @@ var $builtinmodule = function(name) {
         case PROP_DOM_ELEMENT: {
           // TODO: I think duck-typing means that this will work as long as we don't
           // try to do anything more ambitious.
-          // Sk.ffi.remapE3ToPy
           return {v: renderer.domElement};
         }
         case METHOD_RENDER: {
@@ -1394,7 +1393,7 @@ var $builtinmodule = function(name) {
               self.tp$name = METHOD_GET_CLEAR_COLOR;
             });
             $loc.__call__ = new Sk.builtin.func(function(self) {
-              return Sk.misceval.callsim(mod[COLOR], Sk.ffi.remapE3ToPy(renderer.getClearColor().getHex()));
+              return Sk.misceval.callsim(mod[COLOR], Sk.ffi.referenceToPy(renderer.getClearColor()));
             });
             $loc.__str__ = new Sk.builtin.func(function(self) {
               return new Sk.builtin.str(METHOD_GET_CLEAR_COLOR);
@@ -2554,17 +2553,17 @@ var $builtinmodule = function(name) {
       color = Sk.ffi.remapToJs(color);
       self.v = new THREE[AMBIENT_LIGHT](color);
     });
-    $loc.__getattr__ = new Sk.builtin.func(function(light, name) {
-      light = Sk.ffi.remapToJs(light);
+    $loc.__getattr__ = new Sk.builtin.func(function(lightPy, name) {
+      var light = Sk.ffi.remapToJs(lightPy);
       switch(name) {
         case PROP_COLOR: {
           return Sk.misceval.callsim(mod[COLOR], Sk.ffi.referenceToPy(light[PROP_COLOR]));
         }
       }
     });
-    $loc.__setattr__ = new Sk.builtin.func(function(light, name, value) {
-      light = Sk.ffi.remapToJs(light);
-      value = Sk.ffi.remapToJs(value);
+    $loc.__setattr__ = new Sk.builtin.func(function(lightPy, name, valuePy) {
+      var light = Sk.ffi.remapToJs(lightPy);
+      var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
         case PROP_COLOR: {
           light[PROP_COLOR] = new THREE.Color(value);
@@ -2940,7 +2939,7 @@ var $builtinmodule = function(name) {
       material = Sk.ffi.remapToJs(material);
       switch(name) {
         case PROP_COLOR: {
-          return Sk.misceval.callsim(mod[COLOR], Sk.ffi.referenceToPy(material.color));
+          return Sk.misceval.callsim(mod[COLOR], Sk.ffi.referenceToPy(material[PROP_COLOR]));
         }
         case PROP_OPACITY: {
           return Sk.builtin.nmber(material[PROP_OPACITY], Sk.builtin.nmber.float$);
