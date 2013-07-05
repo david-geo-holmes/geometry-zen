@@ -209,7 +209,7 @@ var $builtinmodule = function(name) {
   }
 
   /*
-   * Deterines whether the argument is a genuine THREE.Color reference.
+   * Deterines whether the argument is a genuine Color reference.
    */
   function isColor(x) {
     if (isDefined(x)) {
@@ -377,7 +377,7 @@ var $builtinmodule = function(name) {
       if (arg.skType) {
         switch(arg.skType) {
           case 'float': {
-            // TODO: Handle coercion to nearest integer (THREE does not protect itself)
+            // TODO: Handle coercion to nearest integer.
             return arg.v;
           }
           case 'int': {
@@ -936,8 +936,11 @@ var $builtinmodule = function(name) {
             });
             $loc.__call__ = new Sk.builtin.func(function(self, vPy) {
               var v  = Sk.ffi.remapToJs(vPy);
-              mv.w = 0
+              mv.w = 0;
               mv[METHOD_CROSS](v);
+//            mv.x  = bladeASM.extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 1);
+//            mv.y  = bladeASM.extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 2);
+//            mv.z  = bladeASM.extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 3);
               mv.xy = 0;
               mv.yz = 0;
               mv.zx = 0;
@@ -1173,13 +1176,35 @@ var $builtinmodule = function(name) {
     });
     $loc.__repr__ = new Sk.builtin.func(function(m) {
       m = Sk.ffi.remapToJs(m);
-      var args = [m.w, m.x, m.y, m.z, m.xy, m.yz, m.zx, m.xyz];
-      return new Sk.builtin.str(EUCLIDEAN_3 + "(" + args.join(", ") + ")");
+      var grade0 = m.w !== 0;
+      var grade1 = m.x !== 0 || m.y != 0 || m.z !== 0;
+      var grade2 = m.xy !== 0 || m.yz !== 0 || m.zx !== 0;
+      var grade3 = m.xyz !== 0;
+      if (grade0 && !grade1 && !grade2 && !grade3) {
+        var args = [m.w];
+        return new Sk.builtin.str(SCALAR_3 + "(" + args.join(", ") + ")");
+      }
+      else if (!grade0 && grade1 && !grade2 && !grade3) {
+        var args = [m.x, m.y, m.z];
+        return new Sk.builtin.str(VECTOR_3 + "(" + args.join(", ") + ")");
+      }
+      else if (!grade0 && !grade1 && grade2 && !grade3) {
+        var args = [m.xy, m.yz, m.zx];
+        return new Sk.builtin.str(BIVECTOR_3 + "(" + args.join(", ") + ")");
+      }
+      else if (!grade0 && !grade1 && !grade2 && grade3) {
+        var args = [m.xyz];
+        return new Sk.builtin.str(PSEUDOSCALAR_3 + "(" + args.join(", ") + ")");
+      }
+      else {
+        var args = [m.w, m.x, m.y, m.z, m.xy, m.yz, m.zx, m.xyz];
+        return new Sk.builtin.str(EUCLIDEAN_3 + "(" + args.join(", ") + ")");
+      }
     });
     $loc.__str__ = new Sk.builtin.func(function(mv) {
       mv = Sk.ffi.remapToJs(mv);
       if (isDefined(mv)) {
-        return new Sk.builtin.str(BLADE.Euclidean3.fromCartesian(mv.w, mv.x, mv.y, mv.z, mv.xy, mv.yz, mv.zx, mv.xyz).toStringIJK());
+        return new Sk.builtin.str(bladeSTR.stringFromCoordinates([mv.w, mv.x, mv.y, mv.z, mv.xy, mv.yz, mv.zx, mv.xyz], ["1", "i", "j", "k", "ij", "jk", "ki", "I"]));
       }
       else {
         return new Sk.builtin.str("<type '" + EUCLIDEAN_3 + "'>");
@@ -3461,12 +3486,14 @@ var $builtinmodule = function(name) {
     });
   }, MESH, []);
 
-  mod.LineStrip  = Sk.builtin.assk$(THREE.LineStrip,  Sk.builtin.nmber.int$);
-  mod.LinePieces = Sk.builtin.assk$(THREE.LinePieces, Sk.builtin.nmber.int$);
+  if (typeof THREE !== 'undefined') {
+    mod.LineStrip  = Sk.builtin.assk$(THREE.LineStrip,  Sk.builtin.nmber.int$);
+    mod.LinePieces = Sk.builtin.assk$(THREE.LinePieces, Sk.builtin.nmber.int$);
 
-  mod.FlatShading   = Sk.builtin.assk$(THREE.FlatShading,   Sk.builtin.nmber.int$);
-  mod.NoShading     = Sk.builtin.assk$(THREE.NoShading,     Sk.builtin.nmber.int$);
-  mod.SmoothShading = Sk.builtin.assk$(THREE.SmoothShading, Sk.builtin.nmber.int$);
+    mod.FlatShading   = Sk.builtin.assk$(THREE.FlatShading,   Sk.builtin.nmber.int$);
+    mod.NoShading     = Sk.builtin.assk$(THREE.NoShading,     Sk.builtin.nmber.int$);
+    mod.SmoothShading = Sk.builtin.assk$(THREE.SmoothShading, Sk.builtin.nmber.int$);
+  }
 
   mod[SCALAR_3] = new Sk.builtin.func(function(w) {
     w = Sk.ffi.remapToJs(w);

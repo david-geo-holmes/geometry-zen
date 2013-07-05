@@ -68,7 +68,9 @@ Files = [
         'src/compile.js',
         'src/import.js',
         'src/builtindict.js',
-        ("support/jsbeautify/beautify.js", 'test'),
+        ('support/jsbeautify/beautify.js', 'test'),
+        ('test/THREE.js', 'test'),
+        ('vendor/bladejs/build/blade.js', 'test')
         ]
 
 TestFiles = [
@@ -80,9 +82,12 @@ TestFiles = [
         'support/closure-library/closure/goog/json/json.js',
         'support/jsbeautify/beautify.js',
         'vendor/bladejs/build/bladeASM.js',
+        'vendor/bladejs/build/bladeSTR.js',
+        'vendor/bladejs/build/blade.js',
+        'test/THREE.js',
         'test/sprintf.js',
-        "test/json2.js",
-        "test/test.js"
+        'test/json2.js',
+        'test/test.js'
         ]
 
 def isClean():
@@ -127,10 +132,7 @@ else:
 
 def test():
     """runs the unit tests."""
-    return os.system("%s %s %s" % (
-        jsengine,
-        ' '.join(getFileList('test')),
-        ' '.join(TestFiles)))
+    return os.system("%s %s %s" % (jsengine, ' '.join(getFileList('test')), ' '.join(TestFiles)))
 
 def debugbrowser():
     tmpl = """
@@ -138,7 +140,7 @@ def debugbrowser():
 <html>
     <head>
         <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-        <title>Skulpt test</title>
+        <title>DaVinci test</title>
         <link rel="stylesheet" href="../closure-library/closure/goog/demos/css/demo.css">
         <link rel="stylesheet" href="../closure-library/closure/goog/css/menu.css">
         <link rel="stylesheet" href="../closure-library/closure/goog/css/menuitem.css">
@@ -557,10 +559,7 @@ print("-----");
     if opt:
         os.system("%s build/davinci.min.js support/tmp/run.js" % jsengine)
     else:
-        os.system("%s %s %s support/tmp/run.js" %
-                (jsengine,
-                    shell,
-                    ' '.join(getFileList('test'))))
+        os.system("%s %s %s support/tmp/run.js" % (jsengine, shell, ' '.join(getFileList('test'))))
 
 def runopt(fn):
     run(fn, "", True)
