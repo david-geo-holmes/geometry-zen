@@ -3380,7 +3380,7 @@ goog.asserts.assertInstanceof = function(value, type, opt_message, var_args) {
 };
 
 /**
- * Base namespace for Skulpt. This is the only symbol that Skulpt adds to the
+ * Base namespace for DaVinci. This is the only symbol that DaVinci adds to the
  * global namespace. Other user accessible symbols are noted and described
  * below.
  */
@@ -3389,7 +3389,7 @@ var Sk = Sk || {};
 
 /**
  *
- * Set various customizable parts of Skulpt.
+ * Set various customizable parts of DaVinci.
  *
  * output: Replacable output redirection (called from print, etc.).
  * read: Replacable function to load modules with (called via import, etc.)
@@ -5224,7 +5224,7 @@ goog.exportSymbol("Sk.misceval.apply", Sk.misceval.apply);
  * Constructs a class object given a code object representing the body
  * of the class, the name of the class, and the list of bases.
  *
- * There are no "old-style" classes in Skulpt, so use the user-specified
+ * There are no "old-style" classes in DaVinci, so use the user-specified
  * metaclass (todo;) if there is one, the type of the 0th base class if
  * there's bases, or otherwise the 'type' type.
  *
@@ -9866,7 +9866,7 @@ Sk.builtin.set = function(S)
     this.set_reset_();
     S = new Sk.builtin.list(S);
     // python sorts sets on init, but not thereafter.
-    // Skulpt seems to init a new set each time you add/remove something
+    // DaVinci seems to init a new set each time you add/remove something
     //Sk.builtin.list.prototype['sort'].func_code(S);
     for (var it = S.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext())
     {

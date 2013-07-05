@@ -14,7 +14,7 @@ Sk.builtin.set = function(S)
     this.set_reset_();
     S = new Sk.builtin.list(S);
     // python sorts sets on init, but not thereafter.
-    // Skulpt seems to init a new set each time you add/remove something
+    // DaVinci seems to init a new set each time you add/remove something
     //Sk.builtin.list.prototype['sort'].func_code(S);
     for (var it = S.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext())
     {

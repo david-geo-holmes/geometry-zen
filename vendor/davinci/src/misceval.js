@@ -489,7 +489,7 @@ goog.exportSymbol("Sk.misceval.apply", Sk.misceval.apply);
  * Constructs a class object given a code object representing the body
  * of the class, the name of the class, and the list of bases.
  *
- * There are no "old-style" classes in Skulpt, so use the user-specified
+ * There are no "old-style" classes in DaVinci, so use the user-specified
  * metaclass (todo;) if there is one, the type of the 0th base class if
  * there's bases, or otherwise the 'type' type.
  *

@@ -1,5 +1,5 @@
 /**
- * Base namespace for Skulpt. This is the only symbol that Skulpt adds to the
+ * Base namespace for DaVinci. This is the only symbol that DaVinci adds to the
  * global namespace. Other user accessible symbols are noted and described
  * below.
  */
@@ -8,7 +8,7 @@ var Sk = Sk || {};
 
 /**
  *
- * Set various customizable parts of Skulpt.
+ * Set various customizable parts of DaVinci.
  *
  * output: Replacable output redirection (called from print, etc.).
  * read: Replacable function to load modules with (called via import, etc.)

@@ -1,4 +1,4 @@
-from blade import *
+from e2ga import *
 
 one  = Euclidean2(1, 0, 0, 0)
 i    = Euclidean2(0, 1, 0, 0)

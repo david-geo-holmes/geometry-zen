@@ -1,6 +1,6 @@
 //
 //
-// Sprite Graphics Module for Skulpt
+// Sprite Graphics Module for DaVinci.
 //
 // Based on the turtle module by Brad Miller.
 //

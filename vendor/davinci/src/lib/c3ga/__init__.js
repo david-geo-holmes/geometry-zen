@@ -1,5 +1,5 @@
 /**
- * Geometric Algebra (blade) module for Skulpt Python.
+ * Geometric Algebra (c3ga) module for DaVinci Python.
  *
  * David Holmes (david.geo.holmes@gmail.com)
  */
@@ -8,7 +8,7 @@ var $builtinmodule = function(name) {
    * Symbolic constants representing the Python classes or functions that are exported by this module.
    * These are captured here for both consistency and self-documentation.
    */
-  var EUCLIDEAN_2    = "Euclidean2";    // Multivector of 2-dimensional Euclidean space.
+  var CONFORMAL_3    = "Conformal3";    // Multivector of 5-dimensional Conformal space to represent Euclidean 3D Motions.
 
   // The following symbolic constant simulates a zero scalar argument for convenience functions.
   var ARG_ZERO      = Sk.builtin.assk$(0, Sk.builtin.nmber.float$);
@@ -22,21 +22,21 @@ var $builtinmodule = function(name) {
   function isUndefined(x) { return typeof x === 'undefined'; }
   function isDefined(x)   { return typeof x !== 'undefined'; }
 
-  function remapE2ToPy(x0, x1, x2, x3) {
-    return Sk.misceval.callsim(mod[EUCLIDEAN_2],
+  function remapC3ToPy(x0, x1, x2, x3) {
+    return Sk.misceval.callsim(mod[CONFORMAL_3],
       Sk.builtin.assk$(x0, Sk.builtin.nmber.float$),
       Sk.builtin.assk$(x1, Sk.builtin.nmber.float$),
       Sk.builtin.assk$(x2, Sk.builtin.nmber.float$),
       Sk.builtin.assk$(x3, Sk.builtin.nmber.float$));
   }
 
-  mod[EUCLIDEAN_2] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
+  mod[CONFORMAL_3] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = new Sk.builtin.func(function(self, x0, x1, x2, x3) {
       x0 = Sk.ffi.remapToJs(x0);
       x1 = Sk.ffi.remapToJs(x1);
       x2 = Sk.ffi.remapToJs(x2);
       x3 = Sk.ffi.remapToJs(x3);
-      self.tp$name = EUCLIDEAN_2;
+      self.tp$name = CONFORMAL_3;
       self.v = [x0, x1, x2, x3];
     });
     $loc.__add__ = new Sk.builtin.func(function(a, b) {
@@ -55,7 +55,7 @@ var $builtinmodule = function(name) {
         var x1 = bladeASM.addE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
         var x2 = bladeASM.addE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
         var x3 = bladeASM.addE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
-        return remapE2ToPy(x0, x1, x2, x3);
+        return remapC3ToPy(x0, x1, x2, x3);
       }
       else {
         var a0 = a[0];
@@ -70,7 +70,7 @@ var $builtinmodule = function(name) {
         var x1 = bladeASM.addE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
         var x2 = bladeASM.addE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
         var x3 = bladeASM.addE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
-        return remapE2ToPy(x0, x1, x2, x3);
+        return remapC3ToPy(x0, x1, x2, x3);
       }
     });
     $loc.__radd__ = new Sk.builtin.func(function(rhs, lhs) {
@@ -89,7 +89,7 @@ var $builtinmodule = function(name) {
         var x1 = bladeASM.addE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
         var x2 = bladeASM.addE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
         var x3 = bladeASM.addE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
-        return remapE2ToPy(x0, x1, x2, x3);
+        return remapC3ToPy(x0, x1, x2, x3);
       }
       else {
         throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " + " + JSON.stringify(rhs, null, 2));
@@ -145,7 +145,7 @@ var $builtinmodule = function(name) {
         var x1 = bladeASM.subE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
         var x2 = bladeASM.subE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
         var x3 = bladeASM.subE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
-        return remapE2ToPy(x0, x1, x2, x3);
+        return remapC3ToPy(x0, x1, x2, x3);
       }
       else {
         var a0 = a[0];
@@ -160,7 +160,7 @@ var $builtinmodule = function(name) {
         var x1 = bladeASM.subE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
         var x2 = bladeASM.subE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
         var x3 = bladeASM.subE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
-        return remapE2ToPy(x0, x1, x2, x3);
+        return remapC3ToPy(x0, x1, x2, x3);
       }
     });
     $loc.__rsub__ = new Sk.builtin.func(function(rhs, lhs) {
@@ -179,7 +179,7 @@ var $builtinmodule = function(name) {
         var x1 = bladeASM.subE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
         var x2 = bladeASM.subE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
         var x3 = bladeASM.subE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
-        return remapE2ToPy(x0, x1, x2, x3);
+        return remapC3ToPy(x0, x1, x2, x3);
       }
       else {
         throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " - " + JSON.stringify(rhs, null, 2));
@@ -235,7 +235,7 @@ var $builtinmodule = function(name) {
         var x1 = bladeASM.mulE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
         var x2 = bladeASM.mulE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
         var x3 = bladeASM.mulE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
-        return remapE2ToPy(x0, x1, x2, x3);
+        return remapC3ToPy(x0, x1, x2, x3);
       }
       else {
         var a0 = a[0];
@@ -250,7 +250,7 @@ var $builtinmodule = function(name) {
         var x1 = bladeASM.mulE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
         var x2 = bladeASM.mulE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
         var x3 = bladeASM.mulE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
-        return remapE2ToPy(x0, x1, x2, x3);
+        return remapC3ToPy(x0, x1, x2, x3);
       }
     });
     $loc.__rmul__ = new Sk.builtin.func(function(rhs, lhs) {
@@ -269,7 +269,7 @@ var $builtinmodule = function(name) {
         var x1 = bladeASM.mulE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
         var x2 = bladeASM.mulE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
         var x3 = bladeASM.mulE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
-        return remapE2ToPy(x0, x1, x2, x3);
+        return remapC3ToPy(x0, x1, x2, x3);
       }
       else {
         throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " * " + JSON.stringify(rhs, null, 2));
@@ -325,7 +325,7 @@ var $builtinmodule = function(name) {
         var x1 = bladeASM.extE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
         var x2 = bladeASM.extE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
         var x3 = bladeASM.extE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
-        return remapE2ToPy(x0, x1, x2, x3);
+        return remapC3ToPy(x0, x1, x2, x3);
       }
       else {
         var a0 = a[0];
@@ -340,7 +340,7 @@ var $builtinmodule = function(name) {
         var x1 = bladeASM.extE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
         var x2 = bladeASM.extE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
         var x3 = bladeASM.extE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
-        return remapE2ToPy(x0, x1, x2, x3);
+        return remapC3ToPy(x0, x1, x2, x3);
       }
     });
     $loc.__rxor__ = new Sk.builtin.func(function(rhs, lhs) {
@@ -359,7 +359,7 @@ var $builtinmodule = function(name) {
         var x1 = bladeASM.extE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
         var x2 = bladeASM.extE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
         var x3 = bladeASM.extE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
-        return remapE2ToPy(x0, x1, x2, x3);
+        return remapC3ToPy(x0, x1, x2, x3);
       }
       else {
         throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " ^ " + JSON.stringify(rhs, null, 2));
@@ -415,7 +415,7 @@ var $builtinmodule = function(name) {
         var x1 = bladeASM.lcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
         var x2 = bladeASM.lcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
         var x3 = bladeASM.lcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
-        return remapE2ToPy(x0, x1, x2, x3);
+        return remapC3ToPy(x0, x1, x2, x3);
       }
       else {
         var a0 = a[0];
@@ -430,7 +430,7 @@ var $builtinmodule = function(name) {
         var x1 = bladeASM.lcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
         var x2 = bladeASM.lcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
         var x3 = bladeASM.lcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
-        return remapE2ToPy(x0, x1, x2, x3);
+        return remapC3ToPy(x0, x1, x2, x3);
       }
     });
     $loc.__rlshift__ = new Sk.builtin.func(function(rhs, lhs) {
@@ -449,7 +449,7 @@ var $builtinmodule = function(name) {
         var x1 = bladeASM.lcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
         var x2 = bladeASM.lcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
         var x3 = bladeASM.lcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
-        return remapE2ToPy(x0, x1, x2, x3);
+        return remapC3ToPy(x0, x1, x2, x3);
       }
       else {
         throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " << " + JSON.stringify(rhs, null, 2));
@@ -505,7 +505,7 @@ var $builtinmodule = function(name) {
         var x1 = bladeASM.rcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
         var x2 = bladeASM.rcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
         var x3 = bladeASM.rcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
-        return remapE2ToPy(x0, x1, x2, x3);
+        return remapC3ToPy(x0, x1, x2, x3);
       }
       else {
         var a0 = a[0];
@@ -520,7 +520,7 @@ var $builtinmodule = function(name) {
         var x1 = bladeASM.rcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
         var x2 = bladeASM.rcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
         var x3 = bladeASM.rcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
-        return remapE2ToPy(x0, x1, x2, x3);
+        return remapC3ToPy(x0, x1, x2, x3);
       }
     });
     $loc.__rrshift__ = new Sk.builtin.func(function(rhs, lhs) {
@@ -539,7 +539,7 @@ var $builtinmodule = function(name) {
         var x1 = bladeASM.rcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 1);
         var x2 = bladeASM.rcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 2);
         var x3 = bladeASM.rcoE2(a0, a1, a2, a3, b0, b1, b2, b3, 3);
-        return remapE2ToPy(x0, x1, x2, x3);
+        return remapC3ToPy(x0, x1, x2, x3);
       }
       else {
         throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " >> " + JSON.stringify(rhs, null, 2));
@@ -587,7 +587,7 @@ var $builtinmodule = function(name) {
     // Unary minus.
     $loc.nu$neg = function() {
       var self = Sk.ffi.remapToJs(this);
-      return remapE2ToPy(-self[0], -self[1], -self[2], -self[3]);
+      return remapC3ToPy(-self[0], -self[1], -self[2], -self[3]);
     };
     // Unary plus.
     $loc.nu$pos = function() {
@@ -596,7 +596,7 @@ var $builtinmodule = function(name) {
     // Python invert will be used for Geometric Algebra reversion.
     $loc.nu$inv = function() {
       var self = Sk.ffi.remapToJs(this);
-      return remapE2ToPy(self[0], self[1], self[2], -self[3]);
+      return remapC3ToPy(self[0], self[1], self[2], -self[3]);
     };
     $loc.__div__ = new Sk.builtin.func(function(a, b) {
       a = Sk.ffi.remapToJs(a);
@@ -605,7 +605,7 @@ var $builtinmodule = function(name) {
     });
     $loc.__repr__ = new Sk.builtin.func(function(mv) {
       mv = Sk.ffi.remapToJs(mv);
-      return new Sk.builtin.str(EUCLIDEAN_2 + "(" + mv.join(", ") + ")");
+      return new Sk.builtin.str(CONFORMAL_3 + "(" + mv.join(", ") + ")");
     });
     $loc.__str__ = new Sk.builtin.func(function(mv) {
       mv = Sk.ffi.remapToJs(mv);
@@ -613,7 +613,7 @@ var $builtinmodule = function(name) {
         return new Sk.builtin.str(bladeSTR.stringFromCoordinates([mv[0], mv[1], mv[2], mv[3]], ["1", "i", "j", "I"]));
       }
       else {
-        return new Sk.builtin.str("<type '" + EUCLIDEAN_2 + "'>");
+        return new Sk.builtin.str("<type '" + CONFORMAL_3 + "'>");
       }
     });
     $loc.__eq__ = new Sk.builtin.func(function(a, b) {
@@ -642,10 +642,10 @@ var $builtinmodule = function(name) {
         return Sk.builtin.assk$(self.v.coordinate(3), Sk.builtin.nmber.float$);
       }
       else {
-        throw new Error(key + " is not a valid " + EUCLIDEAN_2 + " attribute.");
+        throw new Error(key + " is not a valid " + CONFORMAL_3 + " attribute.");
       }
     });
-  }, EUCLIDEAN_2, []);
+  }, CONFORMAL_3, []);
 
   return mod;
 }
