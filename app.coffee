@@ -93,5 +93,6 @@ app.get "/*", (req, res, next) ->
     css: if isProductionMode() then "css/app.min.css?version=#{npm.version}" else "css/app.css?version=#{npm.version}"
     js:  if isProductionMode() then "js/app.min.js?version=#{npm.version}" else "js/app.js?version=#{npm.version}"
     bladeASM: "js/bladeASM.js?version=#{npm.version}"
+    e2gaASM: "js/e2gaASM.js?version=#{npm.version}"
     marketing: marketing
     npm: npm

@@ -81,6 +81,7 @@ TestFiles = [
         'support/closure-library/closure/goog/math/vec2.js',
         'support/closure-library/closure/goog/json/json.js',
         'support/jsbeautify/beautify.js',
+        'vendor/bladejs/build/e2gaASM.js',
         'vendor/bladejs/build/bladeASM.js',
         'vendor/bladejs/build/bladeSTR.js',
         'vendor/bladejs/build/blade.js',

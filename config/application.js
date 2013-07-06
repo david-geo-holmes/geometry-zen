@@ -22,7 +22,8 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('application
   copy: {
     dev: {
       files: [
-        {src: "vendor/bladejs/build/bladeASM.js", dest: "generated/js/bladeASM.js"},
+        {src: "vendor/bladejs/build/bladeASM.js",                  dest: "generated/js/bladeASM.js"},
+        {src: "vendor/bladejs/build/e2gaASM.js",                   dest: "generated/js/e2gaASM.js"},
         {src: "vendor/font-awesome/font/FontAwesome.otf",          dest: "generated/img/FontAwesome.otf"},
         {src: "vendor/font-awesome/font/fontawesome-webfont.eot",  dest: "generated/img/fontawesome-webfont.eot"},
         {src: "vendor/font-awesome/font/fontawesome-webfont.svg",  dest: "generated/img/fontawesome-webfont.svg"},
@@ -32,7 +33,8 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('application
     },
     dist: {
       files: [
-        {src: "vendor/bladejs/build/bladeASM.js", dest: "dist/js/bladeASM.js"},
+        {src: "vendor/bladejs/build/bladeASM.js",                  dest: "dist/js/bladeASM.js"},
+        {src: "vendor/bladejs/build/e2gaASM.js",                   dest: "dist/js/e2gaASM.js"},
         {src: "vendor/font-awesome/font/FontAwesome.otf",          dest: "dist/img/FontAwesome.otf"},
         {src: "vendor/font-awesome/font/fontawesome-webfont.eot",  dest: "dist/img/fontawesome-webfont.eot"},
         {src: "vendor/font-awesome/font/fontawesome-webfont.svg",  dest: "dist/img/fontawesome-webfont.svg"},

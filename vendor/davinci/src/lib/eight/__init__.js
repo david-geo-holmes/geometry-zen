@@ -29,14 +29,14 @@ var $builtinmodule = function(name) {
   var DIRECTIONAL_LIGHT     = "DirectionalLight";
   var POINT_LIGHT           = "PointLight";
 
+  var LINE                  = "Line";
   var LINE_BASIC_MATERIAL   = "LineBasicMaterial";
+
+  var MESH                  = "Mesh";
   var MESH_BASIC_MATERIAL   = "MeshBasicMaterial";
   var MESH_LAMBERT_MATERIAL = "MeshLambertMaterial";
   var MESH_NORMAL_MATERIAL  = "MeshNormalMaterial";
   var MESH_PHONG_MATERIAL   = "MeshPhongMaterial";
-
-  var LINE                  = "Line";
-  var MESH                  = "Mesh";
 
   var ARROW_GEOMETRY        = "ArrowGeometry";
   var CUBE_GEOMETRY         = "CubeGeometry";
@@ -57,6 +57,7 @@ var $builtinmodule = function(name) {
   var PROP_GEOMETRY            = "geometry";
   var PROP_ID                  = "id";
   var PROP_LEFT                = "left";
+  var PROP_MASS                = "mass";
   var PROP_MATERIAL            = "material";
   var PROP_NAME                = "name";
   var PROP_NEAR                = "near";
@@ -72,6 +73,7 @@ var $builtinmodule = function(name) {
   var PROP_TRANSPARENT         = "transparent";
   var PROP_TYPE                = "type";
   var PROP_UP                  = "up";
+  var PROP_VELOCITY            = "velocity";
   var PROP_VERTICES            = "vertices";
   var PROP_VISIBLE             = "visible";
   var PROP_WIREFRAME           = "wireframe";
@@ -244,40 +246,6 @@ var $builtinmodule = function(name) {
     }
   }
 
-  function isNumberAssignableFromArg(arg, argName, functionName) {
-    if (isNull(arg)) {
-      return false;
-    }
-    if (isBoolean(arg)) {
-      return false;
-    }
-
-    if (arg.skType) {
-      switch(arg.skType) {
-        case 'float': {
-          return true;
-        }
-        case 'int': {
-          return true;
-        }
-        default: {
-          return false;
-        }
-      }
-    }
-    else if (arg.v) {
-      if (isString(arg.v)) {
-        return false;
-      }
-      else {
-        return false;
-      }
-    }
-    else {
-      return false;
-    }
-  }
-
   function booleanFromArg(arg, argName, functionName, lax) {
     if (isUndefined(argName)) {
       throw new Error("argName must be specified")
@@ -401,7 +369,7 @@ var $builtinmodule = function(name) {
     return Sk.misceval.callsim(mod[EUCLIDEAN_3], w, x, y, z, xy, yz, zx, xyz);
   }
 
-  function enhanceVector3(w, vector, xy, yz, zx, xyz) {
+  function multiVector3(w, vector, xy, yz, zx, xyz) {
     vector.w = w;
     vector.xy = xy;
     vector.yz = yz;
@@ -482,16 +450,16 @@ var $builtinmodule = function(name) {
       zx = Sk.ffi.remapToJs(zx);
       xyz = Sk.ffi.remapToJs(xyz);
       if (isNumber(w) && isNumber(x) && isNumber(y) && isNumber(z) && isNumber(xy) && isNumber(yz) && isNumber(zx) && isNumber(xyz)) {
-        self.v = enhanceVector3(w, new THREE.Vector3(x, y, z), xy, yz, zx, xyz);
+        self.v = multiVector3(w, new THREE.Vector3(x, y, z), xy, yz, zx, xyz);
       }
       else if (isDefined(w) && isUndefined(x) && isUndefined(y) && isUndefined(z) && isUndefined(xy) && isUndefined(yz) && isUndefined(zx) && isUndefined(xyz)) {
-        self.v = enhanceVector3(0, w, 0, 0, 0, 0);
+        self.v = multiVector3(w.w || 0, w, w.xy || 0, w.yz || 0, w.zx|| 0, w.xyz || 0);
       }
       else if (isDefined(w) && isUndefined(x) && isUndefined(y) && isUndefined(z) && isDefined(xy) && isDefined(yz) && isDefined(zx) && isDefined(xyz)) {
-        self.v = enhanceVector3(w, new THREE.Vector3(), xy, yz, zx, xyz);
+        self.v = multiVector3(w, new THREE.Vector3(0, 0, 0), xy, yz, zx, xyz);
       }
       else if (isUndefined(w) && isUndefined(x) && isUndefined(y) && isUndefined(z) && isUndefined(xy) && isUndefined(yz) && isUndefined(zx) && isUndefined(xyz)) {
-        self.v = enhanceVector3(0, new THREE.Vector3(), 0, 0, 0, 0);
+        self.v = multiVector3(0, new THREE.Vector3(0, 0, 0), 0, 0, 0, 0);
       }
       else {
         throw new Sk.builtin.AssertionError(EUCLIDEAN_3);
@@ -2987,6 +2955,185 @@ var $builtinmodule = function(name) {
     });
   }, LINE_BASIC_MATERIAL, []);
 
+  mod[MESH] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
+    $loc.__init__ = new Sk.builtin.func(function(self, geometryPy, materialPy) {
+      self.tp$name = MESH;
+      self.v = new THREE[MESH](Sk.ffi.remapToJs(geometryPy), Sk.ffi.remapToJs(materialPy));
+      self.v[PROP_MASS] = multiVector3(0, new THREE.Vector3(0, 0, 0), 0, 0, 0, 0);
+      self.v[PROP_VELOCITY] = multiVector3(0, new THREE.Vector3(0, 0, 0), 0, 0, 0, 0);
+    });
+    $loc.__getattr__ = new Sk.builtin.func(function(meshPy, name) {
+      var mesh = Sk.ffi.remapToJs(meshPy);
+      switch(name) {
+        case PROP_ID: {
+          return Sk.builtin.nmber(mesh[PROP_ID], Sk.builtin.nmber.int$);
+        }
+        case PROP_NAME: {
+          return new Sk.builtin.str(mesh[PROP_NAME]);
+        }
+        case PROP_GEOMETRY: {
+          var geometry = mesh[PROP_GEOMETRY];
+          return Sk.misceval.callsim(mod[GEOMETRY], Sk.ffi.referenceToPy(mesh[PROP_GEOMETRY]));
+        }
+        case PROP_MASS: {
+          return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(mesh[PROP_MASS]));
+        }
+        case PROP_OVERDRAW: {
+          if (isBoolean(mesh[PROP_OVERDRAW])) {
+            return mesh[PROP_OVERDRAW];
+          }
+          else {
+            return null;
+          }
+        }
+        case PROP_POSITION: {
+          return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(mesh[PROP_POSITION]));
+        }
+        case PROP_ROTATION: {
+          return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(mesh[PROP_ROTATION]));
+        }
+        case PROP_EULER_ORDER: {
+          return new Sk.builtin.str(mesh[PROP_EULER_ORDER]);
+        }
+        case PROP_SCALE: {
+          return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(mesh[PROP_SCALE]));
+        }
+        case PROP_UP: {
+          return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(mesh[PROP_UP]));
+        }
+        case PROP_VELOCITY: {
+          return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(mesh[PROP_VELOCITY]));
+        }
+        case PROP_VISIBLE: {
+          return mesh[PROP_VISIBLE];
+        }
+        case METHOD_LOOK_AT: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_LOOK_AT;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, vectorPy) {
+              mesh.lookAt(Sk.ffi.remapToJs(vectorPy));
+              return meshPy;
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_LOOK_AT);
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_LOOK_AT);
+            })
+          }, METHOD_LOOK_AT, []));
+        }
+        case METHOD_SET_GEOMETRY: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_SET_GEOMETRY;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, geometryPy) {
+              var geometry = Sk.ffi.remapToJs(geometryPy);
+              mesh[METHOD_SET_GEOMETRY](geometry);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET_GEOMETRY)
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET_GEOMETRY)
+            })
+          }, METHOD_SET_GEOMETRY, []));
+        }
+      }
+    });
+    $loc.__setattr__ = new Sk.builtin.func(function(mesh, name, value) {
+      mesh = Sk.ffi.remapToJs(mesh);
+      value = Sk.ffi.remapToJs(value);
+      switch(name) {
+        case PROP_MASS: {
+          if (isNumber(value)) {
+            mesh[PROP_MASS] = multiVector3(value, new THREE.Vector3(0, 0, 0), 0, 0, 0, 0);
+          }
+          else {
+            mesh[PROP_MASS] = value;
+          }
+        }
+        break;
+        case PROP_NAME: {
+          if (isString(value)) {
+            mesh[PROP_NAME] = value;
+          }
+          else {
+            throw new Error(name + " must be a string");
+          }
+        }
+        break;
+        case PROP_OVERDRAW: {
+          if (isBoolean(value)) {
+            mesh[PROP_OVERDRAW] = value;
+          }
+          else if (isNull(value)) {
+            mesh[PROP_OVERDRAW] = null;
+          }
+          else {
+            throw new Error(name + " must be either Boolean or None");
+          }
+        }
+        break;
+        case PROP_POSITION: {
+          mesh[PROP_POSITION] = value;
+        }
+        break;
+        case PROP_ROTATION: {
+          mesh[PROP_ROTATION] = value;
+        }
+        break;
+        case PROP_EULER_ORDER: {
+          if (isString(value)) {
+            mesh[PROP_EULER_ORDER] = value;
+          }
+          else {
+            throw new Error(name + " must be a string");
+          }
+        }
+        break;
+        case PROP_SCALE: {
+          mesh[PROP_SCALE] = value;
+        }
+        break;
+        case PROP_UP: {
+          mesh[PROP_UP] = value;
+        }
+        break;
+        case PROP_VELOCITY: {
+          mesh[PROP_VELOCITY] = value;
+        }
+        break;
+        case PROP_VISIBLE: {
+          if (isBoolean(value)) {
+            mesh[PROP_VISIBLE] = value;
+          }
+          else {
+            throw new Error(PROP_VISIBLE + " must be Boolean");
+          }
+        }
+        break;
+        default: {
+          throw new Error(name + " is not an attribute of " + MESH);
+        }
+      }
+    });
+    $loc.__str__ = new Sk.builtin.func(function(mesh) {
+      mesh = Sk.ffi.remapToJs(mesh);
+      var args = {};
+      args[PROP_ID] = mesh[PROP_ID];
+      args[PROP_NAME] = mesh[PROP_NAME];
+      return new Sk.builtin.str(MESH + "(" + JSON.stringify(args) + ")");
+    });
+    $loc.__repr__ = new Sk.builtin.func(function(mesh) {
+      mesh = Sk.ffi.remapToJs(mesh);
+      var args = [/*mesh[PROP_GEOMETRY], mesh[PROP_MATERIAL]*/];
+      return new Sk.builtin.str(MESH + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
+    });
+  }, MESH, []);
+
   mod[MESH_BASIC_MATERIAL] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = new Sk.builtin.func(function(self, parameters) {
       self.tp$name = MESH_BASIC_MATERIAL;
@@ -3324,166 +3471,6 @@ var $builtinmodule = function(name) {
       return new Sk.builtin.str(MESH_PHONG_MATERIAL + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
     });
   }, MESH_PHONG_MATERIAL, []);
-
-  mod[MESH] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = new Sk.builtin.func(function(self, geometryPy, materialPy) {
-      self.v = new THREE[MESH](Sk.ffi.remapToJs(geometryPy), Sk.ffi.remapToJs(materialPy));
-    });
-    $loc.__getattr__ = new Sk.builtin.func(function(meshPy, name) {
-      var mesh = Sk.ffi.remapToJs(meshPy);
-      switch(name) {
-        case PROP_ID: {
-          return Sk.builtin.nmber(mesh[PROP_ID], Sk.builtin.nmber.int$);
-        }
-        case PROP_NAME: {
-          return new Sk.builtin.str(mesh[PROP_NAME]);
-        }
-        case PROP_GEOMETRY: {
-          var geometry = mesh[PROP_GEOMETRY];
-          return Sk.misceval.callsim(mod[GEOMETRY], Sk.ffi.referenceToPy(mesh[PROP_GEOMETRY]));
-        }
-        case PROP_OVERDRAW: {
-          if (isBoolean(mesh[PROP_OVERDRAW])) {
-            return mesh[PROP_OVERDRAW];
-          }
-          else {
-            return null;
-          }
-        }
-        case PROP_POSITION: {
-          return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(mesh[PROP_POSITION]));
-        }
-        case PROP_ROTATION: {
-          return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(mesh[PROP_ROTATION]));
-        }
-        case PROP_EULER_ORDER: {
-          return new Sk.builtin.str(mesh[PROP_EULER_ORDER]);
-        }
-        case PROP_SCALE: {
-          return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(mesh[PROP_SCALE]));
-        }
-        case PROP_UP: {
-          return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(mesh[PROP_UP]));
-        }
-        case PROP_VISIBLE: {
-          return mesh[PROP_VISIBLE];
-        }
-        case METHOD_LOOK_AT: {
-          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = new Sk.builtin.func(function(self) {
-              self.tp$name = METHOD_LOOK_AT;
-            });
-            $loc.__call__ = new Sk.builtin.func(function(self, vectorPy) {
-              mesh.lookAt(Sk.ffi.remapToJs(vectorPy));
-              return meshPy;
-            });
-            $loc.__str__ = new Sk.builtin.func(function(self) {
-              return new Sk.builtin.str(METHOD_LOOK_AT);
-            })
-            $loc.__repr__ = new Sk.builtin.func(function(self) {
-              return new Sk.builtin.str(METHOD_LOOK_AT);
-            })
-          }, METHOD_LOOK_AT, []));
-        }
-        case METHOD_SET_GEOMETRY: {
-          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = new Sk.builtin.func(function(self) {
-              self.tp$name = METHOD_SET_GEOMETRY;
-            });
-            $loc.__call__ = new Sk.builtin.func(function(self, geometryPy) {
-              var geometry = Sk.ffi.remapToJs(geometryPy);
-              mesh[METHOD_SET_GEOMETRY](geometry);
-            });
-            $loc.__str__ = new Sk.builtin.func(function(self) {
-              return new Sk.builtin.str(METHOD_SET_GEOMETRY)
-            })
-            $loc.__repr__ = new Sk.builtin.func(function(self) {
-              return new Sk.builtin.str(METHOD_SET_GEOMETRY)
-            })
-          }, METHOD_SET_GEOMETRY, []));
-        }
-        default: {
-          throw new Error(name + " is not an attribute of " + MESH);
-        }
-      }
-    });
-    $loc.__setattr__ = new Sk.builtin.func(function(mesh, name, value) {
-      mesh = Sk.ffi.remapToJs(mesh);
-      value = Sk.ffi.remapToJs(value);
-      switch(name) {
-        case PROP_OVERDRAW: {
-          if (isBoolean(value)) {
-            mesh[PROP_OVERDRAW] = value;
-          }
-          else if (isNull(value)) {
-            mesh[PROP_OVERDRAW] = null;
-          }
-          else {
-            throw new Error(name + " must be either Boolean or None");
-          }
-        }
-        break;
-        case PROP_NAME: {
-          if (isString(value)) {
-            mesh[PROP_NAME] = value;
-          }
-          else {
-            throw new Error(name + " must be a string");
-          }
-        }
-        break;
-        case PROP_POSITION: {
-          mesh[PROP_POSITION] = value;
-        }
-        break;
-        case PROP_ROTATION: {
-          mesh[PROP_ROTATION] = value;
-        }
-        break;
-        case PROP_EULER_ORDER: {
-          if (isString(value)) {
-            mesh[PROP_EULER_ORDER] = value;
-          }
-          else {
-            throw new Error(name + " must be a string");
-          }
-        }
-        break;
-        case PROP_SCALE: {
-          mesh[PROP_SCALE] = value;
-        }
-        break;
-        case PROP_UP: {
-          mesh[PROP_UP] = value;
-        }
-        break;
-        case PROP_VISIBLE: {
-          if (isBoolean(value)) {
-            mesh[PROP_VISIBLE] = value;
-          }
-          else {
-            throw new Error(PROP_VISIBLE + " must be Boolean");
-          }
-        }
-        break;
-        default: {
-          throw new Error(name + " is not an attribute of " + MESH);
-        }
-      }
-    });
-    $loc.__str__ = new Sk.builtin.func(function(mesh) {
-      mesh = Sk.ffi.remapToJs(mesh);
-      var args = {};
-      args[PROP_ID] = mesh[PROP_ID];
-      args[PROP_NAME] = mesh[PROP_NAME];
-      return new Sk.builtin.str(MESH + "(" + JSON.stringify(args) + ")");
-    });
-    $loc.__repr__ = new Sk.builtin.func(function(mesh) {
-      mesh = Sk.ffi.remapToJs(mesh);
-      var args = [/*mesh[PROP_GEOMETRY], mesh[PROP_MATERIAL]*/];
-      return new Sk.builtin.str(MESH + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
-    });
-  }, MESH, []);
 
   if (typeof THREE !== 'undefined') {
     mod.LineStrip  = Sk.builtin.assk$(THREE.LineStrip,  Sk.builtin.nmber.int$);

@@ -1,6 +1,6 @@
 {
   "name": "bladejs",
-  "version": "0.0.49",
+  "version": "0.0.50",
   "main": "./build/blade.min.js",
   "description": "JavaScript Geometric Algebra library",
   "author": {
@@ -24,8 +24,8 @@
   "ignore": [
     "node_modules"
   ],
-  "gitHead": "073124cad575a21185faff96117f46e0f3c4df11",
+  "gitHead": "26aa0a4d133e13d400a0a7d87a58f9cc5e3b7c76",
   "readme": "# Blade.JS\n\nJavaScript Geometric Algebra library\n\n## Getting Started\n\nInstall nodejs\n\nInstall grunt-cli globally via npm install grunt-cli\n\nClone the Blade.JS GitHub repository:\n\n  ```sh\n  $ git clone git@github.com:geometryzen/bladejs.git\n  ```\n\nChange to the Blade.JS directory:\n\n  ```sh\n  $ cd bladejs\n  ```\n\n### Install project dependencies.\n\nThere are no dependencies at the moment, but we use Bower as the package management system.\n\nBower is important for registering our library as a Bower package.\n\n  ```sh\n  $ bower install\n  ```\n\n### Install local tools.\n\nNode package manager is used to manage the provisioning of our tools such as Grunt contributions.\n\n  ```sh\n  $ npm install\n  ```\n\n### Perform the build\n\nThe default command for building Blade.JS is\n\n  ```sh\n  $ grunt\n  ```\n\nThis will create blade.js and blade.min.js in the build folder.\n\nIn development it will be more convenient to have Continuous Integration with\n\n  ```sh\n  $ grunt watch\n  ```\n\nThis will watch for changes to the main source file (blade.coffee) and will trigger the build process.\n\n## Commits and Tagging\n\nBecause Blade.JS is provide as a Bower package, there are some obligations to manage the versions.\n\n## Documentation\n_(Coming soon)_\n\n## Examples\n_(Coming soon)_\n\n## Contributing\nIn lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).\n\n_Also, please don't edit files in the \"build\" subdirectory as they are generated via Grunt. You'll find source code in the \"src\" subdirectory!_\n\n## Release History\n_(Nothing yet)_\n\n## License\nCopyright (c) 2013 David Holmes  \nLicensed under the MIT license.\n\n## Developer Notes\n",
   "readmeFilename": "README.md",
-  "_id": "bladejs@0.0.49"
+  "_id": "bladejs@0.0.50"
 }
