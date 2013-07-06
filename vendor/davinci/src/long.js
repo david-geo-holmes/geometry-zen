@@ -360,7 +360,7 @@ Sk.builtin.lng.prototype.nb$inplace_sub = Sk.builtin.lng.prototype.nb$subtract;
 
 Sk.builtin.lng.prototype.nb$inplace_mul = Sk.builtin.lng.prototype.nb$multiply;
 
-Sk.builtin.lng.prototype.nb$inplace_divide = Sk.builtin.lng.prototype.nb$divide;
+Sk.builtin.lng.prototype.nb$inplace_div = Sk.builtin.lng.prototype.nb$divide;
 
 Sk.builtin.lng.prototype.nb$inplace_remainder = Sk.builtin.lng.prototype.nb$remainder;
 

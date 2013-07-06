@@ -628,18 +628,19 @@ var $builtinmodule = function(name) {
       throw new Error("Under construction ne");
     });
 
-    $loc.__getattr__ = new Sk.builtin.func(function(self, key) {
+    $loc.__getattr__ = new Sk.builtin.func(function(selfPy, key) {
+      var self = Sk.ffi.remapToJs(selfPy);
       if (key === 'w') {
-        return Sk.builtin.assk$(self.v.coordinate(0), Sk.builtin.nmber.float$);
+        return Sk.builtin.assk$(self[0], Sk.builtin.nmber.float$);
       }
       else if (key === 'x') {
-        return Sk.builtin.assk$(self.v.coordinate(1), Sk.builtin.nmber.float$);
+        return Sk.builtin.assk$(self[1], Sk.builtin.nmber.float$);
       }
       else if (key === 'y') {
-        return Sk.builtin.assk$(self.v.coordinate(2), Sk.builtin.nmber.float$);
+        return Sk.builtin.assk$(self[2], Sk.builtin.nmber.float$);
       }
       else if (key === 'xy') {
-        return Sk.builtin.assk$(self.v.coordinate(3), Sk.builtin.nmber.float$);
+        return Sk.builtin.assk$(self[3], Sk.builtin.nmber.float$);
       }
       else {
         throw new Error(key + " is not a valid " + CONFORMAL_2 + " attribute.");

@@ -4,20 +4,13 @@
  * David Holmes (david.geo.holmes@gmail.com)
  */
 var $builtinmodule = function(name) {
-  /**
-   * Symbolic constants representing the Python classes or functions that are exported by this module.
-   * These are captured here for both consistency and self-documentation.
-   */
-  var EUCLIDEAN_2    = "Euclidean2";    // Multivector of 2-dimensional Euclidean space.
-
-  // The following symbolic constant simulates a zero scalar argument for convenience functions.
-  var ARG_ZERO      = Sk.builtin.assk$(0, Sk.builtin.nmber.float$);
+  var EUCLIDEAN_2    = "Euclidean2";
 
   var mod = {};
 
+  function isBoolean(x)   { return typeof x === 'boolean'; }
   function isNumber(x)    { return typeof x === 'number'; }
   function isString(x)    { return typeof x === 'string'; }
-  function isBoolean(x)   { return typeof x === 'boolean'; }
   function isNull(x)      { return typeof x === 'object' && x === null; }
   function isUndefined(x) { return typeof x === 'undefined'; }
   function isDefined(x)   { return typeof x !== 'undefined'; }
@@ -28,6 +21,50 @@ var $builtinmodule = function(name) {
       Sk.builtin.assk$(x1, Sk.builtin.nmber.float$),
       Sk.builtin.assk$(x2, Sk.builtin.nmber.float$),
       Sk.builtin.assk$(x3, Sk.builtin.nmber.float$));
+  }
+
+  function divide(a00, a01, a10, a11, b00, b01, b10, b11, x) {
+    // r = ~b
+    var r00 = +b00;
+    var r01 = +b01;
+    var r10 = +b10;
+    var r11 = -b11;
+    // m = b * r
+    var m00 = bladeASM.mulE2(b00, b01, b10, b11, r00, r01, r10, r11, 0);
+    var m01 = bladeASM.mulE2(b00, b01, b10, b11, r00, r01, r10, r11, 1);
+    var m10 = bladeASM.mulE2(b00, b01, b10, b11, r00, r01, r10, r11, 2);
+    var m11 = bladeASM.mulE2(b00, b01, b10, b11, r00, r01, r10, r11, 3);
+    // c = cliffordConjugate(m)
+    var c00 = +m00;
+    var c01 = -m01;
+    var c10 = -m10;
+    var c11 = -m11;
+    // s = r * c
+    var s00 = bladeASM.mulE2(r00, r01, r10, r11, c00, c01, c10, c11, 0);
+    var s01 = bladeASM.mulE2(r00, r01, r10, r11, c00, c01, c10, c11, 1);
+    var s10 = bladeASM.mulE2(r00, r01, r10, r11, c00, c01, c10, c11, 2);
+    var s11 = bladeASM.mulE2(r00, r01, r10, r11, c00, c01, c10, c11, 3);
+    // k = b * s
+    var k00 = bladeASM.mulE2(b00, b01, b10, b11, s00, s01, s10, s11, 0);
+    // i = inverse(b)
+    var i00 = s00/k00;
+    var i01 = s01/k00;
+    var i10 = s10/k00;
+    var i11 = s11/k00;
+    // x = a * inverse(b)
+    var x00 = bladeASM.mulE2(a00, a01, a10, a11, i00, i01, i10, i11, 0);
+    var x01 = bladeASM.mulE2(a00, a01, a10, a11, i00, i01, i10, i11, 1);
+    var x10 = bladeASM.mulE2(a00, a01, a10, a11, i00, i01, i10, i11, 2);
+    var x11 = bladeASM.mulE2(a00, a01, a10, a11, i00, i01, i10, i11, 3);
+    if (typeof x !== 'undefined') {
+      x[0] = x00;
+      x[1] = x01;
+      x[2] = x10;
+      x[3] = x11;
+    }
+    else {
+      return remapE2ToPy(x00, x01, x10, x11);
+    }
   }
 
   mod[EUCLIDEAN_2] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
@@ -309,6 +346,38 @@ var $builtinmodule = function(name) {
         return selfPy;
       }
     });
+    $loc.__div__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(b)) {
+        return divide(a[0], a[1], a[2], a[3], b, 0, 0, 0);
+      }
+      else {
+        return divide(a[0], a[1], a[2], a[3], b[0], b[1], b[2], b[3]);
+      }
+    });
+    $loc.__rdiv__ = new Sk.builtin.func(function(rhs, lhs) {
+      lhs = Sk.ffi.remapToJs(lhs);
+      rhs = Sk.ffi.remapToJs(rhs);
+      if (isNumber(lhs)) {
+        return divide(lhs, 0, 0, 0, rhs[0], rhs[1], rhs[2], rhs[3]);
+      }
+      else {
+        throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " / " + JSON.stringify(rhs, null, 2));
+      }
+    });
+    $loc.__idiv__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var self = Sk.ffi.remapToJs(selfPy);
+      var other = Sk.ffi.remapToJs(otherPy);
+      if (isNumber(other)) {
+        divide(self[0], self[1], self[2], self[3], other, 0, 0, 0, self)
+        return selfPy;
+      }
+      else {
+        divide(self[0], self[1], self[2], self[3], other[0], other[1], other[2], other[3], self)
+        return selfPy;
+      }
+    });
     $loc.__xor__ = new Sk.builtin.func(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
@@ -584,16 +653,13 @@ var $builtinmodule = function(name) {
       b = Sk.ffi.remapToJs(b);
       throw new Error("Under construction or");
     });
-    // Unary minus.
     $loc.nu$neg = function() {
       var self = Sk.ffi.remapToJs(this);
       return remapE2ToPy(-self[0], -self[1], -self[2], -self[3]);
     };
-    // Unary plus.
     $loc.nu$pos = function() {
       return this;
     };
-    // Python invert will be used for Geometric Algebra reversion.
     $loc.nu$inv = function() {
       var self = Sk.ffi.remapToJs(this);
       return remapE2ToPy(self[0], self[1], self[2], -self[3]);
@@ -612,11 +678,6 @@ var $builtinmodule = function(name) {
           return remapE2ToPy(0, 0, 0, mv[3]);
         }
       }
-    });
-    $loc.__div__ = new Sk.builtin.func(function(a, b) {
-      a = Sk.ffi.remapToJs(a);
-      b = Sk.ffi.remapToJs(b);
-      throw new Error("Under construction");
     });
     $loc.__repr__ = new Sk.builtin.func(function(mv) {
       mv = Sk.ffi.remapToJs(mv);
@@ -643,18 +704,19 @@ var $builtinmodule = function(name) {
       throw new Error("Under construction ne");
     });
 
-    $loc.__getattr__ = new Sk.builtin.func(function(self, key) {
+    $loc.__getattr__ = new Sk.builtin.func(function(selfPy, key) {
+      var self = Sk.ffi.remapToJs(selfPy);
       if (key === 'w') {
-        return Sk.builtin.assk$(self.v.coordinate(0), Sk.builtin.nmber.float$);
+        return Sk.builtin.assk$(self[0], Sk.builtin.nmber.float$);
       }
       else if (key === 'x') {
-        return Sk.builtin.assk$(self.v.coordinate(1), Sk.builtin.nmber.float$);
+        return Sk.builtin.assk$(self[1], Sk.builtin.nmber.float$);
       }
       else if (key === 'y') {
-        return Sk.builtin.assk$(self.v.coordinate(2), Sk.builtin.nmber.float$);
+        return Sk.builtin.assk$(self[2], Sk.builtin.nmber.float$);
       }
       else if (key === 'xy') {
-        return Sk.builtin.assk$(self.v.coordinate(3), Sk.builtin.nmber.float$);
+        return Sk.builtin.assk$(self[3], Sk.builtin.nmber.float$);
       }
       else {
         throw new Error(key + " is not a valid " + EUCLIDEAN_2 + " attribute.");

@@ -552,7 +552,7 @@ Sk.builtin.nmber.prototype.nb$inplace_sub = Sk.builtin.nmber.prototype.nb$subtra
 
 Sk.builtin.nmber.prototype.nb$inplace_mul = Sk.builtin.nmber.prototype.nb$multiply;
 
-Sk.builtin.nmber.prototype.nb$inplace_divide = Sk.builtin.nmber.prototype.nb$divide;
+Sk.builtin.nmber.prototype.nb$inplace_div = Sk.builtin.nmber.prototype.nb$divide;
 
 Sk.builtin.nmber.prototype.nb$inplace_remainder = Sk.builtin.nmber.prototype.nb$remainder;
 

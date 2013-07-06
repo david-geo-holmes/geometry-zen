@@ -5309,7 +5309,7 @@ Sk.abstr.iboNameToSlotFunc_ = function(obj, name) {
     case "Add":      return obj.nb$inplace_add          ? obj.nb$inplace_add          : obj['__iadd__'];
     case "Sub":      return obj.nb$inplace_sub          ? obj.nb$inplace_sub          : obj['__isub__'];
     case "Mult":     return obj.nb$inplace_mul          ? obj.nb$inplace_mul          : obj['__imul__'];
-    case "Div":      return obj.nb$inplace_divide;
+    case "Div":      return obj.nb$inplace_div          ? obj.nb$inplace_div          : obj['__idiv__'];
     case "FloorDiv": return obj.nb$inplace_floor_divide ? obj.nb$inplace_floor_divide : obj['__ifloordiv__'];
     case "Mod":      return obj.nb$inplace_remainder;
     case "Pow":      return obj.nb$inplace_power;
@@ -9112,7 +9112,7 @@ Sk.builtin.nmber.prototype.nb$inplace_sub = Sk.builtin.nmber.prototype.nb$subtra
 
 Sk.builtin.nmber.prototype.nb$inplace_mul = Sk.builtin.nmber.prototype.nb$multiply;
 
-Sk.builtin.nmber.prototype.nb$inplace_divide = Sk.builtin.nmber.prototype.nb$divide;
+Sk.builtin.nmber.prototype.nb$inplace_div = Sk.builtin.nmber.prototype.nb$divide;
 
 Sk.builtin.nmber.prototype.nb$inplace_remainder = Sk.builtin.nmber.prototype.nb$remainder;
 
@@ -9592,7 +9592,7 @@ Sk.builtin.lng.prototype.nb$inplace_sub = Sk.builtin.lng.prototype.nb$subtract;
 
 Sk.builtin.lng.prototype.nb$inplace_mul = Sk.builtin.lng.prototype.nb$multiply;
 
-Sk.builtin.lng.prototype.nb$inplace_divide = Sk.builtin.lng.prototype.nb$divide;
+Sk.builtin.lng.prototype.nb$inplace_div = Sk.builtin.lng.prototype.nb$divide;
 
 Sk.builtin.lng.prototype.nb$inplace_remainder = Sk.builtin.lng.prototype.nb$remainder;
 

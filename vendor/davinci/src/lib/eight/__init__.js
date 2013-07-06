@@ -117,10 +117,6 @@ var $builtinmodule = function(name) {
   function isDefined(x)   { return typeof x !== 'undefined'; }
   function isNull(x)      { return typeof x === 'object' && x === null; }
 
-  function getClassName(object) {
-    return Object.prototype.toString.call(object).match(/^\[object\s(.*)\]$/)[1];
-  }
-
   function methodAdd(target) {
     if (!isObject(target)) {
       throw new Sk.builtin.AssertionError("target must be an object.");
