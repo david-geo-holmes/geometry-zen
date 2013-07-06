@@ -365,6 +365,138 @@ var $builtinmodule = function(name) {
     return Sk.misceval.callsim(mod[EUCLIDEAN_3], w, x, y, z, xy, yz, zx, xyz);
   }
 
+  function divide(a000, a001, a010, a011, a100, a101, a110, a111, b000, b001, b010, b011, b100, b101, b110, b111, dst) {
+    console.log("a000: " + a000);
+    console.log("a001: " + a001);
+    console.log("a010: " + a010);
+    console.log("a011: " + a011);
+    console.log("a100: " + a100);
+    console.log("a101: " + a101);
+    console.log("a110: " + a110);
+    console.log("a111: " + a111);
+    console.log("b000: " + b000);
+    console.log("b001: " + b001);
+    console.log("b010: " + b010);
+    console.log("b011: " + b011);
+    console.log("b100: " + b100);
+    console.log("b101: " + b101);
+    console.log("b110: " + b110);
+    console.log("b111: " + b111);
+    // WARNING! bladeASM.mulE2 uses w,x,y,z,xy,yz,zx,xyz representation. Notice the ordering and sign change.
+    // TODO: Move everything to the more systematic bitmap representation.
+    // r = ~b
+    var r000 = +b000; // w,   grade 0(+)
+    var r001 = +b001; // x,   grade 1(+)
+    var r010 = +b010; // y,   grade 1(+)
+    var r011 = -b011; // xy,  grade 2(-)
+    var r100 = +b100; // z,   grade 1(+)
+    var r101 = -b101; // yz,  grade 2(-)
+    var r110 = -b110; // yz,  grade 2(-)
+    var r111 = -b111; // xyz, grade 3(-)
+    console.log("r000: " + r000);
+    console.log("r001: " + r001);
+    console.log("r010: " + r010);
+    console.log("r011: " + r011);
+    console.log("r100: " + r100);
+    console.log("r101: " + r101);
+    console.log("r110: " + r110);
+    console.log("r111: " + r111);
+    // m = b * r
+    var m000 =  bladeASM.mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 0);
+    var m001 =  bladeASM.mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 1);
+    var m010 =  bladeASM.mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 2);
+    var m011 =  bladeASM.mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 4);
+    var m100 =  bladeASM.mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 3);
+    var m101 = -bladeASM.mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 6);
+    var m110 =  bladeASM.mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 5);
+    var m111 =  bladeASM.mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 7);
+    console.log("m000: " + m000);
+    console.log("m001: " + m001);
+    console.log("m010: " + m010);
+    console.log("m011: " + m011);
+    console.log("m100: " + m100);
+    console.log("m101: " + m101);
+    console.log("m110: " + m110);
+    console.log("m111: " + m111);
+    // c = cliffordConjugate(m)
+    var c000 = +m000; // w,   grade 0(+)
+    var c001 = -m001; // x,   grade 1(-)
+    var c010 = -m010; // y,   grade 1(-)
+    var c011 = -m011; // xy,  grade 2(-)
+    var c100 = -m100; // z,   grade 1(-)
+    var c101 = -m101; // -zx, grade 2(-)
+    var c110 = -m110; // yz,  grade 2(-)
+    var c111 = +m111; // xyz, grade 3(+)
+    // s = r * c
+    var s000 =  bladeASM.mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 0);
+    var s001 =  bladeASM.mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 1);
+    var s010 =  bladeASM.mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 2);
+    var s011 =  bladeASM.mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 4);
+    var s100 =  bladeASM.mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 3);
+    var s101 = -bladeASM.mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 6);
+    var s110 =  bladeASM.mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 5);
+    var s111 =  bladeASM.mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 7);
+    // k = b * s
+    var k000 =  bladeASM.mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, s000, s001, s010, s100, s011, s110, -s101, s111, 0);
+    // i = inverse(b)
+    var i000 = s000/k000;
+    var i001 = s001/k000;
+    var i010 = s010/k000;
+    var i011 = s011/k000;
+    var i100 = s100/k000;
+    var i101 = s101/k000;
+    var i110 = s110/k000;
+    var i111 = s111/k000;
+    console.log("i000: " + i000);
+    console.log("i001: " + i001);
+    console.log("i010: " + i010);
+    console.log("i011: " + i011);
+    console.log("i100: " + i100);
+    console.log("i101: " + i101);
+    console.log("i110: " + i110);
+    console.log("i111: " + i111);
+    // x = a * inverse(b)
+    var x000 =  bladeASM.mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 0);
+    var x001 =  bladeASM.mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 1);
+    var x010 =  bladeASM.mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 2);
+    var x011 =  bladeASM.mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 4);
+    var x100 =  bladeASM.mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 3);
+    var x101 = -bladeASM.mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 6);
+    var x110 =  bladeASM.mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 5);
+    var x111 =  bladeASM.mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 7);
+    // translate bitmap representation to Cartesian.
+    var w   =  x000;
+    var x   =  x001;
+    var y   =  x010;
+    var z   =  x100;
+    var xy  =  x011;
+    var yz  =  x110;
+    var zx  = -x101;
+    var xyz =  x111;
+    console.log("w:   " + w);
+    console.log("x:   " + x);
+    console.log("y:   " + y);
+    console.log("z:   " + z);
+    console.log("xy:  " + xy);
+    console.log("yz:  " + yz);
+    console.log("zx:  " + zx);
+    console.log("xyz: " + xyz);
+    // return or populate the optional dst parameter.
+    if (typeof dst !== 'undefined') {
+      dst.w   = w;
+      dst.x   = x;
+      dst.y   = y;
+      dst.z   = z;
+      dst.xy  = xy;
+      dst.yz  = yz;
+      dst.zx  = zx;
+      dst.xyz = xyz;
+    }
+    else {
+      return remapE3ToPy(w, x, y, z, xy, yz, zx, xyz);
+    }
+  }
+
   function multiVector3(w, vector, xy, yz, zx, xyz) {
     vector.w = w;
     vector.xy = xy;
@@ -615,6 +747,38 @@ var $builtinmodule = function(name) {
       a.zx  = bladeASM.mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 6);
       a.xyz = bladeASM.mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 7);
       return selfPy;
+    });
+    $loc.__div__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(b)) {
+        return divide(a.w, a.x, a.y, a.xy, a.z, -a.zx, a.yz, a.xyz, b, 0, 0, 0, 0, 0, 0, 0);
+      }
+      else {
+        return divide(a.w, a.x, a.y, a.xy, a.z, -a.zx, a.yz, a.xyz, b.w, b.x, b.y, b.xy, b.z, -b.zx, b.yz, b.xyz);
+      }
+    });
+    $loc.__rdiv__ = new Sk.builtin.func(function(rhs, lhs) {
+      lhs = Sk.ffi.remapToJs(lhs);
+      rhs = Sk.ffi.remapToJs(rhs);
+      if (isNumber(lhs)) {
+        return divide(lhs, 0, 0, 0, 0, 0, 0, 0, rhs.w, rhs.x, rhs.y, rhs.xy, rhs.z, -rhs.zx, rhs.yz, rhs.xyz);
+      }
+      else {
+        throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " / " + JSON.stringify(rhs, null, 2));
+      }
+    });
+    $loc.__idiv__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var a = Sk.ffi.remapToJs(selfPy);
+      var b = Sk.ffi.remapToJs(otherPy);
+      if (isNumber(b)) {
+        divide(a.w, a.x, a.y, a.xy, a.z, -a.zx, a.yz, a.xyz, b, 0, 0, 0, 0, 0, 0, 0, a);
+        return selfPy;
+      }
+      else {
+        divide(a.w, a.x, a.y, a.xy, a.z, -a.zx, a.yz, a.xyz, b.w, b.x, b.y, b.xy, b.z, -b.zx, b.yz, b.xyz, a);
+        return selfPy;
+      }
     });
     $loc.__xor__ = new Sk.builtin.func(function(a, b) {
       a = Sk.ffi.remapToJs(a);

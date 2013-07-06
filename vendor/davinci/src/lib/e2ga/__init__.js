@@ -370,11 +370,11 @@ var $builtinmodule = function(name) {
       var self = Sk.ffi.remapToJs(selfPy);
       var other = Sk.ffi.remapToJs(otherPy);
       if (isNumber(other)) {
-        divide(self[0], self[1], self[2], self[3], other, 0, 0, 0, self)
+        divide(self[0], self[1], self[2], self[3], other, 0, 0, 0, self);
         return selfPy;
       }
       else {
-        divide(self[0], self[1], self[2], self[3], other[0], other[1], other[2], other[3], self)
+        divide(self[0], self[1], self[2], self[3], other[0], other[1], other[2], other[3], self);
         return selfPy;
       }
     });
