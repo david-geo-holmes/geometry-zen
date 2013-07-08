@@ -17,6 +17,7 @@ var $builtinmodule = function(name) {
   var PSEUDOSCALAR_3        = "Pseudoscalar3";
 
   var SCENE                 = "Scene";
+  var CANVAS_RENDERER       = "CanvasRenderer";
   var WEBGL_RENDERER        = "WebGLRenderer";
   var COLOR                 = "Color";
   var ORTHOGRAPHIC_CAMERA   = "OrthographicCamera";
@@ -47,6 +48,7 @@ var $builtinmodule = function(name) {
   var OCTAHEDRON_GEOMETRY   = "OctahedronGeometry";
   var PLANE_GEOMETRY        = "PlaneGeometry";
   var SPHERE_GEOMETRY       = "SphereGeometry";
+  var TEXT_GEOMETRY         = "TextGeometry";
   var TETRAHEDRON_GEOMETRY  = "TetrahedronGeometry";
   var TORUS_GEOMETRY        = "TorusGeometry";
 
@@ -60,6 +62,7 @@ var $builtinmodule = function(name) {
   var PROP_LEFT                = "left";
   var PROP_MASS                = "mass";
   var PROP_MATERIAL            = "material";
+  var PROP_MATRIX_AUTO_UPDATE  = "matrixAutoUpdate";
   var PROP_NAME                = "name";
   var PROP_NEAR                = "near";
   var PROP_NEEDS_UPDATE        = "needsUpdate";
@@ -98,6 +101,7 @@ var $builtinmodule = function(name) {
   var METHOD_SET_COMPONENT     = "setComponent";
   var METHOD_SET               = "set";
   var METHOD_SET_GEOMETRY      = "setGeometry";
+  var METHOD_UPDATE_MATRIX     = "updateMatrix";
 
   var METHOD_ADD               = "add";
   var METHOD_CLONE             = "clone";
@@ -1416,7 +1420,191 @@ var $builtinmodule = function(name) {
     });
   }, SCENE, []);
 
-   mod[WEBGL_RENDERER] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
+  mod[CANVAS_RENDERER] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
+    var PROP_AUTO_CLEAR   = "autoClear";
+    var PROP_CLEAR_COLOR  = "clearColor";
+    var PROP_DOM_ELEMENT  = "domElement";
+    var PROP_GAMMA_INPUT  = "gammaInput";
+    var PROP_GAMMA_OUTPUT = "gammaOutput";
+    var PROP_SORT_OBJECTS = "sortObjects";
+    $loc.__init__ = new Sk.builtin.func(function(self, parameters) {
+      self.tp$name = CANVAS_RENDERER;
+      parameters = Sk.ffi.remapToJs(parameters);
+      self.v = new THREE[CANVAS_RENDERER](parameters);
+    });
+    $loc.setSize = new Sk.builtin.func(function(self, width, height) {
+      self.v.setSize(Sk.builtin.asnum$(width), Sk.builtin.asnum$(height));
+    });
+    $loc.__getattr__ = new Sk.builtin.func(function(self, name) {
+      var METHOD_RENDER = "render";
+      var METHOD_GET_CLEAR_COLOR = "getClearColor";
+      var METHOD_SET_CLEAR_COLOR = "setClearColor";
+      var METHOD_SET_SIZE        = "setSize";
+      var renderer  = Sk.ffi.remapToJs(self);
+      switch(name) {
+        case PROP_AUTO_CLEAR: {
+          return renderer[PROP_AUTO_CLEAR];
+        }
+        case PROP_GAMMA_INPUT: {
+          return renderer[PROP_GAMMA_INPUT];
+        }
+        case PROP_GAMMA_OUTPUT: {
+          return renderer[PROP_GAMMA_OUTPUT];
+        }
+        case PROP_SORT_OBJECTS: {
+          return renderer[PROP_SORT_OBJECTS];
+        }
+        case PROP_DOM_ELEMENT: {
+          // TODO: I think duck-typing means that this will work as long as we don't
+          // try to do anything more ambitious.
+          return {v: renderer.domElement};
+        }
+        case METHOD_RENDER: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_RENDER;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, scene, camera) {
+              scene  = Sk.ffi.remapToJs(scene);
+              camera = Sk.ffi.remapToJs(camera);
+              renderer.render(scene, camera);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_RENDER);
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_RENDER);
+            })
+          }, METHOD_RENDER, []));
+        }
+        case METHOD_GET_CLEAR_COLOR: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_GET_CLEAR_COLOR;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self) {
+              return Sk.misceval.callsim(mod[COLOR], Sk.ffi.referenceToPy(renderer.getClearColor()));
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_GET_CLEAR_COLOR);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_GET_CLEAR_COLOR);
+            });
+          }, METHOD_GET_CLEAR_COLOR, []));
+        }
+        case METHOD_SET_CLEAR_COLOR: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_SET_CLEAR_COLOR;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, color, alpha) {
+              color  = Sk.ffi.remapToJs(color);
+              alpha = Sk.ffi.remapToJs(alpha);
+              renderer.setClearColor(color, alpha);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET_CLEAR_COLOR);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET_CLEAR_COLOR);
+            });
+          }, METHOD_SET_CLEAR_COLOR, []));
+        }
+        case METHOD_SET_SIZE: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_SET_SIZE;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, width, height, updateStyle) {
+              width  = Sk.ffi.remapToJs(width);
+              height = Sk.ffi.remapToJs(height);
+              updateStyle = Sk.ffi.remapToJs(updateStyle);
+              renderer.setSize(width, height, updateStyle);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET_SIZE);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET_SIZE);
+            });
+          }, METHOD_SET_SIZE, []));
+        }
+        default: {
+          // The framework will raise an AttributeError exception.
+          return /* undefined */;
+        }
+      }
+    });
+    $loc.__setattr__ = new Sk.builtin.func(function(self, name, value) {
+      var renderer  = Sk.ffi.remapToJs(self);
+      value = Sk.ffi.remapToJs(value);
+      switch(name) {
+        case PROP_AUTO_CLEAR: {
+          if (isBoolean(value)) {
+            renderer[PROP_AUTO_CLEAR] = value;
+          }
+          else {
+            throw new Sk.builtin.TypeError("'" + PROP_AUTO_CLEAR + "' attribute must be a <type 'bool'>.");
+          }
+        }
+        break;
+        case PROP_GAMMA_INPUT: {
+          if (isBoolean(value)) {
+            renderer[PROP_GAMMA_INPUT] = value;
+          }
+          else {
+            throw new Sk.builtin.TypeError("'" + PROP_GAMMA_INPUT + "' attribute must be a <type 'bool'>.");
+          }
+        }
+        break;
+        case PROP_GAMMA_OUTPUT: {
+          if (isBoolean(value)) {
+            renderer[PROP_GAMMA_OUTPUT] = value;
+          }
+          else {
+            throw new Sk.builtin.TypeError("'" + PROP_GAMMA_OUTPUT + "' attribute must be a <type 'bool'>.");
+          }
+        }
+        break;
+        case PROP_SORT_OBJECTS: {
+          if (isBoolean(value)) {
+            renderer[PROP_SORT_OBJECTS] = value;
+          }
+          else {
+            throw new Sk.builtin.TypeError("'" + PROP_SORT_OBJECTS + "' attribute must be a <type 'bool'>.");
+          }
+        }
+        break;
+        case "size": {
+          var width  = Sk.builtin.asnum$(value[0]);
+          var height = Sk.builtin.asnum$(value[1]);
+          renderer.setSize(width, height);
+        }
+        break;
+        default: {
+          throw new Error(name + " is not an attribute of " + CANVAS_RENDERER);
+        }
+      }
+    });
+    $loc.__str__ = new Sk.builtin.func(function(self) {
+      var renderer = self.v;
+      var args = {};
+      args[PROP_AUTO_CLEAR] = renderer[PROP_AUTO_CLEAR];
+      args[PROP_GAMMA_INPUT] = renderer[PROP_GAMMA_INPUT];
+      args[PROP_GAMMA_OUTPUT] = renderer[PROP_GAMMA_OUTPUT];
+      return new Sk.builtin.str(CANVAS_RENDERER + "(" + JSON.stringify(args) + ")");
+    });
+    $loc.__repr__ = new Sk.builtin.func(function(self) {
+      var renderer = self.v;
+      var autoClear = renderer[PROP_AUTO_CLEAR];
+      // Note: The WebGLRenderer takes only one argument, but it is a dictionary.
+      var args = [{"autoClear": autoClear}];
+      return new Sk.builtin.str(CANVAS_RENDERER + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
+    });
+  }, CANVAS_RENDERER, []);
+
+  mod[WEBGL_RENDERER] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
     var PROP_AUTO_CLEAR   = "autoClear";
     var PROP_CLEAR_COLOR  = "clearColor";
     var PROP_DOM_ELEMENT  = "domElement";
@@ -2507,6 +2695,37 @@ var $builtinmodule = function(name) {
     });
   }, TETRAHEDRON_GEOMETRY, []);
 
+   mod[TEXT_GEOMETRY] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
+    $loc.__init__ = new Sk.builtin.func(function(self, text, parameters) {
+      text = Sk.ffi.remapToJs(text);
+      parameters = Sk.ffi.remapToJs(parameters);
+      self.v = new THREE[TEXT_GEOMETRY](text, parameters);
+    });
+    $loc.__getattr__ = new Sk.builtin.func(function(self, name) {
+      switch(name) {
+      }
+    });
+    $loc.__setattr__ = new Sk.builtin.func(function(geometryPy, name, valuePy) {
+      var geometry = Sk.ffi.remapToJs(geometryPy);
+      var value = Sk.ffi.remapToJs(valuePy);
+      switch(name) {
+        default: {
+          throw new Error(name + " is not an attribute of " + TEXT_GEOMETRY);
+        }
+      }
+    });
+    $loc.__str__ = new Sk.builtin.func(function(self) {
+      var text = Sk.ffi.remapToJs(self);
+      var args = {};
+      return new Sk.builtin.str(TEXT_GEOMETRY + "(" + JSON.stringify(args) + ")");
+    });
+    $loc.__repr__ = new Sk.builtin.func(function(self) {
+      var text = Sk.ffi.remapToJs(self);
+      var args = [];
+      return new Sk.builtin.str(TEXT_GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
+    });
+  }, TEXT_GEOMETRY, []);
+
    mod[TORUS_GEOMETRY] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
     var PROP_TUBE             = "tube";
     var PROP_RADIAL_SEGMENTS  = "radialSegments";
@@ -2627,6 +2846,21 @@ var $builtinmodule = function(name) {
     $loc.__getattr__ = new Sk.builtin.func(function(objPy, name) {
       var obj = Sk.ffi.remapToJs(objPy);
       switch(name) {
+        case PROP_POSITION: {
+          return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(obj[PROP_POSITION]));
+        }
+        case PROP_ROTATION: {
+          return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(obj[PROP_ROTATION]));
+        }
+        case PROP_EULER_ORDER: {
+          return new Sk.builtin.str(obj[PROP_EULER_ORDER]);
+        }
+        case PROP_SCALE: {
+          return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(obj[PROP_SCALE]));
+        }
+        case PROP_UP: {
+          return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(obj[PROP_UP]));
+        }
         case METHOD_ADD: {
           return methodAdd(obj);
         }
@@ -2639,6 +2873,31 @@ var $builtinmodule = function(name) {
       obj = Sk.ffi.remapToJs(obj);
       value = Sk.ffi.remapToJs(value);
       switch(name) {
+        case PROP_POSITION: {
+          obj[PROP_POSITION] = value;
+        }
+        break;
+        case PROP_ROTATION: {
+          obj[PROP_ROTATION] = value;
+        }
+        break;
+        case PROP_EULER_ORDER: {
+          if (isString(value)) {
+            obj[PROP_EULER_ORDER] = value;
+          }
+          else {
+            throw new Error(name + " must be a string");
+          }
+        }
+        break;
+        case PROP_SCALE: {
+          obj[PROP_SCALE] = value;
+        }
+        break;
+        case PROP_UP: {
+          obj[PROP_UP] = value;
+        }
+        break;
         default: {
           throw new Error(name + " is not an settable attribute of " + OBJECT_3D);
         }
@@ -3114,15 +3373,18 @@ var $builtinmodule = function(name) {
         case PROP_ID: {
           return Sk.builtin.nmber(mesh[PROP_ID], Sk.builtin.nmber.int$);
         }
-        case PROP_NAME: {
-          return new Sk.builtin.str(mesh[PROP_NAME]);
-        }
         case PROP_GEOMETRY: {
           var geometry = mesh[PROP_GEOMETRY];
           return Sk.misceval.callsim(mod[GEOMETRY], Sk.ffi.referenceToPy(mesh[PROP_GEOMETRY]));
         }
         case PROP_MASS: {
           return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(mesh[PROP_MASS]));
+        }
+        case PROP_MATRIX_AUTO_UPDATE: {
+          return mesh[PROP_MATRIX_AUTO_UPDATE];
+        }
+        case PROP_NAME: {
+          return new Sk.builtin.str(mesh[PROP_NAME]);
         }
         case PROP_OVERDRAW: {
           if (isBoolean(mesh[PROP_OVERDRAW])) {
@@ -3187,6 +3449,22 @@ var $builtinmodule = function(name) {
             })
           }, METHOD_SET_GEOMETRY, []));
         }
+        case METHOD_UPDATE_MATRIX: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_UPDATE_MATRIX;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self) {
+              mesh[METHOD_UPDATE_MATRIX]();
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_UPDATE_MATRIX)
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_UPDATE_MATRIX)
+            })
+          }, METHOD_UPDATE_MATRIX, []));
+        }
       }
     });
     $loc.__setattr__ = new Sk.builtin.func(function(mesh, name, value) {
@@ -3199,6 +3477,15 @@ var $builtinmodule = function(name) {
           }
           else {
             mesh[PROP_MASS] = value;
+          }
+        }
+        break;
+        case PROP_MATRIX_AUTO_UPDATE: {
+          if (isBoolean(value)) {
+            mesh[PROP_MATRIX_AUTO_UPDATE] = value;
+          }
+          else {
+            throw new Error(PROP_MATRIX_AUTO_UPDATE + " must be Boolean");
           }
         }
         break;

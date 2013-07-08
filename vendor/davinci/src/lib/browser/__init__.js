@@ -15,6 +15,8 @@ var $builtinmodule = function(name) {
   
   var PROP_ANIMATION_TIME            = "animationTime";
   var PROP_BODY                      = "body";
+  var PROP_CLIENT_X                  = "clientX";
+  var PROP_CLIENT_Y                  = "clientY";
   var PROP_DEVICE_PIXEL_RATIO        = "devicePixelRatio";
   var PROP_DOCUMENT                  = "document";
   var PROP_FILL_STYLE                = "fillStyle";
@@ -812,6 +814,12 @@ var $builtinmodule = function(name) {
                   });
                   $loc.__getattr__ = new Sk.builtin.func(function(self, name) {
                     switch(name) {
+                      case PROP_CLIENT_X: {
+                        return Sk.builtin.assk$(event[PROP_CLIENT_X], Sk.builtin.nmber.float$);
+                      }
+                      case PROP_CLIENT_Y: {
+                        return Sk.builtin.assk$(event[PROP_CLIENT_Y], Sk.builtin.nmber.float$);
+                      }
                       case PROP_KEY_CODE: {
                         return Sk.builtin.assk$(event[PROP_KEY_CODE], Sk.builtin.nmber.float$);
                       }
