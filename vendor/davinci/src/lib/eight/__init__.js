@@ -16,6 +16,8 @@ var $builtinmodule = function(name) {
   var BIVECTOR_3            = "Bivector3";
   var PSEUDOSCALAR_3        = "Pseudoscalar3";
 
+  var QUATERNION            = "Quaternion";
+
   var SCENE                 = "Scene";
   var CANVAS_RENDERER       = "CanvasRenderer";
   var WEBGL_RENDERER        = "WebGLRenderer";
@@ -86,28 +88,34 @@ var $builtinmodule = function(name) {
   var PROP_WIREFRAME           = "wireframe";
   var PROP_WIREFRAME_LINEWIDTH = "wireframeLinewidth";
 
-  var PROP_W                   = "w";
-  var PROP_X                   = "x";
-  var PROP_Y                   = "y";
-  var PROP_Z                   = "z";
-  var PROP_XY                  = "xy";
-  var PROP_YZ                  = "yz";
-  var PROP_ZX                  = "zx";
-  var PROP_XYZ                 = "xyz";
-  var METHOD_SET_X             = "setX";
-  var METHOD_SET_Y             = "setY";
-  var METHOD_SET_Z             = "setZ";
-  var METHOD_GET_COMPONENT     = "getComponent";
-  var METHOD_SET_COMPONENT     = "setComponent";
-  var METHOD_SET               = "set";
-  var METHOD_SET_GEOMETRY      = "setGeometry";
-  var METHOD_UPDATE_MATRIX     = "updateMatrix";
+  var PROP_W                     = "w";
+  var PROP_X                     = "x";
+  var PROP_Y                     = "y";
+  var PROP_Z                     = "z";
+  var PROP_XY                    = "xy";
+  var PROP_YZ                    = "yz";
+  var PROP_ZX                    = "zx";
+  var PROP_XYZ                   = "xyz";
+  var METHOD_SET_X               = "setX";
+  var METHOD_SET_Y               = "setY";
+  var METHOD_SET_Z               = "setZ";
+  var METHOD_GET_COMPONENT       = "getComponent";
+  var METHOD_SET_COMPONENT       = "setComponent";
+  var METHOD_SET                 = "set";
+  var METHOD_SET_FROM_AXIS_ANGLE = "setFromAxisAngle";
+  var METHOD_SET_FROM_EULER      = "setFromEuler";
+  var METHOD_SET_GEOMETRY        = "setGeometry";
+  var METHOD_UPDATE_MATRIX       = "updateMatrix";
 
   var METHOD_ADD               = "add";
   var METHOD_CLONE             = "clone";
+  var METHOD_CONJUGATE         = "conjugate";
+  var METHOD_COPY              = "copy";
   var METHOD_CROSS             = "cross";
   var METHOD_DOT               = "dot";
+  var METHOD_INVERSE           = "inverse";
   var METHOD_LENGTH            = "length";
+  var METHOD_LENGTH_SQ         = "lengthSq";
   var METHOD_LOOK_AT           = "lookAt";
   var METHOD_NORMALIZE         = "normalize";
   var METHOD_REMOVE            = "remove";
@@ -371,6 +379,14 @@ var $builtinmodule = function(name) {
     zx = Sk.builtin.assk$(zx, Sk.builtin.nmber.float$);
     xyz = Sk.builtin.assk$(xyz, Sk.builtin.nmber.float$);
     return Sk.misceval.callsim(mod[EUCLIDEAN_3], w, x, y, z, xy, yz, zx, xyz);
+  }
+
+  function wxyzToPy(w, x, y, z) {
+    var wPy = Sk.builtin.assk$(w, Sk.builtin.nmber.float$);
+    var xPy = Sk.builtin.assk$(x, Sk.builtin.nmber.float$);
+    var yPy = Sk.builtin.assk$(y, Sk.builtin.nmber.float$);
+    var zPy = Sk.builtin.assk$(z, Sk.builtin.nmber.float$);
+    return Sk.misceval.callsim(mod[QUATERNION], xPy, yPy, zPy, wPy);
   }
 
   function divide(a000, a001, a010, a011, a100, a101, a110, a111, b000, b001, b010, b011, b100, b101, b110, b111, dst) {
@@ -1301,6 +1317,398 @@ var $builtinmodule = function(name) {
       }
     });
   }, EUCLIDEAN_3, []);
+
+  mod[QUATERNION] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
+    $loc.__init__ = new Sk.builtin.func(function(self, x, y, z, w) {
+      x = Sk.ffi.remapToJs(x);
+      y = Sk.ffi.remapToJs(y);
+      z = Sk.ffi.remapToJs(z);
+      w = Sk.ffi.remapToJs(w);
+      if (isObject(x) && isUndefined(y) && isUndefined(z) && isUndefined(w)) {
+        self.v = x;
+      }
+      else {
+        self.v = new THREE[QUATERNION](x, y, z, w);
+      }
+      self.tp$name = QUATERNION;
+    });
+    $loc.__add__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(b)) {
+        return wxyzToPy(a.w + b, a.x, a.y, a.z);
+      }
+      else {
+        var w = a.w + b.w;
+        var x = a.x + b.x;
+        var y = a.y + b.y;
+        var z = a.z + b.z;
+        return wxyzToPy(w, x, y, z);
+      }
+    });
+    $loc.__radd__ = new Sk.builtin.func(function(b, a) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(a)) {
+        return wxyzToPy(a + b.w, b.x, b.y, b.z);
+      }
+      else {
+        throw new Sk.builtin.AssertionError();
+      }
+    });
+    $loc.__iadd__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var self = Sk.ffi.remapToJs(selfPy);
+      var other = Sk.ffi.remapToJs(otherPy);
+      if (isNumber(other)) {
+        self.w += other;
+      }
+      else {
+        self.w += other.w;
+        self.x += other.x;
+        self.y += other.y;
+        self.z += other.z;
+      }
+      return selfPy;
+    });
+    $loc.__sub__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(b)) {
+        return wxyzToPy(a.w - b, a.x, a.y, a.z);
+      }
+      else {
+        var w = a.w - b.w;
+        var x = a.x - b.x;
+        var y = a.y - b.y;
+        var z = a.z - b.z;
+        return wxyzToPy(w, x, y, z);
+      }
+    });
+    $loc.__rsub__ = new Sk.builtin.func(function(b, a) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(a)) {
+        return wxyzToPy(a - b.w, -b.x, -b.y, -b.z);
+      }
+      else {
+        throw new Sk.builtin.AssertionError();
+      }
+    });
+    $loc.__isub__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var self = Sk.ffi.remapToJs(selfPy);
+      var other = Sk.ffi.remapToJs(otherPy);
+      if (isNumber(other)) {
+        self.w -= other;
+      }
+      else {
+        self.w -= other.w;
+        self.x -= other.x;
+        self.y -= other.y;
+        self.z -= other.z;
+      }
+      return selfPy;
+    });
+    $loc.__mul__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(b)) {
+        return wxyzToPy(a.w * b, a.x * b, a.y * b, a.z * b);
+      }
+      else {
+        var ab = new THREE[QUATERNION]().multiplyQuaternions(a, b);
+        return Sk.misceval.callsim(mod[QUATERNION], Sk.ffi.referenceToPy(ab));
+      }
+    });
+    $loc.__rmul__ = new Sk.builtin.func(function(b, a) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(a)) {
+        return quaternionToPy(a * b.w, a * b.x, a * b.y, a * b.z);
+      }
+      else {
+        throw new Sk.builtin.AssertionError();
+      }
+    });
+    $loc.__imul__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var a = Sk.ffi.remapToJs(selfPy);
+      var b = Sk.ffi.remapToJs(otherPy);
+      var a0 = a.w;
+      var a1 = a.x;
+      var a2 = a.y;
+      var a3 = a.z;
+      var b0, b1, b2, b3, b4, b5, b6, b7;
+      if (isNumber(b)) {
+        a.w *= b;
+        a.x *= b;
+        a.y *= b;
+        a.z *= b;
+      }
+      else {
+        a.multiply(b);
+      }
+      return selfPy;
+    });
+    $loc.nu$pos = function() {
+      return this;
+    };
+    $loc.nu$neg = function() {
+      var mv = Sk.ffi.remapToJs(this);
+      return quaternionToPy(-mv.x, -mv.y, -mv.z, -mv.w);
+    };
+    $loc.nu$inv = function() {
+      var mv = Sk.ffi.remapToJs(this);
+      return remapE3ToPy(mv.w, mv.x, mv.y, mv.z, -mv.xy, -mv.yz, -mv.zx, -mv.xyz);
+    };
+    $loc.__eq__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      return a.w === b.w && a.x === b.x && a.y === b.y && a.z === b.z;
+    });
+    $loc.__ne__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      return a.w !== b.w || a.x !== b.x || a.y !== b.y || a.z !== b.z;
+    });
+    $loc.__getattr__ = new Sk.builtin.func(function(quaternionPy, name) {
+      var quaternion = Sk.ffi.remapToJs(quaternionPy);
+      switch(name) {
+        case PROP_X: {
+          return Sk.builtin.assk$(quaternion.x, Sk.builtin.nmber.float$);
+        }
+        case PROP_Y: {
+          return Sk.builtin.assk$(quaternion.y, Sk.builtin.nmber.float$);
+        }
+        case PROP_Z: {
+          return Sk.builtin.assk$(quaternion.z, Sk.builtin.nmber.float$);
+        }
+        case PROP_W: {
+          return Sk.builtin.assk$(quaternion.w, Sk.builtin.nmber.float$);
+        }
+        case METHOD_COPY: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_COPY;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, qPy) {
+              var q  = Sk.ffi.remapToJs(qPy);
+              quaternion.x = q.x;
+              quaternion.y = q.y;
+              quaternion.z = q.z;
+              quaternion.w = q.w;
+              return quaternionPy;
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_COPY);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_COPY);
+            });
+          }, METHOD_COPY, []));
+        }
+        case METHOD_SET_FROM_AXIS_ANGLE: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_SET_FROM_AXIS_ANGLE;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, axisPy, anglePy) {
+              var axis = Sk.ffi.remapToJs(axisPy);
+              var angle = Sk.ffi.remapToJs(anglePy);
+              quaternion[METHOD_SET_FROM_AXIS_ANGLE](axis, angle);
+              return quaternionPy;
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET_FROM_AXIS_ANGLE);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET_FROM_AXIS_ANGLE);
+            });
+          }, METHOD_SET_FROM_AXIS_ANGLE, []));
+        }
+        case METHOD_SET_FROM_EULER: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_SET_FROM_EULER;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, vectorPy, orderPy) {
+              var vector = Sk.ffi.remapToJs(vectorPy);
+              var order = Sk.ffi.remapToJs(orderPy);
+              quaternion[METHOD_SET_FROM_EULER](vector, order);
+              return quaternionPy;
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET_FROM_EULER);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET_FROM_EULER);
+            });
+          }, METHOD_SET_FROM_EULER, []));
+        }
+        case METHOD_SET: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_SET;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, x, y, z, w) {
+              quaternion.x = Sk.ffi.remapToJs(x);
+              quaternion.y = Sk.ffi.remapToJs(y);
+              quaternion.z = Sk.ffi.remapToJs(z);
+              quaternion.w = Sk.ffi.remapToJs(w);
+              return quaternionPy;
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET);
+            });
+          }, METHOD_SET, []));
+        }
+        case METHOD_CLONE: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_CLONE;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self) {
+              return wxyzToPy(quaternion.w, quaternion.x, quaternion.y, quaternion.z);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_CLONE);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_CLONE);
+            });
+          }, METHOD_CLONE, []));
+        }
+        case METHOD_CONJUGATE: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_CONJUGATE;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self) {
+              quaternion[METHOD_CONJUGATE]();
+              return quaternionPy;
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_CONJUGATE);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_CONJUGATE);
+            });
+          }, METHOD_CONJUGATE, []));
+        }
+        case METHOD_INVERSE: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_INVERSE;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self) {
+              var k = 1.0 / quaternion.lengthSq();
+              quaternion[METHOD_CONJUGATE]();
+              quaternion.w *= k;
+              quaternion.x *= k;
+              quaternion.y *= k;
+              quaternion.z *= k;
+              return quaternionPy;
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_INVERSE);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_INVERSE);
+            });
+          }, METHOD_INVERSE, []));
+        }
+        case METHOD_LENGTH: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_LENGTH;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self) {
+              return Sk.builtin.assk$(quaternion[METHOD_LENGTH](), Sk.builtin.nmber.float$);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_LENGTH);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_LENGTH);
+            });
+          }, METHOD_LENGTH, []));
+        }
+        case METHOD_LENGTH_SQ: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_LENGTH_SQ;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self) {
+              return Sk.builtin.assk$(quaternion[METHOD_LENGTH_SQ](), Sk.builtin.nmber.float$);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_LENGTH_SQ);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_LENGTH_SQ);
+            });
+          }, METHOD_LENGTH_SQ, []));
+        }
+        case METHOD_NORMALIZE: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_NORMALIZE;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self) {
+              quaternion[METHOD_NORMALIZE]();
+              return quaternionPy;
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_NORMALIZE);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_NORMALIZE);
+            });
+          }, METHOD_NORMALIZE, []));
+        }
+      }
+    });
+    $loc.__setattr__ = new Sk.builtin.func(function(quaternionPy, name, valuePy) {
+      var quaternion = Sk.ffi.remapToJs(quaternionPy);
+      var value = Sk.ffi.remapToJs(valuePy);
+      switch(name) {
+        case PROP_X: {
+          quaternion.x = value;
+        }
+        break;
+        case PROP_Y: {
+          quaternion.y = value;
+        }
+        break;
+        case PROP_Z: {
+          quaternion.z = value;
+        }
+        break;
+        case PROP_W: {
+          quaternion.w = value;
+        }
+        break;
+        default: {
+          throw new Sk.builtin.AttributeError(name + " is not an attribute of " + QUATERNION);
+        }
+      }
+    });
+    $loc.__repr__ = new Sk.builtin.func(function(quaternionPy) {
+      var quaternion = Sk.ffi.remapToJs(quaternionPy);
+      var args = [quaternion.x, quaternion.y, quaternion.z, quaternion.w];
+      return new Sk.builtin.str(QUATERNION + "(" + args.join(", ") + ")");
+    });
+    $loc.__str__ = new Sk.builtin.func(function(quaternionPy) {
+      var quaternion = Sk.ffi.remapToJs(quaternionPy);
+      if (isDefined(quaternion)) {
+        return new Sk.builtin.str(bladeSTR.stringFromCoordinates([quaternion.w, quaternion.x, quaternion.y, quaternion.z], ["1", "i", "j", "k"]));
+      }
+      else {
+        return new Sk.builtin.str("<type '" + QUATERNION + "'>");
+      }
+    });
+  }, QUATERNION, []);
 
   // Erik Moller's requestAnimationFrame for smart(er) animating
   // Minor formatting changes and use of braces for if conditions.
