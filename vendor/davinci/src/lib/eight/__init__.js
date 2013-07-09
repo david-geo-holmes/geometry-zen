@@ -71,6 +71,7 @@ var $builtinmodule = function(name) {
   var PROP_OPACITY             = "opacity";
   var PROP_OVERDRAW            = "overdraw";
   var PROP_POSITION            = "position";
+  var PROP_QUATERNION          = "quaternion";
   var PROP_RADIUS              = "radius";
   var PROP_RIGHT               = "right";
   var PROP_ROTATION            = "rotation";
@@ -82,6 +83,7 @@ var $builtinmodule = function(name) {
   var PROP_TRANSPARENT         = "transparent";
   var PROP_TYPE                = "type";
   var PROP_UP                  = "up";
+  var PROP_USE_QUATERNION      = "useQuaternion";
   var PROP_VELOCITY            = "velocity";
   var PROP_VERTICES            = "vertices";
   var PROP_VISIBLE             = "visible";
@@ -1752,6 +1754,9 @@ var $builtinmodule = function(name) {
         case PROP_POSITION: {
           return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(scene[PROP_POSITION]));
         }
+        case PROP_QUATERNION: {
+          return Sk.misceval.callsim(mod[QUATERNION], Sk.ffi.referenceToPy(scene[PROP_QUATERNION]));
+        }
         case PROP_ROTATION: {
           return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(scene[PROP_ROTATION]));
         }
@@ -1763,6 +1768,9 @@ var $builtinmodule = function(name) {
         }
         case PROP_UP: {
           return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(scene[PROP_UP]));
+        }
+        case PROP_USE_QUATERNION: {
+          return scene[PROP_USE_QUATERNION];
         }
         case METHOD_LOOK_AT: {
           return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
@@ -1797,6 +1805,10 @@ var $builtinmodule = function(name) {
           scene[PROP_POSITION] = value;
         }
         break;
+        case PROP_QUATERNION: {
+          scene[PROP_QUATERNION] = value;
+        }
+        break;
         case PROP_ROTATION: {
           scene[PROP_ROTATION] = value;
         }
@@ -1816,6 +1828,10 @@ var $builtinmodule = function(name) {
         break;
         case PROP_UP: {
           scene[PROP_UP] = value;
+        }
+        break;
+        case PROP_USE_QUATERNION: {
+          scene[PROP_USE_QUATERNION] = value;
         }
         break;
         default: {
@@ -2311,6 +2327,9 @@ var $builtinmodule = function(name) {
         case PROP_POSITION: {
           return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(camera[PROP_POSITION]));
         }
+        case PROP_QUATERNION: {
+          return Sk.misceval.callsim(mod[QUATERNION], Sk.ffi.referenceToPy(camera[PROP_QUATERNION]));
+        }
         case PROP_ROTATION: {
           return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(camera[PROP_ROTATION]));
         }
@@ -2322,6 +2341,9 @@ var $builtinmodule = function(name) {
         }
         case PROP_UP: {
           return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(camera[PROP_UP]));
+        }
+        case PROP_USE_QUATERNION: {
+          return camera[PROP_USE_QUATERNION];
         }
         case METHOD_LOOK_AT: {
           return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
@@ -2378,6 +2400,10 @@ var $builtinmodule = function(name) {
           camera[PROP_POSITION] = value;
         }
         break;
+        case PROP_QUATERNION: {
+          camera[PROP_QUATERNION] = value;
+        }
+        break;
         case PROP_ROTATION: {
           camera[PROP_ROTATION] = value;
         }
@@ -2399,6 +2425,10 @@ var $builtinmodule = function(name) {
           camera[PROP_UP] = value;
         }
         break;
+        case PROP_USE_QUATERNION: {
+          camera[PROP_USE_QUATERNION] = value;
+        }
+        break;
         default: {
           throw new Sk.builtin.AssertionError(name + " is not an attribute of " + PERSPECTIVE_CAMERA);
         }
@@ -2410,7 +2440,6 @@ var $builtinmodule = function(name) {
   }, PERSPECTIVE_CAMERA, []);
 
   mod[ORTHOGRAPHIC_CAMERA] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
-    var PROP_UP       = "up";
     $loc.__init__ = new Sk.builtin.func(function(self, leftPy, rightPy, topPy, bottomPy, nearPy, farPy) {
       var left = Sk.builtin.asnum$(leftPy)
       var right = Sk.builtin.asnum$(rightPy)
@@ -2432,6 +2461,9 @@ var $builtinmodule = function(name) {
         case PROP_POSITION: {
           return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(camera[PROP_POSITION]));
         }
+        case PROP_QUATERNION: {
+          return Sk.misceval.callsim(mod[QUATERNION], Sk.ffi.referenceToPy(camera[PROP_QUATERNION]));
+        }
         case PROP_ROTATION: {
           return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(camera[PROP_ROTATION]));
         }
@@ -2443,6 +2475,9 @@ var $builtinmodule = function(name) {
         }
         case PROP_UP: {
           return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(camera[PROP_UP]));
+        }
+        case PROP_USE_QUATERNION: {
+          return camera[PROP_USE_QUATERNION];
         }
         case METHOD_LOOK_AT: {
           return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
@@ -2511,6 +2546,10 @@ var $builtinmodule = function(name) {
           camera[PROP_POSITION] = value;
         }
         break;
+        case PROP_QUATERNION: {
+          camera[PROP_QUATERNION] = value;
+        }
+        break;
         case PROP_ROTATION: {
           camera[PROP_ROTATION] = value;
         }
@@ -2530,6 +2569,10 @@ var $builtinmodule = function(name) {
         break;
         case PROP_UP: {
           camera[PROP_UP] = value;
+        }
+        break;
+        case PROP_USE_QUATERNION: {
+          camera[PROP_USE_QUATERNION] = value;
         }
         break;
         default: {
@@ -3257,6 +3300,9 @@ var $builtinmodule = function(name) {
         case PROP_POSITION: {
           return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(obj[PROP_POSITION]));
         }
+        case PROP_QUATERNION: {
+          return Sk.misceval.callsim(mod[QUATERNION], Sk.ffi.referenceToPy(obj[PROP_QUATERNION]));
+        }
         case PROP_ROTATION: {
           return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(obj[PROP_ROTATION]));
         }
@@ -3268,6 +3314,9 @@ var $builtinmodule = function(name) {
         }
         case PROP_UP: {
           return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(obj[PROP_UP]));
+        }
+        case PROP_USE_QUATERNION: {
+          return obj[PROP_USE_QUATERNION];
         }
         case METHOD_ADD: {
           return methodAdd(obj);
@@ -3283,6 +3332,10 @@ var $builtinmodule = function(name) {
       switch(name) {
         case PROP_POSITION: {
           obj[PROP_POSITION] = value;
+        }
+        break;
+        case PROP_QUATERNION: {
+          obj[PROP_QUATERNION] = value;
         }
         break;
         case PROP_ROTATION: {
@@ -3304,6 +3357,10 @@ var $builtinmodule = function(name) {
         break;
         case PROP_UP: {
           obj[PROP_UP] = value;
+        }
+        break;
+        case PROP_USE_QUATERNION: {
+          obj[PROP_USE_QUATERNION] = value;
         }
         break;
         default: {
@@ -3398,6 +3455,9 @@ var $builtinmodule = function(name) {
         case PROP_POSITION: {
           return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(light[PROP_POSITION]));
         }
+        case PROP_QUATERNION: {
+          return Sk.misceval.callsim(mod[QUATERNION], Sk.ffi.referenceToPy(light[PROP_QUATERNION]));
+        }
         case PROP_ROTATION: {
           return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(light[PROP_ROTATION]));
         }
@@ -3409,6 +3469,9 @@ var $builtinmodule = function(name) {
         }
         case PROP_UP: {
           return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(light[PROP_UP]));
+        }
+        case PROP_USE_QUATERNION: {
+          return light[PROP_USE_QUATERNION];
         }
         case METHOD_LOOK_AT: {
           return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
@@ -3459,6 +3522,10 @@ var $builtinmodule = function(name) {
           light[PROP_POSITION] = value;
         }
         break;
+        case PROP_QUATERNION: {
+          light[PROP_QUATERNION] = value;
+        }
+        break;
         case PROP_ROTATION: {
           light[PROP_ROTATION] = value;
         }
@@ -3478,6 +3545,10 @@ var $builtinmodule = function(name) {
         break;
         case PROP_UP: {
           light[PROP_UP] = value;
+        }
+        break;
+        case PROP_USE_QUATERNION: {
+          light[PROP_USE_QUATERNION] = value;
         }
         break;
         default: {
@@ -3530,6 +3601,9 @@ var $builtinmodule = function(name) {
         case PROP_POSITION: {
           return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(light[PROP_POSITION]));
         }
+        case PROP_QUATERNION: {
+          return Sk.misceval.callsim(mod[QUATERNION], Sk.ffi.referenceToPy(light[PROP_QUATERNION]));
+        }
         case PROP_ROTATION: {
           return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(light[PROP_ROTATION]));
         }
@@ -3541,6 +3615,9 @@ var $builtinmodule = function(name) {
         }
         case PROP_UP: {
           return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(light[PROP_UP]));
+        }
+        case PROP_USE_QUATERNION: {
+          return light[PROP_USE_QUATERNION];
         }
         case METHOD_LOOK_AT: {
           return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
@@ -3591,6 +3668,10 @@ var $builtinmodule = function(name) {
           light[PROP_POSITION] = value;
         }
         break;
+        case PROP_QUATERNION: {
+          light[PROP_QUATERNION] = value;
+        }
+        break;
         case PROP_ROTATION: {
           light[PROP_ROTATION] = value;
         }
@@ -3610,6 +3691,10 @@ var $builtinmodule = function(name) {
         break;
         case PROP_UP: {
           light[PROP_UP] = value;
+        }
+        break;
+        case PROP_USE_QUATERNION: {
+          light[PROP_USE_QUATERNION] = value;
         }
         break;
         default: {
@@ -3650,6 +3735,9 @@ var $builtinmodule = function(name) {
         case PROP_POSITION: {
           return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(line[PROP_POSITION]));
         }
+        case PROP_QUATERNION: {
+          return Sk.misceval.callsim(mod[QUATERNION], Sk.ffi.referenceToPy(line[PROP_QUATERNION]));
+        }
         case PROP_ROTATION: {
           return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(line[PROP_ROTATION]));
         }
@@ -3661,6 +3749,9 @@ var $builtinmodule = function(name) {
         }
         case PROP_UP: {
           return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(line[PROP_UP]));
+        }
+        case PROP_USE_QUATERNION: {
+          return line[PROP_USE_QUATERNION];
         }
         case METHOD_LOOK_AT: {
           return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
@@ -3805,6 +3896,9 @@ var $builtinmodule = function(name) {
         case PROP_POSITION: {
           return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(mesh[PROP_POSITION]));
         }
+        case PROP_QUATERNION: {
+          return Sk.misceval.callsim(mod[QUATERNION], Sk.ffi.referenceToPy(mesh[PROP_QUATERNION]));
+        }
         case PROP_ROTATION: {
           return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(mesh[PROP_ROTATION]));
         }
@@ -3816,6 +3910,9 @@ var $builtinmodule = function(name) {
         }
         case PROP_UP: {
           return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(mesh[PROP_UP]));
+        }
+        case PROP_USE_QUATERNION: {
+          return mesh[PROP_USE_QUATERNION];
         }
         case PROP_VELOCITY: {
           return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(mesh[PROP_VELOCITY]));
@@ -3922,6 +4019,10 @@ var $builtinmodule = function(name) {
           mesh[PROP_POSITION] = value;
         }
         break;
+        case PROP_QUATERNION: {
+          mesh[PROP_QUATERNION] = value;
+        }
+        break;
         case PROP_ROTATION: {
           mesh[PROP_ROTATION] = value;
         }
@@ -3941,6 +4042,10 @@ var $builtinmodule = function(name) {
         break;
         case PROP_UP: {
           mesh[PROP_UP] = value;
+        }
+        break;
+        case PROP_USE_QUATERNION: {
+          mesh[PROP_USE_QUATERNION] = value;
         }
         break;
         case PROP_VELOCITY: {
