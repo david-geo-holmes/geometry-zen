@@ -13,34 +13,43 @@ var $builtinmodule = function(name) {
   var EVENT_CLASS       = "Event";
   var WINDOW_CLASS      = "Window";
   
-  var PROP_ANIMATION_TIME            = "animationTime";
-  var PROP_BODY                      = "body";
-  var PROP_CLIENT_X                  = "clientX";
-  var PROP_CLIENT_Y                  = "clientY";
-  var PROP_DEVICE_PIXEL_RATIO        = "devicePixelRatio";
-  var PROP_DOCUMENT                  = "document";
-  var PROP_FILL_STYLE                = "fillStyle";
-  var PROP_FIRST_CHILD               = "firstChild";
-  var PROP_HEIGHT                    = "height";
-  var PROP_KEY_CODE                  = "keyCode";
-  var PROP_LAST_CHILD                = "lastChild";
-  var PROP_LEFT                      = "left";
-  var PROP_NEXT_SIBLING              = "nextSibling";
-  var PROP_PARENT_NODE               = "parentNode";
-  var PROP_POSITION                  = "position";
-  var PROP_PREVIOUS_SIBLING          = "previousSibling";
-  var PROP_STROKE_STYLE              = "strokeStyle";
-  var PROP_STYLE                     = "style";
-  var PROP_TOP                       = "top";
-  var PROP_WEBKIT_HIDDEN             = "webkitHidden";
-  var PROP_WIDTH                     = "width";
-  var PROP_WINDOW                    = "window";
+  var PROP_ANIMATION_TIME                   = "animationTime";
+  var PROP_BODY                             = "body";
+  var PROP_CLIENT_X                         = "clientX";
+  var PROP_CLIENT_Y                         = "clientY";
+  var PROP_DEVICE_PIXEL_RATIO               = "devicePixelRatio";
+  var PROP_DOCUMENT                         = "document";
+  var PROP_FONT                             = "font";
+  var PROP_FILL_STYLE                       = "fillStyle";
+  var PROP_FIRST_CHILD                      = "firstChild";
+  var PROP_HEIGHT                           = "height";
+  var PROP_KEY_CODE                         = "keyCode";
+  var PROP_LAST_CHILD                       = "lastChild";
+  var PROP_LEFT                             = "left";
+  var PROP_LINE_CAP                         = "lineCap";
+  var PROP_LINE_JOIN                        = "lineJoin";
+  var PROP_LINE_WIDTH                       = "lineWidth";
+  var PROP_NEXT_SIBLING                     = "nextSibling";
+  var PROP_PARENT_NODE                      = "parentNode";
+  var PROP_POSITION                         = "position";
+  var PROP_PREVIOUS_SIBLING                 = "previousSibling";
+  var PROP_STROKE_STYLE                     = "strokeStyle";
+  var PROP_STYLE                            = "style";
+  var PROP_TOP                              = "top";
+  var PROP_WEBKIT_BACKING_STORE_PIXEL_RATIO = "webkitBackingStorePixelRatio";
+  var PROP_WEBKIT_HIDDEN                    = "webkitHidden";
+  var PROP_WIDTH                            = "width";
+  var PROP_WINDOW                           = "window";
+
   var METHOD_ADD_EVENT_LISTENER      = "addEventListener";
   var METHOD_APPEND_CHILD            = "appendChild";
   var METHOD_ARC                     = "arc";
+  var METHOD_ARC_TO                  = "arcTo";
   var METHOD_BEGIN_PATH              = "beginPath";
+  var METHOD_BEZIER_CURVE_TO         = "bezierCurveTo";
   var METHOD_CANCEL_ANIMATION_FRAME  = "cancelAnimationFrame";
   var METHOD_CLEAR_RECT              = "clearRect";
+  var METHOD_CLIP                    = "clip";
   var METHOD_CLOSE_PATH              = "closePath";
   var METHOD_FILL                    = "fill";
   var METHOD_FILL_RECT               = "fillRect";
@@ -49,10 +58,14 @@ var $builtinmodule = function(name) {
   var METHOD_INSERT_BEFORE           = "insertBefore";
   var METHOD_LINE_TO                 = "lineTo";
   var METHOD_MOVE_TO                 = "moveTo";
+  var METHOD_QUADRATIC_CURVE_TO      = "quadraticCurveTo";
   var METHOD_RECT                    = "rect";
   var METHOD_REMOVE_CHILD            = "removeChild";
   var METHOD_REMOVE_EVENT_LISTENER   = "removeEventListener";
   var METHOD_REQUEST_ANIMATION_FRAME = "requestAnimationFrame";
+  var METHOD_RESTORE                 = "restore";
+  var METHOD_ROTATE                  = "rotate";
+  var METHOD_SAVE                    = "save";
   var METHOD_SET_ATTRIBUTE           = "setAttribute";
   var METHOD_SET_TIMEOUT             = "setTimeout";
   var METHOD_SET_TRANSFORM           = "setTransform";
@@ -277,8 +290,23 @@ var $builtinmodule = function(name) {
                     case PROP_FILL_STYLE: {
                       return new Sk.builtin.str(context[PROP_FILL_STYLE]);
                     }
+                    case PROP_FONT: {
+                      return new Sk.builtin.str(context[PROP_FONT]);
+                    }
+                    case PROP_LINE_CAP: {
+                      return new Sk.builtin.str(context[PROP_LINE_CAP]);
+                    }
+                    case PROP_LINE_JOIN: {
+                      return new Sk.builtin.str(context[PROP_LINE_JOIN]);
+                    }
+                    case PROP_LINE_WIDTH: {
+                      return Sk.builtin.assk$(context[PROP_LINE_WIDTH], Sk.builtin.nmber.int$);
+                    }
                     case PROP_STROKE_STYLE: {
                       return new Sk.builtin.str(context[PROP_STROKE_STYLE]);
+                    }
+                    case PROP_WEBKIT_BACKING_STORE_PIXEL_RATIO: {
+                      return Sk.builtin.assk$(context[PROP_WEBKIT_BACKING_STORE_PIXEL_RATIO], Sk.builtin.nmber.int$);
                     }
                     case METHOD_ARC: {
                       return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
@@ -302,6 +330,29 @@ var $builtinmodule = function(name) {
                         });
                       }, METHOD_ARC, []));
                     }
+                    case METHOD_ARC_TO: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_ARC_TO;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, x1, y1, x2, y2, radiusX, radiusY, rotation) {
+                          x1 = Sk.ffi.remapToJs(x1);
+                          y1 = Sk.ffi.remapToJs(y1);
+                          x2 = Sk.ffi.remapToJs(x2);
+                          y2 = Sk.ffi.remapToJs(y2);
+                          radiusX = Sk.ffi.remapToJs(radiusX);
+                          radiusY = Sk.ffi.remapToJs(radiusY);
+                          rotation = Sk.ffi.remapToJs(rotation);
+                          context[METHOD_ARC_TO](x1, y1, x2, y2, radiusX, radiusY, rotation);
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_ARC_TO);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_ARC_TO);
+                        });
+                      }, METHOD_ARC_TO, []));
+                    }
                     case METHOD_BEGIN_PATH: {
                       return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
                         $loc.__init__ = new Sk.builtin.func(function(self) {
@@ -317,6 +368,28 @@ var $builtinmodule = function(name) {
                           return new Sk.builtin.str(METHOD_BEGIN_PATH);
                         });
                       }, METHOD_BEGIN_PATH, []));
+                    }
+                    case METHOD_BEZIER_CURVE_TO: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_BEZIER_CURVE_TO;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, cp1x, cp1y, cp2x, cp2y, x, y) {
+                          cp1x = Sk.ffi.remapToJs(cp1x);
+                          cp1y = Sk.ffi.remapToJs(cp1y);
+                          cp2x = Sk.ffi.remapToJs(cp2x);
+                          cp2y = Sk.ffi.remapToJs(cp2y);
+                          x = Sk.ffi.remapToJs(x);
+                          y = Sk.ffi.remapToJs(y);
+                          context[METHOD_BEZIER_CURVE_TO](cp1x, cp1y, cp2x, cp2y, x, y);
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_BEZIER_CURVE_TO);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_BEZIER_CURVE_TO);
+                        });
+                      }, METHOD_BEZIER_CURVE_TO, []));
                     }
                     case METHOD_CLEAR_RECT: {
                       return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
@@ -353,6 +426,22 @@ var $builtinmodule = function(name) {
                           return new Sk.builtin.str(METHOD_CLOSE_PATH);
                         });
                       }, METHOD_CLOSE_PATH, []));
+                    }
+                    case METHOD_CLIP: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_CLIP;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self) {
+                          context[METHOD_CLIP]();
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_CLIP);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_CLIP);
+                        });
+                      }, METHOD_CLIP, []));
                     }
                     case METHOD_FILL: {
                       return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
@@ -446,6 +535,26 @@ var $builtinmodule = function(name) {
                         });
                       }, METHOD_MOVE_TO, []));
                     }
+                    case METHOD_QUADRATIC_CURVE_TO: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_QUADRATIC_CURVE_TO;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, cpx, cpy, x, y) {
+                          cpx = Sk.ffi.remapToJs(cpx);
+                          cpy = Sk.ffi.remapToJs(cpy);
+                          x = Sk.ffi.remapToJs(x);
+                          y = Sk.ffi.remapToJs(y);
+                          context[METHOD_QUADRATIC_CURVE_TO](cpx, cpy, x, y);
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_QUADRATIC_CURVE_TO);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_QUADRATIC_CURVE_TO);
+                        });
+                      }, METHOD_QUADRATIC_CURVE_TO, []));
+                    }
                     case METHOD_RECT: {
                       return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
                         $loc.__init__ = new Sk.builtin.func(function(self) {
@@ -465,6 +574,55 @@ var $builtinmodule = function(name) {
                           return new Sk.builtin.str(METHOD_RECT);
                         });
                       }, METHOD_RECT, []));
+                    }
+                    case METHOD_RESTORE: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_RESTORE;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self) {
+                          context[METHOD_RESTORE]();
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_RESTORE);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_RESTORE);
+                        });
+                      }, METHOD_RESTORE, []));
+                    }
+                    case METHOD_ROTATE: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_ROTATE;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, angle) {
+                          angle = Sk.ffi.remapToJs(angle);
+                          context[METHOD_ROTATE](angle);
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_ROTATE);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_ROTATE);
+                        });
+                      }, METHOD_ROTATE, []));
+                    }
+                    case METHOD_SAVE: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_SAVE;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self) {
+                          context[METHOD_SAVE]();
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_SAVE);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_SAVE);
+                        });
+                      }, METHOD_SAVE, []));
                     }
                     case METHOD_SET_TRANSFORM: {
                       return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
@@ -552,6 +710,22 @@ var $builtinmodule = function(name) {
                   switch(name) {
                     case PROP_FILL_STYLE: {
                       context[PROP_FILL_STYLE] = value;
+                    }
+                    break;
+                    case PROP_FONT: {
+                      context[PROP_FONT] = value;
+                    }
+                    break;
+                    case PROP_LINE_CAP: {
+                      context[PROP_LINE_CAP] = value;
+                    }
+                    break;
+                    case PROP_LINE_JOIN: {
+                      context[PROP_LINE_JOIN] = value;
+                    }
+                    break;
+                    case PROP_LINE_WIDTH: {
+                      context[PROP_LINE_WIDTH] = value;
                     }
                     break;
                     case PROP_STROKE_STYLE: {
@@ -695,7 +869,7 @@ var $builtinmodule = function(name) {
           return wrapNumber(window[name]);
         }
         case PROP_DEVICE_PIXEL_RATIO: {
-          return wrapNumber(window[name]);
+          return Sk.builtin.assk$(window[PROP_DEVICE_PIXEL_RATIO], Sk.builtin.nmber.int$);
         }
         case METHOD_ADD_EVENT_LISTENER: {
           return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
