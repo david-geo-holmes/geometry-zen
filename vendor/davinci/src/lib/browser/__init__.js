@@ -18,6 +18,7 @@ var $builtinmodule = function(name) {
   var PROP_CLIENT_X                         = "clientX";
   var PROP_CLIENT_Y                         = "clientY";
   var PROP_DEVICE_PIXEL_RATIO               = "devicePixelRatio";
+  var PROP_DIR                              = "dir";
   var PROP_DOCUMENT                         = "document";
   var PROP_FONT                             = "font";
   var PROP_FILL_STYLE                       = "fillStyle";
@@ -35,6 +36,8 @@ var $builtinmodule = function(name) {
   var PROP_PREVIOUS_SIBLING                 = "previousSibling";
   var PROP_STROKE_STYLE                     = "strokeStyle";
   var PROP_STYLE                            = "style";
+  var PROP_TEXT_ALIGN                       = "textAlign";
+  var PROP_TEXT_BASELINE                    = "textBaseline";
   var PROP_TOP                              = "top";
   var PROP_WEBKIT_BACKING_STORE_PIXEL_RATIO = "webkitBackingStorePixelRatio";
   var PROP_WEBKIT_HIDDEN                    = "webkitHidden";
@@ -172,6 +175,9 @@ var $builtinmodule = function(name) {
         case 'clientWidth': {
           return wrapNumber(node[name]);
         }
+        case PROP_DIR: {
+          return new Sk.builtin.str(node[PROP_DIR]);
+        }
         case PROP_FIRST_CHILD: {
           return wrapNode(node[PROP_FIRST_CHILD]);
         }
@@ -304,6 +310,12 @@ var $builtinmodule = function(name) {
                     }
                     case PROP_STROKE_STYLE: {
                       return new Sk.builtin.str(context[PROP_STROKE_STYLE]);
+                    }
+                    case PROP_TEXT_ALIGN: {
+                      return new Sk.builtin.str(context[PROP_TEXT_ALIGN]);
+                    }
+                    case PROP_TEXT_BASELINE: {
+                      return new Sk.builtin.str(context[PROP_TEXT_BASELINE]);
                     }
                     case PROP_WEBKIT_BACKING_STORE_PIXEL_RATIO: {
                       return Sk.builtin.assk$(context[PROP_WEBKIT_BACKING_STORE_PIXEL_RATIO], Sk.builtin.nmber.int$);
@@ -484,12 +496,20 @@ var $builtinmodule = function(name) {
                         $loc.__init__ = new Sk.builtin.func(function(self) {
                           self.tp$name = METHOD_FILL_TEXT;
                         });
-                        $loc.__call__ = new Sk.builtin.func(function(self, text, x, y, maxWidth) {
+                        $loc.__call__ = new Sk.builtin.func(function(self, text, x, y, maxWidthPy) {
                           text = Sk.ffi.remapToJs(text);
                           x = Sk.ffi.remapToJs(x);
                           y = Sk.ffi.remapToJs(y);
-                          maxWidth = Sk.ffi.remapToJs(maxWidth);
-                          context[METHOD_FILL_TEXT](text, x, y, maxWidth);
+                          var maxWidth = Sk.ffi.remapToJs(maxWidthPy);
+                          if (typeof maxWidth === 'undefined') {
+                            context[METHOD_FILL_TEXT](text, x, y);
+                          }
+                          else if (typeof maxWidth === 'number') {
+                            context[METHOD_FILL_TEXT](text, x, y, maxWidth);
+                          }
+                          else {
+                            throw new Sk.builtin.TypeError("maxWidth");
+                          }
                         });
                         $loc.__str__ = new Sk.builtin.func(function(self) {
                           return new Sk.builtin.str(METHOD_FILL_TEXT);
@@ -687,12 +707,20 @@ var $builtinmodule = function(name) {
                         $loc.__init__ = new Sk.builtin.func(function(self) {
                           self.tp$name = METHOD_STROKE_TEXT;
                         });
-                        $loc.__call__ = new Sk.builtin.func(function(self, text, x, y, maxWidth) {
+                        $loc.__call__ = new Sk.builtin.func(function(self, text, x, y, maxWidthPy) {
                           text = Sk.ffi.remapToJs(text);
                           x = Sk.ffi.remapToJs(x);
                           y = Sk.ffi.remapToJs(y);
-                          maxWidth = Sk.ffi.remapToJs(maxWidth);
-                          context[METHOD_STROKE_TEXT](text, x, y, maxWidth);
+                          var maxWidth = Sk.ffi.remapToJs(maxWidthPy);
+                          if (typeof maxWidth === 'undefined') {
+                            context[METHOD_STROKE_TEXT](text, x, y);
+                          }
+                          else if (typeof maxWidth === 'number') {
+                            context[METHOD_STROKE_TEXT](text, x, y, maxWidth);
+                          }
+                          else {
+                            throw new Sk.builtin.TypeError("maxWidth");
+                          }
                         });
                         $loc.__str__ = new Sk.builtin.func(function(self) {
                           return new Sk.builtin.str(METHOD_STROKE_TEXT);
@@ -730,6 +758,14 @@ var $builtinmodule = function(name) {
                     break;
                     case PROP_STROKE_STYLE: {
                       context[PROP_STROKE_STYLE] = value;
+                    }
+                    break;
+                    case PROP_TEXT_ALIGN: {
+                      context[PROP_TEXT_ALIGN] = value;
+                    }
+                    break;
+                    case PROP_TEXT_BASELINE: {
+                      context[PROP_TEXT_BASELINE] = value;
                     }
                     break;
                     default: {
@@ -807,6 +843,10 @@ var $builtinmodule = function(name) {
       var node = Sk.ffi.remapToJs(nodePy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
+        case PROP_DIR: {
+          node[PROP_DIR] = value;
+        }
+        break;
         case 'id': {
           node.setAttribute(name, value);
         }
@@ -820,7 +860,7 @@ var $builtinmodule = function(name) {
         }
         break;
         default: {
-          self.v.setAttribute(name, stringFromArg(value));
+          node.setAttribute(name, stringFromArg(value));
         }
       }
     });
