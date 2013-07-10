@@ -1,6 +1,6 @@
 {
   "name": "davinci",
-  "version": "0.0.51",
+  "version": "0.0.52",
   "main": "./build/davinci.min.js",
   "description": "Python to JavaScript cross compiler",
   "author": {
@@ -27,8 +27,8 @@
   "ignore": [
     "node_modules"
   ],
-  "gitHead": "6596d8fd54c85c3d0387f3285df0cd71dc9c13c4",
   "readme": "# Welcome to davinci\n\ndavinci is a Javascript implementation of Python 2.x.  Python that runs in your browser!  Python that runs on your iPad!\nIts being used by [Geometry Zen](http://www.geometryzen.org) -- You can see davinci in action there.\n\n## Origins\n\ndavinci started as a fork of Skulpt to support the Geometry Zen project.\n\nSkulpt is the brainchild of Scott Graham.\n\nBrad Miller has been shepherding the development of Skulpt since sometime in 2010/2011.\n\ndavinci was created to avoid conflicting with Skulpt in the face of heavy experimentation and refactoring.\n\ndavinci is now maintained by David Holmes.\n\n## How can I help\n\nThere is plenty of work still to do in making improvements to davinci.  If you would like to contribute\n\n1. Create a Github account if you don't already have one\n2. Create a Fork of the davinci repository -- This will make a clone of the repository in your account.  **DO NOT** clone this one.  Once you've made the fork you will clone the forked version in your account to your local machine for development.\n3. Check the issues list for something to do.\n4. Fix or add your own features.  Commit and push to your forked version of the repository.  When everything is tested and ready to be incorporated into the master version...\n5. Make a Pull Request to get your feature(s) added to the main repository.\n\n## Acknowledgements\n\n* First and foremost to Scott Graham for starting the original Skulpt project.\n* Bob Lacatena for lots of work on Python longs in Skulpt.\n* Charles Severence for bug fixes and the re module in Skulpt.\n",
   "readmeFilename": "README.md",
-  "_id": "davinci@0.0.51"
+  "gitHead": "f38e17ceffc933482cf46433c88699a22acc462a",
+  "_id": "davinci@0.0.52"
 }

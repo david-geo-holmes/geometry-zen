@@ -7,11 +7,12 @@ var $builtinmodule = function(name) {
 
   var mod = {};
 
-  var NODE              = "Node";
-  var CONTEXT_CLASS     = "Context";
-  var DOCUMENT_CLASS    = "Document";
-  var EVENT_CLASS       = "Event";
-  var WINDOW_CLASS      = "Window";
+  var CANVAS_GRADIENT_CLASS = "CanvasGradient";
+  var CONTEXT_CLASS         = "Context";
+  var DOCUMENT_CLASS        = "Document";
+  var EVENT_CLASS           = "Event";
+  var NODE                  = "Node";
+  var WINDOW_CLASS          = "Window";
   
   var PROP_ANIMATION_TIME                   = "animationTime";
   var PROP_BODY                             = "body";
@@ -45,6 +46,7 @@ var $builtinmodule = function(name) {
   var PROP_WINDOW                           = "window";
 
   var METHOD_ADD_EVENT_LISTENER      = "addEventListener";
+  var METHOD_ADD_COLOR_STOP          = "addColorStop";
   var METHOD_APPEND_CHILD            = "appendChild";
   var METHOD_ARC                     = "arc";
   var METHOD_ARC_TO                  = "arcTo";
@@ -54,6 +56,7 @@ var $builtinmodule = function(name) {
   var METHOD_CLEAR_RECT              = "clearRect";
   var METHOD_CLIP                    = "clip";
   var METHOD_CLOSE_PATH              = "closePath";
+  var METHOD_CREATE_LINEAR_GRADIENT  = "createLinearGradient";
   var METHOD_FILL                    = "fill";
   var METHOD_FILL_RECT               = "fillRect";
   var METHOD_FILL_TEXT               = "fillText";
@@ -69,12 +72,14 @@ var $builtinmodule = function(name) {
   var METHOD_RESTORE                 = "restore";
   var METHOD_ROTATE                  = "rotate";
   var METHOD_SAVE                    = "save";
+  var METHOD_SCALE                   = "scale";
   var METHOD_SET_ATTRIBUTE           = "setAttribute";
   var METHOD_SET_TIMEOUT             = "setTimeout";
   var METHOD_SET_TRANSFORM           = "setTransform";
   var METHOD_STROKE                  = "stroke";
   var METHOD_STROKE_RECT             = "strokeRect";
   var METHOD_STROKE_TEXT             = "strokeText";
+  var METHOD_TRANSLATE               = "translate";
   // We must be able to track the JavaScript listener functions.
   // TODO: This should include both the typoe and the useCapture flag.
   var winListeners = {};
@@ -455,6 +460,68 @@ var $builtinmodule = function(name) {
                         });
                       }, METHOD_CLIP, []));
                     }
+                    case METHOD_CREATE_LINEAR_GRADIENT: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_CREATE_LINEAR_GRADIENT;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, x0, y0, x1, y1) {
+                          x0 = Sk.ffi.remapToJs(x0);
+                          y0 = Sk.ffi.remapToJs(y0);
+                          x1 = Sk.ffi.remapToJs(x1);
+                          y1 = Sk.ffi.remapToJs(y1);
+                          var gradient = context[METHOD_CREATE_LINEAR_GRADIENT](x0, y0, x1, y1);
+                          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                            $loc.__init__ = new Sk.builtin.func(function(self) {
+                              self.tp$name = CANVAS_GRADIENT_CLASS;
+                              self.v = gradient;
+                            });
+                            $loc.__getattr__ = new Sk.builtin.func(function(gradientPy, name) {
+                              switch(name) {
+                                case METHOD_ADD_COLOR_STOP: {
+                                  return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                                    $loc.__init__ = new Sk.builtin.func(function(self) {
+                                      self.tp$name = METHOD_ADD_COLOR_STOP;
+                                    });
+                                    $loc.__call__ = new Sk.builtin.func(function(self, offset, color) {
+                                      offset = Sk.ffi.remapToJs(offset);
+                                      color = Sk.ffi.remapToJs(color);
+                                      gradient[METHOD_ADD_COLOR_STOP](offset, color);
+                                    });
+                                    $loc.__str__ = new Sk.builtin.func(function(self) {
+                                      return new Sk.builtin.str(METHOD_ADD_COLOR_STOP);
+                                    });
+                                    $loc.__repr__ = new Sk.builtin.func(function(self) {
+                                      return new Sk.builtin.str(METHOD_ADD_COLOR_STOP);
+                                    });
+                                  }, METHOD_ADD_COLOR_STOP, []));
+                                }
+                              }
+                            })
+                            $loc.__setattr__ = new Sk.builtin.func(function(gradientPy, name, valuePy) {
+                              var value = Sk.ffi.remapToJs(valuePy);
+                              switch(name) {
+                                default: {
+                                  throw new Sk.builtin.AssertionError(name + " is not a writeable attribute of " + CANVAS_GRADIENT_CLASS);
+                                }
+                              }
+                            })
+                            $loc.__str__ = new Sk.builtin.func(function(self) {
+                              return new Sk.builtin.str(CANVAS_GRADIENT_CLASS);
+                            });
+                            $loc.__repr__ = new Sk.builtin.func(function(self) {
+                              return new Sk.builtin.str(CANVAS_GRADIENT_CLASS);
+                            });
+                          }, CANVAS_GRADIENT_CLASS, []));
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_CREATE_LINEAR_GRADIENT);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_CREATE_LINEAR_GRADIENT);
+                        });
+                      }, METHOD_CREATE_LINEAR_GRADIENT, []));
+                    }
                     case METHOD_FILL: {
                       return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
                         $loc.__init__ = new Sk.builtin.func(function(self) {
@@ -644,6 +711,24 @@ var $builtinmodule = function(name) {
                         });
                       }, METHOD_SAVE, []));
                     }
+                    case METHOD_SCALE: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_SCALE;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, x, y) {
+                          x = Sk.ffi.remapToJs(x);
+                          y = Sk.ffi.remapToJs(y);
+                          context[METHOD_SCALE](x, y);
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_SCALE);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_SCALE);
+                        });
+                      }, METHOD_SCALE, []));
+                    }
                     case METHOD_SET_TRANSFORM: {
                       return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
                         $loc.__init__ = new Sk.builtin.func(function(self) {
@@ -729,6 +814,24 @@ var $builtinmodule = function(name) {
                           return new Sk.builtin.str(METHOD_STROKE_TEXT);
                         });
                       }, METHOD_STROKE_TEXT, []));
+                    }
+                    case METHOD_TRANSLATE: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_TRANSLATE;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, x, y) {
+                          x = Sk.ffi.remapToJs(x);
+                          y = Sk.ffi.remapToJs(y);
+                          context[METHOD_TRANSLATE](x, y);
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_TRANSLATE);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_TRANSLATE);
+                        });
+                      }, METHOD_TRANSLATE, []));
                     }
                   }
                 })
