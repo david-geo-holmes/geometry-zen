@@ -7,17 +7,18 @@ var $builtinmodule = function(name) {
 
   var mod = {};
 
-  var CANVAS_GRADIENT_CLASS = "CanvasGradient";
-  var CONTEXT_CLASS         = "Context";
-  var DOCUMENT_CLASS        = "Document";
-  var EVENT_CLASS           = "Event";
-  var NODE                  = "Node";
-  var WINDOW_CLASS          = "Window";
+  var CANVAS_GRADIENT_CLASS       = "CanvasGradient";
+  var CANVAS_RENDERING_CONTEXT_2D = "CanvasRenderingContext2D";
+  var DOCUMENT_CLASS              = "Document";
+  var EVENT_CLASS                 = "Event";
+  var NODE                        = "Node";
+  var WINDOW_CLASS                = "Window";
   
   var PROP_ANIMATION_TIME                   = "animationTime";
   var PROP_BODY                             = "body";
   var PROP_CLIENT_X                         = "clientX";
   var PROP_CLIENT_Y                         = "clientY";
+  var PROP_CURRENT_TRANSFORM                = "currentTransform";
   var PROP_DEVICE_PIXEL_RATIO               = "devicePixelRatio";
   var PROP_DIR                              = "dir";
   var PROP_DOCUMENT                         = "document";
@@ -35,6 +36,10 @@ var $builtinmodule = function(name) {
   var PROP_PARENT_NODE                      = "parentNode";
   var PROP_POSITION                         = "position";
   var PROP_PREVIOUS_SIBLING                 = "previousSibling";
+  var PROP_SHADOW_BLUR                      = "shadowBlur";
+  var PROP_SHADOW_COLOR                     = "shadowColor";
+  var PROP_SHADOW_OFFSET_X                  = "shadowOffsetX";
+  var PROP_SHADOW_OFFSET_Y                  = "shadowOffsetY";
   var PROP_STROKE_STYLE                     = "strokeStyle";
   var PROP_STYLE                            = "style";
   var PROP_TEXT_ALIGN                       = "textAlign";
@@ -62,6 +67,7 @@ var $builtinmodule = function(name) {
   var METHOD_FILL_TEXT               = "fillText";
   var METHOD_GET_CONTEXT             = "getContext";
   var METHOD_INSERT_BEFORE           = "insertBefore";
+  var METHOD_INVERSE                 = "inverse";
   var METHOD_LINE_TO                 = "lineTo";
   var METHOD_MOVE_TO                 = "moveTo";
   var METHOD_QUADRATIC_CURVE_TO      = "quadraticCurveTo";
@@ -79,6 +85,7 @@ var $builtinmodule = function(name) {
   var METHOD_STROKE                  = "stroke";
   var METHOD_STROKE_RECT             = "strokeRect";
   var METHOD_STROKE_TEXT             = "strokeText";
+  var METHOD_TRANSFORM               = "transform";
   var METHOD_TRANSLATE               = "translate";
   // We must be able to track the JavaScript listener functions.
   // TODO: This should include both the typoe and the useCapture flag.
@@ -288,12 +295,13 @@ var $builtinmodule = function(name) {
             $loc.__init__ = new Sk.builtin.func(function(self) {
               self.tp$name = METHOD_GET_CONTEXT;
             });
-            $loc.__call__ = new Sk.builtin.func(function(self, contextIdPy) {
+            $loc.__call__ = new Sk.builtin.func(function(self, contextIdPy, contextAttributePy) {
               var contextId = Sk.ffi.remapToJs(contextIdPy);
-              var context = node.getContext(contextId);
+              var contextAttribute = Sk.ffi.remapToJs(contextAttributePy);
+              var context = node.getContext(contextId, contextAttribute);
               return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
                 $loc.__init__ = new Sk.builtin.func(function(self) {
-                  self.tp$name = CONTEXT_CLASS;
+                  self.tp$name = CANVAS_RENDERING_CONTEXT_2D;
                   self.v = context;
                 });
                 $loc.__getattr__ = new Sk.builtin.func(function(contextPy, name) {
@@ -312,6 +320,18 @@ var $builtinmodule = function(name) {
                     }
                     case PROP_LINE_WIDTH: {
                       return Sk.builtin.assk$(context[PROP_LINE_WIDTH], Sk.builtin.nmber.int$);
+                    }
+                    case PROP_SHADOW_BLUR: {
+                      return Sk.builtin.assk$(context[PROP_SHADOW_BLUR], Sk.builtin.nmber.int$);
+                    }
+                    case PROP_SHADOW_COLOR: {
+                      return new Sk.builtin.str(context[PROP_SHADOW_COLOR]);
+                    }
+                    case PROP_SHADOW_OFFSET_X: {
+                      return Sk.builtin.assk$(context[PROP_SHADOW_OFFSET_X], Sk.builtin.nmber.int$);
+                    }
+                    case PROP_SHADOW_OFFSET_Y: {
+                      return Sk.builtin.assk$(context[PROP_SHADOW_OFFSET_Y], Sk.builtin.nmber.int$);
                     }
                     case PROP_STROKE_STYLE: {
                       return new Sk.builtin.str(context[PROP_STROKE_STYLE]);
@@ -428,22 +448,6 @@ var $builtinmodule = function(name) {
                         });
                       }, METHOD_CLEAR_RECT, []));
                     }
-                    case METHOD_CLOSE_PATH: {
-                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
-                        $loc.__init__ = new Sk.builtin.func(function(self) {
-                          self.tp$name = METHOD_CLOSE_PATH;
-                        });
-                        $loc.__call__ = new Sk.builtin.func(function(self) {
-                          context[METHOD_CLOSE_PATH]();
-                        });
-                        $loc.__str__ = new Sk.builtin.func(function(self) {
-                          return new Sk.builtin.str(METHOD_CLOSE_PATH);
-                        });
-                        $loc.__repr__ = new Sk.builtin.func(function(self) {
-                          return new Sk.builtin.str(METHOD_CLOSE_PATH);
-                        });
-                      }, METHOD_CLOSE_PATH, []));
-                    }
                     case METHOD_CLIP: {
                       return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
                         $loc.__init__ = new Sk.builtin.func(function(self) {
@@ -459,6 +463,22 @@ var $builtinmodule = function(name) {
                           return new Sk.builtin.str(METHOD_CLIP);
                         });
                       }, METHOD_CLIP, []));
+                    }
+                    case METHOD_CLOSE_PATH: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_CLOSE_PATH;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self) {
+                          context[METHOD_CLOSE_PATH]();
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_CLOSE_PATH);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_CLOSE_PATH);
+                        });
+                      }, METHOD_CLOSE_PATH, []));
                     }
                     case METHOD_CREATE_LINEAR_GRADIENT: {
                       return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
@@ -734,14 +754,14 @@ var $builtinmodule = function(name) {
                         $loc.__init__ = new Sk.builtin.func(function(self) {
                           self.tp$name = METHOD_SET_TRANSFORM;
                         });
-                        $loc.__call__ = new Sk.builtin.func(function(self, m11, m12, m21, m22, dx, dy) {
-                          m11 = Sk.ffi.remapToJs(m11);
-                          m12 = Sk.ffi.remapToJs(m12);
-                          m21 = Sk.ffi.remapToJs(m21);
-                          m22 = Sk.ffi.remapToJs(m22);
-                          dx = Sk.ffi.remapToJs(dx);
-                          dy = Sk.ffi.remapToJs(dy);
-                          context[METHOD_SET_TRANSFORM](m11, m12, m21, m22, dx, dy);
+                        $loc.__call__ = new Sk.builtin.func(function(self, a, b, c, d, e, f) {
+                          a = Sk.ffi.remapToJs(a);
+                          b = Sk.ffi.remapToJs(b);
+                          c = Sk.ffi.remapToJs(c);
+                          d = Sk.ffi.remapToJs(d);
+                          e = Sk.ffi.remapToJs(e);
+                          f = Sk.ffi.remapToJs(f);
+                          context[METHOD_SET_TRANSFORM](a, b, c, d, e, f);
                         });
                         $loc.__str__ = new Sk.builtin.func(function(self) {
                           return new Sk.builtin.str(METHOD_SET_TRANSFORM);
@@ -815,6 +835,28 @@ var $builtinmodule = function(name) {
                         });
                       }, METHOD_STROKE_TEXT, []));
                     }
+                    case METHOD_TRANSFORM: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_TRANSFORM;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, a, b, c, d, e, f) {
+                          a = Sk.ffi.remapToJs(a);
+                          b = Sk.ffi.remapToJs(b);
+                          c = Sk.ffi.remapToJs(c);
+                          d = Sk.ffi.remapToJs(d);
+                          e = Sk.ffi.remapToJs(e);
+                          f = Sk.ffi.remapToJs(f);
+                          context[METHOD_TRANSFORM](a, b, c, d, e, f);
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_TRANSFORM);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_TRANSFORM);
+                        });
+                      }, METHOD_TRANSFORM, []));
+                    }
                     case METHOD_TRANSLATE: {
                       return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
                         $loc.__init__ = new Sk.builtin.func(function(self) {
@@ -859,6 +901,22 @@ var $builtinmodule = function(name) {
                       context[PROP_LINE_WIDTH] = value;
                     }
                     break;
+                    case PROP_SHADOW_BLUR: {
+                      context[PROP_SHADOW_BLUR] = value;
+                    }
+                    break;
+                    case PROP_SHADOW_COLOR: {
+                      context[PROP_SHADOW_COLOR] = value;
+                    }
+                    break;
+                    case PROP_SHADOW_OFFSET_X: {
+                      context[PROP_SHADOW_OFFSET_X] = value;
+                    }
+                    break;
+                    case PROP_SHADOW_OFFSET_Y: {
+                      context[PROP_SHADOW_OFFSET_Y] = value;
+                    }
+                    break;
                     case PROP_STROKE_STYLE: {
                       context[PROP_STROKE_STYLE] = value;
                     }
@@ -872,17 +930,17 @@ var $builtinmodule = function(name) {
                     }
                     break;
                     default: {
-                      throw new Sk.builtin.AssertionError(name + " is not a writeable attribute of " + CONTEXT_CLASS);
+                      throw new Sk.builtin.AssertionError(name + " is not a writeable attribute of " + CANVAS_RENDERING_CONTEXT_2D);
                     }
                   }
                 })
                 $loc.__str__ = new Sk.builtin.func(function(self) {
-                  return new Sk.builtin.str(CONTEXT_CLASS);
+                  return new Sk.builtin.str(CANVAS_RENDERING_CONTEXT_2D);
                 });
                 $loc.__repr__ = new Sk.builtin.func(function(self) {
-                  return new Sk.builtin.str(CONTEXT_CLASS);
+                  return new Sk.builtin.str(CANVAS_RENDERING_CONTEXT_2D);
                 });
-              }, CONTEXT_CLASS, []));
+              }, CANVAS_RENDERING_CONTEXT_2D, []));
             });
             $loc.__str__ = new Sk.builtin.func(function(self) {
               return new Sk.builtin.str(METHOD_GET_CONTEXT);
