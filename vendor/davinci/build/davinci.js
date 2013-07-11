@@ -5272,7 +5272,7 @@ Sk.abstr.binop_type_error = function(lhs, rhs, name) {
 
 Sk.abstr.boNameToSlotFuncLhs_ = function(obj, name) {
   switch (name) {
-    case "Add":      return obj.nb$add ? obj.nb$add :                   obj['__add__'];
+    case "Add":      return obj.nb$add      ? obj.nb$add :              obj['__add__'];
     case "Sub":      return obj.nb$subtract ? obj.nb$subtract :         obj['__sub__'];
     case "Mult":     return obj.nb$multiply ? obj.nb$multiply :         obj['__mul__'];
     case "Div":      return obj.nb$divide ? obj.nb$divide :             obj['__div__'];
