@@ -110,7 +110,7 @@ put them in the right place by looking at something. code obj? func obj?
 
 closure binding:
 
-1. need to handle converting from davinci objects to js objects (for
+1. need to handle converting from skulpt objects to js objects (for
    number, bool, string) maybe only handle those 3 and use something
    manual for others?
 2. need to handle getting the return value to be an object that has a

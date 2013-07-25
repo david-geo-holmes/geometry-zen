@@ -1,0 +1,25 @@
+a => 3*i+5*j+7*k
+b => 2*i+4*j+6*k
+a cross b => 2*i-4*j+2*k
+1) a cross b is orthogonal to both b and c.
+(a cross b).dot(a) => 0.0
+(a cross b).dot(b) => 0.0
+2) |a cross b| = |a||b|sin(theta), where theta is the angle between a and b.
+3) The direction of a cross b follows the right-hand rule.
+i cross j => k
+j cross k => i
+k cross i => j
+j cross i => -k
+k cross j => -i
+i cross k => -j
+i, j and k are actually multivectors under the covers!
+repr(i) => Vector3(1, 0, 0)
+repr(j) => Vector3(0, 1, 0)
+repr(k) => Vector3(0, 0, 1)
+Pseudoscalar3(1) => I
+repr(Pseudoscalar3(1)) => Pseudoscalar3(1)
+ijk => I
+dual(b) => -6*ij-2*jk-4*ki
+repr(dual(b)) => Bivector3(-6, -2, -4)
+a << dual(b) => 2*i-4*j+2*k
+a cross b    => 2*i-4*j+2*k

@@ -82,32 +82,37 @@ function testTokenize(name)
 var parsefail = 0;
 var parsepass = 0;
 
-function testParse(name) {
-  try { var input = read(name + ".py"); }
-  catch (e) { return; }
+function testParse(name)
+{
+    try { var input = read(name + ".py"); }
+    catch (e) { return; }
 
-  var expect = read(name + ".expect");
-  var got;
-  try {
-    got = Sk.parseTreeDump(Sk.parse(name + ".py", input));
-  }
-  catch (e) {
-    got = "EXCEPTION\n";
-    got += e.constructor.name + "\n";
-    got += JSON.stringify(e) + "\n";
-  }
-  if (expect !== got) {
-    print("FAILED: (" + name + ".py)\n-----");
-    print(input);
-    print("-----\nGOT:\n-----");
-    print(got);
-    print("-----\nWANTED:\n-----");
-    print(expect);
-    parsefail += 1;
-  }
-  else {
-    parsepass += 1;
-  }
+    var expect = read(name + ".expect");
+    var got;
+    try
+    {
+        got = Sk.parseTreeDump(Sk.parse(name + ".py", input));
+    }
+    catch (e)
+    {
+       got = "EXCEPTION\n";
+       got += e.constructor.name + "\n";
+       got += JSON.stringify(e) + "\n";
+    }
+    if (expect !== got)
+    {
+        print("FAILED: (" + name + ".py)\n-----");
+        print(input);
+        print("-----\nGOT:\n-----");
+        print(got);
+        print("-----\nWANTED:\n-----");
+        print(expect);
+        parsefail += 1;
+    }
+    else
+    {
+        parsepass += 1;
+    }
 }
 
 var transformpass = 0;
@@ -189,74 +194,93 @@ var AllRunTests = [];
 var runpass = 0;
 var runfail = 0;
 var rundisabled = 0;
-function testRun(name, nocatch) {
-  try {
-    var input = read(name + ".py");
-  }
-  catch (e) {
-    try {
-      read(name + ".py.disabled"); rundisabled += 1;
-    }
+function testRun(name, nocatch)
+{
+    try { var input = read(name + ".py"); }
     catch (e) {
+        try { read(name + ".py.disabled"); rundisabled += 1;}
+        catch (e) {}
+        return;
     }
-    return;
-  }
 
-  AllRunTests.unshift(name);
+    AllRunTests.unshift(name);
 
-  var got = '';
-  var justpath = name.substr(0, name.lastIndexOf('/'));
-  Sk.configure({
-    output: function(str) { got += str; },
-    sysargv: [ name + '.py' ],
-    read: read,
-    syspath: [ justpath ]
-  });
+    var got = '';
+    var justpath = name.substr(0, name.lastIndexOf('/'));
+    Sk.configure({
+        output: function(str) { got += str; },
+        sysargv: [ name + '.py' ],
+        read: read,
+        syspath: [ justpath ]
+    });
 
-  var expect = read(name + ".py.real");
-  var expectalt;
-  try { expectalt = read(name + ".py.real.alt"); }
-  catch (e) {}
-  var module;
-  //nocatch=true;
-  if (nocatch) {
-    var justname = name.substr(name.lastIndexOf('/') + 1);
-    module = Sk.importMain(justname);
-  }
-  else {
-    try {
-      var justname = name.substr(name.lastIndexOf('/') + 1);
-      module = Sk.importMain(justname);
+    var expect = read(name + ".py.real");
+    var expectalt;
+    try { expectalt = read(name + ".py.real.alt"); }
+    catch (e) {}
+    var module;
+    //nocatch=true;
+    if (nocatch)
+    {
+        var justname = name.substr(name.lastIndexOf('/') + 1);
+        module = Sk.importMain(justname);
+        //print(got);
     }
-    catch (e) {
-      if (e.name !== undefined) {
-        // js exception, currently happens for del'd objects. shouldn't really though.
-        got += "EXCEPTION: " + e.name + "\n";
-        got += e.message;
-      }
-      else {
-        got = "EXCEPTION: " + Sk.builtins['str'](e).v + "\n";
-      }
+    else
+    {
+        try {
+            var justname = name.substr(name.lastIndexOf('/') + 1);
+            module = Sk.importMain(justname);
+        }
+        catch (e)
+        {
+            if (e.name !== undefined)
+            {
+                // js exception, currently happens for del'd objects. shouldn't
+                // really though.
+                got = "EXCEPTION: " + e.name + "\n";
+            }
+            else
+            {
+                got = "EXCEPTION: " + Sk.builtins['str'](e).v + "\n";
+            }
+        }
+        if (expect !== got && (expectalt !== undefined || expectalt !== got))
+        {
+            print("FAILED: (" + name + ".py)\n-----");
+            print(input);
+            print("-----\nGOT:\n-----");
+            print(got);
+            print("-----\nWANTED:\n-----");
+            print(expect);
+			print("-----\nDIFF:\n-----")
+			print("len got: " + got.length + "\n")
+			print("len wanted: " + expect.length + "\n")
+			var longest = got.length > expect.length ? got : expect;
+			for (var i in longest) {
+				if (got[i] !== expect[i]){
+					try{
+						print("firstdiff at: " + i + " got: " + got[i].charCodeAt(0) + " (" + got.substr(i) + ") expect: " + expect[i].charCodeAt(0) + " (" + expect.substr(i) + ")");
+					} catch (err){
+						break;
+					}
+					break;
+				}
+			}
+            if (module && module.$js)
+            {
+                print("-----\nJS:\n-----");
+                var beaut = js_beautify(module.$js);
+                print(beaut);
+            }
+            runfail += 1;
+            //throw "dying on first run fail";
+        }
+        else
+        {
+            runpass += 1;
+        }
     }
-    if (expect !== got && (expectalt !== undefined || expectalt !== got)) {
-      print("FAILED: (" + name + ".py)\n-----");
-      print(input);
-      print("-----\nGOT:\n-----");
-      print(got);
-      print("-----\nWANTED:\n-----");
-      print(expect);
-      if (module && module.$js) {
-        print("-----\nJS:\n-----");
-        var beaut = js_beautify(module.$js);
-        print(beaut);
-      }
-      runfail += 1;
-      //throw "dying on first run fail";
-    }
-    else {
-      runpass += 1;
-    }
-  }
 }
 
 var interactivepass = 0;

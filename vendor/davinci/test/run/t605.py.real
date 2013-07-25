@@ -1,0 +1,135 @@
+Quaternions
+----------
+Construction
+----------
+Quaternion(1, 2, 3, 4)
+4+i+2*j+3*k
+quaternion.x => 1.0
+quaternion.y => 2.0
+quaternion.z => 3.0
+quaternion.w => 4.0
+----------
+Defaults for Quaternion()
+----------
+Quaternion(0, 0, 0, 1)
+1
+x => 0.0
+y => 0.0
+z => 0.0
+w => 1.0
+----------
+Assignment
+----------
+Quaternion(0, 0, 0, 0)
+0
+4+i+2*j+3*k
+4+i+2*j+3*k
+Quaternion(1, 2, 3, 4)
+----------
+set(x, y, z, w)
+----------
+Quaternion(17, 13, 11, 7)
+quaternion.x => 17.0
+quaternion.y => 13.0
+quaternion.z => 11.0
+quaternion.w => 7.0
+----------
+copy(q) Quaternion
+----------
+1+4*i+3*j+2*k
+Quaternion(4, 3, 2, 1)
+----------
+setFromEuler(vector, order) Quaternion
+----------
+----------
+setFromAxisAngle(axis, angle) Quaternion
+----------
+----------
+inverse()
+----------
+----------
+length()
+----------
+----------
+lengthSq()
+----------
+30.0
+----------
+normalize()
+----------
+----------
+clone()
+----------
+1+4*i+3*j+2*k
+----------
+operators
+----------
+----------
+Addition +
+----------
+1 + 1 => 2
+1 + i => 1+i
+1 + j => 1+j
+1 + k => 1+k
+
+i + 1 => 1+i
+i + i => 2*i
+i + j => i+j
+i + k => i+k
+
+j + 1 => 1+j
+j + i => i+j
+j + j => 2*j
+j + k => j+k
+
+k + 1 => 1+k
+k + i => i+k
+k + j => j+k
+k + k => 2*k
+
+----------
+Subtraction -
+----------
+1 - 1 => 0
+1 - i => 1-i
+1 - j => 1-j
+1 - k => 1-k
+
+i - 1 => -1+i
+i - i => 0
+i - j => i-j
+i - k => i-k
+
+j - 1 => -1+j
+j - i => -i+j
+j - j => 0
+j - k => j-k
+
+k - 1 => -1+k
+k - i => -i+k
+k - j => -j+k
+k - k => 0
+
+----------
+Multiplication *
+----------
+1 * 1 => 1
+1 * i => i
+1 * j => j
+1 * k => k
+
+i * 1 => i
+i * i => -1
+i * j => k
+i * k => -j
+
+j * 1 => j
+j * i => -k
+j * j => -1
+j * k => i
+
+k * 1 => k
+k * i => j
+k * j => -i
+k * k => -1
+

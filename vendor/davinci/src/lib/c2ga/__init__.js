@@ -584,17 +584,14 @@ var $builtinmodule = function(name) {
       b = Sk.ffi.remapToJs(b);
       throw new Error("Under construction or");
     });
-    // Unary minus.
-    $loc.nu$neg = function() {
+    $loc.nb$negative = function() {
       var self = Sk.ffi.remapToJs(this);
       return remapC3ToPy(-self[0], -self[1], -self[2], -self[3]);
     };
-    // Unary plus.
-    $loc.nu$pos = function() {
+    $loc.nb$positive = function() {
       return this;
     };
-    // Python invert will be used for Geometric Algebra reversion.
-    $loc.nu$inv = function() {
+    $loc.nb$invert = function() {
       var self = Sk.ffi.remapToJs(this);
       return remapC3ToPy(self[0], self[1], self[2], -self[3]);
     };

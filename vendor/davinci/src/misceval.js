@@ -1,38 +1,50 @@
 Sk.misceval = {};
 
-Sk.misceval.isIndex = function(o) {
-  return o === null || typeof o === "number" || o.constructor === Sk.builtin.lng || o.constructor === Sk.builtin.nmber || o.tp$index;
+Sk.misceval.isIndex = function(o)
+{
+    if (o === null || o.constructor === Sk.builtin.lng || o.tp$index
+	|| o === true || o === false) {
+        return true;
+    }
+
+    return Sk.builtin.checkInt(o);
 };
 goog.exportSymbol("Sk.misceval.isIndex", Sk.misceval.isIndex);
 
-Sk.misceval.asIndex = function(o) {
-  if (!Sk.misceval.isIndex(o)) return undefined;
-  if (o === null) return undefined;
-  if (typeof o === "number") return o;
-  if (o.constructor === Sk.builtin.nmber) return o.v;
-  if (o.constructor === Sk.builtin.lng) return o.tp$index();
-  goog.asserts.fail("todo;");
+Sk.misceval.asIndex = function(o)
+{
+    if (!Sk.misceval.isIndex(o)) return undefined;
+    if (o === null) return undefined;
+    if (o === true) return 1;
+    if (o === false) return 0;
+    if (typeof o === "number") return o;
+	if (o.constructor === Sk.builtin.nmber) return o.v;
+	if (o.constructor === Sk.builtin.lng) return o.tp$index();
+    goog.asserts.fail("todo;");
 };
 
 /**
  * return u[v:w]
  */
- Sk.misceval.applySlice = function(u, v, w) {
-  if (u.sq$slice && Sk.misceval.isIndex(v) && Sk.misceval.isIndex(w)) {
-    var ilow = Sk.misceval.asIndex(v);
-    if (ilow === undefined) ilow = 0;
-    var ihigh = Sk.misceval.asIndex(w);
-    if (ihigh === undefined) ihigh = 1e100;
-    return Sk.abstr.sequenceGetSlice(u, ilow, ihigh);
-  }
-  return Sk.abstr.objectGetItem(u, new Sk.builtin.slice(v, w, null));
+Sk.misceval.applySlice = function(u, v, w)
+{
+    if (u.sq$slice && Sk.misceval.isIndex(v) && Sk.misceval.isIndex(w))
+    {
+        var ilow = Sk.misceval.asIndex(v);
+        if (ilow === undefined) ilow = 0;
+        var ihigh = Sk.misceval.asIndex(w);
+        if (ihigh === undefined) ihigh = 1e100;
+        return Sk.abstr.sequenceGetSlice(u, ilow, ihigh);
+    }
+    return Sk.abstr.objectGetItem(u, new Sk.builtin.slice(v, w, null));
 };
 goog.exportSymbol("Sk.misceval.applySlice", Sk.misceval.applySlice);
 
 /**
  * u[v:w] = x
  */
- Sk.misceval.assignSlice = function(u, v, w, x) {
+Sk.misceval.assignSlice = function(u, v, w, x)
+{
     if (u.sq$ass_slice && Sk.misceval.isIndex(v) && Sk.misceval.isIndex(w))
     {
         var ilow = Sk.misceval.asIndex(v) || 0;
@@ -57,8 +69,8 @@ goog.exportSymbol("Sk.misceval.assignSlice", Sk.misceval.assignSlice);
  * Used by min() and max() to get an array from arbitrary input.
  * Note that this does no validation, just coercion.
  */
- Sk.misceval.arrayFromArguments = function(args)
- {
+Sk.misceval.arrayFromArguments = function(args)
+{
     // If args is not a single thing return as is
     if ( args.length != 1 )
     {
@@ -67,7 +79,7 @@ goog.exportSymbol("Sk.misceval.assignSlice", Sk.misceval.assignSlice);
     var arg = args[0];
     if ( arg instanceof Sk.builtin.set )
     {
-        // this is a Sk.builtin.list
+        // this is a Sk.builtin.set
         arg = arg.tp$iter().$obj;
     }
     else if ( arg instanceof Sk.builtin.dict )
@@ -75,7 +87,19 @@ goog.exportSymbol("Sk.misceval.assignSlice", Sk.misceval.assignSlice);
         // this is a Sk.builtin.list
         arg = Sk.builtin.dict.prototype['keys'].func_code(arg);
     }
-    // shouldn't else if here as the two above output lists to arg.
+    else if ( arg instanceof Sk.builtin.str )
+    {
+        // this is a Sk.builtin.str
+        var res = [];
+        for (var it = arg.tp$iter(), i = it.tp$iternext(); 
+             i !== undefined; i = it.tp$iternext())
+        {
+            res.push(i);
+        }
+        return res;
+    }
+
+    // shouldn't else if here as the above may output lists to arg.
     if ( arg instanceof Sk.builtin.list || arg instanceof Sk.builtin.tuple )
     {
         return arg.v;
@@ -85,29 +109,49 @@ goog.exportSymbol("Sk.misceval.assignSlice", Sk.misceval.assignSlice);
 goog.exportSymbol("Sk.misceval.arrayFromArguments", Sk.misceval.arrayFromArguments);
 
 /**
- * for reversed comparison: Lt -> GtE, etc.
+ * for reversed comparison: Gt -> Lt, etc.
  */
- Sk.misceval.swappedOp_ = {
-    'Eq': 'Eq',         //
-    'NotEq': 'NotEq',   //
+Sk.misceval.swappedOp_ = {
+    'Eq': 'Eq',
+    'NotEq': 'NotEq',
     'Lt': 'GtE',
     'LtE': 'Gt',
     'Gt': 'LtE',
     'GtE': 'Lt',
-    'Is': 'Is',         //
-    'IsNot': 'IsNot',   //  
-    'In_': undefined,   //  No swap equivalent (equivalent = "contains")
-    'NotIn': undefined  //  No swap equivalent (equivalent = "does not contain")
+    'Is': 'IsNot',
+    'IsNot': 'Is',
+    'In_': 'NotIn',
+    'NotIn': 'In_'
 };
 
 
 Sk.misceval.richCompareBool = function(v, w, op)
 {
-    if (op === 'Is')
-        return v === w;
+    if (op === 'Is') {
+	if (v instanceof Sk.builtin.nmber && w instanceof Sk.builtin.nmber)
+	{
+	    return (v.numberCompare(w) === 0) && (v.skType === w.skType);
+	}
+	else if (v instanceof Sk.builtin.lng && w instanceof Sk.builtin.lng)
+	{
+	    return v.longCompare(w) === 0;
+	}
 
-    if (op === 'IsNot')
+        return v === w;
+    }
+
+    if (op === 'IsNot') {
+	if (v instanceof Sk.builtin.nmber && w instanceof Sk.builtin.nmber)
+	{
+	    return (v.numberCompare(w) !== 0) || (v.skType !== w.skType);
+	}
+	else if (v instanceof Sk.builtin.lng && w instanceof Sk.builtin.lng)
+	{
+	    return v.longCompare(w) !== 0;
+	}
+
         return v !== w;
+    }
 
     if (v === w)
     {
@@ -135,6 +179,10 @@ Sk.misceval.richCompareBool = function(v, w, op)
             case 'GtE': return v >= w;
             case 'NotEq': return v != w;
             case 'Eq': return v == w;
+            case 'In':
+            case 'NotIn':  {
+                throw new Sk.builtin.TypeError("argument of type '" + Sk.abstr.typeName(w) + "' is not iterable");
+            };
             default: throw "assert";
         }
     }
@@ -165,39 +213,39 @@ Sk.misceval.richCompareBool = function(v, w, op)
                     return Sk.misceval.callsim(v['__eq__'], v, w);
                 else if (w && w['__eq__'])
                     return Sk.misceval.callsim(w['__eq__'], w, v);
-            }
+                }
             else if (op === 'NotEq') {
                 if (v && v['__ne__'])
                     return Sk.misceval.callsim(v['__ne__'], v, w);
-                else if (w && w['__eq__'])
+                else if (w && w['__ne__'])
                     return Sk.misceval.callsim(w['__ne__'], w, v);
-            }
+                }
             else if (op === 'Gt') {
                 if (v && v['__gt__'])
                     return Sk.misceval.callsim(v['__gt__'], v, w);
                 else if (w && w['__le__'])
                     return Sk.misceval.callsim(w['__le__'], w, v);
-            }
+                }
             else if (op === 'Lt') {
                 if (v && v['__lt__'])
                     return Sk.misceval.callsim(v['__lt__'], v, w);
                 else if (w && w['__ge__'])
                     return Sk.misceval.callsim(w['__ge__'], w, v);
-            }
+                }
             else if (op === 'GtE') {
                 if (v && v['__ge__'])
                     return Sk.misceval.callsim(v['__ge__'], v, w);
                 else if (w && w['__lt__'])
                     return Sk.misceval.callsim(w['__lt__'], w, v);
-            }
+                }
             else if (op === 'LtE') {
                 if (v && v['__le__'])
                     return Sk.misceval.callsim(v['__le__'], v, w);
                 else if (w && w['__gt__'])
                     return Sk.misceval.callsim(w['__gt__'], w, v);
-            }
+                }
 
-/*  Fix by BM -- old version
+/*	Fix by BM -- old version
             if (op === 'Eq')
                 if (v && v['__eq__'])
                     return Sk.misceval.callsim(v['__eq__'], v, w);
@@ -228,13 +276,14 @@ Sk.misceval.richCompareBool = function(v, w, op)
                     return Sk.misceval.callsim(v['__le__'], v, w);
                 else if (w && w['__ge__'])
                     return Sk.misceval.callsim(w['__ge__'], w, v);
-                */
+*/
 
             // if those aren't defined, fallback on the __cmp__ method if it
             // exists
             if (v && v['__cmp__'])
             {
                 var ret = Sk.misceval.callsim(v['__cmp__'], v, w);
+		ret = Sk.builtin.asnum$(ret);
                 if (op === 'Eq') return ret === 0;
                 else if (op === 'NotEq') return ret !== 0;
                 else if (op === 'Lt') return ret < 0;
@@ -246,6 +295,7 @@ Sk.misceval.richCompareBool = function(v, w, op)
             {
                 // note, flipped on return value and call
                 var ret = Sk.misceval.callsim(w['__cmp__'], w, v);
+		ret = Sk.builtin.asnum$(ret);
                 if (op === 'Eq') return ret === 0;
                 else if (op === 'NotEq') return ret !== 0;
                 else if (op === 'Lt') return ret > 0;
@@ -267,7 +317,9 @@ Sk.misceval.richCompareBool = function(v, w, op)
     if (op === 'Eq') return v === w;
     if (op === 'NotEq') return v !== w;
 
-    throw new Sk.builtin.ValueError("don't know how to compare '" + v.tp$name + "' and '" + w.tp$name + "'");
+    var vname = Sk.abstr.typeName(v);
+    var wname = Sk.abstr.typeName(w);
+    throw new Sk.builtin.ValueError("don't know how to compare '" + vname + "' and '" + wname + "'");
 };
 goog.exportSymbol("Sk.misceval.richCompareBool", Sk.misceval.richCompareBool);
 
@@ -282,10 +334,15 @@ Sk.misceval.objectRepr = function(v)
         return new Sk.builtin.str("False");
     else if (typeof v === "number")
         return new Sk.builtin.str("" + v);
+    else if (!v['$r']) {
+        if (v.tp$name) {
+            return new Sk.builtin.str("<" + v.tp$name + " object>");
+        } else {
+            return new Sk.builtin.str("<unknown>");
+        };
+    }
     else if (v.constructor === Sk.builtin.nmber)
         return new Sk.builtin.str("" + v.v);
-    else if (!v['$r'])
-        return new Sk.builtin.str("<" + v.tp$name + " object>");
     else
         return v['$r']();
 };
@@ -298,7 +355,7 @@ Sk.misceval.opAllowsEquality = function(op)
         case 'LtE':
         case 'Eq':
         case 'GtE':
-        return true;
+            return true;
     }
     return false;
 };
@@ -310,6 +367,7 @@ Sk.misceval.isTrue = function(x)
     if (x === false) return false;
     if (x === null) return false;
     if (typeof x === "number") return x !== 0;
+    if (x instanceof Sk.builtin.lng) return x.nb$nonzero();
     if (x.constructor === Sk.builtin.nmber) return x.v !== 0;
     if (x.mp$length) return x.mp$length() !== 0;
     if (x.sq$length) return x.sq$length() !== 0;
@@ -340,14 +398,17 @@ goog.exportSymbol("Sk.misceval.print_", Sk.misceval.print_);
  * @param {string} name
  * @param {Object=} other generally globals
  */
- Sk.misceval.loadname = function(name, other) {
-  var v = other[name];
-  if (v !== undefined) return v;
+Sk.misceval.loadname = function(name, other)
+{
+    var v = other[name];
+    if (v !== undefined) return v;
 
-  var bi = Sk.builtins[name];
-  if (bi !== undefined) return bi;
+    var bi = Sk.builtins[name];
+    if (bi !== undefined) return bi;
 
-  throw new Sk.builtin.NameError("name '" + name + "' is not defined");
+    name = name.replace('_$rw$', '');
+    name = name.replace('_$rn$', '');
+    throw new Sk.builtin.NameError("name '" + name + "' is not defined");
 };
 goog.exportSymbol("Sk.misceval.loadname", Sk.misceval.loadname);
 
@@ -378,7 +439,7 @@ goog.exportSymbol("Sk.misceval.loadname", Sk.misceval.loadname);
  * Note that the same problem exists for function objects too (a "def"
  * creates a function object that also has properties). It just happens
  * that attributes on classes in python are much more useful and common
- * than the attributes on functions.
+ * that the attributes on functions.
  *
  * Also note, that for full python compatibility we have to do the $call
  * method because any python object could have a __call__ method which
@@ -426,10 +487,11 @@ goog.exportSymbol("Sk.misceval.loadname", Sk.misceval.loadname);
  * TODO I think all the above is out of date.
  */
 
- Sk.misceval.call = function(func, kwdict, varargseq, kws, args) {
-  var args = Array.prototype.slice.call(arguments, 4);
-  // todo; possibly inline apply to avoid extra stack frame creation
-  return Sk.misceval.apply(func, kwdict, varargseq, kws, args);
+Sk.misceval.call = function(func, kwdict, varargseq, kws, args)
+{
+    var args = Array.prototype.slice.call(arguments, 4);
+    // todo; possibly inline apply to avoid extra stack frame creation
+    return Sk.misceval.apply(func, kwdict, varargseq, kws, args);
 };
 goog.exportSymbol("Sk.misceval.call", Sk.misceval.call);
 
@@ -437,51 +499,77 @@ goog.exportSymbol("Sk.misceval.call", Sk.misceval.call);
  * @param {Object} func the thing to call
  * @param {...*} args stuff to pass it
  */
- Sk.misceval.callsim = function(func, args) {
-  var args = Array.prototype.slice.call(arguments, 1);
-  return Sk.misceval.apply(func, undefined, undefined, undefined, args);
+Sk.misceval.callsim = function(func, args)
+{
+    var args = Array.prototype.slice.call(arguments, 1);
+    return Sk.misceval.apply(func, undefined, undefined, undefined, args);
 };
 goog.exportSymbol("Sk.misceval.callsim", Sk.misceval.callsim);
 
 /**
- * same as Sk.misceval.call except args is an actual array, rather than varargs.
+ * same as Sk.misceval.call except args is an actual array, rather than
+ * varargs.
  */
- Sk.misceval.apply = function(func, kwdict, varargseq, kws, args) {
-  if (typeof func === "function") {
-    // todo; i believe the only time this happens is the wrapper
-    // function around generators (that creates the iterator).
-    // should just make that a real function object and get rid
-    // of this case.
-    // alternatively, put it to more use, and perhaps use
-    // descriptors to create builtin.func's in other places.
+Sk.misceval.apply = function(func, kwdict, varargseq, kws, args)
+{
+    if (func === null)
+    {
+        throw new Sk.builtin.TypeError("'" + Sk.abstr.typeName(func) + "' object is not callable");
+    }
+    else if (typeof func === "function")
+    {
+        // todo; i believe the only time this happens is the wrapper
+        // function around generators (that creates the iterator).
+        // should just make that a real function object and get rid
+        // of this case.
+        // alternatively, put it to more use, and perhaps use
+        // descriptors to create builtin.func's in other places.
 
-    goog.asserts.assert(kws === undefined);
-    return func.apply(null, args);
-  }
-  else {
-    var fcall = func.tp$call;
-    if (fcall !== undefined) {
-      if (varargseq) {
-        for (var it = varargseq.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext()) {
-          args.push(i);
+        // This actually happens for all builtin functions (in
+        // builtin.js, for example) as they are javascript functions,
+        // not Sk.builtin.func objects.
+
+        if (varargseq)
+        {
+            for (var it = varargseq.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext())
+            {
+                args.push(i);
+            }
         }
-      }
-      if (kwdict) {
-        goog.asserts.fail("todo;");
-      }
-      return fcall.call(func, args, kws, kwdict);
+        goog.asserts.assert(((kws === undefined) || (kws.length === 0)));
+        return func.apply(null, args);
     }
-    // todo; can we push this into a tp$call somewhere so there's
-    // not redundant checks everywhere for all of these __x__ ones?
-    fcall = func.__call__;
-    if (fcall !== undefined) {
-      // func is actually the object here because we got __call__
-      // from it. todo; should probably use descr_get here
-      args.unshift(func);
-      return Sk.misceval.apply(fcall, kws, args, kwdict, varargseq);
+    else
+    {
+        var fcall = func.tp$call;
+        if (fcall !== undefined)
+        {
+            if (varargseq)
+            {
+                for (var it = varargseq.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext())
+                {
+                    args.push(i);
+                }
+            }
+            if (kwdict)
+            {
+                goog.asserts.fail("todo;");
+            }
+            return fcall.call(func, args, kws, kwdict);
+        }
+
+        // todo; can we push this into a tp$call somewhere so there's
+        // not redundant checks everywhere for all of these __x__ ones?
+        fcall = func.__call__;
+        if (fcall !== undefined)
+        {
+            // func is actually the object here because we got __call__
+            // from it. todo; should probably use descr_get here
+            args.unshift(func);
+            return Sk.misceval.apply(fcall, kws, args, kwdict, varargseq);
+        }
+        throw new Sk.builtin.TypeError("'" + Sk.abstr.typeName(func) + "' object is not callable");
     }
-    throw new TypeError("'" + func.tp$name + "' object is not callable.");
-  }
 };
 goog.exportSymbol("Sk.misceval.apply", Sk.misceval.apply);
 
@@ -489,7 +577,7 @@ goog.exportSymbol("Sk.misceval.apply", Sk.misceval.apply);
  * Constructs a class object given a code object representing the body
  * of the class, the name of the class, and the list of bases.
  *
- * There are no "old-style" classes in DaVinci, so use the user-specified
+ * There are no "old-style" classes in Skulpt, so use the user-specified
  * metaclass (todo;) if there is one, the type of the 0th base class if
  * there's bases, or otherwise the 'type' type.
  *
@@ -500,8 +588,8 @@ goog.exportSymbol("Sk.misceval.apply", Sk.misceval.apply);
  * should return a newly constructed class object.
  *
  */
- Sk.misceval.buildClass = function(globals, func, name, bases)
- {
+Sk.misceval.buildClass = function(globals, func, name, bases)
+{
     // todo; metaclass
     var meta = Sk.builtin.type;
 

@@ -1,5 +1,5 @@
 /**
- * Base namespace for DaVinci. This is the only symbol that DaVinci adds to the
+ * Base namespace for Skulpt. This is the only symbol that Skulpt adds to the
  * global namespace. Other user accessible symbols are noted and described
  * below.
  */
@@ -8,7 +8,7 @@ var Sk = Sk || {};
 
 /**
  *
- * Set various customizable parts of DaVinci.
+ * Set various customizable parts of Skulpt.
  *
  * output: Replacable output redirection (called from print, etc.).
  * read: Replacable function to load modules with (called via import, etc.)
@@ -30,9 +30,9 @@ Sk.configure = function(options)
     Sk.read = options["read"] || Sk.read;
     goog.asserts.assert(typeof Sk.read === "function");
 
-    Sk.timeoutMsg = options["timeoutMsg"] || Sk.timeoutMsg;
-    goog.asserts.assert(typeof Sk.timeoutMsg === "function");
-    goog.exportSymbol("Sk.timeoutMsg", Sk.timeoutMsg);
+    Sk.timeoutMsg = options["timeoutMsg"] || Sk.timeoutMsg;											// RNL
+    goog.asserts.assert(typeof Sk.timeoutMsg === "function");										// RNL
+	goog.exportSymbol("Sk.timeoutMsg", Sk.timeoutMsg);
 
     Sk.sysargv = options["sysargv"] || Sk.sysargv;
     goog.asserts.assert(goog.isArrayLike(Sk.sysargv));

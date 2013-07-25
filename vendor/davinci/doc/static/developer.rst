@@ -6,10 +6,10 @@ There's a python script named "m" in the root that performs common operations. '
     USAGE: m [command] [options] [.py file]
     Where command is one of:
 
-            run   -- given a .py file run it using davinci  ./m run myprog.py
+            run   -- given a .py file run it using skulpt  ./m run myprog.py
             test  -- run all test cases in test/run
-            dist  -- create davinci.min.js and builtin.js  with -u also build
-                     uncompressed davinci for debugging
+            dist  -- create skulpt.js and builtin.js  with -u also build
+                     uncompressed skulpt for debugging
             docbi -- regenerate builtin.js only and copy to doc/static
 
             regenparser      -- regenerate parser tests
@@ -26,7 +26,7 @@ There's a python script named "m" in the root that performs common operations. '
             browser -- run all tests in the browser
             shell   -- run a python program but keep a shell open (like python -i)
                        ./m shell myprog.py
-            vfs -- Build a virtual file system to support davinci read tests
+            vfs -- Build a virtual file system to support skulpt read tests
 
             debugbrowser  -- debug in the browser -- open your javascript console
 
@@ -45,7 +45,7 @@ A typical development workflow might be as follows.  Suppose that you want to ad
     print abs(-1.0)
     print abs(24)
 
-2. Now go edit the source.  To implement ``abs`` you would edit the builtin.js file.  Now abs is pretty easy to add, because you can just have our davinci version of abs call ``Math.abs``  So here it is
+2. Now go edit the source.  To implement ``abs`` you would edit the builtin.js file.  Now abs is pretty easy to add, because you can just have our skulpt version of abs call ``Math.abs``  So here it is
 
 .. sourcecode:: javascript
 
@@ -137,7 +137,7 @@ This is all incredibly useful information.
 
   * First it demonstrates that your addition actually worked.  You can see the output at the bottom.
 
-  * Second, you can see how davinci 'compiled' your python program into its intermediate Javascript form.  While this may not be all that helpful in this particular case it can be very very helpful in figuring out what davinci is actually doing.
+  * Second, you can see how skulpt 'compiled' your python program into its intermediate Javascript form.  While this may not be all that helpful in this particular case it can be very very helpful in figuring out what skulpt is actually doing.
 
 3. Now you should run all of the unit tests to make sure you have broken anything else accidentally.  This is really easy::
 
@@ -204,9 +204,9 @@ If the outputs don't match, then there's something to be fixed. Try to narrow it
 
 There's a helper script that just looks for the next available XXX and opens vim to let you paste the test case: ./m nrt (standing for New Run Test).  nrt will automatically add the expected output and other files so that your new test will be a part of ``./m test`` for all time.
 
-If you have done something really invasive you will want to regenerate all the tests, you can run  ``./m regenruntests``  to do this. That runs python on all the .py files and saves the output to the same name with the extension .py.real, which is what the test suite uses to compare against when running in Skulpt.   **Unless it doesn't**  In some cases we just can't make davinci match the Python output exactly.  In this case you can create a tXXX.py.real.force file which contains the desired test output to compare against the actual output in Skulpt  For example::
+If you have done something really invasive you will want to regenerate all the tests, you can run  ``./m regenruntests``  to do this. That runs python on all the .py files and saves the output to the same name with the extension .py.real, which is what the test suite uses to compare against when running in Skulpt.   **Unless it doesn't**  In some cases we just can't make skulpt match the Python output exactly.  In this case you can create a tXXX.py.real.force file which contains the desired test output to compare against the actual output in Skulpt  For example::
 
     >>> print t
     <turtle.Turtle object at 0x1009a6590>
 
-It would be impossible to arrange for you to have a turtle at exactly that address, and in any case davinci doesn't worry about that information and would simply print out <turtle.Turtle Object>  This is a perfect example of when to use a force file.  Simply edit the real file and remove the hex address.  There are other cases where you may run into this as well.
+It would be impossible to arrange for you to have a turtle at exactly that address, and in any case skulpt doesn't worry about that information and would simply print out <turtle.Turtle Object>  This is a perfect example of when to use a force file.  Simply edit the real file and remove the hex address.  There are other cases where you may run into this as well.

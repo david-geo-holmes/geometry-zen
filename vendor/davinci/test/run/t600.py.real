@@ -1,0 +1,34 @@
+----------
+construction
+----------
+z1 = complex(11, 7)
+----------
+properties
+----------
+z1.real => 11.0
+z1.imag => 7.0
+----------
+representations
+----------
+str(z1)  => (11+7j)
+repr(z1) => complex(11, 7)
+----------
+type
+----------
+str(type(z1))  => <class 'complex'>
+repr(type(z1)) => <class 'complex'>
+----------
+construction
+----------
+z1 = complex(5, 3)
+----------
+z1 + z2 => (16+10j)
+z1 - z2 => (6+4j)
+z1 * z2 => (34+68j)
+z1 / z2 => (2.235294117647059+0.058823529411764705j)
+----------
+z1 == z1 => True
+z1 != z1 => False
+z1 == z2 => False
+z1 != z2 => True
+----------

@@ -1,1 +1,1 @@
-for i in "leonardo": print i
+for i in "skulpt": print i

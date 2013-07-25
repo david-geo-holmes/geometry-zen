@@ -946,14 +946,14 @@ var $builtinmodule = function(name) {
       a.xyz = bladeASM.rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 7);
       return selfPy;
     });
-    $loc.nu$pos = function() {
+    $loc.nb$positive = function() {
       return this;
     };
-    $loc.nu$neg = function() {
+    $loc.nb$negative = function() {
       var mv = Sk.ffi.remapToJs(this);
       return remapE3ToPy(-mv.w, -mv.x, -mv.y, -mv.z, -mv.xy, -mv.yz, -mv.zx, -mv.xyz);
     };
-    $loc.nu$inv = function() {
+    $loc.nb$invert = function() {
       var mv = Sk.ffi.remapToJs(this);
       return remapE3ToPy(mv.w, mv.x, mv.y, mv.z, -mv.xy, -mv.yz, -mv.zx, -mv.xyz);
     };
@@ -1450,14 +1450,14 @@ var $builtinmodule = function(name) {
       }
       return selfPy;
     });
-    $loc.nu$pos = function() {
+    $loc.nb$positive = function() {
       return this;
     };
-    $loc.nu$neg = function() {
+    $loc.nb$negative = function() {
       var mv = Sk.ffi.remapToJs(this);
       return quaternionToPy(-mv.x, -mv.y, -mv.z, -mv.w);
     };
-    $loc.nu$inv = function() {
+    $loc.nb$invert = function() {
       var mv = Sk.ffi.remapToJs(this);
       return remapE3ToPy(mv.w, mv.x, mv.y, mv.z, -mv.xy, -mv.yz, -mv.zx, -mv.xyz);
     };

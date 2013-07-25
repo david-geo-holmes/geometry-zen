@@ -7,34 +7,33 @@ Sk.realsyspath = undefined;
  * @param {string} ext extension to use (.py or .js)
  * @param {boolean=} failok will throw if not true
  */
-Sk.importSearchPathForName = function(name, ext, failok) {
-  var L = Sk.realsyspath;
-  for (var it = L.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext()) {
-    var nameAsPath = name.replace(/\./g, "/");
-    var searchPaths = [
-      i.v + "/" + nameAsPath + ext,                 // module
-      i.v + "/" + nameAsPath + "/__init__" + ext    // package
-    ];
+Sk.importSearchPathForName = function(name, ext, failok)
+{
+    var L = Sk.realsyspath;
+    for (var it = L.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext())
+    {
+        var nameAsPath = name.replace(/\./g, "/");
+        var fns = [
+            i.v + "/" + nameAsPath + ext,                 // module
+            i.v + "/" + nameAsPath + "/__init__" + ext    // package
+                ];
 
-    for (var j = 0; j < searchPaths.length; ++j) {
-      var searchPath = searchPaths[j];
-      // Sk.debugout("  import search, trying", searchPath);
-      try {
-        // todo; lame, this is the only way we have to test existence right now
-        Sk.read(searchPath);
-        // Sk.debugout("import search, found at", name, "type", ext, "at", searchPath);
-        return searchPath;
-      }
-      catch (e) {
-        // 
-      };
+        for (var j = 0; j < fns.length; ++j)
+        {
+            var fn = fns[j];
+            //Sk.debugout("  import search, trying", fn);
+            try {
+                // todo; lame, this is the only way we have to test existence right now
+                Sk.read(fn);
+                //Sk.debugout("import search, found at", name, "type", ext, "at", fn);
+                return fn;
+            } catch (e) {};
+        }
     }
-  }
-  if (!failok) {
-    // Sk.debugout("import search, nothing found, and failure was not an option");
-    throw new Sk.builtin.ImportError("No module named " + name);
-  }
-  // Sk.debugout("import search, nothing found, but failure was ok");
+   
+    if (!failok)
+        throw new Sk.builtin.ImportError("No module named " + name);
+    //Sk.debugout("import search, nothing found, but failure was ok");
 };
 
 Sk.doOneTimeInitialization = function()
@@ -96,14 +95,15 @@ Sk.importModuleInternal_ = function(name, dumpJS, modname, suppliedPyBody)
     var parentModName;
 
     // if leaf is already in sys.modules, early out
-    var prev = Sk.sysmodules.mp$subscript(modname);
-    if (prev !== undefined)
-    {
+    try {
+        var prev = Sk.sysmodules.mp$subscript(modname);
         // if we're a dotted module, return the top level, otherwise ourselves
         if (modNameSplit.length > 1)
             return Sk.sysmodules.mp$subscript(modNameSplit[0]);
         else
-            return prev;
+            return prev;        
+    } catch (x) {
+        // not in sys.modules, continue
     }
 
     if (modNameSplit.length > 1)
@@ -171,16 +171,15 @@ Sk.importModuleInternal_ = function(name, dumpJS, modname, suppliedPyBody)
                 return lines.join("\n");
             };
             finalcode = withLineNumbers(co.code);
-            // Sk.debugout(finalcode);
+            Sk.debugout(finalcode);
         }
     }
 
     var namestr = "new Sk.builtin.str('" + modname + "')";
     finalcode += "\n" + co.funcname + "(" + namestr + ");";
 
-    if (Sk.debugCode) {
-      Sk.debugout(finalcode);
-    }
+//	if (Sk.debugCode)
+//		Sk.debugout(finalcode);
 
     var modlocs = goog.global.eval(finalcode);
 
@@ -224,6 +223,8 @@ Sk.importMain = function(name, dumpJS)
 	Sk.sysmodules = new Sk.builtin.dict([]);
 	Sk.realsyspath = undefined;
 
+    Sk.resetCompiler();
+
     return Sk.importModuleInternal_(name, dumpJS, "__main__");
 };
 
@@ -235,6 +236,8 @@ Sk.importMainWithBody = function(name, dumpJS, body)
 	Sk.sysmodules = new Sk.builtin.dict([]);
 	Sk.realsyspath = undefined;
     
+    Sk.resetCompiler();
+
     return Sk.importModuleInternal_(name, dumpJS, "__main__", body);
 };
 

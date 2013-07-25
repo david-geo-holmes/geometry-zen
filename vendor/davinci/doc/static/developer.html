@@ -323,18 +323,18 @@ ul.auto-toc {
 </style>
 </head>
 <body>
-<div class="document" id="getting-started-with-development-on-davinci">
-<h1 class="title">Getting Started with Development on davinci</h1>
+<div class="document" id="getting-started-with-development-on-skulpt">
+<h1 class="title">Getting Started with Development on Skulpt</h1>
 
 <p>There's a python script named &quot;m&quot; in the root that performs common operations. 'm' is a python script, so you'll need python installed.  Here is the list of things that m can do:</p>
 <pre class="literal-block">
 USAGE: m [command] [options] [.py file]
 Where command is one of:
 
-        run   -- given a .py file run it using davinci  ./m run myprog.py
+        run   -- given a .py file run it using skulpt  ./m run myprog.py
         test  -- run all test cases in test/run
-        dist  -- create davinci.min.js and builtin.js  with -u also build
-                 uncompressed davinci for debugging
+        dist  -- create skulpt.js and builtin.js  with -u also build
+                 uncompressed skulpt for debugging
         docbi -- regenerate builtin.js only and copy to doc/static
 
         regenparser      -- regenerate parser tests
@@ -351,7 +351,7 @@ Where command is one of:
         browser -- run all tests in the browser
         shell   -- run a python program but keep a shell open (like python -i)
                    ./m shell myprog.py
-        vfs -- Build a virtual file system to support davinci read tests
+        vfs -- Build a virtual file system to support skulpt read tests
 
         debugbrowser  -- debug in the browser -- open your javascript console
 </pre>
@@ -367,7 +367,7 @@ print abs(-1.0)
 print abs(24)
 </pre>
 <ol class="arabic simple" start="2">
-<li>Now go edit the source.  To implement <tt class="docutils literal">abs</tt> you would edit the builtin.js file.  Now abs is pretty easy to add, because you can just have our davinci version of abs call <tt class="docutils literal">Math.abs</tt>  So here it is</li>
+<li>Now go edit the source.  To implement <tt class="docutils literal">abs</tt> you would edit the builtin.js file.  Now abs is pretty easy to add, because you can just have our skulpt version of abs call <tt class="docutils literal">Math.abs</tt>  So here it is</li>
 </ol>
 <pre class="code javascript literal-block">
 <span class="name other">Sk</span><span class="punctuation">.</span><span class="name other">builtin</span><span class="punctuation">.</span><span class="name other">abs</span> <span class="operator">=</span> <span class="keyword declaration">function</span> <span class="name other">abs</span><span class="punctuation">(</span><span class="name other">x</span><span class="punctuation">)</span>
@@ -458,7 +458,7 @@ print abs(24)
 <blockquote>
 <ul class="simple">
 <li>First it demonstrates that your addition actually worked.  You can see the output at the bottom.</li>
-<li>Second, you can see how davinci 'compiled' your python program into its intermediate Javascript form.  While this may not be all that helpful in this particular case it can be very very helpful in figuring out what davinci is actually doing.</li>
+<li>Second, you can see how skulpt 'compiled' your python program into its intermediate Javascript form.  While this may not be all that helpful in this particular case it can be very very helpful in figuring out what skulpt is actually doing.</li>
 </ul>
 </blockquote>
 <ol class="arabic" start="3">
@@ -517,12 +517,12 @@ $ ./m run blah.py
 </pre>
 <p>If the outputs don't match, then there's something to be fixed. Try to narrow it down to something minimal that just has one specific bug, and then add it to the test suite as test/run/tXXX.py.</p>
 <p>There's a helper script that just looks for the next available XXX and opens vim to let you paste the test case: ./m nrt (standing for New Run Test).  nrt will automatically add the expected output and other files so that your new test will be a part of <tt class="docutils literal">./m test</tt> for all time.</p>
-<p>If you have done something really invasive you will want to regenerate all the tests, you can run  <tt class="docutils literal">./m regenruntests</tt>  to do this. That runs python on all the .py files and saves the output to the same name with the extension .py.real, which is what the test suite uses to compare against when running in Skulpt.   <strong>Unless it doesn't</strong>  In some cases we just can't make davinci match the Python output exactly.  In this case you can create a tXXX.py.real.force file which contains the desired test output to compare against the actual output in Skulpt  For example:</p>
+<p>If you have done something really invasive you will want to regenerate all the tests, you can run  <tt class="docutils literal">./m regenruntests</tt>  to do this. That runs python on all the .py files and saves the output to the same name with the extension .py.real, which is what the test suite uses to compare against when running in Skulpt.   <strong>Unless it doesn't</strong>  In some cases we just can't make skulpt match the Python output exactly.  In this case you can create a tXXX.py.real.force file which contains the desired test output to compare against the actual output in Skulpt  For example:</p>
 <pre class="literal-block">
 &gt;&gt;&gt; print t
 &lt;turtle.Turtle object at 0x1009a6590&gt;
 </pre>
-<p>It would be impossible to arrange for you to have a turtle at exactly that address, and in any case davinci doesn't worry about that information and would simply print out &lt;turtle.Turtle Object&gt;  This is a perfect example of when to use a force file.  Simply edit the real file and remove the hex address.  There are other cases where you may run into this as well.</p>
+<p>It would be impossible to arrange for you to have a turtle at exactly that address, and in any case skulpt doesn't worry about that information and would simply print out &lt;turtle.Turtle Object&gt;  This is a perfect example of when to use a force file.  Simply edit the real file and remove the hex address.  There are other cases where you may run into this as well.</p>
 </div>
 </div>
 </body>

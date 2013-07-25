@@ -1,0 +1,704 @@
+----------
+repr
+----------
+Euclidean3(0, 0, 0, 0, 0, 0, 0, 0)
+Scalar3(1)
+Scalar3(2)
+Vector3(1, 0, 0)
+Vector3(0, 1, 0)
+Vector3(0, 0, 1)
+Bivector3(1, 0, 0)
+Bivector3(0, 1, 0)
+Bivector3(0, 0, 1)
+Pseudoscalar3(1)
+----------
+str
+----------
+0
+1
+2
+i
+j
+k
+ij
+jk
+ki
+I
+----------
+Addition +
+----------
+0 + 0 => 0
+0 + 1 => 1
+0 + 2 => 2
+0 + i => i
+0 + j => j
+0 + k => k
+0 + ij => ij
+0 + jk => jk
+0 + ki => ki
+0 + I => I
+
+1 + 0 => 1
+1 + 1 => 2
+1 + 2 => 3
+1 + i => 1+i
+1 + j => 1+j
+1 + k => 1+k
+1 + ij => 1+ij
+1 + jk => 1+jk
+1 + ki => 1+ki
+1 + I => 1+I
+
+2 + 0 => 2
+2 + 1 => 3
+2 + 2 => 4
+2 + i => 2+i
+2 + j => 2+j
+2 + k => 2+k
+2 + ij => 2+ij
+2 + jk => 2+jk
+2 + ki => 2+ki
+2 + I => 2+I
+
+i + 0 => i
+i + 1 => 1+i
+i + 2 => 2+i
+i + i => 2*i
+i + j => i+j
+i + k => i+k
+i + ij => i+ij
+i + jk => i+jk
+i + ki => i+ki
+i + I => i+I
+
+j + 0 => j
+j + 1 => 1+j
+j + 2 => 2+j
+j + i => i+j
+j + j => 2*j
+j + k => j+k
+j + ij => j+ij
+j + jk => j+jk
+j + ki => j+ki
+j + I => j+I
+
+k + 0 => k
+k + 1 => 1+k
+k + 2 => 2+k
+k + i => i+k
+k + j => j+k
+k + k => 2*k
+k + ij => k+ij
+k + jk => k+jk
+k + ki => k+ki
+k + I => k+I
+
+ij + 0 => ij
+ij + 1 => 1+ij
+ij + 2 => 2+ij
+ij + i => i+ij
+ij + j => j+ij
+ij + k => k+ij
+ij + ij => 2*ij
+ij + jk => ij+jk
+ij + ki => ij+ki
+ij + I => ij+I
+
+jk + 0 => jk
+jk + 1 => 1+jk
+jk + 2 => 2+jk
+jk + i => i+jk
+jk + j => j+jk
+jk + k => k+jk
+jk + ij => ij+jk
+jk + jk => 2*jk
+jk + ki => jk+ki
+jk + I => jk+I
+
+ki + 0 => ki
+ki + 1 => 1+ki
+ki + 2 => 2+ki
+ki + i => i+ki
+ki + j => j+ki
+ki + k => k+ki
+ki + ij => ij+ki
+ki + jk => jk+ki
+ki + ki => 2*ki
+ki + I => ki+I
+
+I + 0 => I
+I + 1 => 1+I
+I + 2 => 2+I
+I + i => i+I
+I + j => j+I
+I + k => k+I
+I + ij => ij+I
+I + jk => jk+I
+I + ki => ki+I
+I + I => 2*I
+
+----------
+Subtraction -
+----------
+0 - 0 => 0
+0 - 1 => -1
+0 - 2 => -2
+0 - i => -i
+0 - j => -j
+0 - k => -k
+0 - ij => -ij
+0 - jk => -jk
+0 - ki => -ki
+0 - I => -I
+
+1 - 0 => 1
+1 - 1 => 0
+1 - 2 => -1
+1 - i => 1-i
+1 - j => 1-j
+1 - k => 1-k
+1 - ij => 1-ij
+1 - jk => 1-jk
+1 - ki => 1-ki
+1 - I => 1-I
+
+2 - 0 => 2
+2 - 1 => 1
+2 - 2 => 0
+2 - i => 2-i
+2 - j => 2-j
+2 - k => 2-k
+2 - ij => 2-ij
+2 - jk => 2-jk
+2 - ki => 2-ki
+2 - I => 2-I
+
+i - 0 => i
+i - 1 => -1+i
+i - 2 => -2+i
+i - i => 0
+i - j => i-j
+i - k => i-k
+i - ij => i-ij
+i - jk => i-jk
+i - ki => i-ki
+i - I => i-I
+
+j - 0 => j
+j - 1 => -1+j
+j - 2 => -2+j
+j - i => -i+j
+j - j => 0
+j - k => j-k
+j - ij => j-ij
+j - jk => j-jk
+j - ki => j-ki
+j - I => j-I
+
+k - 0 => k
+k - 1 => -1+k
+k - 2 => -2+k
+k - i => -i+k
+k - j => -j+k
+k - k => 0
+k - ij => k-ij
+k - jk => k-jk
+k - ki => k-ki
+k - I => k-I
+
+ij - 0 => ij
+ij - 1 => -1+ij
+ij - 2 => -2+ij
+ij - i => -i+ij
+ij - j => -j+ij
+ij - k => -k+ij
+ij - ij => 0
+ij - jk => ij-jk
+ij - ki => ij-ki
+ij - I => ij-I
+
+jk - 0 => jk
+jk - 1 => -1+jk
+jk - 2 => -2+jk
+jk - i => -i+jk
+jk - j => -j+jk
+jk - k => -k+jk
+jk - ij => -ij+jk
+jk - jk => 0
+jk - ki => jk-ki
+jk - I => jk-I
+
+ki - 0 => ki
+ki - 1 => -1+ki
+ki - 2 => -2+ki
+ki - i => -i+ki
+ki - j => -j+ki
+ki - k => -k+ki
+ki - ij => -ij+ki
+ki - jk => -jk+ki
+ki - ki => 0
+ki - I => ki-I
+
+I - 0 => I
+I - 1 => -1+I
+I - 2 => -2+I
+I - i => -i+I
+I - j => -j+I
+I - k => -k+I
+I - ij => -ij+I
+I - jk => -jk+I
+I - ki => -ki+I
+I - I => 0
+
+----------
+Multiplication *
+----------
+0 * 0 => 0
+0 * 1 => 0
+0 * 2 => 0
+0 * i => 0
+0 * j => 0
+0 * k => 0
+0 * ij => 0
+0 * jk => 0
+0 * ki => 0
+0 * I => 0
+
+1 * 0 => 0
+1 * 1 => 1
+1 * 2 => 2
+1 * i => i
+1 * j => j
+1 * k => k
+1 * ij => ij
+1 * jk => jk
+1 * ki => ki
+1 * I => I
+
+2 * 0 => 0
+2 * 1 => 2
+2 * 2 => 4
+2 * i => 2*i
+2 * j => 2*j
+2 * k => 2*k
+2 * ij => 2*ij
+2 * jk => 2*jk
+2 * ki => 2*ki
+2 * I => 2*I
+
+i * 0 => 0
+i * 1 => i
+i * 2 => 2*i
+i * i => 1
+i * j => ij
+i * k => -ki
+i * ij => j
+i * jk => I
+i * ki => -k
+i * I => jk
+
+j * 0 => 0
+j * 1 => j
+j * 2 => 2*j
+j * i => -ij
+j * j => 1
+j * k => jk
+j * ij => -i
+j * jk => k
+j * ki => I
+j * I => ki
+
+k * 0 => 0
+k * 1 => k
+k * 2 => 2*k
+k * i => ki
+k * j => -jk
+k * k => 1
+k * ij => I
+k * jk => -j
+k * ki => i
+k * I => ij
+
+ij * 0 => 0
+ij * 1 => ij
+ij * 2 => 2*ij
+ij * i => -j
+ij * j => i
+ij * k => I
+ij * ij => -1
+ij * jk => -ki
+ij * ki => jk
+ij * I => -k
+
+jk * 0 => 0
+jk * 1 => jk
+jk * 2 => 2*jk
+jk * i => I
+jk * j => -k
+jk * k => j
+jk * ij => ki
+jk * jk => -1
+jk * ki => -ij
+jk * I => -i
+
+ki * 0 => 0
+ki * 1 => ki
+ki * 2 => 2*ki
+ki * i => k
+ki * j => I
+ki * k => -i
+ki * ij => -jk
+ki * jk => ij
+ki * ki => -1
+ki * I => -j
+
+I * 0 => 0
+I * 1 => I
+I * 2 => 2*I
+I * i => jk
+I * j => ki
+I * k => ij
+I * ij => -k
+I * jk => -i
+I * ki => -j
+I * I => -1
+
+----------
+Extension ^
+----------
+0 ^ 0 => 0
+0 ^ 1 => 0
+0 ^ 2 => 0
+0 ^ i => 0
+0 ^ j => 0
+0 ^ k => 0
+0 ^ ij => 0
+0 ^ jk => 0
+0 ^ ki => 0
+0 ^ I => 0
+
+1 ^ 0 => 0
+1 ^ 1 => 1
+1 ^ 2 => 2
+1 ^ i => i
+1 ^ j => j
+1 ^ k => k
+1 ^ ij => ij
+1 ^ jk => jk
+1 ^ ki => ki
+1 ^ I => I
+
+2 ^ 0 => 0
+2 ^ 1 => 2
+2 ^ 2 => 4
+2 ^ i => 2*i
+2 ^ j => 2*j
+2 ^ k => 2*k
+2 ^ ij => 2*ij
+2 ^ jk => 2*jk
+2 ^ ki => 2*ki
+2 ^ I => 2*I
+
+i ^ 0 => 0
+i ^ 1 => i
+i ^ 2 => 2*i
+i ^ i => 0
+i ^ j => ij
+i ^ k => -ki
+i ^ ij => 0
+i ^ jk => I
+i ^ ki => 0
+i ^ I => 0
+
+j ^ 0 => 0
+j ^ 1 => j
+j ^ 2 => 2*j
+j ^ i => -ij
+j ^ j => 0
+j ^ k => jk
+j ^ ij => 0
+j ^ jk => 0
+j ^ ki => I
+j ^ I => 0
+
+k ^ 0 => 0
+k ^ 1 => k
+k ^ 2 => 2*k
+k ^ i => ki
+k ^ j => -jk
+k ^ k => 0
+k ^ ij => I
+k ^ jk => 0
+k ^ ki => 0
+k ^ I => 0
+
+ij ^ 0 => 0
+ij ^ 1 => ij
+ij ^ 2 => 2*ij
+ij ^ i => 0
+ij ^ j => 0
+ij ^ k => I
+ij ^ ij => 0
+ij ^ jk => 0
+ij ^ ki => 0
+ij ^ I => 0
+
+jk ^ 0 => 0
+jk ^ 1 => jk
+jk ^ 2 => 2*jk
+jk ^ i => I
+jk ^ j => 0
+jk ^ k => 0
+jk ^ ij => 0
+jk ^ jk => 0
+jk ^ ki => 0
+jk ^ I => 0
+
+ki ^ 0 => 0
+ki ^ 1 => ki
+ki ^ 2 => 2*ki
+ki ^ i => 0
+ki ^ j => I
+ki ^ k => 0
+ki ^ ij => 0
+ki ^ jk => 0
+ki ^ ki => 0
+ki ^ I => 0
+
+I ^ 0 => 0
+I ^ 1 => I
+I ^ 2 => 2*I
+I ^ i => 0
+I ^ j => 0
+I ^ k => 0
+I ^ ij => 0
+I ^ jk => 0
+I ^ ki => 0
+I ^ I => 0
+
+----------
+Left Contraction <<
+----------
+0 << 0 => 0
+0 << 1 => 0
+0 << 2 => 0
+0 << i => 0
+0 << j => 0
+0 << k => 0
+0 << ij => 0
+0 << jk => 0
+0 << ki => 0
+0 << I => 0
+
+1 << 0 => 0
+1 << 1 => 1
+1 << 2 => 2
+1 << i => i
+1 << j => j
+1 << k => k
+1 << ij => ij
+1 << jk => jk
+1 << ki => ki
+1 << I => I
+
+2 << 0 => 0
+2 << 1 => 2
+2 << 2 => 4
+2 << i => 2*i
+2 << j => 2*j
+2 << k => 2*k
+2 << ij => 2*ij
+2 << jk => 2*jk
+2 << ki => 2*ki
+2 << I => 2*I
+
+i << 0 => 0
+i << 1 => 0
+i << 2 => 0
+i << i => 1
+i << j => 0
+i << k => 0
+i << ij => j
+i << jk => 0
+i << ki => -k
+i << I => jk
+
+j << 0 => 0
+j << 1 => 0
+j << 2 => 0
+j << i => 0
+j << j => 1
+j << k => 0
+j << ij => -i
+j << jk => k
+j << ki => 0
+j << I => ki
+
+k << 0 => 0
+k << 1 => 0
+k << 2 => 0
+k << i => 0
+k << j => 0
+k << k => 1
+k << ij => 0
+k << jk => -j
+k << ki => i
+k << I => ij
+
+ij << 0 => 0
+ij << 1 => 0
+ij << 2 => 0
+ij << i => 0
+ij << j => 0
+ij << k => 0
+ij << ij => -1
+ij << jk => 0
+ij << ki => 0
+ij << I => -k
+
+jk << 0 => 0
+jk << 1 => 0
+jk << 2 => 0
+jk << i => 0
+jk << j => 0
+jk << k => 0
+jk << ij => 0
+jk << jk => -1
+jk << ki => 0
+jk << I => -i
+
+ki << 0 => 0
+ki << 1 => 0
+ki << 2 => 0
+ki << i => 0
+ki << j => 0
+ki << k => 0
+ki << ij => 0
+ki << jk => 0
+ki << ki => -1
+ki << I => -j
+
+I << 0 => 0
+I << 1 => 0
+I << 2 => 0
+I << i => 0
+I << j => 0
+I << k => 0
+I << ij => 0
+I << jk => 0
+I << ki => 0
+I << I => -1
+
+----------
+Right Contraction >>
+----------
+0 >> 0 => 0
+0 >> 1 => 0
+0 >> 2 => 0
+0 >> i => 0
+0 >> j => 0
+0 >> k => 0
+0 >> ij => 0
+0 >> jk => 0
+0 >> ki => 0
+0 >> I => 0
+
+1 >> 0 => 0
+1 >> 1 => 1
+1 >> 2 => 2
+1 >> i => 0
+1 >> j => 0
+1 >> k => 0
+1 >> ij => 0
+1 >> jk => 0
+1 >> ki => 0
+1 >> I => 0
+
+2 >> 0 => 0
+2 >> 1 => 2
+2 >> 2 => 4
+2 >> i => 0
+2 >> j => 0
+2 >> k => 0
+2 >> ij => 0
+2 >> jk => 0
+2 >> ki => 0
+2 >> I => 0
+
+i >> 0 => 0
+i >> 1 => i
+i >> 2 => 2*i
+i >> i => 1
+i >> j => 0
+i >> k => 0
+i >> ij => 0
+i >> jk => 0
+i >> ki => 0
+i >> I => 0
+
+j >> 0 => 0
+j >> 1 => j
+j >> 2 => 2*j
+j >> i => 0
+j >> j => 1
+j >> k => 0
+j >> ij => 0
+j >> jk => 0
+j >> ki => 0
+j >> I => 0
+
+k >> 0 => 0
+k >> 1 => k
+k >> 2 => 2*k
+k >> i => 0
+k >> j => 0
+k >> k => 1
+k >> ij => 0
+k >> jk => 0
+k >> ki => 0
+k >> I => 0
+
+ij >> 0 => 0
+ij >> 1 => ij
+ij >> 2 => 2*ij
+ij >> i => -j
+ij >> j => i
+ij >> k => 0
+ij >> ij => -1
+ij >> jk => 0
+ij >> ki => 0
+ij >> I => 0
+
+jk >> 0 => 0
+jk >> 1 => jk
+jk >> 2 => 2*jk
+jk >> i => 0
+jk >> j => -k
+jk >> k => j
+jk >> ij => 0
+jk >> jk => -1
+jk >> ki => 0
+jk >> I => 0
+
+ki >> 0 => 0
+ki >> 1 => ki
+ki >> 2 => 2*ki
+ki >> i => k
+ki >> j => 0
+ki >> k => -i
+ki >> ij => 0
+ki >> jk => 0
+ki >> ki => -1
+ki >> I => 0
+
+I >> 0 => 0
+I >> 1 => I
+I >> 2 => 2*I
+I >> i => jk
+I >> j => ki
+I >> k => ij
+I >> ij => -k
+I >> jk => -i
+I >> ki => -j
+I >> I => -1
+

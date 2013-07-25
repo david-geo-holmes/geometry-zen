@@ -3380,7 +3380,7 @@ goog.asserts.assertInstanceof = function(value, type, opt_message, var_args) {
 };
 
 /**
- * Base namespace for DaVinci. This is the only symbol that DaVinci adds to the
+ * Base namespace for Skulpt. This is the only symbol that Skulpt adds to the
  * global namespace. Other user accessible symbols are noted and described
  * below.
  */
@@ -3389,7 +3389,7 @@ var Sk = Sk || {};
 
 /**
  *
- * Set various customizable parts of DaVinci.
+ * Set various customizable parts of Skulpt.
  *
  * output: Replacable output redirection (called from print, etc.).
  * read: Replacable function to load modules with (called via import, etc.)
@@ -3411,9 +3411,9 @@ Sk.configure = function(options)
     Sk.read = options["read"] || Sk.read;
     goog.asserts.assert(typeof Sk.read === "function");
 
-    Sk.timeoutMsg = options["timeoutMsg"] || Sk.timeoutMsg;
-    goog.asserts.assert(typeof Sk.timeoutMsg === "function");
-    goog.exportSymbol("Sk.timeoutMsg", Sk.timeoutMsg);
+    Sk.timeoutMsg = options["timeoutMsg"] || Sk.timeoutMsg;											// RNL
+    goog.asserts.assert(typeof Sk.timeoutMsg === "function");										// RNL
+	goog.exportSymbol("Sk.timeoutMsg", Sk.timeoutMsg);
 
     Sk.sysargv = options["sysargv"] || Sk.sysargv;
     goog.asserts.assert(goog.isArrayLike(Sk.sysargv));
@@ -3514,408 +3514,881 @@ Sk.builtin = {};
 // todo; these should all be func objects too, otherwise str() of them won't
 // work, etc.
 
-Sk.builtin.asnum$ = function(a) {
-  if (a === undefined) return a;
-  if (a === null) return a;
-  if (typeof a === "number") return a;
-  if (typeof a === "string") return a;
-  if (a.constructor === Sk.builtin.nmber) return a.v;
-  if (a.constructor === Sk.builtin.lng)   return a.str$(10, true);
-  if (a.constructor === Sk.builtin.biginteger) return a.toString();
+Sk.builtin.range = function range(start, stop, step)
+{
+    var ret = [];
+    var i;
 
-  return a;
+    Sk.builtin.pyCheckArgs("range", arguments, 1, 3);
+    Sk.builtin.pyCheckType("start", "integer", Sk.builtin.checkInt(start));
+    if (stop !== undefined) {
+        Sk.builtin.pyCheckType("stop", "integer", Sk.builtin.checkInt(stop));
+    };
+    if (step !== undefined) {
+        Sk.builtin.pyCheckType("step", "integer", Sk.builtin.checkInt(step));
+    };
+
+    start = Sk.builtin.asnum$(start);
+    stop = Sk.builtin.asnum$(stop);
+    step = Sk.builtin.asnum$(step);
+
+    if ((stop === undefined) && (step === undefined)) {
+        stop = start;
+        start = 0;
+        step = 1;
+    } else if (step === undefined) {
+        step = 1;
+    };
+
+    if (step === 0) {
+        throw new Sk.builtin.ValueError("range() step argument must not be zero");
+    };
+
+    if (step > 0) {
+        for (i=start; i<stop; i+=step) {
+            ret.push(new Sk.builtin.nmber(i, Sk.builtin.nmber.int$));
+        };
+    } else {
+        for (i=start; i>stop; i+=step) {
+            ret.push(new Sk.builtin.nmber(i, Sk.builtin.nmber.int$));
+        };        
+    };
+
+    return new Sk.builtin.list(ret);
+};
+
+Sk.builtin.asnum$ = function(a) {
+	if (a === undefined) return a;
+	if (a === null) return a;
+	if (typeof a === "number") return a;
+	if (typeof a === "string") return a;
+	if (a.constructor === Sk.builtin.nmber) return a.v;
+	if (a.constructor === Sk.builtin.lng) {
+	    if (a.cantBeInt())
+		return a.str$(10, true);
+	    return a.toInt$();
+	}
+	if (a.constructor === Sk.builtin.biginteger) {
+	    if ((a.trueCompare(new Sk.builtin.biginteger(Sk.builtin.lng.threshold$)) > 0)
+		|| (a.trueCompare(new Sk.builtin.biginteger(-Sk.builtin.lng.threshold$)) < 0)) {
+		return a.toString();
+	    }
+	    return a.intValue();
+	}
+
+	return a;
 }
 goog.exportSymbol("Sk.builtin.asnum$", Sk.builtin.asnum$);
 
 Sk.builtin.assk$ = function(a, b) {
-  return new Sk.builtin.nmber(a, b);
+	return new Sk.builtin.nmber(a, b);
 }
 goog.exportSymbol("Sk.builtin.assk$", Sk.builtin.assk$);
 
 Sk.builtin.asnum$nofloat = function(a) {
-  if (a === undefined) return a;
-  if (a === null) return a;
-  if (typeof a === "number") a = a.toString();
-  if (a.constructor === Sk.builtin.nmber) a = a.v.toString();
-  if (a.constructor === Sk.builtin.lng)   a = a.str$(10, true);
-  if (a.constructor === Sk.builtin.biginteger) a = a.toString();
+	if (a === undefined) return a;
+	if (a === null) return a;
+	if (typeof a === "number") a = a.toString();
+	if (a.constructor === Sk.builtin.nmber) a = a.v.toString();
+	if (a.constructor === Sk.builtin.lng)   a = a.str$(10, true);
+	if (a.constructor === Sk.builtin.biginteger) a = a.toString();
 
-  // Sk.debugout("INITIAL: " + a);
+//	Sk.debugout("INITIAL: " + a);
 
-  //  If not a float, great, just return this
-  if (a.indexOf('.') < 0 && a.indexOf('e') < 0 && a.indexOf('E') < 0) {
-    return a;
-  }
+	//	If not a float, great, just return this
+	if (a.indexOf('.') < 0 && a.indexOf('e') < 0 && a.indexOf('E') < 0)
+		return a;
 
-  var expon=0;
-  var mantissa;
+	var expon=0;
+	var mantissa;
 
-  if (a.indexOf('e') >= 0) {
-    mantissa = a.substr(0,a.indexOf('e'));
-    expon = a.substr(a.indexOf('e')+1);
-  }
-  else if (a.indexOf('E') >= 0) {
-    mantissa = a.substr(0,a.indexOf('e'));
-    expon = a.substr(a.indexOf('E')+1);
-  }
-  else {
-    mantissa = a;
-  }
+	if (a.indexOf('e') >= 0) {
+		mantissa = a.substr(0,a.indexOf('e'));
+		expon = a.substr(a.indexOf('e')+1);
+	} else if (a.indexOf('E') >= 0) {
+		mantissa = a.substr(0,a.indexOf('e'));
+		expon = a.substr(a.indexOf('E')+1);
+	} else {
+		mantissa = a;
+	}
 
-  // Sk.debugout("e:" + expon);
+//	Sk.debugout("e:" + expon);
 
-  expon = parseInt(expon, 10);
+	expon = parseInt(expon, 10);
 
-  // Sk.debugout("MANTISSA:" + mantissa);
-  // Sk.debugout("EXPONENT:" + expon);
+//	Sk.debugout("MANTISSA:" + mantissa);
+//	Sk.debugout("EXPONENT:" + expon);
 
-  var decimal = mantissa.indexOf('.');
+	var decimal = mantissa.indexOf('.');
 
-  // Sk.debugout("DECIMAL: " + decimal);
+//	Sk.debugout("DECIMAL: " + decimal);
 
-  //  Simplest case, no decimal
-  if (decimal < 0) {
-    if (expon >= 0) {
-      // Just add more zeroes and we're done
-      while (expon-- > 0) {
-        mantissa += "0";
-      }
-      return mantissa;    
-    }
-    else {
-      if (mantissa.length > -expon) {
-        return mantissa.substr(0,mantissa.length + expon);
-      }
-      else {
-        return 0;
-      }
-    }
-  }
+	//	Simplest case, no decimal
+	if (decimal < 0) {
+		if (expon >= 0) {
+			// Just add more zeroes and we're done
+			while (expon-- > 0)
+				mantissa += "0";
+			return mantissa;
+		} else {
+			if (mantissa.length > -expon)
+				return mantissa.substr(0,mantissa.length + expon);
+			else
+				return 0;
+		}
+	}
 
-  //  Negative exponent OR decimal (neg or pos exp)
-  if (decimal == 0)
-    mantissa = mantissa.substr(1);
-  else if (decimal < mantissa.length)
-    mantissa = mantissa.substr(0,decimal) + mantissa.substr(decimal+1);
-  else
-    mantissa = mantissa.substr(0,decimal);
+	//	Negative exponent OR decimal (neg or pos exp)
+	if (decimal == 0)
+		mantissa = mantissa.substr(1);
+	else if (decimal < mantissa.length)
+		mantissa = mantissa.substr(0,decimal) + mantissa.substr(decimal+1);
+	else
+		mantissa = mantissa.substr(0,decimal);
 
-//  Sk.debugout("NO DECIMAL: " + mantissa);
+//	Sk.debugout("NO DECIMAL: " + mantissa);
 
-decimal = decimal + expon;
+	decimal = decimal + expon;
 
-//  Sk.debugout("MOVE DECIM: " + decimal);
+//	Sk.debugout("MOVE DECIM: " + decimal);
 
-while (decimal > mantissa.length)
-  mantissa += "0";
+	while (decimal > mantissa.length)
+		mantissa += "0";
 
-//  Sk.debugout("PADDED    : " + mantissa);
+//	Sk.debugout("PADDED    : " + mantissa);
 
-if (decimal <= 0) {
-  mantissa = 0;
+	if (decimal <= 0) {
+		mantissa = 0;
+	} else {
+		mantissa = mantissa.substr(0,decimal);
+	}
+
+//	Sk.debugout("LENGTH: " + mantissa.length);
+//	Sk.debugout("RETURN: " + mantissa);
+
+	return mantissa;
 }
-else {
-  mantissa = mantissa.substr(0,decimal);
-}
-
-//  Sk.debugout("LENGTH: " + mantissa.length);
-//  Sk.debugout("RETURN: " + mantissa);
-
-return mantissa;
-}
-
 goog.exportSymbol("Sk.builtin.asnum$nofloat", Sk.builtin.asnum$nofloat);
 
-Sk.builtin.range = function(start, stop, step) {
-  var ret = [];
-  var s = new Sk.builtin.slice(Sk.builtin.asnum$(start), Sk.builtin.asnum$(stop), Sk.builtin.asnum$(step));
-  s.sssiter$(0, function(i) { ret.push(new Sk.builtin.nmber(i,undefined)); });
-  return new Sk.builtin.list(ret);
+Sk.builtin.round = function round(number, ndigits)
+{
+    var result, multiplier;
+
+    Sk.builtin.pyCheckArgs("round", arguments, 1, 2);
+    Sk.builtin.pyCheckType("number", "number", Sk.builtin.checkNumber(number));
+    if (ndigits !== undefined) {
+        Sk.builtin.pyCheckType("ndigits", "number", Sk.builtin.checkNumber(ndigits));
+    };
+
+    if (ndigits === undefined) {
+        ndigits = 0;
+    };
+
+    number = Sk.builtin.asnum$(number);
+    ndigits = Sk.builtin.asnum$(ndigits);
+
+    multiplier = Math.pow(10, ndigits);
+    result = Math.round(number * multiplier) / multiplier;
+
+    return new Sk.builtin.nmber(result, Sk.builtin.nmber.float$);
 };
 
-Sk.builtin.len = function(item) {
-  if (item.sq$length) {
-    return new Sk.builtin.nmber(item.sq$length(), undefined);
-  }
-  if (item.mp$length) {
-    return new Sk.builtin.nmber(item.mp$length(), undefined);
-  }
-  throw new Sk.builtin.TypeError("object of type '" + item.tp$name + "' has no len()");
+Sk.builtin.len = function len(item)
+{
+    Sk.builtin.pyCheckArgs("len", arguments, 1, 1);
+
+    if (item.sq$length)
+        return new Sk.builtin.nmber(item.sq$length(), Sk.builtin.nmber.int$);
+    
+    if (item.mp$length)
+        return new Sk.builtin.nmber(item.mp$length(), Sk.builtin.nmber.int$);
+
+    if (item.tp$length)
+	return new Sk.builtin.nmber(item.tp$length(), Sk.builtin.nmber.int$);
+
+    throw new Sk.builtin.TypeError("object of type '" + Sk.abstr.typeName(item) + "' has no len()");
 };
 
 Sk.builtin.min = function min()
 {
-  // todo; throw if no args
-  arguments = Sk.misceval.arrayFromArguments(arguments);
-  var lowest = arguments[0];
-  for (var i = 1; i < arguments.length; ++i) {
-    if (Sk.misceval.richCompareBool(arguments[i], lowest, 'Lt')) {
-      lowest = arguments[i];
+    Sk.builtin.pyCheckArgs("min", arguments, 1);
+
+    arguments = Sk.misceval.arrayFromArguments(arguments);
+    var lowest = arguments[0];
+    for (var i = 1; i < arguments.length; ++i)
+    {
+        if (Sk.misceval.richCompareBool(arguments[i], lowest, 'Lt'))
+            lowest = arguments[i];
     }
-  }
-  return lowest;
+    return lowest;
 };
 
 Sk.builtin.max = function max()
 {
-  // todo; throw if no args
-  arguments = Sk.misceval.arrayFromArguments(arguments);
-  var highest = arguments[0];
-  for (var i = 1; i < arguments.length; ++i) {
-    if (Sk.misceval.richCompareBool(arguments[i], highest, 'Gt')) {
-      highest = arguments[i];
+    Sk.builtin.pyCheckArgs("max", arguments, 1);
+
+    arguments = Sk.misceval.arrayFromArguments(arguments);
+    var highest = arguments[0];
+    for (var i = 1; i < arguments.length; ++i)
+    {
+        if (Sk.misceval.richCompareBool(arguments[i], highest, 'Gt'))
+            highest = arguments[i];
     }
-  }
-  return highest;
+    return highest;
 };
+
+Sk.builtin.any = function any(iter)
+{
+    var it, i;
+
+    Sk.builtin.pyCheckArgs("any", arguments, 1);
+    Sk.builtin.pyCheckType("iter", "iterable", Sk.builtin.checkIterable(iter));
+
+    if (!iter.tp$iter) {
+        throw "TypeError: object is not iterable";
+    }
+
+    it = iter.tp$iter();
+    for (i = it.tp$iternext(); i !== undefined; i = it.tp$iternext()) {
+        if (Sk.misceval.isTrue(i)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+Sk.builtin.all = function all(iter)
+{
+    var it, i;
+
+    Sk.builtin.pyCheckArgs("all", arguments, 1);
+    Sk.builtin.pyCheckType("iter", "iterable", Sk.builtin.checkIterable(iter));
+
+    if (!iter.tp$iter) {
+        throw "TypeError: object is not iterable";
+    }
+
+    it = iter.tp$iter();
+    for (i = it.tp$iternext(); i !== undefined; i = it.tp$iternext()) {
+        if (!Sk.misceval.isTrue(i)) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 Sk.builtin.sum = function sum(iter,start)
 {
-  var tot = 0;
-  if (iter instanceof Sk.builtin.list) {
-    iter = iter.v;
-  } else {
-    throw "TypeError: an iterable is required";
-  }
-  if (start === undefined ) {
-    start = 0;
-  } else {
-    start = Sk.builtin.asnum$(start);
-  }
-  for (var i = start; i < iter.length; ++i) {
-    var tmp = Sk.builtin.asnum$(iter[i]);
-    if (typeof tmp !== "number")
-    {
-      throw "TypeError: an number is required";
+    var tot;
+    var it, i;
+    var has_float;
+
+    Sk.builtin.pyCheckArgs("sum", arguments, 1, 2);
+    Sk.builtin.pyCheckType("iter", "iterable", Sk.builtin.checkIterable(iter));
+    if (start !== undefined) {        
+        Sk.builtin.pyCheckType("start", "number", Sk.builtin.checkNumber(start));
+	start = Sk.builtin.asnum$(start);
+    };
+
+    if (start === undefined ) {
+        start = 0;
     }
-    tot = tot + tmp;
-  }
-  return new Sk.builtin.nmber(tot,undefined);
+
+    tot = new Sk.builtin.nmber(start, Sk.builtin.nmber.int$);
+
+    it = iter.tp$iter();
+    for (i = it.tp$iternext(); i !== undefined; i = it.tp$iternext()) {
+        if (!Sk.builtin.checkNumber(i)) {
+            throw new Sk.builtin.TypeError("a number is required");
+        }
+	if (i.skType === Sk.builtin.nmber.float$) {
+	    has_float = true;
+	    if (tot.skType !== Sk.builtin.nmber.float$) {
+		tot = new Sk.builtin.nmber(Sk.builtin.asnum$(tot),
+					   Sk.builtin.nmber.float$)
+	    }
+	} else if (i instanceof Sk.builtin.lng) {
+	    if (!has_float) {
+		if (!(tot instanceof Sk.builtin.lng)) {
+		    tot = new Sk.builtin.lng(tot)
+		}
+	    }
+	}
+
+	tot = tot.nb$add(i);
+    }
+
+    return tot;
 };
 
-Sk.builtin.abs = function abs(x) {
-  return new Sk.builtin.nmber(Math.abs(Sk.builtin.asnum$(x)),undefined);
+Sk.builtin.zip = function zip()
+{
+    if (arguments.length === 0)
+    {
+        return new Sk.builtin.list([]);        
+    }
+
+    var iters = [];
+    for (var i = 0; i < arguments.length; i++)
+    {
+        if (arguments[i].tp$iter)
+        {
+            iters.push(arguments[i].tp$iter());
+        }
+        else
+        {
+            throw "TypeError: argument " + i + " must support iteration";    
+        }
+    }
+    var res = [];
+    var done = false;
+    while (!done)
+    {
+        var tup = [];
+        for (i = 0; i < arguments.length; i++)
+        {
+            var el = iters[i].tp$iternext();
+            if (el === undefined)
+            {
+                done = true;
+                break;
+            }
+            tup.push(el);
+        }
+        if (!done)
+        {
+            res.push(new Sk.builtin.tuple(tup));    
+        }
+    }
+    return new Sk.builtin.list(res);
+}
+
+Sk.builtin.abs = function abs(x)
+{
+    Sk.builtin.pyCheckArgs("abs", arguments, 1, 1);
+    Sk.builtin.pyCheckType("x", "number", Sk.builtin.checkNumber(x));
+
+    return new Sk.builtin.nmber(Math.abs(Sk.builtin.asnum$(x)),x.skType);
 };
 
-// http://stackoverflow.com/questions/11832914/round-up-to-2-decimal-places-in-javascript
-Sk.builtin.round = function round(x,digits)
-{   
-  x = Sk.builtin.asnum$(x);   //  This is the lazy way...the right way implements a round routine based on nmber
-  digits = Sk.builtin.asnum$(digits);
-  if (typeof x != "number" ) {
-    throw "TypeError: a float is required";
-  }
+Sk.builtin.ord = function ord(x)
+{
+    Sk.builtin.pyCheckArgs("ord", arguments, 1, 1);
 
-  if(typeof digits === "undefined") {
-    return Sk.builtin.assk$(Math.round(x), Sk.builtin.nmber.float$);
-  }
-  else {
-    var multiplier = Math.pow(10, digits);
-    return Sk.builtin.assk$((Math.round(x * multiplier) / multiplier), Sk.builtin.nmber.float$);
-  }
+    if (x.constructor !== Sk.builtin.str || x.v.length !== 1)
+    {
+        throw "ord() expected string of length 1";
+    }
+    return (x.v).charCodeAt(0);
 };
 
-Sk.builtin.ord = function ord(x) {
-  if (x.constructor !== Sk.builtin.str || x.v.length !== 1) {
-    throw "ord() expected string of length 1";
-  }
-  return (x.v).charCodeAt(0);
+Sk.builtin.chr = function chr(x)
+{
+    Sk.builtin.pyCheckArgs("chr", arguments, 1, 1);
+    Sk.builtin.pyCheckType("x", "integer", Sk.builtin.checkInt(x));
+
+	x = Sk.builtin.asnum$(x);
+
+
+    if ((x < 0) || (x > 255))
+    {
+        throw new Sk.builtin.ValueError("chr() arg not in range(256)");
+    }
+
+    return new Sk.builtin.str(String.fromCharCode(x));
 };
 
-Sk.builtin.chr = function chr(x) {
-  x = Sk.builtin.asnum$(x);
-  if (typeof x !== "number") {
-    throw "TypeError: an integer is required";
-  }
-  return new Sk.builtin.str(String.fromCharCode(x));
+Sk.builtin.int2str_ = function helper_(x, radix, prefix)
+{
+    var str = '';
+    if (x instanceof Sk.builtin.lng) {
+	var suffix = '';
+	if (radix !== 2)
+	    suffix = 'L';
+
+	str = x.str$(radix, false);
+	if (x.nb$isnegative()) {
+	    return new Sk.builtin.str('-'+prefix+str+suffix);
+	}
+	return new Sk.builtin.str(prefix+str+suffix);
+    } else {
+	x = Sk.builtin.asnum$(x);
+	str = x.toString(radix);
+	if (x < 0) {
+	    return new Sk.builtin.str('-'+prefix+str.slice(1));
+	}
+	return new Sk.builtin.str(prefix+str);
+    }
 };
 
-Sk.builtin.hex = function hex(x) {
-  if (typeof x !== "number") {
-    throw "TypeError: an integer is required";
-  }
-  return new Sk.builtin.str('0x'+x.toString(16));
+Sk.builtin.hex = function hex(x)
+{
+    Sk.builtin.pyCheckArgs("hex", arguments, 1, 1);
+    Sk.builtin.pyCheckType("x", "integer", Sk.builtin.checkInt(x));
+    return Sk.builtin.int2str_(x, 16, "0x");
 };
 
-Sk.builtin.oct = function oct(x) {
-  if (typeof x !== "number") {
-    throw "TypeError: an integer is required";
-  }
-  return new Sk.builtin.str('0'+x.toString(8));
+Sk.builtin.oct = function oct(x)
+{
+    Sk.builtin.pyCheckArgs("oct", arguments, 1, 1);
+    Sk.builtin.pyCheckType("x", "integer", Sk.builtin.checkInt(x));
+    return Sk.builtin.int2str_(x, 8, "0");
 };
 
-Sk.builtin.bin = function bin(x) {
-  if (typeof x !== "number") {
-    throw "TypeError: an integer is required";
-  }
-  return new Sk.builtin.str('0b'+x.toString(2));
+Sk.builtin.bin = function bin(x)
+{
+    Sk.builtin.pyCheckArgs("bin", arguments, 1, 1);
+    Sk.builtin.pyCheckType("x", "integer", Sk.builtin.checkInt(x));
+    return Sk.builtin.int2str_(x, 2, "0b");
 };
 
-Sk.builtin.dir = function dir(x) {
-  var names = [];
-  for (var k in x.constructor.prototype)
-  {
+Sk.builtin.dir = function dir(x)
+{
+    Sk.builtin.pyCheckArgs("dir", arguments, 1, 1);
+
+    var getName = function (k) {
+        var s = null;
+        var internal = ["__bases__", "__mro__", "__class__"];
+        if (internal.indexOf(k) !== -1)
+            return null;
+        if (k.indexOf('$') !== -1)
+            s = Sk.builtin.dir.slotNameToRichName(k);
+        else if (k.charAt(k.length - 1) !== '_')
+            s = k;
+        else if (k.charAt(0) === '_')
+            s = k;
+        return s;
+    };
+
+    var names = [];
+    var k;
     var s;
-    if (k.indexOf('$') !== -1)
-      s = Sk.builtin.dir.slotNameToRichName(k);
-    else if (k.charAt(k.length - 1) !== '_')
-      s = k;
-    if (s)
-      names.push(new Sk.builtin.str(s));
-  }
-  names.sort(function(a, b) { return (a.v > b.v) - (a.v < b.v); });
-  return new Sk.builtin.list(names);
-};
+    var i;
+    var mro;
+    var base;
+    var prop;
 
-Sk.builtin.dir.slotNameToRichName = function(k) {
-  // todo; map tp$xyz to __xyz__ properly
-  return undefined;
-};
-
-Sk.builtin.repr = function repr(x) {
-  return Sk.misceval.objectRepr(x);
-};
-
-Sk.builtin.open = function open(filename, mode, bufsize) {
-  if (mode === undefined) mode = new Sk.builtin.str("r");
-  if (mode.v !== "r" && mode.v !== "rb") throw "todo; haven't implemented non-read opens";
-  return new Sk.builtin.file(filename, mode, bufsize);
-};
-
-Sk.builtin.isinstance = function(obj, type) {
-  if (obj.ob$type === type) return true;
-
-  if (type instanceof Sk.builtin.tuple) {
-    for (var i = 0; i < type.v.length; ++i) {
-      if (Sk.builtin.isinstance(obj, type.v[i]))
-        return true;
-    }
-    return false;
-  }
-
-  var issubclass = function(klass, base) {
-    if (klass === base) return true;
-    if (klass['$d'] === undefined) return false;
-    var bases = klass['$d'].mp$subscript(Sk.builtin.type.basesStr_);
-    for (var i = 0; i < bases.v.length; ++i)
+    // Add all object properties
+    for (k in x.constructor.prototype)
     {
-      if (issubclass(bases.v[i], base))
-        return true;
+        s = getName(k);
+        if (s)
+            names.push(new Sk.builtin.str(s));
     }
-    return false;
-  };
 
-  return issubclass(obj.ob$type, type);
+    // Add all attributes
+    if (x['$d']) 
+    {
+        if (x['$d'].tp$iter)
+        {
+            // Dictionary
+            var it = x['$d'].tp$iter();
+            var i;
+            for (i = it.tp$iternext(); i !== undefined; i = it.tp$iternext())
+            {
+                s = new Sk.builtin.str(i);
+                s = getName(s.v);
+                if (s)
+                    names.push(new Sk.builtin.str(s));
+            }
+        }
+        else
+        {
+            // Object
+            for (s in x['$d'])
+            {
+                names.push(new Sk.builtin.str(s));
+            }
+        }
+    }
+
+    // Add all class attributes
+    mro = x.tp$mro;
+    if (mro)
+    {
+        mro = x.tp$mro;
+        for (i = 0; i < mro.v.length; ++i)
+        {
+            base = mro.v[i];
+            for (prop in base)
+            {
+                if (base.hasOwnProperty(prop))
+                {
+                    s = getName(prop);
+                    if (s)
+                        names.push(new Sk.builtin.str(s));
+                }
+            }
+        }
+    }
+        
+    // Sort results
+    names.sort(function(a, b) { return (a.v > b.v) - (a.v < b.v); });
+
+    // Get rid of duplicates before returning, as duplicates should
+    //  only occur when they are shadowed
+    var last = function(value, index, self) {
+	// Returns true iff the value is not the same as the next value
+	return value !== self[index+1];
+    };
+    return new Sk.builtin.list(names.filter(last));
+};
+
+Sk.builtin.dir.slotNameToRichName = function(k)
+{
+    // todo; map tp$xyz to __xyz__ properly
+    return undefined;
+};
+
+Sk.builtin.repr = function repr(x)
+{
+    Sk.builtin.pyCheckArgs("repr", arguments, 1, 1);
+
+    return Sk.misceval.objectRepr(x);
+};
+
+Sk.builtin.open = function open(filename, mode, bufsize)
+{
+    if (mode === undefined) mode = new Sk.builtin.str("r");
+    if (mode.v !== "r" && mode.v !== "rb") throw "todo; haven't implemented non-read opens";
+    return new Sk.builtin.file(filename, mode, bufsize);
+};
+
+Sk.builtin.isinstance = function isinstance(obj, type)
+{
+    Sk.builtin.pyCheckArgs("isinstance", arguments, 2, 2);
+
+    if (type === Sk.builtin.int_.prototype.ob$type) {
+	return (obj.tp$name === 'number') && (obj.skType === Sk.builtin.nmber.int$);
+    }
+
+    if (type === Sk.builtin.float_.prototype.ob$type) {
+        return (obj.tp$name === 'number') && (obj.skType === Sk.builtin.nmber.float$); 
+    }
+
+    if (type === Sk.builtin.NoneObj.prototype.ob$type) {
+        return obj === null;
+    }
+
+    if (type === Sk.builtin.bool.prototype.ob$type) {
+        return (obj === true) || (obj === false);
+    }
+
+    // Normal case
+    if (obj.ob$type === type) return true;
+
+    // Handle tuple type argument
+    if (type instanceof Sk.builtin.tuple)
+    {
+        for (var i = 0; i < type.v.length; ++i)
+        {
+            if (Sk.builtin.isinstance(obj, type.v[i]))
+                return true;
+        }
+        return false;
+    }
+
+    var issubclass = function(klass, base)
+    {
+        if (klass === base) return true;
+        if (klass['$d'] === undefined) return false;
+        var bases = klass['$d'].mp$subscript(Sk.builtin.type.basesStr_);
+        for (var i = 0; i < bases.v.length; ++i)
+        {
+            if (issubclass(bases.v[i], base))
+                return true;
+        }
+        return false;
+    };
+
+    return issubclass(obj.ob$type, type);
 };
 
 Sk.builtin.hashCount = 0;
-Sk.builtin.hash = function hash(value) {
-  if (value instanceof Object && value.tp$hash !== undefined) {
-    if (value.$savedHash_) return value.$savedHash_;
-    value.$savedHash_ = 'custom ' + value.tp$hash();
-    return value.$savedHash_;
-  }
+Sk.builtin.hash = function hash(value)
+{
+    Sk.builtin.pyCheckArgs("hash", arguments, 1, 1);
 
-  if (value instanceof Object) {
-    if (value.__id === undefined) {
-      Sk.builtin.hashCount += 1;
-      value.__id = 'object ' + Sk.builtin.hashCount;
+    // Useless object to get compiler to allow check for __hash__ property
+    var junk = {__hash__: function() {return 0;}}
+
+    if ((value instanceof Object) && (value.tp$hash !== undefined))
+    {
+        if (value.$savedHash_) return value.$savedHash_;
+        value.$savedHash_ = value.tp$hash();
+        return value.$savedHash_;
     }
-    return value.__id;
-  }
-  return (typeof value) + ' ' + String(value);
+    else if ((value instanceof Object) && (value.__hash__ !== undefined))
+    {
+        return Sk.misceval.callsim(value.__hash__, value);
+    }
+    else if (value instanceof Object)
+    {
+        if (value.__id === undefined)
+        {
+            Sk.builtin.hashCount += 1;
+            value.__id = Sk.builtin.hashCount;
+        }
+        return value.__id;
+    }
+    else if (typeof value === "number")
+    {
+        return value;
+    }
+    else if (value === null)
+    {
+	return 0;  // what should this be?
+    }
+    else if (value === true)
+    {
+	return 1;
+    }
+    else if (value === false)
+    {
+	return 0;
+    }
 
-  // todo; throw properly for unhashable types
+    return (typeof value) + ' ' + String(value);
+    // todo; throw properly for unhashable types
 };
 
-Sk.builtin.getattr = function(obj, name, default_) {
-  var ret = obj.tp$getattr(name.v);
-  if (ret === undefined) {
-    if (default_ !== undefined) {
-      return default_;
+Sk.builtin.getattr = function getattr(obj, name, default_)
+{
+    Sk.builtin.pyCheckArgs("getattr", arguments, 2, 3);
+    Sk.builtin.pyCheckType("name", "string", Sk.builtin.checkString(name));
+
+    var ret = obj.tp$getattr(name.v);
+    if (ret === undefined)
+    {
+        if (default_ !== undefined)
+            return default_;
+        else
+            throw new Sk.builtin.AttributeError();
     }
-    else {
-      throw new Sk.builtin.AttributeError();
-    }
-  }
-  return ret;
+    return ret;
 };
 
 Sk.builtin.raw_input = function(obj, name, default_)
 {
-  var x = prompt(obj.v);
-  return new Sk.builtin.str(x);
+    var x = prompt(obj.v);
+    return new Sk.builtin.str(x);
 };
 
 Sk.builtin.input = function(obj, name, default_)
 {
-  var x = prompt(obj.v);
-  return new Sk.builtin.str(x);
+    var x = prompt(obj.v);
+    return new Sk.builtin.str(x);
 };
 
 Sk.builtin.jseval = function jseval(evalcode)
 {
-  goog.global.eval(evalcode);
+    goog.global.eval(evalcode);
 };
 
 Sk.builtin.jsmillis = function jsmillis()
 {
-  var now = new Date()
-  return now.valueOf();
+	var now = new Date()
+	return now.valueOf();
 };
 
-Sk.builtin.all =  function all()
+Sk.builtin.superbi =  function superbi()
 {
-  if (arguments.length == 0) {
-    throw new Sk.builtin.TypeError("all() takes exactly one argument (0 given)")
-  }
-  arguments = Sk.misceval.arrayFromArguments(arguments);
-  var lowest = arguments[0];
-  for (var i = 0; i < arguments.length; ++i)
-  {
-    if (! Sk.misceval.isTrue(arguments[i]))
-      return false;
-  }
-  return true;
-};
+    throw new Sk.builtin.NotImplementedError("super is not yet implemented, please report your use case as a github issue.");
+}
 
-Sk.builtin.any =  function any()
+Sk.builtin.eval_ =  function eval_()
 {
-  if (arguments.length == 0) {
-    throw new Sk.builtin.TypeError("any() takes exactly one argument (0 given)")
-  }
-  arguments = Sk.misceval.arrayFromArguments(arguments);
-  var lowest = arguments[0];
-  for (var i = 0; i < arguments.length; ++i)
-  {
-    if (Sk.misceval.isTrue(arguments[i]))
-      return true;
-  }
-  return false;
-};
+    throw new Sk.builtin.NotImplementedError("eval is not yet implemented");
+}
 
+Sk.builtin.map = function map(fun, seq) {
+    Sk.builtin.pyCheckArgs("map", arguments, 2);
 
-Sk.builtin.superbi =  function superbi() {
-  throw new Sk.builtin.NotImplementedError("Super is not yet implemented, please report your use case as a github issue.");
+    if (fun === null){
+        fun = { func_code: function (x) { return x; } }
+    }
+
+    if (arguments.length > 2){
+        var combined = [];
+        var iterables = Array.prototype.slice.apply(arguments).slice(1);
+        for (var i in iterables){
+            if (iterables[i].tp$iter === undefined){
+                var argnum = parseInt(i,10) + 2;
+                throw new Sk.builtin.TypeError("argument " + argnum + " to map() must support iteration");
+            }
+            iterables[i] = iterables[i].tp$iter()
+        }
+
+        while(true) {
+            var args = [];
+            var nones = 0;
+            for (var i in iterables){
+                var next = iterables[i].tp$iternext()
+                if (next === undefined) {
+                    args.push(null);
+                    nones++;
+                }
+                else{
+                    args.push(next);
+                }
+            }
+            if (nones !== iterables.length) {
+                combined.push(args);
+            }
+            else {
+                break;
+            }
+        }
+        seq = new Sk.builtin.list(combined);
+    }
+
+    if (seq.tp$iter === undefined){
+        throw new Sk.builtin.TypeError("'" + Sk.abstr.typeName(seq) + "' object is not iterable");
+    }
+
+    var retval = [],
+        iter = seq.tp$iter(),
+        next = iter.tp$iternext();
+
+    while (next !== undefined){
+        if (!(next instanceof Array)){ next = [next]; }
+        retval.push(fun.func_code.apply(this, next));
+        next = iter.tp$iternext();
+    }
+
+	return new Sk.builtin.list(retval);
+}
+
+Sk.builtin.reduce = function reduce(fun, seq, initializer) {
+	Sk.builtin.pyCheckArgs("reduce", arguments, 2, 3);
+	var iter = seq.tp$iter();
+	if (initializer === undefined){
+		initializer = iter.tp$iternext();
+		if (initializer === undefined){
+			throw new Sk.builtin.TypeError('reduce() of empty sequence with no initial value');
+		}
+	}
+	var accum_value = initializer;
+	var next = iter.tp$iternext();
+	while (next !== undefined){
+		accum_value = fun.func_code(accum_value, next)
+		next = iter.tp$iternext();
+	}
+	return accum_value;
+}
+
+Sk.builtin.filter = function filter(fun, iterable) { 
+	Sk.builtin.pyCheckArgs("filter", arguments, 2, 2);
+	
+	//todo: need to find a proper way to tell what type it is.
+	if (iterable.tp$iter === undefined){
+		throw new Sk.builtin.TypeError("'" + Sk.abstr.typeName(iterable) + "' object is not iterable");
+	}
+	
+	//simulate default identity function
+	if (fun === null) {
+		fun = { func_code: function (x) { return Sk.builtin.bool(x); } } 
+	}
+	
+	var ctor = function () { return []; }
+	var add = function (iter, item) { iter.push(item); return iter; } 
+	var ret = function (iter) { return new Sk.builtin.list(iter); }
+	
+	if (iterable.__class__ === Sk.builtin.str){
+		ctor = function () { return new Sk.builtin.str(''); }
+		add = function (iter, item) { return iter.sq$concat(item); }
+		ret = function (iter) { return iter; }
+	} else if (iterable.__class__ === Sk.builtin.tuple) {
+		ret = function (iter) { return new Sk.builtin.tuple(iter); }
+	}
+	
+	var iter = iterable.tp$iter(),
+		next = iter.tp$iternext(),
+		retval = ctor();
+	
+	if (next === undefined){
+		return ret(retval);
+	}
+	
+	while (next !== undefined){
+		if (fun.func_code(next)){
+			retval = add(retval, next);
+		}
+		next = iter.tp$iternext();
+	}
+	
+	return ret(retval);
 }
 
 Sk.builtin.hasattr = function hasattr(obj,attr) {
-  if (typeof attr.v !== "string") {
-    throw new Sk.builtin.TypeError('hasattr() attribute name must be a string');
-  }
+    Sk.builtin.pyCheckArgs("hasattr", arguments, 2, 2);
+    if (!Sk.builtin.checkString(attr)) {
+        throw new Sk.builtin.TypeError('hasattr(): attribute name must be string');
+    }
 
-  if (obj.tp$getattr) {
-    if (obj.tp$getattr(attr.v)) {
-      return true;
-    }
-    else {
-      return false;
-    }
-  }
-  else {
-    throw new Sk.builtin.AttributeError('Object has no tp$getattr method');
-  }
+    if (obj.tp$getattr) {
+        if (obj.tp$getattr(attr.v)) {
+            return true;
+        } else
+            return false;
+    } else
+        throw new Sk.builtin.AttributeError('Object has no tp$getattr method')
 }
+
+
+Sk.builtin.pow = function pow(a, b, c) {
+    Sk.builtin.pyCheckArgs("pow", arguments, 2, 3);
+    Sk.builtin.pyCheckType("a", "number", Sk.builtin.checkNumber(a));
+    Sk.builtin.pyCheckType("b", "number", Sk.builtin.checkNumber(b));
+    var b = Sk.builtin.asnum$(b);
+    var type = a.skType;
+    if (b < 0 || b.skType === Sk.builtin.nmber.float$) {
+        type = Sk.builtin.nmber.float$;
+    }
+    if (c==undefined) {
+        return new Sk.builtin.nmber(Math.pow(Sk.builtin.asnum$(a),b), type);
+    }
+    Sk.builtin.pyCheckType("c", "number", Sk.builtin.checkNumber(c));
+    if (a.skType !== Sk.builtin.nmber.int$ || b.skType !== Sk.builtin.nmber.int$ || c.skType !== Sk.builtin.nmber.int$) {
+        throw new Sk.builtin.TypeError("TypeError: pow() 3rd argument not allowed unless all arguments are integers")
+    }
+    return new Sk.builtin.nmber(Math.pow(Sk.builtin.asnum$(a),Sk.builtin.asnum$(b)) % Sk.builtin.asnum$(c), Sk.builtin.nmber.int$);
+}
+
+Sk.builtin.quit = function quit(msg) {
+    var s = new Sk.builtin.str(msg).v;
+    throw new Sk.builtin.SystemExit(s);
+}
+
+Sk.builtin.bytearray = function bytearray() { throw new Sk.builtin.NotImplementedError("bytearray is not yet implemented")}
+Sk.builtin.callable = function callable() { throw new Sk.builtin.NotImplementedError("callable is not yet implemented")}
+Sk.builtin.complex = function complex() { throw new Sk.builtin.NotImplementedError("complex is not yet implemented")}
+Sk.builtin.delattr = function delattr() { throw new Sk.builtin.NotImplementedError("delattr is not yet implemented")}
+Sk.builtin.divmod = function divmod() { throw new Sk.builtin.NotImplementedError("divmod is not yet implemented")}
+Sk.builtin.execfile = function execfile() { throw new Sk.builtin.NotImplementedError("execfile is not yet implemented")}
+Sk.builtin.format = function format() { throw new Sk.builtin.NotImplementedError("format is not yet implemented")}
+Sk.builtin.frozenset = function frozenset() { throw new Sk.builtin.NotImplementedError("frozenset is not yet implemented")}
+Sk.builtin.globals = function globals() { throw new Sk.builtin.NotImplementedError("globals is not yet implemented")}
+Sk.builtin.help = function help() { throw new Sk.builtin.NotImplementedError("help is not yet implemented")}
+Sk.builtin.issubclass = function issubclass() { throw new Sk.builtin.NotImplementedError("issubclass is not yet implemented")}
+Sk.builtin.iter = function iter() { throw new Sk.builtin.NotImplementedError("iter is not yet implemented")}
+Sk.builtin.locals = function locals() { throw new Sk.builtin.NotImplementedError("locals is not yet implemented")}
+Sk.builtin.memoryview = function memoryview() { throw new Sk.builtin.NotImplementedError("memoryview is not yet implemented")}
+Sk.builtin.next_ = function next_() { throw new Sk.builtin.NotImplementedError("next is not yet implemented")}
+Sk.builtin.property = function property() { throw new Sk.builtin.NotImplementedError("property is not yet implemented")}
+Sk.builtin.reload = function reload() { throw new Sk.builtin.NotImplementedError("reload is not yet implemented")}
+Sk.builtin.reversed = function reversed() { throw new Sk.builtin.NotImplementedError("reversed is not yet implemented")}
+Sk.builtin.sorted = function sorted() { throw new Sk.builtin.NotImplementedError("sorted is not yet implemented")}
+Sk.builtin.unichr = function unichr() { throw new Sk.builtin.NotImplementedError("unichr is not yet implemented")}
+Sk.builtin.vars = function vars() { throw new Sk.builtin.NotImplementedError("vars is not yet implemented")}
+Sk.builtin.xrange = Sk.builtin.range;
+Sk.builtin.apply_ = function apply_() { throw new Sk.builtin.NotImplementedError("apply is not yet implemented")}
+Sk.builtin.buffer = function buffer() { throw new Sk.builtin.NotImplementedError("buffer is not yet implemented")}
+Sk.builtin.coerce = function coerce() { throw new Sk.builtin.NotImplementedError("coerce is not yet implemented")}
+Sk.builtin.intern = function intern() { throw new Sk.builtin.NotImplementedError("intern is not yet implemented")}
+
 
 /*
 Sk.builtinFiles = {};
@@ -3930,39 +4403,41 @@ Sk.builtinFiles = undefined;
  * @constructor
  * @param {...*} args
  */
-Sk.builtin.Exception = function(args) {
-  var args = Array.prototype.slice.call(arguments);
-  // hackage to allow shorter throws
-  for (var i = 0; i < args.length; ++i) {
-    if (typeof args[i] === "string") {
-      args[i] = new Sk.builtin.str(args[i]);
+Sk.builtin.Exception = function(args)
+{
+    var args = Array.prototype.slice.call(arguments);
+    // hackage to allow shorter throws
+    for (var i = 0; i < args.length; ++i)
+    {
+        if (typeof args[i] === "string")
+            args[i] = new Sk.builtin.str(args[i]);
     }
-  }
-  this.args = new Sk.builtin.tuple(args);
+    this.args = new Sk.builtin.tuple(args);
 };
-
 Sk.builtin.Exception.prototype.tp$name = "Exception";
 
-Sk.builtin.Exception.prototype.tp$str = function() {
-  var ret = "";
+Sk.builtin.Exception.prototype.tp$str = function()
+{
+    var ret = "";
+    //print(JSON.stringify(this.args));
 
-  ret += this.tp$name;
-  if (this.args) {
-    if (this.args.v.length > 0) {
-      ret += ": " + this.args.v[0].v;
-    }
+    ret += this.tp$name;
+    if (this.args)
+        ret += ": " + this.args.v[0].v;
 
-    if (this.args.v.length > 4) {
-      ret += "\nFile \"" + this.args.v[1].v + "\", " + "line " + this.args.v[2] + "\n" + this.args.v[4].v + "\n";
-      for (var i = 0; i < this.args.v[3]; ++i) ret += " ";
-      ret += "^\n";
+    if (this.args.v.length > 4)		//	RNL from length > 1
+    {
+        ret += "\nFile \"" + this.args.v[1].v + "\", " + "line " + this.args.v[2] + "\n" +
+            this.args.v[4].v + "\n";
+        for (var i = 0; i < this.args.v[3]; ++i) ret += " ";
+        ret += "^\n";
     }
-  }
-  return new Sk.builtin.str(ret);
+    return new Sk.builtin.str(ret);
 };
 
-Sk.builtin.Exception.prototype.toString = function() {
-  return this.tp$str().v;
+Sk.builtin.Exception.prototype.toString = function()
+{
+    return this.tp$str().v;
 }
 
 goog.exportSymbol("Sk.builtin.Exception", Sk.builtin.Exception);
@@ -4036,9 +4511,31 @@ Sk.builtin.NameError.prototype.tp$name = "NameError";
  * @extends Sk.builtin.Exception
  * @param {...*} args
  */
+Sk.builtin.OverflowError = function(args) { Sk.builtin.Exception.apply(this, arguments); }
+goog.inherits(Sk.builtin.OverflowError, Sk.builtin.Exception);
+Sk.builtin.OverflowError.prototype.tp$name = "OverflowError";
+
+
+/**
+ * @constructor
+ * @extends Sk.builtin.Exception
+ * @param {...*} args
+ */
 Sk.builtin.ParseError = function(args) { Sk.builtin.Exception.apply(this, arguments); }
 goog.inherits(Sk.builtin.ParseError, Sk.builtin.Exception);
 Sk.builtin.ParseError.prototype.tp$name = "ParseError";
+
+
+/**
+ * @constructor
+ * @extends Sk.builtin.Exception
+ * @param {...*} args
+ */
+Sk.builtin.SystemExit = function(args) { Sk.builtin.Exception.apply(this, arguments); }
+goog.inherits(Sk.builtin.SystemExit, Sk.builtin.Exception);
+Sk.builtin.SystemExit.prototype.tp$name = "SystemExit";
+goog.exportSymbol("Sk.builtin.SystemExit", Sk.builtin.SystemExit);
+
 
 /**
  * @constructor
@@ -4075,6 +4572,7 @@ goog.exportSymbol("Sk.builtin.TypeError", Sk.builtin.TypeError);
 Sk.builtin.ValueError = function(args) { Sk.builtin.Exception.apply(this, arguments); }
 goog.inherits(Sk.builtin.ValueError, Sk.builtin.Exception);
 Sk.builtin.ValueError.prototype.tp$name = "ValueError";
+goog.exportSymbol("Sk.builtin.ValueError", Sk.builtin.ValueError);
 
 /**
  * @constructor
@@ -4121,10 +4619,9 @@ goog.exportSymbol("Sk.builtin.NotImplementedError", Sk.builtin.NotImplementedErr
  * @extends Sk.builtin.Exception
  * @param {...*} args
  */
-Sk.builtin.NegativePowerError = function(args) { Sk.builtin.Exception.apply(this, arguments); }
-goog.inherits(Sk.builtin.NegativePowerError, Sk.builtin.Exception);
-Sk.builtin.NegativePowerError.prototype.tp$name = "NegativePowerError";
-goog.exportSymbol("Sk.builtin.NegativePowerError", Sk.builtin.NegativePowerError);/**
+Sk.builtin.NegativePowerError = function(args) { Sk.builtin.Exception.apply(this, arguments); }goog.inherits(Sk.builtin.NegativePowerError, Sk.builtin.Exception);Sk.builtin.NegativePowerError.prototype.tp$name = "NegativePowerError";
+goog.exportSymbol("Sk.builtin.NegativePowerError", Sk.builtin.NegativePowerError);
+/**
  *
  * @constructor
  *
@@ -4149,24 +4646,20 @@ Sk.builtin.type = function(name, bases, dict)
     {
         // 1 arg version of type()
         var obj = name;
-        if (obj === true || obj === false) return Sk.builtin.BoolObj.prototype.ob$type;
+        if (obj === true || obj === false) return Sk.builtin.bool.prototype.ob$type;
         if (obj === null) return Sk.builtin.NoneObj.prototype.ob$type;
         if (typeof obj === "number")
         {
-			if (obj.skType === "int")
-				return Sk.builtin.IntObj.prototype.ob$type;
-			else if (obj.skType === "float")
-                return Sk.builtin.FloatObj.prototype.ob$type;
-            else if (Math.floor(obj) === obj)
-                return Sk.builtin.IntObj.prototype.ob$type;
+	    if (Math.floor(obj) === obj)
+                return Sk.builtin.int_.prototype.ob$type;
             else
-                return Sk.builtin.FloatObj.prototype.ob$type;
+                return Sk.builtin.float_.prototype.ob$type;
         }
 		if (obj.constructor === Sk.builtin.nmber) {
 			if (obj.skType === "int")
-				return Sk.builtin.IntObj.prototype.ob$type;
+				return Sk.builtin.int_.prototype.ob$type;
 			else // if (obj.skType === "float")
-                return Sk.builtin.FloatObj.prototype.ob$type;
+                return Sk.builtin.float_.prototype.ob$type;
 		}
         return obj.ob$type;
     }
@@ -4219,25 +4712,41 @@ Sk.builtin.type = function(name, bases, dict)
             if (mod) cname = mod.v + ".";
             return new Sk.builtin.str("<" + cname + name + " object>");
         };
+        klass.prototype.tp$str = function()
+        {
+            var strf = this.tp$getattr("__str__");
+            if (strf !== undefined)
+                return Sk.misceval.apply(strf, undefined, undefined, undefined, []);
+            return this['$r']();
+        };
+	klass.prototype.tp$length = function()
+	{
+            var lenf = this.tp$getattr("__len__");
+            if (lenf !== undefined)
+                return Sk.misceval.apply(lenf, undefined, undefined, undefined, []);
+	    var tname = Sk.abstr.typeName(this);
+	    throw new Sk.builtin.AttributeError(tname + " instance has no attribute '__len__'");
+	};	    
         klass.prototype.tp$call = function(args, kw)
         {
             var callf = this.tp$getattr("__call__");
             /* todo; vararg kwdict */
             if (callf)
                 return Sk.misceval.apply(callf, undefined, undefined, kw, args);
-            throw new Sk.builtin.TypeError("'" + this.tp$name + "' object is not callable");
+            throw new Sk.builtin.TypeError("'" + Sk.abstr.typeName(this) + "' object is not callable");
         };
         klass.prototype.tp$iter = function()
         {
             var iterf = this.tp$getattr("__iter__");
+            var tname = Sk.abstr.typeName(this);
             if (iterf)
             {
                  var ret = Sk.misceval.callsim(iterf);
                  if (ret.tp$getattr("next") === undefined)
-                    throw new Sk.builtin.TypeError("iter() return non-iterator of type '" + this.tp$name + "'");
+                    throw new Sk.builtin.TypeError("iter() return non-iterator of type '" + tname + "'");
                  return ret;
             }
-            throw new Sk.builtin.TypeError("'" + this.tp$name + "' object is not iterable");
+            throw new Sk.builtin.TypeError("'" + tname + "' object is not iterable");
         };
         klass.prototype.tp$iternext = function()
         {
@@ -4245,6 +4754,20 @@ Sk.builtin.type = function(name, bases, dict)
             goog.asserts.assert(iternextf !== undefined, "iter() should have caught this");
             return Sk.misceval.callsim(iternextf);
         };
+	klass.prototype.tp$getitem = function(key)
+	{
+	    var getf = this.tp$getattr("__getitem__");
+	    if (getf !== undefined)
+		return Sk.misceval.apply(getf, undefined, undefined, undefined, [key]);
+	    throw new Sk.builtin.TypeError("'" + Sk.abstr.typeName(this) + "' object does not support indexing");
+	}
+	klass.prototype.tp$setitem = function(key, value)
+	{
+	    var setf = this.tp$getattr("__setitem__");
+	    if (setf !== undefined)
+		return Sk.misceval.apply(setf, undefined, undefined, undefined, [key,value]);
+	    throw new Sk.builtin.TypeError("'" + Sk.abstr.typeName(this) + "' object does not support item assignment");
+	}
 
         klass.tp$name = name;
 
@@ -4261,13 +4784,11 @@ Sk.builtin.type = function(name, bases, dict)
             //print("mro result", Sk.builtin.repr(mro).v);
         }
 
-        // because we're not returning a new type() here, we have to manually
-        // add all the methods we want from the type class.
-        klass.tp$getattr = Sk.builtin.type.prototype.tp$getattr;
-        klass.ob$type = Sk.builtin.type;
-
         klass.prototype.ob$type = klass;
         Sk.builtin.type.makeIntoTypeObj(name, klass);
+	
+	// fix for class attributes
+	klass.tp$setattr = Sk.builtin.type.prototype.tp$setattr;
 
         return klass;
     }
@@ -4284,31 +4805,28 @@ Sk.builtin.type.makeTypeObj = function(name, newedInstanceOfType)
     return newedInstanceOfType;
 };
 
-/**
- *
- * @param name A JavaScript name for the type. e.g. "float"
- * @param t A function that takes an Sk type such as a string and returns the compiled type.
- */
-Sk.builtin.type.makeIntoTypeObj = function(name, t) {
-  goog.asserts.assert(name !== undefined);
-  goog.asserts.assert(t !== undefined);
-  t.ob$type = Sk.builtin.type;
-  t.tp$name = name;
-  t['$r'] = function() {
-    var mod = t.__module__;
-    var cname = "";
-    if (mod) cname = mod.v + ".";
-    var ctype = "class";
-    if (!mod)
-      if (name === 'float' || name === 'int' || name === 'long' || name === 'bool' || name === 'str')
-        ctype = "type";
-    return new Sk.builtin.str("<" + ctype + " '" + cname + t.tp$name + "'>");
-  };
-  t.tp$str = undefined;
-  t.tp$getattr = Sk.builtin.type.prototype.tp$getattr;
-  t.tp$setattr = Sk.builtin.object.prototype.GenericSetAttr;
-  t.tp$richcompare = Sk.builtin.type.prototype.tp$richcompare;
-  return t;
+Sk.builtin.type.makeIntoTypeObj = function(name, t)
+{
+    goog.asserts.assert(name !== undefined);
+    goog.asserts.assert(t !== undefined);
+    t.ob$type = Sk.builtin.type;
+    t.tp$name = name;
+    t['$r'] = function()
+    {
+        var mod = t.__module__;
+        var cname = "";
+        if (mod) cname = mod.v + ".";
+		var ctype = "class";
+		if (!mod)
+			if (name === 'float' || name === 'int' || name === 'long' || name === 'bool' || name === 'str')
+				ctype = "type";
+        return new Sk.builtin.str("<" + ctype + " '" + cname + t.tp$name + "'>");
+    };
+    t.tp$str = undefined;
+    t.tp$getattr = Sk.builtin.type.prototype.tp$getattr;
+    t.tp$setattr = Sk.builtin.object.prototype.GenericSetAttr;
+	t.tp$richcompare = Sk.builtin.type.prototype.tp$richcompare;
+    return t;
 };
 
 Sk.builtin.type.ob$type = Sk.builtin.type;
@@ -4326,7 +4844,7 @@ Sk.builtin.type.prototype.tp$getattr = function(name)
     var descr = Sk.builtin.type.typeLookup(tp, name);
     var f;
     //print("type.tpgetattr descr", descr, descr.tp$name, descr.func_code, name);
-    if (descr !== undefined && descr.ob$type !== undefined)
+    if (descr !== undefined && descr !== null && descr.ob$type !== undefined)
     {
         f = descr.ob$type.tp$descr_get;
         // todo;if (f && descr.tp$descr_set) // is a data descriptor if it has a set
@@ -4335,11 +4853,11 @@ Sk.builtin.type.prototype.tp$getattr = function(name)
 
     if (this['$d'])
     {
-        //print("hi");
-        var res = this['$d'].mp$subscript(new Sk.builtin.str(name));
-        //print(res);
+        var res = this['$d'].mp$lookup(new Sk.builtin.str(name));
         if (res !== undefined)
+        {
             return res;
+        }
     }
 
     if (f)
@@ -4348,7 +4866,7 @@ Sk.builtin.type.prototype.tp$getattr = function(name)
         return f.call(descr, null, tp);
     }
 
-    if (descr)
+    if (descr !== undefined)
     {
         return descr;
     }
@@ -4356,23 +4874,35 @@ Sk.builtin.type.prototype.tp$getattr = function(name)
     return undefined;
 };
 
+Sk.builtin.type.prototype.tp$setattr = function(name, value)
+{
+    // class attributes are direct properties of the object
+    this[name] = value;
+}
+
 Sk.builtin.type.typeLookup = function(type, name)
 {
     var mro = type.tp$mro;
+    var pyname = new Sk.builtin.str(name);
+    var base;
+    var res;
+    var i;
 
     // todo; probably should fix this, used for builtin types to get stuff
     // from prototype
     if (!mro)
         return type.prototype[name];
 
-    for (var i = 0; i < mro.v.length; ++i)
+    for (i = 0; i < mro.v.length; ++i)
     {
-        var base = mro.v[i];
+        base = mro.v[i];
         if (base.hasOwnProperty(name))
             return base[name];
-        var res = base['$d'].mp$subscript(new Sk.builtin.str(name));
+        res = base['$d'].mp$lookup(pyname);
         if (res !== undefined)
+        {
             return res;
+        }
     }
 
     return undefined;
@@ -4424,7 +4954,7 @@ Sk.builtin.type.mroMerge_ = function(seqs)
         }
 
         if (cands.length === 0)
-            throw new TypeError("Inconsistent precedences in type hierarchy");
+            throw new Sk.builtin.TypeError("Inconsistent precedences in type hierarchy");
 
         var next = cands[0];
         // append next to result and remove from sequences
@@ -4443,7 +4973,7 @@ Sk.builtin.type.buildMRO_ = function(klass)
     // MERGE(klass + mro(bases) + bases)
     var all = [ [klass] ];
 
-    //Sk.debugout("buildMRO for", klass.tp$name);
+    // Sk.debugout("buildMRO for", klass.tp$name);
 
     var kbases = klass['$d'].mp$subscript(Sk.builtin.type.basesStr_);
     for (var i = 0; i < kbases.v.length; ++i)
@@ -4490,7 +5020,8 @@ Sk.builtin.type.prototype.tp$richcompare = function(other, op)
 	var r2 = other['$r']();
 
 	return r1.tp$richcompare(r2, op);
-};/**
+};
+/**
  * @constructor
  */
 Sk.builtin.object = function()
@@ -4500,48 +5031,60 @@ Sk.builtin.object = function()
     return this;
 };
 
-Sk.builtin.object.prototype.GenericGetAttr = function(name) {
+Sk.builtin.object.prototype.GenericGetAttr = function(name)
+{
+    goog.asserts.assert(typeof name === "string");
 
-  goog.asserts.assert(typeof name === "string");
+    var tp = this.ob$type;
+    goog.asserts.assert(tp !== undefined, "object has no ob$type!");
 
-  var tp = this.ob$type;
-  goog.asserts.assert(tp !== undefined, "object has no ob$type!");
+    //print("getattr", tp.tp$name, name);
 
-  //print("getattr", tp.tp$name, name);
+    var descr = Sk.builtin.type.typeLookup(tp, name);
 
-  var descr = Sk.builtin.type.typeLookup(tp, name);
+    // otherwise, look in the type for a descr
+    var f;
+    //print("descr", descr);
+    if (descr !== undefined && descr !== null && descr.ob$type !== undefined)
+    {
+        f = descr.ob$type.tp$descr_get;
+        // todo;
+        //if (f && descr.tp$descr_set) // is a data descriptor if it has a set
+            //return f.call(descr, this, this.ob$type);
+    }
 
-  // otherwise, look in the type for a descr
-  var f;
-  //print("descr", descr);
-  if (descr !== undefined && descr.ob$type !== undefined) {
-    f = descr.ob$type.tp$descr_get;
-    // todo;
-    //if (f && descr.tp$descr_set) // is a data descriptor if it has a set
-        //return f.call(descr, this, this.ob$type);
-  }
+    // todo; assert? force?
+    if (this['$d'])
+    {
+        var res;
+        if  (this['$d'].mp$lookup) {
+            res = this['$d'].mp$lookup(new Sk.builtin.str(name));
+        }
+        else if (this['$d'].mp$subscript) {
+            try {
+                res = this['$d'].mp$subscript(new Sk.builtin.str(name));
+            } catch (x) {
+                res = undefined;
+            }
+        }
+        else if (typeof this['$d'] === "object") // todo; definitely the wrong place for this. other custom tp$getattr won't work on object -- bnm -- implemented custom __getattr__ in abstract.js
+            res = this['$d'][name];
+        if (res !== undefined)
+            return res;
+    }
 
-  // todo; assert? force?
-  if (this['$d']) {
-    var res;
-    if (this['$d'].mp$subscript)
-      res = this['$d'].mp$subscript(new Sk.builtin.str(name));
-    else if (typeof this['$d'] === "object") // todo; definitely the wrong place for this. other custom tp$getattr won't work on object -- bnm -- implemented custom __getattr__ in abstract.js
-      res = this['$d'][name];
-    if (res !== undefined)
-      return res;
-  }
+    if (f)
+    {
+        // non-data descriptor
+        return f.call(descr, this, this.ob$type);
+    }
 
-  if (f) {
-    // non-data descriptor
-    return f.call(descr, this, this.ob$type);
-  }
+    if (descr !== undefined)
+    {
+        return descr;
+    }
 
-  if (descr) {
-    return descr;
-  }
-
-  return undefined;
+    return undefined;
 };
 goog.exportSymbol("Sk.builtin.object.prototype.GenericGetAttr", Sk.builtin.object.prototype.GenericGetAttr);
 
@@ -4558,24 +5101,100 @@ goog.exportSymbol("Sk.builtin.object.prototype.GenericSetAttr", Sk.builtin.objec
 
 Sk.builtin.object.prototype.HashNotImplemented = function()
 {
-    throw new Sk.builtin.TypeError("unhashable type: '" + this.tp$name + "'");
+    throw new Sk.builtin.TypeError("unhashable type: '" + Sk.abstr.typeName(this) + "'");
 };
 
 Sk.builtin.object.prototype.tp$getattr = Sk.builtin.object.prototype.GenericGetAttr;
 Sk.builtin.object.prototype.tp$setattr = Sk.builtin.object.prototype.GenericSetAttr;
 Sk.builtin.type.makeIntoTypeObj('object', Sk.builtin.object);
 
-Sk.builtin.BoolObj = function() {};
-Sk.builtin.BoolObj.prototype.ob$type = Sk.builtin.type.makeTypeObj('bool', new Sk.builtin.BoolObj());
-
-Sk.builtin.IntObj = function() {};
-Sk.builtin.IntObj.prototype.ob$type = Sk.builtin.type.makeTypeObj('int', new Sk.builtin.IntObj());
-
-Sk.builtin.FloatObj = function() {};
-Sk.builtin.FloatObj.prototype.ob$type = Sk.builtin.type.makeTypeObj('float', new Sk.builtin.FloatObj());
-
 Sk.builtin.NoneObj = function() {};
 Sk.builtin.NoneObj.prototype.ob$type = Sk.builtin.type.makeTypeObj('None', new Sk.builtin.NoneObj());
+/**
+ * Check arguments to Python functions to ensure the correct number of
+ * arguments are passed.
+ * 
+ * @param {string} name the name of the function
+ * @param {Object} args the args passed to the function
+ * @param {number} minargs the minimum number of allowable arguments
+ * @param {number=} maxargs optional maximum number of allowable
+ * arguments (default: Infinity)
+ * @param {boolean=} kwargs optional true if kwargs, false otherwise
+ * (default: false)
+ * @param {boolean=} free optional true if free vars, false otherwise
+ * (default: false)
+ */
+Sk.builtin.pyCheckArgs = function (name, args, minargs, maxargs, kwargs, free) {
+    var nargs = args.length;
+    var msg = "";
+
+    if (maxargs === undefined) { maxargs = Infinity; }
+    if (kwargs) { nargs -= 1; }
+    if (free) { nargs -= 1; }
+    if ((nargs < minargs) || (nargs > maxargs)) {
+        if (minargs === maxargs) {
+            msg = name + "() takes exactly " + minargs + " arguments";
+        } else if (nargs < minargs) {
+            msg = name + "() takes at least " + minargs + " arguments";
+        } else {
+            msg = name + "() takes at most " + maxargs + " arguments";
+        }
+        msg += " (" + nargs + " given)";
+        throw new Sk.builtin.TypeError(msg);
+    };
+};
+goog.exportSymbol("Sk.builtin.pyCheckArgs", Sk.builtin.pyCheckArgs);
+
+/**
+ * Check type of argument to Python functions.
+ * 
+ * @param {string} name the name of the argument
+ * @param {string} exptype string of the expected type name
+ * @param {boolean} check truthy if type check passes, falsy otherwise
+ */
+
+Sk.builtin.pyCheckType = function (name, exptype, check) {
+    if (!check) {
+        throw new Sk.builtin.TypeError(name + " must be a " + exptype);
+    };
+};
+goog.exportSymbol("Sk.builtin.pyCheckType", Sk.builtin.pyCheckType);
+
+Sk.builtin.checkSequence = function (arg) {
+    return (arg !== null && arg.mp$subscript !== undefined);
+};
+goog.exportSymbol("Sk.builtin.checkSequence", Sk.builtin.checkSequence);
+
+Sk.builtin.checkIterable = function (arg) {
+    return (arg !== null && arg.tp$iter !== undefined);
+};
+goog.exportSymbol("Sk.builtin.checkIterable", Sk.builtin.checkIterable);
+
+Sk.builtin.checkNumber = function (arg) {
+    return (arg !== null && (typeof arg === "number"
+			     || arg instanceof Sk.builtin.nmber
+			     || arg instanceof Sk.builtin.lng));
+};
+goog.exportSymbol("Sk.builtin.checkNumber", Sk.builtin.checkNumber);
+
+Sk.builtin.checkInt = function (arg) {
+    return (arg !== null) && ((typeof arg === "number" && arg === (arg|0))
+			      || (arg instanceof Sk.builtin.nmber
+				  && arg.skType === Sk.builtin.nmber.int$)
+			      || arg instanceof Sk.builtin.lng);
+};
+goog.exportSymbol("Sk.builtin.checkInt", Sk.builtin.checkInt);
+
+Sk.builtin.checkString = function (arg) {
+    return (arg !== null && arg.__class__ == Sk.builtin.str);
+};
+goog.exportSymbol("Sk.builtin.checkString", Sk.builtin.checkString);
+
+Sk.builtin.checkFunction = function (arg) {
+    return (arg !== null && arg.tp$call !== undefined);  
+};
+goog.exportSymbol("Sk.builtin.checkFunction", Sk.builtin.checkFunction);
+
 /**
  * @constructor
  *
@@ -4621,6 +5240,8 @@ Sk.builtin.func.prototype.tp$descr_get = function(obj, objtype)
 };
 Sk.builtin.func.prototype.tp$call = function(args, kw)
 {
+    var name;
+
     // note: functions expect 'this' to be globals to avoid having to
     // slice/unshift onto the main args
     if (this.func_closure)
@@ -4631,6 +5252,11 @@ Sk.builtin.func.prototype.tp$call = function(args, kw)
 
     var expectskw = this.func_code['co_kwargs'];
     var kwargsarr = [];
+
+    if (this.func_code['no_kw'] && kw) {
+        name = (this.func_code && this.func_code['co_name'] && this.func_code['co_name'].v) || '<native JS>';
+        throw new Sk.builtin.TypeError(name + "() takes no keyword arguments");
+    }
 
     if (kw)
     {
@@ -4650,11 +5276,16 @@ Sk.builtin.func.prototype.tp$call = function(args, kw)
             {
                 args[j] = kw[i+1];
             }
-            else if (this.func_code['co_kwargs'])
+            else if (expectskw)
             {
                 // build kwargs dict
                 kwargsarr.push(new Sk.builtin.str(kw[i]));
                 kwargsarr.push(kw[i + 1]);
+            }
+            else
+            {
+                name = (this.func_code && this.func_code['co_name'] && this.func_code['co_name'].v) || '<native JS>';
+                throw new Sk.builtin.TypeError(name + "() got an unexpected keyword argument '" + kw[i] + "'");
             }
         }
     }
@@ -4669,21 +5300,62 @@ Sk.builtin.func.prototype.tp$call = function(args, kw)
 };
 
 Sk.builtin.func.prototype.tp$getattr = function(key) {
-  return this[key];
-};
-
+    return this[key];
+}
 Sk.builtin.func.prototype.tp$setattr = function(key,value) {
-  this[key] = value;
-};
+    this[key] = value;
+}
 
 //todo; investigate why the other doesn't work
 //Sk.builtin.type.makeIntoTypeObj('function', Sk.builtin.func);
 Sk.builtin.func.prototype.ob$type = Sk.builtin.type.makeTypeObj('function', new Sk.builtin.func(null, null));
 
-Sk.builtin.func.prototype['$r'] = function() {
-  var name = (this.func_code && this.func_code['co_name'] && this.func_code['co_name'].v) || '<native JS>';
-  return new Sk.builtin.str("<function " + name + ">");
+Sk.builtin.func.prototype['$r'] = function()
+{
+    var name = (this.func_code && this.func_code['co_name'] && this.func_code['co_name'].v) || '<native JS>';
+    return new Sk.builtin.str("<function " + name + ">");
 };
+/*
+ * Object to facilitate building native Javascript functions that
+ * behave similarly to Python functions.
+ *
+ * Use:
+ * foo = Sk.nativejs.func(function foo(...) {...});
+ */
+Sk.nativejs = {
+    FN_ARGS: /^function\s*[^\(]*\(\s*([^\)]*)\)/m,
+    FN_ARG_SPLIT: /,/,
+    FN_ARG: /^\s*(_?)(\S+?)\1\s*$/,
+    STRIP_COMMENTS: /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg,
+    formalParameterList: function (fn) {
+        var fnText,argDecl;
+        var args=[];
+        fnText = fn.toString().replace(this.STRIP_COMMENTS, '');
+        argDecl = fnText.match(this.FN_ARGS); 
+        
+        var r = argDecl[1].split(this.FN_ARG_SPLIT);
+        for(var a in r){
+            var arg = r[a];
+            arg.replace(this.FN_ARG, function(all, underscore, name) {
+                args.push(name);
+            });
+        }
+        return args;
+    },
+    func: function (code) {
+        code['co_name'] = new Sk.builtin.str(code.name);
+        code['co_varnames'] = Sk.nativejs.formalParameterList(code);
+        return new Sk.builtin.func(code);
+    },
+    func_nokw: function (code) {
+        code['co_name'] = new Sk.builtin.str(code.name);
+        code['co_varnames'] = Sk.nativejs.formalParameterList(code);
+        code['no_kw'] = true;
+        return new Sk.builtin.func(code);
+    }
+};
+goog.exportSymbol("Sk.nativejs.func", Sk.nativejs.func);
+goog.exportSymbol("Sk.nativejs.func_nokw", Sk.nativejs.func_nokw);
 /**
  * @constructor
  *
@@ -4730,44 +5402,57 @@ Sk.builtin.method.prototype.tp$call = function(args, kw)
 
 Sk.builtin.method.prototype['$r'] = function()
 {
-    return new Sk.builtin.str("<bound method " + this.im_self.ob$type.tp$name + "." + this.im_func.func_code['co_name'].v
+    var name = (this.im_func.func_code && this.im_func.func_code['co_name'] && this.im_func.func_code['co_name'].v) || '<native JS>';
+    return new Sk.builtin.str("<bound method " + this.im_self.ob$type.tp$name + "." + name
             + " of " + this.im_self['$r']().v + ">");
 };
 Sk.misceval = {};
 
-Sk.misceval.isIndex = function(o) {
-  return o === null || typeof o === "number" || o.constructor === Sk.builtin.lng || o.constructor === Sk.builtin.nmber || o.tp$index;
+Sk.misceval.isIndex = function(o)
+{
+    if (o === null || o.constructor === Sk.builtin.lng || o.tp$index
+	|| o === true || o === false) {
+        return true;
+    }
+
+    return Sk.builtin.checkInt(o);
 };
 goog.exportSymbol("Sk.misceval.isIndex", Sk.misceval.isIndex);
 
-Sk.misceval.asIndex = function(o) {
-  if (!Sk.misceval.isIndex(o)) return undefined;
-  if (o === null) return undefined;
-  if (typeof o === "number") return o;
-  if (o.constructor === Sk.builtin.nmber) return o.v;
-  if (o.constructor === Sk.builtin.lng) return o.tp$index();
-  goog.asserts.fail("todo;");
+Sk.misceval.asIndex = function(o)
+{
+    if (!Sk.misceval.isIndex(o)) return undefined;
+    if (o === null) return undefined;
+    if (o === true) return 1;
+    if (o === false) return 0;
+    if (typeof o === "number") return o;
+	if (o.constructor === Sk.builtin.nmber) return o.v;
+	if (o.constructor === Sk.builtin.lng) return o.tp$index();
+    goog.asserts.fail("todo;");
 };
 
 /**
  * return u[v:w]
  */
- Sk.misceval.applySlice = function(u, v, w) {
-  if (u.sq$slice && Sk.misceval.isIndex(v) && Sk.misceval.isIndex(w)) {
-    var ilow = Sk.misceval.asIndex(v);
-    if (ilow === undefined) ilow = 0;
-    var ihigh = Sk.misceval.asIndex(w);
-    if (ihigh === undefined) ihigh = 1e100;
-    return Sk.abstr.sequenceGetSlice(u, ilow, ihigh);
-  }
-  return Sk.abstr.objectGetItem(u, new Sk.builtin.slice(v, w, null));
+Sk.misceval.applySlice = function(u, v, w)
+{
+    if (u.sq$slice && Sk.misceval.isIndex(v) && Sk.misceval.isIndex(w))
+    {
+        var ilow = Sk.misceval.asIndex(v);
+        if (ilow === undefined) ilow = 0;
+        var ihigh = Sk.misceval.asIndex(w);
+        if (ihigh === undefined) ihigh = 1e100;
+        return Sk.abstr.sequenceGetSlice(u, ilow, ihigh);
+    }
+    return Sk.abstr.objectGetItem(u, new Sk.builtin.slice(v, w, null));
 };
 goog.exportSymbol("Sk.misceval.applySlice", Sk.misceval.applySlice);
 
 /**
  * u[v:w] = x
  */
- Sk.misceval.assignSlice = function(u, v, w, x) {
+Sk.misceval.assignSlice = function(u, v, w, x)
+{
     if (u.sq$ass_slice && Sk.misceval.isIndex(v) && Sk.misceval.isIndex(w))
     {
         var ilow = Sk.misceval.asIndex(v) || 0;
@@ -4792,8 +5477,8 @@ goog.exportSymbol("Sk.misceval.assignSlice", Sk.misceval.assignSlice);
  * Used by min() and max() to get an array from arbitrary input.
  * Note that this does no validation, just coercion.
  */
- Sk.misceval.arrayFromArguments = function(args)
- {
+Sk.misceval.arrayFromArguments = function(args)
+{
     // If args is not a single thing return as is
     if ( args.length != 1 )
     {
@@ -4802,7 +5487,7 @@ goog.exportSymbol("Sk.misceval.assignSlice", Sk.misceval.assignSlice);
     var arg = args[0];
     if ( arg instanceof Sk.builtin.set )
     {
-        // this is a Sk.builtin.list
+        // this is a Sk.builtin.set
         arg = arg.tp$iter().$obj;
     }
     else if ( arg instanceof Sk.builtin.dict )
@@ -4810,7 +5495,19 @@ goog.exportSymbol("Sk.misceval.assignSlice", Sk.misceval.assignSlice);
         // this is a Sk.builtin.list
         arg = Sk.builtin.dict.prototype['keys'].func_code(arg);
     }
-    // shouldn't else if here as the two above output lists to arg.
+    else if ( arg instanceof Sk.builtin.str )
+    {
+        // this is a Sk.builtin.str
+        var res = [];
+        for (var it = arg.tp$iter(), i = it.tp$iternext(); 
+             i !== undefined; i = it.tp$iternext())
+        {
+            res.push(i);
+        }
+        return res;
+    }
+
+    // shouldn't else if here as the above may output lists to arg.
     if ( arg instanceof Sk.builtin.list || arg instanceof Sk.builtin.tuple )
     {
         return arg.v;
@@ -4820,29 +5517,49 @@ goog.exportSymbol("Sk.misceval.assignSlice", Sk.misceval.assignSlice);
 goog.exportSymbol("Sk.misceval.arrayFromArguments", Sk.misceval.arrayFromArguments);
 
 /**
- * for reversed comparison: Lt -> GtE, etc.
+ * for reversed comparison: Gt -> Lt, etc.
  */
- Sk.misceval.swappedOp_ = {
-    'Eq': 'Eq',         //
-    'NotEq': 'NotEq',   //
+Sk.misceval.swappedOp_ = {
+    'Eq': 'Eq',
+    'NotEq': 'NotEq',
     'Lt': 'GtE',
     'LtE': 'Gt',
     'Gt': 'LtE',
     'GtE': 'Lt',
-    'Is': 'Is',         //
-    'IsNot': 'IsNot',   //  
-    'In_': undefined,   //  No swap equivalent (equivalent = "contains")
-    'NotIn': undefined  //  No swap equivalent (equivalent = "does not contain")
+    'Is': 'IsNot',
+    'IsNot': 'Is',
+    'In_': 'NotIn',
+    'NotIn': 'In_'
 };
 
 
 Sk.misceval.richCompareBool = function(v, w, op)
 {
-    if (op === 'Is')
-        return v === w;
+    if (op === 'Is') {
+	if (v instanceof Sk.builtin.nmber && w instanceof Sk.builtin.nmber)
+	{
+	    return (v.numberCompare(w) === 0) && (v.skType === w.skType);
+	}
+	else if (v instanceof Sk.builtin.lng && w instanceof Sk.builtin.lng)
+	{
+	    return v.longCompare(w) === 0;
+	}
 
-    if (op === 'IsNot')
+        return v === w;
+    }
+
+    if (op === 'IsNot') {
+	if (v instanceof Sk.builtin.nmber && w instanceof Sk.builtin.nmber)
+	{
+	    return (v.numberCompare(w) !== 0) || (v.skType !== w.skType);
+	}
+	else if (v instanceof Sk.builtin.lng && w instanceof Sk.builtin.lng)
+	{
+	    return v.longCompare(w) !== 0;
+	}
+
         return v !== w;
+    }
 
     if (v === w)
     {
@@ -4870,6 +5587,10 @@ Sk.misceval.richCompareBool = function(v, w, op)
             case 'GtE': return v >= w;
             case 'NotEq': return v != w;
             case 'Eq': return v == w;
+            case 'In':
+            case 'NotIn':  {
+                throw new Sk.builtin.TypeError("argument of type '" + Sk.abstr.typeName(w) + "' is not iterable");
+            };
             default: throw "assert";
         }
     }
@@ -4900,39 +5621,39 @@ Sk.misceval.richCompareBool = function(v, w, op)
                     return Sk.misceval.callsim(v['__eq__'], v, w);
                 else if (w && w['__eq__'])
                     return Sk.misceval.callsim(w['__eq__'], w, v);
-            }
+                }
             else if (op === 'NotEq') {
                 if (v && v['__ne__'])
                     return Sk.misceval.callsim(v['__ne__'], v, w);
-                else if (w && w['__eq__'])
+                else if (w && w['__ne__'])
                     return Sk.misceval.callsim(w['__ne__'], w, v);
-            }
+                }
             else if (op === 'Gt') {
                 if (v && v['__gt__'])
                     return Sk.misceval.callsim(v['__gt__'], v, w);
                 else if (w && w['__le__'])
                     return Sk.misceval.callsim(w['__le__'], w, v);
-            }
+                }
             else if (op === 'Lt') {
                 if (v && v['__lt__'])
                     return Sk.misceval.callsim(v['__lt__'], v, w);
                 else if (w && w['__ge__'])
                     return Sk.misceval.callsim(w['__ge__'], w, v);
-            }
+                }
             else if (op === 'GtE') {
                 if (v && v['__ge__'])
                     return Sk.misceval.callsim(v['__ge__'], v, w);
                 else if (w && w['__lt__'])
                     return Sk.misceval.callsim(w['__lt__'], w, v);
-            }
+                }
             else if (op === 'LtE') {
                 if (v && v['__le__'])
                     return Sk.misceval.callsim(v['__le__'], v, w);
                 else if (w && w['__gt__'])
                     return Sk.misceval.callsim(w['__gt__'], w, v);
-            }
+                }
 
-/*  Fix by BM -- old version
+/*	Fix by BM -- old version
             if (op === 'Eq')
                 if (v && v['__eq__'])
                     return Sk.misceval.callsim(v['__eq__'], v, w);
@@ -4963,13 +5684,14 @@ Sk.misceval.richCompareBool = function(v, w, op)
                     return Sk.misceval.callsim(v['__le__'], v, w);
                 else if (w && w['__ge__'])
                     return Sk.misceval.callsim(w['__ge__'], w, v);
-                */
+*/
 
             // if those aren't defined, fallback on the __cmp__ method if it
             // exists
             if (v && v['__cmp__'])
             {
                 var ret = Sk.misceval.callsim(v['__cmp__'], v, w);
+		ret = Sk.builtin.asnum$(ret);
                 if (op === 'Eq') return ret === 0;
                 else if (op === 'NotEq') return ret !== 0;
                 else if (op === 'Lt') return ret < 0;
@@ -4981,6 +5703,7 @@ Sk.misceval.richCompareBool = function(v, w, op)
             {
                 // note, flipped on return value and call
                 var ret = Sk.misceval.callsim(w['__cmp__'], w, v);
+		ret = Sk.builtin.asnum$(ret);
                 if (op === 'Eq') return ret === 0;
                 else if (op === 'NotEq') return ret !== 0;
                 else if (op === 'Lt') return ret > 0;
@@ -5002,7 +5725,9 @@ Sk.misceval.richCompareBool = function(v, w, op)
     if (op === 'Eq') return v === w;
     if (op === 'NotEq') return v !== w;
 
-    throw new Sk.builtin.ValueError("don't know how to compare '" + v.tp$name + "' and '" + w.tp$name + "'");
+    var vname = Sk.abstr.typeName(v);
+    var wname = Sk.abstr.typeName(w);
+    throw new Sk.builtin.ValueError("don't know how to compare '" + vname + "' and '" + wname + "'");
 };
 goog.exportSymbol("Sk.misceval.richCompareBool", Sk.misceval.richCompareBool);
 
@@ -5017,10 +5742,15 @@ Sk.misceval.objectRepr = function(v)
         return new Sk.builtin.str("False");
     else if (typeof v === "number")
         return new Sk.builtin.str("" + v);
+    else if (!v['$r']) {
+        if (v.tp$name) {
+            return new Sk.builtin.str("<" + v.tp$name + " object>");
+        } else {
+            return new Sk.builtin.str("<unknown>");
+        };
+    }
     else if (v.constructor === Sk.builtin.nmber)
         return new Sk.builtin.str("" + v.v);
-    else if (!v['$r'])
-        return new Sk.builtin.str("<" + v.tp$name + " object>");
     else
         return v['$r']();
 };
@@ -5033,7 +5763,7 @@ Sk.misceval.opAllowsEquality = function(op)
         case 'LtE':
         case 'Eq':
         case 'GtE':
-        return true;
+            return true;
     }
     return false;
 };
@@ -5045,6 +5775,7 @@ Sk.misceval.isTrue = function(x)
     if (x === false) return false;
     if (x === null) return false;
     if (typeof x === "number") return x !== 0;
+    if (x instanceof Sk.builtin.lng) return x.nb$nonzero();
     if (x.constructor === Sk.builtin.nmber) return x.v !== 0;
     if (x.mp$length) return x.mp$length() !== 0;
     if (x.sq$length) return x.sq$length() !== 0;
@@ -5075,14 +5806,17 @@ goog.exportSymbol("Sk.misceval.print_", Sk.misceval.print_);
  * @param {string} name
  * @param {Object=} other generally globals
  */
- Sk.misceval.loadname = function(name, other) {
-  var v = other[name];
-  if (v !== undefined) return v;
+Sk.misceval.loadname = function(name, other)
+{
+    var v = other[name];
+    if (v !== undefined) return v;
 
-  var bi = Sk.builtins[name];
-  if (bi !== undefined) return bi;
+    var bi = Sk.builtins[name];
+    if (bi !== undefined) return bi;
 
-  throw new Sk.builtin.NameError("name '" + name + "' is not defined");
+    name = name.replace('_$rw$', '');
+    name = name.replace('_$rn$', '');
+    throw new Sk.builtin.NameError("name '" + name + "' is not defined");
 };
 goog.exportSymbol("Sk.misceval.loadname", Sk.misceval.loadname);
 
@@ -5113,7 +5847,7 @@ goog.exportSymbol("Sk.misceval.loadname", Sk.misceval.loadname);
  * Note that the same problem exists for function objects too (a "def"
  * creates a function object that also has properties). It just happens
  * that attributes on classes in python are much more useful and common
- * than the attributes on functions.
+ * that the attributes on functions.
  *
  * Also note, that for full python compatibility we have to do the $call
  * method because any python object could have a __call__ method which
@@ -5161,10 +5895,11 @@ goog.exportSymbol("Sk.misceval.loadname", Sk.misceval.loadname);
  * TODO I think all the above is out of date.
  */
 
- Sk.misceval.call = function(func, kwdict, varargseq, kws, args) {
-  var args = Array.prototype.slice.call(arguments, 4);
-  // todo; possibly inline apply to avoid extra stack frame creation
-  return Sk.misceval.apply(func, kwdict, varargseq, kws, args);
+Sk.misceval.call = function(func, kwdict, varargseq, kws, args)
+{
+    var args = Array.prototype.slice.call(arguments, 4);
+    // todo; possibly inline apply to avoid extra stack frame creation
+    return Sk.misceval.apply(func, kwdict, varargseq, kws, args);
 };
 goog.exportSymbol("Sk.misceval.call", Sk.misceval.call);
 
@@ -5172,51 +5907,77 @@ goog.exportSymbol("Sk.misceval.call", Sk.misceval.call);
  * @param {Object} func the thing to call
  * @param {...*} args stuff to pass it
  */
- Sk.misceval.callsim = function(func, args) {
-  var args = Array.prototype.slice.call(arguments, 1);
-  return Sk.misceval.apply(func, undefined, undefined, undefined, args);
+Sk.misceval.callsim = function(func, args)
+{
+    var args = Array.prototype.slice.call(arguments, 1);
+    return Sk.misceval.apply(func, undefined, undefined, undefined, args);
 };
 goog.exportSymbol("Sk.misceval.callsim", Sk.misceval.callsim);
 
 /**
- * same as Sk.misceval.call except args is an actual array, rather than varargs.
+ * same as Sk.misceval.call except args is an actual array, rather than
+ * varargs.
  */
- Sk.misceval.apply = function(func, kwdict, varargseq, kws, args) {
-  if (typeof func === "function") {
-    // todo; i believe the only time this happens is the wrapper
-    // function around generators (that creates the iterator).
-    // should just make that a real function object and get rid
-    // of this case.
-    // alternatively, put it to more use, and perhaps use
-    // descriptors to create builtin.func's in other places.
+Sk.misceval.apply = function(func, kwdict, varargseq, kws, args)
+{
+    if (func === null)
+    {
+        throw new Sk.builtin.TypeError("'" + Sk.abstr.typeName(func) + "' object is not callable");
+    }
+    else if (typeof func === "function")
+    {
+        // todo; i believe the only time this happens is the wrapper
+        // function around generators (that creates the iterator).
+        // should just make that a real function object and get rid
+        // of this case.
+        // alternatively, put it to more use, and perhaps use
+        // descriptors to create builtin.func's in other places.
 
-    goog.asserts.assert(kws === undefined);
-    return func.apply(null, args);
-  }
-  else {
-    var fcall = func.tp$call;
-    if (fcall !== undefined) {
-      if (varargseq) {
-        for (var it = varargseq.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext()) {
-          args.push(i);
+        // This actually happens for all builtin functions (in
+        // builtin.js, for example) as they are javascript functions,
+        // not Sk.builtin.func objects.
+
+        if (varargseq)
+        {
+            for (var it = varargseq.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext())
+            {
+                args.push(i);
+            }
         }
-      }
-      if (kwdict) {
-        goog.asserts.fail("todo;");
-      }
-      return fcall.call(func, args, kws, kwdict);
+        goog.asserts.assert(((kws === undefined) || (kws.length === 0)));
+        return func.apply(null, args);
     }
-    // todo; can we push this into a tp$call somewhere so there's
-    // not redundant checks everywhere for all of these __x__ ones?
-    fcall = func.__call__;
-    if (fcall !== undefined) {
-      // func is actually the object here because we got __call__
-      // from it. todo; should probably use descr_get here
-      args.unshift(func);
-      return Sk.misceval.apply(fcall, kws, args, kwdict, varargseq);
+    else
+    {
+        var fcall = func.tp$call;
+        if (fcall !== undefined)
+        {
+            if (varargseq)
+            {
+                for (var it = varargseq.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext())
+                {
+                    args.push(i);
+                }
+            }
+            if (kwdict)
+            {
+                goog.asserts.fail("todo;");
+            }
+            return fcall.call(func, args, kws, kwdict);
+        }
+
+        // todo; can we push this into a tp$call somewhere so there's
+        // not redundant checks everywhere for all of these __x__ ones?
+        fcall = func.__call__;
+        if (fcall !== undefined)
+        {
+            // func is actually the object here because we got __call__
+            // from it. todo; should probably use descr_get here
+            args.unshift(func);
+            return Sk.misceval.apply(fcall, kws, args, kwdict, varargseq);
+        }
+        throw new Sk.builtin.TypeError("'" + Sk.abstr.typeName(func) + "' object is not callable");
     }
-    throw new TypeError("'" + func.tp$name + "' object is not callable.");
-  }
 };
 goog.exportSymbol("Sk.misceval.apply", Sk.misceval.apply);
 
@@ -5224,7 +5985,7 @@ goog.exportSymbol("Sk.misceval.apply", Sk.misceval.apply);
  * Constructs a class object given a code object representing the body
  * of the class, the name of the class, and the list of bases.
  *
- * There are no "old-style" classes in DaVinci, so use the user-specified
+ * There are no "old-style" classes in Skulpt, so use the user-specified
  * metaclass (todo;) if there is one, the type of the 0th base class if
  * there's bases, or otherwise the 'type' type.
  *
@@ -5235,8 +5996,8 @@ goog.exportSymbol("Sk.misceval.apply", Sk.misceval.apply);
  * should return a newly constructed class object.
  *
  */
- Sk.misceval.buildClass = function(globals, func, name, bases)
- {
+Sk.misceval.buildClass = function(globals, func, name, bases)
+{
     // todo; metaclass
     var meta = Sk.builtin.type;
 
@@ -5266,28 +6027,59 @@ Sk.abstr = {};
 //
 //
 
-Sk.abstr.binop_type_error = function(lhs, rhs, name) {
-  throw new TypeError("unsupported operand type(s) for " + name + ": '" + lhs.tp$name + "' and '" + rhs.tp$name + "'");
+Sk.abstr.typeName = function(v) {
+    var vtypename;
+    if (v === null) {
+        vtypename = "NoneType";
+    } else if ((v === true) || (v === false)) {
+        vtypename = "bool";
+    } else if (typeof v === "number") {
+        vtypename = "number";
+    } else if (v instanceof Sk.builtin.nmber) {
+    vtypename = v.skType;
+    } else if (v.tp$name !== undefined) {
+        vtypename = v.tp$name;
+    } else if (v.ob$type && (v.ob$type.tp$name !== undefined)) {
+        vtypename = v.ob$type.tp$name;
+    } else {
+        vtypename = "unknown";
+    };
+    return vtypename;
+};
+
+Sk.abstr.binop_type_error = function(v, w, name)
+{
+    var vtypename = Sk.abstr.typeName(v);
+    var wtypename = Sk.abstr.typeName(w);
+
+    throw new Sk.builtin.TypeError("unsupported operand type(s) for " + name + ": '"
+            + vtypename + "' and '" + wtypename + "'");
 };
 
 Sk.abstr.boNameToSlotFuncLhs_ = function(obj, name) {
+  if (obj === null) {
+    return undefined;
+  };
   switch (name) {
-    case "Add":      return obj.nb$add      ? obj.nb$add :              obj['__add__'];
-    case "Sub":      return obj.nb$subtract ? obj.nb$subtract :         obj['__sub__'];
-    case "Mult":     return obj.nb$multiply ? obj.nb$multiply :         obj['__mul__'];
-    case "Div":      return obj.nb$divide ? obj.nb$divide :             obj['__div__'];
+    case "Add":      return obj.nb$add          ? obj.nb$add :          obj['__add__'];
+    case "Sub":      return obj.nb$subtract     ? obj.nb$subtract :     obj['__sub__'];
+    case "Mult":     return obj.nb$multiply     ? obj.nb$multiply :     obj['__mul__'];
+    case "Div":      return obj.nb$divide       ? obj.nb$divide :       obj['__div__'];
     case "FloorDiv": return obj.nb$floor_divide ? obj.nb$floor_divide : obj['__floordiv__'];
-    case "Mod":      return obj.nb$remainder ? obj.nb$remainder :       obj['__mod__'];
-    case "Pow":      return obj.nb$power ? obj.nb$power :               obj['__pow__'];
-    case "LShift":   return obj.nb$lshift ? obj.nb$lshift :             obj['__lshift__'];
-    case "RShift":   return obj.nb$rshift ? obj.nb$rshift :             obj['__rshift__'];
-    case "BitAnd":   return obj.nb$and ? obj.nb$and :                   obj['__and__'];
-    case "BitXor":   return obj.nb$xor ? obj.nb$xor :                   obj['__xor__'];
-    case "BitOr":    return obj.nb$or ? obj.nb$or :                     obj['__or__'];
+    case "Mod":      return obj.nb$remainder    ? obj.nb$remainder :    obj['__mod__'];
+    case "Pow":      return obj.nb$power        ? obj.nb$power :        obj['__pow__'];
+    case "LShift":   return obj.nb$lshift       ? obj.nb$lshift :       obj['__lshift__'];
+    case "RShift":   return obj.nb$rshift       ? obj.nb$rshift :       obj['__rshift__'];
+    case "BitAnd":   return obj.nb$and          ? obj.nb$and :          obj['__and__'];
+    case "BitXor":   return obj.nb$xor          ? obj.nb$xor :          obj['__xor__'];
+    case "BitOr":    return obj.nb$or           ? obj.nb$or :           obj['__or__'];
   }
 };
 
 Sk.abstr.boNameToSlotFuncRhs_ = function(obj, name) {
+  if (obj === null) {
+    return undefined;
+  };
   switch (name) {
     case "Add":      return obj.nb$add          ? obj.nb$add :          obj['__radd__'];
     case "Sub":      return obj.nb$subtract     ? obj.nb$subtract :     obj['__rsub__'];
@@ -5307,54 +6099,52 @@ Sk.abstr.boNameToSlotFuncRhs_ = function(obj, name) {
 Sk.abstr.iboNameToSlotFunc_ = function(obj, name) {
   switch (name) {
     case "Add":      return obj.nb$inplace_add          ? obj.nb$inplace_add          : obj['__iadd__'];
-    case "Sub":      return obj.nb$inplace_sub          ? obj.nb$inplace_sub          : obj['__isub__'];
-    case "Mult":     return obj.nb$inplace_mul          ? obj.nb$inplace_mul          : obj['__imul__'];
-    case "Div":      return obj.nb$inplace_div          ? obj.nb$inplace_div          : obj['__idiv__'];
+    case "Sub":      return obj.nb$inplace_subtract     ? obj.nb$inplace_subtract     : obj['__isub__'];
+    case "Mult":     return obj.nb$inplace_multiply     ? obj.nb$inplace_multiply     : obj['__imul__'];
+    case "Div":      return obj.nb$inplace_divide       ? obj.nb$inplace_divide       : obj['__idiv__'];
     case "FloorDiv": return obj.nb$inplace_floor_divide ? obj.nb$inplace_floor_divide : obj['__ifloordiv__'];
     case "Mod":      return obj.nb$inplace_remainder;
     case "Pow":      return obj.nb$inplace_power;
-    case "LShift":   return obj.nb$lshift               ? obj.nb$lshift               : obj['__ilshift__'];
-    case "RShift":   return obj.nb$rshift               ? obj.nb$rshift               : obj['__irshift__'];
-    case "BitAnd":   return obj.nb$and;
-    case "BitOr":    return obj.nb$or;
-    case "BitXor":   return obj.nb$xor                  ? obj.nb$xor                  : obj['__ixor__'];
+    case "LShift":   return obj.nb$inplace_lshift       ? obj.nb$inplace_lshift       : obj['__ilshift__'];
+    case "RShift":   return obj.nb$inplace_rshift       ? obj.nb$inplace_rshift       : obj['__irshift__'];
+    case "BitAnd":   return obj.nb$inplace_and;
+    case "BitOr":    return obj.nb$inplace_or;
+    case "BitXor":   return obj.nb$inplace_xor          ? obj.nb$inplace_xor          : obj['__ixor__'];
   }
 };
 
-Sk.abstr.binary_op_ = function(v, w, opname) {
-  var ret;
-  var vop = Sk.abstr.boNameToSlotFuncLhs_(v, opname);
-  if (vop !== undefined) {
-    if (vop.call) {
-      ret = vop.call(v, w);
+Sk.abstr.binary_op_ = function(v, w, opname)
+{
+    var ret;
+    var vop = Sk.abstr.boNameToSlotFuncLhs_(v, opname);
+    if (vop !== undefined)
+    {   
+        if (vop.call) {
+            ret = vop.call(v, w);
+        } else {  // assume that vop is an __xxx__ type method
+            ret = Sk.misceval.callsim(vop, v, w)
+        }
+        if (ret !== undefined) return ret;
     }
-    else {
-      ret = Sk.misceval.callsim(vop, v, w)
+    var wop = Sk.abstr.boNameToSlotFuncRhs_(w, opname);
+    if (wop !== undefined)
+    {
+        if (wop.call) {
+            ret = wop.call(w, v);
+        } else { // assume that wop is an __xxx__ type method
+            ret = Sk.misceval.callsim(wop, w, v)
+        }
+        if (ret !== undefined) return ret;
     }
-    if (ret !== undefined) return ret;
-  }
-  var wop = Sk.abstr.boNameToSlotFuncRhs_(w, opname);
-  if (wop !== undefined) {
-    if (wop.call) {
-      ret = wop.call(w, v);
-    }
-    else {
-      ret = Sk.misceval.callsim(wop, w, v)
-    }
-    if (ret !== undefined) return ret;
-  }
 
-  if (opname === "Add" && v.sq$concat) {
-    return v.sq$concat(w);
-  }
-  else if (opname === "Mult" && v.sq$repeat) {
-    return Sk.abstr.sequenceRepeat(v.sq$repeat, v, w);
-  }
-  else if (opname === "Mult" && w.sq$repeat) {
-    return Sk.abstr.sequenceRepeat(w.sq$repeat, w, v);
-  }
+    if (opname === "Add" && v && v.sq$concat)
+        return v.sq$concat(w);
+    else if (opname === "Mult" && v && v.sq$repeat)
+        return Sk.abstr.sequenceRepeat(v.sq$repeat, v, w);
+    else if (opname === "Mult" && w && w.sq$repeat)
+        return Sk.abstr.sequenceRepeat(w.sq$repeat, w, v);
 
-  Sk.abstr.binop_type_error(v, w, opname);
+    Sk.abstr.binop_type_error(v, w, opname);
 };
 
 Sk.abstr.binary_iop_ = function(v, w, opname)
@@ -5363,21 +6153,21 @@ Sk.abstr.binary_iop_ = function(v, w, opname)
     var vop = Sk.abstr.iboNameToSlotFunc_(v, opname);
     if (vop !== undefined)
     {
-		if (vop.call) {
-        	ret = vop.call(v, w);
-		} else {  // assume that vop is an __xxx__ type method
-			ret = Sk.misceval.callsim(vop,v,w);	//	added to be like not-in-place... is this okay?
-		}
+    if (vop.call) {
+            ret = vop.call(v, w);
+    } else {  // assume that vop is an __xxx__ type method
+        ret = Sk.misceval.callsim(vop,v,w); //  added to be like not-in-place... is this okay?
+        }
         if (ret !== undefined) return ret;
     }
     var wop = Sk.abstr.iboNameToSlotFunc_(w, opname);
     if (wop !== undefined)
     {
-		if (wop.call) {
-        	ret = wop.call(w, v);
-		} else { // assume that wop is an __xxx__ type method
-			ret = Sk.misceval.callsim(wop,w,v);	//	added to be like not-in-place... is this okay?
-		}
+    if (wop.call) {
+            ret = wop.call(w, v);
+    } else { // assume that wop is an __xxx__ type method
+        ret = Sk.misceval.callsim(wop,w,v); //  added to be like not-in-place... is this okay?
+        }
         if (ret !== undefined) return ret;
     }
 
@@ -5405,84 +6195,138 @@ Sk.abstr.binary_iop_ = function(v, w, opname)
 //
 // handle upconverting a/b from number to long if op causes too big/small a
 // result, or if either of the ops are already longs
-Sk.abstr.numOpAndPromote = function(a, b, opfn) {
-  if (typeof a === "number" && typeof b === "number") {
-    a = new Sk.builtin.nmber(a, undefined);
-    b = new Sk.builtin.nmber(b, undefined);
-  }
-  else if (a === undefined || b === undefined) {
-    throw new Sk.builtin.NameError('Undefined variable in expression')
-  }
+Sk.abstr.numOpAndPromote = function(a, b, opfn)
+{
+    if (a === null || b === null) {
+        return undefined;
+    };
 
-  if (a.constructor === Sk.builtin.lng) {
-//		if (b.constructor == Sk.builtin.nmber)
-//			if (b.skType == Sk.builtin.nmber.float$) {
-//				var tmp = new Sk.builtin.nmber(a.tp$str(), Sk.builtin.nmber.float$);
-//				return [tmp, b];
-//			} else
-//				return [a, b.v];
-    return [a, b];
-  }
-  else if (a.constructor === Sk.builtin.nmber) {
-    return [a, b];
-  }
-  else if (typeof a === "number") {
-    var tmp = new Sk.builtin.nmber(a, undefined);
-    return [tmp, b];
-  }
-  else {
-    return undefined;
-  }
+    if (typeof a === "number" && typeof b === "number")
+    {
+        var ans = opfn(a, b);
+        // todo; handle float   Removed RNL (bugs in lng, and it should be a question of precision, not magnitude -- this was just wrong)
+        if ( (ans > Sk.builtin.lng.threshold$ || ans < -Sk.builtin.lng.threshold$)  // RNL
+        && Math.floor(ans) === ans) {                                               // RNL
+            return [Sk.builtin.lng.fromInt$(a), Sk.builtin.lng.fromInt$(b)];        // RNL
+        } else                                                                      // RNL
+            return ans;
+    }
+    else if (a === undefined || b === undefined) {
+        throw new Sk.builtin.NameError('Undefined variable in expression')
+    }
+
+    if (a.constructor === Sk.builtin.lng) {
+//      if (b.constructor == Sk.builtin.nmber)
+//          if (b.skType == Sk.builtin.nmber.float$) {
+//              var tmp = new Sk.builtin.nmber(a.tp$str(), Sk.builtin.nmber.float$);
+//              return [tmp, b];
+//          } else
+//              return [a, b.v];
+        return [a, b];
+    } else if (a.constructor === Sk.builtin.nmber) {
+        return [a, b];
+    } else if (typeof a === "number") {
+        var tmp = new Sk.builtin.nmber(a, undefined);
+        return [tmp, b];
+    } else
+        return undefined;
 };
 
 Sk.abstr.boNumPromote_ = {
-  "Add": function(a, b) { return a + b; },
-  "Sub": function(a, b) { return a - b; },
-  "Mult": function(a, b) { return a * b; },
-  "Mod": function(a, b) { return (b < 0 ? -1 : 1) * (Math.abs(a) % b); },
-  "Div": function(a, b) {
-    if (b === 0) {
-      throw new Sk.builtin.ZeroDivisionError("integer division or modulo by zero");
+    "Add": function(a, b) { return a + b; },
+    "Sub": function(a, b) { return a - b; },
+    "Mult": function(a, b) { return a * b; },
+    "Mod": function(a, b) { 
+        if (b === 0)
+            throw new Sk.builtin.ZeroDivisionError("division or modulo by zero");
+        var m = a % b; return ((m * b) < 0 ? (m + b) : m); 
+    },
+    "Div": function(a, b) {
+        if (b === 0)
+            throw new Sk.builtin.ZeroDivisionError("division or modulo by zero");
+        else
+            return a / b;
+    },
+    "FloorDiv": function(a, b) { 
+        if (b === 0)
+            throw new Sk.builtin.ZeroDivisionError("division or modulo by zero");
+        else
+            return Math.floor(a / b); // todo; wrong? neg?
+    },
+    "Pow": Math.pow,
+    "BitAnd": function(a, b) { 
+        var m = a & b;
+        if (m < 0) {
+            m = m + 4294967296; // convert back to unsigned
+        }
+        return m;
+    },
+    "BitOr": function(a, b) {
+        var m = a | b;
+        if (m < 0) {
+            m = m + 4294967296; // convert back to unsigned
+        }
+        return m;
+    },
+    "BitXor": function(a, b) {
+        var m = a ^ b;
+        if (m < 0) {
+            m = m + 4294967296; // convert back to unsigned
+        }
+        return m;
+    },
+    "LShift": function(a, b) { 
+    if (b < 0) {
+        throw new Sk.builtin.ValueError("negative shift count");
+    }
+    var m = a << b;
+    if (m > a) {
+        return m; 
     }
     else {
-      return a / b;
+        // Fail, this will get recomputed with longs
+        return a * Math.pow(2, b);
     }
-  },
-  "FloorDiv": function(a, b) { return Math.floor(a / b); }, // todo; wrong? neg?
-  "Pow": function(a, b) {
-    if (a < 0 && b % 1 != 0)
-      throw new Sk.builtin.NegativePowerError("cannot raise a negative number to a fractional power");
-    else if (a == 0 && b < 0)
-      throw new Sk.builtin.NegativePowerError("cannot raise zero to a negative power");
-    else
-      return Math.pow(a, b);
-  },
-  "BitAnd": function(a, b) { return a & b; },
-  "BitOr": function(a, b) { return a | b; },
-  "BitXor": function(a, b) { return a ^ b; },
-  "LShift": function(a, b) { return a << b; },
-  "RShift": function(a, b) { return a >> b; }
+    },
+    "RShift": function(a, b) { 
+        if (b < 0) {
+            throw new Sk.builtin.ValueError("negative shift count");
+        }
+        var m = a >> b;
+        if ((a > 0) && (m < 0)) {
+            // fix incorrect sign extension
+            m = m & (Math.pow(2, 32-b) - 1);
+        }
+        return m; 
+    }
 };
 
-Sk.abstr.numberBinOp = function(v, w, op) {
-  var numPromoteFunc = Sk.abstr.boNumPromote_[op];
-  if (numPromoteFunc !== undefined) {
-    var tmp = Sk.abstr.numOpAndPromote(v, w, numPromoteFunc);
-    if (typeof tmp === "number") {
-      return tmp;
+Sk.abstr.numberBinOp = function(v, w, op)
+{
+    var numPromoteFunc = Sk.abstr.boNumPromote_[op];
+    if (numPromoteFunc !== undefined)
+    {
+        var tmp = Sk.abstr.numOpAndPromote(v, w, numPromoteFunc);
+        if (typeof tmp === "number")
+        {
+            return tmp;
+        }
+        else if (tmp !== undefined &&  tmp.constructor === Sk.builtin.nmber)
+        {
+            return tmp;
+        }
+        else if (tmp !== undefined && tmp.constructor === Sk.builtin.lng)
+        {
+            return tmp;
+        }
+        else if (tmp !== undefined)
+        {
+            v = tmp[0];
+            w = tmp[1];
+        }
     }
-    else if (tmp !== undefined &&  tmp.constructor === Sk.builtin.nmber) {
-      return tmp;
-    }
-    else if (tmp !== undefined && tmp.constructor === Sk.builtin.lng) {
-      return tmp;
-    }
-    else if (tmp !== undefined) {
-      v = tmp[0];
-      w = tmp[1];
-    }
-  }
-  return Sk.abstr.binary_op_(v, w, op);
+
+    return Sk.abstr.binary_op_(v, w, op);
 };
 goog.exportSymbol("Sk.abstr.numberBinOp", Sk.abstr.numberBinOp);
 
@@ -5492,18 +6336,18 @@ Sk.abstr.numberInplaceBinOp = function(v, w, op)
     if (numPromoteFunc !== undefined)
     {
         var tmp = Sk.abstr.numOpAndPromote(v, w, numPromoteFunc);
-		if (typeof tmp === "number")
+        if (typeof tmp === "number")
         {
             return tmp;
         }
-		else if (tmp !== undefined &&  tmp.constructor === Sk.builtin.nmber)
-		{
+        else if (tmp !== undefined &&  tmp.constructor === Sk.builtin.nmber)
+        {
             return tmp;
-		}
-		else if (tmp !== undefined && tmp.constructor === Sk.builtin.lng)
-		{
+        }
+        else if (tmp !== undefined && tmp.constructor === Sk.builtin.lng)
+        {
             return tmp;
-		}
+        }
         else if (tmp !== undefined)
         {
             v = tmp[0];
@@ -5515,21 +6359,30 @@ Sk.abstr.numberInplaceBinOp = function(v, w, op)
 };
 goog.exportSymbol("Sk.abstr.numberInplaceBinOp", Sk.abstr.numberInplaceBinOp);
 
-Sk.abstr.numberUnaryOp = function(v, opname) {
-  if (opname === "Not") {
-    return Sk.misceval.isTrue(v) ? false : true;
-  }
-  else if (typeof v === "number" || typeof v === "boolean") {
-    if (opname === "USub") return -v;
-    if (opname === "UAdd") return v;
-    if (opname === "Invert") return ~v;
-  }
-  else {
-    if (opname === "USub"   && v.nu$neg) return v.nu$neg();
-    if (opname === "UAdd"   && v.nu$pos) return v.nu$pos();
-    if (opname === "Invert" && v.nu$inv) return v.nu$inv();
-  }
-  throw new TypeError("unsupported operand type for " + opname + " '" + v.tp$name + "'");
+Sk.abstr.numberUnaryOp = function(v, op)
+{
+    if (op === "Not") return Sk.misceval.isTrue(v) ? false : true;
+    else if (typeof v === "number" || typeof v === "boolean")
+    {
+        if (op === "USub") return -v;
+        if (op === "UAdd") return v;
+        if (op === "Invert") return ~v;
+    }
+    else if (v instanceof Sk.builtin.nmber) {
+        var value = Sk.builtin.asnum$(v);
+        if (op === "USub") return new Sk.builtin.nmber(-value, value.skType);
+        if (op === "UAdd") return new Sk.builtin.nmber(value, value.skType);
+        if (op === "Invert") return new Sk.builtin.nmber(~value, value.skType);
+    }
+    else
+    {
+        if (op === "USub" && v.nb$negative) return v.nb$negative();
+        if (op === "UAdd" && v.nb$positive) return v.nb$positive();
+        if (op === "Invert" && v.nb$invert) return v.nb$invert();
+    }
+
+    var vtypename = Sk.abstr.typeName(v);
+    throw new Sk.builtin.TypeError("unsupported operand type for " + op + " '" + vtypename + "'");
 };
 goog.exportSymbol("Sk.abstr.numberUnaryOp", Sk.abstr.numberUnaryOp);
 
@@ -5545,6 +6398,7 @@ goog.exportSymbol("Sk.abstr.numberUnaryOp", Sk.abstr.numberUnaryOp);
 
 Sk.abstr.fixSeqIndex_ = function(seq, i)
 {
+    i = Sk.builtin.asnum$(i);
     if (i < 0 && seq.sq$length)
         i += seq.sq$length();
     return i;
@@ -5554,7 +6408,8 @@ Sk.abstr.sequenceContains = function(seq, ob)
 {
     if (seq.sq$contains) return seq.sq$contains(ob);
 
-    if (!seq.tp$iter) throw new TypeError("argument of type '" + seq.tp$name + "' is not iterable");
+    var seqtypename = Sk.abstr.typeName(seq);
+    if (!seq.tp$iter) throw new Sk.builtin.TypeError("argument of type '" + seqtypename + "' is not iterable");
     
     for (var it = seq.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext())
     {
@@ -5576,30 +6431,31 @@ Sk.abstr.sequenceSetItem = function(seq, i, x)
 
 Sk.abstr.sequenceDelItem = function(seq, i)
 {
-	i = Sk.builtin.asnum$(i);
-    if (seq.sq$ass_item)
+    if (seq.sq$del_item)
     {
         i = Sk.abstr.fixSeqIndex_(seq, i);
-        return seq.sq$ass_item(i, null);
+        seq.sq$del_item(i);
+        return;
     }
-    throw new TypeError("'" + seq.tp$name + "' object does not support item deletion");
+
+    var seqtypename = Sk.abstr.typeName(seq);
+    throw new Sk.builtin.TypeError("'" + seqtypename + "' object does not support item deletion");
 };
 
 Sk.abstr.sequenceRepeat = function(f, seq, n)
 {
-	n = Sk.builtin.asnum$(n);
+    n = Sk.builtin.asnum$(n);
     var count = Sk.misceval.asIndex(n);
     if (count === undefined)
     {
-        throw new TypeError("can't multiply sequence by non-int of type '" + n.tp$name + "'");
+        var ntypename = Sk.abstr.typeName(n);
+        throw new Sk.builtin.TypeError("can't multiply sequence by non-int of type '" + ntypename + "'");
     }
     return f.call(seq, n);
 };
 
 Sk.abstr.sequenceGetSlice = function(seq, i1, i2)
 {
-	i1 = Sk.builtin.asnum$(i1);
-	i2 = Sk.builtin.asnum$(i2);
     if (seq.sq$slice)
     {
         i1 = Sk.abstr.fixSeqIndex_(seq, i1);
@@ -5610,26 +6466,27 @@ Sk.abstr.sequenceGetSlice = function(seq, i1, i2)
     {
         return seq.mp$subscript(new Sk.builtin.slice(i1, i2));
     }
-    throw new TypeError("'" + seq.tp$name + "' object is unsliceable");
+
+    var seqtypename = Sk.abstr.typeName(seq);
+    throw new Sk.builtin.TypeError("'" + seqtypename + "' object is unsliceable");
 };
 
 Sk.abstr.sequenceDelSlice = function(seq, i1, i2)
 {
-	i1 = Sk.builtin.asnum$(i1);
-	i2 = Sk.builtin.asnum$(i2);
-    if (seq.sq$ass_slice)
+    if (seq.sq$del_slice)
     {
         i1 = Sk.abstr.fixSeqIndex_(seq, i1);
         i2 = Sk.abstr.fixSeqIndex_(seq, i2);
-        return seq.sq$ass_slice(i1, i2, null);
+        seq.sq$del_slice(i1, i2);
+        return;
     }
-    throw new TypeError("'" + seq.tp$name + "' doesn't support slice deletion");
+
+    var seqtypename = Sk.abstr.typeName(seq);
+    throw new Sk.builtin.TypeError("'" + seqtypename + "' doesn't support slice deletion");
 };
 
 Sk.abstr.sequenceSetSlice = function(seq, i1, i2, x)
 {
-	i1 = Sk.builtin.asnum$(i1);
-	i2 = Sk.builtin.asnum$(i2);
     if (seq.sq$ass_slice)
     {
         i1 = Sk.abstr.fixSeqIndex_(seq, i1);
@@ -5642,7 +6499,8 @@ Sk.abstr.sequenceSetSlice = function(seq, i1, i2, x)
     }
     else
     {
-        throw new TypeError("'" + seq.tp$name + "' object doesn't support slice assignment");
+        var seqtypename = Sk.abstr.typeName(seq);
+        throw new Sk.builtin.TypeError("'" + seqtypename + "' object doesn't support slice assignment");
     }
 };
 
@@ -5660,98 +6518,117 @@ Sk.abstr.sequenceSetSlice = function(seq, i1, i2, x)
 
 Sk.abstr.objectDelItem = function(o, key)
 {
-    if (o.mp$ass_subscript) {
-        var kf = Sk.builtin.hash;
-        var k = kf(key)
-        if (o[k] !== undefined) {
-            o.size -= 1;
-            delete o[k];
+    if (o !== null)
+    {
+        if (o.mp$del_subscript) {
+            o.mp$del_subscript(key);
             return;
         }
-        return o.mp$ass_subscript(key, null);
+        if (o.sq$ass_item)
+        {
+            var keyValue = Sk.misceval.asIndex(key);
+            if (keyValue === undefined) {
+                var keytypename = Sk.abstr.typeName(key);
+                throw new Sk.builtin.TypeError("sequence index must be integer, not '" + keytypename + "'");
+            }
+            Sk.abstr.sequenceDelItem(o, keyValue);
+            return;
+        }
+        // if o is a slice do something else...
     }
-    if (o.sq$ass_item)
-    {
-        var keyValue = Sk.misceval.asIndex(key);
-        if (keyValue === undefined)
-            throw new TypeError("sequence index must be integer, not '" + key.tp$name + "'");
-        return Sk.abstr.sequenceDelItem(o, keyValue);
-    }
-    // if o is a slice do something else...
-    throw new TypeError("'" + o.tp$name + "' object does not support item deletion");
+
+    var otypename = Sk.abstr.typeName(o);
+    throw new Sk.builtin.TypeError("'" + otypename + "' object does not support item deletion");
 };
 goog.exportSymbol("Sk.abstr.objectDelItem", Sk.abstr.objectDelItem);
 
-Sk.abstr.objectGetItem = function(o, key) {
-  if (o.mp$subscript) {
-    return o.mp$subscript(key);
-  }
-  else if (Sk.misceval.isIndex(key) && o.sq$item) {
-    return Sk.abstr.sequenceGetItem(o, Sk.misceval.asIndex(key));
-  }
-  else if (o.__getitem__ !== undefined) {
-    return Sk.misceval.callsim(o.__getitem__, o, key);
-  }
-  else {
-    throw new TypeError("'" + o.tp$name + "' does not support indexing");
-  }
+Sk.abstr.objectGetItem = function(o, key)
+{
+    if (o !== null) 
+    {
+        if (o.mp$subscript)
+            return o.mp$subscript(key);
+        else if (Sk.misceval.isIndex(key) && o.sq$item)
+            return Sk.abstr.sequenceGetItem(o, Sk.misceval.asIndex(key));
+        else if (o.tp$getitem) {
+            return o.tp$getitem(key);
+        }
+    }
+
+    var otypename = Sk.abstr.typeName(o);
+    throw new Sk.builtin.TypeError("'" + otypename + "' does not support indexing");
 };
 goog.exportSymbol("Sk.abstr.objectGetItem", Sk.abstr.objectGetItem);
 
 Sk.abstr.objectSetItem = function(o, key, v)
 {
-    if (o.mp$ass_subscript)
-        return o.mp$ass_subscript(key, v);
-    else if (Sk.misceval.isIndex(key) && o.sq$ass_item)
-        return Sk.abstr.sequenceSetItem(o, Sk.misceval.asIndex(key), v);
-    throw new TypeError("'" + o.tp$name + "' does not support item assignment");
+    if (o !== null) 
+    {
+        if (o.mp$ass_subscript)
+            return o.mp$ass_subscript(key, v);
+        else if (Sk.misceval.isIndex(key) && o.sq$ass_item)
+            return Sk.abstr.sequenceSetItem(o, Sk.misceval.asIndex(key), v);
+    else if (o.tp$setitem)
+        return o.tp$setitem(key, v);
+    }
+
+    var otypename = Sk.abstr.typeName(o);
+    throw new Sk.builtin.TypeError("'" + otypename + "' does not support item assignment");
 };
 goog.exportSymbol("Sk.abstr.objectSetItem", Sk.abstr.objectSetItem);
 
-Sk.abstr.gattr = function(obj, nameJS) {
-  var ret;
-  if(obj['__getattr__']) {
-    // ? Since this is callsim, shouldn't the name follow the wrapped string convention?
-    ret = Sk.misceval.callsim(obj['__getattr__'], obj, nameJS);
-    if (ret !== undefined) {
-      return ret;
+
+
+Sk.abstr.gattr = function(obj, nameJS)
+{
+    var objname = Sk.abstr.typeName(obj);
+
+    if (obj === null) {
+        throw new Sk.builtin.AttributeError("'" + objname + "' object has no attribute '" + nameJS + "'");
     }
-    else {
-      throw new Sk.builtin.AttributeError("'" + obj.tp$name + "' object has no attribute getter '" + nameJS + "'.");
+
+    var ret = undefined;
+
+    if (obj['__getattr__']) {
+        ret = Sk.misceval.callsim(obj['__getattr__'], obj, nameJS);
+    } else if (obj.tp$getattr !== undefined) {
+        ret = obj.tp$getattr(nameJS);
     }
-  }
-  else {
-    if (obj.tp$getattr && typeof obj.tp$getattr === 'function') {
-      ret = obj.tp$getattr(nameJS);
-      if (ret !== undefined) {
-        return ret;
-      }
-      else {
-        throw new Sk.builtin.AttributeError("'" + obj.tp$name + "' object has no attribute getter '" + nameJS + "'.");
-      }
+
+    if (ret === undefined) {
+        throw new Sk.builtin.AttributeError("'" + objname + "' object has no attribute '" + nameJS + "'");       
     }
-    else {
-      throw new Sk.builtin.AttributeError("'" + obj.tp$name + "' object has no attribute getters.");
-    }
-  }
-  throw new Sk.builtin.AssertionError();
+ 
+    return ret;
+    
 };
 goog.exportSymbol("Sk.abstr.gattr", Sk.abstr.gattr);
 
-Sk.abstr.sattr = function(obj, nameJS, data) {
-  if(obj['__setattr__']) {
-    Sk.misceval.callsim(obj['__setattr__'],obj, nameJS, data);
-  }
-  else {
-    obj.tp$setattr(nameJS, data);
-  }
+Sk.abstr.sattr = function(obj, nameJS, data)
+{
+    var objname = Sk.abstr.typeName(obj);
+
+    if (obj === null) {
+        throw new Sk.builtin.AttributeError("'" + objname + "' object has no attribute '" + nameJS + "'");
+    } else if (obj['__setattr__']) {
+        Sk.misceval.callsim(obj['__setattr__'], obj, nameJS, data);
+    } else if (obj.tp$setattr !== undefined) {
+        obj.tp$setattr(nameJS, data);
+    } else {
+        throw new Sk.builtin.AttributeError("'" + objname + "' object has no attribute '" + nameJS + "'");
+    }
 };
 
 goog.exportSymbol("Sk.abstr.sattr", Sk.abstr.sattr);
 
 Sk.abstr.iter = function(obj)
 {
-    return obj.tp$iter();
+    if (obj.tp$iter) {
+        return obj.tp$iter();
+    }
+    else {
+        throw new Sk.builtin.TypeError("'" + Sk.abstr.typeName(obj) + "' object is not iterable");
+    }
 };
 goog.exportSymbol("Sk.abstr.iter", Sk.abstr.iter);
 
@@ -5803,7 +6680,7 @@ Sk.quickSort = function(arr, cmp, key, reverse)
             } else {
 			  var cmpresult = Sk.misceval.callsim(cmp, arr[ix], piv);
             }
-            if( cmpresult < 0 ) {
+            if( Sk.builtin.asnum$(cmpresult) < 0 ) {
 //				swap store, ix
 				tmp=arr[store];
 				arr[store]=arr[ix];
@@ -5923,51 +6800,67 @@ Sk.mergeSort.stdCmp = new Sk.builtin.func(function(k0, k1)
 //};
 /**
  * @constructor
- * @param {Array.<Object>} L
+ * @param {Array.<Object>=} L
  * @extends Sk.builtin.object
  */
-Sk.builtin.list = function(L) {
-  if (!(this instanceof Sk.builtin.list)) return new Sk.builtin.list(L);
+Sk.builtin.list = function(L)
+{
+    if (!(this instanceof Sk.builtin.list)) return new Sk.builtin.list(L);
 
-  if (L === undefined) {
-    this.v = [];
-  }
-  else if (Object.prototype.toString.apply(L) === '[object Array]') {
-    this.v = L;
-  }
-  else {
-    if (L.tp$iter) {
-      this.v = [];
-      for (var it = L.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext()) {
-        this.v.push(i);
-      }
+    if (L === undefined)
+    {
+            this.v = [];
     }
-    else {
-      throw new Sk.builtin.ValueError("expecting Array or iterable");
+    else if (Object.prototype.toString.apply(L) === '[object Array]')
+    {
+        this.v = L;
     }
-  }
-  this["v"] = this.v;
-  return this;
+    else
+    {
+        if (L.tp$iter)
+        {
+            this.v = [];
+            for (var it = L.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext())
+                this.v.push(i);
+        }
+        else
+            throw new Sk.builtin.ValueError("expecting Array or iterable");
+    }
+
+    this.__class__ = Sk.builtin.list;
+
+    this["v"] = this.v;
+    return this;
 };
+
 
 Sk.builtin.list.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('list', Sk.builtin.list);
 
-Sk.builtin.list.prototype.list_iter_ = function() {
-  var ret = {
-    tp$iter: function() { return ret; },
-    $obj: this,
-    $index: 0,
-    tp$iternext: function() {
-      // todo; StopIteration
-      if (ret.$index >= ret.$obj.v.length) return undefined;
-      return ret.$obj.v[ret.$index++];
-    }
-  };
-  return ret;
+Sk.builtin.list.prototype.list_iter_ = function()
+{
+    var ret =
+    {
+        tp$iter: function() { return ret; },
+        $obj: this,
+        $index: 0,
+        tp$iternext: function()
+        {
+            // todo; StopIteration
+            if (ret.$index >= ret.$obj.v.length) return undefined;
+            return ret.$obj.v[ret.$index++];
+        }
+    };
+    return ret;
 };
 
 Sk.builtin.list.prototype.list_concat_ = function(other)
 {
+    // other not a list
+    if (!other.__class__ || other.__class__ != Sk.builtin.list)
+    {
+        throw new Sk.builtin.TypeError("can only concatenate list to list");
+    }
+
     var ret = this.v.slice();
     for (var i = 0; i < other.v.length; ++i)
     {
@@ -5976,23 +6869,39 @@ Sk.builtin.list.prototype.list_concat_ = function(other)
     return new Sk.builtin.list(ret);
 }
 
-Sk.builtin.list.prototype.list_ass_item_ = function(i, v)
+Sk.builtin.list.prototype.list_del_item_ = function(i)
 {
     i = Sk.builtin.asnum$(i);
     if (i < 0 || i >= this.v.length)
         throw new Sk.builtin.IndexError("list assignment index out of range");
-    if (v === null)
-        return Sk.builtin.list.prototype.list_ass_slice_.call(this, i, i+1, v);
+    this.list_del_slice_(i, i+1);    
+};
+
+Sk.builtin.list.prototype.list_del_slice_ = function(ilow, ihigh)
+{
+    ilow = Sk.builtin.asnum$(ilow);
+    ihigh = Sk.builtin.asnum$(ihigh);
+    var args = [];
+    args.unshift(ihigh - ilow);
+    args.unshift(ilow);
+    this.v.splice.apply(this.v, args);
+};
+
+Sk.builtin.list.prototype.list_ass_item_ = function(i, v)
+{
+	i = Sk.builtin.asnum$(i);
+    if (i < 0 || i >= this.v.length)
+        throw new Sk.builtin.IndexError("list assignment index out of range");
     this.v[i] = v;
 };
 
 Sk.builtin.list.prototype.list_ass_slice_ = function(ilow, ihigh, v)
 {
-    ilow = Sk.builtin.asnum$(ilow);
-    ihigh = Sk.builtin.asnum$(ihigh);
+	ilow = Sk.builtin.asnum$(ilow);
+	ihigh = Sk.builtin.asnum$(ihigh);
 
     // todo; item rather list/null
-    var args = v === null ? [] : v.v.slice(0);
+    var args = v.v.slice(0);
     args.unshift(ihigh - ilow);
     args.unshift(ilow);
     this.v.splice.apply(this.v, args);
@@ -6011,8 +6920,6 @@ Sk.builtin.list.prototype.tp$hash = Sk.builtin.object.prototype.HashNotImplement
 
 Sk.builtin.list.prototype.tp$richcompare = function(w, op)
 {
-    // todo; NotImplemented if either isn't a list
-
     // todo; can't figure out where cpy handles this silly case (test/run/t96.py)
     // perhaps by trapping a stack overflow? otherwise i'm not sure for more
     // complicated cases. bleh
@@ -6020,6 +6927,17 @@ Sk.builtin.list.prototype.tp$richcompare = function(w, op)
     // if the comparison allows for equality then short-circuit it here
     if (this === w && Sk.misceval.opAllowsEquality(op))
         return true;
+
+    // w not a list
+    if (!w.__class__ || w.__class__ != Sk.builtin.list)
+    {
+        // shortcuts for eq/not
+        if (op === 'Eq') return false;
+        if (op === 'NotEq') return true;
+
+        // todo; other types should have an arbitrary order
+        return false;
+    }
 
     var v = this.v;
     var w = w.v;
@@ -6063,7 +6981,7 @@ Sk.builtin.list.prototype.sq$length = function() { return this.v.length; };
 Sk.builtin.list.prototype.sq$concat = Sk.builtin.list.prototype.list_concat_;
 Sk.builtin.list.prototype.sq$repeat = function(n)
 {
-    n = Sk.builtin.asnum$(n);
+	n = Sk.builtin.asnum$(n);
     var ret = [];
     for (var i = 0; i < n; ++i)
         for (var j = 0; j < this.v.length; ++j)
@@ -6075,7 +6993,9 @@ Sk.builtin.list.prototype.sq$item = list_item;
 Sk.builtin.list.prototype.sq$slice = list_slice;
 */
 Sk.builtin.list.prototype.sq$ass_item = Sk.builtin.list.prototype.list_ass_item_;
+Sk.builtin.list.prototype.sq$del_item = Sk.builtin.list.prototype.list_del_item_;
 Sk.builtin.list.prototype.sq$ass_slice = Sk.builtin.list.prototype.list_ass_slice_;
+Sk.builtin.list.prototype.sq$del_slice = Sk.builtin.list.prototype.list_del_slice_;
 //Sk.builtin.list.prototype.sq$contains // iter version is fine
 /*
 Sk.builtin.list.prototype.sq$inplace_concat = list_inplace_concat;
@@ -6084,12 +7004,17 @@ Sk.builtin.list.prototype.sq$inplace_repeat = list_inplace_repeat;
 
 Sk.builtin.list.prototype.list_subscript_ = function(index)
 {
-    index = Sk.builtin.asnum$(index);
-    if (typeof index === "number")
+    if (Sk.misceval.isIndex(index))
     {
-        if (index < 0) index = this.v.length + index;
-        if (index < 0 || index >= this.v.length) throw new Sk.builtin.IndexError("list index out of range");
-        return this.v[index];
+        var i = Sk.misceval.asIndex(index);
+        if (i !== undefined) 
+        {
+            if (i < 0) i = this.v.length + i;
+            if (i < 0 || i >= this.v.length) {
+                throw new Sk.builtin.IndexError("list index out of range");
+            }
+            return this.v[i]
+        }
     }
     else if (index instanceof Sk.builtin.slice)
     {
@@ -6100,18 +7025,8 @@ Sk.builtin.list.prototype.list_subscript_ = function(index)
                 });
         return new Sk.builtin.list(ret);
     }
-    else
-        throw new TypeError("list indices must be integers, not " + typeof index);
-};
 
-Sk.builtin.list.prototype.list_ass_item_ = function(i, value)
-{
-    i = Sk.builtin.asnum$(i);
-    if (i < 0 || i >= this.v.length) throw new Sk.builtin.IndexError("list index out of range");
-    if (value === null)
-        this.list_ass_slice_(i, i+1, value);
-    else
-        this.v[i] = value;
+    throw new Sk.builtin.TypeError("list indices must be integers, not " + Sk.abstr.typeName(index));
 };
 
 Sk.builtin.list.prototype.list_ass_subscript_ = function(index, value)
@@ -6119,65 +7034,118 @@ Sk.builtin.list.prototype.list_ass_subscript_ = function(index, value)
     if (Sk.misceval.isIndex(index))
     {
         var i = Sk.misceval.asIndex(index);
-        if (i < 0) i = this.v.length + i;
-        this.list_ass_item_(i, value);
+        if (i !== undefined) 
+        {
+            if (i < 0) i = this.v.length + i;
+            this.list_ass_item_(i, value);
+            return;
+        }
+    }
+    else if (index instanceof Sk.builtin.slice)
+    {
+        var step = index.step !== null ? index.step : 1;
+        if (step === 1)
+            this.list_ass_slice_(index.start, index.stop, value);
+        else
+        {
+            var tosub = [];
+            index.sssiter$(this, function(i, wrt) { tosub.push(i); });
+            var j = 0;
+            if (tosub.length !== value.v.length) throw new Sk.builtin.ValueError("attempt to assign sequence of size " + value.v.length + " to extended slice of size " + tosub.length);
+            for (var i = 0; i < tosub.length; ++i)
+            {
+                this.v.splice(tosub[i], 1, value.v[j]);
+                j += 1;
+            }
+        }
+        return;
+    }
+
+    throw new Sk.builtin.TypeError("list indices must be integers, not " + Sk.abstr.typeName(index));
+};
+
+Sk.builtin.list.prototype.list_del_subscript_ = function(index)
+{
+    if (Sk.misceval.isIndex(index))
+    {
+        var i = Sk.misceval.asIndex(index);
+        if (i !== undefined) 
+        {
+            if (i < 0) i = this.v.length + i;
+            this.list_del_item_(i);
+            return;
+        }
     }
     else if (index instanceof Sk.builtin.slice)
     {
         if (index.step === 1)
-            this.list_ass_slice_(index.start, index.stop, value);
+            this.list_del_slice_(index.start, index.stop);
         else
         {
-            if (value === null)
-            {
-                var self = this;
-                var dec = 0; // offset of removal for next index (because we'll have removed, but the iterator is giving orig indices)
-                var offdir = index.step > 0 ? 1 : 0;
-                index.sssiter$(this, function(i, wrt)
-                        {
-                            self.v.splice(i - dec, 1);
-                            dec += offdir;
-                        });
-            }
-            else
-            {
-                var tosub = [];
-                index.sssiter$(this, function(i, wrt) { tosub.push(i); });
-                var j = 0;
-                if (tosub.length !== value.v.length) throw new Sk.builtin.ValueError("attempt to assign sequence of size " + value.v.length + " to extended slice of size " + tosub.length);
-                for (var i = 0; i < tosub.length; ++i)
-                {
-                    this.v.splice(tosub[i], 1, value.v[j]);
-                    j += 1;
-                }
-            }
+            var self = this;
+            var dec = 0; // offset of removal for next index (because we'll have removed, but the iterator is giving orig indices)
+            var step = index.step === null ? 1 : index.step;
+            var offdir = step > 0 ? 1 : 0;
+            index.sssiter$(this, function(i, wrt)
+                           {
+                               self.v.splice(i - dec, 1);
+                               dec += offdir;
+                           });
         }
+        return;
     }
-    else
-        throw new TypeError("list indices must be integers, not " + typeof index);
+
+    throw new Sk.builtin.TypeError("list indices must be integers, not " + typeof index);
 };
 
 Sk.builtin.list.prototype.mp$subscript = Sk.builtin.list.prototype.list_subscript_;
 Sk.builtin.list.prototype.mp$ass_subscript = Sk.builtin.list.prototype.list_ass_subscript_;
+Sk.builtin.list.prototype.mp$del_subscript = Sk.builtin.list.prototype.list_del_subscript_;
 
-Sk.builtin.list.prototype.__getitem__ = new Sk.builtin.func(function(self, index) {
-  return Sk.builtin.list.prototype.list_subscript_.call(self, index);
-});
+Sk.builtin.list.prototype.__getitem__ = new Sk.builtin.func(function(self, index)
+        {
+            return Sk.builtin.list.prototype.list_subscript_.call(self, index);
+        });
 //Sk.builtin.list.prototype.__reversed__ = todo;
-Sk.builtin.list.prototype['append'] = new Sk.builtin.func(function(self, item) {
-  self.v.push(item);
-  return null;
+Sk.builtin.list.prototype['append'] = new Sk.builtin.func(function(self, item)
+{
+    Sk.builtin.pyCheckArgs("append", arguments, 2, 2);
+
+    self.v.push(item);
+    return null;
 });
 
-Sk.builtin.list.prototype['insert'] = new Sk.builtin.func(function(self, i, x) {
-  i = Sk.builtin.asnum$(i);
-  if (i < 0) i = 0;
-  else if (i > self.v.length) i = self.v.length - 1;
-  self.v.splice(i, 0, x);
+Sk.builtin.list.prototype['insert'] = new Sk.builtin.func(function(self, i, x)
+{
+    Sk.builtin.pyCheckArgs("insert", arguments, 3, 3);
+    if (!Sk.builtin.checkNumber(i)) {
+        throw new Sk.builtin.TypeError("an integer is required");
+    };
+
+	i = Sk.builtin.asnum$(i);
+    if (i < 0) i = 0;
+    else if (i > self.v.length) i = self.v.length;
+    self.v.splice(i, 0, x);
 });
 
 Sk.builtin.list.prototype['extend'] = new Sk.builtin.func(function(self, b)
 {
+    Sk.builtin.pyCheckArgs("extend", arguments, 2, 2);
+    if (!Sk.builtin.checkIterable(b)) {
+        throw new Sk.builtin.TypeError("'" + Sk.abstr.typeName(b) 
+                                        + "' object is not iterable");  
+    };
+    if (self == b) {
+        // Handle extending list with itself
+        var newb = [];
+        for (var it = b.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext())
+            newb.push(i);
+
+        // Concatenate
+        self.v.push.apply(self.v, newb);
+
+        return null;
+    };
     for (var it = b.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext())
         self.v.push(i);
     return null;
@@ -6185,10 +7153,19 @@ Sk.builtin.list.prototype['extend'] = new Sk.builtin.func(function(self, b)
 
 Sk.builtin.list.prototype['pop'] = new Sk.builtin.func(function(self, i)
 {
-    if (i === undefined)
+    Sk.builtin.pyCheckArgs("pop", arguments, 1, 2);
+    if (i === undefined) {
         i = self.v.length - 1;
-    else    
-        i = Sk.builtin.asnum$(i);
+    };
+    if (!Sk.builtin.checkNumber(i)) {
+        throw new Sk.builtin.TypeError("an integer is required");
+    };
+
+    i = Sk.builtin.asnum$(i);
+    if ((i < 0) || (i >= self.v.length)) {
+        throw new Sk.builtin.IndexError("pop index out of range");
+    };
+
     var ret = self.v[i];
     self.v.splice(i, 1);
     return ret;
@@ -6196,6 +7173,8 @@ Sk.builtin.list.prototype['pop'] = new Sk.builtin.func(function(self, i)
 
 Sk.builtin.list.prototype['remove'] = new Sk.builtin.func(function(self, item)
 {
+    Sk.builtin.pyCheckArgs("remove", arguments, 2, 2);
+
     var idx = Sk.builtin.list.prototype['index'].func_code(self, item);
     self.v.splice(idx, 1);
     return null;
@@ -6203,6 +7182,8 @@ Sk.builtin.list.prototype['remove'] = new Sk.builtin.func(function(self, item)
 
 Sk.builtin.list.prototype['index'] = new Sk.builtin.func(function(self, item)
 {
+    Sk.builtin.pyCheckArgs("index", arguments, 2, 2);
+
     var len = self.v.length;
     var obj = self.v;
     for (var i = 0; i < len; ++i)
@@ -6215,6 +7196,8 @@ Sk.builtin.list.prototype['index'] = new Sk.builtin.func(function(self, item)
 
 Sk.builtin.list.prototype['count'] = new Sk.builtin.func(function(self, item)
 {
+    Sk.builtin.pyCheckArgs("count", arguments, 2, 2);
+
     var len = self.v.length;
     var obj = self.v;
     var count = 0;
@@ -6230,6 +7213,8 @@ Sk.builtin.list.prototype['count'] = new Sk.builtin.func(function(self, item)
 
 Sk.builtin.list.prototype['reverse'] = new Sk.builtin.func(function(self)
 {
+    Sk.builtin.pyCheckArgs("reverse", arguments, 1, 1);
+
     var len = self.v.length;
     var old = self.v;
     var newarr = [];
@@ -6260,8 +7245,9 @@ var interned = {};
  * @param {*} x
  * @extends Sk.builtin.object
  */
-Sk.builtin.str = function(x) {
-    if (x === undefined) throw "error: trying to str() undefined (should be at least null)";
+Sk.builtin.str = function(x)
+{
+    if (x === undefined) x = "";
     if (x instanceof Sk.builtin.str && x !== Sk.builtin.str.prototype.ob$type) return x;
     if (!(this instanceof Sk.builtin.str)) return new Sk.builtin.str(x);
 
@@ -6270,30 +7256,27 @@ Sk.builtin.str = function(x) {
     if (x === true) ret = "True";
     else if (x === false) ret = "False";
     else if (x === null) ret = "None";
-    else if (typeof x === "number") {
-      ret = x.toString();
-      if (ret === "Infinity") ret = "inf";
-      else if (ret === "-Infinity") ret = "-inf";
+    else if (typeof x === "number")
+    {
+        ret = x.toString();
+        if (ret === "Infinity") ret = "inf";
+        else if (ret === "-Infinity") ret = "-inf";
     }
     else if (typeof x === "string")
-      ret = x;
-    else if (x.tp$str !== undefined) {
-      ret = x.tp$str();
-      if (!(ret instanceof Sk.builtin.str)) {
-        throw new Sk.builtin.ValueError("__str__ didn't return a str");
-      }
-      return ret;
+        ret = x;
+    else if (x.tp$str !== undefined)
+    {
+        ret = x.tp$str();
+        if (!(ret instanceof Sk.builtin.str)) throw new Sk.builtin.ValueError("__str__ didn't return a str");
+        return ret;
     }
-    else if (x.__str__ !== undefined) {
-      return Sk.misceval.callsim(x.__str__, x);
-    }
-    else {
-      return Sk.misceval.objectRepr(x);
-    }
+    else 
+        return Sk.misceval.objectRepr(x);
 
     // interning required for strings in py
-    if (Object.prototype.hasOwnProperty.call(interned, "1"+ret)) {
-      return interned["1"+ret];
+    if (Object.prototype.hasOwnProperty.call(interned, "1"+ret)) // note, have to use Object to avoid __proto__, etc. failing
+    {
+        return interned["1"+ret];
     }
 
     this.__class__ = Sk.builtin.str;
@@ -6301,56 +7284,68 @@ Sk.builtin.str = function(x) {
     this["v"] = this.v;
     interned["1"+ret] = this;
     return this;
+
 };
 goog.exportSymbol("Sk.builtin.str", Sk.builtin.str);
 
 Sk.builtin.str.$emptystr = new Sk.builtin.str('');
 
-Sk.builtin.str.prototype.mp$subscript = function(index) {
-    index = Sk.builtin.asnum$(index);
-    if (typeof index === "number" && Math.floor(index) === index /* not a float*/ ) {
-      if (index < 0) index = this.v.length + index;
-      if (index < 0 || index >= this.v.length) throw new Sk.builtin.IndexError("string index out of range");
-      return new Sk.builtin.str(this.v.charAt(index));
+Sk.builtin.str.prototype.mp$subscript = function(index)
+{
+	index = Sk.builtin.asnum$(index);
+    if (typeof index === "number" && Math.floor(index) === index /* not a float*/ )
+    {
+        if (index < 0) index = this.v.length + index;
+        if (index < 0 || index >= this.v.length) throw new Sk.builtin.IndexError("string index out of range");
+        return new Sk.builtin.str(this.v.charAt(index));
     }
-    else if (index instanceof Sk.builtin.slice) {
-      var ret = '';
-      index.sssiter$(this, function(i, wrt) {
-        if (i >= 0 && i < wrt.v.length) {
-          ret += wrt.v.charAt(i);
-        }
-      });
-      return new Sk.builtin.str(ret);
+    else if (index instanceof Sk.builtin.slice)
+    {
+        var ret = '';
+        index.sssiter$(this, function(i, wrt) {
+                if (i >= 0 && i < wrt.v.length)
+                    ret += wrt.v.charAt(i);
+                });
+        return new Sk.builtin.str(ret);
     }
-    else {
-      throw new TypeError("string indices must be numbers, not " + typeof index);
-    }
+    else
+        throw new Sk.builtin.TypeError("string indices must be numbers, not " + typeof index);
 };
 
-Sk.builtin.str.prototype.sq$length = function() {
-  return this.v.length;
+Sk.builtin.str.prototype.sq$length = function()
+{
+    return this.v.length;
 };
-
-Sk.builtin.str.prototype.sq$concat = function(other) {return new Sk.builtin.str(this.v + other.v);};
-Sk.builtin.str.prototype.sq$repeat = function(n) {
-  n = Sk.builtin.asnum$(n);
-  var ret = "";
-  for (var i = 0; i < n; ++i) {
-    ret += this.v;
-  }
-  return new Sk.builtin.str(ret);
+Sk.builtin.str.prototype.sq$concat = function(other) 
+{ 
+    if (!other || !Sk.builtin.checkString(other))
+    {
+        var otypename = Sk.abstr.typeName(other);
+        throw new Sk.builtin.TypeError("cannot concatenate 'str' and '"
+                            + otypename + "' objects");
+    }
+    return new Sk.builtin.str(this.v + other.v); 
 };
-
-Sk.builtin.str.prototype.sq$item = function() {goog.asserts.fail();};
-Sk.builtin.str.prototype.sq$slice = function(i1, i2) {
-  i1 = Sk.builtin.asnum$(i1);
-  i2 = Sk.builtin.asnum$(i2);
-  return new Sk.builtin.str(this.v.substr(i1, i2 - i1));
+Sk.builtin.str.prototype.sq$repeat = function(n)
+{
+	n = Sk.builtin.asnum$(n);
+    var ret = "";
+    for (var i = 0; i < n; ++i)
+        ret += this.v;
+    return new Sk.builtin.str(ret);
+};
+Sk.builtin.str.prototype.sq$item = function() { goog.asserts.fail(); };
+Sk.builtin.str.prototype.sq$slice = function(i1, i2)
+{
+	i1 = Sk.builtin.asnum$(i1);
+	i2 = Sk.builtin.asnum$(i2);
+    if (i1 < 0) i1 = 0;
+    return new Sk.builtin.str(this.v.substr(i1, i2 - i1));
 };
 
 Sk.builtin.str.prototype.sq$contains = function(ob) {
     if ( ob.v === undefined || ob.v.constructor != String) {
-        throw new TypeError("TypeError: 'In <string> requires string as left operand");
+        throw new Sk.builtin.TypeError("TypeError: 'In <string> requires string as left operand");
     }
     if (this.v.indexOf(ob.v) != -1) {
         return true;
@@ -6469,7 +7464,7 @@ Sk.builtin.str.prototype['$r'] = function()
 Sk.builtin.str.re_escape_ = function(s)
 {
     var ret = [];
-    var re = /^[A-Za-z0-9]+$/;
+	var re = /^[A-Za-z0-9]+$/;
     for (var i = 0; i < s.length; ++i)
     {
         var c = s.charAt(i);
@@ -6491,21 +7486,40 @@ Sk.builtin.str.re_escape_ = function(s)
 
 Sk.builtin.str.prototype['lower'] = new Sk.builtin.func(function(self)
 {
+    Sk.builtin.pyCheckArgs("lower", arguments, 1, 1);
     return new Sk.builtin.str(self.v.toLowerCase());
 });
 
 Sk.builtin.str.prototype['upper'] = new Sk.builtin.func(function(self)
 {
+    Sk.builtin.pyCheckArgs("upper", arguments, 1, 1);
     return new Sk.builtin.str(self.v.toUpperCase());
 });
 
 Sk.builtin.str.prototype['capitalize'] = new Sk.builtin.func(function(self)
 {
-    return new Sk.builtin.str(self.v.charAt(0).toUpperCase()+self.v.substring(1));
+    Sk.builtin.pyCheckArgs("capitalize", arguments, 1, 1);
+    var orig = self.v;
+    var cap;
+    var i;
+
+    if (orig.length === 0) {
+        return new Sk.builtin.str("");
+    };
+
+    cap = orig.charAt(0).toUpperCase();
+
+    for (i = 1; i < orig.length; i++) {
+        cap += orig.charAt(i).toLowerCase();
+    };
+        
+    return new Sk.builtin.str(cap);
 });
 
 Sk.builtin.str.prototype['join'] = new Sk.builtin.func(function(self, seq)
 {
+    Sk.builtin.pyCheckArgs("join", arguments, 2, 2);
+    Sk.builtin.pyCheckType("seq", "iterable", Sk.builtin.checkIterable(seq));
     var arrOfStrs = [];
     for (var it = seq.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext())
     {
@@ -6517,59 +7531,113 @@ Sk.builtin.str.prototype['join'] = new Sk.builtin.func(function(self, seq)
 
 Sk.builtin.str.prototype['split'] = new Sk.builtin.func(function(self, on, howmany)
 {
+    Sk.builtin.pyCheckArgs("split", arguments, 1, 3);
+    if (on === undefined) {
+        on = null;
+    }
+    if ((on !== null) && !Sk.builtin.checkString(on)) { 
+        throw new Sk.builtin.TypeError("expected a string");
+    }
+    if ((on !== null) && on.v === "") {
+        throw new Sk.builtin.ValueError("empty separator");
+    }
+    if ((howmany !== undefined) && !Sk.builtin.checkInt(howmany)) {
+        throw new Sk.builtin.TypeError("an integer is required");
+    }
+
     howmany = Sk.builtin.asnum$(howmany);
-    var res;
-    if (! on) {
-        res = self.v.trim().split(/[\s]+/, howmany);
+    var regex = /[\s]+/g;
+    var str = self.v;
+    if (on === null) {
+        str = str.trimLeft();
     } else {
-        res = self.v.split(new Sk.builtin.str(on).v, howmany);
+	// Escape special characters in "on" so we can use a regexp
+	var s = on.v.replace(/([.*+?=|\\\/()\[\]\{\}^$])/g, "\\$1");
+        regex = new RegExp(s, "g");
     }
-    var tmp = [];
-    for (var i = 0; i < res.length; ++i)
-    {
-        tmp.push(new Sk.builtin.str(res[i]));
+
+    // This is almost identical to re.split, 
+    // except how the regexp is constructed
+
+    var result = [];
+    var match;
+    var index = 0;
+    var splits = 0;
+    while ((match = regex.exec(str)) != null) {
+        if (match.index === regex.lastIndex) {
+            // empty match
+            break;
+        }
+        result.push(new Sk.builtin.str(str.substring(index, match.index)));
+        index = regex.lastIndex;
+        splits += 1;
+        if (howmany && (splits >= howmany)) {
+            break;
+        }
     }
-    return new Sk.builtin.list(tmp);
+    str = str.substring(index);
+    if (on !== null || (str.length > 0)) {
+        result.push(new Sk.builtin.str(str));
+    }
+
+    return new Sk.builtin.list(result);
 });
 
 Sk.builtin.str.prototype['strip'] = new Sk.builtin.func(function(self, chars)
 {
-    goog.asserts.assert(!chars, "todo;");
-    return new Sk.builtin.str(self.v.replace(/^\s+|\s+$/g, ''));
+    Sk.builtin.pyCheckArgs("strip", arguments, 1, 2);
+    if ((chars !== undefined) && !Sk.builtin.checkString(chars)) {
+	throw new Sk.builtin.TypeError("strip arg must be None or str");
+    }
+    var pattern;
+    if (chars === undefined) {
+	pattern =  /^\s+|\s+$/g;
+    }
+    else {
+	var regex = Sk.builtin.str.re_escape_(chars.v);
+	pattern = new RegExp("^["+regex+"]+|["+regex+"]+$","g");
+    }
+    return new Sk.builtin.str(self.v.replace(pattern, ''));
 });
 
 Sk.builtin.str.prototype['lstrip'] = new Sk.builtin.func(function(self, chars)
 {
-    if (chars){
-        var currstr = self.v;
-        var charStr = new Sk.builtin.str(chars)
-        while(currstr.indexOf(charStr.v) === 0){
-            currstr = currstr.substr(charStr.v.length);
-        }
-        return new Sk.builtin.str(currstr);
+    Sk.builtin.pyCheckArgs("lstrip", arguments, 1, 2);
+    if ((chars !== undefined) && !Sk.builtin.checkString(chars)) {
+	throw new Sk.builtin.TypeError("lstrip arg must be None or str");
     }
-    else{
-        return new Sk.builtin.str(self.v.replace(/^\s+/g, ''));
+    var pattern;
+    if (chars === undefined) {
+	pattern =  /^\s+/g;
     }
+    else {
+	var regex = Sk.builtin.str.re_escape_(chars.v);
+	pattern = new RegExp("^["+regex+"]+","g");
+    }
+    return new Sk.builtin.str(self.v.replace(pattern, ''));
 });
 
 Sk.builtin.str.prototype['rstrip'] = new Sk.builtin.func(function(self, chars)
 {
-    if (chars){
-        var currstr = self.v;
-        var charStr = new Sk.builtin.str(chars)
-        while(currstr.lastIndexOf(charStr.v) === currstr.length - charStr.v.length){
-            currstr = currstr.substr(0, currstr.length - charStr.v.length);
-        }
-        return new Sk.builtin.str(currstr);
+    Sk.builtin.pyCheckArgs("rstrip", arguments, 1, 2);
+    if ((chars !== undefined) && !Sk.builtin.checkString(chars)) {
+	throw new Sk.builtin.TypeError("rstrip arg must be None or str");
     }
-    else{
-      return new Sk.builtin.str(self.v.replace(/\s+$/g, ''));
+    var pattern;
+    if (chars === undefined) {
+	pattern =  /\s+$/g;
     }
+    else {
+	var regex = Sk.builtin.str.re_escape_(chars.v);
+	pattern = new RegExp("["+regex+"]+$","g");
+    }
+    return new Sk.builtin.str(self.v.replace(pattern, ''));
 });
 
 Sk.builtin.str.prototype['partition'] = new Sk.builtin.func(function(self, sep)
 {
+    Sk.builtin.pyCheckArgs("partition", arguments, 2, 2);
+    Sk.builtin.pyCheckType("sep", "string", Sk.builtin.checkString(sep));
     var sepStr = new Sk.builtin.str(sep);
     var pos = self.v.indexOf(sepStr.v);
     if (pos < 0)
@@ -6585,6 +7653,8 @@ Sk.builtin.str.prototype['partition'] = new Sk.builtin.func(function(self, sep)
 
 Sk.builtin.str.prototype['rpartition'] = new Sk.builtin.func(function(self, sep)
 {
+    Sk.builtin.pyCheckArgs("rpartition", arguments, 2, 2);
+    Sk.builtin.pyCheckType("sep", "string", Sk.builtin.checkString(sep));
     var sepStr = new Sk.builtin.str(sep);
     var pos = self.v.lastIndexOf(sepStr.v);
     if (pos < 0)
@@ -6598,9 +7668,35 @@ Sk.builtin.str.prototype['rpartition'] = new Sk.builtin.func(function(self, sep)
         new Sk.builtin.str(self.v.substring(pos + sepStr.v.length))]);
 });
 
-Sk.builtin.str.prototype['count'] = new Sk.builtin.func(function(self, pat) {
+Sk.builtin.str.prototype['count'] = new Sk.builtin.func(function(self, pat, start, end) {
+    Sk.builtin.pyCheckArgs("count", arguments, 2, 4);
+    if (!Sk.builtin.checkString(pat)) {
+	throw new Sk.builtin.TypeError("expected a character buffer object");
+    }
+    if ((start !== undefined) && !Sk.builtin.checkInt(start)) {
+	throw new Sk.builtin.TypeError("slice indices must be integers or None or have an __index__ method");
+    }
+    if ((end !== undefined) && !Sk.builtin.checkInt(end)) {
+	throw new Sk.builtin.TypeError("slice indices must be integers or None or have an __index__ method");
+    }
+
+    if (start === undefined)
+	start = 0;
+    else {
+	start = Sk.builtin.asnum$(start);
+	start = start >= 0 ? start : self.v.length + start;
+    }
+
+    if (end === undefined)
+	end = self.v.length;
+    else {
+	end = Sk.builtin.asnum$(end);
+	end = end >= 0 ? end : self.v.length + end;
+    }
+
     var m = new RegExp(pat.v,'g');
-    var ctl = self.v.match(m)
+    var slice = self.v.slice(start,end);
+    var ctl = slice.match(m)
     if (! ctl) {
         return 0;
     } else {
@@ -6609,74 +7705,221 @@ Sk.builtin.str.prototype['count'] = new Sk.builtin.func(function(self, pat) {
     
 });
 
-Sk.builtin.str.prototype['ljust'] = new Sk.builtin.func(function(self, len) {
-    len = Sk.builtin.asnum$(len);
+Sk.builtin.str.prototype['ljust'] = new Sk.builtin.func(function(self, len, fillchar) {
+    Sk.builtin.pyCheckArgs("ljust", arguments, 2, 3);
+    if (!Sk.builtin.checkInt(len)) {
+	throw new Sk.builtin.TypeError("integer argument exepcted, got "
+				       + Sk.abstr.typeName(len));
+    }
+    if ((fillchar !== undefined) && (!Sk.builtin.checkString(fillchar)
+				     || fillchar.v.length !== 1)) {
+	throw new Sk.builtin.TypeError("must be char, not "
+				       + Sk.abstr.typeName(fillchar))
+    }
+    if (fillchar === undefined) {
+	fillchar = " ";
+    } else {
+	fillchar = fillchar.v;
+    }
+	len = Sk.builtin.asnum$(len);
     if (self.v.length >= len) {
         return self;
     } else {
-        var newstr = Array.prototype.join.call({length:Math.floor(len-self.v.length)+1}," ");
+        var newstr = Array.prototype.join.call({length:Math.floor(len-self.v.length)+1},fillchar);
         return new Sk.builtin.str(self.v+newstr);
     }
 });
 
-Sk.builtin.str.prototype['rjust'] = new Sk.builtin.func(function(self, len) {
-    len = Sk.builtin.asnum$(len);
+Sk.builtin.str.prototype['rjust'] = new Sk.builtin.func(function(self, len, fillchar) {
+    Sk.builtin.pyCheckArgs("rjust", arguments, 2, 3);
+    if (!Sk.builtin.checkInt(len)) {
+	throw new Sk.builtin.TypeError("integer argument exepcted, got "
+				       + Sk.abstr.typeName(len));
+    }
+    if ((fillchar !== undefined) && (!Sk.builtin.checkString(fillchar)
+				     || fillchar.v.length !== 1)) {
+	throw new Sk.builtin.TypeError("must be char, not "
+				       + Sk.abstr.typeName(fillchar))
+    }
+    if (fillchar === undefined) {
+	fillchar = " ";
+    } else {
+	fillchar = fillchar.v;
+    }
+	len = Sk.builtin.asnum$(len);
     if (self.v.length >= len) {
         return self;
     } else {
-        var newstr = Array.prototype.join.call({length:Math.floor(len-self.v.length)+1}," ");
+        var newstr = Array.prototype.join.call({length:Math.floor(len-self.v.length)+1},fillchar);
         return new Sk.builtin.str(newstr+self.v);
     }
 
 });
 
-Sk.builtin.str.prototype['center'] = new Sk.builtin.func(function(self, len) {
-    len = Sk.builtin.asnum$(len);
+Sk.builtin.str.prototype['center'] = new Sk.builtin.func(function(self, len, fillchar) {
+    Sk.builtin.pyCheckArgs("center", arguments, 2, 3);
+    if (!Sk.builtin.checkInt(len)) {
+	throw new Sk.builtin.TypeError("integer argument exepcted, got "
+				       + Sk.abstr.typeName(len));
+    }
+    if ((fillchar !== undefined) && (!Sk.builtin.checkString(fillchar)
+				     || fillchar.v.length !== 1)) {
+	throw new Sk.builtin.TypeError("must be char, not "
+				       + Sk.abstr.typeName(fillchar))
+    }
+    if (fillchar === undefined) {
+	fillchar = " ";
+    } else {
+	fillchar = fillchar.v;
+    }
+	len = Sk.builtin.asnum$(len);
     if (self.v.length >= len) {
         return self;
     } else {
-        var newstr1 = Array.prototype.join.call({length:Math.floor((len-self.v.length)/2)+1}," ");
+        var newstr1 = Array.prototype.join.call({length:Math.floor((len-self.v.length)/2)+1},fillchar);
         var newstr = newstr1+self.v+newstr1;
         if (newstr.length < len ) {
-            newstr = newstr + " "
+            newstr = newstr + fillchar
         }
         return new Sk.builtin.str(newstr);
     }
 
 });
 
-Sk.builtin.str.prototype['find'] = new Sk.builtin.func(function(self, tgt, start) {
-   return self.v.indexOf(tgt.v,start);
+Sk.builtin.str.prototype['find'] = new Sk.builtin.func(function(self, tgt, start, end) {
+    Sk.builtin.pyCheckArgs("find", arguments, 2, 4);
+    if (!Sk.builtin.checkString(tgt)) {
+	throw new Sk.builtin.TypeError("expected a character buffer object");
+    }
+    if ((start !== undefined) && !Sk.builtin.checkInt(start)) {
+	throw new Sk.builtin.TypeError("slice indices must be integers or None or have an __index__ method");
+    }
+    if ((end !== undefined) && !Sk.builtin.checkInt(end)) {
+	throw new Sk.builtin.TypeError("slice indices must be integers or None or have an __index__ method");
+    }
+
+    if (start === undefined)
+	start = 0;
+    else {
+	start = Sk.builtin.asnum$(start);
+	start = start >= 0 ? start : self.v.length + start;
+    }
+
+    if (end === undefined)
+	end = self.v.length;
+    else {
+	end = Sk.builtin.asnum$(end);
+	end = end >= 0 ? end : self.v.length + end;
+    }
+
+    var idx = self.v.indexOf(tgt.v, start);
+    idx = ((idx >= start) && (idx < end)) ? idx : -1;
+
+    return new Sk.builtin.nmber(idx, Sk.builtin.nmber.int$);
 });
 
-Sk.builtin.str.prototype['index'] = new Sk.builtin.func(function(self, tgt, start) {
-   return self.v.indexOf(tgt.v,start);
+Sk.builtin.str.prototype['index'] = new Sk.builtin.func(function(self, tgt, start, end) {
+    Sk.builtin.pyCheckArgs("index", arguments, 2, 4);
+    var idx = Sk.misceval.callsim(self['find'], self, tgt, start, end);
+    if (Sk.builtin.asnum$(idx) === -1) {
+        throw new Sk.builtin.ValueError("substring not found");
+    };
+    return idx;
 });
 
-Sk.builtin.str.prototype['rfind'] = new Sk.builtin.func(function(self, tgt, start) {
-   return self.v.lastIndexOf(tgt.v,start);
+Sk.builtin.str.prototype['rfind'] = new Sk.builtin.func(function(self, tgt, start, end) {
+    Sk.builtin.pyCheckArgs("rfind", arguments, 2, 4);
+    if (!Sk.builtin.checkString(tgt)) {
+	throw new Sk.builtin.TypeError("expected a character buffer object");
+    }
+    if ((start !== undefined) && !Sk.builtin.checkInt(start)) {
+	throw new Sk.builtin.TypeError("slice indices must be integers or None or have an __index__ method");
+    }
+    if ((end !== undefined) && !Sk.builtin.checkInt(end)) {
+	throw new Sk.builtin.TypeError("slice indices must be integers or None or have an __index__ method");
+    }
+
+    if (start === undefined)
+	start = 0;
+    else {
+	start = Sk.builtin.asnum$(start);
+	start = start >= 0 ? start : self.v.length + start;
+    }
+
+    if (end === undefined)
+	end = self.v.length;
+    else {
+	end = Sk.builtin.asnum$(end);
+	end = end >= 0 ? end : self.v.length + end;
+    }
+
+    var idx = self.v.lastIndexOf(tgt.v, end);
+    idx = (idx !== end) ? idx : self.v.lastIndexOf(tgt.v, end-1);
+    idx = ((idx >= start) && (idx < end)) ? idx : -1;
+
+    return new Sk.builtin.nmber(idx, Sk.builtin.nmber.int$);
 });
 
-Sk.builtin.str.prototype['rindex'] = new Sk.builtin.func(function(self, tgt, start) {
-   return self.v.lastIndexOf(tgt.v,start);
+Sk.builtin.str.prototype['rindex'] = new Sk.builtin.func(function(self, tgt, start, end) {
+    Sk.builtin.pyCheckArgs('rindex', arguments, 2, 4);
+    var idx = Sk.misceval.callsim(self['rfind'], self, tgt, start, end);
+    if (Sk.builtin.asnum$(idx) === -1) {
+        throw new Sk.builtin.ValueError("substring not found");
+    };
+    return idx;
 });
 
 Sk.builtin.str.prototype['startswith'] = new Sk.builtin.func(function(self, tgt) {
+    Sk.builtin.pyCheckArgs("startswith", arguments, 2, 2);
+    Sk.builtin.pyCheckType("tgt", "string", Sk.builtin.checkString(tgt));
    return 0 == self.v.indexOf(tgt.v);
 });
 
 // http://stackoverflow.com/questions/280634/endswith-in-javascript
 Sk.builtin.str.prototype['endswith'] = new Sk.builtin.func(function(self, tgt) {
+    Sk.builtin.pyCheckArgs("endswith", arguments, 2, 2);
+    Sk.builtin.pyCheckType("tgt", "string", Sk.builtin.checkString(tgt));
     return self.v.indexOf(tgt.v, self.v.length - tgt.v.length) !== -1;
 });
 
 Sk.builtin.str.prototype['replace'] = new Sk.builtin.func(function(self, oldS, newS, count)
 {
-    if (oldS.constructor !== Sk.builtin.str || newS.constructor !== Sk.builtin.str)
-        throw new Sk.builtin.TypeError("expecting a string");
-    goog.asserts.assert(count === undefined, "todo; replace() with count not implemented");
+    Sk.builtin.pyCheckArgs("replace", arguments, 3, 4);
+    Sk.builtin.pyCheckType("oldS", "string", Sk.builtin.checkString(oldS));
+    Sk.builtin.pyCheckType("newS", "string", Sk.builtin.checkString(newS));
+    if ((count !== undefined) && !Sk.builtin.checkInt(count)) {
+	throw new Sk.builtin.TypeError("integer argument expected, got " +
+				       Sk.abstr.typeName(count));
+    }
+    count = Sk.builtin.asnum$(count);
     var patt = new RegExp(Sk.builtin.str.re_escape_(oldS.v), "g");
-    return new Sk.builtin.str(self.v.replace(patt, newS.v));
+
+    if ((count === undefined) || (count < 0)) {
+	return new Sk.builtin.str(self.v.replace(patt, newS.v));
+    }
+
+    var c = 0;
+    function replacer(match) {
+	c++;
+	if (c <= count) {
+	    return newS.v;
+	}
+	return match;
+    }
+    return new Sk.builtin.str(self.v.replace(patt, replacer));
+});
+
+Sk.builtin.str.prototype['isdigit'] = new Sk.builtin.func(function(self) {
+    Sk.builtin.pyCheckArgs("isdigit", arguments, 1, 1);
+    if (self.v.length === 0) { return false; }
+    var i;
+    for (i=0; i<self.v.length; i++) {
+        var ch = self.v.charAt(i);
+        if (ch < '0' || ch > '9') {
+            return false;
+        };
+    };
+    return true;
 });
 
 Sk.builtin.str.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('str', Sk.builtin.str);
@@ -6698,7 +7941,7 @@ Sk.builtin.str.prototype.nb$remainder = function(rhs)
     // length modifier is ignored
 
     if (rhs.constructor !== Sk.builtin.tuple && (rhs.mp$subscript === undefined || rhs.constructor === Sk.builtin.str)) rhs = new Sk.builtin.tuple([rhs]);
-    
+
     // general approach is to use a regex that matches the format above, and
     // do an re.sub with a function as replacement to make the subs.
 
@@ -6707,8 +7950,8 @@ Sk.builtin.str.prototype.nb$remainder = function(rhs)
     var index = 0;
     var replFunc = function(substring, mappingKey, conversionFlags, fieldWidth, precision, precbody, conversionType)
     {
-        fieldWidth = Sk.builtin.asnum$(fieldWidth);
-        precision  = Sk.builtin.asnum$(precision);
+		fieldWidth = Sk.builtin.asnum$(fieldWidth);
+		precision  = Sk.builtin.asnum$(precision);
 
         var i;
         if (mappingKey === undefined || mappingKey === "" ) i = index++; // ff passes '' not undef for some reason
@@ -6736,7 +7979,7 @@ Sk.builtin.str.prototype.nb$remainder = function(rhs)
 
         var formatNumber = function(n, base)
         {
-            base = Sk.builtin.asnum$(base);
+			base = Sk.builtin.asnum$(base);
             var j;
             var r;
             var neg = false;
@@ -6753,14 +7996,14 @@ Sk.builtin.str.prototype.nb$remainder = function(rhs)
             else if (n instanceof Sk.builtin.nmber)
             {
                 r = n.str$(base, false);
-                if (r.length > 2 && r.substr(-2) === ".0")
-                    r = r.substr(0, r.length - 2);
+				if (r.length > 2 && r.substr(-2) === ".0")
+					r = r.substr(0, r.length - 2);
                 neg = n.nb$isnegative();
             }
             else if (n instanceof Sk.builtin.lng)
             {
                 r = n.str$(base, false);
-                neg = n.nb$isnegative();    //  neg = n.size$ < 0;  RNL long.js change
+                neg = n.nb$isnegative();	//	neg = n.size$ < 0;	RNL long.js change
             }
 
             goog.asserts.assert(r !== undefined, "unhandled number format");
@@ -6841,27 +8084,27 @@ Sk.builtin.str.prototype.nb$remainder = function(rhs)
             case 'X':
                 return handleWidth(formatNumber(value, 16)).toUpperCase();
 
-            case 'e':
-            case 'E':
             case 'f':
             case 'F':
+            case 'e':
+            case 'E':
             case 'g':
             case 'G':
-                var convValue = Sk.builtin.asnum$(value);
-                if (typeof convValue === "string")
-                    convValue = Number(convValue);
-                if (convValue === Infinity)
-                    return "inf";
-                if (convValue === -Infinity)
-                    return "-inf";
-                if (isNaN(convValue))
-                    return "nan";
+				var convValue = Sk.builtin.asnum$(value);
+				if (typeof convValue === "string")
+					convValue = Number(convValue);
+				if (convValue === Infinity)
+					return "inf";
+				if (convValue === -Infinity)
+					return "-inf";
+				if (isNaN(convValue))
+					return "nan";
                 var convName = ['toExponential', 'toFixed', 'toPrecision']['efg'.indexOf(conversionType.toLowerCase())];
-                if (precision === undefined || precision === "")
-                    if (conversionType === 'e' || conversionType === 'E')
-                        precision = 6;
-                    else if (conversionType === 'f' || conversionType === 'F')
-                        precision = 7;
+				if (precision === undefined || precision === "")
+					if (conversionType === 'e' || conversionType === 'E')
+						precision = 6;
+					else if (conversionType === 'f' || conversionType === 'F')
+						precision = 7;
                 var result = (convValue)[convName](precision);
                 if ('EFG'.indexOf(conversionType) !== -1) result = result.toUpperCase();
                 // todo; signs etc.
@@ -6877,7 +8120,7 @@ Sk.builtin.str.prototype.nb$remainder = function(rhs)
                 else if (value.constructor === Sk.builtin.str)
                     return value.v.substr(0, 1);
                 else
-                    throw new TypeError("an integer is required");
+                    throw new Sk.builtin.TypeError("an integer is required");
                 break; // stupid lint
 
             case 'r':
@@ -6911,19 +8154,36 @@ Sk.builtin.str.prototype.nb$remainder = function(rhs)
  */
 Sk.builtin.tuple = function(L)
 {
-    if (arguments.length > 1) {
-    throw new TypeError("tuple must be created from a sequence");
-    }
-    if (L instanceof Sk.builtin.tuple) return;
     if (!(this instanceof Sk.builtin.tuple)) return new Sk.builtin.tuple(L);
+
+    if (L === undefined)
+    {
+        L = [];
+    }
+
     if (Object.prototype.toString.apply(L) === '[object Array]')
+    {
         this.v = L;
+    }
     else
-        this.v = L.v;
+    {
+        if (L.tp$iter)
+        {
+            this.v = [];
+            for (var it = L.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext())
+                this.v.push(i);
+        }
+        else
+            throw new Sk.builtin.ValueError("expecting Array or iterable");        
+    }
+
     this.__class__ = Sk.builtin.tuple;
+
+    this["v"] = this.v;
     return this;
 };
 
+Sk.builtin.tuple.prototype.tp$name = "tuple";
 Sk.builtin.tuple.prototype['$r'] = function()
 {
     if (this.v.length === 0) return new Sk.builtin.str("()");
@@ -6939,12 +8199,17 @@ Sk.builtin.tuple.prototype['$r'] = function()
 
 Sk.builtin.tuple.prototype.mp$subscript = function(index)
 {
-    if (index.constructor === Sk.builtin.nmber) index = index.v;
-    if (typeof index === "number")
+    if (Sk.misceval.isIndex(index))
     {
-        if (index < 0) index = this.v.length + index;
-        if (index < 0 || index >= this.v.length) throw new Sk.builtin.IndexError("tuple index out of range");
-        return this.v[index];
+	var i = Sk.misceval.asIndex(index);
+	if (i !== undefined)
+	{
+            if (i < 0) i = this.v.length + i;
+            if (i < 0 || i >= this.v.length) {
+		throw new Sk.builtin.IndexError("tuple index out of range");
+	    }
+            return this.v[i];
+	}
     }
     else if (index instanceof Sk.builtin.slice)
     {
@@ -6955,8 +8220,8 @@ Sk.builtin.tuple.prototype.mp$subscript = function(index)
                 });
         return new Sk.builtin.tuple(ret);
     }
-    else
-        throw new TypeError("tuple indices must be integers, not " + typeof index);
+
+    throw new Sk.builtin.TypeError("tuple indices must be integers, not " + Sk.abstr.typeName(index));
 };
 
 // todo; the numbers and order are taken from python, but the answer's
@@ -7009,12 +8274,23 @@ Sk.builtin.tuple.prototype.tp$iter = function()
     return ret;
 };
 
+Sk.builtin.tuple.prototype.tp$getattr = Sk.builtin.object.prototype.GenericGetAttr;
+
 Sk.builtin.tuple.prototype.tp$richcompare = function(w, op)
 {
-    // todo; NotImplemented if either isn't a tuple
-
     //print("  tup rc", JSON.stringify(this.v), JSON.stringify(w), op);
         
+    // w not a tuple
+    if (!w.__class__ || w.__class__ != Sk.builtin.tuple)
+    {
+        // shortcuts for eq/not
+        if (op === 'Eq') return false;
+        if (op === 'NotEq') return true;
+
+        // todo; other types should have an arbitrary order
+        return false;
+    }
+
     var v = this.v;
     var w = w.v;
     var vl = v.length;
@@ -7060,6 +8336,34 @@ Sk.builtin.tuple.prototype.sq$concat = function(other)
 
 Sk.builtin.tuple.prototype.sq$length = function() { return this.v.length; };
 
+
+Sk.builtin.tuple.prototype['index'] = new Sk.builtin.func(function(self, item)
+{
+    var len = self.v.length;
+    var obj = self.v;
+    for (var i = 0; i < len; ++i)
+    {
+        if (Sk.misceval.richCompareBool(obj[i], item, "Eq"))
+            return i;
+    }
+    throw new Sk.builtin.ValueError("tuple.index(x): x not in tuple");
+});
+
+Sk.builtin.tuple.prototype['count'] = new Sk.builtin.func(function(self, item)
+{
+    var len = self.v.length;
+    var obj = self.v;
+    var count = 0;
+    for (var i = 0; i < len; ++i)
+    {
+        if (Sk.misceval.richCompareBool(obj[i], item, "Eq"))
+        {
+            count += 1;
+        }
+    }
+    return count;
+});
+
 goog.exportSymbol("Sk.builtin.tuple", Sk.builtin.tuple);
 /**
  * @constructor
@@ -7069,14 +8373,54 @@ Sk.builtin.dict = function dict(L)
 {
     if (!(this instanceof Sk.builtin.dict)) return new Sk.builtin.dict(L);
 
+    if (L === undefined)
+    {
+        L = [];
+    }
+
     this.size = 0;
 
-    if ( L !== undefined ) 
+    if (Object.prototype.toString.apply(L) === '[object Array]')
     {
+        // Handle dictionary literals
         for (var i = 0; i < L.length; i += 2)
         {
             this.mp$ass_subscript(L[i], L[i+1]);
         }
+    }
+    else if (L instanceof Sk.builtin.dict) {
+        // Handle calls of type "dict(mapping)" from Python code
+        for (var it = L.tp$iter(), k = it.tp$iternext();
+             k !== undefined;
+             k = it.tp$iternext())
+        {
+            var v = L.mp$subscript(k);
+            if (v === undefined)
+            {
+                //print(k, "had undefined v");
+                v = null;
+            }
+            this.mp$ass_subscript(k, v);
+        }
+    }
+    else if (L.tp$iter)
+    {
+        // Handle calls of type "dict(iterable)" from Python code
+        for (var it = L.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext())
+        {
+            if (i.mp$subscript)
+            {
+                this.mp$ass_subscript(i.mp$subscript(0), i.mp$subscript(1));
+            }
+            else
+            {
+                throw new Sk.builtin.TypeError("element " + this.size + " is not a sequence");    
+            }
+        }
+    }
+    else
+    {
+        throw new Sk.builtin.TypeError("object is not iterable");
     }
 
     this.__class__ = Sk.builtin.dict;
@@ -7088,27 +8432,134 @@ Sk.builtin.dict.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('dict', Sk.b
 
 var kf = Sk.builtin.hash;
 
+Sk.builtin.dict.prototype.key$lookup = function(bucket, key)
+{
+    var item;
+    var eq;
+    var i;
+
+    for (i=0; i<bucket.items.length; i++)
+    {
+        item = bucket.items[i];
+        eq = Sk.misceval.richCompareBool(item.lhs, key, 'Eq');
+        if (eq)
+        {
+            return item;
+        }
+    }
+    return null;
+}   
+
+Sk.builtin.dict.prototype.key$pop = function(bucket, key)
+{
+    var item;
+    var eq;
+    var i;
+
+    for (i=0; i<bucket.items.length; i++)
+    {
+        item = bucket.items[i];
+        eq = Sk.misceval.richCompareBool(item.lhs, key, 'Eq');
+        if (eq)
+        {
+            bucket.items.splice(i, 1);
+            this.size -= 1;
+            return item;
+        }
+    }
+    return undefined;    
+}
+
+// Perform dictionary lookup, either return value or undefined if key not in dictionary
+Sk.builtin.dict.prototype.mp$lookup = function(key)
+{
+    var bucket = this[kf(key)];
+    var item;
+
+    // todo; does this need to go through mp$ma_lookup
+
+    if (bucket !== undefined)
+    {
+        item = this.key$lookup(bucket, key);
+        if (item) {
+            return item.rhs;
+        };
+    }
+
+    // Not found in dictionary     
+    return undefined;
+}
+
 Sk.builtin.dict.prototype.mp$subscript = function(key)
 {
-    var entry = this[kf(key)];
-    // todo; does this need to go through mp$ma_lookup
-    return entry === undefined ? undefined : entry.rhs;
+    var res = this.mp$lookup(key);
+
+    if (res !== undefined)
+    {
+        // Found in dictionary
+        return res;
+    }
+    else
+    {
+        // Not found in dictionary
+        var s = new Sk.builtin.str(key);
+        throw new Sk.builtin.KeyError(s.v);
+    }
 };
+
+Sk.builtin.dict.prototype.sq$contains = function(ob)
+{
+    var res = this.mp$lookup(ob);
+
+    return (res !== undefined);
+}
+
 Sk.builtin.dict.prototype.mp$ass_subscript = function(key, w)
 {
     var k = kf(key);
-    // if (this[k] !== undefined)
-    // {
-    //     this.size -=1;
-    //     delete this[k];
-    //     return;
-    // }
-    // only increment if it's not already used as a key
-    if ( !(k in this) ) {
+    var bucket = this[k];
+    var item;
+
+    if (bucket === undefined)
+    {
+        // New bucket
+        bucket = {$hash: k, items: [{lhs: key, rhs: w}]};
+        this[k] = bucket;
         this.size += 1;
+        return;
     }
-    this[k] = { lhs: key, rhs: w };
+
+    item = this.key$lookup(bucket, key);
+    if (item) {
+        item.rhs = w;
+        return;
+    };
+
+    // Not found in dictionary
+    bucket.items.push({lhs: key, rhs: w});
+    this.size += 1;
 };
+
+Sk.builtin.dict.prototype.mp$del_subscript = function(key)
+{
+    var bucket = this[kf(key)];
+    var item;
+    var s;
+
+    // todo; does this need to go through mp$ma_lookup
+
+    if (bucket !== undefined)
+    {
+        item = this.key$pop(bucket, key);
+        if (item !== undefined) {
+            return;
+        };
+    }
+
+    // Not found in dictionary     
+    s = new Sk.builtin.str(key);
+    throw new Sk.builtin.KeyError(s.v);    
+}
 
 Sk.builtin.dict.prototype.tp$iter = function()
 {
@@ -7117,10 +8568,13 @@ Sk.builtin.dict.prototype.tp$iter = function()
     {
         if (this.hasOwnProperty(k))
         {
-            var i = this[k];
-            if (i && i.lhs !== undefined) // skip internal stuff. todo; merge pyobj and this
+            var bucket = this[k];
+            if (bucket && bucket.$hash !== undefined) // skip internal stuff. todo; merge pyobj and this
             {
-                allkeys.push(k);
+                for (var i=0; i<bucket.items.length; i++)
+                {
+                    allkeys.push(bucket.items[i].lhs);
+                }
             }
         }
     }
@@ -7136,7 +8590,8 @@ Sk.builtin.dict.prototype.tp$iter = function()
         {
             // todo; StopIteration
             if (ret.$index >= ret.$keys.length) return undefined;
-            return ret.$obj[ret.$keys[ret.$index++]].lhs;
+            return ret.$keys[ret.$index++];
+            // return ret.$obj[ret.$keys[ret.$index++]].lhs;
         }
     };
     return ret;
@@ -7163,16 +8618,91 @@ Sk.builtin.dict.prototype['$r'] = function()
 Sk.builtin.dict.prototype.mp$length = function() { return this.size; };
 
 Sk.builtin.dict.prototype.tp$getattr = Sk.builtin.object.prototype.GenericGetAttr;
+Sk.builtin.dict.prototype.tp$hash = Sk.builtin.object.prototype.HashNotImplemented;
+
+Sk.builtin.dict.prototype.tp$richcompare = function(other, op)
+{
+    // if the comparison allows for equality then short-circuit it here
+    if (this === other && Sk.misceval.opAllowsEquality(op))
+        return true;
+
+    // Only support Eq and NotEq comparisons
+    switch (op)
+    {
+        case 'Lt': return undefined;
+        case 'LtE': return undefined;
+        case 'Eq': break;
+        case 'NotEq': break;
+        case 'Gt': return undefined;
+        case 'GtE': return undefined;
+        default:
+            goog.asserts.fail();
+    }
+
+    if (!(other instanceof Sk.builtin.dict)) {
+        if (op === 'Eq') {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    var thisl = this.size;
+    var otherl = other.size;
+
+    if (thisl !== otherl) {
+        if (op === 'Eq') {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    for (var iter = this.tp$iter(), k = iter.tp$iternext();
+            k !== undefined;
+            k = iter.tp$iternext())
+    {
+        var v = this.mp$subscript(k);
+        var otherv = other.mp$subscript(k);
+
+        if (!Sk.misceval.richCompareBool(v, otherv, 'Eq'))
+        {
+            if (op === 'Eq') {
+                return false;
+            } else {
+                return true;
+            }            
+        }
+    }
+
+    if (op === 'Eq') {
+        return true;
+    } else {
+        return false;
+    }                
+}
 
 Sk.builtin.dict.prototype['get'] = new Sk.builtin.func(function(self, k, d)
 {
+    var ret;
+
     if (d === undefined) {
         //d = new Sk.builtin.NoneObj();
         d = null;
     }
-    var ret = self.mp$subscript(k);
-    if (ret !== undefined) return ret;
-    return d;
+
+    ret = self.mp$lookup(k);
+    if (ret === undefined)
+    {
+        ret = d;
+    }
+
+    return ret;
+});
+
+Sk.builtin.dict.prototype['has_key'] = new Sk.builtin.func(function(self, k)
+{
+    return self.sq$contains(k);
 });
 
 Sk.builtin.dict.prototype['items'] = new Sk.builtin.func(function(self)
@@ -7960,6 +9490,7 @@ for(var i = 0; i < s.length; ++i) {
  var x = Sk.builtin.biginteger.intAt(s,i);
  if(x < 0) {
    if(s.charAt(i) == "-" && this.signum() == 0) mi = true;
+   if(s.charAt(i) == ".") break;
    continue;
  }
  w = b*w+x;
@@ -8564,105 +10095,105 @@ Sk.builtin.biginteger.prototype.isProbablePrime = Sk.builtin.biginteger.prototyp
 /**
  * @constructor
  */
-Sk.builtin.nmber = function(x, skType)  /* number is a reserved word */
+Sk.builtin.nmber = function(x, skType)	/* number is a reserved word */
 {
-    if (!(this instanceof Sk.builtin.nmber)) return new Sk.builtin.nmber(x, undefined);
+    if (!(this instanceof Sk.builtin.nmber)) return new Sk.builtin.nmber(x, skType);
 
-  if (x instanceof Sk.builtin.str)
-    x = x.v;
+	if (x instanceof Sk.builtin.str)
+		x = x.v;
 
-  if (x instanceof Sk.builtin.nmber) {
-    this.v = x.v;
-    this.skType = x.skType;
-  } else if (typeof x === "number") {
-    this.v = x;
-    if (skType === undefined) {
-      if (x > Sk.builtin.nmber.threshold$ || x < -Sk.builtin.nmber.threshold$ || x % 1 != 0)
-        this.skType = Sk.builtin.nmber.float$;
-      else
-        this.skType = Sk.builtin.nmber.int$;
-    } else {
-      this.skType = skType;
-      if (skType === Sk.builtin.nmber.int$)
-      if (x > Sk.builtin.nmber.threshold$ || x < -Sk.builtin.nmber.threshold$)
-        return new Sk.builtin.lng(x);
-    }
-  } else if (typeof x === "string") {
-    var result = Sk.numberFromStr(x);
-    if (skType !== undefined)
-      result.skType = skType;
-    if (skType === Sk.builtin.nmber.int$)
-      if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$)
-        return new Sk.builtin.lng(x);
-    return result;
-  } else if (x instanceof Sk.builtin.lng) {
-    return Sk.numberFromStr(x.str$(10, true));
-  } else if (x instanceof Sk.builtin.biginteger) {
-    var result = Sk.numberFromStr(x.toString());
-    if (skType !== undefined)
-      result.skType = skType;
-    if (skType === Sk.builtin.nmber.int$)
-      if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$)
-        return new Sk.builtin.lng(x);
-  } else {
-    this.v = 0;
-    if (skType === undefined)
-      this.skType = Sk.builtin.nmber.int$;
-    else
-      this.skType = skType;
-  }
+	if (x instanceof Sk.builtin.nmber) {
+		this.v = x.v;
+		this.skType = x.skType;
+	} else if (typeof x === "number") {
+		this.v = x;
+		if (skType === undefined) {
+			if (x > Sk.builtin.nmber.threshold$ || x < -Sk.builtin.nmber.threshold$ || x % 1 != 0)
+				this.skType = Sk.builtin.nmber.float$;
+			else
+				this.skType = Sk.builtin.nmber.int$;
+		} else {
+			this.skType = skType;
+			if (skType === Sk.builtin.nmber.int$)
+			if (x > Sk.builtin.nmber.threshold$ || x < -Sk.builtin.nmber.threshold$)
+				return new Sk.builtin.lng(x);
+		}
+	} else if (typeof x === "string") {
+		var result = Sk.numberFromStr(x);
+		if (skType !== undefined)
+			result.skType = skType;
+		if (skType === Sk.builtin.nmber.int$)
+			if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$)
+				return new Sk.builtin.lng(x);
+		return result;
+	} else if (x instanceof Sk.builtin.lng) {
+		return Sk.numberFromStr(x.str$(10, true));
+	} else if (x instanceof Sk.builtin.biginteger) {
+		var result = Sk.numberFromStr(x.toString());
+		if (skType !== undefined)
+			result.skType = skType;
+		if (skType === Sk.builtin.nmber.int$)
+			if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$)
+				return new Sk.builtin.lng(x);
+	} else {
+		this.v = 0;
+		if (skType === undefined)
+			this.skType = Sk.builtin.nmber.int$;
+		else
+			this.skType = skType;
+	}
 
     return this;
 };
 
-Sk.builtin.nmber.tp$index = function()
+Sk.builtin.nmber.prototype.tp$index = function()
 {
     return this.v;
 };
 
 Sk.builtin.nmber.prototype.tp$hash = function()
 {
-    return 'number ' + this.v;
+    return this.v;
 };
 
 Sk.builtin.nmber.prototype.tp$name = "number";
 Sk.builtin.nmber.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('number', Sk.builtin.nmber);
 
-//  Threshold to determine when types should be converted to long
+//	Threshold to determine when types should be converted to long
 Sk.builtin.nmber.threshold$ = Math.pow(2, 53);
 Sk.builtin.nmber.float$ = "float";
 Sk.builtin.nmber.int$ = "int";
 
 Sk.builtin.nmber.fromInt$ = function(ival)
 {
-  return new Sk.builtin.nmber(ival, undefined);
+	return new Sk.builtin.nmber(ival, undefined);
 };
 
 // js string (not Sk.builtin.str) -> long. used to create longs in transformer, respects
 // 0x, 0o, 0b, etc.
 Sk.numberFromStr = function(s)
 {
-  if (s == 'inf')
-    return new Sk.builtin.nmber(Infinity, undefined);
-  if (s == '-inf')
-    return new Sk.builtin.nmber(-Infinity, undefined);
+	if (s == 'inf')
+		return new Sk.builtin.nmber(Infinity, undefined);
+	if (s == '-inf')
+		return new Sk.builtin.nmber(-Infinity, undefined);
 
-  var res = new Sk.builtin.nmber(0, undefined);
+	var res = new Sk.builtin.nmber(0, undefined);
 
-   if (s.indexOf('.') !== -1
+	 if (s.indexOf('.') !== -1
             || s.indexOf('e') !== -1
             || s.indexOf('E') !== -1)
     {
         res.v = parseFloat(s);
-    res.skType = Sk.builtin.nmber.float$;
-    return res;
+		res.skType = Sk.builtin.nmber.float$;
+		return res;
     }
 
     // ugly gunk to placate an overly-nanny closure-compiler:
     // http://code.google.com/p/closure-compiler/issues/detail?id=111
     // this is all just to emulate "parseInt(s)" with no radix.
     var tmp = s;
-  var s1;
+	var s1;
     if (s.charAt(0) === '-') tmp = s.substr(1);
     if (tmp.charAt(0) === '0' && (tmp.charAt(1) === 'x' || tmp.charAt(1) === 'X'))
         s1 = parseInt(s, 16);
@@ -8673,446 +10204,468 @@ Sk.numberFromStr = function(s)
     else
         s1 = parseInt(s, 10);
 
-  res.v = s1;
-  res.skType = Sk.builtin.nmber.int$;
-  return res;
+	res.v = s1;
+	res.skType = Sk.builtin.nmber.int$;
+	return res;
 };
 goog.exportSymbol("Sk.numberFromStr", Sk.numberFromStr);
 
 Sk.builtin.nmber.prototype.clone = function()
 {
-  return new Sk.builtin.nmber(this, undefined);
+	return new Sk.builtin.nmber(this, undefined);
 };
 
 Sk.builtin.nmber.prototype.toFixed = function(x) {
-  x = Sk.builtin.asnum$(x);
-  return this.v.toFixed(x)
+	x = Sk.builtin.asnum$(x);
+	return this.v.toFixed(x)
 }
 
 Sk.builtin.nmber.prototype.nb$add = function(other)
 {
-  var result;
+	var result;
 
-  if (typeof other === "number")
-    other = new Sk.builtin.nmber(other, undefined);
+	if (typeof other === "number")
+		other = new Sk.builtin.nmber(other, undefined);
 
-  if (other instanceof Sk.builtin.nmber) {
-    result = new Sk.builtin.nmber(this.v + other.v, undefined);
-    if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$)
-      result.skType = Sk.builtin.nmber.float$;
-    else {
-      result.skType = Sk.builtin.nmber.int$;
-      if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
-        //  Promote to long
-        result = new Sk.builtin.lng(this.v).nb$add(other.v);
-      }
-    }
-    return result;
-  }
+	if (other instanceof Sk.builtin.nmber) {
+		result = new Sk.builtin.nmber(this.v + other.v, undefined);
+		if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$)
+			result.skType = Sk.builtin.nmber.float$;
+		else {
+			result.skType = Sk.builtin.nmber.int$;
+			if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
+				//	Promote to long
+				result = new Sk.builtin.lng(this.v).nb$add(other.v);
+			}
+		}
+		return result;
+	}
 
-  if (other instanceof Sk.builtin.lng) {
-    if (this.skType === Sk.builtin.nmber.float$) {  // float + long --> float
-      result = new Sk.builtin.nmber(this.v + parseFloat(other.str$(10, true)), Sk.builtin.nmber.float$);
-    } else {  //  int + long --> long
-      var thisAsLong = new Sk.builtin.lng(this.v);
-      result = thisAsLong.nb$add(other);
-    }
-    return result;
-  }
+	if (other instanceof Sk.builtin.lng) {
+		if (this.skType === Sk.builtin.nmber.float$) {  // float + long --> float
+			result = new Sk.builtin.nmber(this.v + parseFloat(other.str$(10, true)), Sk.builtin.nmber.float$);
+		} else {	//	int + long --> long
+			var thisAsLong = new Sk.builtin.lng(this.v);
+			result = thisAsLong.nb$add(other);
+		}
+		return result;
+	}
 
-  return undefined;
+	return undefined;
 };
 
 
 Sk.builtin.nmber.prototype.nb$subtract = function(other)
 {
-  var result;
+	var result;
 
-  if (typeof other === "number") {
-    other = new Sk.builtin.nmber(other, undefined);
-  }
+	if (typeof other === "number") {
+		other = new Sk.builtin.nmber(other, undefined);
+	}
 
-  if (other instanceof Sk.builtin.nmber) {
-    result = new Sk.builtin.nmber(this.v - other.v, undefined);
-    if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$)
-      result.skType = Sk.builtin.nmber.float$;
-    else {
-      result.skType = Sk.builtin.nmber.int$;
-      if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
-        //  Promote to long
-        result = new Sk.builtin.lng(this.v).nb$subtract(other.v);
-      }
-    }
-    return result;
-  }
+	if (other instanceof Sk.builtin.nmber) {
+		result = new Sk.builtin.nmber(this.v - other.v, undefined);
+		if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$)
+			result.skType = Sk.builtin.nmber.float$;
+		else {
+			result.skType = Sk.builtin.nmber.int$;
+			if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
+				//	Promote to long
+				result = new Sk.builtin.lng(this.v).nb$subtract(other.v);
+			}
+		}
+		return result;
+	}
 
-  if (other instanceof Sk.builtin.lng) {
-    if (this.skType === Sk.builtin.nmber.float$) {  // float + long --> float
-      result = new Sk.builtin.nmber(this.v - parseFloat(other.str$(10, true)), Sk.builtin.nmber.float$);
-    } else {  //  int - long --> long
-      var thisAsLong = new Sk.builtin.lng(this.v);
-      result = thisAsLong.nb$subtract(other);
-    }
-    return result;
-  }
+	if (other instanceof Sk.builtin.lng) {
+		if (this.skType === Sk.builtin.nmber.float$) {  // float + long --> float
+			result = new Sk.builtin.nmber(this.v - parseFloat(other.str$(10, true)), Sk.builtin.nmber.float$);
+		} else {	//	int - long --> long
+			var thisAsLong = new Sk.builtin.lng(this.v);
+			result = thisAsLong.nb$subtract(other);
+		}
+		return result;
+	}
 
-  return undefined;
+	return undefined;
 };
 
 Sk.builtin.nmber.prototype.nb$multiply = function(other)
 {
-  var result;
+	var result;
 
-  if (typeof other === "number")
-    other = new Sk.builtin.nmber(other, undefined);
+	if (typeof other === "number")
+		other = new Sk.builtin.nmber(other, undefined);
 
-  if (other instanceof Sk.builtin.nmber) {
-    result = new Sk.builtin.nmber(this.v * other.v, undefined);
-    if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$)
-      result.skType = Sk.builtin.nmber.float$;
-    else {
-      result.skType = Sk.builtin.nmber.int$;
-      if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
-        //  Promote to long
-        result = new Sk.builtin.lng(this.v).nb$multiply(other.v);
-      }
-    }
-    return result;
-  }
+	if (other instanceof Sk.builtin.nmber) {
+		result = new Sk.builtin.nmber(this.v * other.v, undefined);
+		if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$)
+			result.skType = Sk.builtin.nmber.float$;
+		else {
+			result.skType = Sk.builtin.nmber.int$;
+			if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
+				//	Promote to long
+				result = new Sk.builtin.lng(this.v).nb$multiply(other.v);
+			}
+		}
+		return result;
+	}
 
-  if (other instanceof Sk.builtin.lng) {
-    if (this.skType === Sk.builtin.nmber.float$) {  // float + long --> float
-      result = new Sk.builtin.nmber(this.v * parseFloat(other.str$(10, true)), Sk.builtin.nmber.float$);
-    } else {  //  int - long --> long
-      var thisAsLong = new Sk.builtin.lng(this.v);
-      result = thisAsLong.nb$multiply(other);
-    }
-    return result;
-  }
+	if (other instanceof Sk.builtin.lng) {
+		if (this.skType === Sk.builtin.nmber.float$) {  // float + long --> float
+			result = new Sk.builtin.nmber(this.v * parseFloat(other.str$(10, true)), Sk.builtin.nmber.float$);
+		} else {	//	int - long --> long
+			var thisAsLong = new Sk.builtin.lng(this.v);
+			result = thisAsLong.nb$multiply(other);
+		}
+		return result;
+	}
 
-  return undefined;
+	return undefined;
 };
 
 Sk.builtin.nmber.prototype.nb$divide = function(other)
 {
-  var result;
+	var result;
 
-  if (typeof other === "number")
-    other = new Sk.builtin.nmber(other, undefined);
+	if (typeof other === "number")
+		other = new Sk.builtin.nmber(other, undefined);
 
-  if (other instanceof Sk.builtin.nmber) {
-    if (other.v == 0)
-      throw new Sk.builtin.ZeroDivisionError("integer division or modulo by zero");
+	if (other instanceof Sk.builtin.nmber) {
+		if (other.v == 0)
+			throw new Sk.builtin.ZeroDivisionError("integer division or modulo by zero");
 
-    if (this.v === Infinity)
-      if (other.v === Infinity || other.v === -Infinity)
-        return new Sk.builtin.nmber(NaN, Sk.builtin.nmber.float$);
-      else if (other.nb$isnegative())
-        return new Sk.builtin.nmber(-Infinity, Sk.builtin.nmber.float$);
-      else
-        return new Sk.builtin.nmber(Infinity, Sk.builtin.nmber.float$);
-    if (this.v === -Infinity)
-      if (other.v === Infinity || other.v === -Infinity)
-        return new Sk.builtin.nmber(NaN, Sk.builtin.nmber.float$);
-      else if (other.nb$isnegative())
-        return new Sk.builtin.nmber(Infinity, Sk.builtin.nmber.float$);
-      else
-        return new Sk.builtin.nmber(-Infinity, Sk.builtin.nmber.float$);
+		if (this.v === Infinity)
+			if (other.v === Infinity || other.v === -Infinity)
+				return new Sk.builtin.nmber(NaN, Sk.builtin.nmber.float$);
+			else if (other.nb$isnegative())
+				return new Sk.builtin.nmber(-Infinity, Sk.builtin.nmber.float$);
+			else
+				return new Sk.builtin.nmber(Infinity, Sk.builtin.nmber.float$);
+		if (this.v === -Infinity)
+			if (other.v === Infinity || other.v === -Infinity)
+				return new Sk.builtin.nmber(NaN, Sk.builtin.nmber.float$);
+			else if (other.nb$isnegative())
+				return new Sk.builtin.nmber(Infinity, Sk.builtin.nmber.float$);
+			else
+				return new Sk.builtin.nmber(-Infinity, Sk.builtin.nmber.float$);
 
-    result = new Sk.builtin.nmber(this.v / other.v, undefined);
-    if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$ || Sk.python3)
-      result.skType = Sk.builtin.nmber.float$;
-    else {
-      result.v = Math.floor(result.v);
-      result.skType = Sk.builtin.nmber.int$;
-      if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
-        //  Promote to long
-        result = new Sk.builtin.lng(this.v).nb$divide(other.v);
-      }
-    }
-    return result;
-  }
+		result = new Sk.builtin.nmber(this.v / other.v, undefined);
+		if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$ || Sk.python3)
+			result.skType = Sk.builtin.nmber.float$;
+		else {
+			result.v = Math.floor(result.v);
+			result.skType = Sk.builtin.nmber.int$;
+			if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
+				//	Promote to long
+				result = new Sk.builtin.lng(this.v).nb$divide(other.v);
+			}
+		}
+		return result;
+	}
 
-  if (other instanceof Sk.builtin.lng) {
-    if (other.longCompare(Sk.builtin.biginteger.ZERO) == 0)
-      throw new Sk.builtin.ZeroDivisionError("integer division or modulo by zero");
+	if (other instanceof Sk.builtin.lng) {
+		if (other.longCompare(Sk.builtin.biginteger.ZERO) == 0)
+			throw new Sk.builtin.ZeroDivisionError("integer division or modulo by zero");
 
-    if (this.v === Infinity)
-      if (other.nb$isnegative())
-        return new Sk.builtin.nmber(-Infinity, Sk.builtin.nmber.float$);
-      else
-        return new Sk.builtin.nmber(Infinity, Sk.builtin.nmber.float$);
-    if (this.v === -Infinity)
-      if (other.nb$isnegative())
-        return new Sk.builtin.nmber(Infinity, Sk.builtin.nmber.float$);
-      else
-        return new Sk.builtin.nmber(-Infinity, Sk.builtin.nmber.float$);
+		if (this.v === Infinity)
+			if (other.nb$isnegative())
+				return new Sk.builtin.nmber(-Infinity, Sk.builtin.nmber.float$);
+			else
+				return new Sk.builtin.nmber(Infinity, Sk.builtin.nmber.float$);
+		if (this.v === -Infinity)
+			if (other.nb$isnegative())
+				return new Sk.builtin.nmber(Infinity, Sk.builtin.nmber.float$);
+			else
+				return new Sk.builtin.nmber(-Infinity, Sk.builtin.nmber.float$);
 
-    if (this.skType === Sk.builtin.nmber.float$) {  // float / long --> float
-      result = new Sk.builtin.nmber(this.v / parseFloat(other.str$(10, true)), Sk.builtin.nmber.float$);
-    } else {  //  int - long --> long
-      var thisAsLong = new Sk.builtin.lng(this.v);
-      result = thisAsLong.nb$divide(other);
-    }
-    return result;
-  }
+		if (this.skType === Sk.builtin.nmber.float$) {  // float / long --> float
+			result = new Sk.builtin.nmber(this.v / parseFloat(other.str$(10, true)), Sk.builtin.nmber.float$);
+		} else {	//	int - long --> long
+			var thisAsLong = new Sk.builtin.lng(this.v);
+			result = thisAsLong.nb$divide(other);
+		}
+		return result;
+	}
 
-  return undefined;
+	return undefined;
 };
 
 Sk.builtin.nmber.prototype.nb$floor_divide = function(other)
 {
-  var result;
+	var result;
 
-  if (typeof other === "number")
-    other = new Sk.builtin.nmber(other, undefined);
+	if (typeof other === "number")
+		other = new Sk.builtin.nmber(other, undefined);
 
-  if (this.v === Infinity || this.v === -Infinity)
-    return new Sk.builtin.nmber(NaN, Sk.builtin.nmber.float$);
+	if (this.v === Infinity || this.v === -Infinity)
+		return new Sk.builtin.nmber(NaN, Sk.builtin.nmber.float$);
 
-  if (other instanceof Sk.builtin.nmber) {
-    if (other.v == 0)
-      throw new Sk.builtin.ZeroDivisionError("integer division or modulo by zero");
+	if (other instanceof Sk.builtin.nmber) {
+		if (other.v == 0)
+			throw new Sk.builtin.ZeroDivisionError("integer division or modulo by zero");
 
-    if (other.v === Infinity)
-      if (this.nb$isnegative())
-        return new Sk.builtin.nmber(-1, Sk.builtin.nmber.float$);
-      else
-        return new Sk.builtin.nmber(0, Sk.builtin.nmber.float$);
-    if (other.v === -Infinity)
-      if (this.nb$isnegative() || !this.nb$nonzero())
-        return new Sk.builtin.nmber(0, Sk.builtin.nmber.float$);
-      else
-        return new Sk.builtin.nmber(-1, Sk.builtin.nmber.float$);
+		if (other.v === Infinity)
+			if (this.nb$isnegative())
+				return new Sk.builtin.nmber(-1, Sk.builtin.nmber.float$);
+			else
+				return new Sk.builtin.nmber(0, Sk.builtin.nmber.float$);
+		if (other.v === -Infinity)
+			if (this.nb$isnegative() || !this.nb$nonzero())
+				return new Sk.builtin.nmber(0, Sk.builtin.nmber.float$);
+			else
+				return new Sk.builtin.nmber(-1, Sk.builtin.nmber.float$);
 
-    result = new Sk.builtin.nmber(Math.floor(this.v / other.v), undefined);
-    if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$)
-      result.skType = Sk.builtin.nmber.float$;
-    else {
-      result.v = Math.floor(result.v);
-      result.skType = Sk.builtin.nmber.int$;
-      if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
-        //  Promote to long
-        result = new Sk.builtin.lng(this.v).nb$floor_divide(other.v);
-      }
-    }
-    return result;
-  }
+		result = new Sk.builtin.nmber(Math.floor(this.v / other.v), undefined);
+		if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$)
+			result.skType = Sk.builtin.nmber.float$;
+		else {
+			result.v = Math.floor(result.v);
+			result.skType = Sk.builtin.nmber.int$;
+			if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
+				//	Promote to long
+				result = new Sk.builtin.lng(this.v).nb$floor_divide(other.v);
+			}
+		}
+		return result;
+	}
 
-  if (other instanceof Sk.builtin.lng) {
-    if (other.longCompare(Sk.builtin.biginteger.ZERO) == 0)
-      throw new Sk.builtin.ZeroDivisionError("integer division or modulo by zero");
-    if (this.skType === Sk.builtin.nmber.float$) {  // float / long --> float
-      result = Math.floor(this.v / parseFloat(other.str$(10, true)));
-      result = new Sk.builtin.nmber(result, Sk.builtin.nmber.float$);
-    } else {  //  int - long --> long
-      var thisAsLong = new Sk.builtin.lng(this.v);
-      result = thisAsLong.nb$floor_divide(other);
-    }
-    return result;
-  }
+	if (other instanceof Sk.builtin.lng) {
+		if (other.longCompare(Sk.builtin.biginteger.ZERO) == 0)
+			throw new Sk.builtin.ZeroDivisionError("integer division or modulo by zero");
+		if (this.skType === Sk.builtin.nmber.float$) {  // float / long --> float
+			result = Math.floor(this.v / parseFloat(other.str$(10, true)));
+			result = new Sk.builtin.nmber(result, Sk.builtin.nmber.float$);
+		} else {	//	int - long --> long
+			var thisAsLong = new Sk.builtin.lng(this.v);
+			result = thisAsLong.nb$floor_divide(other);
+		}
+		return result;
+	}
 
-  return undefined;
+	return undefined;
 };
 
 Sk.builtin.nmber.prototype.nb$remainder = function(other)
 {
-  var result;
+	var result;
 
-  if (typeof other === "number")
-    other = new Sk.builtin.nmber(other, undefined);
+	if (typeof other === "number")
+		other = new Sk.builtin.nmber(other, undefined);
 
-  if (other instanceof Sk.builtin.nmber) {
-    if (other.v == 0)
-      throw new Sk.builtin.ZeroDivisionError("integer division or modulo by zero");
+	if (other instanceof Sk.builtin.nmber) {
+		if (other.v == 0)
+			throw new Sk.builtin.ZeroDivisionError("integer division or modulo by zero");
 
-    if (this.v == 0)
-      if (this.skType == Sk.builtin.nmber.float$ || other.skType == Sk.builtin.nmber.float$)
-        return new Sk.builtin.nmber(0, Sk.builtin.nmber.float$);
-      else
-        return new Sk.builtin.nmber(0, Sk.builtin.nmber.int$);
+		if (this.v == 0)
+			if (this.skType == Sk.builtin.nmber.float$ || other.skType == Sk.builtin.nmber.float$)
+				return new Sk.builtin.nmber(0, Sk.builtin.nmber.float$);
+			else
+				return new Sk.builtin.nmber(0, Sk.builtin.nmber.int$);
 
-    if (other.v === Infinity)
-      if (this.v === Infinity || this.v === -Infinity)
-        return new Sk.builtin.nmber(NaN, Sk.builtin.nmber.float$);
-      else if (this.nb$ispositive())
-        return new Sk.builtin.nmber(this.v, Sk.builtin.nmber.float$);
-      else
-        return new Sk.builtin.nmber(Infinity, Sk.builtin.nmber.float$);
+		if (other.v === Infinity)
+			if (this.v === Infinity || this.v === -Infinity)
+				return new Sk.builtin.nmber(NaN, Sk.builtin.nmber.float$);
+			else if (this.nb$ispositive())
+				return new Sk.builtin.nmber(this.v, Sk.builtin.nmber.float$);
+			else
+				return new Sk.builtin.nmber(Infinity, Sk.builtin.nmber.float$);
 
-    //  Javacript logic on negatives doesn't work for Python... do this instead
-    var tmp = this.v % other.v;
-    if (this.v < 0) {
-      if (other.v > 0 && tmp < 0)
-        tmp = tmp + other.v;
-    } else {
-      if (other.v < 0 && tmp != 0)
-        tmp = tmp + other.v;
-    }
-    if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$)
-      result = new Sk.builtin.nmber(tmp, Sk.builtin.nmber.float$);
-    else {
-    //  tmp = Math.floor(tmp);
-      result = new Sk.builtin.nmber(tmp, Sk.builtin.nmber.int$);
-      if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
-        //  Promote to long
-        result = new Sk.builtin.lng(this.v).nb$remainder(other.v);
-      }
-    }
-    return result;
-  }
+		//	Javacript logic on negatives doesn't work for Python... do this instead
+		var tmp = this.v % other.v;
+		if (this.v < 0) {
+			if (other.v > 0 && tmp < 0)
+				tmp = tmp + other.v;
+		} else {
+			if (other.v < 0 && tmp != 0)
+				tmp = tmp + other.v;
+		}
+		if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$)
+			result = new Sk.builtin.nmber(tmp, Sk.builtin.nmber.float$);
+		else {
+		//	tmp = Math.floor(tmp);
+			result = new Sk.builtin.nmber(tmp, Sk.builtin.nmber.int$);
+			if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
+				//	Promote to long
+				result = new Sk.builtin.lng(this.v).nb$remainder(other.v);
+			}
+		}
+		return result;
+	}
 
-  if (other instanceof Sk.builtin.lng) {
-    if (other.longCompare(Sk.builtin.biginteger.ZERO) == 0)
-      throw new Sk.builtin.ZeroDivisionError("integer division or modulo by zero");
+	if (other instanceof Sk.builtin.lng) {
+		if (other.longCompare(Sk.builtin.biginteger.ZERO) == 0)
+			throw new Sk.builtin.ZeroDivisionError("integer division or modulo by zero");
 
-    if (this.v == 0)
-      if (this.skType === Sk.builtin.nmber.int$)
-        return new Sk.builtin.lng(0);
-      else
-        return new Sk.builtin.nmber(0, this.skType);
+		if (this.v == 0)
+			if (this.skType === Sk.builtin.nmber.int$)
+				return new Sk.builtin.lng(0);
+			else
+				return new Sk.builtin.nmber(0, this.skType);
 
-    if (this.skType === Sk.builtin.nmber.float$) {  // float / long --> float
-      var op2 = parseFloat(other.str$(10, true))
-      var tmp = this.v % op2;
-      if (tmp < 0) {
-        if (op2 > 0 && tmp != 0)
-          tmp = tmp + op2;
-      } else {
-        if (op2 < 0 && tmp != 0)
-          tmp = tmp + op2;
-      }
-      result = new Sk.builtin.nmber(tmp, Sk.builtin.nmber.float$);
-    } else {  //  int - long --> long
-      var thisAsLong = new Sk.builtin.lng(this.v);
-      result = thisAsLong.nb$remainder(other);
-    }
-    return result;
-  }
+		if (this.skType === Sk.builtin.nmber.float$) {  // float / long --> float
+			var op2 = parseFloat(other.str$(10, true))
+			var tmp = this.v % op2;
+			if (tmp < 0) {
+				if (op2 > 0 && tmp != 0)
+					tmp = tmp + op2;
+			} else {
+				if (op2 < 0 && tmp != 0)
+					tmp = tmp + op2;
+			}
+			result = new Sk.builtin.nmber(tmp, Sk.builtin.nmber.float$);
+		} else {	//	int - long --> long
+			var thisAsLong = new Sk.builtin.lng(this.v);
+			result = thisAsLong.nb$remainder(other);
+		}
+		return result;
+	}
 
-  return undefined;
+	return undefined;
 };
 
 Sk.builtin.nmber.prototype.nb$power = function(other)
 {
-  var result;
+	var result;
 
-  if (typeof other === "number")
-    other = new Sk.builtin.nmber(other, undefined);
+	if (typeof other === "number")
+		other = new Sk.builtin.nmber(other, undefined);
 
-  if (other instanceof Sk.builtin.nmber) {
-    if (this.v < 0 && other.v % 1 != 0)
-      throw new Sk.builtin.NegativePowerError("cannot raise a negative number to a fractional power");
-    if (this.v == 0 && other.v < 0) {
-      throw new Sk.builtin.NegativePowerError("cannot raise zero to a negative power");
-    }
+	if (other instanceof Sk.builtin.nmber) {
+		if (this.v < 0 && other.v % 1 != 0)
+			throw new Sk.builtin.NegativePowerError("cannot raise a negative number to a fractional power");
+		if (this.v == 0 && other.v < 0) {
+			throw new Sk.builtin.NegativePowerError("cannot raise zero to a negative power");
+		}
 
-    result = new Sk.builtin.nmber(Math.pow(this.v, other.v), undefined);
-    if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$ || other.v < 0)
-      result.skType = Sk.builtin.nmber.float$;
-    else {
-      result.v = Math.floor(result.v);
-      result.skType = Sk.builtin.nmber.int$;
-      if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
-        //  Promote to long
-        result = new Sk.builtin.lng(this.v).nb$power(other.v);
-      }
-    }
-    return result;
-  }
+		result = new Sk.builtin.nmber(Math.pow(this.v, other.v), undefined);
+		if (this.skType === Sk.builtin.nmber.float$ || other.skType === Sk.builtin.nmber.float$ || other.v < 0)
+			result.skType = Sk.builtin.nmber.float$;
+		else {
+			result.v = Math.floor(result.v);
+			result.skType = Sk.builtin.nmber.int$;
+			if (result.v > Sk.builtin.nmber.threshold$ || result.v < -Sk.builtin.nmber.threshold$) {
+				//	Promote to long
+				result = new Sk.builtin.lng(this.v).nb$power(other.v);
+			}
+		}
+	    if ((Math.abs(result.v) === Infinity)
+		&& (Math.abs(this.v) !== Infinity)
+		&& (Math.abs(other.v) !== Infinity)) {
+		throw new Sk.builtin.OverflowError("Numerical result out of range");
+	    }
+		return result;
+	}
 
-  if (other instanceof Sk.builtin.lng) {
-    if (this.v == 0 && other.longCompare(Sk.builtin.biginteger.ZERO) < 0)
-      throw new Sk.builtin.NegativePowerError("cannot raise zero to a negative power");
-    if (this.skType === Sk.builtin.nmber.float$ || other.nb$isnegative()) {  // float / long --> float
-      result = new Sk.builtin.nmber(Math.pow(this.v, parseFloat(other.str$(10, true))), Sk.builtin.nmber.float$);
-    } else {  //  int - long --> long
-      var thisAsLong = new Sk.builtin.lng(this.v);
-      result = thisAsLong.nb$power(other);
-    }
-    return result;
-  }
+	if (other instanceof Sk.builtin.lng) {
+		if (this.v == 0 && other.longCompare(Sk.builtin.biginteger.ZERO) < 0)
+			throw new Sk.builtin.NegativePowerError("cannot raise zero to a negative power");
+		if (this.skType === Sk.builtin.nmber.float$ || other.nb$isnegative()) {  // float / long --> float
+			result = new Sk.builtin.nmber(Math.pow(this.v, parseFloat(other.str$(10, true))), Sk.builtin.nmber.float$);
+		} else {	//	int - long --> long
+			var thisAsLong = new Sk.builtin.lng(this.v);
+			result = thisAsLong.nb$power(other);
+		}
+		return result;
+	}
 
-  return undefined;
+	return undefined;
 };
 
 Sk.builtin.nmber.prototype.nb$and = function(other)
 {
-  var tmp;
-  if (typeof other === "number")
-    tmp = this.v & other;
-  else if (other instanceof Sk.builtin.nmber)
-    tmp = this.v & other.v
+	var tmp;
+        other = Sk.builtin.asnum$(other);
+        tmp = this.v & other;
+        if ((tmp !== undefined) && (tmp < 0)) {
+            tmp = tmp + 4294967296; // convert back to unsigned
+        }
 
-  if (tmp !== undefined)
-    return new Sk.builtin.nmber(tmp, undefined);
+	if (tmp !== undefined)
+		return new Sk.builtin.nmber(tmp, undefined);
 
-  return undefined;
+	return undefined;
 }
 
 Sk.builtin.nmber.prototype.nb$or = function(other)
 {
-  var tmp;
-  if (typeof other === "number")
-    tmp = this.v | other;
-  else if (other instanceof Sk.builtin.nmber)
-    tmp = this.v | other.v
+	var tmp;
+        other = Sk.builtin.asnum$(other);
+        tmp = this.v | other;
+        if ((tmp !== undefined) && (tmp < 0)) {
+            tmp = tmp + 4294967296; // convert back to unsigned
+        }
 
-  if (tmp !== undefined)
-    return new Sk.builtin.nmber(tmp, undefined);
+	if (tmp !== undefined)
+		return new Sk.builtin.nmber(tmp, undefined);
 
-  return undefined;
+	return undefined;
 }
 
 Sk.builtin.nmber.prototype.nb$xor = function(other)
 {
-  var tmp;
-  if (typeof other === "number")
-    tmp = this.v ^ other;
-  else if (other instanceof Sk.builtin.nmber)
-    tmp = this.v ^ other.v
+	var tmp;
+        other = Sk.builtin.asnum$(other);
+        tmp = this.v ^ other;
+        if ((tmp !== undefined) && (tmp < 0)) {
+            tmp = tmp + 4294967296; // convert back to unsigned
+        }
 
-  if (tmp !== undefined)
-    return new Sk.builtin.nmber(tmp, undefined);
+	if (tmp !== undefined)
+		return new Sk.builtin.nmber(tmp, undefined);
 
-  return undefined;
+	return undefined;
 }
 
 Sk.builtin.nmber.prototype.nb$lshift = function(other)
 {
-  var tmp;
-  if (typeof other === "number")
-    tmp = this.v << other;
-  else if (other instanceof Sk.builtin.nmber)
-    tmp = this.v << other.v
+    var tmp;
+    var shift = Sk.builtin.asnum$(other);
 
-  if (tmp !== undefined)
-    return new Sk.builtin.nmber(tmp, undefined);
+    if (shift !== undefined) {
+        if (shift < 0)
+	    throw new Sk.builtin.ValueError("negative shift count");
+	tmp = this.v << shift;
+	if (tmp <= this.v) {
+	    // Fail, recompute with longs
+	    return Sk.builtin.lng.fromInt$(this.v).nb$lshift(shift);
+	}
+    }
 
-  return undefined;
+	if (tmp !== undefined)
+		return new Sk.builtin.nmber(tmp, this.skType);
+
+	return undefined;
 }
 
 Sk.builtin.nmber.prototype.nb$rshift = function(other)
 {
-  var tmp;
-  if (typeof other === "number")
-    tmp = this.v >> other;
-  else if (other instanceof Sk.builtin.nmber)
-    tmp = this.v >> other.v
+    var tmp;
+    var shift = Sk.builtin.asnum$(other);
 
-  if (tmp !== undefined)
-    return new Sk.builtin.nmber(tmp, undefined);
+    if (shift !== undefined) {
+        if (shift < 0)
+	    throw new Sk.builtin.ValueError("negative shift count");
+	tmp = this.v >> shift;
+	if ((this.v > 0) && (tmp < 0)) {
+	    // Fix incorrect sign extension
+	    tmp = tmp & (Math.pow(2, 32-shift) - 1);
+	}
+    }
 
-  return undefined;
+	if (tmp !== undefined)
+		return new Sk.builtin.nmber(tmp, this.skType);
+
+	return undefined;
 }
 
 Sk.builtin.nmber.prototype.nb$inplace_add = Sk.builtin.nmber.prototype.nb$add;
 
-Sk.builtin.nmber.prototype.nb$inplace_sub = Sk.builtin.nmber.prototype.nb$subtract;
+Sk.builtin.nmber.prototype.nb$inplace_subtract = Sk.builtin.nmber.prototype.nb$subtract;
 
-Sk.builtin.nmber.prototype.nb$inplace_mul = Sk.builtin.nmber.prototype.nb$multiply;
+Sk.builtin.nmber.prototype.nb$inplace_multiply = Sk.builtin.nmber.prototype.nb$multiply;
 
-Sk.builtin.nmber.prototype.nb$inplace_div = Sk.builtin.nmber.prototype.nb$divide;
+Sk.builtin.nmber.prototype.nb$inplace_divide = Sk.builtin.nmber.prototype.nb$divide;
 
 Sk.builtin.nmber.prototype.nb$inplace_remainder = Sk.builtin.nmber.prototype.nb$remainder;
 
@@ -9120,11 +10673,27 @@ Sk.builtin.nmber.prototype.nb$inplace_floor_divide = Sk.builtin.nmber.prototype.
 
 Sk.builtin.nmber.prototype.nb$inplace_power = Sk.builtin.nmber.prototype.nb$power;
 
-Sk.builtin.nmber.prototype.nu$neg = function() { return new Sk.builtin.nmber(-this.v, undefined); };
+Sk.builtin.nmber.prototype.nb$inplace_and = Sk.builtin.nmber.prototype.nb$and;
 
-Sk.builtin.nmber.prototype.nu$pos = function() { return this.clone(); };
+Sk.builtin.nmber.prototype.nb$inplace_or = Sk.builtin.nmber.prototype.nb$or;
 
-Sk.builtin.nmber.prototype.nb$nonzero = function() { return this.v !== 0; };
+Sk.builtin.nmber.prototype.nb$inplace_xor = Sk.builtin.nmber.prototype.nb$xor;
+
+Sk.builtin.nmber.prototype.nb$inplace_lshift = Sk.builtin.nmber.prototype.nb$lshift;
+
+Sk.builtin.nmber.prototype.nb$inplace_rshift = Sk.builtin.nmber.prototype.nb$rshift;
+
+Sk.builtin.nmber.prototype.nb$negative = function()
+{
+	return new Sk.builtin.nmber(-this.v, undefined);
+};
+
+Sk.builtin.nmber.prototype.nb$positive = function() { return this.clone(); };
+
+Sk.builtin.nmber.prototype.nb$nonzero = function()
+{
+	return this.v !== 0;
+};
 
 Sk.builtin.nmber.prototype.nb$isnegative = function() { return this.v < 0 };
 
@@ -9132,62 +10701,64 @@ Sk.builtin.nmber.prototype.nb$ispositive = function() { return this.v >= 0 };
 
 Sk.builtin.nmber.prototype.numberCompare = function(other)
 {
-  if (typeof other === "boolean")
-    if (other)
-      other = 1;
-    else
-      other = 0;
+	if (typeof other === "boolean")
+		if (other)
+			other = 1;
+		else
+			other = 0;
 
-  if (typeof other === "number") {
-    return this.v - other;
-  }
+	if (typeof other === "number") {
+		return this.v - other;
+	}
 
-  if (other instanceof Sk.builtin.nmber) {
-    if (this.v == Infinity && other.v == Infinity) return 0;
-    if (this.v == -Infinity && other.v == -Infinity) return 0;
-    return this.v - other.v;
-  }
+	if (other instanceof Sk.builtin.nmber) {
+		if (this.v == Infinity && other.v == Infinity) return 0;
+		if (this.v == -Infinity && other.v == -Infinity) return 0;
+		return this.v - other.v;
+	}
 
-  if (other instanceof Sk.builtin.lng) {
-    if (this.skType === Sk.builtin.nmber.int$ || this.v % 1 == 0) {
-      var thisAsLong = new Sk.builtin.lng(this.v);
-      var tmp = thisAsLong.longCompare(other);
-      return tmp;
-    }
-    var diff = this.nb$subtract(other);
-    if (diff instanceof Sk.builtin.nmber) {
-      return diff.v;
-    } else if (diff instanceof Sk.builtin.lng) {
-      return diff.longCompare(Sk.builtin.biginteger.ZERO);
-    }
-  }
+	if (other instanceof Sk.builtin.lng) {
+		if (this.skType === Sk.builtin.nmber.int$ || this.v % 1 == 0) {
+			var thisAsLong = new Sk.builtin.lng(this.v);
+			var tmp = thisAsLong.longCompare(other);
+			return tmp;
+		}
+		var diff = this.nb$subtract(other);
+		if (diff instanceof Sk.builtin.nmber) {
+			return diff.v;
+		} else if (diff instanceof Sk.builtin.lng) {
+			return diff.longCompare(Sk.builtin.biginteger.ZERO);
+		}
+	}
 
-  return undefined;
+	return undefined;
 }
 
 Sk.builtin.nmber.prototype.__eq__ = function(me, other) {
-  return me.numberCompare(other) == 0;
+	return me.numberCompare(other) == 0;
 };
 
 Sk.builtin.nmber.prototype.__ne__ = function(me, other) {
-  return me.numberCompare(other) != 0;
+	return me.numberCompare(other) != 0;
 };
 
 Sk.builtin.nmber.prototype.__lt__ = function(me, other) {
-  return me.numberCompare(other) < 0;
+	return me.numberCompare(other) < 0;
 };
 
 Sk.builtin.nmber.prototype.__le__ = function(me, other) {
-  return me.numberCompare(other) <= 0;
+	return me.numberCompare(other) <= 0;
 };
 
 Sk.builtin.nmber.prototype.__gt__ = function(me, other) {
-  return me.numberCompare(other) > 0;
+	return me.numberCompare(other) > 0;
 };
 
 Sk.builtin.nmber.prototype.__ge__ = function(me, other) {
-  return me.numberCompare(other) >= 0;
+	return me.numberCompare(other) >= 0;
 };
+
+Sk.builtin.nmber.prototype.tp$getattr = Sk.builtin.object.prototype.GenericGetAttr;
 
 Sk.builtin.nmber.prototype['$r'] = function()
 {
@@ -9201,33 +10772,60 @@ Sk.builtin.nmber.prototype.tp$str = function()
 
 Sk.builtin.nmber.prototype.str$ = function(base, sign)
 {
-  if (isNaN(this.v))
-    return "nan";
+	if (isNaN(this.v))
+		return "nan";
 
-  if (sign === undefined) sign = true;
+	if (sign === undefined) sign = true;
 
-  if (this.v == Infinity)
-    return 'inf';
-  if (this.v == -Infinity && sign)
-    return '-inf';
-  if (this.v == -Infinity && !sign)
-    return 'inf';
+	if (this.v == Infinity)
+		return 'inf';
+	if (this.v == -Infinity && sign)
+		return '-inf';
+	if (this.v == -Infinity && !sign)
+		return 'inf';
 
-  var work = sign ? this.v : Math.abs(this.v);
+	var work = sign ? this.v : Math.abs(this.v);
 
 
-  var tmp;
-  if (base === undefined || base === 10) {
-    tmp = work.toString();
-  } else {
-    tmp = work.toString(base);
-  }
+	var tmp;
+	if (base === undefined || base === 10) {
+		if (this.skType == Sk.builtin.nmber.float$) {
+			tmp = work.toPrecision(12);
 
-  if (this.skType !== Sk.builtin.nmber.float$)
-    return tmp;
-  if (tmp.indexOf('.') < 0 && tmp.indexOf('E') < 0 && tmp.indexOf('e') < 0)
-    tmp = tmp + '.0';
-  return tmp;
+		    // transform fractions with 4 or more leading zeroes into exponents
+		    var idx = tmp.indexOf('.');
+		    var pre = work.toString().slice(0,idx);
+		    var post = work.toString().slice(idx);
+		    if (pre.match(/^-?0$/) && post.slice(1).match(/^0{4,}/)) {
+			if (tmp.length < 12)
+			    tmp = work.toExponential();
+			else
+			    tmp = work.toExponential(11);
+		    }
+
+			while (tmp.charAt(tmp.length-1) == "0" && tmp.indexOf('e') < 0) {
+				tmp = tmp.substring(0,tmp.length-1)
+			}
+			if (tmp.charAt(tmp.length-1) == ".") {
+				tmp = tmp + "0"
+			}
+			tmp = tmp.replace(new RegExp('\\.0+e'),'e',"i")
+		    // make exponent two digits instead of one (ie e+09 not e+9)
+		    tmp = tmp.replace(/(e[-+])([1-9])$/, "$10$2");
+		    // remove trailing zeroes before the exponent
+		    tmp = tmp.replace(/0+(e.*)/,'$1');
+		} else {
+			tmp = work.toString()
+		}
+	} else {
+		tmp = work.toString(base);
+	}
+
+	if (this.skType !== Sk.builtin.nmber.float$)
+		return tmp;
+	if (tmp.indexOf('.') < 0 && tmp.indexOf('E') < 0 && tmp.indexOf('e') < 0)
+		tmp = tmp + '.0';
+	return tmp;
 };
 
 goog.exportSymbol("Sk.builtin.nmber", Sk.builtin.nmber);// long aka "bignumber" implementation
@@ -9235,46 +10833,50 @@ goog.exportSymbol("Sk.builtin.nmber", Sk.builtin.nmber);// long aka "bignumber" 
 //  Using javascript BigInteger by Tom Wu
 /**
  * @constructor
+ * @param {*} x
+ * @param {number=} base
  */
-Sk.builtin.lng = function(x)  /* long is a reserved word */
+Sk.builtin.lng = function(x, base)	/* long is a reserved word */
 {
-    if (!(this instanceof Sk.builtin.lng)) return new Sk.builtin.lng(x);
+    base = Sk.builtin.asnum$(base);
+    if (!(this instanceof Sk.builtin.lng)) return new Sk.builtin.lng(x, base);
 
-  if (x instanceof Sk.builtin.str)
-    x = x.v;
-
-  if (x instanceof Sk.builtin.lng)
-    this.biginteger = x.biginteger.clone();
-  else if (x instanceof Sk.builtin.biginteger)
-    this.biginteger = x;
-  else if (typeof x === "string")
-    return Sk.longFromStr(x);
-  else {
-    x = Sk.builtin.asnum$nofloat(x);
-    this.biginteger = new Sk.builtin.biginteger(x);
-  }
+    if (x === undefined)
+	this.biginteger = new Sk.builtin.biginteger(0);
+    else if (x instanceof Sk.builtin.lng)
+	this.biginteger = x.biginteger.clone();
+    else if (x instanceof Sk.builtin.biginteger)
+	this.biginteger = x;
+    else if (x instanceof String)
+	return Sk.longFromStr(x, base);
+    else if (x instanceof Sk.builtin.str)
+	return Sk.longFromStr(x.v, base);
+    else {
+	x = Sk.builtin.asnum$nofloat(x);
+	this.biginteger = new Sk.builtin.biginteger(x);
+    }
 
     return this;
 };
 
-Sk.builtin.lng.tp$index = function()
+Sk.builtin.lng.prototype.tp$index = function()
 {
     return parseInt(this.str$(10, true), 10);
 };
 
-Sk.builtin.lng.tp$hash = function()
+Sk.builtin.lng.prototype.tp$hash = function()
 {
-    return 'number ' + this.str$(10, true);
+    return this.tp$index();
 };
 
 Sk.builtin.lng.prototype.tp$name = "long";
 Sk.builtin.lng.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('long', Sk.builtin.lng);
 
-//  Threshold to determine when types should be converted to long
+//	Threshold to determine when types should be converted to long
 Sk.builtin.lng.threshold$ = Math.pow(2, 53);
 
-Sk.builtin.lng.MAX_INT$ = new Sk.builtin.lng(Sk.builtin.lng.threshold$); 
-Sk.builtin.lng.MIN_INT$ = new Sk.builtin.lng(-Sk.builtin.lng.threshold$); 
+Sk.builtin.lng.MAX_INT$ = new Sk.builtin.lng(Sk.builtin.lng.threshold$);
+Sk.builtin.lng.MIN_INT$ = new Sk.builtin.lng(-Sk.builtin.lng.threshold$);
 
 //Sk.builtin.lng.LONG_DIVIDE$ = 0;
 //Sk.builtin.lng.FLOAT_DIVIDE$ = -1;
@@ -9283,405 +10885,478 @@ Sk.builtin.lng.MIN_INT$ = new Sk.builtin.lng(-Sk.builtin.lng.threshold$);
 //Sk.builtin.lng.dividemode$ = Sk.builtin.lng.LONG_DIVIDE$;
 
 Sk.builtin.lng.prototype.cantBeInt = function() {
-  return (this.longCompare(Sk.builtin.lng.MAX_INT$) > 0) || (this.longCompare(Sk.builtin.lng.MIN_INT$) < 0);
+	return (this.longCompare(Sk.builtin.lng.MAX_INT$) > 0) || (this.longCompare(Sk.builtin.lng.MIN_INT$) < 0);
 }
 
 //Sk.builtin.lng.longDivideMode = function(m) 
 //{
-//  if (m) {
-//    if (m instanceof Sk.builtin.str) {
-//      if (m.v == 'float') m = Sk.builtin.lng.FLOAT_DIVIDE$;
-//      else if (m.v == 'long')  m = Sk.builtin.lng.LONG_DIVIDE$;
-//      else if (m.v == 'variable') m = Sk.builtin.lng.VARIABLE_DIVIDE$;
-//      else goog.asserts.assert(true, "Invalid long division mode.");
-//    }
-//    Sk.builtin.lng.dividemode$ = m;
-//  }
-//  if (Sk.builtin.lng.dividemode$ == Sk.builtin.lng.FLOAT_DIVIDE$)
-//    return new Sk.builtin.str('float');
-//  if (Sk.builtin.lng.dividemode$ == Sk.builtin.lng.VARIABLE_DIVIDE$)
-//    return new Sk.builtin.str('variable');
-//  return new Sk.builtin.str('long'); 
+//	if (m) {
+//		if (m instanceof Sk.builtin.str) {
+//			if (m.v == 'float') m = Sk.builtin.lng.FLOAT_DIVIDE$;
+//			else if (m.v == 'long')  m = Sk.builtin.lng.LONG_DIVIDE$;
+//			else if (m.v == 'variable') m = Sk.builtin.lng.VARIABLE_DIVIDE$;
+//			else goog.asserts.assert(true, "Invalid long division mode.");
+//		}
+//		Sk.builtin.lng.dividemode$ = m;
+//	}
+//	if (Sk.builtin.lng.dividemode$ == Sk.builtin.lng.FLOAT_DIVIDE$)
+//		return new Sk.builtin.str('float');
+//	if (Sk.builtin.lng.dividemode$ == Sk.builtin.lng.VARIABLE_DIVIDE$)
+//		return new Sk.builtin.str('variable');
+//	return new Sk.builtin.str('long'); 
 //};
 
 Sk.builtin.lng.fromInt$ = function(ival) 
 {
-  return new Sk.builtin.lng(ival);
+	return new Sk.builtin.lng(ival);
 };
 
 // js string (not Sk.builtin.str) -> long. used to create longs in transformer, respects
 // 0x, 0o, 0b, etc.
-Sk.longFromStr = function(s)
+Sk.longFromStr = function(s, base)
 {
-    goog.asserts.assert(s.charAt(s.length - 1) !== "L" && s.charAt(s.length - 1) !== 'l', "L suffix should be removed before here");
+    // l/L are valid digits with base >= 22
+    // goog.asserts.assert(s.charAt(s.length - 1) !== "L" && s.charAt(s.length - 1) !== 'l', "L suffix should be removed before here");
 
-  var neg=false;
-  if (s.substr(0, 1) == "-") {
-    s = s.substr(1);
-    neg=true;
-  }
-    var base = 10;
-    if (s.substr(0, 2) === "0x" || s.substr(0, 2) === "0X")
-    {
-        s = s.substr(2);
-        base = 16;
-    }
-    else if (s.substr(0, 2) === "0o")
-    {
-        s = s.substr(2);
-        base = 8;
-    }
-    else if (s.substr(0, 1) === "0")
-    {
-        s = s.substr(1);
-        base = 8;
-    }
-    else if (s.substr(0, 2) === "0b")
-    {
-        s = s.substr(2);
-        base = 2;
-    }
+    var parser = function (s, base) {
+        if (base == 10)
+            return new Sk.builtin.biginteger(s);
+        else
+            return new Sk.builtin.biginteger(s, base);
+    };
 
-  if (base == 10) {
-    if (s.indexOf('e') >= 0 || s.indexOf('E') >= 0 || s.indexOf('.') >= 0) {
-      s = Math.floor(parseFloat(s));
-    }
-  }
+    var biginteger = Sk.str2number(s, base, parser, function(x){return x.negate();}, "long");
 
-  var biginteger;
-  if (base == 10)
-    biginteger = new Sk.builtin.biginteger(s);
-  else
-    biginteger = new Sk.builtin.biginteger(s,base);
-
-  if (neg)
-    biginteger = biginteger.negate();
-
-  return new Sk.builtin.lng(biginteger);
-
+    return new Sk.builtin.lng(biginteger);
 };
 goog.exportSymbol("Sk.longFromStr", Sk.longFromStr);
 
+Sk.builtin.lng.prototype.toInt$ = function()
+{
+    return this.biginteger.intValue();
+};
+
 Sk.builtin.lng.prototype.clone = function()
 {
-  return new Sk.builtin.lng(this);
+	return new Sk.builtin.lng(this);
 };
 
 Sk.builtin.lng.prototype.nb$add = function(other)
 {
-  if (other instanceof Sk.builtin.nmber) {
-    if (other.skType === Sk.builtin.nmber.float$) {
-      var thisAsFloat = new Sk.builtin.nmber(this.str$(10, true), Sk.builtin.nmber.float$);
-      return thisAsFloat.nb$add(other);
-    } else {
-      //  Promote an int to long
-      other = new Sk.builtin.lng(other.v);
-    }
-  }
+	if (other instanceof Sk.builtin.nmber) {
+		if (other.skType === Sk.builtin.nmber.float$) {
+			var thisAsFloat = new Sk.builtin.nmber(this.str$(10, true), Sk.builtin.nmber.float$);
+			return thisAsFloat.nb$add(other);
+		} else {
+			//	Promote an int to long
+			other = new Sk.builtin.lng(other.v);
+		}
+	}
 
-  if (other instanceof Sk.builtin.lng) {
-    return new Sk.builtin.lng(this.biginteger.add(other.biginteger));
-  }
+	if (other instanceof Sk.builtin.lng) {
+		return new Sk.builtin.lng(this.biginteger.add(other.biginteger));
+	}
 
-  if (other instanceof Sk.builtin.biginteger) {
-    return new Sk.builtin.lng(this.biginteger.add(other));
-  }
+	if (other instanceof Sk.builtin.biginteger) {
+		return new Sk.builtin.lng(this.biginteger.add(other));
+	}
 
-  return new Sk.builtin.lng(this.biginteger.add(new Sk.builtin.biginteger(other)));
-};
-
-Sk.builtin.lng.prototype.nb$subtract = function(other)
-{
-  if (other instanceof Sk.builtin.nmber) {
-    if (other.skType === Sk.builtin.nmber.float$) {
-      var thisAsFloat = new Sk.builtin.nmber(this.str$(10, true), Sk.builtin.nmber.float$);
-      return thisAsFloat.nb$subtract(other);
-    } else {
-      //  Promote an int to long
-      other = new Sk.builtin.lng(other.v);
-    }
-  }
-
-  if (other instanceof Sk.builtin.lng) {
-    return new Sk.builtin.lng(this.biginteger.subtract(other.biginteger));
-  }
-
-  if (other instanceof Sk.builtin.biginteger) {
-    return new Sk.builtin.lng(this.biginteger.subtract(other));
-  }
-
-  return new Sk.builtin.lng(this.biginteger.subtract(new Sk.builtin.biginteger(other)));
-};
-
-Sk.builtin.lng.prototype.nb$multiply = function(other)
-{
-  if (other instanceof Sk.builtin.nmber) {
-    if (other.skType === Sk.builtin.nmber.float$) {
-      var thisAsFloat = new Sk.builtin.nmber(this.str$(10, true), Sk.builtin.nmber.float$);
-      return thisAsFloat.nb$multiply(other);
-    } else {
-      //  Promote an int to long
-      other = new Sk.builtin.lng(other.v);
-    }
-  }
-
-  if (other instanceof Sk.builtin.lng) {
-    return new Sk.builtin.lng(this.biginteger.multiply(other.biginteger));
-  }
-
-  if (typeof(other) == 'float') {
-    return parseFloat(this.biginteger.toString()) * other;
-  }
-
-  if (other instanceof Sk.builtin.biginteger) {
-    return new Sk.builtin.lng(this.biginteger.multiply(other));
-  }
-
-  return new Sk.builtin.lng(this.biginteger.multiply(new Sk.builtin.biginteger(other)));
-};
-
-Sk.builtin.lng.prototype.nb$divide = function(other)
-{
-  if (other instanceof Sk.builtin.nmber) {
-    if (other.skType === Sk.builtin.nmber.float$) {
-      var thisAsFloat = new Sk.builtin.nmber(this.str$(10, true), Sk.builtin.nmber.float$);
-      return thisAsFloat.nb$divide(other);
-    } else {
-      //  Promote an int to long
-      other = new Sk.builtin.lng(other.v);
-    }
-  }
-
-  var result;
-//  if (Sk.builtin.lng.dividemode$ == Sk.builtin.lng.FLOAT_DIVIDE$ || Sk.builtin.lng.dividemode$ == Sk.builtin.lng.VARIABLE_DIVIDE$) {
-//    if (other instanceof Sk.builtin.lng) {
-//      result = this.biginteger.divideAndRemainder(other.biginteger);
-//    } else if (other instanceof Sk.builtin.biginteger) {
-//      result = this.biginteger.divideAndRemainder(other);
-//    } else {
-//      result = this.biginteger.divideAndRemainder(new Sk.builtin.biginteger(other));
-//    }
-//
-//    //  result = Array of quotient [0], remainder [1]
-//
-//    if (result [1].compare(Sk.builtin.biginteger.ZERO) != 0) {
-//      //  Non-zero remainder -- this will be a float no matter what
-//      return parseFloat(this.biginteger.toString()) / parseFloat(other.biginteger.toString());
-//    } else {
-//      //  No remainder
-//      if (Sk.builtin.lng.dividemode$ == Sk.builtin.lng.FLOAT_DIVIDE$)
-//        return parseFloat(result [0].toString());   //  Float option with no remainder, return quotient as float
-//      else
-//        return new Sk.builtin.lng(result [0]);      //  Variable option with no remainder, return new long from quotient
-//    }
-//  }
-
-//  Standard, long result mode
-
-  if (! (other instanceof Sk.builtin.lng) ) {
-    other = new Sk.builtin.lng(other);
-  }
-
-  //  Special logic to round DOWN towards negative infinity for negative results
-  var thisneg = this.nb$isnegative();
-  var otherneg = other.nb$isnegative();
-  if ((thisneg && !otherneg) || (otherneg && !thisneg)) {
-    result = this.biginteger.divideAndRemainder(other.biginteger);
-    //  If remainder is zero or positive, just return division result
-    if (result[1].trueCompare(Sk.builtin.biginteger.ZERO) == 0) {
-      //  No remainder, just return result
-      return new Sk.builtin.lng(result[0]);
-    } else {
-      //  Reminder... subtract 1 from the result (like rounding to neg infinity)
-      result = result[0].subtract(Sk.builtin.biginteger.ONE);
-      return new Sk.builtin.lng(result);
-    }
-  } else {
-    return new Sk.builtin.lng(this.biginteger.divide(other.biginteger));
-  }
-};
-
-Sk.builtin.lng.prototype.nb$floor_divide = function(other)
-{
-  if (other instanceof Sk.builtin.nmber) {
-    if (other.skType === Sk.builtin.nmber.float$) {
-      var thisAsFloat = new Sk.builtin.nmber(this.str$(10, true), Sk.builtin.nmber.float$);
-      return thisAsFloat.nb$floor_divide(other);
-    }
-  }
-
-  return this.nb$divide(other);
-};
-
-Sk.builtin.lng.prototype.nb$remainder = function(other)
-{
-  if (this.biginteger.trueCompare(Sk.builtin.biginteger.ZERO) === 0)
-    if (other instanceof Sk.builtin.nmber && other.skType === Sk.builtin.nmber.float$)
-      return new Sk.builtin.nmber(0, Sk.builtin.nmber.float$);
-    else
-      return new Sk.builtin.lng(0);
-
-  if (other instanceof Sk.builtin.nmber) {
-    if (other.skType === Sk.builtin.nmber.float$) {
-      var thisAsFloat = new Sk.builtin.nmber(this.str$(10, true), Sk.builtin.nmber.float$);
-      return thisAsFloat.nb$remainder(other);
-    } else {
-      //  Promote an int to long
-      other = new Sk.builtin.lng(other.v);
-    }
-  }
-
-  if (! (other instanceof Sk.builtin.lng) ) {
-    other = new Sk.builtin.lng(other);
-  }
-
-  var tmp = new Sk.builtin.lng(this.biginteger.remainder(other.biginteger));
-  if (this.nb$isnegative()) {
-    if (other.nb$ispositive() && tmp.nb$nonzero())
-      tmp = tmp.nb$add(other).nb$remainder(other);
-  } else {
-    if (other.nb$isnegative() && tmp.nb$nonzero())
-      tmp = tmp.nb$add(other);
-  }
-  return tmp;
-  
-};
-
-Sk.builtin.lng.prototype.nb$power = function(n)
-{
-  if (typeof n === "number") {
-    if (n < 0) {
-      var thisAsFloat = new Sk.builtin.nmber(this.str$(10, true), Sk.builtin.nmber.float$);
-      return thisAsFloat.nb$power(n);
-    } else
-      return new Sk.builtin.lng(this.biginteger.pow(new Sk.builtin.biginteger(n)));
-  }
-
-  if (n instanceof Sk.builtin.nmber) {
-    if (n.skType === Sk.builtin.nmber.float$ || n.v < 0) {
-      var thisAsFloat = new Sk.builtin.nmber(this.str$(10, true), Sk.builtin.nmber.float$);
-      return thisAsFloat.nb$power(n);
-    } else {
-      //  Promote an int to long
-      n = new Sk.builtin.lng(n.v);
-    }
-  }
-
-  if (n instanceof Sk.builtin.lng) {
-    if (n.nb$isnegative()) {
-      var thisAsFloat = new Sk.builtin.nmber(this.str$(10, true), Sk.builtin.nmber.float$);
-      return thisAsFloat.nb$power(n);
-    } else
-      return new Sk.builtin.lng(this.biginteger.pow(n.biginteger));
-  }
-
-  if (n instanceof Sk.builtin.biginteger) {
-    if (n.isnegative()) {
-      var thisAsFloat = new Sk.builtin.nmber(this.str$(10, true), Sk.builtin.nmber.float$);
-      return thisAsFloat.nb$power(n);
-    }
-    return new Sk.builtin.lng(this.biginteger.pow(n));
-  }
-
-  return new Sk.builtin.lng(this.biginteger.pow(new Sk.builtin.biginteger(n)));
+	return new Sk.builtin.lng(this.biginteger.add(new Sk.builtin.biginteger(other)));
 };
 
 Sk.builtin.lng.prototype.nb$inplace_add = Sk.builtin.lng.prototype.nb$add;
 
-Sk.builtin.lng.prototype.nb$inplace_sub = Sk.builtin.lng.prototype.nb$subtract;
+Sk.builtin.lng.prototype.nb$subtract = function(other)
+{
+	if (other instanceof Sk.builtin.nmber) {
+		if (other.skType === Sk.builtin.nmber.float$) {
+			var thisAsFloat = new Sk.builtin.nmber(this.str$(10, true), Sk.builtin.nmber.float$);
+			return thisAsFloat.nb$subtract(other);
+		} else {
+			//	Promote an int to long
+			other = new Sk.builtin.lng(other.v);
+		}
+	}
 
-Sk.builtin.lng.prototype.nb$inplace_mul = Sk.builtin.lng.prototype.nb$multiply;
+	if (other instanceof Sk.builtin.lng) {
+		return new Sk.builtin.lng(this.biginteger.subtract(other.biginteger));
+	}
 
-Sk.builtin.lng.prototype.nb$inplace_div = Sk.builtin.lng.prototype.nb$divide;
+	if (other instanceof Sk.builtin.biginteger) {
+		return new Sk.builtin.lng(this.biginteger.subtract(other));
+	}
 
-Sk.builtin.lng.prototype.nb$inplace_remainder = Sk.builtin.lng.prototype.nb$remainder;
+	return new Sk.builtin.lng(this.biginteger.subtract(new Sk.builtin.biginteger(other)));
+};
+
+Sk.builtin.lng.prototype.nb$inplace_subtract = Sk.builtin.lng.prototype.nb$subtract;
+
+Sk.builtin.lng.prototype.nb$multiply = function(other)
+{
+	if (other instanceof Sk.builtin.nmber) {
+		if (other.skType === Sk.builtin.nmber.float$) {
+			var thisAsFloat = new Sk.builtin.nmber(this.str$(10, true), Sk.builtin.nmber.float$);
+			return thisAsFloat.nb$multiply(other);
+		} else {
+			//	Promote an int to long
+			other = new Sk.builtin.lng(other.v);
+		}
+	}
+
+	if (other instanceof Sk.builtin.lng) {
+		return new Sk.builtin.lng(this.biginteger.multiply(other.biginteger));
+	}
+
+	if (typeof(other) == 'float') {
+		return parseFloat(this.biginteger.toString()) * other;
+	}
+
+	if (other instanceof Sk.builtin.biginteger) {
+		return new Sk.builtin.lng(this.biginteger.multiply(other));
+	}
+
+	return new Sk.builtin.lng(this.biginteger.multiply(new Sk.builtin.biginteger(other)));
+};
+
+Sk.builtin.lng.prototype.nb$inplace_multiply = Sk.builtin.lng.prototype.nb$multiply;
+
+Sk.builtin.lng.prototype.nb$divide = function(other)
+{
+	if (other instanceof Sk.builtin.nmber) {
+		if (other.skType === Sk.builtin.nmber.float$) {
+			var thisAsFloat = new Sk.builtin.nmber(this.str$(10, true), Sk.builtin.nmber.float$);
+			return thisAsFloat.nb$divide(other);
+		} else {
+			//	Promote an int to long
+			other = new Sk.builtin.lng(other.v);
+		}
+	}
+
+	var result;
+//	if (Sk.builtin.lng.dividemode$ == Sk.builtin.lng.FLOAT_DIVIDE$ || Sk.builtin.lng.dividemode$ == Sk.builtin.lng.VARIABLE_DIVIDE$) {
+//		if (other instanceof Sk.builtin.lng) {
+//			result = this.biginteger.divideAndRemainder(other.biginteger);
+//		} else if (other instanceof Sk.builtin.biginteger) {
+//			result = this.biginteger.divideAndRemainder(other);
+//		} else {
+//			result = this.biginteger.divideAndRemainder(new Sk.builtin.biginteger(other));
+//		}
+//
+//		//	result = Array of quotient [0], remainder [1]
+//
+//		if (result [1].compare(Sk.builtin.biginteger.ZERO) != 0) {
+//			//	Non-zero remainder -- this will be a float no matter what
+//			return parseFloat(this.biginteger.toString()) / parseFloat(other.biginteger.toString());
+//		} else {
+//			//	No remainder
+//			if (Sk.builtin.lng.dividemode$ == Sk.builtin.lng.FLOAT_DIVIDE$)
+//				return parseFloat(result [0].toString());		//	Float option with no remainder, return quotient as float
+//			else
+//				return new Sk.builtin.lng(result [0]);			//	Variable option with no remainder, return new long from quotient
+//		}
+//	}
+
+//	Standard, long result mode
+
+	if (! (other instanceof Sk.builtin.lng) ) {
+		other = new Sk.builtin.lng(other);
+	}
+
+	//	Special logic to round DOWN towards negative infinity for negative results
+	var thisneg = this.nb$isnegative();
+	var otherneg = other.nb$isnegative();
+	if ((thisneg && !otherneg) || (otherneg && !thisneg)) {
+		result = this.biginteger.divideAndRemainder(other.biginteger);
+		//	If remainder is zero or positive, just return division result
+		if (result[1].trueCompare(Sk.builtin.biginteger.ZERO) == 0) {
+			//	No remainder, just return result
+			return new Sk.builtin.lng(result[0]);
+		} else {
+			//	Reminder... subtract 1 from the result (like rounding to neg infinity)
+			result = result[0].subtract(Sk.builtin.biginteger.ONE);
+			return new Sk.builtin.lng(result);
+		}
+	} else {
+		return new Sk.builtin.lng(this.biginteger.divide(other.biginteger));
+	}
+};
+
+Sk.builtin.lng.prototype.nb$inplace_divide = Sk.builtin.lng.prototype.nb$divide;
+
+Sk.builtin.lng.prototype.nb$floor_divide = function(other)
+{
+	if (other instanceof Sk.builtin.nmber) {
+		if (other.skType === Sk.builtin.nmber.float$) {
+			var thisAsFloat = new Sk.builtin.nmber(this.str$(10, true), Sk.builtin.nmber.float$);
+			return thisAsFloat.nb$floor_divide(other);
+		}
+	}
+
+	return this.nb$divide(other);
+};
 
 Sk.builtin.lng.prototype.nb$inplace_floor_divide = Sk.builtin.lng.prototype.nb$floor_divide;
 
+Sk.builtin.lng.prototype.nb$remainder = function(other)
+{
+	if (this.biginteger.trueCompare(Sk.builtin.biginteger.ZERO) === 0)
+		if (other instanceof Sk.builtin.nmber && other.skType === Sk.builtin.nmber.float$)
+			return new Sk.builtin.nmber(0, Sk.builtin.nmber.float$);
+		else
+			return new Sk.builtin.lng(0);
+
+	if (other instanceof Sk.builtin.nmber) {
+		if (other.skType === Sk.builtin.nmber.float$) {
+			var thisAsFloat = new Sk.builtin.nmber(this.str$(10, true), Sk.builtin.nmber.float$);
+			return thisAsFloat.nb$remainder(other);
+		} else {
+			//	Promote an int to long
+			other = new Sk.builtin.lng(other.v);
+		}
+	}
+
+	if (! (other instanceof Sk.builtin.lng) ) {
+		other = new Sk.builtin.lng(other);
+	}
+
+	var tmp = new Sk.builtin.lng(this.biginteger.remainder(other.biginteger));
+	if (this.nb$isnegative()) {
+		if (other.nb$ispositive() && tmp.nb$nonzero())
+			tmp = tmp.nb$add(other).nb$remainder(other);
+	} else {
+		if (other.nb$isnegative() && tmp.nb$nonzero())
+			tmp = tmp.nb$add(other);
+	}
+	return tmp;
+
+};
+
+Sk.builtin.lng.prototype.nb$inplace_remainder = Sk.builtin.lng.prototype.nb$remainder;
+
+Sk.builtin.lng.prototype.nb$power = function(n)
+{
+	if (typeof n === "number") {
+		if (n < 0) {
+			var thisAsFloat = new Sk.builtin.nmber(this.str$(10, true), Sk.builtin.nmber.float$);
+			return thisAsFloat.nb$power(n);
+		} else
+			return new Sk.builtin.lng(this.biginteger.pow(new Sk.builtin.biginteger(n)));
+	}
+
+	if (n instanceof Sk.builtin.nmber) {
+		if (n.skType === Sk.builtin.nmber.float$ || n.v < 0) {
+			var thisAsFloat = new Sk.builtin.nmber(this.str$(10, true), Sk.builtin.nmber.float$);
+			return thisAsFloat.nb$power(n);
+		} else {
+			//	Promote an int to long
+			n = new Sk.builtin.lng(n.v);
+		}
+	}
+
+	if (n instanceof Sk.builtin.lng) {
+		if (n.nb$isnegative()) {
+			var thisAsFloat = new Sk.builtin.nmber(this.str$(10, true), Sk.builtin.nmber.float$);
+			return thisAsFloat.nb$power(n);
+		} else
+			return new Sk.builtin.lng(this.biginteger.pow(n.biginteger));
+	}
+
+	if (n instanceof Sk.builtin.biginteger) {
+		if (n.isnegative()) {
+			var thisAsFloat = new Sk.builtin.nmber(this.str$(10, true), Sk.builtin.nmber.float$);
+			return thisAsFloat.nb$power(n);
+		}
+		return new Sk.builtin.lng(this.biginteger.pow(n));
+	}
+
+	return new Sk.builtin.lng(this.biginteger.pow(new Sk.builtin.biginteger(n)));
+};
+
 Sk.builtin.lng.prototype.nb$inplace_power = Sk.builtin.lng.prototype.nb$power;
 
-Sk.builtin.lng.prototype.nu$neg = function() { return new Sk.builtin.lng(this.biginteger.negate()); };
+Sk.builtin.lng.prototype.nb$lshift = function(other)
+{
+    if (other instanceof Sk.builtin.lng) {
+	if (other.biginteger.signum() < 0) {
+	    throw new Sk.builtin.ValueError("negative shift count");
+	}
+	return new Sk.builtin.lng(this.biginteger.shiftLeft(other.biginteger));
+    }
+    if (other instanceof Sk.builtin.biginteger) {
+	if (other.signum() < 0) {
+	    throw new Sk.builtin.ValueError("negative shift count");
+	}
+	return new Sk.builtin.lng(this.biginteger.shiftLeft(other));
+    }
+    
+    if (other < 0) {
+	throw new Sk.builtin.ValueError("negative shift count");
+    }
+    other = Sk.builtin.asnum$(other);
+    return new Sk.builtin.lng(this.biginteger.shiftLeft(new Sk.builtin.biginteger(other)));
+}
 
-Sk.builtin.lng.prototype.nu$pos = function() { return this.clone(); };
+Sk.builtin.lng.prototype.nb$inplace_lshift = Sk.builtin.lng.prototype.nb$lshift;
 
-Sk.builtin.lng.prototype.nb$nonzero = function() { return this.biginteger.trueCompare(Sk.builtin.biginteger.ZERO) !== 0; };
+Sk.builtin.lng.prototype.nb$rshift = function(other)
+{
+    if (other instanceof Sk.builtin.lng) {
+	if (other.biginteger.signum() < 0) {
+	    throw new Sk.builtin.ValueError("negative shift count");
+	}
+	return new Sk.builtin.lng(this.biginteger.shiftRight(other.biginteger));
+    }
+    if (other instanceof Sk.builtin.biginteger) {
+	if (other.signum() < 0) {
+	    throw new Sk.builtin.ValueError("negative shift count");
+	}
+	return new Sk.builtin.lng(this.biginteger.shiftRight(other));
+    }
+    
+    if (other < 0) {
+	throw new Sk.builtin.ValueError("negative shift count");
+    }
+    other = Sk.builtin.asnum$(other);
+    return new Sk.builtin.lng(this.biginteger.shiftRight(new Sk.builtin.biginteger(other)));
+}
 
-Sk.builtin.lng.prototype.nb$isnegative = function() {
-  return this.biginteger.isnegative();
-  //return this.biginteger.trueCompare(Sk.builtin.biginteger.ZERO) < 0;
+Sk.builtin.lng.prototype.nb$inplace_rshift = Sk.builtin.lng.prototype.nb$rshift;
+
+Sk.builtin.lng.prototype.nb$and = function(other)
+{
+    if (other instanceof Sk.builtin.lng) {
+	return new Sk.builtin.lng(this.biginteger.and(other.biginteger));
+    }
+    if (other instanceof Sk.builtin.biginteger) {
+	return new Sk.builtin.lng(this.biginteger.and(other));
+    }
+    
+    other = Sk.builtin.asnum$(other);
+    return new Sk.builtin.lng(this.biginteger.and(new Sk.builtin.biginteger(other)));
+}
+
+Sk.builtin.lng.prototype.nb$inplace_and = Sk.builtin.lng.prototype.nb$and;
+
+Sk.builtin.lng.prototype.nb$or = function(other)
+{
+    if (other instanceof Sk.builtin.lng) {
+	return new Sk.builtin.lng(this.biginteger.or(other.biginteger));
+    }
+    if (other instanceof Sk.builtin.biginteger) {
+	return new Sk.builtin.lng(this.biginteger.or(other));
+    }
+    
+    other = Sk.builtin.asnum$(other);
+    return new Sk.builtin.lng(this.biginteger.or(new Sk.builtin.biginteger(other)));
+}
+
+Sk.builtin.lng.prototype.nb$inplace_or = Sk.builtin.lng.prototype.nb$or;
+
+Sk.builtin.lng.prototype.nb$xor = function(other)
+{
+    if (other instanceof Sk.builtin.lng) {
+	return new Sk.builtin.lng(this.biginteger.xor(other.biginteger));
+    }
+    if (other instanceof Sk.builtin.biginteger) {
+	return new Sk.builtin.lng(this.biginteger.xor(other));
+    }
+    
+    other = Sk.builtin.asnum$(other);
+    return new Sk.builtin.lng(this.biginteger.xor(new Sk.builtin.biginteger(other)));
+}
+
+Sk.builtin.lng.prototype.nb$inplace_xor = Sk.builtin.lng.prototype.nb$xor;
+
+Sk.builtin.lng.prototype.nb$negative = function()
+{
+	return new Sk.builtin.lng(this.biginteger.negate());
 };
 
-Sk.builtin.lng.prototype.nb$ispositive = function() {
-  return ! this.biginteger.isnegative();
-  //return this.biginteger.trueCompare(Sk.builtin.biginteger.ZERO) >= 0;
+Sk.builtin.lng.prototype.nb$positive = function() { return this.clone(); };
+
+Sk.builtin.lng.prototype.nb$nonzero = function()
+{
+	return this.biginteger.trueCompare(Sk.builtin.biginteger.ZERO) !== 0;
 };
 
-Sk.builtin.lng.prototype.nu$inv = function() { return this.clone(); };
+Sk.builtin.lng.prototype.nb$isnegative = function()
+{
+	return this.biginteger.isnegative();
+	//return this.biginteger.trueCompare(Sk.builtin.biginteger.ZERO) < 0;
+};
+
+Sk.builtin.lng.prototype.nb$ispositive = function()
+{
+	return ! this.biginteger.isnegative();
+	//return this.biginteger.trueCompare(Sk.builtin.biginteger.ZERO) >= 0;
+};
+
+Sk.builtin.lng.prototype.nb$invert = function() { throw new Sk.builtin.AssertionError(); };
 
 Sk.builtin.lng.prototype.longCompare = function(other)
 {
-  if (typeof other === "boolean")
-    if (other)
-      other = 1;
-    else
-      other = 0;
+	if (typeof other === "boolean")
+		if (other)
+			other = 1;
+		else
+			other = 0;
 
-  var tmp;
+	var tmp;
 
-  if (typeof other === "number") {
-    other = new Sk.builtin.lng(other);
-  }
+	if (typeof other === "number") {
+		other = new Sk.builtin.lng(other);
+	}
 
-  if (other instanceof Sk.builtin.nmber) {
-    if (other.skType === Sk.builtin.nmber.int$ || other.v % 1 == 0) {
-      var otherAsLong = new Sk.builtin.lng(other.v);
-      return this.longCompare(otherAsLong);
-    } else {
-      var thisAsFloat = new Sk.builtin.nmber(this, Sk.builtin.nmber.float$);
-      return thisAsFloat.numberCompare(other);
-    }
-  }
+	if (other instanceof Sk.builtin.nmber) {
+		if (other.skType === Sk.builtin.nmber.int$ || other.v % 1 == 0) {
+			var otherAsLong = new Sk.builtin.lng(other.v);
+			return this.longCompare(otherAsLong);
+		} else {
+			var thisAsFloat = new Sk.builtin.nmber(this, Sk.builtin.nmber.float$);
+			return thisAsFloat.numberCompare(other);
+		}
+	}
 
-  else if (other instanceof Sk.builtin.lng) {
-//    tmp = this.biginteger.trueCompare(other.biginteger);
-    tmp = this.biginteger.subtract(other.biginteger);
-  }
+	else if (other instanceof Sk.builtin.lng) {
+//		tmp = this.biginteger.trueCompare(other.biginteger);
+		tmp = this.biginteger.subtract(other.biginteger);
+	}
 
-  else if (other instanceof Sk.builtin.biginteger) {
-//    tmp = this.biginteger.trueCompare(other);
-    tmp = this.biginteger.subtract(other);
-  }
+	else if (other instanceof Sk.builtin.biginteger) {
+//		tmp = this.biginteger.trueCompare(other);
+		tmp = this.biginteger.subtract(other);
+	}
 
-  else {
-//    tmp = this.biginteger.trueCompare(new Sk.builtin.biginteger(other));
-    tmp = this.biginteger.subtract(new Sk.builtin.biginteger(other));
-  }
+	else {
+//		tmp = this.biginteger.trueCompare(new Sk.builtin.biginteger(other));
+		tmp = this.biginteger.subtract(new Sk.builtin.biginteger(other));
+	}
 
-  return Sk.builtin.asnum$(tmp);
+	return tmp;
 }
 
 Sk.builtin.lng.prototype.__eq__ = function(me, other) {
-  return me.longCompare(other) == 0;
+	return me.longCompare(other) == 0;
 };
 
 Sk.builtin.lng.prototype.__ne__ = function(me, other) {
-  return me.longCompare(other) != 0;
+	return me.longCompare(other) != 0;
 };
 
 Sk.builtin.lng.prototype.__lt__ = function(me, other) {
-  return me.longCompare(other) < 0;
+	return me.longCompare(other) < 0;
 };
 
 Sk.builtin.lng.prototype.__le__ = function(me, other) {
-  return me.longCompare(other) <= 0;
+	return me.longCompare(other) <= 0;
 };
 
 Sk.builtin.lng.prototype.__gt__ = function(me, other) {
-  return me.longCompare(other) > 0;
+	return me.longCompare(other) > 0;
 };
 
 Sk.builtin.lng.prototype.__ge__ = function(me, other) {
-  return me.longCompare(other) >= 0;
+	return me.longCompare(other) >= 0;
 };
 
 Sk.builtin.lng.prototype['$r'] = function()
@@ -9696,85 +11371,222 @@ Sk.builtin.lng.prototype.tp$str = function()
 
 Sk.builtin.lng.prototype.str$ = function(base, sign)
 {
-  if (sign === undefined) sign = true;
+	if (sign === undefined) sign = true;
 
-  var work = sign ? this.biginteger : this.biginteger.abs();
+	var work = sign ? this.biginteger : this.biginteger.abs();
 
-  if (base === undefined || base === 10) {
-    return work.toString();
-  }
+	if (base === undefined || base === 10) {
+		return work.toString();
+	}
 
-  //  Another base... convert...
-  return work.toString(base);
+	//	Another base... convert...
+	return work.toString(base);
 };
-Sk.builtin.int_ = function(x, base) {
+Sk.builtin.bool = function(x)
+{
+    Sk.builtin.pyCheckArgs("bool", arguments, 1);
+    return Sk.misceval.isTrue(x);    
+}
 
-  if (x instanceof Sk.builtin.str) {
-    base = Sk.builtin.asnum$(base);
-    if (base === undefined) base = 10; // default radix is 10.
-    if (x.v.substring(0,2).toLowerCase() === '0x' && base !== 16 && base !== 0) {
-      throw new Sk.builtin.ValueError("int: Argument: " + x.v + " is not a valid literal");
-    }
-    if (x.v.substring(0,2).toLowerCase() === '0b') {
-      if (base !== 2 && base !== 0) {
-        throw new Sk.builtin.ValueError("int: Argument: " + x.v + " is not a valid literal");
-      }
-      else {
-        x.v = x.v.substring(2);
-        base = 2;
-      }
+Sk.builtin.bool.prototype.tp$name = "bool";
+Sk.builtin.bool.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('bool', Sk.builtin.bool);
+// Takes a JavaScript string and returns a number using the
+// parser and negater functions (for int/long right now)
+//
+// parser should take a string that is a postive number which only
+// contains characters that are valid in the given base and a base and
+// return a number
+//
+// negater should take a number and return its negation
+//
+// fname is a string containing the function name to be used in error
+// messages
+Sk.str2number = function(s, base, parser, negater, fname)
+{
+    var origs = s;
+    var neg = false;
+
+    // strip whitespace from ends
+    // s = s.trim();
+    s = s.replace(/^\s+|\s+$/g, '');
+
+    // check for minus sign
+    if (s.charAt(0) == '-') {
+	neg = true;
+	s = s.substring(1);
     }
 
-    if (!isNaN(x.v) && x.v.indexOf(".") < 0) {
-      return new Sk.builtin.nmber(parseInt(x.v, base), Sk.builtin.nmber.int$);
+    // check for plus sign
+    if (s.charAt(0) == '+') {
+	s = s.substring(1);
     }
-    else {
-      throw new Sk.builtin.ValueError("int: Argument: " + x.v + " is not a valid literal");
-    }
-  }
 
-  if (x instanceof Sk.builtin.lng) {
-    if (x.cantBeInt()) {
-      return new Sk.builtin.lng(x);
-    }
-    else {
-      return new Sk.builtin.nmber(x.str$(10, true), Sk.builtin.nmber.int$);
-    }
-  }
+    if (base === undefined) base = 10; // default radix is 10, not dwim
 
-  x = Sk.builtin.asnum$(x);
-  if (x % 1 !== 0) {
-    if (x < 0) {
-      x = -Math.floor(-x);
+    if (base < 2 || base > 36) {
+	if (base != 0) {
+	    throw new Sk.builtin.ValueError(fname + "() base must be >= 2 and <= 36");
+	}
     }
-    else {
-      x = Math.floor(x);
+
+    if ( s.substring(0,2).toLowerCase() == '0x' ) {
+	if (base != 16 && base != 0) {
+	    throw new Sk.builtin.ValueError("invalid literal for " + fname + "() with base " + base + ": '" + origs + "'");
+	} else {
+	    s = s.substring(2);
+	    base = 16;
+	}
     }
-  }
-  return new Sk.builtin.nmber(x, Sk.builtin.nmber.int$);
+    else if ( s.substring(0,2).toLowerCase() == '0b' ) { 
+	if (base != 2 && base != 0) {
+	    throw new Sk.builtin.ValueError("invalid literal for " + fname + "() with base " + base + ": '" + origs + "'");
+	} else {
+	    s = s.substring(2);
+	    base = 2;
+	}
+    }
+    else if ( s.substring(0,2).toLowerCase() == '0o' ) {
+	if (base != 8 && base != 0) {
+	    throw new Sk.builtin.ValueError("invalid literal for " + fname + "() with base " + base + ": '" + origs + "'");
+	} else {
+	    s = s.substring(2);
+	    base = 8;
+	}
+    }
+    else if ( s.charAt(0) == '0' ) {
+	if (s == '0') return 0;
+	if (base == 8 || base == 0) {
+	    base = 8;
+	}
+    }
+
+    if (base == 0) base = 10;
+
+    if (s.length === 0) {
+	throw new Sk.builtin.ValueError("invalid literal for " + fname + "() with base " + base + ": '" + origs + "'");
+    }
+
+    // check all characters are valid
+    var i, ch, val;
+    for (i=0; i<s.length; i++) {
+	ch = s.charCodeAt(i);
+	val = base;
+	if ((ch >= 48) && (ch <= 57)) {
+	    // 0-9
+	    val = ch - 48;
+        }
+	else if ((ch >= 65) && (ch <= 90)) {
+	    // A-Z
+	    val = ch - 65 + 10;
+        }
+        else if ((ch >= 97) && (ch <= 122)) {
+	    // a-z
+	    val = ch - 97 + 10;
+	}
+
+	if (val >= base) {
+	    throw new Sk.builtin.ValueError("invalid literal for " + fname + "() with base " + base + ": '" + origs + "'");
+	}
+    }
+
+    // parse number
+    val = parser(s, base);
+    if (neg) {
+	val = negater(val);
+    }
+    return val;
+}
+
+Sk.builtin.int_ = function(x, base)
+{
+    if (x instanceof Sk.builtin.str)
+    {
+		base = Sk.builtin.asnum$(base);
+        var val = Sk.str2number(x.v, base, parseInt, 
+                                function(x){return -x;}, "int");
+        if ((val > Sk.builtin.lng.threshold$) 
+            || (val < -Sk.builtin.lng.threshold$)) 
+        {
+            // Too big for int, convert to long
+            return new Sk.builtin.lng(x, base);
+
+        }
+
+        return new Sk.builtin.nmber(val, Sk.builtin.nmber.int$);
+    }
+
+    if (base !== undefined) {
+	throw new Sk.builtin.TypeError("int() can't convert non-string with explicit base");
+    }
+
+    if (x instanceof Sk.builtin.lng)
+    {
+	if (x.cantBeInt())
+	    return new Sk.builtin.lng(x);
+	else
+	    return new Sk.builtin.nmber(x.toInt$(), Sk.builtin.nmber.int$);
+    }
+
+    // sneaky way to do truncate, floor doesn't work < 0, round doesn't work on the .5> side
+    // bitwise ops convert to 32bit int in the "C-truncate-way" we want.
+    x = Sk.builtin.asnum$(x);
+    return new Sk.builtin.nmber(x | 0, Sk.builtin.nmber.int$);
 };
 
 Sk.builtin.int_.prototype.tp$name = "int";
 Sk.builtin.int_.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('int', Sk.builtin.int_);
-Sk.builtin.float_ = function(x) {
-  function toNumberJS(x) {
-    if (x instanceof Sk.builtin.str) {
-      if (x.v === "inf") return Infinity;
-      else if (x.v === "-inf") return -Infinity;
-      else if (!isNaN(x.v)) return parseFloat(x.v);
-      else {
-        throw new Sk.builtin.ValueError("float: Argument: " + x.v + " is not number");
-      }
+Sk.builtin.float_ = function(x)
+{
+    if (x === undefined)
+    {
+        return new Sk.builtin.nmber(0.0, Sk.builtin.nmber.float$);
     }
-    else {
-      return Sk.builtin.asnum$(x);
+
+    if (x instanceof Sk.builtin.str)
+    {
+		var tmp;
+
+	if (x.v.match(/^-inf$/i)) {
+	    tmp = -Infinity;
+	}
+	else if (x.v.match(/^[+]?inf$/i)) {
+	    tmp = Infinity;
+	}
+	else if (x.v.match(/^[-+]?nan$/i)) {
+	    tmp = NaN;
+	}
+
+        else if (!isNaN(x.v))
+            tmp = parseFloat(x.v);
+        else {
+            throw new Sk.builtin.ValueError("float: Argument: " + x.v + " is not number");
+        }
+		return new Sk.builtin.nmber(tmp, Sk.builtin.nmber.float$);
     }
-  }
-  return new Sk.builtin.nmber(toNumberJS(x), Sk.builtin.nmber.float$);
+
+    // Floats are just numbers
+    if (typeof x === "number" || x instanceof Sk.builtin.nmber
+	|| x instanceof Sk.builtin.lng)
+    {
+	x = Sk.builtin.asnum$(x);
+        return new Sk.builtin.nmber(x, Sk.builtin.nmber.float$);
+    }
+
+    // Convert booleans
+    if (x === true) 
+    {
+        return new Sk.builtin.nmber(1.0, Sk.builtin.nmber.float$);
+    }
+    if (x === false)
+    {
+        return new Sk.builtin.nmber(0.0, Sk.builtin.nmber.float$);
+    }
+
+    throw new Sk.builtin.TypeError("float() argument must be a string or a number");
 };
 
 Sk.builtin.float_.prototype.tp$name = "float";
-Sk.builtin.float_.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj("float", Sk.builtin.float_);
+Sk.builtin.float_.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('float', Sk.builtin.float_);
 /**
  * @constructor
  * @param {number} start
@@ -9799,6 +11611,13 @@ Sk.builtin.slice = function slice(start, stop, step)
     this.start = start;
     this.stop = stop;
     this.step = step;
+    
+    if (((this.start !== null) && !Sk.builtin.checkInt(this.start))
+        || ((this.stop !== null) && !Sk.builtin.checkInt(this.stop))
+        || ((this.step !== null) && !Sk.builtin.checkInt(this.step))) {
+        throw new Sk.builtin.TypeError("slice indices must be integers or None");
+    }
+
     return this;
 };
 
@@ -9820,15 +11639,32 @@ Sk.builtin.slice.prototype.indices = function(length)
     {
         if (start === null) start = 0;
         if (stop === null) stop = length;
-        if (start < 0) start = length + start;
+        if (stop > length) {
+            stop = length;
+        }
+        if (start < 0) {
+            start = length + start;
+            if (start < 0) {
+                start = 0;
+            }
+        }
         if (stop < 0) stop = length + stop;
     }
     else
     {
         if (start === null) start = length - 1;
-        else if (start < 0) start = length + start;
-        if (stop === null) stop = -1;
-        else if (stop < 0) stop = length + stop;
+        if (start >= length) {
+            start = length - 1;
+        }
+        if (stop === null) {
+            stop = -1;
+        } else if (stop < 0) {
+            stop = length + stop;
+            if (stop < 0) {
+                stop = -1;
+            }
+        }
+        if (start < 0) start = length + start;
     }
     return [start, stop, step];
 };
@@ -9866,7 +11702,7 @@ Sk.builtin.set = function(S)
     this.set_reset_();
     S = new Sk.builtin.list(S);
     // python sorts sets on init, but not thereafter.
-    // DaVinci seems to init a new set each time you add/remove something
+    // Skulpt seems to init a new set each time you add/remove something
     //Sk.builtin.list.prototype['sort'].func_code(S);
     for (var it = S.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext())
     {
@@ -9913,6 +11749,17 @@ Sk.builtin.set.prototype.tp$richcompare = function(w, op)
 
     if (this === w && Sk.misceval.opAllowsEquality(op))
         return true;
+
+    // w not a set
+    if (!w.__class__ || w.__class__ != Sk.builtin.set)
+    {
+        // shortcuts for eq/not
+        if (op === 'Eq') return false;
+        if (op === 'NotEq') return true;
+
+        // todo; other types should have an arbitrary order
+        return false;
+    }
 
     var vl = this.sq$length();
     var wl = w.sq$length();
@@ -10107,7 +11954,7 @@ Sk.builtin.set.prototype['add'] = new Sk.builtin.func(function(self, item)
 
 Sk.builtin.set.prototype['discard'] = new Sk.builtin.func(function(self, item)
 {
-    if (self.v.mp$subscript(item) !== undefined)
+    if (self.v.mp$lookup(item) !== undefined)
     {
         var kf = Sk.builtin.hash;
         var k = kf(item);
@@ -10134,14 +11981,7 @@ Sk.builtin.set.prototype['pop'] = new Sk.builtin.func(function(self)
 
 Sk.builtin.set.prototype['remove'] = new Sk.builtin.func(function(self, item)
 {
-    if (Sk.abstr.sequenceContains(self, item))
-    {
-        Sk.builtin.set.prototype['discard'].func_code(self, item);
-    }
-    else
-    {
-        throw new Sk.builtin.KeyError(item);
-    }
+    self.v.mp$del_subscript(item);
     return null;
 });
 
@@ -10398,39 +12238,37 @@ goog.exportSymbol("Sk.builtin.file", Sk.builtin.file);
 Sk.ffi = Sk.ffi || {};
 
 /**
- * maps from Javascript Object/Array/string/number/boolean to Python dict/list/str/Float/Boolean.
+ * maps from Javascript Object/Array/string to Python dict/list/str.
  *
  * only works on basic objects that are being used as storage, doesn't handle
  * functions, etc.
  */
-Sk.ffi.remapToPy = function(obj) {
-  if (Object.prototype.toString.call(obj) === "[object Array]") {
-    var arr = [];
-    for (var i = 0; i < obj.length; ++i) {
-      arr.push(Sk.ffi.remapToPy(obj[i]));
+Sk.ffi.remapToPy = function(obj)
+{
+    if (Object.prototype.toString.call(obj) === "[object Array]")
+    {
+        var arr = [];
+        for (var i = 0; i < obj.length; ++i)
+            arr.push(Sk.ffi.remapToPy(obj[i]));
+        return new Sk.builtin.list(arr);
     }
-    return new Sk.builtin.list(arr);
-  }
-  else if (typeof obj === "object") {
-    var kvs = [];
-    for (var k in obj) {
-      kvs.push(Sk.ffi.remapToPy(k));
-      kvs.push(Sk.ffi.remapToPy(obj[k]));
+    else if (typeof obj === "object")
+    {
+        var kvs = [];
+        for (var k in obj)
+        {
+            kvs.push(Sk.ffi.remapToPy(k));
+            kvs.push(Sk.ffi.remapToPy(obj[k]));
+        }
+        return new Sk.builtin.dict(kvs);
     }
-    return new Sk.builtin.dict(kvs);
-  }
-  else if (typeof obj === "string") {
-    return new Sk.builtin.str(obj);
-  }
-  else if (typeof obj === "number") {
-    return new Sk.builtin.nmber(obj, undefined);
-  }
-  else if (typeof obj === "boolean") {
-    return obj;
-  }
-  else {
+    else if (typeof obj === "string")
+        return new Sk.builtin.str(obj);
+    else if (typeof obj === "number")
+		return new Sk.builtin.nmber(obj, undefined);
+	else if (typeof obj === "boolean")
+        return obj;
     goog.asserts.fail("unhandled remap type " + typeof(obj));
-  }
 };
 goog.exportSymbol("Sk.ffi.remapToPy", Sk.ffi.remapToPy);
 
@@ -10450,63 +12288,62 @@ Sk.ffi.referenceToPy = function(obj) {
 goog.exportSymbol("Sk.ffi.referenceToPy", Sk.ffi.referenceToPy);
 
 /**
- * maps from Python to Javascript.
- *
- * This should be applied to every argument in libraries written in JavaScript.
+ * maps from Python dict/list/str to Javascript Object/Array/string.
  */
-Sk.ffi.remapToJs = function(obj) {
-  if (typeof obj === "undefined") {
-    return obj;
-  }
-  else if (obj instanceof Sk.builtin.dict) {
-    var ret = {};
-    for (var iter = obj.tp$iter(), k = iter.tp$iternext(); k !== undefined; k = iter.tp$iternext()) {
-      var v = obj.mp$subscript(k);
-      if (v === undefined) {
-        v = null;
-      }
-      var kAsJs = Sk.ffi.remapToJs(k);
-      ret[kAsJs] = Sk.ffi.remapToJs(v);
+Sk.ffi.remapToJs = function(obj)
+{
+    if (obj instanceof Sk.builtin.dict)
+    {
+        var ret = {};
+        for (var iter = obj.tp$iter(), k = iter.tp$iternext();
+                k !== undefined;
+                k = iter.tp$iternext())
+        {
+            var v = obj.mp$subscript(k);
+            if (v === undefined)
+                v = null;
+            var kAsJs = Sk.ffi.remapToJs(k);
+            // todo; assert that this is a reasonble lhs?
+            ret[kAsJs] = Sk.ffi.remapToJs(v);
+        }
+        return ret;
     }
-    return ret;
-  }
-  else if (obj instanceof Sk.builtin.list) {
-    var ret = [];
-    for (var i = 0; i < obj.v.length; ++i) {
-      ret.push(Sk.ffi.remapToJs(obj.v[i]));
+    else if (obj instanceof Sk.builtin.list)
+    {
+        var ret = [];
+        for (var i = 0; i < obj.v.length; ++i)
+            ret.push(Sk.ffi.remapToJs(obj.v[i]));
+        return ret;
     }
-    return ret;
-  }
-  else if (obj instanceof Sk.builtin.nmber) {
-    return Sk.builtin.asnum$(obj);
-  }
-  else if (obj instanceof Sk.builtin.lng) {
-    return Sk.builtin.asnum$(obj);
-  }
-  else if (typeof obj === "number" || typeof obj === "boolean") {
-    return obj;
-  }
-  else {
-    // The assumption is that all custom types are placed on the "v" property of the self object.
-    return obj.v;
-  }
+	else if (obj instanceof Sk.builtin.nmber)
+	{
+		return Sk.builtin.asnum$(obj);
+	}
+	else if (obj instanceof Sk.builtin.lng)
+	{
+		return Sk.builtin.asnum$(obj);
+	}
+    else if (typeof obj === "number" || typeof obj === "boolean")
+        return obj;
+    else
+        return obj.v;
 };
 goog.exportSymbol("Sk.ffi.remapToJs", Sk.ffi.remapToJs);
 
 Sk.ffi.callback = function(fn)
 {
-  if (fn === undefined) return fn;
-  return function() {
-    return Sk.misceval.apply(fn, undefined, undefined, undefined, Array.prototype.slice.call(arguments, 0));
-  };
+    if (fn === undefined) return fn;
+    return function() {
+        return Sk.misceval.apply(fn, undefined, undefined, undefined, Array.prototype.slice.call(arguments, 0));
+    };
 };
 goog.exportSymbol("Sk.ffi.callback", Sk.ffi.callback);
 
 Sk.ffi.stdwrap = function(type, towrap)
 {
-  var inst = new type();
-  inst['v'] = towrap;
-  return inst;
+    var inst = new type();
+    inst['v'] = towrap;
+    return inst;
 };
 goog.exportSymbol("Sk.ffi.stdwrap", Sk.ffi.stdwrap);
 
@@ -10514,30 +12351,88 @@ goog.exportSymbol("Sk.ffi.stdwrap", Sk.ffi.stdwrap);
  * for when the return type might be one of a variety of basic types.
  * number|string, etc.
  */
-Sk.ffi.basicwrap = function(obj) {
-  if (obj instanceof Sk.builtin.nmber)
-    return Sk.builtin.asnum$(obj);
-  if (obj instanceof Sk.builtin.lng)
-    return Sk.builtin.asnum$(obj);
-  if (typeof obj === "number" || typeof obj === "boolean")
-    return obj;
-  if (typeof obj === "string")
-    return new Sk.builtin.str(obj);
-  goog.asserts.fail("unexpected type for basicwrap");
+Sk.ffi.basicwrap = function(obj)
+{
+	if (obj instanceof Sk.builtin.nmber)
+		return Sk.builtin.asnum$(obj);
+	if (obj instanceof Sk.builtin.lng)
+		return Sk.builtin.asnum$(obj);
+    if (typeof obj === "number" || typeof obj === "boolean")
+        return obj;
+    if (typeof obj === "string")
+        return new Sk.builtin.str(obj);
+    goog.asserts.fail("unexpected type for basicwrap");
 };
 goog.exportSymbol("Sk.ffi.basicwrap", Sk.ffi.basicwrap);
 
-Sk.ffi.unwrapo = function(obj) {
-  if (obj === undefined) return undefined;
-  return obj['v'];
+Sk.ffi.unwrapo = function(obj)
+{
+    if (obj === undefined) return undefined;
+    return obj['v'];
 };
 goog.exportSymbol("Sk.ffi.unwrapo", Sk.ffi.unwrapo);
 
-Sk.ffi.unwrapn = function(obj) {
-  if (obj === null) return null;
-  return obj['v'];
+Sk.ffi.unwrapn = function(obj)
+{
+    if (obj === null) return null;
+    return obj['v'];
 };
 goog.exportSymbol("Sk.ffi.unwrapn", Sk.ffi.unwrapn);
+/**
+ * @constructor
+ * @param {Object} iterable
+ * @param {number=} start
+ * @extends Sk.builtin.object
+ */
+Sk.builtin.enumerate = function(iterable, start)
+{
+    if (!(this instanceof Sk.builtin.enumerate)) return new Sk.builtin.enumerate(iterable, start);
+
+    Sk.builtin.pyCheckArgs("enumerate", arguments, 1, 2);
+    if (!Sk.builtin.checkIterable(iterable)) {
+        throw new Sk.builtin.TypeError("'" + Sk.abstr.typeName(iterable) + "' object is not iterable");
+    }
+    if (start !== undefined) {
+        if (!Sk.misceval.isIndex(start)) {
+            throw new Sk.builtin.TypeError("'" + Sk.abstr.typeName(start) + "' object cannot be interpreted as an index");
+        } else {
+	    start = Sk.misceval.asIndex(start);
+	}
+    }
+    else {
+	start = 0;
+    }
+
+    var it = iterable.tp$iter();
+
+    this.tp$iter = function() { return this; };
+    this.$index = start;
+    this.tp$iternext = function () {
+        // todo; StopIteration
+        var next = it.tp$iternext();
+        if (next === undefined) return undefined;
+        return new Sk.builtin.tuple([this.$index++, next]);
+    };
+
+    this.__class__ = Sk.builtin.enumerate;
+
+    return this;
+}
+
+Sk.builtin.enumerate.prototype.tp$name = "enumerate";
+Sk.builtin.enumerate.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('enumerate', Sk.builtin.enumerate);
+
+Sk.builtin.enumerate.prototype.tp$getattr = Sk.builtin.object.prototype.GenericGetAttr;
+
+Sk.builtin.enumerate.prototype['__iter__'] = new Sk.builtin.func(function(self)
+{
+    return self.tp$iter();
+});								 
+
+Sk.builtin.enumerate.prototype['next'] = new Sk.builtin.func(function(self)
+{
+    return self.tp$iternext();
+});								 
 /*
  * This is a port of tokenize.py by Ka-Ping Yee.
  *
@@ -10712,7 +12607,8 @@ var ContStr = group("[uUbB]?[rR]?'[^\\n'\\\\]*(?:\\\\.[^\\n'\\\\]*)*" +
                 '[uUbB]?[rR]?"[^\\n"\\\\]*(?:\\\\.[^\\n"\\\\]*)*' +
                 group('"', '\\\\\\r?\\n'));
 var PseudoExtras = group('\\\\\\r?\\n', Comment_, Triple);
-var PseudoToken = group(PseudoExtras, Number_, Funny, ContStr, Ident);
+// Need to prefix with "^" as we only want to match what's next
+var PseudoToken = "^" + group(PseudoExtras, Number_, Funny, ContStr, Ident);
 
 var pseudoprog;
 var single3prog;
@@ -10821,6 +12717,7 @@ Sk.Tokenizer.prototype.generateTokens = function(line)
         {
             throw new Sk.builtin.TokenError("EOF in multi-line string", this.filename, this.strstart[0], this.strstart[1], this.contline);
         }
+        this.endprog.lastIndex = 0;
         endmatch = this.endprog.test(line);
         if (endmatch)
         {
@@ -10927,6 +12824,7 @@ Sk.Tokenizer.prototype.generateTokens = function(line)
             pos += 1;
             capos = line.charAt(pos);
         }
+        pseudoprog.lastIndex = 0;
         var pseudomatch = pseudoprog.exec(line.substring(pos));
         if (pseudomatch)
         {
@@ -10956,6 +12854,7 @@ Sk.Tokenizer.prototype.generateTokens = function(line)
             else if (triple_quoted.hasOwnProperty(token))
             {
                 this.endprog = endprogs[token];
+                this.endprog.lastIndex = 0;
                 endmatch = this.endprog.test(line.substring(pos));
                 if (endmatch)
                 {
@@ -11116,67 +13015,65 @@ sym:
  eval_input: 280,
  except_clause: 281,
  exec_stmt: 282,
- exit_stmt: 283,
- expr: 284,
- expr_stmt: 285,
- exprlist: 286,
- factor: 287,
- file_input: 288,
- flow_stmt: 289,
- for_stmt: 290,
- fpdef: 291,
- fplist: 292,
- funcdef: 293,
- gen_for: 294,
- gen_if: 295,
- gen_iter: 296,
- global_stmt: 297,
- if_stmt: 298,
- import_as_name: 299,
- import_as_names: 300,
- import_from: 301,
- import_name: 302,
- import_stmt: 303,
- lambdef: 304,
- list_for: 305,
- list_if: 306,
- list_iter: 307,
- listmaker: 308,
- not_test: 309,
- old_lambdef: 310,
- old_test: 311,
- or_test: 312,
- parameters: 313,
- pass_stmt: 314,
- power: 315,
- print_stmt: 316,
- quit_stmt: 317,
- raise_stmt: 318,
- return_stmt: 319,
- shift_expr: 320,
- simple_stmt: 321,
+ expr: 283,
+ expr_stmt: 284,
+ exprlist: 285,
+ factor: 286,
+ file_input: 287,
+ flow_stmt: 288,
+ for_stmt: 289,
+ fpdef: 290,
+ fplist: 291,
+ funcdef: 292,
+ gen_for: 293,
+ gen_if: 294,
+ gen_iter: 295,
+ global_stmt: 296,
+ if_stmt: 297,
+ import_as_name: 298,
+ import_as_names: 299,
+ import_from: 300,
+ import_name: 301,
+ import_stmt: 302,
+ lambdef: 303,
+ list_for: 304,
+ list_if: 305,
+ list_iter: 306,
+ listmaker: 307,
+ not_test: 308,
+ old_lambdef: 309,
+ old_test: 310,
+ or_test: 311,
+ parameters: 312,
+ pass_stmt: 313,
+ power: 314,
+ print_stmt: 315,
+ raise_stmt: 316,
+ return_stmt: 317,
+ shift_expr: 318,
+ simple_stmt: 319,
  single_input: 256,
- sliceop: 322,
- small_stmt: 323,
- stmt: 324,
- subscript: 325,
- subscriptlist: 326,
- suite: 327,
- term: 328,
- test: 329,
- testlist: 330,
- testlist1: 331,
- testlist_gexp: 332,
- testlist_safe: 333,
- trailer: 334,
- try_stmt: 335,
- varargslist: 336,
- while_stmt: 337,
- with_stmt: 338,
- with_var: 339,
- xor_expr: 340,
- yield_expr: 341,
- yield_stmt: 342},
+ sliceop: 320,
+ small_stmt: 321,
+ stmt: 322,
+ subscript: 323,
+ subscriptlist: 324,
+ suite: 325,
+ term: 326,
+ test: 327,
+ testlist: 328,
+ testlist1: 329,
+ testlist_gexp: 330,
+ testlist_safe: 331,
+ trailer: 332,
+ try_stmt: 333,
+ varargslist: 334,
+ while_stmt: 335,
+ with_stmt: 336,
+ with_var: 337,
+ xor_expr: 338,
+ yield_expr: 339,
+ yield_stmt: 340},
 number2symbol:
 {256: 'single_input',
  257: 'and_expr',
@@ -11205,66 +13102,64 @@ number2symbol:
  280: 'eval_input',
  281: 'except_clause',
  282: 'exec_stmt',
- 283: 'exit_stmt',
- 284: 'expr',
- 285: 'expr_stmt',
- 286: 'exprlist',
- 287: 'factor',
- 288: 'file_input',
- 289: 'flow_stmt',
- 290: 'for_stmt',
- 291: 'fpdef',
- 292: 'fplist',
- 293: 'funcdef',
- 294: 'gen_for',
- 295: 'gen_if',
- 296: 'gen_iter',
- 297: 'global_stmt',
- 298: 'if_stmt',
- 299: 'import_as_name',
- 300: 'import_as_names',
- 301: 'import_from',
- 302: 'import_name',
- 303: 'import_stmt',
- 304: 'lambdef',
- 305: 'list_for',
- 306: 'list_if',
- 307: 'list_iter',
- 308: 'listmaker',
- 309: 'not_test',
- 310: 'old_lambdef',
- 311: 'old_test',
- 312: 'or_test',
- 313: 'parameters',
- 314: 'pass_stmt',
- 315: 'power',
- 316: 'print_stmt',
- 317: 'quit_stmt',
- 318: 'raise_stmt',
- 319: 'return_stmt',
- 320: 'shift_expr',
- 321: 'simple_stmt',
- 322: 'sliceop',
- 323: 'small_stmt',
- 324: 'stmt',
- 325: 'subscript',
- 326: 'subscriptlist',
- 327: 'suite',
- 328: 'term',
- 329: 'test',
- 330: 'testlist',
- 331: 'testlist1',
- 332: 'testlist_gexp',
- 333: 'testlist_safe',
- 334: 'trailer',
- 335: 'try_stmt',
- 336: 'varargslist',
- 337: 'while_stmt',
- 338: 'with_stmt',
- 339: 'with_var',
- 340: 'xor_expr',
- 341: 'yield_expr',
- 342: 'yield_stmt'},
+ 283: 'expr',
+ 284: 'expr_stmt',
+ 285: 'exprlist',
+ 286: 'factor',
+ 287: 'file_input',
+ 288: 'flow_stmt',
+ 289: 'for_stmt',
+ 290: 'fpdef',
+ 291: 'fplist',
+ 292: 'funcdef',
+ 293: 'gen_for',
+ 294: 'gen_if',
+ 295: 'gen_iter',
+ 296: 'global_stmt',
+ 297: 'if_stmt',
+ 298: 'import_as_name',
+ 299: 'import_as_names',
+ 300: 'import_from',
+ 301: 'import_name',
+ 302: 'import_stmt',
+ 303: 'lambdef',
+ 304: 'list_for',
+ 305: 'list_if',
+ 306: 'list_iter',
+ 307: 'listmaker',
+ 308: 'not_test',
+ 309: 'old_lambdef',
+ 310: 'old_test',
+ 311: 'or_test',
+ 312: 'parameters',
+ 313: 'pass_stmt',
+ 314: 'power',
+ 315: 'print_stmt',
+ 316: 'raise_stmt',
+ 317: 'return_stmt',
+ 318: 'shift_expr',
+ 319: 'simple_stmt',
+ 320: 'sliceop',
+ 321: 'small_stmt',
+ 322: 'stmt',
+ 323: 'subscript',
+ 324: 'subscriptlist',
+ 325: 'suite',
+ 326: 'term',
+ 327: 'test',
+ 328: 'testlist',
+ 329: 'testlist1',
+ 330: 'testlist_gexp',
+ 331: 'testlist_safe',
+ 332: 'trailer',
+ 333: 'try_stmt',
+ 334: 'varargslist',
+ 335: 'while_stmt',
+ 336: 'with_stmt',
+ 337: 'with_var',
+ 338: 'xor_expr',
+ 339: 'yield_expr',
+ 340: 'yield_stmt'},
 dfas:
 {256: [[[[1, 1], [2, 1], [3, 2]], [[0, 1]], [[2, 1]]],
        {2: 1,
@@ -11300,75 +13195,75 @@ dfas:
         33: 1,
         34: 1,
         35: 1,
-        36: 1,
-        37: 1,
-        38: 1}],
- 257: [[[[39, 1]], [[40, 0], [0, 1]]],
-       {6: 1, 8: 1, 9: 1, 12: 1, 14: 1, 18: 1, 21: 1, 25: 1, 29: 1, 37: 1}],
- 258: [[[[41, 1]], [[42, 0], [0, 1]]],
+        36: 1}],
+ 257: [[[[37, 1]], [[38, 0], [0, 1]]],
+       {6: 1, 8: 1, 9: 1, 11: 1, 13: 1, 17: 1, 20: 1, 24: 1, 28: 1, 35: 1}],
+ 258: [[[[39, 1]], [[40, 0], [0, 1]]],
        {6: 1,
         7: 1,
         8: 1,
         9: 1,
-        12: 1,
-        14: 1,
-        18: 1,
-        21: 1,
-        25: 1,
-        29: 1,
-        37: 1}],
- 259: [[[[43, 1], [44, 2], [45, 3]],
-        [[46, 4]],
-        [[47, 5], [0, 2]],
-        [[46, 6]],
-        [[47, 7], [0, 4]],
-        [[43, 1], [44, 2], [45, 3], [0, 5]],
+        11: 1,
+        13: 1,
+        17: 1,
+        20: 1,
+        24: 1,
+        28: 1,
+        35: 1}],
+ 259: [[[[41, 1], [42, 2], [43, 3]],
+        [[44, 4]],
+        [[45, 5], [0, 2]],
+        [[44, 6]],
+        [[45, 7], [0, 4]],
+        [[41, 1], [42, 2], [43, 3], [0, 5]],
         [[0, 6]],
-        [[44, 4], [45, 3]]],
+        [[42, 4], [43, 3]]],
        {6: 1,
         7: 1,
         8: 1,
         9: 1,
-        12: 1,
-        14: 1,
-        18: 1,
-        21: 1,
-        25: 1,
-        29: 1,
-        37: 1,
-        38: 1,
-        43: 1,
-        45: 1}],
- 260: [[[[46, 1]], [[48, 2], [49, 3], [0, 1]], [[0, 2]], [[46, 2]]],
+        11: 1,
+        13: 1,
+        17: 1,
+        20: 1,
+        24: 1,
+        28: 1,
+        35: 1,
+        36: 1,
+        41: 1,
+        43: 1}],
+ 260: [[[[44, 1]], [[46, 2], [47, 3], [0, 1]], [[0, 2]], [[44, 2]]],
        {6: 1,
         7: 1,
         8: 1,
         9: 1,
-        12: 1,
-        14: 1,
-        18: 1,
-        21: 1,
-        25: 1,
-        29: 1,
-        37: 1,
-        38: 1}],
- 261: [[[[50, 1]], [[25, 0], [37, 0], [0, 1]]],
-       {6: 1, 8: 1, 9: 1, 12: 1, 14: 1, 18: 1, 21: 1, 25: 1, 29: 1, 37: 1}],
- 262: [[[[20, 1]], [[46, 2]], [[47, 3], [0, 2]], [[46, 4]], [[0, 4]]],
-       {20: 1}],
- 263: [[[[6, 1], [8, 2], [12, 5], [29, 4], [9, 3], [14, 6], [21, 2]],
-        [[6, 1], [0, 1]],
+        11: 1,
+        13: 1,
+        17: 1,
+        20: 1,
+        24: 1,
+        28: 1,
+        35: 1,
+        36: 1}],
+ 261: [[[[48, 1]], [[24, 0], [35, 0], [0, 1]]],
+       {6: 1, 8: 1, 9: 1, 11: 1, 13: 1, 17: 1, 20: 1, 24: 1, 28: 1, 35: 1}],
+ 262: [[[[19, 1]], [[44, 2]], [[45, 3], [0, 2]], [[44, 4]], [[0, 4]]],
+       {19: 1}],
+ 263: [[[[17, 1], [8, 2], [9, 5], [28, 4], [11, 3], [13, 6], [20, 2]],
+        [[17, 1], [0, 1]],
         [[0, 2]],
-        [[51, 7], [52, 2]],
-        [[53, 2], [54, 8], [55, 8]],
-        [[56, 9], [57, 2]],
-        [[58, 10]],
-        [[52, 2]],
-        [[53, 2]],
-        [[57, 2]],
-        [[14, 2]]],
-       {6: 1, 8: 1, 9: 1, 12: 1, 14: 1, 21: 1, 29: 1}],
- 264: [[[[59, 1],
+        [[49, 7], [50, 2]],
+        [[51, 2], [52, 8], [53, 8]],
+        [[54, 9], [55, 2]],
+        [[56, 10]],
+        [[50, 2]],
+        [[51, 2]],
+        [[55, 2]],
+        [[13, 2]]],
+       {8: 1, 9: 1, 11: 1, 13: 1, 17: 1, 20: 1, 28: 1}],
+ 264: [[[[57, 1],
+         [58, 1],
+         [59, 1],
          [60, 1],
          [61, 1],
          [62, 1],
@@ -11377,11 +13272,11 @@ dfas:
          [65, 1],
          [66, 1],
          [67, 1],
-         [68, 1],
-         [69, 1],
-         [70, 1]],
+         [68, 1]],
         [[0, 1]]],
-       {59: 1,
+       {57: 1,
+        58: 1,
+        59: 1,
         60: 1,
         61: 1,
         62: 1,
@@ -11390,131 +13285,128 @@ dfas:
         65: 1,
         66: 1,
         67: 1,
-        68: 1,
-        69: 1,
-        70: 1}],
- 265: [[[[33, 1]], [[0, 1]]], {33: 1}],
+        68: 1}],
+ 265: [[[[31, 1]], [[0, 1]]], {31: 1}],
  266: [[[[10, 1]],
-        [[21, 2]],
-        [[71, 3], [29, 4]],
-        [[72, 5]],
-        [[53, 6], [73, 7]],
+        [[20, 2]],
+        [[69, 3], [28, 4]],
+        [[70, 5]],
+        [[51, 6], [71, 7]],
         [[0, 5]],
-        [[71, 3]],
-        [[53, 6]]],
+        [[69, 3]],
+        [[51, 6]]],
        {10: 1}],
- 267: [[[[74, 1],
-         [75, 1],
+ 267: [[[[72, 1],
+         [73, 1],
          [7, 2],
-         [76, 1],
          [74, 1],
-         [77, 1],
+         [72, 1],
+         [75, 1],
+         [76, 1],
+         [77, 3],
          [78, 1],
-         [79, 3],
-         [80, 1],
-         [81, 1]],
+         [79, 1]],
         [[0, 1]],
-        [[77, 1]],
+        [[75, 1]],
         [[7, 1], [0, 3]]],
-       {7: 1, 74: 1, 75: 1, 76: 1, 77: 1, 78: 1, 79: 1, 80: 1, 81: 1}],
- 268: [[[[82, 1]], [[83, 0], [0, 1]]],
-       {6: 1, 8: 1, 9: 1, 12: 1, 14: 1, 18: 1, 21: 1, 25: 1, 29: 1, 37: 1}],
- 269: [[[[84, 1],
+       {7: 1, 72: 1, 73: 1, 74: 1, 75: 1, 76: 1, 77: 1, 78: 1, 79: 1}],
+ 268: [[[[80, 1]], [[81, 0], [0, 1]]],
+       {6: 1, 8: 1, 9: 1, 11: 1, 13: 1, 17: 1, 20: 1, 24: 1, 28: 1, 35: 1}],
+ 269: [[[[82, 1],
+         [83, 1],
+         [84, 1],
          [85, 1],
          [86, 1],
          [87, 1],
          [88, 1],
-         [89, 1],
-         [90, 1],
-         [91, 1]],
+         [89, 1]],
         [[0, 1]]],
-       {4: 1, 10: 1, 15: 1, 17: 1, 28: 1, 31: 1, 35: 1, 36: 1}],
- 270: [[[[34, 1]], [[0, 1]]], {34: 1}],
- 271: [[[[92, 1]], [[90, 2], [87, 2]], [[0, 2]]], {35: 1}],
- 272: [[[[35, 1]],
-        [[93, 2]],
-        [[29, 4], [2, 3]],
+       {4: 1, 10: 1, 14: 1, 16: 1, 27: 1, 30: 1, 33: 1, 34: 1}],
+ 270: [[[[32, 1]], [[0, 1]]], {32: 1}],
+ 271: [[[[90, 1]], [[88, 2], [85, 2]], [[0, 2]]], {33: 1}],
+ 272: [[[[33, 1]],
+        [[91, 2]],
+        [[28, 4], [2, 3]],
         [[0, 3]],
-        [[53, 5], [94, 6]],
+        [[51, 5], [92, 6]],
         [[2, 3]],
-        [[53, 5]]],
-       {35: 1}],
- 273: [[[[95, 1]], [[95, 1], [0, 1]]], {35: 1}],
- 274: [[[[22, 1]], [[96, 2]], [[0, 2]]], {22: 1}],
- 275: [[[[46, 1]],
-        [[71, 2]],
-        [[46, 3]],
-        [[47, 4], [0, 3]],
-        [[46, 1], [0, 4]]],
+        [[51, 5]]],
+       {33: 1}],
+ 273: [[[[93, 1]], [[93, 1], [0, 1]]], {33: 1}],
+ 274: [[[[21, 1]], [[94, 2]], [[0, 2]]], {21: 1}],
+ 275: [[[[44, 1]],
+        [[69, 2]],
+        [[44, 3]],
+        [[45, 4], [0, 3]],
+        [[44, 1], [0, 4]]],
        {6: 1,
         7: 1,
         8: 1,
         9: 1,
-        12: 1,
-        14: 1,
-        18: 1,
-        21: 1,
-        25: 1,
-        29: 1,
-        37: 1,
-        38: 1}],
- 276: [[[[93, 1]], [[97, 2], [0, 1]], [[21, 3]], [[0, 3]]], {21: 1}],
- 277: [[[[98, 1]], [[47, 0], [0, 1]]], {21: 1}],
- 278: [[[[21, 1]], [[99, 0], [0, 1]]], {21: 1}],
- 279: [[[[21, 1]], [[0, 1]]], {21: 1}],
- 280: [[[[73, 1]], [[2, 1], [100, 2]], [[0, 2]]],
+        11: 1,
+        13: 1,
+        17: 1,
+        20: 1,
+        24: 1,
+        28: 1,
+        35: 1,
+        36: 1}],
+ 276: [[[[91, 1]], [[95, 2], [0, 1]], [[20, 3]], [[0, 3]]], {20: 1}],
+ 277: [[[[96, 1]], [[45, 0], [0, 1]]], {20: 1}],
+ 278: [[[[20, 1]], [[97, 0], [0, 1]]], {20: 1}],
+ 279: [[[[20, 1]], [[0, 1]]], {20: 1}],
+ 280: [[[[71, 1]], [[2, 1], [98, 2]], [[0, 2]]],
        {6: 1,
         7: 1,
         8: 1,
         9: 1,
-        12: 1,
-        14: 1,
-        18: 1,
-        21: 1,
-        25: 1,
-        29: 1,
-        37: 1,
-        38: 1}],
- 281: [[[[101, 1]],
-        [[46, 2], [0, 1]],
-        [[97, 3], [47, 3], [0, 2]],
-        [[46, 4]],
+        11: 1,
+        13: 1,
+        17: 1,
+        20: 1,
+        24: 1,
+        28: 1,
+        35: 1,
+        36: 1}],
+ 281: [[[[99, 1]],
+        [[44, 2], [0, 1]],
+        [[95, 3], [45, 3], [0, 2]],
+        [[44, 4]],
         [[0, 4]]],
-       {101: 1}],
- 282: [[[[16, 1]],
-        [[82, 2]],
-        [[77, 3], [0, 2]],
-        [[46, 4]],
-        [[47, 5], [0, 4]],
-        [[46, 6]],
+       {99: 1}],
+ 282: [[[[15, 1]],
+        [[80, 2]],
+        [[75, 3], [0, 2]],
+        [[44, 4]],
+        [[45, 5], [0, 4]],
+        [[44, 6]],
         [[0, 6]]],
-       {16: 1}],
- 283: [[[[11, 1]], [[73, 2], [0, 1]], [[0, 2]]], {11: 1}],
- 284: [[[[102, 1]], [[103, 0], [0, 1]]],
-       {6: 1, 8: 1, 9: 1, 12: 1, 14: 1, 18: 1, 21: 1, 25: 1, 29: 1, 37: 1}],
- 285: [[[[73, 1]],
-        [[104, 2], [49, 3], [0, 1]],
-        [[73, 4], [55, 4]],
-        [[73, 5], [55, 5]],
+       {15: 1}],
+ 283: [[[[100, 1]], [[101, 0], [0, 1]]],
+       {6: 1, 8: 1, 9: 1, 11: 1, 13: 1, 17: 1, 20: 1, 24: 1, 28: 1, 35: 1}],
+ 284: [[[[71, 1]],
+        [[102, 2], [47, 3], [0, 1]],
+        [[71, 4], [53, 4]],
+        [[71, 5], [53, 5]],
         [[0, 4]],
-        [[49, 3], [0, 5]]],
+        [[47, 3], [0, 5]]],
        {6: 1,
         7: 1,
         8: 1,
         9: 1,
-        12: 1,
-        14: 1,
-        18: 1,
-        21: 1,
-        25: 1,
-        29: 1,
-        37: 1,
-        38: 1}],
- 286: [[[[82, 1]], [[47, 2], [0, 1]], [[82, 1], [0, 2]]],
-       {6: 1, 8: 1, 9: 1, 12: 1, 14: 1, 18: 1, 21: 1, 25: 1, 29: 1, 37: 1}],
- 287: [[[[25, 1], [105, 2], [37, 1], [18, 1]], [[106, 2]], [[0, 2]]],
-       {6: 1, 8: 1, 9: 1, 12: 1, 14: 1, 18: 1, 21: 1, 25: 1, 29: 1, 37: 1}],
- 288: [[[[2, 0], [100, 1], [107, 0]], [[0, 1]]],
+        11: 1,
+        13: 1,
+        17: 1,
+        20: 1,
+        24: 1,
+        28: 1,
+        35: 1,
+        36: 1}],
+ 285: [[[[80, 1]], [[45, 2], [0, 1]], [[80, 1], [0, 2]]],
+       {6: 1, 8: 1, 9: 1, 11: 1, 13: 1, 17: 1, 20: 1, 24: 1, 28: 1, 35: 1}],
+ 286: [[[[103, 2], [24, 1], [6, 1], [35, 1]], [[104, 2]], [[0, 2]]],
+       {6: 1, 8: 1, 9: 1, 11: 1, 13: 1, 17: 1, 20: 1, 24: 1, 28: 1, 35: 1}],
+ 287: [[[[2, 0], [98, 1], [105, 0]], [[0, 1]]],
        {2: 1,
         4: 1,
         5: 1,
@@ -11549,159 +13441,149 @@ dfas:
         34: 1,
         35: 1,
         36: 1,
-        37: 1,
-        38: 1,
-        100: 1}],
- 289: [[[[108, 1],
-         [109, 1],
-         [110, 1],
-         [111, 1],
-         [112, 1],
-         [113, 1],
-         [114, 1]],
-        [[0, 1]]],
-       {5: 1, 11: 1, 19: 1, 26: 1, 32: 1, 33: 1, 34: 1}],
- 290: [[[[28, 1]],
-        [[96, 2]],
-        [[77, 3]],
-        [[73, 4]],
-        [[71, 5]],
-        [[72, 6]],
-        [[115, 7], [0, 6]],
-        [[71, 8]],
-        [[72, 9]],
+        98: 1}],
+ 288: [[[[106, 1], [107, 1], [108, 1], [109, 1], [110, 1]], [[0, 1]]],
+       {5: 1, 18: 1, 25: 1, 31: 1, 32: 1}],
+ 289: [[[[27, 1]],
+        [[94, 2]],
+        [[75, 3]],
+        [[71, 4]],
+        [[69, 5]],
+        [[70, 6]],
+        [[111, 7], [0, 6]],
+        [[69, 8]],
+        [[70, 9]],
         [[0, 9]]],
-       {28: 1}],
- 291: [[[[29, 1], [21, 2]], [[116, 3]], [[0, 2]], [[53, 2]]], {21: 1, 29: 1}],
- 292: [[[[117, 1]], [[47, 2], [0, 1]], [[117, 1], [0, 2]]], {21: 1, 29: 1}],
- 293: [[[[4, 1]], [[21, 2]], [[118, 3]], [[71, 4]], [[72, 5]], [[0, 5]]],
+       {27: 1}],
+ 290: [[[[28, 1], [20, 2]], [[112, 3]], [[0, 2]], [[51, 2]]], {20: 1, 28: 1}],
+ 291: [[[[113, 1]], [[45, 2], [0, 1]], [[113, 1], [0, 2]]], {20: 1, 28: 1}],
+ 292: [[[[4, 1]], [[20, 2]], [[114, 3]], [[69, 4]], [[70, 5]], [[0, 5]]],
        {4: 1}],
- 294: [[[[28, 1]],
-        [[96, 2]],
-        [[77, 3]],
-        [[119, 4]],
-        [[120, 5], [0, 4]],
+ 293: [[[[27, 1]],
+        [[94, 2]],
+        [[75, 3]],
+        [[115, 4]],
+        [[116, 5], [0, 4]],
         [[0, 5]]],
-       {28: 1}],
- 295: [[[[31, 1]], [[121, 2]], [[120, 3], [0, 2]], [[0, 3]]], {31: 1}],
- 296: [[[[48, 1], [122, 1]], [[0, 1]]], {28: 1, 31: 1}],
- 297: [[[[27, 1]], [[21, 2]], [[47, 1], [0, 2]]], {27: 1}],
- 298: [[[[31, 1]],
-        [[46, 2]],
-        [[71, 3]],
-        [[72, 4]],
-        [[115, 5], [123, 1], [0, 4]],
-        [[71, 6]],
-        [[72, 7]],
+       {27: 1}],
+ 294: [[[[30, 1]], [[117, 2]], [[116, 3], [0, 2]], [[0, 3]]], {30: 1}],
+ 295: [[[[46, 1], [118, 1]], [[0, 1]]], {27: 1, 30: 1}],
+ 296: [[[[26, 1]], [[20, 2]], [[45, 1], [0, 2]]], {26: 1}],
+ 297: [[[[30, 1]],
+        [[44, 2]],
+        [[69, 3]],
+        [[70, 4]],
+        [[111, 5], [119, 1], [0, 4]],
+        [[69, 6]],
+        [[70, 7]],
         [[0, 7]]],
-       {31: 1}],
- 299: [[[[21, 1]], [[97, 2], [0, 1]], [[21, 3]], [[0, 3]]], {21: 1}],
- 300: [[[[124, 1]], [[47, 2], [0, 1]], [[124, 1], [0, 2]]], {21: 1}],
- 301: [[[[30, 1]],
-        [[93, 2], [99, 3]],
-        [[24, 4]],
-        [[93, 2], [24, 4], [99, 3]],
-        [[125, 5], [43, 5], [29, 6]],
-        [[0, 5]],
-        [[125, 7]],
-        [[53, 5]]],
        {30: 1}],
- 302: [[[[24, 1]], [[126, 2]], [[0, 2]]], {24: 1}],
- 303: [[[[127, 1], [128, 1]], [[0, 1]]], {24: 1, 30: 1}],
- 304: [[[[38, 1]], [[71, 2], [129, 3]], [[46, 4]], [[71, 2]], [[0, 4]]],
-       {38: 1}],
- 305: [[[[28, 1]],
-        [[96, 2]],
-        [[77, 3]],
-        [[130, 4]],
-        [[131, 5], [0, 4]],
+ 298: [[[[20, 1]], [[95, 2], [0, 1]], [[20, 3]], [[0, 3]]], {20: 1}],
+ 299: [[[[120, 1]], [[45, 2], [0, 1]], [[120, 1], [0, 2]]], {20: 1}],
+ 300: [[[[29, 1]],
+        [[91, 2], [97, 3]],
+        [[23, 4]],
+        [[91, 2], [23, 4], [97, 3]],
+        [[121, 5], [41, 5], [28, 6]],
+        [[0, 5]],
+        [[121, 7]],
+        [[51, 5]]],
+       {29: 1}],
+ 301: [[[[23, 1]], [[122, 2]], [[0, 2]]], {23: 1}],
+ 302: [[[[123, 1], [124, 1]], [[0, 1]]], {23: 1, 29: 1}],
+ 303: [[[[36, 1]], [[69, 2], [125, 3]], [[44, 4]], [[69, 2]], [[0, 4]]],
+       {36: 1}],
+ 304: [[[[27, 1]],
+        [[94, 2]],
+        [[75, 3]],
+        [[126, 4]],
+        [[127, 5], [0, 4]],
         [[0, 5]]],
-       {28: 1}],
- 306: [[[[31, 1]], [[121, 2]], [[131, 3], [0, 2]], [[0, 3]]], {31: 1}],
- 307: [[[[132, 1], [133, 1]], [[0, 1]]], {28: 1, 31: 1}],
- 308: [[[[46, 1]],
-        [[132, 2], [47, 3], [0, 1]],
+       {27: 1}],
+ 305: [[[[30, 1]], [[117, 2]], [[127, 3], [0, 2]], [[0, 3]]], {30: 1}],
+ 306: [[[[128, 1], [129, 1]], [[0, 1]]], {27: 1, 30: 1}],
+ 307: [[[[44, 1]],
+        [[128, 2], [45, 3], [0, 1]],
         [[0, 2]],
-        [[46, 4], [0, 3]],
-        [[47, 3], [0, 4]]],
+        [[44, 4], [0, 3]],
+        [[45, 3], [0, 4]]],
        {6: 1,
         7: 1,
         8: 1,
         9: 1,
-        12: 1,
-        14: 1,
-        18: 1,
-        21: 1,
-        25: 1,
-        29: 1,
-        37: 1,
-        38: 1}],
- 309: [[[[7, 1], [134, 2]], [[41, 2]], [[0, 2]]],
+        11: 1,
+        13: 1,
+        17: 1,
+        20: 1,
+        24: 1,
+        28: 1,
+        35: 1,
+        36: 1}],
+ 308: [[[[7, 1], [130, 2]], [[39, 2]], [[0, 2]]],
        {6: 1,
         7: 1,
         8: 1,
         9: 1,
-        12: 1,
-        14: 1,
-        18: 1,
-        21: 1,
-        25: 1,
-        29: 1,
-        37: 1}],
- 310: [[[[38, 1]], [[71, 2], [129, 3]], [[121, 4]], [[71, 2]], [[0, 4]]],
-       {38: 1}],
- 311: [[[[135, 1], [119, 1]], [[0, 1]]],
+        11: 1,
+        13: 1,
+        17: 1,
+        20: 1,
+        24: 1,
+        28: 1,
+        35: 1}],
+ 309: [[[[36, 1]], [[69, 2], [125, 3]], [[117, 4]], [[69, 2]], [[0, 4]]],
+       {36: 1}],
+ 310: [[[[131, 1], [115, 1]], [[0, 1]]],
        {6: 1,
         7: 1,
         8: 1,
         9: 1,
-        12: 1,
-        14: 1,
-        18: 1,
-        21: 1,
-        25: 1,
-        29: 1,
-        37: 1,
-        38: 1}],
- 312: [[[[136, 1]], [[137, 0], [0, 1]]],
+        11: 1,
+        13: 1,
+        17: 1,
+        20: 1,
+        24: 1,
+        28: 1,
+        35: 1,
+        36: 1}],
+ 311: [[[[132, 1]], [[133, 0], [0, 1]]],
        {6: 1,
         7: 1,
         8: 1,
         9: 1,
-        12: 1,
-        14: 1,
-        18: 1,
-        21: 1,
-        25: 1,
-        29: 1,
-        37: 1}],
- 313: [[[[29, 1]], [[53, 2], [129, 3]], [[0, 2]], [[53, 2]]], {29: 1}],
- 314: [[[[23, 1]], [[0, 1]]], {23: 1}],
- 315: [[[[138, 1]], [[139, 1], [45, 2], [0, 1]], [[106, 3]], [[0, 3]]],
-       {6: 1, 8: 1, 9: 1, 12: 1, 14: 1, 21: 1, 29: 1}],
- 316: [[[[13, 1]],
-        [[46, 2], [140, 3], [0, 1]],
-        [[47, 4], [0, 2]],
-        [[46, 5]],
-        [[46, 2], [0, 4]],
-        [[47, 6], [0, 5]],
-        [[46, 7]],
-        [[47, 8], [0, 7]],
-        [[46, 7], [0, 8]]],
-       {13: 1}],
- 317: [[[[32, 1]], [[73, 2], [0, 1]], [[0, 2]]], {32: 1}],
- 318: [[[[5, 1]],
-        [[46, 2], [0, 1]],
-        [[47, 3], [0, 2]],
-        [[46, 4]],
-        [[47, 5], [0, 4]],
-        [[46, 6]],
+        11: 1,
+        13: 1,
+        17: 1,
+        20: 1,
+        24: 1,
+        28: 1,
+        35: 1}],
+ 312: [[[[28, 1]], [[51, 2], [125, 3]], [[0, 2]], [[51, 2]]], {28: 1}],
+ 313: [[[[22, 1]], [[0, 1]]], {22: 1}],
+ 314: [[[[134, 1]], [[135, 1], [43, 2], [0, 1]], [[104, 3]], [[0, 3]]],
+       {8: 1, 9: 1, 11: 1, 13: 1, 17: 1, 20: 1, 28: 1}],
+ 315: [[[[12, 1]],
+        [[44, 2], [136, 3], [0, 1]],
+        [[45, 4], [0, 2]],
+        [[44, 5]],
+        [[44, 2], [0, 4]],
+        [[45, 6], [0, 5]],
+        [[44, 7]],
+        [[45, 8], [0, 7]],
+        [[44, 7], [0, 8]]],
+       {12: 1}],
+ 316: [[[[5, 1]],
+        [[44, 2], [0, 1]],
+        [[45, 3], [0, 2]],
+        [[44, 4]],
+        [[45, 5], [0, 4]],
+        [[44, 6]],
         [[0, 6]]],
        {5: 1}],
- 319: [[[[19, 1]], [[73, 2], [0, 1]], [[0, 2]]], {19: 1}],
- 320: [[[[141, 1]], [[142, 0], [140, 0], [0, 1]]],
-       {6: 1, 8: 1, 9: 1, 12: 1, 14: 1, 18: 1, 21: 1, 25: 1, 29: 1, 37: 1}],
- 321: [[[[143, 1]], [[2, 2], [144, 3]], [[0, 2]], [[143, 1], [2, 2]]],
+ 317: [[[[18, 1]], [[71, 2], [0, 1]], [[0, 2]]], {18: 1}],
+ 318: [[[[137, 1]], [[136, 0], [138, 0], [0, 1]]],
+       {6: 1, 8: 1, 9: 1, 11: 1, 13: 1, 17: 1, 20: 1, 24: 1, 28: 1, 35: 1}],
+ 319: [[[[139, 1]], [[2, 2], [140, 3]], [[0, 2]], [[139, 1], [2, 2]]],
        {5: 1,
         6: 1,
         7: 1,
@@ -11710,8 +13592,8 @@ dfas:
         11: 1,
         12: 1,
         13: 1,
-        14: 1,
-        16: 1,
+        15: 1,
+        17: 1,
         18: 1,
         19: 1,
         20: 1,
@@ -11721,24 +13603,22 @@ dfas:
         24: 1,
         25: 1,
         26: 1,
-        27: 1,
+        28: 1,
         29: 1,
-        30: 1,
+        31: 1,
         32: 1,
-        33: 1,
-        34: 1,
-        37: 1,
-        38: 1}],
- 322: [[[[71, 1]], [[46, 2], [0, 1]], [[0, 2]]], {71: 1}],
- 323: [[[[145, 1],
+        35: 1,
+        36: 1}],
+ 320: [[[[69, 1]], [[44, 2], [0, 1]], [[0, 2]]], {69: 1}],
+ 321: [[[[141, 1],
+         [142, 1],
+         [143, 1],
+         [144, 1],
+         [145, 1],
          [146, 1],
          [147, 1],
          [148, 1],
-         [149, 1],
-         [150, 1],
-         [151, 1],
-         [152, 1],
-         [153, 1]],
+         [149, 1]],
         [[0, 1]]],
        {5: 1,
         6: 1,
@@ -11748,8 +13628,8 @@ dfas:
         11: 1,
         12: 1,
         13: 1,
-        14: 1,
-        16: 1,
+        15: 1,
+        17: 1,
         18: 1,
         19: 1,
         20: 1,
@@ -11759,15 +13639,13 @@ dfas:
         24: 1,
         25: 1,
         26: 1,
-        27: 1,
+        28: 1,
         29: 1,
-        30: 1,
+        31: 1,
         32: 1,
-        33: 1,
-        34: 1,
-        37: 1,
-        38: 1}],
- 324: [[[[1, 1], [3, 1]], [[0, 1]]],
+        35: 1,
+        36: 1}],
+ 322: [[[[1, 1], [3, 1]], [[0, 1]]],
        {4: 1,
         5: 1,
         6: 1,
@@ -11800,50 +13678,48 @@ dfas:
         33: 1,
         34: 1,
         35: 1,
-        36: 1,
-        37: 1,
-        38: 1}],
- 325: [[[[46, 1], [71, 2], [99, 3]],
-        [[71, 2], [0, 1]],
-        [[46, 4], [154, 5], [0, 2]],
-        [[99, 6]],
-        [[154, 5], [0, 4]],
+        36: 1}],
+ 323: [[[[44, 1], [69, 2], [97, 3]],
+        [[69, 2], [0, 1]],
+        [[44, 4], [150, 5], [0, 2]],
+        [[97, 6]],
+        [[150, 5], [0, 4]],
         [[0, 5]],
-        [[99, 5]]],
+        [[97, 5]]],
        {6: 1,
         7: 1,
         8: 1,
         9: 1,
-        12: 1,
-        14: 1,
-        18: 1,
-        21: 1,
-        25: 1,
-        29: 1,
-        37: 1,
-        38: 1,
-        71: 1,
-        99: 1}],
- 326: [[[[155, 1]], [[47, 2], [0, 1]], [[155, 1], [0, 2]]],
+        11: 1,
+        13: 1,
+        17: 1,
+        20: 1,
+        24: 1,
+        28: 1,
+        35: 1,
+        36: 1,
+        69: 1,
+        97: 1}],
+ 324: [[[[151, 1]], [[45, 2], [0, 1]], [[151, 1], [0, 2]]],
        {6: 1,
         7: 1,
         8: 1,
         9: 1,
-        12: 1,
-        14: 1,
-        18: 1,
-        21: 1,
-        25: 1,
-        29: 1,
-        37: 1,
-        38: 1,
-        71: 1,
-        99: 1}],
- 327: [[[[1, 1], [2, 2]],
+        11: 1,
+        13: 1,
+        17: 1,
+        20: 1,
+        24: 1,
+        28: 1,
+        35: 1,
+        36: 1,
+        69: 1,
+        97: 1}],
+ 325: [[[[1, 1], [2, 2]],
         [[0, 1]],
-        [[156, 3]],
-        [[107, 4]],
-        [[157, 1], [107, 4]]],
+        [[152, 3]],
+        [[105, 4]],
+        [[153, 1], [105, 4]]],
        {2: 1,
         5: 1,
         6: 1,
@@ -11853,8 +13729,8 @@ dfas:
         11: 1,
         12: 1,
         13: 1,
-        14: 1,
-        16: 1,
+        15: 1,
+        17: 1,
         18: 1,
         19: 1,
         20: 1,
@@ -11864,175 +13740,175 @@ dfas:
         24: 1,
         25: 1,
         26: 1,
-        27: 1,
+        28: 1,
         29: 1,
-        30: 1,
+        31: 1,
         32: 1,
-        33: 1,
-        34: 1,
-        37: 1,
-        38: 1}],
- 328: [[[[106, 1]], [[158, 0], [43, 0], [159, 0], [160, 0], [0, 1]]],
-       {6: 1, 8: 1, 9: 1, 12: 1, 14: 1, 18: 1, 21: 1, 25: 1, 29: 1, 37: 1}],
- 329: [[[[119, 1], [161, 2]],
-        [[31, 3], [0, 1]],
+        35: 1,
+        36: 1}],
+ 326: [[[[104, 1]], [[154, 0], [41, 0], [155, 0], [156, 0], [0, 1]]],
+       {6: 1, 8: 1, 9: 1, 11: 1, 13: 1, 17: 1, 20: 1, 24: 1, 28: 1, 35: 1}],
+ 327: [[[[115, 1], [157, 2]],
+        [[30, 3], [0, 1]],
         [[0, 2]],
-        [[119, 4]],
-        [[115, 5]],
-        [[46, 2]]],
+        [[115, 4]],
+        [[111, 5]],
+        [[44, 2]]],
        {6: 1,
         7: 1,
         8: 1,
         9: 1,
-        12: 1,
-        14: 1,
-        18: 1,
-        21: 1,
-        25: 1,
-        29: 1,
-        37: 1,
-        38: 1}],
- 330: [[[[46, 1]], [[47, 2], [0, 1]], [[46, 1], [0, 2]]],
+        11: 1,
+        13: 1,
+        17: 1,
+        20: 1,
+        24: 1,
+        28: 1,
+        35: 1,
+        36: 1}],
+ 328: [[[[44, 1]], [[45, 2], [0, 1]], [[44, 1], [0, 2]]],
        {6: 1,
         7: 1,
         8: 1,
         9: 1,
-        12: 1,
-        14: 1,
-        18: 1,
-        21: 1,
-        25: 1,
-        29: 1,
-        37: 1,
-        38: 1}],
- 331: [[[[46, 1]], [[47, 0], [0, 1]]],
+        11: 1,
+        13: 1,
+        17: 1,
+        20: 1,
+        24: 1,
+        28: 1,
+        35: 1,
+        36: 1}],
+ 329: [[[[44, 1]], [[45, 0], [0, 1]]],
        {6: 1,
         7: 1,
         8: 1,
         9: 1,
-        12: 1,
-        14: 1,
-        18: 1,
-        21: 1,
-        25: 1,
-        29: 1,
-        37: 1,
-        38: 1}],
- 332: [[[[46, 1]],
-        [[48, 2], [47, 3], [0, 1]],
+        11: 1,
+        13: 1,
+        17: 1,
+        20: 1,
+        24: 1,
+        28: 1,
+        35: 1,
+        36: 1}],
+ 330: [[[[44, 1]],
+        [[46, 2], [45, 3], [0, 1]],
         [[0, 2]],
-        [[46, 4], [0, 3]],
-        [[47, 3], [0, 4]]],
+        [[44, 4], [0, 3]],
+        [[45, 3], [0, 4]]],
        {6: 1,
         7: 1,
         8: 1,
         9: 1,
-        12: 1,
-        14: 1,
-        18: 1,
-        21: 1,
-        25: 1,
-        29: 1,
-        37: 1,
-        38: 1}],
- 333: [[[[121, 1]],
-        [[47, 2], [0, 1]],
-        [[121, 3]],
-        [[47, 4], [0, 3]],
-        [[121, 3], [0, 4]]],
+        11: 1,
+        13: 1,
+        17: 1,
+        20: 1,
+        24: 1,
+        28: 1,
+        35: 1,
+        36: 1}],
+ 331: [[[[117, 1]],
+        [[45, 2], [0, 1]],
+        [[117, 3]],
+        [[45, 4], [0, 3]],
+        [[117, 3], [0, 4]]],
        {6: 1,
         7: 1,
         8: 1,
         9: 1,
-        12: 1,
-        14: 1,
-        18: 1,
-        21: 1,
-        25: 1,
-        29: 1,
-        37: 1,
-        38: 1}],
- 334: [[[[29, 1], [99, 2], [12, 3]],
-        [[53, 4], [94, 5]],
-        [[21, 4]],
-        [[162, 6]],
+        11: 1,
+        13: 1,
+        17: 1,
+        20: 1,
+        24: 1,
+        28: 1,
+        35: 1,
+        36: 1}],
+ 332: [[[[28, 1], [97, 2], [11, 3]],
+        [[51, 4], [92, 5]],
+        [[20, 4]],
+        [[158, 6]],
         [[0, 4]],
-        [[53, 4]],
-        [[57, 4]]],
-       {12: 1, 29: 1, 99: 1}],
- 335: [[[[15, 1]],
-        [[71, 2]],
-        [[72, 3]],
-        [[163, 4], [164, 5]],
-        [[71, 6]],
-        [[71, 7]],
-        [[72, 8]],
-        [[72, 9]],
-        [[163, 4], [115, 10], [164, 5], [0, 8]],
+        [[51, 4]],
+        [[50, 4]]],
+       {11: 1, 28: 1, 97: 1}],
+ 333: [[[[14, 1]],
+        [[69, 2]],
+        [[70, 3]],
+        [[159, 4], [160, 5]],
+        [[69, 6]],
+        [[69, 7]],
+        [[70, 8]],
+        [[70, 9]],
+        [[159, 4], [111, 10], [160, 5], [0, 8]],
         [[0, 9]],
-        [[71, 11]],
-        [[72, 12]],
-        [[164, 5], [0, 12]]],
-       {15: 1}],
- 336: [[[[43, 1], [117, 2], [45, 3]],
-        [[21, 4]],
-        [[49, 5], [47, 6], [0, 2]],
-        [[21, 7]],
-        [[47, 8], [0, 4]],
-        [[46, 9]],
-        [[43, 1], [117, 2], [45, 3], [0, 6]],
+        [[69, 11]],
+        [[70, 12]],
+        [[160, 5], [0, 12]]],
+       {14: 1}],
+ 334: [[[[41, 1], [113, 2], [43, 3]],
+        [[20, 4]],
+        [[47, 5], [45, 6], [0, 2]],
+        [[20, 7]],
+        [[45, 8], [0, 4]],
+        [[44, 9]],
+        [[41, 1], [113, 2], [43, 3], [0, 6]],
         [[0, 7]],
-        [[45, 3]],
-        [[47, 6], [0, 9]]],
-       {21: 1, 29: 1, 43: 1, 45: 1}],
- 337: [[[[17, 1]],
-        [[46, 2]],
-        [[71, 3]],
-        [[72, 4]],
-        [[115, 5], [0, 4]],
-        [[71, 6]],
-        [[72, 7]],
+        [[43, 3]],
+        [[45, 6], [0, 9]]],
+       {20: 1, 28: 1, 41: 1, 43: 1}],
+ 335: [[[[16, 1]],
+        [[44, 2]],
+        [[69, 3]],
+        [[70, 4]],
+        [[111, 5], [0, 4]],
+        [[69, 6]],
+        [[70, 7]],
         [[0, 7]]],
-       {17: 1}],
- 338: [[[[36, 1]],
-        [[46, 2]],
-        [[71, 3], [165, 4]],
-        [[72, 5]],
-        [[71, 3]],
+       {16: 1}],
+ 336: [[[[34, 1]],
+        [[44, 2]],
+        [[69, 3], [161, 4]],
+        [[70, 5]],
+        [[69, 3]],
         [[0, 5]]],
-       {36: 1}],
- 339: [[[[97, 1]], [[82, 2]], [[0, 2]]], {97: 1}],
- 340: [[[[166, 1]], [[167, 0], [0, 1]]],
-       {6: 1, 8: 1, 9: 1, 12: 1, 14: 1, 18: 1, 21: 1, 25: 1, 29: 1, 37: 1}],
- 341: [[[[26, 1]], [[73, 2], [0, 1]], [[0, 2]]], {26: 1}],
- 342: [[[[55, 1]], [[0, 1]]], {26: 1}]},
+       {34: 1}],
+ 337: [[[[95, 1]], [[80, 2]], [[0, 2]]], {95: 1}],
+ 338: [[[[162, 1]], [[163, 0], [0, 1]]],
+       {6: 1, 8: 1, 9: 1, 11: 1, 13: 1, 17: 1, 20: 1, 24: 1, 28: 1, 35: 1}],
+ 339: [[[[25, 1]], [[71, 2], [0, 1]], [[0, 2]]], {25: 1}],
+ 340: [[[[53, 1]], [[0, 1]]], {25: 1}]},
 states:
 [[[[1, 1], [2, 1], [3, 2]], [[0, 1]], [[2, 1]]],
+ [[[37, 1]], [[38, 0], [0, 1]]],
  [[[39, 1]], [[40, 0], [0, 1]]],
- [[[41, 1]], [[42, 0], [0, 1]]],
- [[[43, 1], [44, 2], [45, 3]],
-  [[46, 4]],
-  [[47, 5], [0, 2]],
-  [[46, 6]],
-  [[47, 7], [0, 4]],
-  [[43, 1], [44, 2], [45, 3], [0, 5]],
+ [[[41, 1], [42, 2], [43, 3]],
+  [[44, 4]],
+  [[45, 5], [0, 2]],
+  [[44, 6]],
+  [[45, 7], [0, 4]],
+  [[41, 1], [42, 2], [43, 3], [0, 5]],
   [[0, 6]],
-  [[44, 4], [45, 3]]],
- [[[46, 1]], [[48, 2], [49, 3], [0, 1]], [[0, 2]], [[46, 2]]],
- [[[50, 1]], [[25, 0], [37, 0], [0, 1]]],
- [[[20, 1]], [[46, 2]], [[47, 3], [0, 2]], [[46, 4]], [[0, 4]]],
- [[[6, 1], [8, 2], [12, 5], [29, 4], [9, 3], [14, 6], [21, 2]],
-  [[6, 1], [0, 1]],
+  [[42, 4], [43, 3]]],
+ [[[44, 1]], [[46, 2], [47, 3], [0, 1]], [[0, 2]], [[44, 2]]],
+ [[[48, 1]], [[24, 0], [35, 0], [0, 1]]],
+ [[[19, 1]], [[44, 2]], [[45, 3], [0, 2]], [[44, 4]], [[0, 4]]],
+ [[[17, 1], [8, 2], [9, 5], [28, 4], [11, 3], [13, 6], [20, 2]],
+  [[17, 1], [0, 1]],
   [[0, 2]],
-  [[51, 7], [52, 2]],
-  [[53, 2], [54, 8], [55, 8]],
-  [[56, 9], [57, 2]],
-  [[58, 10]],
-  [[52, 2]],
-  [[53, 2]],
-  [[57, 2]],
-  [[14, 2]]],
- [[[59, 1],
+  [[49, 7], [50, 2]],
+  [[51, 2], [52, 8], [53, 8]],
+  [[54, 9], [55, 2]],
+  [[56, 10]],
+  [[50, 2]],
+  [[51, 2]],
+  [[55, 2]],
+  [[13, 2]]],
+ [[[57, 1],
+   [58, 1],
+   [59, 1],
    [60, 1],
    [61, 1],
    [62, 1],
@@ -12041,253 +13917,247 @@ states:
    [65, 1],
    [66, 1],
    [67, 1],
-   [68, 1],
-   [69, 1],
-   [70, 1]],
+   [68, 1]],
   [[0, 1]]],
- [[[33, 1]], [[0, 1]]],
+ [[[31, 1]], [[0, 1]]],
  [[[10, 1]],
-  [[21, 2]],
-  [[71, 3], [29, 4]],
-  [[72, 5]],
-  [[53, 6], [73, 7]],
+  [[20, 2]],
+  [[69, 3], [28, 4]],
+  [[70, 5]],
+  [[51, 6], [71, 7]],
   [[0, 5]],
-  [[71, 3]],
-  [[53, 6]]],
- [[[74, 1],
-   [75, 1],
+  [[69, 3]],
+  [[51, 6]]],
+ [[[72, 1],
+   [73, 1],
    [7, 2],
-   [76, 1],
    [74, 1],
-   [77, 1],
+   [72, 1],
+   [75, 1],
+   [76, 1],
+   [77, 3],
    [78, 1],
-   [79, 3],
-   [80, 1],
-   [81, 1]],
+   [79, 1]],
   [[0, 1]],
-  [[77, 1]],
+  [[75, 1]],
   [[7, 1], [0, 3]]],
- [[[82, 1]], [[83, 0], [0, 1]]],
- [[[84, 1], [85, 1], [86, 1], [87, 1], [88, 1], [89, 1], [90, 1], [91, 1]],
+ [[[80, 1]], [[81, 0], [0, 1]]],
+ [[[82, 1], [83, 1], [84, 1], [85, 1], [86, 1], [87, 1], [88, 1], [89, 1]],
   [[0, 1]]],
- [[[34, 1]], [[0, 1]]],
- [[[92, 1]], [[90, 2], [87, 2]], [[0, 2]]],
- [[[35, 1]],
-  [[93, 2]],
-  [[29, 4], [2, 3]],
+ [[[32, 1]], [[0, 1]]],
+ [[[90, 1]], [[88, 2], [85, 2]], [[0, 2]]],
+ [[[33, 1]],
+  [[91, 2]],
+  [[28, 4], [2, 3]],
   [[0, 3]],
-  [[53, 5], [94, 6]],
+  [[51, 5], [92, 6]],
   [[2, 3]],
-  [[53, 5]]],
- [[[95, 1]], [[95, 1], [0, 1]]],
- [[[22, 1]], [[96, 2]], [[0, 2]]],
- [[[46, 1]], [[71, 2]], [[46, 3]], [[47, 4], [0, 3]], [[46, 1], [0, 4]]],
- [[[93, 1]], [[97, 2], [0, 1]], [[21, 3]], [[0, 3]]],
- [[[98, 1]], [[47, 0], [0, 1]]],
- [[[21, 1]], [[99, 0], [0, 1]]],
- [[[21, 1]], [[0, 1]]],
- [[[73, 1]], [[2, 1], [100, 2]], [[0, 2]]],
- [[[101, 1]],
-  [[46, 2], [0, 1]],
-  [[97, 3], [47, 3], [0, 2]],
-  [[46, 4]],
+  [[51, 5]]],
+ [[[93, 1]], [[93, 1], [0, 1]]],
+ [[[21, 1]], [[94, 2]], [[0, 2]]],
+ [[[44, 1]], [[69, 2]], [[44, 3]], [[45, 4], [0, 3]], [[44, 1], [0, 4]]],
+ [[[91, 1]], [[95, 2], [0, 1]], [[20, 3]], [[0, 3]]],
+ [[[96, 1]], [[45, 0], [0, 1]]],
+ [[[20, 1]], [[97, 0], [0, 1]]],
+ [[[20, 1]], [[0, 1]]],
+ [[[71, 1]], [[2, 1], [98, 2]], [[0, 2]]],
+ [[[99, 1]],
+  [[44, 2], [0, 1]],
+  [[95, 3], [45, 3], [0, 2]],
+  [[44, 4]],
   [[0, 4]]],
- [[[16, 1]],
-  [[82, 2]],
-  [[77, 3], [0, 2]],
-  [[46, 4]],
-  [[47, 5], [0, 4]],
-  [[46, 6]],
+ [[[15, 1]],
+  [[80, 2]],
+  [[75, 3], [0, 2]],
+  [[44, 4]],
+  [[45, 5], [0, 4]],
+  [[44, 6]],
   [[0, 6]]],
- [[[11, 1]], [[73, 2], [0, 1]], [[0, 2]]],
- [[[102, 1]], [[103, 0], [0, 1]]],
- [[[73, 1]],
-  [[104, 2], [49, 3], [0, 1]],
-  [[73, 4], [55, 4]],
-  [[73, 5], [55, 5]],
+ [[[100, 1]], [[101, 0], [0, 1]]],
+ [[[71, 1]],
+  [[102, 2], [47, 3], [0, 1]],
+  [[71, 4], [53, 4]],
+  [[71, 5], [53, 5]],
   [[0, 4]],
-  [[49, 3], [0, 5]]],
- [[[82, 1]], [[47, 2], [0, 1]], [[82, 1], [0, 2]]],
- [[[25, 1], [105, 2], [37, 1], [18, 1]], [[106, 2]], [[0, 2]]],
- [[[2, 0], [100, 1], [107, 0]], [[0, 1]]],
- [[[108, 1], [109, 1], [110, 1], [111, 1], [112, 1], [113, 1], [114, 1]],
-  [[0, 1]]],
- [[[28, 1]],
-  [[96, 2]],
-  [[77, 3]],
-  [[73, 4]],
-  [[71, 5]],
-  [[72, 6]],
-  [[115, 7], [0, 6]],
-  [[71, 8]],
-  [[72, 9]],
+  [[47, 3], [0, 5]]],
+ [[[80, 1]], [[45, 2], [0, 1]], [[80, 1], [0, 2]]],
+ [[[103, 2], [24, 1], [6, 1], [35, 1]], [[104, 2]], [[0, 2]]],
+ [[[2, 0], [98, 1], [105, 0]], [[0, 1]]],
+ [[[106, 1], [107, 1], [108, 1], [109, 1], [110, 1]], [[0, 1]]],
+ [[[27, 1]],
+  [[94, 2]],
+  [[75, 3]],
+  [[71, 4]],
+  [[69, 5]],
+  [[70, 6]],
+  [[111, 7], [0, 6]],
+  [[69, 8]],
+  [[70, 9]],
   [[0, 9]]],
- [[[29, 1], [21, 2]], [[116, 3]], [[0, 2]], [[53, 2]]],
- [[[117, 1]], [[47, 2], [0, 1]], [[117, 1], [0, 2]]],
- [[[4, 1]], [[21, 2]], [[118, 3]], [[71, 4]], [[72, 5]], [[0, 5]]],
- [[[28, 1]], [[96, 2]], [[77, 3]], [[119, 4]], [[120, 5], [0, 4]], [[0, 5]]],
- [[[31, 1]], [[121, 2]], [[120, 3], [0, 2]], [[0, 3]]],
- [[[48, 1], [122, 1]], [[0, 1]]],
- [[[27, 1]], [[21, 2]], [[47, 1], [0, 2]]],
- [[[31, 1]],
-  [[46, 2]],
-  [[71, 3]],
-  [[72, 4]],
-  [[115, 5], [123, 1], [0, 4]],
-  [[71, 6]],
-  [[72, 7]],
-  [[0, 7]]],
- [[[21, 1]], [[97, 2], [0, 1]], [[21, 3]], [[0, 3]]],
- [[[124, 1]], [[47, 2], [0, 1]], [[124, 1], [0, 2]]],
+ [[[28, 1], [20, 2]], [[112, 3]], [[0, 2]], [[51, 2]]],
+ [[[113, 1]], [[45, 2], [0, 1]], [[113, 1], [0, 2]]],
+ [[[4, 1]], [[20, 2]], [[114, 3]], [[69, 4]], [[70, 5]], [[0, 5]]],
+ [[[27, 1]], [[94, 2]], [[75, 3]], [[115, 4]], [[116, 5], [0, 4]], [[0, 5]]],
+ [[[30, 1]], [[117, 2]], [[116, 3], [0, 2]], [[0, 3]]],
+ [[[46, 1], [118, 1]], [[0, 1]]],
+ [[[26, 1]], [[20, 2]], [[45, 1], [0, 2]]],
  [[[30, 1]],
-  [[93, 2], [99, 3]],
-  [[24, 4]],
-  [[93, 2], [24, 4], [99, 3]],
-  [[125, 5], [43, 5], [29, 6]],
+  [[44, 2]],
+  [[69, 3]],
+  [[70, 4]],
+  [[111, 5], [119, 1], [0, 4]],
+  [[69, 6]],
+  [[70, 7]],
+  [[0, 7]]],
+ [[[20, 1]], [[95, 2], [0, 1]], [[20, 3]], [[0, 3]]],
+ [[[120, 1]], [[45, 2], [0, 1]], [[120, 1], [0, 2]]],
+ [[[29, 1]],
+  [[91, 2], [97, 3]],
+  [[23, 4]],
+  [[91, 2], [23, 4], [97, 3]],
+  [[121, 5], [41, 5], [28, 6]],
   [[0, 5]],
-  [[125, 7]],
-  [[53, 5]]],
- [[[24, 1]], [[126, 2]], [[0, 2]]],
- [[[127, 1], [128, 1]], [[0, 1]]],
- [[[38, 1]], [[71, 2], [129, 3]], [[46, 4]], [[71, 2]], [[0, 4]]],
- [[[28, 1]], [[96, 2]], [[77, 3]], [[130, 4]], [[131, 5], [0, 4]], [[0, 5]]],
- [[[31, 1]], [[121, 2]], [[131, 3], [0, 2]], [[0, 3]]],
- [[[132, 1], [133, 1]], [[0, 1]]],
- [[[46, 1]],
-  [[132, 2], [47, 3], [0, 1]],
+  [[121, 7]],
+  [[51, 5]]],
+ [[[23, 1]], [[122, 2]], [[0, 2]]],
+ [[[123, 1], [124, 1]], [[0, 1]]],
+ [[[36, 1]], [[69, 2], [125, 3]], [[44, 4]], [[69, 2]], [[0, 4]]],
+ [[[27, 1]], [[94, 2]], [[75, 3]], [[126, 4]], [[127, 5], [0, 4]], [[0, 5]]],
+ [[[30, 1]], [[117, 2]], [[127, 3], [0, 2]], [[0, 3]]],
+ [[[128, 1], [129, 1]], [[0, 1]]],
+ [[[44, 1]],
+  [[128, 2], [45, 3], [0, 1]],
   [[0, 2]],
-  [[46, 4], [0, 3]],
-  [[47, 3], [0, 4]]],
- [[[7, 1], [134, 2]], [[41, 2]], [[0, 2]]],
- [[[38, 1]], [[71, 2], [129, 3]], [[121, 4]], [[71, 2]], [[0, 4]]],
- [[[135, 1], [119, 1]], [[0, 1]]],
- [[[136, 1]], [[137, 0], [0, 1]]],
- [[[29, 1]], [[53, 2], [129, 3]], [[0, 2]], [[53, 2]]],
- [[[23, 1]], [[0, 1]]],
- [[[138, 1]], [[139, 1], [45, 2], [0, 1]], [[106, 3]], [[0, 3]]],
- [[[13, 1]],
-  [[46, 2], [140, 3], [0, 1]],
-  [[47, 4], [0, 2]],
-  [[46, 5]],
-  [[46, 2], [0, 4]],
-  [[47, 6], [0, 5]],
-  [[46, 7]],
-  [[47, 8], [0, 7]],
-  [[46, 7], [0, 8]]],
- [[[32, 1]], [[73, 2], [0, 1]], [[0, 2]]],
+  [[44, 4], [0, 3]],
+  [[45, 3], [0, 4]]],
+ [[[7, 1], [130, 2]], [[39, 2]], [[0, 2]]],
+ [[[36, 1]], [[69, 2], [125, 3]], [[117, 4]], [[69, 2]], [[0, 4]]],
+ [[[131, 1], [115, 1]], [[0, 1]]],
+ [[[132, 1]], [[133, 0], [0, 1]]],
+ [[[28, 1]], [[51, 2], [125, 3]], [[0, 2]], [[51, 2]]],
+ [[[22, 1]], [[0, 1]]],
+ [[[134, 1]], [[135, 1], [43, 2], [0, 1]], [[104, 3]], [[0, 3]]],
+ [[[12, 1]],
+  [[44, 2], [136, 3], [0, 1]],
+  [[45, 4], [0, 2]],
+  [[44, 5]],
+  [[44, 2], [0, 4]],
+  [[45, 6], [0, 5]],
+  [[44, 7]],
+  [[45, 8], [0, 7]],
+  [[44, 7], [0, 8]]],
  [[[5, 1]],
-  [[46, 2], [0, 1]],
-  [[47, 3], [0, 2]],
-  [[46, 4]],
-  [[47, 5], [0, 4]],
-  [[46, 6]],
+  [[44, 2], [0, 1]],
+  [[45, 3], [0, 2]],
+  [[44, 4]],
+  [[45, 5], [0, 4]],
+  [[44, 6]],
   [[0, 6]]],
- [[[19, 1]], [[73, 2], [0, 1]], [[0, 2]]],
- [[[141, 1]], [[142, 0], [140, 0], [0, 1]]],
- [[[143, 1]], [[2, 2], [144, 3]], [[0, 2]], [[143, 1], [2, 2]]],
- [[[71, 1]], [[46, 2], [0, 1]], [[0, 2]]],
- [[[145, 1],
+ [[[18, 1]], [[71, 2], [0, 1]], [[0, 2]]],
+ [[[137, 1]], [[136, 0], [138, 0], [0, 1]]],
+ [[[139, 1]], [[2, 2], [140, 3]], [[0, 2]], [[139, 1], [2, 2]]],
+ [[[69, 1]], [[44, 2], [0, 1]], [[0, 2]]],
+ [[[141, 1],
+   [142, 1],
+   [143, 1],
+   [144, 1],
+   [145, 1],
    [146, 1],
    [147, 1],
    [148, 1],
-   [149, 1],
-   [150, 1],
-   [151, 1],
-   [152, 1],
-   [153, 1]],
+   [149, 1]],
   [[0, 1]]],
  [[[1, 1], [3, 1]], [[0, 1]]],
- [[[46, 1], [71, 2], [99, 3]],
-  [[71, 2], [0, 1]],
-  [[46, 4], [154, 5], [0, 2]],
-  [[99, 6]],
-  [[154, 5], [0, 4]],
+ [[[44, 1], [69, 2], [97, 3]],
+  [[69, 2], [0, 1]],
+  [[44, 4], [150, 5], [0, 2]],
+  [[97, 6]],
+  [[150, 5], [0, 4]],
   [[0, 5]],
-  [[99, 5]]],
- [[[155, 1]], [[47, 2], [0, 1]], [[155, 1], [0, 2]]],
- [[[1, 1], [2, 2]], [[0, 1]], [[156, 3]], [[107, 4]], [[157, 1], [107, 4]]],
- [[[106, 1]], [[158, 0], [43, 0], [159, 0], [160, 0], [0, 1]]],
- [[[119, 1], [161, 2]],
-  [[31, 3], [0, 1]],
+  [[97, 5]]],
+ [[[151, 1]], [[45, 2], [0, 1]], [[151, 1], [0, 2]]],
+ [[[1, 1], [2, 2]], [[0, 1]], [[152, 3]], [[105, 4]], [[153, 1], [105, 4]]],
+ [[[104, 1]], [[154, 0], [41, 0], [155, 0], [156, 0], [0, 1]]],
+ [[[115, 1], [157, 2]],
+  [[30, 3], [0, 1]],
   [[0, 2]],
-  [[119, 4]],
-  [[115, 5]],
-  [[46, 2]]],
- [[[46, 1]], [[47, 2], [0, 1]], [[46, 1], [0, 2]]],
- [[[46, 1]], [[47, 0], [0, 1]]],
- [[[46, 1]],
-  [[48, 2], [47, 3], [0, 1]],
+  [[115, 4]],
+  [[111, 5]],
+  [[44, 2]]],
+ [[[44, 1]], [[45, 2], [0, 1]], [[44, 1], [0, 2]]],
+ [[[44, 1]], [[45, 0], [0, 1]]],
+ [[[44, 1]],
+  [[46, 2], [45, 3], [0, 1]],
   [[0, 2]],
-  [[46, 4], [0, 3]],
-  [[47, 3], [0, 4]]],
- [[[121, 1]],
-  [[47, 2], [0, 1]],
-  [[121, 3]],
-  [[47, 4], [0, 3]],
-  [[121, 3], [0, 4]]],
- [[[29, 1], [99, 2], [12, 3]],
-  [[53, 4], [94, 5]],
-  [[21, 4]],
-  [[162, 6]],
+  [[44, 4], [0, 3]],
+  [[45, 3], [0, 4]]],
+ [[[117, 1]],
+  [[45, 2], [0, 1]],
+  [[117, 3]],
+  [[45, 4], [0, 3]],
+  [[117, 3], [0, 4]]],
+ [[[28, 1], [97, 2], [11, 3]],
+  [[51, 4], [92, 5]],
+  [[20, 4]],
+  [[158, 6]],
   [[0, 4]],
-  [[53, 4]],
-  [[57, 4]]],
- [[[15, 1]],
-  [[71, 2]],
-  [[72, 3]],
-  [[163, 4], [164, 5]],
-  [[71, 6]],
-  [[71, 7]],
-  [[72, 8]],
-  [[72, 9]],
-  [[163, 4], [115, 10], [164, 5], [0, 8]],
+  [[51, 4]],
+  [[50, 4]]],
+ [[[14, 1]],
+  [[69, 2]],
+  [[70, 3]],
+  [[159, 4], [160, 5]],
+  [[69, 6]],
+  [[69, 7]],
+  [[70, 8]],
+  [[70, 9]],
+  [[159, 4], [111, 10], [160, 5], [0, 8]],
   [[0, 9]],
-  [[71, 11]],
-  [[72, 12]],
-  [[164, 5], [0, 12]]],
- [[[43, 1], [117, 2], [45, 3]],
-  [[21, 4]],
-  [[49, 5], [47, 6], [0, 2]],
-  [[21, 7]],
-  [[47, 8], [0, 4]],
-  [[46, 9]],
-  [[43, 1], [117, 2], [45, 3], [0, 6]],
+  [[69, 11]],
+  [[70, 12]],
+  [[160, 5], [0, 12]]],
+ [[[41, 1], [113, 2], [43, 3]],
+  [[20, 4]],
+  [[47, 5], [45, 6], [0, 2]],
+  [[20, 7]],
+  [[45, 8], [0, 4]],
+  [[44, 9]],
+  [[41, 1], [113, 2], [43, 3], [0, 6]],
   [[0, 7]],
-  [[45, 3]],
-  [[47, 6], [0, 9]]],
- [[[17, 1]],
-  [[46, 2]],
-  [[71, 3]],
-  [[72, 4]],
-  [[115, 5], [0, 4]],
-  [[71, 6]],
-  [[72, 7]],
+  [[43, 3]],
+  [[45, 6], [0, 9]]],
+ [[[16, 1]],
+  [[44, 2]],
+  [[69, 3]],
+  [[70, 4]],
+  [[111, 5], [0, 4]],
+  [[69, 6]],
+  [[70, 7]],
   [[0, 7]]],
- [[[36, 1]], [[46, 2]], [[71, 3], [165, 4]], [[72, 5]], [[71, 3]], [[0, 5]]],
- [[[97, 1]], [[82, 2]], [[0, 2]]],
- [[[166, 1]], [[167, 0], [0, 1]]],
- [[[26, 1]], [[73, 2], [0, 1]], [[0, 2]]],
- [[[55, 1]], [[0, 1]]]],
+ [[[34, 1]], [[44, 2]], [[69, 3], [161, 4]], [[70, 5]], [[69, 3]], [[0, 5]]],
+ [[[95, 1]], [[80, 2]], [[0, 2]]],
+ [[[162, 1]], [[163, 0], [0, 1]]],
+ [[[25, 1]], [[71, 2], [0, 1]], [[0, 2]]],
+ [[[53, 1]], [[0, 1]]]],
 labels:
 [[0, 'EMPTY'],
- [321, null],
+ [319, null],
  [4, null],
  [269, null],
  [1, 'def'],
  [1, 'raise'],
- [3, null],
+ [32, null],
  [1, 'not'],
  [2, null],
  [26, null],
  [1, 'class'],
- [1, 'exit'],
  [9, null],
  [1, 'print'],
  [25, null],
  [1, 'try'],
  [1, 'exec'],
  [1, 'while'],
- [32, null],
+ [3, null],
  [1, 'return'],
  [1, 'assert'],
  [1, null],
@@ -12301,33 +14171,32 @@ labels:
  [7, null],
  [1, 'from'],
  [1, 'if'],
- [1, 'quit'],
  [1, 'break'],
  [1, 'continue'],
  [50, null],
  [1, 'with'],
  [14, null],
  [1, 'lambda'],
- [320, null],
+ [318, null],
  [19, null],
- [309, null],
+ [308, null],
  [1, 'and'],
  [16, null],
  [260, null],
  [36, null],
- [329, null],
+ [327, null],
  [12, null],
- [294, null],
+ [293, null],
  [22, null],
- [328, null],
+ [326, null],
+ [307, null],
+ [10, null],
+ [8, null],
+ [330, null],
+ [339, null],
  [275, null],
  [27, null],
- [8, null],
- [332, null],
- [341, null],
- [308, null],
- [10, null],
- [331, null],
+ [329, null],
  [46, null],
  [39, null],
  [41, null],
@@ -12341,8 +14210,8 @@ labels:
  [38, null],
  [45, null],
  [11, null],
- [327, null],
- [330, null],
+ [325, null],
+ [328, null],
  [29, null],
  [21, null],
  [28, null],
@@ -12351,178 +14220,174 @@ labels:
  [1, 'is'],
  [31, null],
  [20, null],
- [284, null],
+ [283, null],
  [267, null],
- [335, null],
- [298, null],
- [290, null],
+ [333, null],
+ [297, null],
+ [289, null],
  [266, null],
- [338, null],
- [337, null],
- [293, null],
+ [336, null],
+ [335, null],
+ [292, null],
  [271, null],
  [273, null],
  [278, null],
  [259, null],
  [272, null],
- [286, null],
+ [285, null],
  [1, 'as'],
  [276, null],
  [23, null],
  [0, null],
  [1, 'except'],
- [340, null],
+ [338, null],
  [18, null],
  [264, null],
- [315, null],
- [287, null],
- [324, null],
+ [314, null],
+ [286, null],
+ [322, null],
  [265, null],
- [283, null],
  [270, null],
+ [316, null],
  [317, null],
- [319, null],
- [318, null],
- [342, null],
+ [340, null],
  [1, 'else'],
- [292, null],
  [291, null],
- [313, null],
+ [290, null],
  [312, null],
- [296, null],
  [311, null],
  [295, null],
- [1, 'elif'],
- [299, null],
- [300, null],
- [277, null],
- [302, null],
- [301, null],
- [336, null],
- [333, null],
- [307, null],
- [305, null],
- [306, null],
- [268, null],
  [310, null],
+ [294, null],
+ [1, 'elif'],
+ [298, null],
+ [299, null],
+ [277, null],
+ [301, null],
+ [300, null],
+ [334, null],
+ [331, null],
+ [306, null],
+ [304, null],
+ [305, null],
+ [268, null],
+ [309, null],
  [258, null],
  [1, 'or'],
  [263, null],
- [334, null],
+ [332, null],
  [35, null],
  [261, null],
  [34, null],
- [323, null],
+ [321, null],
  [13, null],
- [289, null],
- [274, null],
- [285, null],
- [314, null],
- [316, null],
+ [288, null],
  [262, null],
+ [284, null],
+ [313, null],
+ [315, null],
+ [274, null],
  [282, null],
- [297, null],
- [303, null],
- [322, null],
- [325, null],
+ [296, null],
+ [302, null],
+ [320, null],
+ [323, null],
  [5, null],
  [6, null],
  [48, null],
  [17, null],
  [24, null],
- [304, null],
- [326, null],
+ [303, null],
+ [324, null],
  [281, null],
  [1, 'finally'],
- [339, null],
+ [337, null],
  [257, null],
  [33, null]],
 keywords:
-{'and': 42,
- 'as': 97,
- 'assert': 20,
- 'break': 33,
+{'and': 40,
+ 'as': 95,
+ 'assert': 19,
+ 'break': 31,
  'class': 10,
- 'continue': 34,
+ 'continue': 32,
  'def': 4,
- 'del': 22,
- 'elif': 123,
- 'else': 115,
- 'except': 101,
- 'exec': 16,
- 'exit': 11,
- 'finally': 164,
- 'for': 28,
- 'from': 30,
- 'global': 27,
- 'if': 31,
- 'import': 24,
- 'in': 77,
- 'is': 79,
- 'lambda': 38,
+ 'del': 21,
+ 'elif': 119,
+ 'else': 111,
+ 'except': 99,
+ 'exec': 15,
+ 'finally': 160,
+ 'for': 27,
+ 'from': 29,
+ 'global': 26,
+ 'if': 30,
+ 'import': 23,
+ 'in': 75,
+ 'is': 77,
+ 'lambda': 36,
  'not': 7,
- 'or': 137,
- 'pass': 23,
- 'print': 13,
- 'quit': 32,
+ 'or': 133,
+ 'pass': 22,
+ 'print': 12,
  'raise': 5,
- 'return': 19,
- 'try': 15,
- 'while': 17,
- 'with': 36,
- 'yield': 26},
+ 'return': 18,
+ 'try': 14,
+ 'while': 16,
+ 'with': 34,
+ 'yield': 25},
 tokens:
-{0: 100,
- 1: 21,
+{0: 98,
+ 1: 20,
  2: 8,
- 3: 6,
+ 3: 17,
  4: 2,
- 5: 156,
- 6: 157,
- 7: 29,
- 8: 53,
- 9: 12,
- 10: 57,
- 11: 71,
- 12: 47,
- 13: 144,
- 14: 37,
- 15: 25,
- 16: 43,
- 17: 159,
- 18: 103,
- 19: 40,
- 20: 81,
- 21: 75,
- 22: 49,
- 23: 99,
- 24: 160,
- 25: 14,
+ 5: 152,
+ 6: 153,
+ 7: 28,
+ 8: 51,
+ 9: 11,
+ 10: 50,
+ 11: 69,
+ 12: 45,
+ 13: 140,
+ 14: 35,
+ 15: 24,
+ 16: 41,
+ 17: 155,
+ 18: 101,
+ 19: 38,
+ 20: 79,
+ 21: 73,
+ 22: 47,
+ 23: 97,
+ 24: 156,
+ 25: 13,
  26: 9,
- 27: 52,
- 28: 76,
- 29: 74,
- 30: 78,
- 31: 80,
- 32: 18,
- 33: 167,
- 34: 142,
- 35: 140,
- 36: 45,
- 37: 65,
- 38: 69,
- 39: 60,
- 40: 68,
- 41: 61,
- 42: 63,
- 43: 64,
- 44: 66,
- 45: 70,
- 46: 59,
- 47: 62,
- 48: 158,
- 49: 67,
- 50: 35},
+ 27: 55,
+ 28: 74,
+ 29: 72,
+ 30: 76,
+ 31: 78,
+ 32: 6,
+ 33: 163,
+ 34: 138,
+ 35: 136,
+ 36: 43,
+ 37: 63,
+ 38: 67,
+ 39: 58,
+ 40: 66,
+ 41: 59,
+ 42: 61,
+ 43: 62,
+ 44: 64,
+ 45: 68,
+ 46: 57,
+ 47: 60,
+ 48: 154,
+ 49: 65,
+ 50: 33},
 start: 256
 };
 // low level parser to a concrete syntax tree, derived from cpython's lib2to3
@@ -12541,8 +14406,9 @@ start: 256
  *
  * can throw ParseError
  */
-function Parser(grammar)
+function Parser(filename, grammar)
 {
+    this.filename = filename;
     this.grammar = grammar;
     return this;
 }
@@ -12658,14 +14524,14 @@ OUTERWHILE:
             this.pop();
             if (this.stack.length === 0)
             {
-                throw new Sk.builtin.ParseError("too much input");
+                throw new Sk.builtin.ParseError("too much input", this.filename);
             }
         }
         else
         {
             // no transition
             var errline = context[0][0];
-            throw new Sk.builtin.ParseError("bad input on line " + errline.toString(), "", errline, context);	//	RNL
+            throw new Sk.builtin.ParseError("bad input on line " + errline.toString(), this.filename, errline, context);	//	RNL
 //          throw new Sk.builtin.ParseError("bad input on line " + errline.toString());		RNL
         }
     }
@@ -12686,8 +14552,12 @@ Parser.prototype.classify = function(type, value, context)
         }
     }
     ilabel = this.grammar.tokens.hasOwnProperty(type) && this.grammar.tokens[type];
-    if (!ilabel)
-        throw new Sk.builtin.ParseError("bad token", type, value, context);
+    if (!ilabel) {
+        // throw new Sk.builtin.ParseError("bad token", type, value, context);
+        // Questionable modification to put line number in position 2
+        // like everywhere else and filename in position 1.
+        throw new Sk.builtin.ParseError("bad token", this.filename, context[0][0], context);
+    }
     return ilabel;
 };
 
@@ -12779,7 +14649,7 @@ Parser.prototype.pop = function()
 function makeParser(filename, style)
 {
     if (style === undefined) style = "file_input";
-    var p = new Parser(Sk.ParseTables);
+    var p = new Parser(filename, Sk.ParseTables);
     // for closure's benefit
     if (style === "file_input")
         p.setup(Sk.ParseTables.sym.file_input);
@@ -12832,7 +14702,7 @@ function makeParser(filename, style)
         if (ret)
         {
             if (ret !== "done") {
-                throw "ParseError: incomplete input";
+                throw new Sk.builtin.ParseError("incomplete input", this.filename);
 			}
             return p.rootnode;
         }
@@ -13036,26 +14906,6 @@ function ClassDef(/* {identifier} */ name, /* {asdl_seq *} */ bases, /*
 /** @constructor */
 function Return_(/* {expr_ty} */ value, /* {int} */ lineno, /* {int} */
                       col_offset)
-{
-    this.value = value;
-    this.lineno = lineno;
-    this.col_offset = col_offset;
-    return this;
-}
-
-/** @constructor */
-function Quit_(/* {expr_ty} */ value, /* {int} */ lineno, /* {int} */
-                    col_offset)
-{
-    this.value = value;
-    this.lineno = lineno;
-    this.col_offset = col_offset;
-    return this;
-}
-
-/** @constructor */
-function Exit_(/* {expr_ty} */ value, /* {int} */ lineno, /* {int} */
-                    col_offset)
 {
     this.value = value;
     this.lineno = lineno;
@@ -13650,14 +15500,6 @@ Return_.prototype._astname = "Return";
 Return_.prototype._fields = [
     "value", function(n) { return n.value; }
 ];
-Quit_.prototype._astname = "Quit";
-Quit_.prototype._fields = [
-    "value", function(n) { return n.value; }
-];
-Exit_.prototype._astname = "Exit";
-Exit_.prototype._fields = [
-    "value", function(n) { return n.value; }
-];
 Delete_.prototype._astname = "Delete";
 Delete_.prototype._fields = [
     "targets", function(n) { return n.targets; }
@@ -14050,10 +15892,10 @@ function numStmts(n)
     return 0;
 }
 
-function forbiddenCheck(c, n, x)
+function forbiddenCheck(c, n, x, lineno)
 {
-    if (x === "None") throw new Sk.builtin.SyntaxError("assignment to None");
-    if (x === "True" || x === "False") throw new Sk.builtin.SyntaxError("assignment to True or False is forbidden");
+    if (x === "None") throw new Sk.builtin.SyntaxError("assignment to None", "", lineno);
+    if (x === "True" || x === "False") throw new Sk.builtin.SyntaxError("assignment to True or False is forbidden", "", lineno);
 }
 
 /**
@@ -14072,7 +15914,7 @@ function setContext(c, e, ctx, n)
     {
         case Attribute:
         case Name:
-            if (ctx === Store) forbiddenCheck(c, n, e.attr);
+            if (ctx === Store) forbiddenCheck(c, n, e.attr, n.lineno);
             e.ctx = ctx;
             break;
         case Subscript:
@@ -14084,7 +15926,7 @@ function setContext(c, e, ctx, n)
             break;
         case Tuple:
             if (e.elts.length === 0)
-                throw new Sk.builtin.SyntaxError("can't assign to ()");
+                throw new Sk.builtin.SyntaxError("can't assign to ()", "", n.lineno);
             e.ctx = ctx;
             s = e.elts;
             break;
@@ -14124,7 +15966,7 @@ function setContext(c, e, ctx, n)
     }
     if (exprName)
     {
-        throw new Sk.builtin.SyntaxError("can't " + (ctx === Store ? "assign to" : "delete") + " " + exprName);
+        throw new Sk.builtin.SyntaxError("can't " + (ctx === Store ? "assign to" : "delete") + " " + exprName, "", n.lineno);
     }
 
     if (s)
@@ -14309,7 +16151,7 @@ function astForTryStmt(c, n)
     }
     else if (CHILD(n, nc - 3).type !== SYM.except_clause)
     {
-        throw new Sk.builtin.SyntaxError("malformed 'try' statement");
+        throw new Sk.builtin.SyntaxError("malformed 'try' statement", "", n.lineno);
     }
 
     if (nexcept > 0)
@@ -14585,7 +16427,7 @@ function aliasForImportName(c, n)
             case TOK.T_STAR:
                 return new alias(strobj("*"), null);
             default:
-                throw new Sk.builtin.SyntaxError("unexpected import name");
+                throw new Sk.builtin.SyntaxError("unexpected import name", "", n.lineno);
         }
     break; }
 }
@@ -14647,10 +16489,10 @@ function astForImportStmt(c, n)
                 n = CHILD(n, idx);
                 nchildren = NCH(n);
                 if (nchildren % 2 === 0)
-                    throw new Sk.builtin.SyntaxError("trailing comma not allowed without surrounding parentheses");
+                    throw new Sk.builtin.SyntaxError("trailing comma not allowed without surrounding parentheses", "", n.lineno);
                 break;
             default:
-                throw new Sk.builtin.SyntaxError("Unexpected node-type in from-import");
+                throw new Sk.builtin.SyntaxError("Unexpected node-type in from-import", "", n.lineno);
         }
         var aliases = [];
         if (n.type === TOK.T_STAR)
@@ -14661,7 +16503,7 @@ function astForImportStmt(c, n)
         var modname = mod ? mod.name.v : "";
         return new ImportFrom(strobj(modname), aliases, ndots, lineno, col_offset);
     }
-    throw new Sk.builtin.SyntaxError("unknown import statement");
+    throw new Sk.builtin.SyntaxError("unknown import statement", "", n.lineno);
 }
 
 function astForTestlistGexp(c, n)
@@ -14850,9 +16692,9 @@ function astForCall(c, n, func)
         }
     }
     if (ngens > 1 || (ngens && (nargs || nkeywords)))
-        throw new Sk.builtin.SyntaxError("Generator expression must be parenthesized if not sole argument");
+        throw new Sk.builtin.SyntaxError("Generator expression must be parenthesized if not sole argument", "", n.lineno);
     if (nargs + nkeywords + ngens > 255)
-        throw new Sk.builtin.SyntaxError("more than 255 arguments");
+        throw new Sk.builtin.SyntaxError("more than 255 arguments", "", n.lineno);
     var args = [];
     var keywords = [];
     nargs = 0;
@@ -14866,8 +16708,8 @@ function astForCall(c, n, func)
         {
             if (NCH(ch) === 1)
             {
-                if (nkeywords) throw new Sk.builtin.SyntaxError("non-keyword arg after keyword arg");
-                if (vararg) throw new Sk.builtin.SyntaxError("only named arguments may follow *expression");
+                if (nkeywords) throw new Sk.builtin.SyntaxError("non-keyword arg after keyword arg", "", n.lineno);
+                if (vararg) throw new Sk.builtin.SyntaxError("only named arguments may follow *expression", "", n.lineno);
                 args[nargs++] = astForExpr(c, CHILD(ch, 0));
             }
             else if (CHILD(ch, 1).type === SYM.gen_for)
@@ -14875,14 +16717,14 @@ function astForCall(c, n, func)
             else
             {
                 var e = astForExpr(c, CHILD(ch, 0));
-                if (e.constructor === Lambda) throw new Sk.builtin.SyntaxError("lambda cannot contain assignment");
-                else if (e.constructor !== Name) throw new Sk.builtin.SyntaxError("keyword can't be an expression");
+                if (e.constructor === Lambda) throw new Sk.builtin.SyntaxError("lambda cannot contain assignment", "", n.lineno);
+                else if (e.constructor !== Name) throw new Sk.builtin.SyntaxError("keyword can't be an expression", "", n.lineno);
                 var key = e.id;
-                forbiddenCheck(c, CHILD(ch, 0), key);
+                forbiddenCheck(c, CHILD(ch, 0), key, n.lineno);
                 for (var k = 0; k < nkeywords; ++k)
                 {
                     var tmp = keywords[k].arg;
-                    if (tmp === key) throw new Sk.builtin.SyntaxError("keyword argument repeated");
+                    if (tmp === key) throw new Sk.builtin.SyntaxError("keyword argument repeated", "", n.lineno);
                 }
                 keywords[nkeywords++] = new keyword(key, astForExpr(c, CHILD(ch, 2)));
             }
@@ -14976,17 +16818,6 @@ function astForFlowStmt(c, n)
                 return new Return_(null, n.lineno, n.col_offset);
             else
                 return new Return_(astForTestlist(c, CHILD(ch, 1)), n.lineno, n.col_offset);
-        case SYM.quit_stmt:
-            if (NCH(ch) === 1)
-                return new Quit_(null, n.lineno, n.col_offset);
-            else
-                return new Quit_(astForTestlist(c, CHILD(ch, 1)), n.lineno, n.col_offset);
-        case SYM.exit_stmt:
-            if (NCH(ch) === 1)
-                return new Exit_(null, n.lineno, n.col_offset);
-            else
-                return new Exit_(astForTestlist(c, CHILD(ch, 1)), n.lineno, n.col_offset);
-
         case SYM.raise_stmt:
             if (NCH(ch) === 1)
                 return new Raise(null, null, null, n.lineno, n.col_offset);
@@ -15056,8 +16887,8 @@ function astForArguments(c, n)
                         /* def f((x)=4): pass should raise an error.
                            def f((x, (y))): pass will just incur the tuple unpacking warning. */
                         if (parenthesized && !complexArgs)
-                            throw new Sk.builtin.SyntaxError("parenthesized arg with default");
-                        throw new Sk.builtin.SyntaxError("non-default argument follows default argument");
+                            throw new Sk.builtin.SyntaxError("parenthesized arg with default", "", n.lineno);
+                        throw new Sk.builtin.SyntaxError("non-default argument follows default argument", "", n.lineno);
                     }
 
                     if (NCH(ch) === 3)
@@ -15081,22 +16912,22 @@ function astForArguments(c, n)
                     }
                     if (CHILD(ch, 0).type === TOK.T_NAME)
                     {
-                        forbiddenCheck(c, n, CHILD(ch, 0).value);
+                        forbiddenCheck(c, n, CHILD(ch, 0).value, n.lineno);
                         var id = strobj(CHILD(ch, 0).value);
                         args[k++] = new Name(id, Param, ch.lineno, ch.col_offset);
                     }
                     i += 2;
                     if (parenthesized)
-                        throw new Sk.builtin.SyntaxError("parenthesized argument names are invalid");
+                        throw new Sk.builtin.SyntaxError("parenthesized argument names are invalid", "", n.lineno);
                 break; }
                 break;
             case TOK.T_STAR:
-                forbiddenCheck(c, CHILD(n, i + 1), CHILD(n, i + 1).value);
+                forbiddenCheck(c, CHILD(n, i + 1), CHILD(n, i + 1).value, n.lineno);
                 vararg = strobj(CHILD(n, i + 1).value);
                 i += 3;
                 break;
             case TOK.T_DOUBLESTAR:
-                forbiddenCheck(c, CHILD(n, i + 1), CHILD(n, i + 1).value);
+                forbiddenCheck(c, CHILD(n, i + 1), CHILD(n, i + 1).value, n.lineno);
                 kwarg = strobj(CHILD(n, i + 1).value);
                 i += 3;
                 break;
@@ -15112,7 +16943,7 @@ function astForFuncdef(c, n, decoratorSeq)
     /* funcdef: 'def' NAME parameters ':' suite */
     REQ(n, SYM.funcdef);
     var name = strobj(CHILD(n, 1).value);
-    forbiddenCheck(c, CHILD(n, 1), CHILD(n, 1).value);
+    forbiddenCheck(c, CHILD(n, 1), CHILD(n, 1).value, n.lineno);
     var args = astForArguments(c, CHILD(n, 2));
     var body = astForSuite(c, CHILD(n, 4));
     return new FunctionDef(name, args, body, decoratorSeq, n.lineno, n.col_offset);
@@ -15132,7 +16963,7 @@ function astForClassdef(c, n, decoratorSeq)
 {
     /* classdef: 'class' NAME ['(' testlist ')'] ':' suite */
     REQ(n, SYM.classdef);
-    forbiddenCheck(c, n, CHILD(n, 1).value);
+    forbiddenCheck(c, n, CHILD(n, 1).value, n.lineno);
     var classname = strobj(CHILD(n, 1).value);
     if (NCH(n) === 4)
         return new ClassDef(classname, [], astForSuite(c, CHILD(n, 3)), decoratorSeq, n.lineno, n.col_offset);
@@ -15360,17 +17191,17 @@ function astForExprStmt(c, n)
         var expr1 = astForTestlist(c, ch);
         switch (expr1.constructor)
         {
-            case GeneratorExp: throw new Sk.builtin.SyntaxError("augmented assignment to generator expression not possible");
-            case Yield: throw new Sk.builtin.SyntaxError("augmented assignment to yield expression not possible");
+            case GeneratorExp: throw new Sk.builtin.SyntaxError("augmented assignment to generator expression not possible", "", n.lineno);
+            case Yield: throw new Sk.builtin.SyntaxError("augmented assignment to yield expression not possible", "", n.lineno);
             case Name:
                 var varName = expr1.id;
-                forbiddenCheck(c, ch, varName);
+                forbiddenCheck(c, ch, varName, n.lineno);
                 break;
             case Attribute:
             case Subscript:
                 break;
             default:
-                throw new Sk.builtin.SyntaxError("illegal expression for augmented assignment");
+                throw new Sk.builtin.SyntaxError("illegal expression for augmented assignment", "", n.lineno);
         }
         setContext(c, expr1, Store, ch);
 
@@ -15391,7 +17222,7 @@ function astForExprStmt(c, n)
         for (var i = 0; i < NCH(n) - 2; i += 2)
         {
             var ch = CHILD(n, i);
-            if (ch.type === SYM.yield_expr) throw new Sk.builtin.SyntaxError("assignment to yield expression not possible");
+            if (ch.type === SYM.yield_expr) throw new Sk.builtin.SyntaxError("assignment to yield expression not possible", "", n.lineno);
             var e = astForTestlist(c, ch);
             setContext(c, e, Store, CHILD(n, i));
             targets[i / 2] = e;
@@ -15440,6 +17271,9 @@ function parsestr(c, s)
                 else if (c === '\\') ret += "\\";
                 else if (c === 't') ret += "\t";
                 else if (c === 'r') ret += "\r";
+                else if (c === 'b') ret += "\b";
+                else if (c === 'f') ret += "\f";
+                else if (c === 'v') ret += "\v";
                 else if (c === '0') ret += "\0";
                 else if (c === '"') ret += '"';
                 else if (c === '\'') ret += '\'';
@@ -15460,7 +17294,9 @@ function parsestr(c, s)
                 }
                 else
                 {
-                    goog.asserts.fail("unhandled escape: '" + c.charCodeAt(0) + "'");
+                    // Leave it alone
+                    ret += "\\" + c;
+                    // goog.asserts.fail("unhandled escape: '" + c.charCodeAt(0) + "'");
                 }
             }
             else
@@ -15511,27 +17347,88 @@ function parsestrplus(c, n)
     var ret = new Sk.builtin.str("");
     for (var i = 0; i < NCH(n); ++i)
     {
-        ret = ret.sq$concat(parsestr(c, CHILD(n, i).value));
+        try {
+            ret = ret.sq$concat(parsestr(c, CHILD(n, i).value));
+        } catch (x) {
+            throw new Sk.builtin.SyntaxError("invalid string (possibly contains a unicode character)", "", CHILD(n, i).lineno);
+        }
     }
     return ret;
 }
 
-function parsenumber(c, s)
+function parsenumber(c, s, lineno)
 {
-    // todo; no complex support
-
     var end = s.charAt(s.length - 1);
-    if (end === 'l' || end === 'L')
-        return Sk.longFromStr(s.substr(0, s.length - 1));
-    var k = goog.global.eval(s);
-    if ((k > Sk.builtin.lng.threshold$ || k < -Sk.builtin.lng.threshold$)
-            && Math.floor(k) === k
-            && (s.indexOf('e') === -1 && s.indexOf('E') === -1))
-    {
-        return Sk.longFromStr(s);
+
+    // todo; no complex support
+    if (end === 'j' || end === 'J') {
+	throw new Sk.builtin.SyntaxError("complex numbers are currently unsupported", "", lineno);
     }
 
-	return Sk.numberFromStr(s);
+    // Handle longs
+    if (end === 'l' || end === 'L') {
+        return Sk.longFromStr(s.substr(0, s.length - 1), 0);
+    }
+    
+    // todo; we don't currently distinguish between int and float so
+    // str is wrong for these.
+    if (s.indexOf('.') !== -1)
+    {
+        return new Sk.builtin.nmber(parseFloat(s), Sk.builtin.nmber.float$);
+    }
+
+    // Handle integers of various bases
+    var tmp = s;
+    var val;
+    var neg = false;
+    if (s.charAt(0) === '-') {
+        tmp = s.substr(1);
+        neg = true;
+    }
+
+    if (tmp.charAt(0) === '0' && (tmp.charAt(1) === 'x' || tmp.charAt(1) === 'X')) {
+        // Hex
+        tmp = tmp.substring(2);
+        val = parseInt(tmp, 16);
+    } else if ((s.indexOf('e') !== -1) || (s.indexOf('E') !== -1)) {
+	// Float with exponent (needed to make sure e/E wasn't hex first)
+	return new Sk.builtin.nmber(parseFloat(s), Sk.builtin.nmber.float$);
+    } else if (tmp.charAt(0) === '0' && (tmp.charAt(1) === 'b' || tmp.charAt(1) === 'B')) {
+        // Binary
+        tmp = tmp.substring(2);
+        val = parseInt(tmp, 2);
+    } else if (tmp.charAt(0) === '0') {
+        if (tmp === "0") {
+            // Zero
+            val = 0;
+        } else {
+            // Octal
+            tmp = tmp.substring(1);
+            if ((tmp.charAt(0) === 'o') || (tmp.charAt(0) === 'O')) {
+                tmp = tmp.substring(1);
+            }
+            val = parseInt(tmp, 8);            
+        }
+    }
+    else {
+        // Decimal
+        val = parseInt(tmp, 10);
+    }
+
+    // Convert to long
+    if (val > Sk.builtin.lng.threshold$
+        && Math.floor(val) === val
+        && (s.indexOf('e') === -1 && s.indexOf('E') === -1))
+    {
+        return Sk.longFromStr(s, 0);
+    }
+
+    // Small enough, return parsed number
+    if (neg) {
+        return new Sk.builtin.nmber(-val, Sk.builtin.int$);
+    } else {
+        return new Sk.builtin.nmber(val, Sk.builtin.int$);
+    }
 }
 
 function astForSlice(c, n)
@@ -15600,7 +17497,7 @@ function astForAtom(c, n)
         case TOK.T_STRING:
             return new Str(parsestrplus(c, n), n.lineno, n.col_offset);
         case TOK.T_NUMBER:
-            return new Num(parsenumber(c, ch.value), n.lineno, n.col_offset);
+        return new Num(parsenumber(c, ch.value, n.lineno), n.lineno, n.col_offset);
         case TOK.T_LPAR: // various uses for parens
             ch = CHILD(n, 1);
             if (ch.type === TOK.T_RPAR)
@@ -15632,7 +17529,7 @@ function astForAtom(c, n)
             }
             return new Dict(keys, values, n.lineno, n.col_offset);
         case TOK.T_BACKQUOTE:
-            throw new Sk.builtin.SyntaxError("backquote not supported, use repr()");
+            throw new Sk.builtin.SyntaxError("backquote not supported, use repr()", "", n.lineno);
         default:
             goog.asserts.fail("unhandled atom", ch.type);
     }
@@ -16227,6 +18124,7 @@ SymbolTable.prototype.SEQExpr = function(nodes)
 
 SymbolTable.prototype.enterBlock = function(name, blockType, ast, lineno)
 {
+    name = fixReservedNames(name);
     //print("enterBlock:", name);
     var prev = null;
     if (this.cur)
@@ -16263,46 +18161,47 @@ SymbolTable.prototype.visitParams = function(args, toplevel)
         if (arg.constructor === Name)
         {
             goog.asserts.assert(arg.ctx === Param || (arg.ctx === Store && !toplevel));
-            this.addDef(arg.id, DEF_PARAM);
+            this.addDef(arg.id, DEF_PARAM, arg.lineno);
         }
         else
         {
             // Tuple isn't supported
-            throw new SyntaxError("invalid expression in parameter list");
+            throw new Sk.builtin.SyntaxError("invalid expression in parameter list", this.filename);
         }
     }
 }
 
-SymbolTable.prototype.visitArguments = function(a)
+SymbolTable.prototype.visitArguments = function(a, lineno)
 {
     if (a.args) this.visitParams(a.args, true);
     if (a.vararg)
     {
-        this.addDef(a.vararg, DEF_PARAM);
+        this.addDef(a.vararg, DEF_PARAM, lineno);
         this.cur.varargs = true;
     }
     if (a.kwarg)
     {
-        this.addDef(a.kwarg, DEF_PARAM);
+        this.addDef(a.kwarg, DEF_PARAM, lineno);
         this.cur.varkeywords = true;
     }
 };
 
-SymbolTable.prototype.newTmpname = function()
+SymbolTable.prototype.newTmpname = function(lineno)
 {
-    this.addDef(new Sk.builtin.str("_[" + (++this.tmpname) + "]"), DEF_LOCAL);
+    this.addDef(new Sk.builtin.str("_[" + (++this.tmpname) + "]"), DEF_LOCAL, lineno);
 }
 
-SymbolTable.prototype.addDef = function(name, flag)
+SymbolTable.prototype.addDef = function(name, flag, lineno)
 {
     //print("addDef:", name.v, flag);
     var mangled = mangleName(this.curClass, new Sk.builtin.str(name)).v;
+    mangled = fixReservedNames(mangled);
     var val = this.cur.symFlags[mangled];
     if (val !== undefined)
     {
         if ((flag & DEF_PARAM) && (val & DEF_PARAM))
         {
-            throw new Sk.builtin.SyntaxError("duplicate argument '" + name + "' in function definition");
+            throw new Sk.builtin.SyntaxError("duplicate argument '" + name.v + "' in function definition", this.filename, lineno);
         }
         val |= flag;
     }
@@ -16351,16 +18250,16 @@ SymbolTable.prototype.visitStmt = function(s)
     switch (s.constructor)
     {
         case FunctionDef:
-            this.addDef(s.name, DEF_LOCAL);
+            this.addDef(s.name, DEF_LOCAL, s.lineno);
             if (s.args.defaults) this.SEQExpr(s.args.defaults);
             if (s.decorator_list) this.SEQExpr(s.decorator_list);
             this.enterBlock(s.name.v, FunctionBlock, s, s.lineno);
-            this.visitArguments(s.args);
+            this.visitArguments(s.args, s.lineno);
             this.SEQStmt(s.body);
             this.exitBlock();
             break;
         case ClassDef:
-            this.addDef(s.name, DEF_LOCAL);
+            this.addDef(s.name, DEF_LOCAL, s.lineno);
             this.SEQExpr(s.bases);
             if (s.decorator_list) this.SEQExpr(s.decorator_list);
             this.enterBlock(s.name.v, ClassBlock, s, s.lineno);
@@ -16376,25 +18275,7 @@ SymbolTable.prototype.visitStmt = function(s)
                 this.visitExpr(s.value);
                 this.cur.returnsValue = true;
                 if (this.cur.generator)
-                    throw new SyntaxError("'return' with argument inside generator");
-            }
-            break;
-        case Exit_:
-            if (s.value)
-            {
-                this.visitExpr(s.value);
-                this.cur.returnsValue = false;
-                if (this.cur.generator)
-                    throw new SyntaxError("'exit' with argument inside generator");
-            }
-            break;
-        case Quit_:
-            if (s.value)
-            {
-                this.visitExpr(s.value);
-                this.cur.returnsValue = false;
-                if (this.cur.generator)
-                    throw new SyntaxError("'quit' with argument inside generator");
+                    throw new Sk.builtin.SyntaxError("'return' with argument inside generator", this.filename);
             }
             break;
         case Delete_:
@@ -16456,7 +18337,7 @@ SymbolTable.prototype.visitStmt = function(s)
             break;
         case Import_:
         case ImportFrom:
-            this.visitAlias(s.names);
+            this.visitAlias(s.names, s.lineno);
             break;
         case Exec:
             this.visitExpr(s.body);
@@ -16472,15 +18353,17 @@ SymbolTable.prototype.visitStmt = function(s)
             for (var i = 0; i < nameslen; ++i)
             {
                 var name = mangleName(this.curClass, s.names[i]).v;
+                name = fixReservedNames(name);
                 var cur = this.cur.symFlags[name];
                 if (cur & (DEF_LOCAL | USE))
                 {
-                    if (cur & DEF_LOCAL)
-                        throw new SyntaxError("name '" + name + "' is assigned to before global declaration");
+                    if (cur & DEF_LOCAL) {
+                        throw new Sk.builtin.SyntaxError("name '" + name + "' is assigned to before global declaration", this.filename, s.lineno);
+                    }
                     else
-                        throw new SyntaxError("name '" + name + "' is used prior to global declaration");
+                        throw new Sk.builtin.SyntaxError("name '" + name + "' is used prior to global declaration", this.filename, s.lineno);
                 }
-                this.addDef(new Sk.builtin.str(name), DEF_GLOBAL);
+                this.addDef(new Sk.builtin.str(name), DEF_GLOBAL, s.lineno);
             }
             break;
         case Expr:
@@ -16492,11 +18375,11 @@ SymbolTable.prototype.visitStmt = function(s)
             // nothing
             break;
         case With_:
-            this.newTmpname();
+            this.newTmpname(s.lineno);
             this.visitExpr(s.context_expr);
             if (s.optional_vars)
             {
-                this.newTmpname();
+                this.newTmpname(s.lineno);
                 this.visitExpr(s.optional_vars);
             }
             this.SEQStmt(s.body);
@@ -16524,11 +18407,11 @@ SymbolTable.prototype.visitExpr = function(e)
             this.visitExpr(e.operand);
             break;
         case Lambda:
-            this.addDef(new Sk.builtin.str("lambda"), DEF_LOCAL);
+            this.addDef(new Sk.builtin.str("lambda"), DEF_LOCAL, e.lineno);
             if (e.args.defaults)
                 this.SEQExpr(e.args.defaults);
             this.enterBlock("lambda", FunctionBlock, e, e.lineno);
-            this.visitArguments(e.args);
+            this.visitArguments(e.args, e.lineno);
             this.visitExpr(e.body);
             this.exitBlock();
             break;
@@ -16542,7 +18425,7 @@ SymbolTable.prototype.visitExpr = function(e)
             this.SEQExpr(e.values);
             break;
         case ListComp:
-            this.newTmpname();
+            this.newTmpname(e.lineno);
             this.visitExpr(e.elt);
             this.visitComprehension(e.generators, 0);
             break;
@@ -16553,7 +18436,7 @@ SymbolTable.prototype.visitExpr = function(e)
             if (e.value) this.visitExpr(e.value);
             this.cur.generator = true;
             if (this.cur.returnsValue)
-                throw new SyntaxError("'return' with argument inside generator");
+                throw new Sk.builtin.SyntaxError("'return' with argument inside generator", this.filename);
             break;
         case Compare:
             this.visitExpr(e.left);
@@ -16580,7 +18463,7 @@ SymbolTable.prototype.visitExpr = function(e)
             this.visitSlice(e.slice);
             break;
         case Name:
-            this.addDef(e.id, e.ctx === Load ? USE : DEF_LOCAL);
+            this.addDef(e.id, e.ctx === Load ? USE : DEF_LOCAL, e.lineno);
             break;
         case List:
         case Tuple:
@@ -16603,7 +18486,7 @@ SymbolTable.prototype.visitComprehension = function(lcs, startAt)
     }
 };
 
-SymbolTable.prototype.visitAlias = function(names)
+SymbolTable.prototype.visitAlias = function(names, lineno)
 {
     /* Compute store_name, the name actually bound by the import
         operation.  It is diferent than a->name when a->name is a
@@ -16618,11 +18501,11 @@ SymbolTable.prototype.visitAlias = function(names)
         if (dot !== -1)
             storename = name.substr(0, dot);
         if (name !== "*")
-            this.addDef(new Sk.builtin.str(storename), DEF_IMPORT);
+            this.addDef(new Sk.builtin.str(storename), DEF_IMPORT, lineno);
         else
         {
             if (this.cur.blockType !== ModuleBlock)
-                throw new SyntaxError("import * only allowed at module level");
+                throw new Sk.builtin.SyntaxError("import * only allowed at module level", this.filename);
         }
     }
 };
@@ -16634,7 +18517,7 @@ SymbolTable.prototype.visitGenexp = function(e)
     this.visitExpr(outermost.iter);
     this.enterBlock("genexpr", FunctionBlock, e, e.lineno);
     this.cur.generator = true;
-    this.addDef(new Sk.builtin.str(".0"), DEF_PARAM);
+    this.addDef(new Sk.builtin.str(".0"), DEF_PARAM, e.lineno);
     this.visitExpr(outermost.target);
     this.SEQExpr(outermost.ifs);
     this.visitComprehension(e.generators, 1);
@@ -16772,7 +18655,7 @@ SymbolTable.prototype.analyzeName = function(ste, dict, name, flags, bound, loca
 {
     if (flags & DEF_GLOBAL)
     {
-        if (flags & DEF_PARAM) throw new Sk.builtin.SyntaxError("name '" + name + "' is local and global");
+        if (flags & DEF_PARAM) throw new Sk.builtin.SyntaxError("name '" + name + "' is local and global", this.filename, ste.lineno);
         dict[name] = GLOBAL_EXPLICIT;
         global[name] = null;
         if (bound && bound[name] !== undefined) delete bound[name];
@@ -16902,6 +18785,8 @@ goog.exportSymbol("Sk.dumpSymtab", Sk.dumpSymtab);
 /** @param {...*} x */
 var out;
 
+Sk.gensymcount = 0;
+
 /**
  * @constructor
  * @param {string} filename
@@ -16922,7 +18807,7 @@ function Compiler(filename, st, flags, sourceCodeForAnnotation)
 
     this.result = [];
 
-    this.gensymcount = 0;
+    // this.gensymcount = 0;
 
     this.allUnits = [];
 
@@ -17004,7 +18889,7 @@ Compiler.prototype.gensym = function(hint)
 {
     hint = hint || '';
     hint = '$' + hint;
-    hint += this.gensymcount++;
+    hint += Sk.gensymcount++;
     return hint;
 };
 
@@ -17037,19 +18922,42 @@ function fixReservedWords(name)
     return name + "_$rw$";
 }
 
+var reservedNames_ = { '__defineGetter__': true, '__defineSetter__': true, 
+    'apply': true, 'call': true, 'eval': true, 'hasOwnProperty': true, 
+    'isPrototypeOf': true, 
+    '__lookupGetter__': true, '__lookupSetter__': true, 
+    '__noSuchMethod__': true, 'propertyIsEnumerable': true,
+    'toSource': true, 'toLocaleString': true, 'toString': true,
+    'unwatch': true, 'valueOf': true, 'watch': true
+};
+
+function fixReservedNames(name)
+{
+    if (reservedNames_[name])
+        return name + "_$rn$";
+    return name;
+}
+
 function mangleName(priv, ident)
 {
     var name = ident.v;
+    var strpriv = null;
+
     if (priv === null || name === null || name.charAt(0) !== '_' || name.charAt(1) !== '_')
         return ident;
     // don't mangle __id__
     if (name.charAt(name.length - 1) === '_' && name.charAt(name.length - 2) === '_')
         return ident;
     // don't mangle classes that are all _ (obscure much?)
-    if (priv.v.replace(/_/g, '') === '')
+    strpriv = priv.v;
+    strpriv.replace(/_/g, '');
+    if (strpriv === '')
         return ident;
-    priv = priv.v.replace(/^_*/, '');
-    return '_' + priv + name;
+
+    strpriv = priv.v;
+    strpriv.replace(/^_*/, '');
+    strpriv = new Sk.builtin.str('_' + strpriv + name);
+    return strpriv;
 }
 
 /**
@@ -17251,35 +19159,7 @@ Compiler.prototype.ccall = function(e)
     }
 };
 
-Compiler.prototype.csimpleslice = function(s, ctx, obj, dataToStore)
-{
-    goog.asserts.assert(s.step === null);
-    var lower = 'null', upper = 'null';
-    if (s.lower)
-        lower = this.vexpr(s.lower);
-    if (s.upper)
-        upper = this.vexpr(s.upper);
-
-    // todo; don't require making a slice obj, and move logic into general sequence place
-    switch (ctx)
-    {
-        case AugLoad:
-        case Load:
-            return this._gr("simpsliceload", "Sk.misceval.applySlice(", obj, ",", lower, ",", upper, ")");
-        case AugStore:
-        case Store:
-            out("Sk.misceval.assignSlice(", obj, ",", lower, ",", upper, ",", dataToStore, ");");
-            break;
-        case Del:
-            out("Sk.misceval.assignSlice(", obj, ",", lower, ",", upper, ",null);");
-            break;
-        case Param:
-        default:
-            goog.asserts.fail("invalid simple slice");
-    }
-};
-
-Compiler.prototype.cslice = function(s, ctx, obj, dataToStore)
+Compiler.prototype.cslice = function(s)
 {
     goog.asserts.assert(s instanceof Slice);
     var low = s.lower ? this.vexpr(s.lower) : 'null';
@@ -17288,21 +19168,21 @@ Compiler.prototype.cslice = function(s, ctx, obj, dataToStore)
     return this._gr('slice', "new Sk.builtins['slice'](", low, ",", high, ",", step, ")");
 };
 
-Compiler.prototype.vslice = function(s, ctx, obj, dataToStore)
+Compiler.prototype.vslicesub = function(s)
 {
-    var kindname = null;
     var subs;
     switch (s.constructor)
     {
+        case Number:
+        case String:
+            // Already compiled, should only happen for augmented assignments
+            subs = s;
+            break;
         case Index:
-            kindname = "index";
             subs = this.vexpr(s.value);
             break;
         case Slice:
-            if (!s.step)
-                return this.csimpleslice(s, ctx, obj, dataToStore);
-            if (ctx !== AugStore)
-                subs = this.cslice(s, ctx, obj, dataToStore);
+            subs = this.cslice(s);
             break;
         case Ellipsis:
         case ExtSlice:
@@ -17311,10 +19191,16 @@ Compiler.prototype.vslice = function(s, ctx, obj, dataToStore)
         default:
             goog.asserts.fail("invalid subscript kind");
     }
-    return this.chandlesubscr(kindname, ctx, obj, subs, dataToStore);
+    return subs;
+}
+
+Compiler.prototype.vslice = function(s, ctx, obj, dataToStore)
+{
+    var subs = this.vslicesub(s);
+    return this.chandlesubscr(ctx, obj, subs, dataToStore);
 };
 
-Compiler.prototype.chandlesubscr = function(kindname, ctx, obj, subs, data)
+Compiler.prototype.chandlesubscr = function(ctx, obj, subs, data)
 {
     if (ctx === Load || ctx === AugLoad)
         return this._gr('lsubscr', "Sk.abstr.objectGetItem(", obj, ",", subs, ")");
@@ -17397,12 +19283,15 @@ Compiler.prototype.vexpr = function(e, data, augstoreval)
         case Compare:
             return this.ccompare(e);
         case Call:
-            return this.ccall(e);
+            var result = this.ccall(e);
+            // After the function call, we've returned to this line
+            this.annotateSource(e);
+            return result;
         case Num:
             if (typeof e.n === "number")
                 return e.n;
-			else if (e.n instanceof Sk.builtin.nmber)
-				return "Sk.numberFromStr('" + e.n.tp$str().v + "')";
+	    else if (e.n instanceof Sk.builtin.nmber)
+		return "new Sk.builtin.nmber(" + e.n.v + ",'" + e.n.skType + "')";
             else if (e.n instanceof Sk.builtin.lng)
                 return "Sk.longFromStr('" + e.n.tp$str().v + "')";
             goog.asserts.fail("unhandled Num type");
@@ -17412,19 +19301,24 @@ Compiler.prototype.vexpr = function(e, data, augstoreval)
             var val;
             if (e.ctx !== AugStore)
                 val = this.vexpr(e.value);
+            var mangled = e.attr['$r']().v;
+            mangled = mangled.substring(1, mangled.length-1);
+            mangled = mangleName(this.u.private_, new Sk.builtin.str(mangled)).v;
+            mangled = fixReservedWords(mangled);
+            mangled = fixReservedNames(mangled);
             switch (e.ctx)
             {
                 case AugLoad:
                 case Load:
-                    return this._gr("lattr", "Sk.abstr.gattr(", val, ",", e.attr['$r']().v, ")");
+                    return this._gr("lattr", "Sk.abstr.gattr(", val, ",'", mangled, "')");
                 case AugStore:
                     out("if(", data, "!==undefined){"); // special case to avoid re-store if inplace worked
                     val = this.vexpr(augstoreval || null); // the || null can never happen, but closure thinks we can get here with it being undef
-                    out("Sk.abstr.sattr(", val, ",", e.attr['$r']().v, ",", data, ");");
+                    out("Sk.abstr.sattr(", val, ",'", mangled, "',", data, ");");
                     out("}");
                     break;
                 case Store:
-                    out("Sk.abstr.sattr(", val, ",", e.attr['$r']().v, ",", data, ");");
+                    out("Sk.abstr.sattr(", val, ",'", mangled, "',", data, ");");
                     break;
                 case Del:
                     goog.asserts.fail("todo;");
@@ -17492,7 +19386,9 @@ Compiler.prototype.caugassign = function(s)
             auge.ctx = AugStore;
             return this.vexpr(auge, res, e.value)
         case Subscript:
-            var auge = new Subscript(e.value, e.slice, AugLoad, e.lineno, e.col_offset);
+            // Only compile the subscript value once
+            var augsub = this.vslicesub(e.slice);
+            var auge = new Subscript(e.value, augsub, AugLoad, e.lineno, e.col_offset);
             var aug = this.vexpr(auge);
             var val = this.vexpr(s.value);
             var res = this._gr('inplbinopsubscr', "Sk.abstr.numberInplaceBinOp(", aug, ",", val, ",'", s.op.prototype._astname, "')");
@@ -17654,7 +19550,7 @@ Compiler.prototype.cif = function(s)
         var next = this.newBlock('next branch of if');
 
         var test = this.vexpr(s.test);
-        this._jumpfalse(this.vexpr(s.test), next);
+        this._jumpfalse(test, next);
         this.vseqstmt(s.body);
         this._jump(end);
 
@@ -17702,6 +19598,7 @@ Compiler.prototype.cwhile = function(s)
         {
             this.setBlock(orelse);
             this.vseqstmt(s.orelse);
+            this._jump(next);
         }
 
         this.setBlock(next);
@@ -17757,7 +19654,7 @@ Compiler.prototype.cfor = function(s)
 
 Compiler.prototype.craise = function(s)
 {
-    if (s.type.id.v === "StopIteration")
+    if (s && s.type && s.type.id && (s.type.id.v === "StopIteration"))
     {
         // currently, we only handle StopIteration, and all it does it return
         // undefined which is what our iterator protocol requires.
@@ -17770,49 +19667,87 @@ Compiler.prototype.craise = function(s)
         // todo;
         var inst = '';
         if (s.inst)
+        {
             inst = this.vexpr(s.inst);
-        out("throw new ", this.vexpr(s.type), "(", inst, ");");
+            out("throw new ", this.vexpr(s.type), "(", inst, ");");
+        }
+
+        if (s.type)
+        {
+            out("throw ", this.vexpr(s.type), ";");
+        }
+        else
+        {
+            // re-raise
+            out("throw $err;");
+        }
     }
 };
 
 Compiler.prototype.ctryexcept = function(s)
 {
-    var except = this.newBlock("except");
+    var n = s.handlers.length;
+
+    // Create a block for each except clause
+    var handlers = [];
+    for (var i = 0; i < n; ++i)
+    {
+        handlers.push(this.newBlock("except_" + i + "_"));
+    }
+
+    var unhandled = this.newBlock("unhandled");
     var orelse = this.newBlock("orelse");
     var end = this.newBlock("end");
 
-    this.setupExcept(except);
-
+    this.setupExcept(handlers[0]);
     this.vseqstmt(s.body);
-
     this.endExcept();
-
     this._jump(orelse);
 
-    this.setBlock(except);
-    var n = s.handlers.length;
     for (var i = 0; i < n; ++i)
     {
+        this.setBlock(handlers[i]);
         var handler = s.handlers[i];
-        if (handler.type && i < n - 1)
+        if (!handler.type && i < n - 1)
+        {
             throw new SyntaxError("default 'except:' must be last");
-        except = this.newBlock("except_" + i + "_");
+        }
+
         if (handler.type)
         {
-            // todo; not right at all
-            this._jumpfalse(this.vexpr(handler.type), except);
+            // should jump to next handler if err not isinstance of handler.type
+            var handlertype = this.vexpr(handler.type);
+            var next = (i == n-1) ? unhandled : handlers[i+1];
+
+            // var isinstance = this.nameop(new Sk.builtin.str("isinstance"), Load));
+            // var check = this._gr('call', "Sk.misceval.callsim(", isinstance, ", $err, ", handlertype, ")");
+
+            // this check is not right, should use isinstance, but exception objects
+            // are not yet proper Python objects
+            var check = this._gr('instance', "$err instanceof ", handlertype);
+            this._jumpfalse(check, next);
         }
-        // todo; name
+
+        if (handler.name)
+        {
+            this.vexpr(handler.name, "$err");
+        }
+
+        // Need to execute finally before leaving body if an exception is raised
         this.vseqstmt(handler.body);
+
+        // Should jump to finally, but finally is not implemented yet
+        this._jump(end);
     }
 
-    // This should really jump to finally instead of end
-    // but until we implement finally jump to end is what
-    // we do.
-    this._jump(end);
+    // If no except clause catches exception, throw it again
+    this.setBlock(unhandled);
+    // Should execute finally first
+    out("throw $err;");
 
     this.setBlock(orelse);
     this.vseqstmt(s.orelse);
+    // Should jump to finally, but finally is not implemented yet
     this._jump(end);
     this.setBlock(end);
 };
@@ -17820,6 +19755,8 @@ Compiler.prototype.ctryexcept = function(s)
 Compiler.prototype.ctryfinally = function(s)
 {
     out("/*todo; tryfinally*/");
+    // everything but the finally?
+    this.ctryexcept(s.body[0]);
 };
 
 Compiler.prototype.cassert = function(s)
@@ -17834,7 +19771,7 @@ Compiler.prototype.cassert = function(s)
     this._jumptrue(test, end);
     // todo; exception handling
     // maybe replace with goog.asserts.fail?? or just an alert?
-    out("throw new Sk.builtins.AssertionError(", s.msg ? this.vexpr(s.msg) : "", ");");
+    out("throw new Sk.builtin.AssertionError(", s.msg ? this.vexpr(s.msg) : "", ");");
     this.setBlock(end);
 };
 
@@ -17887,28 +19824,29 @@ Compiler.prototype.cimport = function(s)
     }
 };
 
-Compiler.prototype.cfromimport = function(s) {
-  var n = s.names.length;
-  var names = [];
-  for (var i = 0; i < n; ++i) {
-    names[i] = s.names[i].name['$r']().v;
-  }
-  var mod = this._gr('module', "Sk.builtin.__import__(", s.module['$r']().v, ",$gbl,$loc,[", names, "])");
-  for (var i = 0; i < n; ++i) {
-    var alias = s.names[i];
-    if (i === 0 && alias.name.v === "*") {
-      goog.asserts.assert(n === 1);
-      out("Sk.importStar(", mod,  ",$loc, $gbl);");
-      return;
-    }
+Compiler.prototype.cfromimport = function(s)
+{
+    var n = s.names.length;
+    var names = [];
+    for (var i = 0; i < n; ++i)
+        names[i] = s.names[i].name['$r']().v;
+    var mod = this._gr('module', "Sk.builtin.__import__(", s.module['$r']().v, ",$gbl,$loc,[", names, "])");
+    for (var i = 0; i < n; ++i)
+    {
+        var alias = s.names[i];
+        if (i === 0 && alias.name.v === "*")
+        {
+            goog.asserts.assert(n === 1);
+            out("Sk.importStar(", mod,  ",$loc, $gbl);");
+            return;
+        }
 
-    var got = this._gr('item', "Sk.abstr.gattr(", mod, ",", alias.name['$r']().v, ")");
-    var storeName = alias.name;
-    if (alias.asname) {
-      storeName = alias.asname;
+        var got = this._gr('item', "Sk.abstr.gattr(", mod, ",", alias.name['$r']().v, ")");
+        var storeName = alias.name;
+        if (alias.asname)
+            storeName = alias.asname;
+        this.nameop(storeName, Store, got);
     }
-    this.nameop(storeName, Store, got);
-  }
 };
 
 /**
@@ -17970,7 +19908,17 @@ Compiler.prototype.buildcodeobj = function(n, coname, decorator_list, args, call
 
     var funcArgs = [];
     if (isGenerator)
+    {
+        if (kwarg)
+        {
+            throw new SyntaxError(coname.v + "(): keyword arguments in generators not supported");
+        }
+        if (vararg)
+        {
+            throw new SyntaxError(coname.v + "(): variable number of arguments in generators not supported");    
+        }
         funcArgs.push("$gen");
+    }
     else
     {
         if (kwarg)
@@ -18003,7 +19951,7 @@ Compiler.prototype.buildcodeobj = function(n, coname, decorator_list, args, call
 
     // note special usage of 'this' to avoid having to slice globals into
     // all function invocations in call
-    this.u.varDeclsCode += "var $blk=" + entryBlock + ",$exc=[],$loc=" + locals + cells + ",$gbl=this;";
+    this.u.varDeclsCode += "var $blk=" + entryBlock + ",$exc=[],$loc=" + locals + cells + ",$gbl=this,$err=undefined;";
 
     //
     // copy all parameters that are also cells into the cells dict. this is so
@@ -18014,6 +19962,18 @@ Compiler.prototype.buildcodeobj = function(n, coname, decorator_list, args, call
         var id = args.args[i].id;
         if (this.isCell(id))
             this.u.varDeclsCode += "$cell." + id.v + "=" + id.v + ";";
+    }
+
+    //
+    // make sure correct number of arguments were passed (generators handled below)
+    //
+    if (!isGenerator) {
+        var minargs = args ? args.args.length - defaults.length : 0;
+        var maxargs = vararg ? Infinity : (args ? args.args.length : 0);
+        var kw = kwarg ? true : false;
+        this.u.varDeclsCode += "Sk.builtin.pyCheckArgs(\"" + coname.v + 
+            "\", arguments, " + minargs + ", " + maxargs + ", " + kw + 
+            ", " + hasFree + ");";
     }
 
     //
@@ -18053,8 +20013,13 @@ Compiler.prototype.buildcodeobj = function(n, coname, decorator_list, args, call
     //
     // finally, set up the block switch that the jump code expects
     //
-    this.u.switchCode += "while(true){switch($blk){";
-    this.u.suffixCode = "}break;}});";
+    // Old switch code
+    // this.u.switchCode += "while(true){switch($blk){";
+    // this.u.suffixCode = "}break;}});";
+
+    // New switch code to catch exceptions
+    this.u.switchCode = "while(true){try{ switch($blk){";
+    this.u.suffixCode = "} }catch(err){if ($exc.length>0) { $err = err; $blk=$exc.pop(); continue; } else { throw err; }} }});";
 
     //
     // jump back to the handler so it can do the main actual work of the
@@ -18134,10 +20099,15 @@ Compiler.prototype.buildcodeobj = function(n, coname, decorator_list, args, call
             frees += ",$free";
     }
     if (isGenerator)
+        // Keyword and variable arguments are not currently supported in generators.
+        // The call to pyCheckArgs assumes they can't be true.
         if (args && args.args.length > 0)
-            return this._gr("gener", "(function(){var $origargs=Array.prototype.slice.call(arguments);return new Sk.builtins['generator'](", scopename, ",$gbl,$origargs", frees, ");})");
+            return this._gr("gener", "(function(){var $origargs=Array.prototype.slice.call(arguments);Sk.builtin.pyCheckArgs(\"", 
+                                     coname.v, "\",arguments,", args.args.length - defaults.length, ",", args.args.length, 
+                                     ");return new Sk.builtins['generator'](", scopename, ",$gbl,$origargs", frees, ");})");
         else
-            return this._gr("gener", "(function(){return new Sk.builtins['generator'](", scopename, ",$gbl,[]", frees, ");})");
+            return this._gr("gener", "(function(){Sk.builtin.pyCheckArgs(\"", coname.v, 
+                                     "\",arguments,0,0);return new Sk.builtins['generator'](", scopename, ",$gbl,[]", frees, ");})");
     else
         return this._gr("funcobj", "new Sk.builtins['function'](", scopename, ",$gbl", frees ,")");
 };
@@ -18332,10 +20302,6 @@ Compiler.prototype.vstmt = function(s)
             else
                 out("return null;");
             break;
-        case Quit_:
-        case Exit_:
-            out("return $loc;");
-            break;
         case Delete_:
             this.vseqexpr(s.targets);
             break;
@@ -18419,15 +20385,17 @@ Compiler.prototype.isCell = function(name)
 Compiler.prototype.nameop = function(name, ctx, dataToStore)
 {
     if ((ctx === Store || ctx === AugStore || ctx === Del) && name.v === "__debug__")
-        this.error("can not assign to __debug__");
+        throw new Sk.builtin.SyntaxError("can not assign to __debug__");
     if ((ctx === Store || ctx === AugStore || ctx === Del) && name.v === "None")
-        this.error("can not assign to None");
+        throw new Sk.builtin.SyntaxError("can not assign to None");
 
     if (name.v === "None") return "null";
     if (name.v === "True") return "true";
     if (name.v === "False") return "false";
 
     var mangled = mangleName(this.u.private_, name).v;
+    // Have to do this before looking it up in the scope
+    mangled = fixReservedNames(mangled);
     var op = 0;
     var optype = OP_NAME;
     var scope = this.u.ste.getScope(mangled);
@@ -18479,6 +20447,8 @@ Compiler.prototype.nameop = function(name, ctx, dataToStore)
             {
                 case Load:
                 case Param:
+                    // Need to check that it is bound!
+                    out("if (", mangled, " === undefined) { throw new Error('local variable \\\'", mangled, "\\\' referenced before assignment'); }\n");
                     return mangled;
                 case Store:
                     out(mangled, "=", dataToStore, ";");
@@ -18511,21 +20481,18 @@ Compiler.prototype.nameop = function(name, ctx, dataToStore)
             }
             break;
         case OP_GLOBAL:
-            switch (ctx) {
-              case Load: {
-                return this._gr("loadgbl", "Sk.misceval.loadname('", mangledNoPre, "',$gbl)");
-              }
-              case Store: {
-                out("$gbl.", mangledNoPre, "=", dataToStore, ';');
-              }
-              break;
-              case Del: {
-                out("delete $gbl.", mangledNoPre);
-              }
-              break;
-              default: {
-                goog.asserts.fail("unhandled case in name op_global");
-              }
+            switch (ctx)
+            {
+                case Load:
+                    return this._gr("loadgbl", "Sk.misceval.loadname('", mangledNoPre, "',$gbl)");
+                case Store:
+                    out("$gbl.", mangledNoPre, "=", dataToStore, ';');
+                    break;
+                case Del:
+                    out("delete $gbl.", mangledNoPre);
+                    break;
+                default:
+                    goog.asserts.fail("unhandled case in name op_global");
             }
             break;
         case OP_DEREF:
@@ -18554,6 +20521,9 @@ Compiler.prototype.enterScope = function(name, key, lineno)
     u.name = name;
     u.firstlineno = lineno;
 
+    if (this.u && this.u.private_)
+        u.private_ = this.u.private_;
+
     this.stack.push(this.u);
     this.allUnits.push(u);
     var scopeName = this.gensym('scope');
@@ -18578,8 +20548,13 @@ Compiler.prototype.exitScope = function()
     if (this.u)
         this.u.activateScope();
 
-    if (prev.name.v !== "<module>") // todo; hacky
-        out(prev.scopename, ".co_name=new Sk.builtins['str'](", prev.name['$r']().v, ");");
+    if (prev.name.v !== "<module>") {// todo; hacky
+        var mangled = prev.name['$r']().v;
+        mangled = mangled.substring(1, mangled.length-1);
+        mangled = fixReservedWords(mangled);
+        mangled = fixReservedNames(mangled);
+        out(prev.scopename, ".co_name=new Sk.builtins['str']('", mangled, "');");
+    }
 };
 
 Compiler.prototype.cbody = function(stmts)
@@ -18602,55 +20577,54 @@ Compiler.prototype.cprint = function(s)
     if (s.nl)
         out('Sk.misceval.print_(', /*dest, ',*/ '"\\n");');
 };
+Compiler.prototype.cmod = function(mod)
+{
+    //print("-----");
+    //print(Sk.astDump(mod));
+    var modf = this.enterScope(new Sk.builtin.str("<module>"), mod, 0);
 
-Compiler.prototype.cmod = function(mod) {
-  //print("-----");
-  //print(Sk.astDump(mod));
-  var modf = this.enterScope(new Sk.builtin.str("<module>"), mod, 0);
+    var entryBlock = this.newBlock('module entry');
+    this.u.prefixCode = "var " + modf + "=(function($modname){";
+    this.u.varDeclsCode = "var $blk=" + entryBlock + ",$exc=[],$gbl={},$loc=$gbl,$err=undefined;$gbl.__name__=$modname;Sk.globals=$gbl;";
 
-  var entryBlock = this.newBlock('module entry');
-  this.u.prefixCode = "var " + modf + "=(function($modname){";
-  this.u.varDeclsCode = "var $blk=" + entryBlock + ",$exc=[],$gbl={},$loc=$gbl;$gbl.__name__=$modname;Sk.globals=$gbl;";
+    // Add the try block that pops the try/except stack if one exists
+    // Github Issue #38
+    // Google Code Issue: 109 / 114
 
-  // Add the try block that pops the try/except stack if one exists
-  // Github Issue #38
-  // Google Code Issue: 109 / 114
+    // Old code:
+    //this.u.switchCode = "while(true){switch($blk){";
+    //this.u.suffixCode = "}}});";
 
-  // Old code:
-  //this.u.switchCode = "while(true){switch($blk){";
-  //this.u.suffixCode = "}}});";
+    // New Code:
+    this.u.switchCode = "try { while(true){try{ switch($blk){";
+    this.u.suffixCode = "} }catch(err){if ($exc.length>0) { $err = err; $blk=$exc.pop(); continue; } else { throw err; }} } }catch(err){ if (err instanceof Sk.builtin.SystemExit) { Sk.misceval.print_(err.toString() + '\\n'); return $loc; } else { throw err; } } });";
 
-  // New Code:
-  this.u.switchCode = "while(true){try{ switch($blk){";
-  this.u.suffixCode = "} }catch(err){if ($exc.length>0) { $blk=$exc.pop(); continue; } else { throw err; }} }});";
+    // Note - this change may need to be adjusted for all the other instances of
+    // switchCode and suffixCode in this file.  Not knowing how to test those
+    // other cases I left them alone.   At least the changes to
+    // setupExcept and endExcept will insure that the generated JavaScript
+    // will be syntactically correct.  The worst that will happen is that when
+    // code in a try block blows up, we will not know to run the except block.
+    // The other problem is that we might catch something that is really an internal
+    // error - it might be nice to add code in the above catch block that looked at
+    // the kind of exception and only popped the stack for exceptions that are
+    // from the original code rather than artifacts of some code generation or
+    // exeution environment error.  We at least err on the side of exceptions
+    // being revealed to the user.  drchuck - Wed Jan 23 19:20:18 EST 2013
 
-  // Note - this change may need to be adjusted for all the other instances of
-  // switchCode and suffixCode in this file.  Not knowing how to test those
-  // other cases I left them alone.   At least the changes to
-  // setupExcept and endExcept will insure that the generated JavaScript
-  // will be syntactically correct.  The worst that will happen is that when
-  // code in a try block blows up, we will not know to run the except block.
-  // The other problem is that we might catch something that is really an internal
-  // error - it might be nice to add code in the above catch block that looked at
-  // the kind of exception and only popped the stack for exceptions that are
-  // from the original code rather than artifacts of some code generation or
-  // exeution environment error.  We at least err on the side of exceptions
-  // being revealed to the user.  drchuck - Wed Jan 23 19:20:18 EST 2013
-
-  switch (mod.constructor) {
-    case Module: {
-      this.cbody(mod.body);
-      out("return $loc;");
+    switch (mod.constructor)
+    {
+        case Module:
+            this.cbody(mod.body);
+            out("return $loc;");
+            break;
+        default:
+            goog.asserts.fail("todo; unhandled case in compilerMod");
     }
-    break;
-    default: {
-      goog.asserts.fail("todo; unhandled case in compilerMod");
-    }
-  }
-  this.exitScope();
+    this.exitScope();
 
-  this.result.push(this.outputAllUnits());
-  return modf;
+    this.result.push(this.outputAllUnits());
+    return modf;
 };
 
 /**
@@ -18674,6 +20648,13 @@ Sk.compile = function(source, filename, mode)
 };
 
 goog.exportSymbol("Sk.compile", Sk.compile);
+
+Sk.resetCompiler = function()
+{
+    Sk.gensymcount = 0;
+}
+
+goog.exportSymbol("Sk.resetCompiler", Sk.resetCompiler);
 // this is stored into sys specially, rather than created by sys
 Sk.sysmodules = new Sk.builtin.dict([]);
 Sk.realsyspath = undefined;
@@ -18683,34 +20664,33 @@ Sk.realsyspath = undefined;
  * @param {string} ext extension to use (.py or .js)
  * @param {boolean=} failok will throw if not true
  */
-Sk.importSearchPathForName = function(name, ext, failok) {
-  var L = Sk.realsyspath;
-  for (var it = L.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext()) {
-    var nameAsPath = name.replace(/\./g, "/");
-    var searchPaths = [
-      i.v + "/" + nameAsPath + ext,                 // module
-      i.v + "/" + nameAsPath + "/__init__" + ext    // package
-    ];
+Sk.importSearchPathForName = function(name, ext, failok)
+{
+    var L = Sk.realsyspath;
+    for (var it = L.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext())
+    {
+        var nameAsPath = name.replace(/\./g, "/");
+        var fns = [
+            i.v + "/" + nameAsPath + ext,                 // module
+            i.v + "/" + nameAsPath + "/__init__" + ext    // package
+                ];
 
-    for (var j = 0; j < searchPaths.length; ++j) {
-      var searchPath = searchPaths[j];
-      // Sk.debugout("  import search, trying", searchPath);
-      try {
-        // todo; lame, this is the only way we have to test existence right now
-        Sk.read(searchPath);
-        // Sk.debugout("import search, found at", name, "type", ext, "at", searchPath);
-        return searchPath;
-      }
-      catch (e) {
-        // 
-      };
+        for (var j = 0; j < fns.length; ++j)
+        {
+            var fn = fns[j];
+            //Sk.debugout("  import search, trying", fn);
+            try {
+                // todo; lame, this is the only way we have to test existence right now
+                Sk.read(fn);
+                //Sk.debugout("import search, found at", name, "type", ext, "at", fn);
+                return fn;
+            } catch (e) {};
+        }
     }
-  }
-  if (!failok) {
-    // Sk.debugout("import search, nothing found, and failure was not an option");
-    throw new Sk.builtin.ImportError("No module named " + name);
-  }
-  // Sk.debugout("import search, nothing found, but failure was ok");
+   
+    if (!failok)
+        throw new Sk.builtin.ImportError("No module named " + name);
+    //Sk.debugout("import search, nothing found, but failure was ok");
 };
 
 Sk.doOneTimeInitialization = function()
@@ -18772,14 +20752,15 @@ Sk.importModuleInternal_ = function(name, dumpJS, modname, suppliedPyBody)
     var parentModName;
 
     // if leaf is already in sys.modules, early out
-    var prev = Sk.sysmodules.mp$subscript(modname);
-    if (prev !== undefined)
-    {
+    try {
+        var prev = Sk.sysmodules.mp$subscript(modname);
         // if we're a dotted module, return the top level, otherwise ourselves
         if (modNameSplit.length > 1)
             return Sk.sysmodules.mp$subscript(modNameSplit[0]);
         else
-            return prev;
+            return prev;        
+    } catch (x) {
+        // not in sys.modules, continue
     }
 
     if (modNameSplit.length > 1)
@@ -18847,16 +20828,15 @@ Sk.importModuleInternal_ = function(name, dumpJS, modname, suppliedPyBody)
                 return lines.join("\n");
             };
             finalcode = withLineNumbers(co.code);
-            // Sk.debugout(finalcode);
+            Sk.debugout(finalcode);
         }
     }
 
     var namestr = "new Sk.builtin.str('" + modname + "')";
     finalcode += "\n" + co.funcname + "(" + namestr + ");";
 
-    if (Sk.debugCode) {
-      Sk.debugout(finalcode);
-    }
+//	if (Sk.debugCode)
+//		Sk.debugout(finalcode);
 
     var modlocs = goog.global.eval(finalcode);
 
@@ -18900,6 +20880,8 @@ Sk.importMain = function(name, dumpJS)
 	Sk.sysmodules = new Sk.builtin.dict([]);
 	Sk.realsyspath = undefined;
 
+    Sk.resetCompiler();
+
     return Sk.importModuleInternal_(name, dumpJS, "__main__");
 };
 
@@ -18911,6 +20893,8 @@ Sk.importMainWithBody = function(name, dumpJS, body)
 	Sk.sysmodules = new Sk.builtin.dict([]);
 	Sk.realsyspath = undefined;
     
+    Sk.resetCompiler();
+
     return Sk.importModuleInternal_(name, dumpJS, "__main__", body);
 };
 
@@ -18942,13 +20926,14 @@ goog.exportSymbol("Sk.importStar", Sk.importStar);
 // Javascript. This is a bit hokey.
 Sk.builtins = {
 'range': Sk.builtin.range,
+'round': Sk.builtin.round,
 'len': Sk.builtin.len,
 'min': Sk.builtin.min,
 'max': Sk.builtin.max,
 'sum': Sk.builtin.sum,
+'zip': Sk.builtin.zip,
 'abs': Sk.builtin.abs,
 'fabs': Sk.builtin.abs,	//	Added by RNL
-'round': Sk.builtin.round,
 'ord': Sk.builtin.ord,
 'chr': Sk.builtin.chr,
 'hex': Sk.builtin.hex,
@@ -18964,6 +20949,11 @@ Sk.builtins = {
 'int_$rw$': Sk.builtin.int_,
 'hasattr': Sk.builtin.hasattr,
 
+'bool': Sk.builtin.bool,
+'any': Sk.builtin.any,
+'all': Sk.builtin.all,
+'enumerate': Sk.builtin.enumerate,
+
 'AttributeError': Sk.builtin.AttributeError,
 'ValueError': Sk.builtin.ValueError,
 'Exception' : Sk.builtin.Exception,
@@ -18977,6 +20967,8 @@ Sk.builtins = {
 'NameError' : Sk.builtin.NameError,
 'IOError' : Sk.builtin.IOError,
 'NotImplementedError' : Sk.builtin.NotImplementedError,
+'SystemExit': Sk.builtin.SystemExit,
+'OverflowError' : Sk.builtin.OverflowError,
 
 'dict': Sk.builtin.dict,
 'file': Sk.builtin.file,
@@ -18989,16 +20981,48 @@ Sk.builtins = {
 'slice': Sk.builtin.slice,
 'str': Sk.builtin.str,
 'set': Sk.builtin.set,
-'super': Sk.builtin.superbi,
 'tuple': Sk.builtin.tuple,
 'type': Sk.builtin.type,
 'input': Sk.builtin.input,
 'raw_input': Sk.builtin.raw_input,
 /*'read': Sk.builtin.read,*/
-'all': Sk.builtin.all,
-'any': Sk.builtin.any,
 'jseval': Sk.builtin.jseval,
-'jsmillis': Sk.builtin.jsmillis
-/*'long_div_mode': Sk.builtin.lng.longDivideMode	//	No longer used/relevant */
+'jsmillis': Sk.builtin.jsmillis,
+'quit': Sk.builtin.quit,
+'exit': Sk.builtin.quit,
+
+// Functions below are not implemented
+'bytearray': Sk.builtin.bytearray,
+'callable': Sk.builtin.callable,
+'complex' : Sk.builtin.complex,
+'delattr' : Sk.builtin.delattr,
+'divmod' : Sk.builtin.divmod,
+'eval_$rn$' : Sk.builtin.eval_,
+'execfile' : Sk.builtin.execfile,
+'filter' : Sk.builtin.filter,
+'format' : Sk.builtin.format,
+'frozenset' : Sk.builtin.frozenset,
+'globals' : Sk.builtin.globals,
+'help' : Sk.builtin.help,
+'issubclass' : Sk.builtin.issubclass,
+'iter': Sk.builtin.iter,
+'locals' : Sk.builtin.locals,
+'map' : Sk.builtin.map,
+'memoryview' : Sk.builtin.memoryview,
+'next' : Sk.builtin.next_,
+'pow' : Sk.builtin.pow,
+'property' : Sk.builtin.property,
+'reduce' : Sk.builtin.reduce,
+'reload' : Sk.builtin.reload,
+'reversed' : Sk.builtin.reversed,
+'sorted' : Sk.builtin.sorted,
+'super': Sk.builtin.superbi,
+'unichr' : Sk.builtin.unichr,
+'vars' : Sk.builtin.vars,
+'xrange' : Sk.builtin.xrange,
+'apply_$rn$' : Sk.builtin.apply_,
+'buffer' : Sk.builtin.buffer,
+'coerce' : Sk.builtin.coerce,
+'intern' : Sk.builtin.intern
 };
 goog.exportSymbol("Sk.builtins", Sk.builtins);

@@ -2,39 +2,41 @@
  * @constructor
  * @param {...*} args
  */
-Sk.builtin.Exception = function(args) {
-  var args = Array.prototype.slice.call(arguments);
-  // hackage to allow shorter throws
-  for (var i = 0; i < args.length; ++i) {
-    if (typeof args[i] === "string") {
-      args[i] = new Sk.builtin.str(args[i]);
+Sk.builtin.Exception = function(args)
+{
+    var args = Array.prototype.slice.call(arguments);
+    // hackage to allow shorter throws
+    for (var i = 0; i < args.length; ++i)
+    {
+        if (typeof args[i] === "string")
+            args[i] = new Sk.builtin.str(args[i]);
     }
-  }
-  this.args = new Sk.builtin.tuple(args);
+    this.args = new Sk.builtin.tuple(args);
 };
-
 Sk.builtin.Exception.prototype.tp$name = "Exception";
 
-Sk.builtin.Exception.prototype.tp$str = function() {
-  var ret = "";
+Sk.builtin.Exception.prototype.tp$str = function()
+{
+    var ret = "";
+    //print(JSON.stringify(this.args));
 
-  ret += this.tp$name;
-  if (this.args) {
-    if (this.args.v.length > 0) {
-      ret += ": " + this.args.v[0].v;
-    }
+    ret += this.tp$name;
+    if (this.args)
+        ret += ": " + this.args.v[0].v;
 
-    if (this.args.v.length > 4) {
-      ret += "\nFile \"" + this.args.v[1].v + "\", " + "line " + this.args.v[2] + "\n" + this.args.v[4].v + "\n";
-      for (var i = 0; i < this.args.v[3]; ++i) ret += " ";
-      ret += "^\n";
+    if (this.args.v.length > 4)		//	RNL from length > 1
+    {
+        ret += "\nFile \"" + this.args.v[1].v + "\", " + "line " + this.args.v[2] + "\n" +
+            this.args.v[4].v + "\n";
+        for (var i = 0; i < this.args.v[3]; ++i) ret += " ";
+        ret += "^\n";
     }
-  }
-  return new Sk.builtin.str(ret);
+    return new Sk.builtin.str(ret);
 };
 
-Sk.builtin.Exception.prototype.toString = function() {
-  return this.tp$str().v;
+Sk.builtin.Exception.prototype.toString = function()
+{
+    return this.tp$str().v;
 }
 
 goog.exportSymbol("Sk.builtin.Exception", Sk.builtin.Exception);
@@ -108,9 +110,31 @@ Sk.builtin.NameError.prototype.tp$name = "NameError";
  * @extends Sk.builtin.Exception
  * @param {...*} args
  */
+Sk.builtin.OverflowError = function(args) { Sk.builtin.Exception.apply(this, arguments); }
+goog.inherits(Sk.builtin.OverflowError, Sk.builtin.Exception);
+Sk.builtin.OverflowError.prototype.tp$name = "OverflowError";
+
+
+/**
+ * @constructor
+ * @extends Sk.builtin.Exception
+ * @param {...*} args
+ */
 Sk.builtin.ParseError = function(args) { Sk.builtin.Exception.apply(this, arguments); }
 goog.inherits(Sk.builtin.ParseError, Sk.builtin.Exception);
 Sk.builtin.ParseError.prototype.tp$name = "ParseError";
+
+
+/**
+ * @constructor
+ * @extends Sk.builtin.Exception
+ * @param {...*} args
+ */
+Sk.builtin.SystemExit = function(args) { Sk.builtin.Exception.apply(this, arguments); }
+goog.inherits(Sk.builtin.SystemExit, Sk.builtin.Exception);
+Sk.builtin.SystemExit.prototype.tp$name = "SystemExit";
+goog.exportSymbol("Sk.builtin.SystemExit", Sk.builtin.SystemExit);
+
 
 /**
  * @constructor
@@ -147,6 +171,7 @@ goog.exportSymbol("Sk.builtin.TypeError", Sk.builtin.TypeError);
 Sk.builtin.ValueError = function(args) { Sk.builtin.Exception.apply(this, arguments); }
 goog.inherits(Sk.builtin.ValueError, Sk.builtin.Exception);
 Sk.builtin.ValueError.prototype.tp$name = "ValueError";
+goog.exportSymbol("Sk.builtin.ValueError", Sk.builtin.ValueError);
 
 /**
  * @constructor
@@ -193,7 +218,5 @@ goog.exportSymbol("Sk.builtin.NotImplementedError", Sk.builtin.NotImplementedErr
  * @extends Sk.builtin.Exception
  * @param {...*} args
  */
-Sk.builtin.NegativePowerError = function(args) { Sk.builtin.Exception.apply(this, arguments); }
-goog.inherits(Sk.builtin.NegativePowerError, Sk.builtin.Exception);
-Sk.builtin.NegativePowerError.prototype.tp$name = "NegativePowerError";
+Sk.builtin.NegativePowerError = function(args) { Sk.builtin.Exception.apply(this, arguments); }goog.inherits(Sk.builtin.NegativePowerError, Sk.builtin.Exception);Sk.builtin.NegativePowerError.prototype.tp$name = "NegativePowerError";
 goog.exportSymbol("Sk.builtin.NegativePowerError", Sk.builtin.NegativePowerError);
