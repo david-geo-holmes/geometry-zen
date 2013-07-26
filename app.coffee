@@ -78,7 +78,7 @@ app.get "/*", (req, res, next) ->
     else
       next()
 
-# Exchange the session code fot an access token.
+# Exchange the session code for an access token.
 app.get '/authenticate/:code', (req, res) ->
   authenticate req.params.code, (err, token) ->
     if (err)
@@ -90,9 +90,9 @@ app.get "/*", (req, res, next) ->
   # Set a cookie to communicate the GitHub Client ID back to the client.
   res.cookie('github-application-client-id', nconf.get("GITHUB_APPLICATION_CLIENT_ID"))
   res.render "index",
-    css: if isProductionMode() then "css/app.min.css?version=#{npm.version}" else "css/app.css?version=#{npm.version}"
-    js:  if isProductionMode() then "js/app.min.js?version=#{npm.version}" else "js/app.js?version=#{npm.version}"
-    bladeASM: "js/bladeASM.js?version=#{npm.version}"
-    e2gaASM: "js/e2gaASM.js?version=#{npm.version}"
+    css: if isProductionMode() then "/css/app.min.css?version=#{npm.version}" else "/css/app.css?version=#{npm.version}"
+    js:  if isProductionMode() then "/js/app.min.js?version=#{npm.version}" else "/js/app.js?version=#{npm.version}"
+    bladeASM: "/js/bladeASM.js?version=#{npm.version}"
+    e2gaASM: "/js/e2gaASM.js?version=#{npm.version}"
     marketing: marketing
     npm: npm
