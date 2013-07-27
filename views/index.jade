@@ -27,7 +27,14 @@ html(lang="en", data-ng-app="app")
             div.nav-collapse.collapse
               ul.nav.pull-right
     div#sticky-wrapper
-      div#view(ng-view)
+      div#view(data-ng-view)
+        | I'm sorry, we are currently experiencing compatibility issues with your browser.
+        br
+        | Please try a different browser type. We suggest Google Chrome or Mozilla Firefox.
+        br
+        | If the problem persists please report the issue using the 
+        a(href="https://github.com/geometryzen/geometryzen/issues", target="_blank")
+          | Issue Tracker
       div#sticky-push
     div#sticky-footer
       div.extra
