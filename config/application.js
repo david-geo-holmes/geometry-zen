@@ -33,6 +33,8 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('application
     },
     dist: {
       files: [
+        {src: "generated/css/app.css",                             dest: "dist/css/app.css"},
+        {src: "generated/js/app.js",                               dest: "dist/js/app.js"},
         {src: "vendor/bladejs/build/bladeASM.js",                  dest: "dist/js/bladeASM.js"},
         {src: "vendor/bladejs/build/e2gaASM.js",                   dest: "dist/js/e2gaASM.js"},
         {src: "vendor/font-awesome/font/FontAwesome.otf",          dest: "dist/img/FontAwesome.otf"},
