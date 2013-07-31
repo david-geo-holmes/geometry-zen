@@ -1,5 +1,5 @@
 from e2ga import *
-from math import random
+from random import random
 
 def explain(m):
     print str(m) + " is " + repr(m)

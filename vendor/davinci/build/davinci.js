@@ -4399,6 +4399,16 @@ Sk.builtin.read = function read(x) {
 };
 Sk.builtinFiles = undefined;
 */
+/*
+ * The filename, line number, and column number of exceptions are
+ * stored within the exception object.  Note that not all exceptions
+ * clearly report the column number.  To customize the exception
+ * message to use any/all of these fields, you can either modify
+ * tp$str below to print the desired message, or use them in the
+ * skulpt wrapper (i.e., runit) to present the exception message.
+ */
+
+
 /**
  * @constructor
  * @param {...*} args
@@ -4413,25 +4423,73 @@ Sk.builtin.Exception = function(args)
             args[i] = new Sk.builtin.str(args[i]);
     }
     this.args = new Sk.builtin.tuple(args);
+
+    if (Sk.currFilename)
+    {
+        this.filename = Sk.currFilename;
+    }
+    else if (this.args.sq$length() >= 4)
+    {
+        if (this.args.v[1].v)
+        {
+            this.filename = this.args.v[1].v;
+        }
+        else
+        {
+            // Unknown, this is an error, and the exception that causes it
+            // probably needs to be fixed.
+            this.filename = "<unknown>";
+        }
+    }
+    else
+    {
+        // Unknown, this is an error, and the exception that causes it
+        // probably needs to be fixed.
+        this.lineno = "<unknown>";
+    }
+
+    if (Sk.currLineNo > 0) 
+    {
+        this.lineno = Sk.currLineNo;
+    }
+    else if (this.args.sq$length() >= 4)
+    {
+        this.lineno = this.args.v[2];
+    }
+    else
+    {
+        // Unknown, this is an error, and the exception that causes it
+        // probably needs to be fixed.
+        this.lineno = "<unknown>";
+    }
+
+    if (Sk.currColNo > 0)
+    {
+        this.colno = Sk.currColNo;
+    }
+    else
+    {
+        this.colno = "<unknown>";
+    }
 };
 Sk.builtin.Exception.prototype.tp$name = "Exception";
 
 Sk.builtin.Exception.prototype.tp$str = function()
 {
     var ret = "";
-    //print(JSON.stringify(this.args));
 
     ret += this.tp$name;
     if (this.args)
         ret += ": " + this.args.v[0].v;
+    ret += " on line " + this.lineno;
 
-    if (this.args.v.length > 4)		//	RNL from length > 1
+    if (this.args.v.length > 4)
     {
-        ret += "\nFile \"" + this.args.v[1].v + "\", " + "line " + this.args.v[2] + "\n" +
-            this.args.v[4].v + "\n";
+        ret += "\n" + this.args.v[4].v + "\n";
         for (var i = 0; i < this.args.v[3]; ++i) ret += " ";
         ret += "^\n";
     }
+
     return new Sk.builtin.str(ret);
 };
 
@@ -4621,6 +4679,15 @@ goog.exportSymbol("Sk.builtin.NotImplementedError", Sk.builtin.NotImplementedErr
  */
 Sk.builtin.NegativePowerError = function(args) { Sk.builtin.Exception.apply(this, arguments); }goog.inherits(Sk.builtin.NegativePowerError, Sk.builtin.Exception);Sk.builtin.NegativePowerError.prototype.tp$name = "NegativePowerError";
 goog.exportSymbol("Sk.builtin.NegativePowerError", Sk.builtin.NegativePowerError);
+
+Sk.currLineNo = -1;
+Sk.currColNo = -1;
+Sk.currFilename = '';
+
+goog.exportSymbol("Sk", Sk);
+goog.exportProperty(Sk, "currLineNo", Sk.currLineNo);
+goog.exportProperty(Sk, "currColNo", Sk.currColNo);
+goog.exportProperty(Sk, "currFilename", Sk.currFilename);
 /**
  *
  * @constructor
@@ -6036,7 +6103,7 @@ Sk.abstr.typeName = function(v) {
     } else if (typeof v === "number") {
         vtypename = "number";
     } else if (v instanceof Sk.builtin.nmber) {
-    vtypename = v.skType;
+	vtypename = v.skType;
     } else if (v.tp$name !== undefined) {
         vtypename = v.tp$name;
     } else if (v.ob$type && (v.ob$type.tp$name !== undefined)) {
@@ -6118,22 +6185,22 @@ Sk.abstr.binary_op_ = function(v, w, opname)
     var ret;
     var vop = Sk.abstr.boNameToSlotFuncLhs_(v, opname);
     if (vop !== undefined)
-    {   
-        if (vop.call) {
-            ret = vop.call(v, w);
-        } else {  // assume that vop is an __xxx__ type method
-            ret = Sk.misceval.callsim(vop, v, w)
-        }
+    {	
+		if (vop.call) {
+        	ret = vop.call(v, w);
+		} else {  // assume that vop is an __xxx__ type method
+			ret = Sk.misceval.callsim(vop,v,w)
+		}
         if (ret !== undefined) return ret;
     }
     var wop = Sk.abstr.boNameToSlotFuncRhs_(w, opname);
     if (wop !== undefined)
     {
-        if (wop.call) {
-            ret = wop.call(w, v);
-        } else { // assume that wop is an __xxx__ type method
-            ret = Sk.misceval.callsim(wop, w, v)
-        }
+		if (wop.call) {
+        	ret = wop.call(w, v);
+		} else { // assume that wop is an __xxx__ type method
+			ret = Sk.misceval.callsim(wop,w,v)
+		}
         if (ret !== undefined) return ret;
     }
 
@@ -6153,21 +6220,21 @@ Sk.abstr.binary_iop_ = function(v, w, opname)
     var vop = Sk.abstr.iboNameToSlotFunc_(v, opname);
     if (vop !== undefined)
     {
-    if (vop.call) {
+	if (vop.call) {
             ret = vop.call(v, w);
-    } else {  // assume that vop is an __xxx__ type method
-        ret = Sk.misceval.callsim(vop,v,w); //  added to be like not-in-place... is this okay?
-        }
+	} else {  // assume that vop is an __xxx__ type method
+	    ret = Sk.misceval.callsim(vop,v,w);	//	added to be like not-in-place... is this okay?
+		}
         if (ret !== undefined) return ret;
     }
     var wop = Sk.abstr.iboNameToSlotFunc_(w, opname);
     if (wop !== undefined)
     {
-    if (wop.call) {
+	if (wop.call) {
             ret = wop.call(w, v);
-    } else { // assume that wop is an __xxx__ type method
-        ret = Sk.misceval.callsim(wop,w,v); //  added to be like not-in-place... is this okay?
-        }
+	} else { // assume that wop is an __xxx__ type method
+	    ret = Sk.misceval.callsim(wop,w,v);	//	added to be like not-in-place... is this okay?
+		}
         if (ret !== undefined) return ret;
     }
 
@@ -6204,32 +6271,32 @@ Sk.abstr.numOpAndPromote = function(a, b, opfn)
     if (typeof a === "number" && typeof b === "number")
     {
         var ans = opfn(a, b);
-        // todo; handle float   Removed RNL (bugs in lng, and it should be a question of precision, not magnitude -- this was just wrong)
-        if ( (ans > Sk.builtin.lng.threshold$ || ans < -Sk.builtin.lng.threshold$)  // RNL
-        && Math.floor(ans) === ans) {                                               // RNL
-            return [Sk.builtin.lng.fromInt$(a), Sk.builtin.lng.fromInt$(b)];        // RNL
-        } else                                                                      // RNL
+        // todo; handle float	Removed RNL (bugs in lng, and it should be a question of precision, not magnitude -- this was just wrong)
+        if ( (ans > Sk.builtin.lng.threshold$ || ans < -Sk.builtin.lng.threshold$)	// RNL
+        && Math.floor(ans) === ans)	{												// RNL
+            return [Sk.builtin.lng.fromInt$(a), Sk.builtin.lng.fromInt$(b)];		// RNL
+        } else																		// RNL
             return ans;
     }
-    else if (a === undefined || b === undefined) {
-        throw new Sk.builtin.NameError('Undefined variable in expression')
-    }
+	else if (a === undefined || b === undefined) {
+		throw new Sk.builtin.NameError('Undefined variable in expression')
+	}
 
-    if (a.constructor === Sk.builtin.lng) {
-//      if (b.constructor == Sk.builtin.nmber)
-//          if (b.skType == Sk.builtin.nmber.float$) {
-//              var tmp = new Sk.builtin.nmber(a.tp$str(), Sk.builtin.nmber.float$);
-//              return [tmp, b];
-//          } else
-//              return [a, b.v];
-        return [a, b];
-    } else if (a.constructor === Sk.builtin.nmber) {
-        return [a, b];
-    } else if (typeof a === "number") {
-        var tmp = new Sk.builtin.nmber(a, undefined);
-        return [tmp, b];
-    } else
-        return undefined;
+	if (a.constructor === Sk.builtin.lng) {
+//		if (b.constructor == Sk.builtin.nmber)
+//			if (b.skType == Sk.builtin.nmber.float$) {
+//				var tmp = new Sk.builtin.nmber(a.tp$str(), Sk.builtin.nmber.float$);
+//				return [tmp, b];
+//			} else
+//				return [a, b.v];
+		return [a, b];
+	} else if (a.constructor === Sk.builtin.nmber) {
+		return [a, b];
+	} else if (typeof a === "number") {
+		var tmp = new Sk.builtin.nmber(a, undefined);
+		return [tmp, b];
+	} else
+		return undefined;
 };
 
 Sk.abstr.boNumPromote_ = {
@@ -6276,17 +6343,17 @@ Sk.abstr.boNumPromote_ = {
         return m;
     },
     "LShift": function(a, b) { 
-    if (b < 0) {
-        throw new Sk.builtin.ValueError("negative shift count");
-    }
-    var m = a << b;
-    if (m > a) {
-        return m; 
-    }
-    else {
-        // Fail, this will get recomputed with longs
-        return a * Math.pow(2, b);
-    }
+	if (b < 0) {
+	    throw new Sk.builtin.ValueError("negative shift count");
+	}
+	var m = a << b;
+	if (m > a) {
+	    return m; 
+	}
+	else {
+	    // Fail, this will get recomputed with longs
+	    return a * Math.pow(2, b);
+	}
     },
     "RShift": function(a, b) { 
         if (b < 0) {
@@ -6311,14 +6378,14 @@ Sk.abstr.numberBinOp = function(v, w, op)
         {
             return tmp;
         }
-        else if (tmp !== undefined &&  tmp.constructor === Sk.builtin.nmber)
-        {
+		else if (tmp !== undefined &&  tmp.constructor === Sk.builtin.nmber)
+		{
             return tmp;
-        }
-        else if (tmp !== undefined && tmp.constructor === Sk.builtin.lng)
-        {
+		}
+		else if (tmp !== undefined && tmp.constructor === Sk.builtin.lng)
+		{
             return tmp;
-        }
+		}
         else if (tmp !== undefined)
         {
             v = tmp[0];
@@ -6340,14 +6407,14 @@ Sk.abstr.numberInplaceBinOp = function(v, w, op)
         {
             return tmp;
         }
-        else if (tmp !== undefined &&  tmp.constructor === Sk.builtin.nmber)
-        {
+		else if (tmp !== undefined &&  tmp.constructor === Sk.builtin.nmber)
+		{
             return tmp;
-        }
-        else if (tmp !== undefined && tmp.constructor === Sk.builtin.lng)
-        {
+		}
+		else if (tmp !== undefined && tmp.constructor === Sk.builtin.lng)
+		{
             return tmp;
-        }
+		}
         else if (tmp !== undefined)
         {
             v = tmp[0];
@@ -6369,8 +6436,8 @@ Sk.abstr.numberUnaryOp = function(v, op)
         if (op === "Invert") return ~v;
     }
     else if (v instanceof Sk.builtin.nmber) {
-        var value = Sk.builtin.asnum$(v);
-        if (op === "USub") return new Sk.builtin.nmber(-value, value.skType);
+	var value = Sk.builtin.asnum$(v);
+	if (op === "USub") return new Sk.builtin.nmber(-value, value.skType);
         if (op === "UAdd") return new Sk.builtin.nmber(value, value.skType);
         if (op === "Invert") return new Sk.builtin.nmber(~value, value.skType);
     }
@@ -6568,8 +6635,8 @@ Sk.abstr.objectSetItem = function(o, key, v)
             return o.mp$ass_subscript(key, v);
         else if (Sk.misceval.isIndex(key) && o.sq$ass_item)
             return Sk.abstr.sequenceSetItem(o, Sk.misceval.asIndex(key), v);
-    else if (o.tp$setitem)
-        return o.tp$setitem(key, v);
+	else if (o.tp$setitem)
+	    return o.tp$setitem(key, v);
     }
 
     var otypename = Sk.abstr.typeName(o);
@@ -12265,8 +12332,8 @@ Sk.ffi.remapToPy = function(obj)
     else if (typeof obj === "string")
         return new Sk.builtin.str(obj);
     else if (typeof obj === "number")
-		return new Sk.builtin.nmber(obj, undefined);
-	else if (typeof obj === "boolean")
+        return new Sk.builtin.nmber(obj, undefined);
+    else if (typeof obj === "boolean")
         return obj;
     goog.asserts.fail("unhandled remap type " + typeof(obj));
 };
@@ -12315,18 +12382,26 @@ Sk.ffi.remapToJs = function(obj)
             ret.push(Sk.ffi.remapToJs(obj.v[i]));
         return ret;
     }
-	else if (obj instanceof Sk.builtin.nmber)
-	{
-		return Sk.builtin.asnum$(obj);
-	}
-	else if (obj instanceof Sk.builtin.lng)
-	{
-		return Sk.builtin.asnum$(obj);
-	}
+    else if (obj instanceof Sk.builtin.nmber)
+    {
+        return Sk.builtin.asnum$(obj);
+    }
+    else if (obj instanceof Sk.builtin.lng)
+    {
+        return Sk.builtin.asnum$(obj);
+    }
     else if (typeof obj === "number" || typeof obj === "boolean")
+    {
         return obj;
+    }
+    else if (typeof obj === "undefined")
+    {
+        return obj;
+    }
     else
+    {
         return obj.v;
+    }
 };
 goog.exportSymbol("Sk.ffi.remapToJs", Sk.ffi.remapToJs);
 
@@ -12353,10 +12428,10 @@ goog.exportSymbol("Sk.ffi.stdwrap", Sk.ffi.stdwrap);
  */
 Sk.ffi.basicwrap = function(obj)
 {
-	if (obj instanceof Sk.builtin.nmber)
-		return Sk.builtin.asnum$(obj);
-	if (obj instanceof Sk.builtin.lng)
-		return Sk.builtin.asnum$(obj);
+    if (obj instanceof Sk.builtin.nmber)
+        return Sk.builtin.asnum$(obj);
+    if (obj instanceof Sk.builtin.lng)
+        return Sk.builtin.asnum$(obj);
     if (typeof obj === "number" || typeof obj === "boolean")
         return obj;
     if (typeof obj === "string")
@@ -14531,7 +14606,7 @@ OUTERWHILE:
         {
             // no transition
             var errline = context[0][0];
-            throw new Sk.builtin.ParseError("bad input on line " + errline.toString(), this.filename, errline, context);	//	RNL
+            throw new Sk.builtin.ParseError("bad input", this.filename, errline, context);	//	RNL
 //          throw new Sk.builtin.ParseError("bad input on line " + errline.toString());		RNL
         }
     }

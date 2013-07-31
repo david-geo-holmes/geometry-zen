@@ -9,5 +9,5 @@
     "commit": "edbf2952c2b71f81c6449aef384bdf233a0d63bc"
   },
   "_source": "git://github.com/documentcloud/underscore.git",
-  "_target": "*"
+  "_target": "1.5.1"
 }

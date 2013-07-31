@@ -2,7 +2,7 @@
 # and provides an alternative geometric formulation of the Lorentz force law.
 # It is not a complete pedagogical analysis, only a glimpse of the computations.
 from eight import *
-from math import acos, fabs, pi, pow, random, sqrt
+from math import acos, fabs, pi, pow, sqrt
 
 def isCloseTo(expected, actual, precision):
     return fabs(expected - actual) < (pow(10, -precision) / 2)
@@ -17,7 +17,6 @@ def assertCloseTo(expect, actual, message):
 
 def makeCoord(n):
     return n
-    # return random()
 
 # Start with two random vectors a and b:
 a = Vector3(makeCoord(3), makeCoord(5), makeCoord(7))

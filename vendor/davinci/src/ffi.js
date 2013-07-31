@@ -55,10 +55,7 @@ goog.exportSymbol("Sk.ffi.referenceToPy", Sk.ffi.referenceToPy);
  */
 Sk.ffi.remapToJs = function(obj)
 {
-    if (typeof obj === "undefined") {
-        return obj;
-    }
-    else if (obj instanceof Sk.builtin.dict)
+    if (obj instanceof Sk.builtin.dict)
     {
         var ret = {};
         for (var iter = obj.tp$iter(), k = iter.tp$iternext();
@@ -89,10 +86,16 @@ Sk.ffi.remapToJs = function(obj)
     {
         return Sk.builtin.asnum$(obj);
     }
-    else if (typeof obj === "number" || typeof obj === "boolean") {
+    else if (typeof obj === "number" || typeof obj === "boolean")
+    {
         return obj;
     }
-    else {
+    else if (typeof obj === "undefined")
+    {
+        return obj;
+    }
+    else
+    {
         return obj.v;
     }
 };

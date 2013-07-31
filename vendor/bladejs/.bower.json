@@ -32,5 +32,5 @@
     "commit": "5a6cc9ca31e3fdea817201350677e5732ab7e1b6"
   },
   "_source": "git://github.com/geometryzen/bladejs.git",
-  "_target": "*"
+  "_target": "0.0.50"
 }

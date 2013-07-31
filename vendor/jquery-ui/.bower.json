@@ -15,5 +15,5 @@
     "commit": "6c476bd548e777b23fdbed295b8518beb049a2d0"
   },
   "_source": "git://github.com/components/jqueryui.git",
-  "_target": "*"
+  "_target": "1.10.3"
 }
