@@ -17,6 +17,10 @@ config.local.json
 config.production.json
 config.json
 
+# Ignore the non-essential DaVinci baggage.
+vendor/davinci/foo
+vendor/davinci/bar
+
 # Ignore the non-essential THREE.js baggage.
 vendor/threejs/editor
 vendor/threejs/examples
