@@ -12,3 +12,4 @@ vendor/
 .DS_Store
 
 /.d8_history
+/.idea

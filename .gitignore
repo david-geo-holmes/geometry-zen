@@ -21,6 +21,14 @@ config.json
 vendor/davinci/foo
 vendor/davinci/bar
 
+# Ignore the non-essential EaselJS baggage.
+vendor/EaselJS/build
+vendor/EaselJS/docs
+vendor/EaselJS/examples
+vendor/EaselJS/src
+vendor/EaselJS/tools
+vendor/EaselJS/tutorials
+
 # Ignore the non-essential THREE.js baggage.
 vendor/threejs/editor
 vendor/threejs/examples
