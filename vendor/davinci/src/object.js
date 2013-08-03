@@ -83,10 +83,14 @@ Sk.builtin.object.prototype.HashNotImplemented = function()
 
 Sk.builtin.object.prototype.tp$getattr = Sk.builtin.object.prototype.GenericGetAttr;
 Sk.builtin.object.prototype.tp$setattr = Sk.builtin.object.prototype.GenericSetAttr;
-Sk.builtin.type.makeIntoTypeObj('object', Sk.builtin.object);
+Sk.builtin.object.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('object', Sk.builtin.object);
 
 /**
  * @constructor
  */
-Sk.builtin.NoneObj = function() {};
-Sk.builtin.NoneObj.prototype.ob$type = Sk.builtin.type.makeTypeObj('None', new Sk.builtin.NoneObj());
+Sk.builtin.none = function() {};
+Sk.builtin.none.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('NoneType', Sk.builtin.none);
+Sk.builtin.none.prototype.tp$name = "None";
+Sk.builtin.none.none$ = Object.create(Sk.builtin.none.prototype, {v: {value: null, enumerable: true}});
+
+goog.exportSymbol("Sk.builtin.none", Sk.builtin.none);

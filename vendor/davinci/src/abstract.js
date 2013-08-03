@@ -12,9 +12,9 @@ Sk.abstr = {};
 
 Sk.abstr.typeName = function(v) {
     var vtypename;
-    if (v === null) {
+    if (v instanceof Sk.builtin.none) {
         vtypename = "NoneType";
-    } else if ((v === true) || (v === false)) {
+    } else if (v instanceof Sk.builtin.bool) {
         vtypename = "bool";
     } else if (typeof v === "number") {
         vtypename = "number";
@@ -119,14 +119,6 @@ Sk.abstr.binary_op_ = function(v, w, opname)
 		}
         if (ret !== undefined) return ret;
     }
-
-    if (opname === "Add" && v && v.sq$concat)
-        return v.sq$concat(w);
-    else if (opname === "Mult" && v && v.sq$repeat)
-        return Sk.abstr.sequenceRepeat(v.sq$repeat, v, w);
-    else if (opname === "Mult" && w && w.sq$repeat)
-        return Sk.abstr.sequenceRepeat(w.sq$repeat, w, v);
-
     Sk.abstr.binop_type_error(v, w, opname);
 };
 
@@ -153,25 +145,6 @@ Sk.abstr.binary_iop_ = function(v, w, opname)
 		}
         if (ret !== undefined) return ret;
     }
-
-    if (opname === "Add")
-    {
-        if (v.sq$inplace_concat)
-            return v.sq$inplace_concat(w);
-        else if (v.sq$concat)
-            return v.sq$concat(w);
-    }
-    else if (opname === "Mult")
-    {
-        if (v.sq$inplace_repeat)
-            return Sk.abstr.sequenceRepeat(v.sq$inplace_repeat, v, w);
-        else if (v.sq$repeat)
-            return Sk.abstr.sequenceRepeat(v.sq$repeat, v, w);
-        // note, don't use w inplace_repeat because we don't want to mutate rhs
-        else if (w.sq$repeat)
-            return Sk.abstr.sequenceRepeat(w.sq$repeat, w, v);
-    }
-
     Sk.abstr.binop_type_error(v, w, opname);
 };
 
@@ -344,14 +317,8 @@ goog.exportSymbol("Sk.abstr.numberInplaceBinOp", Sk.abstr.numberInplaceBinOp);
 
 Sk.abstr.numberUnaryOp = function(v, op)
 {
-    if (op === "Not") return Sk.misceval.isTrue(v) ? false : true;
-    else if (typeof v === "number" || typeof v === "boolean")
-    {
-        if (op === "USub") return -v;
-        if (op === "UAdd") return v;
-        if (op === "Invert") return ~v;
-    }
-    else if (v instanceof Sk.builtin.nmber) {
+    if (op === "Not") return Sk.misceval.isTrue(v) ? Sk.builtin.bool.false$ : Sk.builtin.bool.true$;
+    else if (v instanceof Sk.builtin.nmber || v instanceof Sk.builtin.bool) {
 	var value = Sk.builtin.asnum$(v);
 	if (op === "USub") return new Sk.builtin.nmber(-value, value.skType);
         if (op === "UAdd") return new Sk.builtin.nmber(value, value.skType);

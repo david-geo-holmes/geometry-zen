@@ -22,6 +22,17 @@ Sk.builtin.lng = function(x, base)	/* long is a reserved word */
     else if (x instanceof Sk.builtin.str)
 	return Sk.longFromStr(x.v, base);
     else {
+	if ((x !== undefined) && (!Sk.builtin.checkString(x)
+			      && !Sk.builtin.checkNumber(x)))
+	{
+	    if (x === true)
+		x = 1;
+	    else if (x === false)
+		x = 0;
+	    else
+		throw new Sk.builtin.TypeError("long() argument must be a string or a number, not '" + Sk.abstr.typeName(x) + "'");
+	}
+
 	x = Sk.builtin.asnum$nofloat(x);
 	this.biginteger = new Sk.builtin.biginteger(x);
     }
@@ -299,8 +310,20 @@ Sk.builtin.lng.prototype.nb$remainder = function(other)
 
 Sk.builtin.lng.prototype.nb$inplace_remainder = Sk.builtin.lng.prototype.nb$remainder;
 
-Sk.builtin.lng.prototype.nb$power = function(n)
+/**
+ * @param {number|Object} n
+ * @param {number|Object=} mod
+ * @suppress {checkTypes}
+ */
+Sk.builtin.lng.prototype.nb$power = function(n, mod)
 {
+    if (mod !== undefined)
+    {
+	n = new Sk.builtin.biginteger(Sk.builtin.asnum$(n));
+	mod = new Sk.builtin.biginteger(Sk.builtin.asnum$(mod));
+
+	return new Sk.builtin.lng(this.biginteger.modPowInt(n, mod));
+    }
 	if (typeof n === "number") {
 		if (n < 0) {
 			var thisAsFloat = new Sk.builtin.nmber(this.str$(10, true), Sk.builtin.nmber.float$);

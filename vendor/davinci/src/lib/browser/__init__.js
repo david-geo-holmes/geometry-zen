@@ -1196,7 +1196,7 @@ var $builtinmodule = function(name) {
             $loc.__call__ = new Sk.builtin.func(function(self, typePy, listenerPy, useCapture) {
               var type = Sk.ffi.remapToJs(typePy);
               var listener = function(event) {
-                var eventPy = Sk.misceval.callsim(mod[EVENT], Sk.ffi.referenceToPy(event));
+                var eventPy = Sk.misceval.callsim(mod[EVENT], Sk.ffi.referenceToPy(event), EVENT);
                 Sk.misceval.callsim(listenerPy, eventPy);
               };
               winListeners[type] = listener;
@@ -1317,7 +1317,7 @@ var $builtinmodule = function(name) {
             $loc.__call__ = new Sk.builtin.func(function(self, typePy, listenerPy, useCapture) {
               var type = Sk.ffi.remapToJs(typePy);
               var listener = function(event) {
-                var eventPy = Sk.misceval.callsim(mod[EVENT], Sk.ffi.referenceToPy(event));
+                var eventPy = Sk.misceval.callsim(mod[EVENT], Sk.ffi.referenceToPy(event), EVENT);
                 Sk.misceval.callsim(listenerPy, eventPy);
               };
               docListeners[type] = listener;

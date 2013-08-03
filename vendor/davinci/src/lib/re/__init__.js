@@ -35,7 +35,8 @@ var $builtinmodule = function(name)
         };
 
         newpattern = pattern.replace('/\\/g', '\\\\');
-        
+        newpattern = pattern.replace(/([^\\]){,(?![^\[]*\])/g, '$1{0,');
+
         return newpattern;
     };
 
@@ -143,6 +144,11 @@ var $builtinmodule = function(name)
 
         var regex = new RegExp(pat, jsflags);
 
+	var newline_at_end = new RegExp(/\n$/);
+	if (str.match(newline_at_end)) {
+	    str = str.slice(0,-1);
+	}
+
         var result = [];
         var match;
         while ((match = regex.exec(str)) != null) {
@@ -195,8 +201,13 @@ var $builtinmodule = function(name)
     // Internal function to return a Python list of strings 
     // From a JS regular expression string
     mod._findre = function(res, string) {
+	res = res.replace(/([^\\]){,(?![^\[]*\])/g, '$1{0,');
         var re = eval(res);
-        var matches = string.v.match(re);
+	var patt = new RegExp('\n$');
+	if (string.v.match(patt))
+	    var matches = string.v.slice(0,-1).match(re);
+	else
+            var matches = string.v.match(re);
         retval = new Sk.builtin.list();
         if ( matches == null ) return retval;
         for (var i = 0; i < matches.length; ++i) {
@@ -207,17 +218,43 @@ var $builtinmodule = function(name)
     }
 
     mod.search = new Sk.builtin.func(function(pattern, string, flags) {
-        var res = "/"+pattern.v.replace("/","\\/")+"/";
+	Sk.builtin.pyCheckArgs('search', arguments, 2, 3);
+        if (!Sk.builtin.checkString(pattern)) {
+            throw new Sk.builtin.TypeError("pattern must be a string");
+        };
+        if (!Sk.builtin.checkString(string)) {
+            throw new Sk.builtin.TypeError("string must be a string");
+        };
+	if (flags === undefined) {
+            flags = 0;
+        };
+        if (!Sk.builtin.checkNumber(flags)) {
+            throw new Sk.builtin.TypeError("flags must be a number");
+        };
+        var res = "/"+pattern.v.replace(/\//g,"\\/")+"/";
         lst = mod._findre(res,string);
-        if ( lst.v.length < 1 ) return null;
+        if ( lst.v.length < 1 ) return Sk.builtin.none.none$;
         var mob = Sk.misceval.callsim(mod.MatchObject, lst, pattern, string);
         return mob;
     });
 
     mod.match = new Sk.builtin.func(function(pattern, string, flags) {
-        var res = "/^"+pattern.v.replace("/","\\/")+"/";
+	Sk.builtin.pyCheckArgs('match', arguments, 2, 3);
+        if (!Sk.builtin.checkString(pattern)) {
+            throw new Sk.builtin.TypeError("pattern must be a string");
+        };
+        if (!Sk.builtin.checkString(string)) {
+            throw new Sk.builtin.TypeError("string must be a string");
+        };
+	if (flags === undefined) {
+            flags = 0;
+        };
+        if (!Sk.builtin.checkNumber(flags)) {
+            throw new Sk.builtin.TypeError("flags must be a number");
+        };
+        var res = "/^"+pattern.v.replace(/\//g,"\\/")+"/";
         lst = mod._findre(res,string);
-        if ( lst.v.length < 1 ) return null;
+        if ( lst.v.length < 1 ) return Sk.builtin.none.none$;
         var mob = Sk.misceval.callsim(mod.MatchObject, lst, pattern, string);
         return mob;
     });
