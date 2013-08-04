@@ -61,6 +61,7 @@ Files = [
         'src/file.js',
         'src/ffi.js',
         'src/enumerate.js',
+        'src/event.js',
         'src/tokenize.js',
         'gen/parse_tables.js',
         'src/parser.js',
