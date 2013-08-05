@@ -61,7 +61,6 @@ Files = [
         'src/file.js',
         'src/ffi.js',
         'src/enumerate.js',
-        'src/event.js',
         'src/tokenize.js',
         'gen/parse_tables.js',
         'src/parser.js',
@@ -72,9 +71,13 @@ Files = [
         'src/import.js',
         'src/timsort.js',
         'src/builtindict.js',
+        'src/document.js',
+        'src/event.js',
+        'src/node.js',
+        'src/window.js',
+        'src/e2ga.js',
+        'src/e3ga.js',
         ('support/jsbeautify/beautify.js', 'test'),
-        ('test/THREE.js', 'test'),
-        ('vendor/bladejs/build/blade.js', 'test')
         ]
 
 TestFiles = [
@@ -85,11 +88,6 @@ TestFiles = [
         'support/closure-library/closure/goog/math/vec2.js',
         'support/closure-library/closure/goog/json/json.js',
         'support/jsbeautify/beautify.js',
-        'vendor/bladejs/build/e2gaASM.js',
-        'vendor/bladejs/build/bladeASM.js',
-        'vendor/bladejs/build/bladeSTR.js',
-        'vendor/bladejs/build/blade.js',
-        'test/THREE.js',
         'test/sprintf.js',
         'test/json2.js',
         'test/test.js'

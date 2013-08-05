@@ -3,9 +3,10 @@
  *
  * Usage:
  *
- * mod['Event'] = Sk.builtin.event(mod);
+ * mod['Event'] = Sk.builtin.buildEventClass(mod);
  */
-Sk.builtin.event = function(mod) {
+Sk.builtin.buildEventClass = function(mod) {
+
   var EVENT                                 = "Event";
   var PROP_ALT_KEY                          = "altKey";
   var PROP_BUBBLES                          = "bubbles";

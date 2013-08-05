@@ -4,7 +4,6 @@ doc/static/skulpt.js
 doc/static/davinci.js
 doc/static/davinci.min.js
 doc/static/davinciLib.js
-node_modules/
 vendor/
 
 

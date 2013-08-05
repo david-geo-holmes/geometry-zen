@@ -13651,189 +13651,6 @@ Sk.builtin.enumerate.prototype['next'] = new Sk.builtin.func(function(self)
 {
     return self.tp$iternext();
 });								 
-/**
- * Convenience function for incorporating an Event class into a module.
- *
- * Usage:
- *
- * mod['Event'] = Sk.builtin.event(mod);
- */
-Sk.builtin.event = function(mod) {
-  var EVENT                                 = "Event";
-  var PROP_ALT_KEY                          = "altKey";
-  var PROP_BUBBLES                          = "bubbles";
-  var PROP_BUTTON                           = "button";
-  var PROP_CANCELABLE                       = "cancelable";
-  var PROP_CLIENT_X                         = "clientX";
-  var PROP_CLIENT_Y                         = "clientY";
-  var PROP_CTRL_KEY                         = "ctrlKey";
-  var PROP_DEFAULT_PREVENTED                = "defaultPrevented";
-  var PROP_KEY_CODE                         = "keyCode";
-  var PROP_SCREEN_X                         = "screenX";
-  var PROP_SCREEN_Y                         = "screenY";
-  var PROP_SHIFT_KEY                        = "shiftKey";
-  var PROP_TARGET                           = "target";
-  var PROP_TYPE                             = "type";
-  var METHOD_ADD_EVENT_LISTENER             = "addEventListener";
-  var METHOD_PREVENT_DEFAULT                = "preventDefault";
-  var METHOD_STOP_IMMEDIATE_PROPAGATION     = "stopImmediatePropagation";
-  var METHOD_STOP_PROPAGATION               = "stopPropagation";
-
-  return Sk.misceval.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = new Sk.builtin.func(function(eventPy, argPy) {
-      eventPy.tp$name = EVENT;
-      eventPy.v = Sk.ffi.remapToJs(argPy);
-    });
-    $loc.__getattr__ = new Sk.builtin.func(function(eventPy, name) {
-      var event = Sk.ffi.remapToJs(eventPy);
-      switch(name) {
-        case PROP_ALT_KEY: {
-          return event[PROP_ALT_KEY];
-        }
-        case PROP_BUBBLES: {
-          return event[PROP_BUBBLES];
-        }
-        case PROP_BUTTON: {
-          return Sk.builtin.assk$(event[PROP_BUTTON], Sk.builtin.nmber.int$);
-        }
-        case PROP_CANCELABLE: {
-          return event[PROP_CANCELABLE];
-        }
-        case PROP_CLIENT_X: {
-          return Sk.builtin.assk$(event[PROP_CLIENT_X], Sk.builtin.nmber.int$);
-        }
-        case PROP_CLIENT_Y: {
-          return Sk.builtin.assk$(event[PROP_CLIENT_Y], Sk.builtin.nmber.int$);
-        }
-        case PROP_CTRL_KEY: {
-          return event[PROP_CTRL_KEY];
-        }
-        case PROP_DEFAULT_PREVENTED: {
-          return event[PROP_DEFAULT_PREVENTED];
-        }
-        case PROP_KEY_CODE: {
-          return Sk.builtin.assk$(event[PROP_KEY_CODE], Sk.builtin.nmber.int$);
-        }
-        case PROP_SCREEN_X: {
-          return Sk.builtin.assk$(event[PROP_SCREEN_X], Sk.builtin.nmber.int$);
-        }
-        case PROP_SCREEN_Y: {
-          return Sk.builtin.assk$(event[PROP_SCREEN_Y], Sk.builtin.nmber.int$);
-        }
-        case PROP_SHIFT_KEY: {
-          return event[PROP_SHIFT_KEY];
-        }
-        case PROP_TARGET: {
-          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = new Sk.builtin.func(function(targetPy) {
-              targetPy.tp$name = PROP_TARGET;
-              targetPy.v = event.target;
-            });
-            $loc.__getattr__ = new Sk.builtin.func(function(targetPy, name) {
-              return Sk.ffi.remapToPy(event.target[name])
-            })
-            $loc.__setattr__ = new Sk.builtin.func(function(targetPy, name, valuePy) {
-              event.target[name] = Sk.ffi.remapToJs(valuePy);
-            })
-            $loc.__str__ = new Sk.builtin.func(function(targetPy) {
-              var target = Sk.ffi.remapToJs(targetPy);
-              return new Sk.builtin.str("" + target)
-            })
-            $loc.__repr__ = new Sk.builtin.func(function(targetPy) {
-              var target = Sk.ffi.remapToJs(targetPy);
-              return new Sk.builtin.str("" + target)
-            })
-          }, PROP_TARGET, []));
-        }
-        case PROP_TYPE: {
-          return new Sk.builtin.str(event[PROP_TYPE]);
-        }
-        case METHOD_ADD_EVENT_LISTENER: {
-          return Sk.builtin.addEventListener(mod, event);
-        }
-        case METHOD_PREVENT_DEFAULT: {
-          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = new Sk.builtin.func(function(self) {
-              self.tp$name = METHOD_PREVENT_DEFAULT;
-            });
-            $loc.__call__ = new Sk.builtin.func(function(self) {
-              event[METHOD_PREVENT_DEFAULT]();
-            });
-            $loc.__str__ = new Sk.builtin.func(function(self) {
-              return new Sk.builtin.str(METHOD_PREVENT_DEFAULT)
-            })
-            $loc.__repr__ = new Sk.builtin.func(function(self) {
-              return new Sk.builtin.str(METHOD_PREVENT_DEFAULT)
-            })
-          }, METHOD_PREVENT_DEFAULT, []));
-        }
-        case METHOD_STOP_IMMEDIATE_PROPAGATION: {
-          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = new Sk.builtin.func(function(self) {
-              self.tp$name = METHOD_STOP_IMMEDIATE_PROPAGATION;
-            });
-            $loc.__call__ = new Sk.builtin.func(function(self) {
-              event[METHOD_STOP_IMMEDIATE_PROPAGATION]();
-            });
-            $loc.__str__ = new Sk.builtin.func(function(self) {
-              return new Sk.builtin.str(METHOD_STOP_IMMEDIATE_PROPAGATION)
-            })
-            $loc.__repr__ = new Sk.builtin.func(function(self) {
-              return new Sk.builtin.str(METHOD_STOP_IMMEDIATE_PROPAGATION)
-            })
-          }, METHOD_STOP_IMMEDIATE_PROPAGATION, []));
-        }
-        case METHOD_STOP_PROPAGATION: {
-          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = new Sk.builtin.func(function(self) {
-              self.tp$name = METHOD_STOP_PROPAGATION;
-            });
-            $loc.__call__ = new Sk.builtin.func(function(self) {
-              event[METHOD_STOP_PROPAGATION]();
-            });
-            $loc.__str__ = new Sk.builtin.func(function(self) {
-              return new Sk.builtin.str(METHOD_STOP_PROPAGATION)
-            })
-            $loc.__repr__ = new Sk.builtin.func(function(self) {
-              return new Sk.builtin.str(METHOD_STOP_PROPAGATION)
-            })
-          }, METHOD_STOP_PROPAGATION, []));
-        }
-        default: {
-          return Sk.ffi.remapToPy(event[name]);
-        }
-      }
-    });
-    $loc.__str__ = new Sk.builtin.func(function(eventPy) {
-      var event = Sk.ffi.remapToJs(eventPy);
-      return new Sk.builtin.str("" + event)
-    })
-    $loc.__repr__ = new Sk.builtin.func(function(eventPy) {
-      var event = Sk.ffi.remapToJs(eventPy);
-      return new Sk.builtin.str("" + event)
-    })
-  }, EVENT, []);
-};
-
-Sk.builtin.addEventListener = function (mod, eventTarget) {
-  var EVENT                                 = "Event";
-  var METHOD_ADD_EVENT_LISTENER             = "addEventListener";
-  return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = new Sk.builtin.func(function(self) {
-      self.tp$name = METHOD_ADD_EVENT_LISTENER;
-      self.v = eventTarget[METHOD_ADD_EVENT_LISTENER];
-    });
-    $loc.__call__ = new Sk.builtin.func(function(self, typePy, listenerPy, useCapturePy) {
-      var type = Sk.ffi.remapToJs(typePy);
-      var listenerJs = function(event) {
-        var eventPy = Sk.misceval.callsim(mod[EVENT], Sk.ffi.referenceToPy(event, EVENT));
-        Sk.misceval.callsim(listenerPy, eventPy);
-      };
-      var useCapture = Sk.ffi.remapToJs(useCapturePy);
-      eventTarget[METHOD_ADD_EVENT_LISTENER](type, listenerJs, useCapture);
-    });
-  }, METHOD_ADD_EVENT_LISTENER, []));
-};
 /*
  * This is a port of tokenize.py by Ka-Ping Yee.
  *
@@ -23108,3 +22925,3732 @@ Sk.builtins = {
 'intern' : Sk.builtin.intern
 };
 goog.exportSymbol("Sk.builtins", Sk.builtins);
+/**
+ * Convenience function for incorporating a Window class into a module.
+ *
+ * Usage:
+ *
+ * 1) mod['document'] = Sk.misceval.callsim(Sk.builtin.buildDocumentClass(mod));
+ * 2) mod['Document'] = Sk.builtin.buildDocumentClass(mod);
+ *
+ * Dependencies:
+ *
+ * mod['Event']
+ * mod['Node']
+ *
+ */
+Sk.builtin.buildDocumentClass = function(mod) {
+
+  var DOCUMENT_CLASS                        = "Document";
+  var EVENT                                 = "Event";
+  var NODE                                  = "Node";
+
+  var PROP_BODY                             = "body";
+  var PROP_WEBKIT_HIDDEN                    = "webkitHidden";
+
+  var METHOD_ADD_EVENT_LISTENER             = "addEventListener";
+  var METHOD_CREATE_ELEMENT                 = "createElement";
+  var METHOD_GET_ELEMENT_BY_ID              = "getElementById";
+  var METHOD_GET_ELEMENTS_BY_TAG_NAME       = "getElementsByTagName";
+  var METHOD_REMOVE_EVENT_LISTENER          = "removeEventListener";
+
+  var wrapNode = function(node) {
+    if (node) {
+      return Sk.misceval.callsim(mod[NODE], node);
+    }
+    else {
+      return Sk.builtin.none.none$;
+    }
+  }
+
+  var stringFromArg = function(arg) {
+    if (arg) {
+      return arg.v;
+    }
+    else {
+      return null;
+    }
+  }
+
+  // We must be able to track the JavaScript listener functions.
+  // TODO: This should include both the type and the useCapture flag.
+  var docListeners = {};
+
+  return Sk.misceval.buildClass(mod, function($gbl, $loc) {
+    $loc.__init__ = new Sk.builtin.func(function(documentPy) {
+      documentPy.tp$name = DOCUMENT_CLASS;
+      documentPy.v = document;
+    });
+    $loc.__getattr__ = new Sk.builtin.func(function(self, name) {
+      switch(name) {
+        case PROP_BODY: {
+          return Sk.misceval.callsim(mod[NODE], document[PROP_BODY]);
+        }
+        case PROP_WEBKIT_HIDDEN: {
+          return document[PROP_WEBKIT_HIDDEN];
+        }
+        case METHOD_ADD_EVENT_LISTENER: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_ADD_EVENT_LISTENER;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, typePy, listenerPy, useCapture) {
+              var type = Sk.ffi.remapToJs(typePy);
+              var listener = function(event) {
+                var eventPy = Sk.misceval.callsim(mod[EVENT], Sk.ffi.referenceToPy(event, EVENT));
+                Sk.misceval.callsim(listenerPy, eventPy);
+              };
+              docListeners[type] = listener;
+              document[METHOD_ADD_EVENT_LISTENER](type, listener, useCapture);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_ADD_EVENT_LISTENER)
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_ADD_EVENT_LISTENER)
+            })
+          }, METHOD_ADD_EVENT_LISTENER, []));
+        }
+        case METHOD_REMOVE_EVENT_LISTENER: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_REMOVE_EVENT_LISTENER;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, typePy, listener, useCapture) {
+              var type = Sk.ffi.remapToJs(typePy);
+              var listener = docListeners[type];
+              delete docListeners[type];
+              document[METHOD_REMOVE_EVENT_LISTENER](type, listener, useCapture);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_REMOVE_EVENT_LISTENER)
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_REMOVE_EVENT_LISTENER)
+            })
+          }, METHOD_REMOVE_EVENT_LISTENER, []));
+        }
+        case METHOD_CREATE_ELEMENT: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_CREATE_ELEMENT;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, tagName, attributes) {
+              var element = document.createElement(stringFromArg(tagName));
+              if (attributes instanceof Sk.builtin.dict) {
+                for (var iter = attributes.tp$iter(), k = iter.tp$iternext(); k !== undefined; k = iter.tp$iternext()) {
+                  var v = attributes.mp$subscript(k);
+                  if (v === undefined) {
+                    v = null;
+                  }
+                  var kAsJs = Sk.ffi.remapToJs(k);
+                  var vAsJs = Sk.ffi.remapToJs(v);
+                  element.setAttribute(kAsJs, vAsJs);
+                }
+              }
+              return wrapNode(element);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_CREATE_ELEMENT)
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_CREATE_ELEMENT)
+            })
+          }, METHOD_CREATE_ELEMENT, []));
+        }
+        case METHOD_GET_ELEMENT_BY_ID: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_GET_ELEMENT_BY_ID;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, id) {
+              return wrapNode(document.getElementById(stringFromArg(id)));
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_GET_ELEMENT_BY_ID)
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_GET_ELEMENT_BY_ID)
+            })
+          }, METHOD_GET_ELEMENT_BY_ID, []));
+        }
+        case METHOD_GET_ELEMENTS_BY_TAG_NAME: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_GET_ELEMENTS_BY_TAG_NAME;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, tagName) {
+              var elements = document.getElementsByTagName(stringFromArg(tagName))
+              var xs = [];
+              for (var i = elements.length - 1; i >= 0; i--) {
+                xs.push(wrapNode(elements[i]));
+              }
+              return new Sk.builtin.list(xs);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_GET_ELEMENTS_BY_TAG_NAME)
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_GET_ELEMENTS_BY_TAG_NAME)
+            })
+          }, METHOD_GET_ELEMENTS_BY_TAG_NAME, []));
+        }
+      }
+    });
+    $loc.__str__ = new Sk.builtin.func(function(self) {
+      return new Sk.builtin.str(DOCUMENT_CLASS)
+    })
+    $loc.__repr__ = new Sk.builtin.func(function(self) {
+      return new Sk.builtin.str(DOCUMENT_CLASS)
+    })
+  }, DOCUMENT_CLASS, []);
+};
+/**
+ * Convenience function for incorporating an Event class into a module.
+ *
+ * Usage:
+ *
+ * mod['Event'] = Sk.builtin.buildEventClass(mod);
+ */
+Sk.builtin.buildEventClass = function(mod) {
+
+  var EVENT                                 = "Event";
+  var PROP_ALT_KEY                          = "altKey";
+  var PROP_BUBBLES                          = "bubbles";
+  var PROP_BUTTON                           = "button";
+  var PROP_CANCELABLE                       = "cancelable";
+  var PROP_CLIENT_X                         = "clientX";
+  var PROP_CLIENT_Y                         = "clientY";
+  var PROP_CTRL_KEY                         = "ctrlKey";
+  var PROP_DEFAULT_PREVENTED                = "defaultPrevented";
+  var PROP_KEY_CODE                         = "keyCode";
+  var PROP_SCREEN_X                         = "screenX";
+  var PROP_SCREEN_Y                         = "screenY";
+  var PROP_SHIFT_KEY                        = "shiftKey";
+  var PROP_TARGET                           = "target";
+  var PROP_TYPE                             = "type";
+  var METHOD_ADD_EVENT_LISTENER             = "addEventListener";
+  var METHOD_PREVENT_DEFAULT                = "preventDefault";
+  var METHOD_STOP_IMMEDIATE_PROPAGATION     = "stopImmediatePropagation";
+  var METHOD_STOP_PROPAGATION               = "stopPropagation";
+
+  return Sk.misceval.buildClass(mod, function($gbl, $loc) {
+    $loc.__init__ = new Sk.builtin.func(function(eventPy, argPy) {
+      eventPy.tp$name = EVENT;
+      eventPy.v = Sk.ffi.remapToJs(argPy);
+    });
+    $loc.__getattr__ = new Sk.builtin.func(function(eventPy, name) {
+      var event = Sk.ffi.remapToJs(eventPy);
+      switch(name) {
+        case PROP_ALT_KEY: {
+          return event[PROP_ALT_KEY];
+        }
+        case PROP_BUBBLES: {
+          return event[PROP_BUBBLES];
+        }
+        case PROP_BUTTON: {
+          return Sk.builtin.assk$(event[PROP_BUTTON], Sk.builtin.nmber.int$);
+        }
+        case PROP_CANCELABLE: {
+          return event[PROP_CANCELABLE];
+        }
+        case PROP_CLIENT_X: {
+          return Sk.builtin.assk$(event[PROP_CLIENT_X], Sk.builtin.nmber.int$);
+        }
+        case PROP_CLIENT_Y: {
+          return Sk.builtin.assk$(event[PROP_CLIENT_Y], Sk.builtin.nmber.int$);
+        }
+        case PROP_CTRL_KEY: {
+          return event[PROP_CTRL_KEY];
+        }
+        case PROP_DEFAULT_PREVENTED: {
+          return event[PROP_DEFAULT_PREVENTED];
+        }
+        case PROP_KEY_CODE: {
+          return Sk.builtin.assk$(event[PROP_KEY_CODE], Sk.builtin.nmber.int$);
+        }
+        case PROP_SCREEN_X: {
+          return Sk.builtin.assk$(event[PROP_SCREEN_X], Sk.builtin.nmber.int$);
+        }
+        case PROP_SCREEN_Y: {
+          return Sk.builtin.assk$(event[PROP_SCREEN_Y], Sk.builtin.nmber.int$);
+        }
+        case PROP_SHIFT_KEY: {
+          return event[PROP_SHIFT_KEY];
+        }
+        case PROP_TARGET: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(targetPy) {
+              targetPy.tp$name = PROP_TARGET;
+              targetPy.v = event.target;
+            });
+            $loc.__getattr__ = new Sk.builtin.func(function(targetPy, name) {
+              return Sk.ffi.remapToPy(event.target[name])
+            })
+            $loc.__setattr__ = new Sk.builtin.func(function(targetPy, name, valuePy) {
+              event.target[name] = Sk.ffi.remapToJs(valuePy);
+            })
+            $loc.__str__ = new Sk.builtin.func(function(targetPy) {
+              var target = Sk.ffi.remapToJs(targetPy);
+              return new Sk.builtin.str("" + target)
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(targetPy) {
+              var target = Sk.ffi.remapToJs(targetPy);
+              return new Sk.builtin.str("" + target)
+            })
+          }, PROP_TARGET, []));
+        }
+        case PROP_TYPE: {
+          return new Sk.builtin.str(event[PROP_TYPE]);
+        }
+        case METHOD_ADD_EVENT_LISTENER: {
+          return Sk.builtin.addEventListener(mod, event);
+        }
+        case METHOD_PREVENT_DEFAULT: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_PREVENT_DEFAULT;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self) {
+              event[METHOD_PREVENT_DEFAULT]();
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_PREVENT_DEFAULT)
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_PREVENT_DEFAULT)
+            })
+          }, METHOD_PREVENT_DEFAULT, []));
+        }
+        case METHOD_STOP_IMMEDIATE_PROPAGATION: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_STOP_IMMEDIATE_PROPAGATION;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self) {
+              event[METHOD_STOP_IMMEDIATE_PROPAGATION]();
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_STOP_IMMEDIATE_PROPAGATION)
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_STOP_IMMEDIATE_PROPAGATION)
+            })
+          }, METHOD_STOP_IMMEDIATE_PROPAGATION, []));
+        }
+        case METHOD_STOP_PROPAGATION: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_STOP_PROPAGATION;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self) {
+              event[METHOD_STOP_PROPAGATION]();
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_STOP_PROPAGATION)
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_STOP_PROPAGATION)
+            })
+          }, METHOD_STOP_PROPAGATION, []));
+        }
+        default: {
+          return Sk.ffi.remapToPy(event[name]);
+        }
+      }
+    });
+    $loc.__str__ = new Sk.builtin.func(function(eventPy) {
+      var event = Sk.ffi.remapToJs(eventPy);
+      return new Sk.builtin.str("" + event)
+    })
+    $loc.__repr__ = new Sk.builtin.func(function(eventPy) {
+      var event = Sk.ffi.remapToJs(eventPy);
+      return new Sk.builtin.str("" + event)
+    })
+  }, EVENT, []);
+};
+
+Sk.builtin.addEventListener = function (mod, eventTarget) {
+  var EVENT                                 = "Event";
+  var METHOD_ADD_EVENT_LISTENER             = "addEventListener";
+  return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+    $loc.__init__ = new Sk.builtin.func(function(self) {
+      self.tp$name = METHOD_ADD_EVENT_LISTENER;
+      self.v = eventTarget[METHOD_ADD_EVENT_LISTENER];
+    });
+    $loc.__call__ = new Sk.builtin.func(function(self, typePy, listenerPy, useCapturePy) {
+      var type = Sk.ffi.remapToJs(typePy);
+      var listenerJs = function(event) {
+        var eventPy = Sk.misceval.callsim(mod[EVENT], Sk.ffi.referenceToPy(event, EVENT));
+        Sk.misceval.callsim(listenerPy, eventPy);
+      };
+      var useCapture = Sk.ffi.remapToJs(useCapturePy);
+      eventTarget[METHOD_ADD_EVENT_LISTENER](type, listenerJs, useCapture);
+    });
+  }, METHOD_ADD_EVENT_LISTENER, []));
+};
+/**
+ * Convenience function for incorporating a Node class into a module.
+ *
+ * Usage:
+ *
+ * mod['Node'] = Sk.builtin.buildNodeClass(mod);
+ */
+Sk.builtin.buildNodeClass = function(mod) {
+
+  var NODE                                  = "Node";
+  var CANVAS_GRADIENT_CLASS                 = "CanvasGradient";
+  var CANVAS_RENDERING_CONTEXT_2D           = "CanvasRenderingContext2D";
+
+  var PROP_CLIENT_HEIGHT                    = "clientHeight";
+  var PROP_CLIENT_WIDTH                     = "clientWidth";
+  var PROP_DIR                              = "dir";
+  var PROP_FILL_STYLE                       = "fillStyle";
+  var PROP_FIRST_CHILD                      = "firstChild";
+  var PROP_FONT                             = "font";
+  var PROP_HEIGHT                           = "height";
+  var PROP_LAST_CHILD                       = "lastChild";
+  var PROP_LEFT                             = "left";
+  var PROP_LINE_CAP                         = "lineCap";
+  var PROP_LINE_JOIN                        = "lineJoin";
+  var PROP_LINE_WIDTH                       = "lineWidth";
+  var PROP_NEXT_SIBLING                     = "nextSibling";
+  var PROP_PARENT_NODE                      = "parentNode";
+  var PROP_POSITION                         = "position";
+  var PROP_PREVIOUS_SIBLING                 = "previousSibling";
+  var PROP_SHADOW_BLUR                      = "shadowBlur";
+  var PROP_SHADOW_COLOR                     = "shadowColor";
+  var PROP_SHADOW_OFFSET_X                  = "shadowOffsetX";
+  var PROP_SHADOW_OFFSET_Y                  = "shadowOffsetY";
+  var PROP_STYLE                            = "style";
+  var PROP_STROKE_STYLE                     = "strokeStyle";
+  var PROP_TEXT_ALIGN                       = "textAlign";
+  var PROP_TEXT_BASELINE                    = "textBaseline";
+  var PROP_TOP                              = "top";
+  var PROP_WEBKIT_BACKING_STORE_PIXEL_RATIO = "webkitBackingStorePixelRatio";
+  var PROP_WIDTH                            = "width";
+
+  var METHOD_ADD_COLOR_STOP                 = "addColorStop";
+  var METHOD_APPEND_CHILD                   = "appendChild";
+  var METHOD_ARC                            = "arc";
+  var METHOD_ARC_TO                         = "arcTo";
+  var METHOD_BEGIN_PATH                     = "beginPath";
+  var METHOD_BEZIER_CURVE_TO                = "bezierCurveTo";
+  var METHOD_CLEAR_RECT                     = "clearRect";
+  var METHOD_CLIP                           = "clip";
+  var METHOD_CLOSE_PATH                     = "closePath";
+  var METHOD_CREATE_LINEAR_GRADIENT         = "createLinearGradient";
+  var METHOD_FILL                           = "fill";
+  var METHOD_FILL_RECT                      = "fillRect";
+  var METHOD_FILL_TEXT                      = "fillText";
+  var METHOD_GET_CONTEXT                    = "getContext";
+  var METHOD_INSERT_BEFORE                  = "insertBefore";
+  var METHOD_LINE_TO                        = "lineTo";
+  var METHOD_MOVE_TO                        = "moveTo";
+  var METHOD_QUADRATIC_CURVE_TO             = "quadraticCurveTo";
+  var METHOD_RECT                           = "rect";
+  var METHOD_REMOVE_CHILD                   = "removeChild";
+  var METHOD_RESTORE                        = "restore";
+  var METHOD_ROTATE                         = "rotate";
+  var METHOD_SAVE                           = "save";
+  var METHOD_SCALE                          = "scale";
+  var METHOD_SET_ATTRIBUTE                  = "setAttribute";
+  var METHOD_SET_TRANSFORM                  = "setTransform";
+  var METHOD_STROKE                         = "stroke";
+  var METHOD_STROKE_RECT                    = "strokeRect";
+  var METHOD_STROKE_TEXT                    = "strokeText";
+  var METHOD_TRANSFORM                      = "transform";
+  var METHOD_TRANSLATE                      = "translate";
+
+  var wrapNode = function(node) {
+    if (node) {
+      return Sk.misceval.callsim(mod[NODE], node);
+    }
+    else {
+      return Sk.builtin.none.none$;
+    }
+  }
+
+  var wrapNumber = function(n) {
+    if (typeof n === 'number') {
+      return Sk.builtin.assk$(n, Sk.builtin.nmber.float$);
+    }
+    else {
+      return Sk.builtin.none.none$;
+    }
+  }
+
+  var wrapString = function(s) {
+    if (typeof s === 'string') {
+      return new Sk.builtin.str(s)
+    }
+    else {
+      return Sk.builtin.none.none$;
+    }
+  }
+
+  var nodeFromArg = function(arg) {
+    if (arg) {
+      return arg.v;
+    }
+    else {
+      return null;
+    }
+  }
+
+  var numberFromArg = function(arg) {
+    if (arg) {
+      return arg.v;
+    }
+    else {
+      return null;
+    }
+  }
+
+  var stringFromArg = function(arg) {
+    if (arg) {
+      return arg.v;
+    }
+    else {
+      return null;
+    }
+  }
+
+  return Sk.misceval.buildClass(mod, function($gbl, $loc) {
+    $loc.__init__ = new Sk.builtin.func(function(self, node) {
+      self.tp$name = NODE;
+      self.v = node;
+    });
+    $loc.__getattr__ = new Sk.builtin.func(function(nodePy, name) {
+      var node = Sk.ffi.remapToJs(nodePy);
+      switch(name) {
+        case PROP_CLIENT_HEIGHT: {
+          return wrapNumber(node[PROP_CLIENT_HEIGHT]);
+        }
+        case PROP_CLIENT_WIDTH: {
+          return wrapNumber(node[PROP_CLIENT_WIDTH]);
+        }
+        case PROP_DIR: {
+          return new Sk.builtin.str(node[PROP_DIR]);
+        }
+        case PROP_FIRST_CHILD: {
+          return wrapNode(node[PROP_FIRST_CHILD]);
+        }
+        case PROP_LAST_CHILD: {
+          return wrapNode(node[PROP_LAST_CHILD]);
+        }
+        case PROP_NEXT_SIBLING: {
+          return wrapNode(node[PROP_NEXT_SIBLING]);
+        }
+        case PROP_PARENT_NODE: {
+          return wrapNode(node[PROP_PARENT_NODE]);
+        }
+        case PROP_PREVIOUS_SIBLING: {
+          return wrapNode(node[PROP_PREVIOUS_SIBLING]);
+        }
+        case PROP_HEIGHT: {
+          return Sk.builtin.assk$(node[PROP_HEIGHT], Sk.builtin.nmber.int$);
+        }
+        case PROP_WIDTH: {
+          return Sk.builtin.assk$(node[PROP_WIDTH], Sk.builtin.nmber.int$);
+        }
+        case PROP_STYLE: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = PROP_STYLE;
+              self.v = node.style;
+            });
+            $loc.__getattr__ = new Sk.builtin.func(function(stylePy, name) {
+              var style = Sk.ffi.remapToJs(stylePy);
+              switch(name) {
+                case PROP_HEIGHT: {
+                  return new Sk.builtin.str(style[PROP_HEIGHT]);
+                }
+                case PROP_LEFT: {
+                  return new Sk.builtin.str(style[PROP_LEFT]);
+                }
+                case PROP_POSITION: {
+                  return new Sk.builtin.str(style[PROP_POSITION]);
+                }
+                case PROP_TOP: {
+                  return new Sk.builtin.str(style[PROP_TOP]);
+                }
+                case PROP_WIDTH: {
+                  return new Sk.builtin.str(style[PROP_WIDTH]);
+                }
+              }
+            })
+            $loc.__setattr__ = new Sk.builtin.func(function(stylePy, name, valuePy) {
+              var style = Sk.ffi.remapToJs(stylePy);
+              var value = Sk.ffi.remapToJs(valuePy);
+              switch(name) {
+                case PROP_HEIGHT: {
+                  style[PROP_HEIGHT] = value;
+                }
+                break;
+                case PROP_LEFT: {
+                  style[PROP_LEFT] = value;
+                }
+                break;
+                case PROP_POSITION: {
+                  style[PROP_POSITION] = value;
+                }
+                break;
+                case PROP_TOP: {
+                  style[PROP_TOP] = value;
+                }
+                break;
+                case PROP_WIDTH: {
+                  style[PROP_WIDTH] = value;
+                }
+                break;
+                default: {
+                  throw new Sk.builtin.AssertionError(name + " is not a writeable attribute of " + PROP_STYLE);
+                }
+              }
+            })
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(PROP_STYLE);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(PROP_STYLE);
+            });
+          }, PROP_STYLE, []));
+        }
+        case METHOD_APPEND_CHILD: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_APPEND_CHILD;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, childNode) {
+              return wrapNode(node.appendChild(nodeFromArg(childNode)));
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_APPEND_CHILD);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_APPEND_CHILD);
+            });
+          }, METHOD_APPEND_CHILD, []));
+        }
+        case METHOD_GET_CONTEXT: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_GET_CONTEXT;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, contextIdPy, contextAttributePy) {
+              var contextId = Sk.ffi.remapToJs(contextIdPy);
+              var contextAttribute = Sk.ffi.remapToJs(contextAttributePy);
+              var context = node.getContext(contextId, contextAttribute);
+              return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                $loc.__init__ = new Sk.builtin.func(function(self) {
+                  self.tp$name = CANVAS_RENDERING_CONTEXT_2D;
+                  self.v = context;
+                });
+                $loc.__getattr__ = new Sk.builtin.func(function(contextPy, name) {
+                  switch(name) {
+                    case PROP_FILL_STYLE: {
+                      return new Sk.builtin.str(context[PROP_FILL_STYLE]);
+                    }
+                    case PROP_FONT: {
+                      return new Sk.builtin.str(context[PROP_FONT]);
+                    }
+                    case PROP_LINE_CAP: {
+                      return new Sk.builtin.str(context[PROP_LINE_CAP]);
+                    }
+                    case PROP_LINE_JOIN: {
+                      return new Sk.builtin.str(context[PROP_LINE_JOIN]);
+                    }
+                    case PROP_LINE_WIDTH: {
+                      return Sk.builtin.assk$(context[PROP_LINE_WIDTH], Sk.builtin.nmber.int$);
+                    }
+                    case PROP_SHADOW_BLUR: {
+                      return Sk.builtin.assk$(context[PROP_SHADOW_BLUR], Sk.builtin.nmber.int$);
+                    }
+                    case PROP_SHADOW_COLOR: {
+                      return new Sk.builtin.str(context[PROP_SHADOW_COLOR]);
+                    }
+                    case PROP_SHADOW_OFFSET_X: {
+                      return Sk.builtin.assk$(context[PROP_SHADOW_OFFSET_X], Sk.builtin.nmber.int$);
+                    }
+                    case PROP_SHADOW_OFFSET_Y: {
+                      return Sk.builtin.assk$(context[PROP_SHADOW_OFFSET_Y], Sk.builtin.nmber.int$);
+                    }
+                    case PROP_STROKE_STYLE: {
+                      return new Sk.builtin.str(context[PROP_STROKE_STYLE]);
+                    }
+                    case PROP_TEXT_ALIGN: {
+                      return new Sk.builtin.str(context[PROP_TEXT_ALIGN]);
+                    }
+                    case PROP_TEXT_BASELINE: {
+                      return new Sk.builtin.str(context[PROP_TEXT_BASELINE]);
+                    }
+                    case PROP_WEBKIT_BACKING_STORE_PIXEL_RATIO: {
+                      return Sk.builtin.assk$(context[PROP_WEBKIT_BACKING_STORE_PIXEL_RATIO], Sk.builtin.nmber.int$);
+                    }
+                    case METHOD_ARC: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_ARC;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, x, y, radius, startAngle, endAngle, anticlockwise) {
+                          x = Sk.ffi.remapToJs(x);
+                          y = Sk.ffi.remapToJs(y);
+                          radius = Sk.ffi.remapToJs(radius);
+                          startAngle = Sk.ffi.remapToJs(startAngle);
+                          endAngle = Sk.ffi.remapToJs(endAngle);
+                          anticlockwise = Sk.ffi.remapToJs(anticlockwise);
+                          context[METHOD_ARC](x, y, radius, startAngle, endAngle, anticlockwise);
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_ARC);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_ARC);
+                        });
+                      }, METHOD_ARC, []));
+                    }
+                    case METHOD_ARC_TO: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_ARC_TO;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, x1, y1, x2, y2, radiusX, radiusY, rotation) {
+                          x1 = Sk.ffi.remapToJs(x1);
+                          y1 = Sk.ffi.remapToJs(y1);
+                          x2 = Sk.ffi.remapToJs(x2);
+                          y2 = Sk.ffi.remapToJs(y2);
+                          radiusX = Sk.ffi.remapToJs(radiusX);
+                          radiusY = Sk.ffi.remapToJs(radiusY);
+                          rotation = Sk.ffi.remapToJs(rotation);
+                          context[METHOD_ARC_TO](x1, y1, x2, y2, radiusX, radiusY, rotation);
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_ARC_TO);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_ARC_TO);
+                        });
+                      }, METHOD_ARC_TO, []));
+                    }
+                    case METHOD_BEGIN_PATH: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_BEGIN_PATH;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self) {
+                          context[METHOD_BEGIN_PATH]();
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_BEGIN_PATH);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_BEGIN_PATH);
+                        });
+                      }, METHOD_BEGIN_PATH, []));
+                    }
+                    case METHOD_BEZIER_CURVE_TO: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_BEZIER_CURVE_TO;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, cp1x, cp1y, cp2x, cp2y, x, y) {
+                          cp1x = Sk.ffi.remapToJs(cp1x);
+                          cp1y = Sk.ffi.remapToJs(cp1y);
+                          cp2x = Sk.ffi.remapToJs(cp2x);
+                          cp2y = Sk.ffi.remapToJs(cp2y);
+                          x = Sk.ffi.remapToJs(x);
+                          y = Sk.ffi.remapToJs(y);
+                          context[METHOD_BEZIER_CURVE_TO](cp1x, cp1y, cp2x, cp2y, x, y);
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_BEZIER_CURVE_TO);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_BEZIER_CURVE_TO);
+                        });
+                      }, METHOD_BEZIER_CURVE_TO, []));
+                    }
+                    case METHOD_CLEAR_RECT: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_CLEAR_RECT;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, x, y, w, h) {
+                          x = Sk.ffi.remapToJs(x);
+                          y = Sk.ffi.remapToJs(y);
+                          w = Sk.ffi.remapToJs(w);
+                          h = Sk.ffi.remapToJs(h);
+                          context[METHOD_CLEAR_RECT](x, y, w, h);
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_CLEAR_RECT);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_CLEAR_RECT);
+                        });
+                      }, METHOD_CLEAR_RECT, []));
+                    }
+                    case METHOD_CLIP: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_CLIP;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self) {
+                          context[METHOD_CLIP]();
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_CLIP);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_CLIP);
+                        });
+                      }, METHOD_CLIP, []));
+                    }
+                    case METHOD_CLOSE_PATH: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_CLOSE_PATH;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self) {
+                          context[METHOD_CLOSE_PATH]();
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_CLOSE_PATH);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_CLOSE_PATH);
+                        });
+                      }, METHOD_CLOSE_PATH, []));
+                    }
+                    case METHOD_CREATE_LINEAR_GRADIENT: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_CREATE_LINEAR_GRADIENT;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, x0, y0, x1, y1) {
+                          x0 = Sk.ffi.remapToJs(x0);
+                          y0 = Sk.ffi.remapToJs(y0);
+                          x1 = Sk.ffi.remapToJs(x1);
+                          y1 = Sk.ffi.remapToJs(y1);
+                          var gradient = context[METHOD_CREATE_LINEAR_GRADIENT](x0, y0, x1, y1);
+                          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                            $loc.__init__ = new Sk.builtin.func(function(self) {
+                              self.tp$name = CANVAS_GRADIENT_CLASS;
+                              self.v = gradient;
+                            });
+                            $loc.__getattr__ = new Sk.builtin.func(function(gradientPy, name) {
+                              switch(name) {
+                                case METHOD_ADD_COLOR_STOP: {
+                                  return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                                    $loc.__init__ = new Sk.builtin.func(function(self) {
+                                      self.tp$name = METHOD_ADD_COLOR_STOP;
+                                    });
+                                    $loc.__call__ = new Sk.builtin.func(function(self, offset, color) {
+                                      offset = Sk.ffi.remapToJs(offset);
+                                      color = Sk.ffi.remapToJs(color);
+                                      gradient[METHOD_ADD_COLOR_STOP](offset, color);
+                                    });
+                                    $loc.__str__ = new Sk.builtin.func(function(self) {
+                                      return new Sk.builtin.str(METHOD_ADD_COLOR_STOP);
+                                    });
+                                    $loc.__repr__ = new Sk.builtin.func(function(self) {
+                                      return new Sk.builtin.str(METHOD_ADD_COLOR_STOP);
+                                    });
+                                  }, METHOD_ADD_COLOR_STOP, []));
+                                }
+                              }
+                            })
+                            $loc.__setattr__ = new Sk.builtin.func(function(gradientPy, name, valuePy) {
+                              var value = Sk.ffi.remapToJs(valuePy);
+                              switch(name) {
+                                default: {
+                                  throw new Sk.builtin.AssertionError(name + " is not a writeable attribute of " + CANVAS_GRADIENT_CLASS);
+                                }
+                              }
+                            })
+                            $loc.__str__ = new Sk.builtin.func(function(self) {
+                              return new Sk.builtin.str(CANVAS_GRADIENT_CLASS);
+                            });
+                            $loc.__repr__ = new Sk.builtin.func(function(self) {
+                              return new Sk.builtin.str(CANVAS_GRADIENT_CLASS);
+                            });
+                          }, CANVAS_GRADIENT_CLASS, []));
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_CREATE_LINEAR_GRADIENT);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_CREATE_LINEAR_GRADIENT);
+                        });
+                      }, METHOD_CREATE_LINEAR_GRADIENT, []));
+                    }
+                    case METHOD_FILL: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_FILL;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self) {
+                          context[METHOD_FILL]();
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_FILL);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_FILL);
+                        });
+                      }, METHOD_FILL, []));
+                    }
+                    case METHOD_FILL_RECT: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_FILL_RECT;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, x, y, w, h) {
+                          x = Sk.ffi.remapToJs(x);
+                          y = Sk.ffi.remapToJs(y);
+                          w = Sk.ffi.remapToJs(w);
+                          h = Sk.ffi.remapToJs(h);
+                          context[METHOD_FILL_RECT](x, y, w, h);
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_FILL_RECT);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_FILL_RECT);
+                        });
+                      }, METHOD_FILL_RECT, []));
+                    }
+                    case METHOD_FILL_TEXT: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_FILL_TEXT;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, text, x, y, maxWidthPy) {
+                          text = Sk.ffi.remapToJs(text);
+                          x = Sk.ffi.remapToJs(x);
+                          y = Sk.ffi.remapToJs(y);
+                          var maxWidth = Sk.ffi.remapToJs(maxWidthPy);
+                          if (typeof maxWidth === 'undefined') {
+                            context[METHOD_FILL_TEXT](text, x, y);
+                          }
+                          else if (typeof maxWidth === 'number') {
+                            context[METHOD_FILL_TEXT](text, x, y, maxWidth);
+                          }
+                          else {
+                            throw new Sk.builtin.TypeError("maxWidth");
+                          }
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_FILL_TEXT);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_FILL_TEXT);
+                        });
+                      }, METHOD_FILL_TEXT, []));
+                    }
+                    case METHOD_LINE_TO: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_LINE_TO;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, x, y) {
+                          x = Sk.ffi.remapToJs(x);
+                          y = Sk.ffi.remapToJs(y);
+                          context[METHOD_LINE_TO](x, y);
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_LINE_TO);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_LINE_TO);
+                        });
+                      }, METHOD_LINE_TO, []));
+                    }
+                    case METHOD_MOVE_TO: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_MOVE_TO;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, x, y) {
+                          x = Sk.ffi.remapToJs(x);
+                          y = Sk.ffi.remapToJs(y);
+                          context[METHOD_MOVE_TO](x, y);
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_MOVE_TO);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_MOVE_TO);
+                        });
+                      }, METHOD_MOVE_TO, []));
+                    }
+                    case METHOD_QUADRATIC_CURVE_TO: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_QUADRATIC_CURVE_TO;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, cpx, cpy, x, y) {
+                          cpx = Sk.ffi.remapToJs(cpx);
+                          cpy = Sk.ffi.remapToJs(cpy);
+                          x = Sk.ffi.remapToJs(x);
+                          y = Sk.ffi.remapToJs(y);
+                          context[METHOD_QUADRATIC_CURVE_TO](cpx, cpy, x, y);
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_QUADRATIC_CURVE_TO);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_QUADRATIC_CURVE_TO);
+                        });
+                      }, METHOD_QUADRATIC_CURVE_TO, []));
+                    }
+                    case METHOD_RECT: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_RECT;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, x, y, w, h) {
+                          x = Sk.ffi.remapToJs(x);
+                          y = Sk.ffi.remapToJs(y);
+                          w = Sk.ffi.remapToJs(w);
+                          h = Sk.ffi.remapToJs(h);
+                          context[METHOD_RECT](x, y, w, h);
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_RECT);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_RECT);
+                        });
+                      }, METHOD_RECT, []));
+                    }
+                    case METHOD_RESTORE: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_RESTORE;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self) {
+                          context[METHOD_RESTORE]();
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_RESTORE);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_RESTORE);
+                        });
+                      }, METHOD_RESTORE, []));
+                    }
+                    case METHOD_ROTATE: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_ROTATE;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, angle) {
+                          angle = Sk.ffi.remapToJs(angle);
+                          context[METHOD_ROTATE](angle);
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_ROTATE);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_ROTATE);
+                        });
+                      }, METHOD_ROTATE, []));
+                    }
+                    case METHOD_SAVE: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_SAVE;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self) {
+                          context[METHOD_SAVE]();
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_SAVE);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_SAVE);
+                        });
+                      }, METHOD_SAVE, []));
+                    }
+                    case METHOD_SCALE: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_SCALE;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, x, y) {
+                          x = Sk.ffi.remapToJs(x);
+                          y = Sk.ffi.remapToJs(y);
+                          context[METHOD_SCALE](x, y);
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_SCALE);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_SCALE);
+                        });
+                      }, METHOD_SCALE, []));
+                    }
+                    case METHOD_SET_TRANSFORM: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_SET_TRANSFORM;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, a, b, c, d, e, f) {
+                          a = Sk.ffi.remapToJs(a);
+                          b = Sk.ffi.remapToJs(b);
+                          c = Sk.ffi.remapToJs(c);
+                          d = Sk.ffi.remapToJs(d);
+                          e = Sk.ffi.remapToJs(e);
+                          f = Sk.ffi.remapToJs(f);
+                          context[METHOD_SET_TRANSFORM](a, b, c, d, e, f);
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_SET_TRANSFORM);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_SET_TRANSFORM);
+                        });
+                      }, METHOD_SET_TRANSFORM, []));
+                    }
+                    case METHOD_STROKE: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_STROKE;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self) {
+                          context[METHOD_STROKE]();
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_STROKE);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_STROKE);
+                        });
+                      }, METHOD_STROKE, []));
+                    }
+                    case METHOD_STROKE_RECT: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_STROKE_RECT;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, x, y, w, h) {
+                          x = Sk.ffi.remapToJs(x);
+                          y = Sk.ffi.remapToJs(y);
+                          w = Sk.ffi.remapToJs(w);
+                          h = Sk.ffi.remapToJs(h);
+                          context[METHOD_STROKE_RECT](x, y, w, h);
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_STROKE_RECT);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_STROKE_RECT);
+                        });
+                      }, METHOD_STROKE_RECT, []));
+                    }
+                    case METHOD_STROKE_TEXT: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_STROKE_TEXT;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, text, x, y, maxWidthPy) {
+                          text = Sk.ffi.remapToJs(text);
+                          x = Sk.ffi.remapToJs(x);
+                          y = Sk.ffi.remapToJs(y);
+                          var maxWidth = Sk.ffi.remapToJs(maxWidthPy);
+                          if (typeof maxWidth === 'undefined') {
+                            context[METHOD_STROKE_TEXT](text, x, y);
+                          }
+                          else if (typeof maxWidth === 'number') {
+                            context[METHOD_STROKE_TEXT](text, x, y, maxWidth);
+                          }
+                          else {
+                            throw new Sk.builtin.TypeError("maxWidth");
+                          }
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_STROKE_TEXT);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_STROKE_TEXT);
+                        });
+                      }, METHOD_STROKE_TEXT, []));
+                    }
+                    case METHOD_TRANSFORM: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_TRANSFORM;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, a, b, c, d, e, f) {
+                          a = Sk.ffi.remapToJs(a);
+                          b = Sk.ffi.remapToJs(b);
+                          c = Sk.ffi.remapToJs(c);
+                          d = Sk.ffi.remapToJs(d);
+                          e = Sk.ffi.remapToJs(e);
+                          f = Sk.ffi.remapToJs(f);
+                          context[METHOD_TRANSFORM](a, b, c, d, e, f);
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_TRANSFORM);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_TRANSFORM);
+                        });
+                      }, METHOD_TRANSFORM, []));
+                    }
+                    case METHOD_TRANSLATE: {
+                      return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+                        $loc.__init__ = new Sk.builtin.func(function(self) {
+                          self.tp$name = METHOD_TRANSLATE;
+                        });
+                        $loc.__call__ = new Sk.builtin.func(function(self, x, y) {
+                          x = Sk.ffi.remapToJs(x);
+                          y = Sk.ffi.remapToJs(y);
+                          context[METHOD_TRANSLATE](x, y);
+                        });
+                        $loc.__str__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_TRANSLATE);
+                        });
+                        $loc.__repr__ = new Sk.builtin.func(function(self) {
+                          return new Sk.builtin.str(METHOD_TRANSLATE);
+                        });
+                      }, METHOD_TRANSLATE, []));
+                    }
+                  }
+                })
+                $loc.__setattr__ = new Sk.builtin.func(function(contextPy, name, valuePy) {
+                  var context = Sk.ffi.remapToJs(contextPy);
+                  var value = Sk.ffi.remapToJs(valuePy);
+                  switch(name) {
+                    case PROP_FILL_STYLE: {
+                      context[PROP_FILL_STYLE] = value;
+                    }
+                    break;
+                    case PROP_FONT: {
+                      context[PROP_FONT] = value;
+                    }
+                    break;
+                    case PROP_LINE_CAP: {
+                      context[PROP_LINE_CAP] = value;
+                    }
+                    break;
+                    case PROP_LINE_JOIN: {
+                      context[PROP_LINE_JOIN] = value;
+                    }
+                    break;
+                    case PROP_LINE_WIDTH: {
+                      context[PROP_LINE_WIDTH] = value;
+                    }
+                    break;
+                    case PROP_SHADOW_BLUR: {
+                      context[PROP_SHADOW_BLUR] = value;
+                    }
+                    break;
+                    case PROP_SHADOW_COLOR: {
+                      context[PROP_SHADOW_COLOR] = value;
+                    }
+                    break;
+                    case PROP_SHADOW_OFFSET_X: {
+                      context[PROP_SHADOW_OFFSET_X] = value;
+                    }
+                    break;
+                    case PROP_SHADOW_OFFSET_Y: {
+                      context[PROP_SHADOW_OFFSET_Y] = value;
+                    }
+                    break;
+                    case PROP_STROKE_STYLE: {
+                      context[PROP_STROKE_STYLE] = value;
+                    }
+                    break;
+                    case PROP_TEXT_ALIGN: {
+                      context[PROP_TEXT_ALIGN] = value;
+                    }
+                    break;
+                    case PROP_TEXT_BASELINE: {
+                      context[PROP_TEXT_BASELINE] = value;
+                    }
+                    break;
+                    default: {
+                      throw new Sk.builtin.AssertionError(name + " is not a writeable attribute of " + CANVAS_RENDERING_CONTEXT_2D);
+                    }
+                  }
+                })
+                $loc.__str__ = new Sk.builtin.func(function(self) {
+                  return new Sk.builtin.str(CANVAS_RENDERING_CONTEXT_2D);
+                });
+                $loc.__repr__ = new Sk.builtin.func(function(self) {
+                  return new Sk.builtin.str(CANVAS_RENDERING_CONTEXT_2D);
+                });
+              }, CANVAS_RENDERING_CONTEXT_2D, []));
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_GET_CONTEXT);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_GET_CONTEXT);
+            });
+          }, METHOD_GET_CONTEXT, []));
+        }
+        case METHOD_INSERT_BEFORE: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_INSERT_BEFORE;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, newNode, refNode) {
+              return wrapNode(node.insertBefore(nodeFromArg(newNode), nodeFromArg(refNode)));
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_INSERT_BEFORE)
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_INSERT_BEFORE)
+            })
+          }, METHOD_INSERT_BEFORE, []));
+        }
+        case METHOD_REMOVE_CHILD: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_REMOVE_CHILD;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, childNode) {
+              return wrapNode(node.removeChild(nodeFromArg(childNode)));
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_REMOVE_CHILD);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_REMOVE_CHILD);
+            });
+          }, METHOD_REMOVE_CHILD, []));
+        }
+        case METHOD_SET_ATTRIBUTE: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_SET_ATTRIBUTE;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, name, value) {
+              node.setAttribute(stringFromArg(name), stringFromArg(value));
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET_ATTRIBUTE)
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET_ATTRIBUTE);
+            });
+          }, METHOD_SET_ATTRIBUTE, []));
+        }
+      }
+    });
+    $loc.__setattr__ = new Sk.builtin.func(function(nodePy, name, valuePy) {
+      var node = Sk.ffi.remapToJs(nodePy);
+      var value = Sk.ffi.remapToJs(valuePy);
+      switch(name) {
+        case PROP_DIR: {
+          node[PROP_DIR] = value;
+        }
+        break;
+        case 'id': {
+          node.setAttribute(name, value);
+        }
+        break;
+        case PROP_HEIGHT: {
+          node[PROP_HEIGHT] = value;
+        }
+        break;
+        case PROP_WIDTH: {
+          node[PROP_WIDTH] = value;
+        }
+        break;
+        default: {
+          node.setAttribute(name, stringFromArg(value));
+        }
+      }
+    });
+    $loc.getCSS = new Sk.builtin.func(function(self,key) {
+      return new Sk.builtin.str(self.v.style[key.v]);
+    });
+    $loc.setCSS = new Sk.builtin.func(function(self, attr, value) {
+      self.v.style[attr.v] = value.v
+    });
+    $loc.getAttribute = new Sk.builtin.func(function(self, key) {
+      var res = self.v.getAttribute(key.v)
+      if (res) {
+        return new Sk.builtin.str(res)
+      }
+      else {
+        return null;
+      }
+    });
+    $loc.setAttribute = new Sk.builtin.func(function(self, attr, value) {
+      self.v.setAttribute(attr.v,value.v)
+    });
+    $loc.__str__ = new Sk.builtin.func(function(self) {
+      return new Sk.builtin.str(self.v.tagName)
+    })
+    $loc.__repr__ = new Sk.builtin.func(function(self) {
+      return new Sk.builtin.str(NODE)
+    })
+  }, NODE, []);
+};
+/**
+ * Convenience function for incorporating a Window class into a module.
+ *
+ * Usage:
+ *
+ * 1) mod['window'] = Sk.misceval.callsim(Sk.builtin.buildWindowClass(mod));
+ * 2) mod['Window'] = Sk.builtin.buildWindowClass(mod);
+ *
+ * Dependencies:
+ *
+ * mod['Event']
+ */
+Sk.builtin.buildWindowClass = function(mod) {
+
+  var EVENT                                 = "Event";
+  var WINDOW_CLASS                          = "Window";
+
+  var PROP_ANIMATION_TIME                   = "animationTime";
+  var PROP_DOCUMENT                         = "document";
+  var PROP_DEVICE_PIXEL_RATIO               = "devicePixelRatio";
+
+  var METHOD_ADD_EVENT_LISTENER             = "addEventListener";
+  var METHOD_CANCEL_ANIMATION_FRAME         = "cancelAnimationFrame";
+  var METHOD_REMOVE_EVENT_LISTENER          = "removeEventListener";
+  var METHOD_REQUEST_ANIMATION_FRAME        = "requestAnimationFrame";
+  var METHOD_SET_TIMEOUT                    = "setTimeout";
+
+  var wrapNumber = function(n) {
+    if (typeof n === 'number') {
+      return Sk.builtin.assk$(n, Sk.builtin.nmber.float$);
+    }
+    else {
+      return Sk.builtin.none.none$;
+    }
+  }
+
+  var numberFromArg = function(arg) {
+    if (arg) {
+      return arg.v;
+    }
+    else {
+      return null;
+    }
+  }
+
+  // We must be able to track the JavaScript listener functions.
+  // TODO: This should include both the type and the useCapture flag.
+  var winListeners = {};
+
+  return Sk.misceval.buildClass(mod, function($gbl, $loc) {
+    $loc.__init__ = new Sk.builtin.func(function(windowPy) {
+      windowPy.tp$name = WINDOW_CLASS;
+      windowPy.v = window;
+    });
+    $loc.__getattr__ = new Sk.builtin.func(function(self, name) {
+      switch(name) {
+        case PROP_ANIMATION_TIME: {
+          return wrapNumber(window[PROP_ANIMATION_TIME]);
+        }
+        case PROP_DOCUMENT: {
+          return mod[PROP_DOCUMENT];
+        }
+        case "innerHeight": {
+          return wrapNumber(window[name]);
+        }
+        case "innerWidth": {
+          return wrapNumber(window[name]);
+        }
+        case PROP_DEVICE_PIXEL_RATIO: {
+          return Sk.builtin.assk$(window[PROP_DEVICE_PIXEL_RATIO], Sk.builtin.nmber.int$);
+        }
+        case METHOD_ADD_EVENT_LISTENER: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_ADD_EVENT_LISTENER;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, typePy, listenerPy, useCapture) {
+              var type = Sk.ffi.remapToJs(typePy);
+              var listener = function(event) {
+                var eventPy = Sk.misceval.callsim(mod[EVENT], Sk.ffi.referenceToPy(event, EVENT));
+                Sk.misceval.callsim(listenerPy, eventPy);
+              };
+              winListeners[type] = listener;
+              window[METHOD_ADD_EVENT_LISTENER](type, listener, useCapture);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_ADD_EVENT_LISTENER)
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_ADD_EVENT_LISTENER)
+            })
+          }, METHOD_ADD_EVENT_LISTENER, []));
+        }
+        case METHOD_REMOVE_EVENT_LISTENER: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_REMOVE_EVENT_LISTENER;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, typePy, listener, useCapture) {
+              var type = Sk.ffi.remapToJs(typePy);
+              var listener = winListeners[type];
+              delete winListeners[type];
+              window[METHOD_REMOVE_EVENT_LISTENER](type, listener, useCapture);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_REMOVE_EVENT_LISTENER)
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_REMOVE_EVENT_LISTENER)
+            })
+          }, METHOD_REMOVE_EVENT_LISTENER, []));
+        }
+        case METHOD_CANCEL_ANIMATION_FRAME: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_CANCEL_ANIMATION_FRAME;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, requestID) {
+              if (requestID) {
+                window[METHOD_CANCEL_ANIMATION_FRAME](numberFromArg(requestID));
+              }
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_CANCEL_ANIMATION_FRAME)
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_CANCEL_ANIMATION_FRAME)
+            })
+          }, METHOD_CANCEL_ANIMATION_FRAME, []));
+        }
+        case METHOD_REQUEST_ANIMATION_FRAME: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_REQUEST_ANIMATION_FRAME;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, callback) {
+              var requestID = window[METHOD_REQUEST_ANIMATION_FRAME](function(timestamp) {
+                Sk.misceval.callsim(callback, wrapNumber(timestamp));
+              });
+              return wrapNumber(requestID);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_REQUEST_ANIMATION_FRAME)
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_REQUEST_ANIMATION_FRAME)
+            })
+          }, METHOD_REQUEST_ANIMATION_FRAME, []));
+        }
+        case METHOD_SET_TIMEOUT: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_SET_TIMEOUT;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, funcPy, delayPy, paramsPy) {
+              var delay = Sk.ffi.remapToJs(delayPy);
+              var params = Sk.ffi.remapToJs(paramsPy);
+              var timeoutID = window[METHOD_SET_TIMEOUT](function() {
+                Sk.misceval.callsim(funcPy);
+              }, delay, params);
+              return wrapNumber(timeoutID);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET_TIMEOUT)
+            })
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET_TIMEOUT)
+            })
+          }, METHOD_SET_TIMEOUT, []));
+        }
+      }
+    });
+    $loc.__str__ = new Sk.builtin.func(function(self) {
+      return new Sk.builtin.str(WINDOW_CLASS)
+    })
+    $loc.__repr__ = new Sk.builtin.func(function(self, arg) {
+      return new Sk.builtin.str(WINDOW_CLASS)
+    })
+  }, WINDOW_CLASS, []);
+};
+/**
+ * Convenience function for incorporating a Euclidean2 class into a module.
+ *
+ * Usage:
+ *
+ * Sk.builtin.defineEuclidean2(mod);
+ */
+Sk.builtin.defineEuclidean2 = function(mod) {
+
+  var EUCLIDEAN_2    = "Euclidean2";
+  var SCALAR_2       = "Scalar2";
+  var VECTOR_2       = "Vector2";
+  var PSEUDOSCALAR_2 = "Pseudoscalar2";
+
+  var PROP_W         = "w";
+  var PROP_X         = "x";
+  var PROP_Y         = "y";
+  var PROP_XY        = "xy";
+  var METHOD_CLONE   = "clone";
+  var METHOD_LENGTH  = "length";
+
+  function isNumber(x)    { return typeof x === 'number'; }
+
+  function remapE2ToPy(x00, x01, x10, x11) {
+    return Sk.misceval.callsim(mod[EUCLIDEAN_2],
+      Sk.builtin.assk$(x00, Sk.builtin.nmber.float$),
+      Sk.builtin.assk$(x01, Sk.builtin.nmber.float$),
+      Sk.builtin.assk$(x10, Sk.builtin.nmber.float$),
+      Sk.builtin.assk$(x11, Sk.builtin.nmber.float$));
+  }
+
+  function stringFromCoordinates(coordinates, labels, multiplier) {
+    var append, i, sb, str, _i, _ref;
+    sb = [];
+    append = function(number, label) {
+      var n;
+      if (number !== 0) {
+        if (number >= 0) {
+          if (sb.length > 0) {
+            sb.push("+");
+          }
+        } else {
+          sb.push("-");
+        }
+        n = Math.abs(number);
+        if (n === 1) {
+          return sb.push(label);
+        } else {
+          sb.push(n.toString());
+          if (label !== "1") {
+            sb.push(multiplier);
+            return sb.push(label);
+          }
+        }
+      }
+    };
+    for (i = _i = 0, _ref = coordinates.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+      append(coordinates[i], labels[i]);
+    }
+    if (sb.length > 0) {
+      str = sb.join("");
+    } else {
+      str = "0";
+    }
+    return str;
+  }
+
+  function divide(a00, a01, a10, a11, b00, b01, b10, b11, x) {
+    // r = ~b
+    var r00 = +b00;
+    var r01 = +b01;
+    var r10 = +b10;
+    var r11 = -b11;
+    // m = b * r
+    var m00 = b00 * r00 + b01 * r01 + b10 * r10 - b11 * r11;
+    var m01 = 0;
+    var m10 = 0;
+    var m11 = 0;
+    // c = cliffordConjugate(m)
+    var c00 = +m00;
+    var c01 = -m01;
+    var c10 = -m10;
+    var c11 = -m11;
+    // s = r * c
+    var s00 = r00 * c00 + r01 * c01 + r10 * c10 - r11 * c11;
+    var s01 = r00 * c01 + r01 * c00 - r10 * c11 + r11 * c10;
+    var s10 = r00 * c10 + r01 * c11 + r10 * c00 - r11 * c01;
+    var s11 = r00 * c11 + r01 * c10 - r10 * c01 + r11 * c00;
+    // k = b * s
+    var k00 = b00 * s00 + b01 * s01 + b10 * s10 - b11 * s11;
+    // i = inverse(b)
+    var i00 = s00/k00;
+    var i01 = s01/k00;
+    var i10 = s10/k00;
+    var i11 = s11/k00;
+    // x = a * inverse(b)
+    var x00 = a00 * i00 + a01 * i01 + a10 * i10 - a11 * i11;
+    var x01 = a00 * i01 + a01 * i00 - a10 * i11 + a11 * i10;
+    var x10 = a00 * i10 + a01 * i11 + a10 * i00 - a11 * i01;
+    var x11 = a00 * i11 + a01 * i10 - a10 * i01 + a11 * i00;
+    if (typeof x !== 'undefined') {
+      x[0] = x00;
+      x[1] = x01;
+      x[2] = x10;
+      x[3] = x11;
+    }
+    else {
+      return remapE2ToPy(x00, x01, x10, x11);
+    }
+  }
+
+  mod[SCALAR_2] = new Sk.builtin.func(function(w) {
+    w = Sk.ffi.remapToJs(w);
+    return remapE2ToPy(w, 0, 0, 0);
+  });
+
+  mod[VECTOR_2] = new Sk.builtin.func(function(x, y) {
+    x = Sk.ffi.remapToJs(x);
+    y = Sk.ffi.remapToJs(y);
+    return remapE2ToPy(0, x, y, 0);
+  });
+
+  mod[PSEUDOSCALAR_2] = new Sk.builtin.func(function(xy) {
+    xy = Sk.ffi.remapToJs(xy);
+    return remapE2ToPy(0, 0, 0, xy);
+  });
+
+  mod[EUCLIDEAN_2] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
+    $loc.__init__ = new Sk.builtin.func(function(self, x00, x01, x10, x11) {
+      x00 = Sk.ffi.remapToJs(x00);
+      x01 = Sk.ffi.remapToJs(x01);
+      x10 = Sk.ffi.remapToJs(x10);
+      x11 = Sk.ffi.remapToJs(x11);
+      self.tp$name = EUCLIDEAN_2;
+      self.v = [x00, x01, x10, x11];
+    });
+    $loc.__add__ = new Sk.builtin.func(function(lhs, rhs) {
+      lhs = Sk.ffi.remapToJs(lhs);
+      rhs = Sk.ffi.remapToJs(rhs);
+      if (isNumber(rhs)) {
+        return remapE2ToPy(lhs[0] + rhs, lhs[1], lhs[2], lhs[3]);
+      }
+      else {
+        return remapE2ToPy(lhs[0] + rhs[0], lhs[1] + rhs[1], lhs[2] + rhs[2], lhs[3] + rhs[3]);
+      }
+    });
+    $loc.__radd__ = new Sk.builtin.func(function(rhs, lhs) {
+      lhs = Sk.ffi.remapToJs(lhs);
+      rhs = Sk.ffi.remapToJs(rhs);
+      if (isNumber(lhs)) {
+        return remapE2ToPy(lhs + rhs[0], rhs[1], rhs[2], rhs[3]);
+      }
+      else {
+        throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " + " + JSON.stringify(rhs, null, 2));
+      }
+    });
+    $loc.__iadd__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var self = Sk.ffi.remapToJs(selfPy);
+      var other = Sk.ffi.remapToJs(otherPy);
+      if (isNumber(other)) {
+        self[0] += other;
+        return selfPy;
+      }
+      else {
+        self[0] += other[0];
+        self[1] += other[1];
+        self[2] += other[2];
+        self[3] += other[3];
+        return selfPy;
+      }
+    });
+    $loc.__sub__ = new Sk.builtin.func(function(lhs, rhs) {
+      lhs = Sk.ffi.remapToJs(lhs);
+      rhs = Sk.ffi.remapToJs(rhs);
+      if (isNumber(rhs)) {
+        return remapE2ToPy(lhs[0] - rhs, lhs[1], lhs[2], lhs[3]);
+      }
+      else {
+        return remapE2ToPy(lhs[0] - rhs[0], lhs[1] - rhs[1], lhs[2] - rhs[2], lhs[3] - rhs[3]);
+      }
+    });
+    $loc.__rsub__ = new Sk.builtin.func(function(rhs, lhs) {
+      lhs = Sk.ffi.remapToJs(lhs);
+      rhs = Sk.ffi.remapToJs(rhs);
+      if (isNumber(lhs)) {
+        return remapE2ToPy(lhs - rhs[0], -rhs[1], -rhs[2], -rhs[3]);
+      }
+      else {
+        throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " - " + JSON.stringify(rhs, null, 2));
+      }
+    });
+    $loc.__isub__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var self = Sk.ffi.remapToJs(selfPy);
+      var other = Sk.ffi.remapToJs(otherPy);
+      if (isNumber(other)) {
+        self[0] -= other;
+        return selfPy;
+      }
+      else {
+        self[0] -= other[0];
+        self[1] -= other[1];
+        self[2] -= other[2];
+        self[3] -= other[3];
+        return selfPy;
+      }
+    });
+    $loc.__mul__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(b)) {
+        return remapE2ToPy(a[0] * b, a[1] * b, a[2] * b, a[3] * b);
+      }
+      else {
+        var a00 = a[0];
+        var a01 = a[1];
+        var a10 = a[2];
+        var a11 = a[3];
+        var b00 = b[0];
+        var b01 = b[1];
+        var b10 = b[2];
+        var b11 = b[3];
+        var x00 = a00 * b00 + a01 * b01 + a10 * b10 - a11 * b11;
+        var x01 = a00 * b01 + a01 * b00 - a10 * b11 + a11 * b10;
+        var x10 = a00 * b10 + a01 * b11 + a10 * b00 - a11 * b01;
+        var x11 = a00 * b11 + a01 * b10 - a10 * b01 + a11 * b00;
+        return remapE2ToPy(x00, x01, x10, x11);
+      }
+    });
+    $loc.__rmul__ = new Sk.builtin.func(function(rhs, lhs) {
+      lhs = Sk.ffi.remapToJs(lhs);
+      rhs = Sk.ffi.remapToJs(rhs);
+      if (isNumber(lhs)) {
+        return remapE2ToPy(lhs * rhs[0], lhs * rhs[1], lhs * rhs[2], lhs * rhs[3]);
+      }
+      else {
+        throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " * " + JSON.stringify(rhs, null, 2));
+      }
+    });
+    $loc.__imul__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var self = Sk.ffi.remapToJs(selfPy);
+      var other = Sk.ffi.remapToJs(otherPy);
+      if (isNumber(other)) {
+        self[0] *= other;
+        self[1] *= other;
+        self[2] *= other;
+        self[3] *= other;
+        return selfPy;
+      }
+      else {
+        var a00 = self[0];
+        var a01 = self[1];
+        var a10 = self[2];
+        var a11 = self[3];
+        var b00 = other[0];
+        var b01 = other[1];
+        var b10 = other[2];
+        var b11 = other[3];
+        self[0] = a00 * b00 + a01 * b01 + a10 * b10 - a11 * b11;
+        self[1] = a00 * b01 + a01 * b00 - a10 * b11 + a11 * b10;
+        self[2] = a00 * b10 + a01 * b11 + a10 * b00 - a11 * b01;
+        self[3] = a00 * b11 + a01 * b10 - a10 * b01 + a11 * b00;
+        return selfPy;
+      }
+    });
+    $loc.__div__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(b)) {
+        return divide(a[0], a[1], a[2], a[3], b, 0, 0, 0, undefined);
+      }
+      else {
+        return divide(a[0], a[1], a[2], a[3], b[0], b[1], b[2], b[3], undefined);
+      }
+    });
+    $loc.__rdiv__ = new Sk.builtin.func(function(rhs, lhs) {
+      lhs = Sk.ffi.remapToJs(lhs);
+      rhs = Sk.ffi.remapToJs(rhs);
+      if (isNumber(lhs)) {
+        return divide(lhs, 0, 0, 0, rhs[0], rhs[1], rhs[2], rhs[3], undefined);
+      }
+      else {
+        throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " / " + JSON.stringify(rhs, null, 2));
+      }
+    });
+    $loc.__idiv__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var self = Sk.ffi.remapToJs(selfPy);
+      var other = Sk.ffi.remapToJs(otherPy);
+      if (isNumber(other)) {
+        divide(self[0], self[1], self[2], self[3], other, 0, 0, 0, self);
+        return selfPy;
+      }
+      else {
+        divide(self[0], self[1], self[2], self[3], other[0], other[1], other[2], other[3], self);
+        return selfPy;
+      }
+    });
+    $loc.__xor__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(b)) {
+        return remapE2ToPy(a[0] * b, a[1] * b, a[2] * b, a[3] * b);
+      }
+      else {
+        var a00 = a[0];
+        var a01 = a[1];
+        var a10 = a[2];
+        var a11 = a[3];
+        var b00 = b[0];
+        var b01 = b[1];
+        var b10 = b[2];
+        var b11 = b[3];
+        var x00 = a00 * b00;
+        var x01 = a00 * b01 + a01 * b00;
+        var x10 = a00 * b10             + a10 * b00;
+        var x11 = a00 * b11 + a01 * b10 - a10 * b01 + a11 * b00;
+        return remapE2ToPy(x00, x01, x10, x11);
+      }
+    });
+    $loc.__rxor__ = new Sk.builtin.func(function(rhs, lhs) {
+      lhs = Sk.ffi.remapToJs(lhs);
+      rhs = Sk.ffi.remapToJs(rhs);
+      if (isNumber(lhs)) {
+        return remapE2ToPy(lhs * rhs[0], lhs * rhs[1], lhs * rhs[2], lhs * rhs[3]);
+      }
+      else {
+        throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " ^ " + JSON.stringify(rhs, null, 2));
+      }
+    });
+    $loc.__ixor__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var self = Sk.ffi.remapToJs(selfPy);
+      var other = Sk.ffi.remapToJs(otherPy);
+      if (isNumber(other)) {
+        self[0] *= other;
+        self[1] *= other;
+        self[2] *= other;
+        self[3] *= other;
+        return selfPy;
+      }
+      else {
+        var a00 = self[0];
+        var a01 = self[1];
+        var a10 = self[2];
+        var a11 = self[3];
+        var b00 = other[0];
+        var b01 = other[1];
+        var b10 = other[2];
+        var b11 = other[3];
+        self[0] = a00 * b00;
+        self[1] = a00 * b01 + a01 * b00;
+        self[2] = a00 * b10             + a10 * b00;
+        self[3] = a00 * b11 + a01 * b10 - a10 * b01 + a11 * b00;
+        return selfPy;
+      }
+    });
+    $loc.__lshift__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(b)) {
+        return remapE2ToPy(a[0] * b, 0, 0, 0);
+      }
+      else {
+        var a00 = a[0];
+        var a01 = a[1];
+        var a10 = a[2];
+        var a11 = a[3];
+        var b00 = b[0];
+        var b01 = b[1];
+        var b10 = b[2];
+        var b11 = b[3];
+        var x00 = a00 * b00 + a01 * b01 + a10 * b10 - a11 * b11;
+        var x01 = a00 * b01             - a10 * b11;
+        var x10 = a00 * b10 + a01 * b11;
+        var x11 = a00 * b11;
+        return remapE2ToPy(x00, x01, x10, x11);
+      }
+    });
+    $loc.__rlshift__ = new Sk.builtin.func(function(rhs, lhs) {
+      lhs = Sk.ffi.remapToJs(lhs);
+      rhs = Sk.ffi.remapToJs(rhs);
+      if (isNumber(lhs)) {
+        return remapE2ToPy(lhs * rhs[0], lhs * rhs[1], lhs * rhs[2], lhs * rhs[3]);
+      }
+      else {
+        throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " << " + JSON.stringify(rhs, null, 2));
+      }
+    });
+    $loc.__ilshift__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var self = Sk.ffi.remapToJs(selfPy);
+      var other = Sk.ffi.remapToJs(otherPy);
+      if (isNumber(other)) {
+        self[0] *= other;
+        self[1] = 0;
+        self[2] = 0;
+        self[3] = 0;
+        return selfPy;
+      }
+      else {
+        var a00 = self[0];
+        var a01 = self[1];
+        var a10 = self[2];
+        var a11 = self[3];
+        var b00 = other[0];
+        var b01 = other[1];
+        var b10 = other[2];
+        var b11 = other[3];
+        self[0] = a00 * b00 + a01 * b01 + a10 * b10 - a11 * b11;
+        self[1] = a00 * b01             - a10 * b11;
+        self[2] = a00 * b10 + a01 * b11;
+        self[3] = a00 * b11;
+        return selfPy;
+      }
+    });
+    $loc.__rshift__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(b)) {
+        return remapE2ToPy(a[0] * b, -a[1] * b, -a[2] * b, a[3] * b);
+      }
+      else {
+        var a00 = a[0];
+        var a01 = a[1];
+        var a10 = a[2];
+        var a11 = a[3];
+        var b00 = b[0];
+        var b01 = b[1];
+        var b10 = b[2];
+        var b11 = b[3];
+        var x00 = a00 * b00 + a01 * b01 + a10 * b10 - a11 * b11;
+        var x01 =           + a01 * b00             + a11 * b10;
+        var x10 =                       + a10 * b00 - a11 * b01;
+        var x11 =                                     a11 * b00;
+        return remapE2ToPy(x00, x01, x10, x11);
+      }
+    });
+    $loc.__rrshift__ = new Sk.builtin.func(function(rhs, lhs) {
+      lhs = Sk.ffi.remapToJs(lhs);
+      rhs = Sk.ffi.remapToJs(rhs);
+      if (isNumber(lhs)) {
+        return remapE2ToPy(lhs * rhs[0], 0, 0, 0);
+      }
+      else {
+        throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " >> " + JSON.stringify(rhs, null, 2));
+      }
+    });
+    $loc.__irshift__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var self = Sk.ffi.remapToJs(selfPy);
+      var other = Sk.ffi.remapToJs(otherPy);
+      if (isNumber(other)) {
+        var a00 = self[0];
+        var a01 = self[1];
+        var a10 = self[2];
+        var a11 = self[3];
+        var b00 = other;
+        var b01 = 0;
+        var b10 = 0;
+        var b11 = 0;
+        self[0] *=  other;
+        self[1] *= -other;
+        self[2] *= -other;
+        self[3] *=  other;
+        return selfPy;
+      }
+      else {
+        var a00 = self[0];
+        var a01 = self[1];
+        var a10 = self[2];
+        var a11 = self[3];
+        var b00 = other[0];
+        var b01 = other[1];
+        var b10 = other[2];
+        var b11 = other[3];
+        self[0] = a00 * b00 + a01 * b01 + a10 * b10 - a11 * b11;
+        self[1] =           + a01 * b00             + a11 * b10;
+        self[2] =                       + a10 * b00 - a11 * b01;
+        self[3] =                                     a11 * b00;
+        return selfPy;
+      }
+    });
+    $loc.nb$negative = function() {
+      var self = Sk.ffi.remapToJs(this);
+      return remapE2ToPy(-self[0], -self[1], -self[2], -self[3]);
+    };
+    $loc.nb$positive = function() {
+      return this;
+    };
+    $loc.nb$invert = function() {
+      var self = Sk.ffi.remapToJs(this);
+      return remapE2ToPy(self[0], self[1], self[2], -self[3]);
+    };
+    $loc.__getitem__ = new Sk.builtin.func(function(mv, index) {
+      mv = Sk.ffi.remapToJs(mv);
+      index = Sk.builtin.asnum$(index);
+      switch(index) {
+        case 0: {
+          return remapE2ToPy(mv[0], 0, 0, 0);
+        }
+        case 1: {
+          return remapE2ToPy(0, mv[1], mv[2], 0);
+        }
+        case 2: {
+          return remapE2ToPy(0, 0, 0, mv[3]);
+        }
+      }
+    });
+    $loc.__repr__ = new Sk.builtin.func(function(mv) {
+      mv = Sk.ffi.remapToJs(mv);
+      return new Sk.builtin.str(EUCLIDEAN_2 + "(" + mv.join(", ") + ")");
+    });
+    $loc.__str__ = new Sk.builtin.func(function(mv) {
+      mv = Sk.ffi.remapToJs(mv);
+      if (typeof mv !== 'undefined') {
+        return new Sk.builtin.str(stringFromCoordinates([mv[0], mv[1], mv[2], mv[3]], ["1", "i", "j", "I"], "*"));
+      }
+      else {
+        return new Sk.builtin.str("<type '" + EUCLIDEAN_2 + "'>");
+      }
+    });
+    $loc.__eq__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      return (a[0] === b[0]) && (a[1] === b[1]) && (a[2] === b[2]) && (a[3] === b[3]);
+    });
+    $loc.__ne__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      return (a[0] !== b[0]) || (a[1] !== b[1]) || (a[2] !== b[2]) || (a[3] !== b[3]);
+    });
+    $loc.__getattr__ = new Sk.builtin.func(function(mvPy, name) {
+      var mv = Sk.ffi.remapToJs(mvPy);
+      switch(name) {
+        case PROP_W: {
+          return Sk.builtin.assk$(mv[0], Sk.builtin.nmber.float$);
+        }
+        break;
+        case PROP_X: {
+          return Sk.builtin.assk$(mv[1], Sk.builtin.nmber.float$);
+        }
+        break;
+        case PROP_Y: {
+          return Sk.builtin.assk$(mv[2], Sk.builtin.nmber.float$);
+        }
+        break;
+        case PROP_XY: {
+          return Sk.builtin.assk$(mv[3], Sk.builtin.nmber.float$);
+        }
+        break;
+        case METHOD_CLONE: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(methodPy) {
+              methodPy.tp$name = METHOD_CLONE;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(methodPy) {
+              return remapE2ToPy(mv[0], mv[1], mv[2], mv[3]);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(methodPy) {
+              return new Sk.builtin.str(METHOD_CLONE);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(methodPy) {
+              return new Sk.builtin.str(METHOD_CLONE);
+            });
+          }, METHOD_CLONE, []));
+        }
+        case METHOD_LENGTH: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_LENGTH;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self) {
+              return Sk.builtin.assk$(4, Sk.builtin.nmber.int$);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_LENGTH);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_LENGTH);
+            });
+          }, METHOD_LENGTH, []));
+        }
+        default: {
+          throw new Sk.builtin.AttributeError(name + " is not a readable attribute of " + EUCLIDEAN_2);
+        }
+      }
+    });
+    $loc.__setattr__ = new Sk.builtin.func(function(selfPy, name, valuePy) {
+      var self = Sk.ffi.remapToJs(selfPy);
+      var value = Sk.ffi.remapToJs(valuePy);
+      switch(name) {
+        case PROP_W: {
+          self[0] = value;
+        }
+        break;
+        case PROP_X: {
+          self[1] = value;
+        }
+        break;
+        case PROP_Y: {
+          self[2] = value;
+        }
+        break;
+        case PROP_XY: {
+          self[3] = value;
+        }
+        break;
+        default: {
+          throw new Sk.builtin.AttributeError(name + " is not a writeable attribute of " + EUCLIDEAN_2);
+        }
+      }
+    });
+  }, EUCLIDEAN_2, []);
+};/**
+ * Convenience function for incorporating a Euclidean3 class into a module.
+ *
+ * Usage:
+ *
+ * Sk.builtin.defineEuclidean3(mod);
+ */
+Sk.builtin.defineEuclidean3 = function(mod) {
+
+  var EUCLIDEAN_3                = "Euclidean3";
+  var SCALAR_3                   = "Scalar3";
+  var VECTOR_3                   = "Vector3";
+  var BIVECTOR_3                 = "Bivector3";
+  var PSEUDOSCALAR_3             = "Pseudoscalar3";
+
+  var PROP_W                     = "w";
+  var PROP_X                     = "x";
+  var PROP_Y                     = "y";
+  var PROP_Z                     = "z";
+  var PROP_XY                    = "xy";
+  var PROP_YZ                    = "yz";
+  var PROP_ZX                    = "zx";
+  var PROP_XYZ                   = "xyz";
+
+  var METHOD_ADD                 = "add";
+  var METHOD_CLONE               = "clone";
+  var METHOD_CROSS               = "cross";
+  var METHOD_DOT                 = "dot";
+  var METHOD_LENGTH              = "length";
+  var METHOD_NORMALIZE           = "normalize";
+  var METHOD_SET                 = "set";
+  var METHOD_SET_X               = "setX";
+  var METHOD_SET_Y               = "setY";
+  var METHOD_SET_Z               = "setZ";
+  var METHOD_GET_COMPONENT       = "getComponent";
+  var METHOD_SET_COMPONENT       = "setComponent";
+
+  /**
+   * Emulate ThreeJS Vector3 here to get interoperability.
+   *
+   * @constructor
+   * @param {number} x
+   * @param {number} y
+   * @param {number} z
+   */
+  function Vector3(x, y, z) {
+    this.x = x || 0;
+    this.y = y || 0;
+    this.z = z || 0;
+  }
+  Vector3.prototype = {
+    constructor: Vector3,
+    set: function (x, y, z) {
+      this.x = x;
+      this.y = y;
+      this.z = z;
+      return this;
+    },
+    setX: function (x) {
+      this.x = x;
+      return this;
+    },
+    setY: function (y) {
+      this.y = y;
+      return this;
+    },
+    setZ: function (z) {
+      this.z = z;
+      return this;
+    },
+    setComponent: function (index, value) {
+      switch (index) {
+        case 0: this.x = value; break;
+        case 1: this.y = value; break;
+        case 2: this.z = value; break;
+        default: throw new Error("index is out of range: " + index);
+      }
+    },
+
+    getComponent: function ( index ) {
+      switch ( index ) {
+        case 0: return this.x;
+        case 1: return this.y;
+        case 2: return this.z;
+        default: throw new Error("index is out of range: " + index);
+      }
+    },
+    copy: function (v) {
+      this.x = v.x;
+      this.y = v.y;
+      this.z = v.z;
+      return this;
+    },
+    add: function (v) {
+      this.x += v.x;
+      this.y += v.y;
+      this.z += v.z;
+      return this;
+    },
+    addScalar: function (s) {
+      this.x += s;
+      this.y += s;
+      this.z += s;
+      return this;
+    },
+    addVectors: function (a, b) {
+      this.x = a.x + b.x;
+      this.y = a.y + b.y;
+      this.z = a.z + b.z;
+      return this;
+    },
+    sub: function (v) {
+      this.x -= v.x;
+      this.y -= v.y;
+      this.z -= v.z;
+      return this;
+    },
+    subVectors: function (a, b) {
+      this.x = a.x - b.x;
+      this.y = a.y - b.y;
+      this.z = a.z - b.z;
+      return this;
+    },
+    multiply: function (v) {
+      this.x *= v.x;
+      this.y *= v.y;
+      this.z *= v.z;
+      return this;
+    },
+    multiplyScalar: function (scalar) {
+      this.x *= scalar;
+      this.y *= scalar;
+      this.z *= scalar;
+      return this;
+    },
+    multiplyVectors: function (a, b) {
+      this.x = a.x * b.x;
+      this.y = a.y * b.y;
+      this.z = a.z * b.z;
+      return this;
+    },
+    applyMatrix3: function (m) {
+      var x = this.x;
+      var y = this.y;
+      var z = this.z;
+      var e = m.elements;
+      this.x = e[0] * x + e[3] * y + e[6] * z;
+      this.y = e[1] * x + e[4] * y + e[7] * z;
+      this.z = e[2] * x + e[5] * y + e[8] * z;
+      return this;
+    },
+    applyMatrix4: function (m) {
+      var x = this.x, y = this.y, z = this.z;
+      var e = m.elements;
+      this.x = e[0] * x + e[4] * y + e[8]  * z + e[12];
+      this.y = e[1] * x + e[5] * y + e[9]  * z + e[13];
+      this.z = e[2] * x + e[6] * y + e[10] * z + e[14];
+      return this;
+    },
+    applyProjection: function (m) {
+      var x = this.x, y = this.y, z = this.z;
+      var e = m.elements;
+      var d = 1 / ( e[3] * x + e[7] * y + e[11] * z + e[15] ); // perspective divide
+      this.x = ( e[0] * x + e[4] * y + e[8]  * z + e[12] ) * d;
+      this.y = ( e[1] * x + e[5] * y + e[9]  * z + e[13] ) * d;
+      this.z = ( e[2] * x + e[6] * y + e[10] * z + e[14] ) * d;
+      return this;
+    },
+    applyQuaternion: function (q) {
+      var x = this.x;
+      var y = this.y;
+      var z = this.z;
+      var qx = q.x;
+      var qy = q.y;
+      var qz = q.z;
+      var qw = q.w;
+      // calculate quat * vector
+      var ix =  qw * x + qy * z - qz * y;
+      var iy =  qw * y + qz * x - qx * z;
+      var iz =  qw * z + qx * y - qy * x;
+      var iw = -qx * x - qy * y - qz * z;
+      // calculate result * inverse quat
+      this.x = ix * qw + iw * -qx + iy * -qz - iz * -qy;
+      this.y = iy * qw + iw * -qy + iz * -qx - ix * -qz;
+      this.z = iz * qw + iw * -qz + ix * -qy - iy * -qx;
+      return this;
+    },
+    transformDirection: function (m) {
+      // vector interpreted as a direction
+      var x = this.x, y = this.y, z = this.z;
+      var e = m.elements;
+      this.x = e[0] * x + e[4] * y + e[8]  * z;
+      this.y = e[1] * x + e[5] * y + e[9]  * z;
+      this.z = e[2] * x + e[6] * y + e[10] * z;
+      this.normalize();
+      return this;
+    },
+    divide: function (v) {
+      this.x /= v.x;
+      this.y /= v.y;
+      this.z /= v.z;
+      return this;
+    },
+    divideScalar: function ( scalar ) {
+      if ( scalar !== 0 ) {
+        var invScalar = 1 / scalar;
+        this.x *= invScalar;
+        this.y *= invScalar;
+        this.z *= invScalar;
+      } else {
+        this.x = 0;
+        this.y = 0;
+        this.z = 0;
+      }
+      return this;
+    },
+    min: function ( v ) {
+      if ( this.x > v.x ) {
+        this.x = v.x;
+      }
+      if ( this.y > v.y ) {
+        this.y = v.y;
+      }
+      if ( this.z > v.z ) {
+        this.z = v.z;
+      }
+      return this;
+    },
+    max: function ( v ) {
+      if ( this.x < v.x ) {
+        this.x = v.x;
+      }
+      if ( this.y < v.y ) {
+        this.y = v.y;
+      }
+      if ( this.z < v.z ) {
+        this.z = v.z;
+      }
+      return this;
+    },
+    clamp: function ( min, max ) {
+      // This function assumes min < max, if this assumption isn't true it will not operate correctly
+      if ( this.x < min.x ) {
+        this.x = min.x;
+      } else if ( this.x > max.x ) {
+        this.x = max.x;
+      }
+      if ( this.y < min.y ) {
+        this.y = min.y;
+      } else if ( this.y > max.y ) {
+        this.y = max.y;
+      }
+      if ( this.z < min.z ) {
+        this.z = min.z;
+      } else if ( this.z > max.z ) {
+        this.z = max.z;
+      }
+      return this;
+    },
+    negate: function () {
+      return this.multiplyScalar( - 1 );
+    },
+    dot: function ( v ) {
+      return this.x * v.x + this.y * v.y + this.z * v.z;
+    },
+    lengthSq: function () {
+      return this.x * this.x + this.y * this.y + this.z * this.z;
+    },
+    length: function () {
+      return Math.sqrt( this.x * this.x + this.y * this.y + this.z * this.z );
+    },
+    lengthManhattan: function () {
+      return Math.abs( this.x ) + Math.abs( this.y ) + Math.abs( this.z );
+    },
+    normalize: function () {
+      return this.divideScalar( this.length() );
+    },
+    setLength: function ( l ) {
+      var oldLength = this.length();
+      if ( oldLength !== 0 && l !== oldLength  ) {
+        this.multiplyScalar( l / oldLength );
+      }
+      return this;
+    },
+    lerp: function ( v, alpha ) {
+      this.x += ( v.x - this.x ) * alpha;
+      this.y += ( v.y - this.y ) * alpha;
+      this.z += ( v.z - this.z ) * alpha;
+      return this;
+    },
+    cross: function (v) {
+      var x = this.x, y = this.y, z = this.z;
+      this.x = y * v.z - z * v.y;
+      this.y = z * v.x - x * v.z;
+      this.z = x * v.y - y * v.x;
+      return this;
+    },
+    crossVectors: function ( a, b ) {
+      this.x = a.y * b.z - a.z * b.y;
+      this.y = a.z * b.x - a.x * b.z;
+      this.z = a.x * b.y - a.y * b.x;
+      return this;
+    },
+    angleTo: function ( v ) {
+      var theta = this.dot( v ) / ( this.length() * v.length() );
+      // clamp, to handle numerical problems
+      return Math.acos( clamp( theta, -1, 1 ) );
+    },
+    distanceTo: function ( v ) {
+      return Math.sqrt( this.distanceToSquared( v ) );
+    },
+    distanceToSquared: function ( v ) {
+      var dx = this.x - v.x;
+      var dy = this.y - v.y;
+      var dz = this.z - v.z;
+      return dx * dx + dy * dy + dz * dz;
+    },
+    getPositionFromMatrix: function ( m ) {
+      this.x = m.elements[12];
+      this.y = m.elements[13];
+      this.z = m.elements[14];
+      return this;
+    },
+    getScaleFromMatrix: function ( m ) {
+      var sx = this.set( m.elements[0], m.elements[1], m.elements[2] ).length();
+      var sy = this.set( m.elements[4], m.elements[5], m.elements[6] ).length();
+      var sz = this.set( m.elements[8], m.elements[9], m.elements[10] ).length();
+      this.x = sx;
+      this.y = sy;
+      this.z = sz;
+      return this;
+    },
+    getColumnFromMatrix: function ( index, matrix ) {
+      var offset = index * 4;
+      var me = matrix.elements;
+      this.x = me[ offset ];
+      this.y = me[ offset + 1 ];
+      this.z = me[ offset + 2 ];
+      return this;
+    },
+    equals: function ( v ) {
+      return ( ( v.x === this.x ) && ( v.y === this.y ) && ( v.z === this.z ) );
+    },
+    fromArray: function ( array ) {
+      this.x = array[ 0 ];
+      this.y = array[ 1 ];
+      this.z = array[ 2 ];
+      return this;
+    },
+    toArray: function () {
+      return [ this.x, this.y, this.z ];
+    },
+    clone: function () {
+      return new Vector3( this.x, this.y, this.z );
+    }
+  };
+
+  function clamp( x, a, b ) { return ( x < a ) ? a : ( ( x > b ) ? b : x ); }
+  function isNumber(x)    { return typeof x === 'number'; }
+  function isUndefined(x) { return typeof x === 'undefined'; }
+  function isDefined(x)   { return typeof x !== 'undefined'; }
+
+  function stringFromCoordinates(coordinates, labels) {
+    var append, i, sb, str, _i, _ref;
+    sb = [];
+    append = function(number, label) {
+      var n;
+      if (number !== 0) {
+        if (number >= 0) {
+          if (sb.length > 0) {
+            sb.push("+");
+          }
+        } else {
+          sb.push("-");
+        }
+        n = Math.abs(number);
+        if (n === 1) {
+          return sb.push(label);
+        } else {
+          sb.push(n.toString());
+          if (label !== "1") {
+            sb.push("*");
+            return sb.push(label);
+          }
+        }
+      }
+    };
+    for (i = _i = 0, _ref = coordinates.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+      append(coordinates[i], labels[i]);
+    }
+    if (sb.length > 0) {
+      str = sb.join("");
+    } else {
+      str = "0";
+    }
+    return str;
+  }
+
+  function mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, index) {
+    a0 = +a0;
+    a1 = +a1;
+    a2 = +a2;
+    a3 = +a3;
+    a4 = +a4;
+    a5 = +a5;
+    a6 = +a6;
+    a7 = +a7;
+    b0 = +b0;
+    b1 = +b1;
+    b2 = +b2;
+    b3 = +b3;
+    b4 = +b4;
+    b5 = +b5;
+    b6 = +b6;
+    b7 = +b7;
+    index = index|0;
+    var x = 0.0;
+    switch(~(~index)) {
+      case 0: {
+        x = +(a0 * b0 + a1 * b1 + a2 * b2 + a3 * b3 - a4 * b4 - a5 * b5 - a6 * b6 - a7 * b7);
+      }
+      break;
+      case 1: {
+        x = +(a0 * b1 + a1 * b0 - a2 * b4 + a3 * b6 + a4 * b2 - a5 * b7 - a6 * b3 - a7 * b5);
+      }
+      break;
+      case 2: {
+        x = +(a0 * b2 + a1 * b4 + a2 * b0 - a3 * b5 - a4 * b1 + a5 * b3 - a6 * b7 - a7 * b6);
+      }
+      break;
+      case 3: {
+        x = +(a0 * b3 - a1 * b6 + a2 * b5 + a3 * b0 - a4 * b7 - a5 * b2 + a6 * b1 - a7 * b4);
+      }
+      break;
+      case 4: {
+        x = +(a0 * b4 + a1 * b2 - a2 * b1 + a3 * b7 + a4 * b0 - a5 * b6 + a6 * b5 + a7 * b3);
+      }
+      break;
+      case 5: {
+        x = +(a0 * b5 + a1 * b7 + a2 * b3 - a3 * b2 + a4 * b6 + a5 * b0 - a6 * b4 + a7 * b1);
+      }
+      break;
+      case 6: {
+        x = +(a0 * b6 - a1 * b3 + a2 * b7 + a3 * b1 - a4 * b5 + a5 * b4 + a6 * b0 + a7 * b2);
+      }
+      break;
+      case 7: {
+        x = +(a0 * b7 + a1 * b5 + a2 * b6 + a3 * b4 + a4 * b3 + a5 * b1 + a6 * b2 + a7 * b0);
+      }
+      break;
+      default: {
+      }
+    }
+    return +x;
+  }
+
+  function extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, index) {
+    a0 = +a0;
+    a1 = +a1;
+    a2 = +a2;
+    a3 = +a3;
+    a4 = +a4;
+    a5 = +a5;
+    a6 = +a6;
+    a7 = +a7;
+    b0 = +b0;
+    b1 = +b1;
+    b2 = +b2;
+    b3 = +b3;
+    b4 = +b4;
+    b5 = +b5;
+    b6 = +b6;
+    b7 = +b7;
+    index = index|0;
+    var x = 0.0;
+    switch(~(~index)) {
+      case 0: {
+        x = +(a0 * b0);
+      }
+      break;
+      case 1: {
+        x = +(a0 * b1 + a1 * b0);
+      }
+      break;
+      case 2: {
+        x = +(a0 * b2           + a2 * b0);
+      }
+      break;
+      case 3: {
+        x = +(a0 * b3                     + a3 * b0);
+      }
+      break;
+      case 4: {
+        x = +(a0 * b4 + a1 * b2 - a2 * b1           + a4* b0);
+      }
+      break;
+      case 5: {
+        x = +(a0 * b5           + a2 * b3 - a3 * b2           + a5 * b0);
+      }
+      break;
+      case 6: {
+        x = +(a0 * b6 - a1 * b3           + a3 * b1                     + a6 * b0);
+      }
+      break;
+      case 7: {
+        x = +(a0 * b7 + a1 * b5 + a2 * b6 + a3 * b4 + a4 * b3 + a5 * b1 + a6 * b2 + a7 * b0);
+      }
+      break;
+      default: {
+      }
+    }
+    return +x;
+  }
+
+  function lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, index) {
+    a0 = +a0;
+    a1 = +a1;
+    a2 = +a2;
+    a3 = +a3;
+    a4 = +a4;
+    a5 = +a5;
+    a6 = +a6;
+    a7 = +a7;
+    b0 = +b0;
+    b1 = +b1;
+    b2 = +b2;
+    b3 = +b3;
+    b4 = +b4;
+    b5 = +b5;
+    b6 = +b6;
+    b7 = +b7;
+    index = index|0;
+    var x = 0.0;
+    switch(~(~index)) {
+      case 0: {
+        x = +(a0 * b0 + a1 * b1 + a2 * b2 + a3 * b3 - a4 * b4 - a5 * b5 - a6 * b6 - a7 * b7);
+      }
+      break;
+      case 1: {
+        x = +(a0 * b1           - a2 * b4 + a3 * b6           - a5 * b7);
+      }
+      break;
+      case 2: {
+        x = +(a0 * b2 + a1 * b4           - a3 * b5                     - a6 * b7);
+      }
+      break;
+      case 3: {
+        x = +(a0 * b3 - a1 * b6 + a2 * b5           - a4 * b7);
+      }
+      break;
+      case 4: {
+        x = +(a0 * b4                     + a3 * b7);
+      }
+      break;
+      case 5: {
+        x = +(a0 * b5 + a1 * b7);
+      }
+      break;
+      case 6: {
+        x = +(a0 * b6           + a2 * b7);
+      }
+      break;
+      case 7: {
+        x = +(a0 * b7);
+      }
+      break;
+      default: {
+      }
+    }
+    return +x;
+  }
+
+  function rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, index) {
+    a0 = +a0;
+    a1 = +a1;
+    a2 = +a2;
+    a3 = +a3;
+    a4 = +a4;
+    a5 = +a5;
+    a6 = +a6;
+    a7 = +a7;
+    b0 = +b0;
+    b1 = +b1;
+    b2 = +b2;
+    b3 = +b3;
+    b4 = +b4;
+    b5 = +b5;
+    b6 = +b6;
+    b7 = +b7;
+    index = index|0;
+    var x = 0.0;
+    switch(~(~index)) {
+      case 0: {
+        x = +(a0 * b0 + a1 * b1 + a2 * b2 + a3 * b3 - a4 * b4 - a5 * b5 - a6 * b6 - a7 * b7);
+      }
+      break;
+      case 1: {
+        x = +(        + a1 * b0                     + a4 * b2           - a6 * b3 - a7 * b5);
+      }
+      break;
+      case 2: {
+        x = +(                  + a2 * b0           - a4 * b1 + a5 * b3           - a7 * b6);
+      }
+      break;
+      case 3: {
+        x = +(                            + a3 * b0           - a5 * b2 + a6 * b1 - a7 * b4);
+      }
+      break;
+      case 4: {
+        x = +(                                      + a4 * b0                     + a7 * b3);
+      }
+      break;
+      case 5: {
+        x = +(                                                + a5 * b0           + a7 * b1);
+      }
+      break;
+      case 6: {
+        x = +(                                                          + a6 * b0 + a7 * b2);
+      }
+      break;
+      case 7: {
+        x = +(                                                                    + a7 * b0);
+      }
+      break;
+      default: {
+      }
+    }
+    return +x;
+  }
+
+  function divide(a000, a001, a010, a011, a100, a101, a110, a111, b000, b001, b010, b011, b100, b101, b110, b111, dst) {
+    // WARNING! bladeASM.mulE2 uses w,x,y,z,xy,yz,zx,xyz representation. Notice the ordering and sign change.
+    // TODO: Move everything to the more systematic bitmap representation.
+    // r = ~b = reverse(b)
+    var r000 = +b000; // w,   grade 0(+)
+    var r001 = +b001; // x,   grade 1(+)
+    var r010 = +b010; // y,   grade 1(+)
+    var r011 = -b011; // xy,  grade 2(-)
+    var r100 = +b100; // z,   grade 1(+)
+    var r101 = -b101; // yz,  grade 2(-)
+    var r110 = -b110; // yz,  grade 2(-)
+    var r111 = -b111; // xyz, grade 3(-)
+    // m = b * r = b * (~b)
+    // The grade 2 and grade 3 components evaluate to zero.
+    var m000 =  mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 0);
+    var m001 =  mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 1);
+    var m010 =  mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 2);
+    var m011 =  0;//mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 4);
+    var m100 =  mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 3);
+    var m101 =  0;//-mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 6);
+    var m110 =  0;//mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 5);
+    var m111 =  0;//mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 7);
+    // c = cliffordConjugate(m)
+    var c000 = +m000; // w,   grade 0(+)
+    var c001 = -m001; // x,   grade 1(-)
+    var c010 = -m010; // y,   grade 1(-)
+    var c011 = -m011; // xy,  grade 2(-)
+    var c100 = -m100; // z,   grade 1(-)
+    var c101 = -m101; // -zx, grade 2(-)
+    var c110 = -m110; // yz,  grade 2(-)
+    var c111 = +m111; // xyz, grade 3(+)
+    // s = r * c
+    // TODO: Presumably there is some simplified computation on account of the c's being sparse.
+    var s000 =  mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 0);
+    var s001 =  mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 1);
+    var s010 =  mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 2);
+    var s011 =  mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 4);
+    var s100 =  mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 3);
+    var s101 = -mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 6);
+    var s110 =  mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 5);
+    var s111 =  mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 7);
+    // k = b * s
+    var k000 =  mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, s000, s001, s010, s100, s011, s110, -s101, s111, 0);
+    // i = inverse(b)
+    var i000 = s000/k000;
+    var i001 = s001/k000;
+    var i010 = s010/k000;
+    var i011 = s011/k000;
+    var i100 = s100/k000;
+    var i101 = s101/k000;
+    var i110 = s110/k000;
+    var i111 = s111/k000;
+    // x = a * inverse(b)
+    var x000 =  mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 0);
+    var x001 =  mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 1);
+    var x010 =  mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 2);
+    var x011 =  mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 4);
+    var x100 =  mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 3);
+    var x101 = -mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 6);
+    var x110 =  mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 5);
+    var x111 =  mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 7);
+    // translate bitmap representation to Cartesian.
+    var w   =  x000;
+    var x   =  x001;
+    var y   =  x010;
+    var z   =  x100;
+    var xy  =  x011;
+    var yz  =  x110;
+    var zx  = -x101;
+    var xyz =  x111;
+    // return or populate the optional dst parameter.
+    if (typeof dst !== 'undefined') {
+      dst.w   = w;
+      dst.x   = x;
+      dst.y   = y;
+      dst.z   = z;
+      dst.xy  = xy;
+      dst.yz  = yz;
+      dst.zx  = zx;
+      dst.xyz = xyz;
+    }
+    else {
+      return remapE3ToPy(w, x, y, z, xy, yz, zx, xyz);
+    }
+  }
+
+  function multiVector3(w, vector, xy, yz, zx, xyz) {
+    vector.w = w;
+    vector.xy = xy;
+    vector.yz = yz;
+    vector.zx = zx;
+    vector.xyz = xyz;
+    return vector;
+  }
+
+  function remapE3ToPy(w, x, y, z, xy, yz, zx, xyz) {
+    w = Sk.builtin.assk$(w, Sk.builtin.nmber.float$);
+    x = Sk.builtin.assk$(x, Sk.builtin.nmber.float$);
+    y = Sk.builtin.assk$(y, Sk.builtin.nmber.float$);
+    z = Sk.builtin.assk$(z, Sk.builtin.nmber.float$);
+    xy = Sk.builtin.assk$(xy, Sk.builtin.nmber.float$);
+    yz = Sk.builtin.assk$(yz, Sk.builtin.nmber.float$);
+    zx = Sk.builtin.assk$(zx, Sk.builtin.nmber.float$);
+    xyz = Sk.builtin.assk$(xyz, Sk.builtin.nmber.float$);
+    return Sk.misceval.callsim(mod[EUCLIDEAN_3], w, x, y, z, xy, yz, zx, xyz);
+  }
+
+  function coord(mv, index) {
+    switch(index) {
+      case 0: {
+        return mv.w;
+      }
+      case 1: {
+        return mv.x;
+      }
+      case 2: {
+        return mv.y;
+      }
+      case 3: {
+        return mv.z;
+      }
+      case 4: {
+        return mv.xy;
+      }
+      case 5: {
+        return mv.yz;
+      }
+      case 6: {
+        return mv.zx;
+      }
+      case 7: {
+        return mv.xyz;
+      }
+      default: {
+        throw new Sk.builtin.AssertionError("" + index + " is not a valid multivector coordinate index");
+      }
+    }
+  }
+
+  function compute(f, a, b, coord, pack) {
+    var a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, x0, x1, x2, x3, x4, x5, x6, x7;
+    a0 = a.w;
+    a1 = a.x;
+    a2 = a.y;
+    a3 = a.z;
+    a4 = a.xy;
+    a5 = a.yz;
+    a6 = a.zx;
+    a7 = a.xyz;
+    b0 = b.w;
+    b1 = b.x;
+    b2 = b.y;
+    b3 = b.z;
+    b4 = b.xy;
+    b5 = b.yz;
+    b6 = b.zx;
+    b7 = b.xyz;
+    x0 = f(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 0);
+    x1 = f(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 1);
+    x2 = f(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 2);
+    x3 = f(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 3);
+    x4 = f(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 4);
+    x5 = f(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 5);
+    x6 = f(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 6);
+    x7 = f(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 7);
+    return pack(x0, x1, x2, x3, x4, x5, x6, x7);
+  }
+
+  mod[EUCLIDEAN_3] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
+    $loc.__init__ = new Sk.builtin.func(function(self, w, x, y, z, xy, yz, zx, xyz) {
+      w = Sk.ffi.remapToJs(w);
+      x = Sk.ffi.remapToJs(x);
+      y = Sk.ffi.remapToJs(y);
+      z = Sk.ffi.remapToJs(z);
+      xy = Sk.ffi.remapToJs(xy);
+      yz = Sk.ffi.remapToJs(yz);
+      zx = Sk.ffi.remapToJs(zx);
+      xyz = Sk.ffi.remapToJs(xyz);
+      if (isNumber(w) && isNumber(x) && isNumber(y) && isNumber(z) && isNumber(xy) && isNumber(yz) && isNumber(zx) && isNumber(xyz)) {
+        self.v = multiVector3(w, new Vector3(x, y, z), xy, yz, zx, xyz);
+      }
+      else if (isDefined(w) && isUndefined(x) && isUndefined(y) && isUndefined(z) && isUndefined(xy) && isUndefined(yz) && isUndefined(zx) && isUndefined(xyz)) {
+        self.v = multiVector3(w.w || 0, w, w.xy || 0, w.yz || 0, w.zx|| 0, w.xyz || 0);
+      }
+      else if (isDefined(w) && isUndefined(x) && isUndefined(y) && isUndefined(z) && isDefined(xy) && isDefined(yz) && isDefined(zx) && isDefined(xyz)) {
+        self.v = multiVector3(w, new Vector3(0, 0, 0), xy, yz, zx, xyz);
+      }
+      else if (isUndefined(w) && isUndefined(x) && isUndefined(y) && isUndefined(z) && isUndefined(xy) && isUndefined(yz) && isUndefined(zx) && isUndefined(xyz)) {
+        self.v = multiVector3(0, new Vector3(0, 0, 0), 0, 0, 0, 0);
+      }
+      else {
+        throw new Sk.builtin.AssertionError(EUCLIDEAN_3);
+      }
+      self.tp$name = EUCLIDEAN_3;
+    });
+    $loc.__add__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(b)) {
+        return remapE3ToPy(a.w + b, a.x, a.y, a.z, a.xy, a.yz, a.zx, a.xyz);
+      }
+      else {
+        var w = a.w + b.w;
+        var x = a.x + b.x;
+        var y = a.y + b.y;
+        var z = a.z + b.z;
+        var xy = a.xy + b.xy;
+        var yz = a.yz + b.yz;
+        var zx = a.zx + b.zx;
+        var xyz = a.xyz + b.xyz;
+        return remapE3ToPy(w, x, y, z, xy, yz, zx, xyz);
+      }
+    });
+    $loc.__radd__ = new Sk.builtin.func(function(b, a) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(a)) {
+        return remapE3ToPy(a + b.w, b.x, b.y, b.z, b.xy, b.yz, b.zx, b.xyz);
+      }
+      else {
+        throw new Sk.builtin.AssertionError();
+      }
+    });
+    $loc.__iadd__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var self = Sk.ffi.remapToJs(selfPy);
+      var other = Sk.ffi.remapToJs(otherPy);
+      if (isNumber(other)) {
+        self.w += other;
+      }
+      else {
+        self.w += other.w;
+        self.x += other.x;
+        self.y += other.y;
+        self.z += other.z;
+        self.xy += other.xy;
+        self.yz += other.yz;
+        self.zx += other.zx;
+        self.xyz += other.xyz;
+      }
+      return selfPy;
+    });
+    $loc.__sub__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(b)) {
+        return remapE3ToPy(a.w - b, a.x, a.y, a.z, a.xy, a.yz, a.zx, a.xyz);
+      }
+      else {
+        var w = a.w - b.w;
+        var x = a.x - b.x;
+        var y = a.y - b.y;
+        var z = a.z - b.z;
+        var xy = a.xy - b.xy;
+        var yz = a.yz - b.yz;
+        var zx = a.zx - b.zx;
+        var xyz = a.xyz - b.xyz;
+        return remapE3ToPy(w, x, y, z, xy, yz, zx, xyz);
+      }
+    });
+    $loc.__rsub__ = new Sk.builtin.func(function(b, a) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(a)) {
+        return remapE3ToPy(a - b.w, -b.x, -b.y, -b.z, -b.xy, -b.yz, -b.zx, -b.xyz);
+      }
+      else {
+        throw new Sk.builtin.AssertionError();
+      }
+    });
+    $loc.__isub__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var self = Sk.ffi.remapToJs(selfPy);
+      var other = Sk.ffi.remapToJs(otherPy);
+      if (isNumber(other)) {
+        self.w -= other;
+      }
+      else {
+        self.w -= other.w;
+        self.x -= other.x;
+        self.y -= other.y;
+        self.z -= other.z;
+        self.xy -= other.xy;
+        self.yz -= other.yz;
+        self.zx -= other.zx;
+        self.xyz -= other.xyz;
+      }
+      return selfPy;
+    });
+    $loc.__mul__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(b)) {
+        return remapE3ToPy(a.w * b, a.x * b, a.y * b, a.z * b, a.xy * b, a.yz * b, a.zx * b, a.xyz * b);
+      }
+      else {
+        return compute(mulE3, a, b, coord, remapE3ToPy);
+      }
+    });
+    $loc.__rmul__ = new Sk.builtin.func(function(b, a) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(a)) {
+        return remapE3ToPy(a * b.w, a * b.x, a * b.y, a * b.z, a * b.xy, a * b.yz, a * b.zx, a * b.xyz);
+      }
+      else {
+        throw new Sk.builtin.AssertionError();
+      }
+    });
+    $loc.__imul__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var a = Sk.ffi.remapToJs(selfPy);
+      var b = Sk.ffi.remapToJs(otherPy);
+      var a0 = a.w;
+      var a1 = a.x;
+      var a2 = a.y;
+      var a3 = a.z;
+      var a4 = a.xy;
+      var a5 = a.yz;
+      var a6 = a.zx;
+      var a7 = a.xyz;
+      var b0, b1, b2, b3, b4, b5, b6, b7;
+      if (isNumber(b)) {
+        b0 = b;
+        b1 = 0;
+        b2 = 0;
+        b3 = 0;
+        b4 = 0;
+        b5 = 0;
+        b6 = 0;
+        b7 = 0;
+      }
+      else {
+        b0 = b.w;
+        b1 = b.x;
+        b2 = b.y;
+        b3 = b.z;
+        b4 = b.xy;
+        b5 = b.yz;
+        b6 = b.zx;
+        b7 = b.xyz;
+      }
+      a.w   = mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 0);
+      a.x   = mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 1);
+      a.y   = mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 2);
+      a.z   = mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 3);
+      a.xy  = mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 4);
+      a.yz  = mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 5);
+      a.zx  = mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 6);
+      a.xyz = mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 7);
+      return selfPy;
+    });
+    $loc.__div__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(b)) {
+        return divide(a.w, a.x, a.y, a.xy, a.z, -a.zx, a.yz, a.xyz, b, 0, 0, 0, 0, 0, 0, 0, undefined);
+      }
+      else {
+        return divide(a.w, a.x, a.y, a.xy, a.z, -a.zx, a.yz, a.xyz, b.w, b.x, b.y, b.xy, b.z, -b.zx, b.yz, b.xyz, undefined);
+      }
+    });
+    $loc.__rdiv__ = new Sk.builtin.func(function(rhs, lhs) {
+      lhs = Sk.ffi.remapToJs(lhs);
+      rhs = Sk.ffi.remapToJs(rhs);
+      if (isNumber(lhs)) {
+        return divide(lhs, 0, 0, 0, 0, 0, 0, 0, rhs.w, rhs.x, rhs.y, rhs.xy, rhs.z, -rhs.zx, rhs.yz, rhs.xyz, undefined);
+      }
+      else {
+        throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " / " + JSON.stringify(rhs, null, 2));
+      }
+    });
+    $loc.__idiv__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var a = Sk.ffi.remapToJs(selfPy);
+      var b = Sk.ffi.remapToJs(otherPy);
+      if (isNumber(b)) {
+        divide(a.w, a.x, a.y, a.xy, a.z, -a.zx, a.yz, a.xyz, b, 0, 0, 0, 0, 0, 0, 0, a);
+        return selfPy;
+      }
+      else {
+        divide(a.w, a.x, a.y, a.xy, a.z, -a.zx, a.yz, a.xyz, b.w, b.x, b.y, b.xy, b.z, -b.zx, b.yz, b.xyz, a);
+        return selfPy;
+      }
+    });
+    $loc.__xor__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(b)) {
+        return remapE3ToPy(a.w * b, a.x * b, a.y * b, a.z * b, a.xy * b, a.yz * b, a.zx * b, a.xyz * b);
+      }
+      else {
+        return compute(extE3, a, b, coord, remapE3ToPy);
+      }
+    });
+    $loc.__rxor__ = new Sk.builtin.func(function(b, a) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(a)) {
+        return remapE3ToPy(a * b.w, a * b.x, a * b.y, a * b.z, a * b.xy, a * b.yz, a * b.zx, a * b.xyz);
+      }
+      else {
+        throw new Sk.builtin.AssertionError();
+      }
+    });
+    $loc.__ixor__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var a = Sk.ffi.remapToJs(selfPy);
+      var b = Sk.ffi.remapToJs(otherPy);
+      var a0 = a.w;
+      var a1 = a.x;
+      var a2 = a.y;
+      var a3 = a.z;
+      var a4 = a.xy;
+      var a5 = a.yz;
+      var a6 = a.zx;
+      var a7 = a.xyz;
+      var b0, b1, b2, b3, b4, b5, b6, b7;
+      if (isNumber(b)) {
+        b0 = b;
+        b1 = 0;
+        b2 = 0;
+        b3 = 0;
+        b4 = 0;
+        b5 = 0;
+        b6 = 0;
+        b7 = 0;
+      }
+      else {
+        b0 = b.w;
+        b1 = b.x;
+        b2 = b.y;
+        b3 = b.z;
+        b4 = b.xy;
+        b5 = b.yz;
+        b6 = b.zx;
+        b7 = b.xyz;
+      }
+      a.w   = extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 0);
+      a.x   = extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 1);
+      a.y   = extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 2);
+      a.z   = extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 3);
+      a.xy  = extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 4);
+      a.yz  = extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 5);
+      a.zx  = extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 6);
+      a.xyz = extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 7);
+      return selfPy;
+    });
+    $loc.__lshift__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(b)) {
+        return remapE3ToPy(a.w * b, 0, 0, 0, 0, 0, 0, 0);
+      }
+      else {
+        return compute(lcoE3, a, b, coord, remapE3ToPy);
+      }
+    });
+    $loc.__rlshift__ = new Sk.builtin.func(function(b, a) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(a)) {
+        return remapE3ToPy(a * b.w, a * b.x, a * b.y, a * b.z, a * b.xy, a * b.yz, a * b.zx, a * b.xyz);
+      }
+      else {
+        throw new Sk.builtin.AssertionError();
+      }
+    });
+    $loc.__ilshift__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var a = Sk.ffi.remapToJs(selfPy);
+      var b = Sk.ffi.remapToJs(otherPy);
+      var a0 = a.w;
+      var a1 = a.x;
+      var a2 = a.y;
+      var a3 = a.z;
+      var a4 = a.xy;
+      var a5 = a.yz;
+      var a6 = a.zx;
+      var a7 = a.xyz;
+      var b0, b1, b2, b3, b4, b5, b6, b7;
+      if (isNumber(b)) {
+        b0 = b;
+        b1 = 0;
+        b2 = 0;
+        b3 = 0;
+        b4 = 0;
+        b5 = 0;
+        b6 = 0;
+        b7 = 0;
+      }
+      else {
+        b0 = b.w;
+        b1 = b.x;
+        b2 = b.y;
+        b3 = b.z;
+        b4 = b.xy;
+        b5 = b.yz;
+        b6 = b.zx;
+        b7 = b.xyz;
+      }
+      a.w   = lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 0);
+      a.x   = lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 1);
+      a.y   = lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 2);
+      a.z   = lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 3);
+      a.xy  = lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 4);
+      a.yz  = lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 5);
+      a.zx  = lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 6);
+      a.xyz = lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 7);
+      return selfPy;
+    });
+    $loc.__rshift__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(b)) {
+        return remapE3ToPy(a.w * b, a.x * b, a.y * b, a.z * b, a.xy * b, a.yz * b, a.zx * b, a.xyz * b);
+      }
+      else {
+        return compute(rcoE3, a, b, coord, remapE3ToPy);
+      }
+    });
+    $loc.__rrshift__ = new Sk.builtin.func(function(b, a) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      if (isNumber(a)) {
+        return remapE3ToPy(a * b.w, 0, 0, 0, 0, 0, 0, 0);
+      }
+      else {
+        throw new Sk.builtin.AssertionError();
+      }
+    });
+    $loc.__irshift__ = new Sk.builtin.func(function(selfPy, otherPy) {
+      var a = Sk.ffi.remapToJs(selfPy);
+      var b = Sk.ffi.remapToJs(otherPy);
+      var a0 = a.w;
+      var a1 = a.x;
+      var a2 = a.y;
+      var a3 = a.z;
+      var a4 = a.xy;
+      var a5 = a.yz;
+      var a6 = a.zx;
+      var a7 = a.xyz;
+      var b0, b1, b2, b3, b4, b5, b6, b7;
+      if (isNumber(b)) {
+        b0 = b;
+        b1 = 0;
+        b2 = 0;
+        b3 = 0;
+        b4 = 0;
+        b5 = 0;
+        b6 = 0;
+        b7 = 0;
+      }
+      else {
+        b0 = b.w;
+        b1 = b.x;
+        b2 = b.y;
+        b3 = b.z;
+        b4 = b.xy;
+        b5 = b.yz;
+        b6 = b.zx;
+        b7 = b.xyz;
+      }
+      a.w   = rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 0);
+      a.x   = rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 1);
+      a.y   = rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 2);
+      a.z   = rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 3);
+      a.xy  = rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 4);
+      a.yz  = rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 5);
+      a.zx  = rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 6);
+      a.xyz = rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 7);
+      return selfPy;
+    });
+    $loc.nb$positive = function() {
+      return this;
+    };
+    $loc.nb$negative = function() {
+      var mv = Sk.ffi.remapToJs(this);
+      return remapE3ToPy(-mv.w, -mv.x, -mv.y, -mv.z, -mv.xy, -mv.yz, -mv.zx, -mv.xyz);
+    };
+    $loc.nb$invert = function() {
+      var mv = Sk.ffi.remapToJs(this);
+      return remapE3ToPy(mv.w, mv.x, mv.y, mv.z, -mv.xy, -mv.yz, -mv.zx, -mv.xyz);
+    };
+    $loc.__eq__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      return a.w === b.w && a.x === b.x && a.y === b.y && a.z === b.z && a.xy === b.xy && a.yz === b.yz && a.zx === b.zx && a.xyz === b.xyz;
+    });
+    $loc.__ne__ = new Sk.builtin.func(function(a, b) {
+      a = Sk.ffi.remapToJs(a);
+      b = Sk.ffi.remapToJs(b);
+      return a.w !== b.w || a.x !== b.x || a.y !== b.y || a.z !== b.z || a.xy !== b.xy || a.yz !== b.yz || a.zx !== b.zx || a.xyz !== b.xyz;
+    });
+    $loc.__getitem__ = new Sk.builtin.func(function(mv, index) {
+      mv = Sk.ffi.remapToJs(mv);
+      index = Sk.builtin.asnum$(index);
+      switch(index) {
+        case 0: {
+          return remapE3ToPy(mv.w, 0, 0, 0, 0, 0, 0, 0);
+        }
+        case 1: {
+          return remapE3ToPy(0, mv.x, mv.y, mv.z, 0, 0, 0, 0);
+        }
+        case 2: {
+          return remapE3ToPy(0, 0, 0, 0, mv.xy, mv.yz, mv.zx, 0);
+        }
+        case 3: {
+          return remapE3ToPy(0, 0, 0, 0, 0, 0, 0, mv.xyz);
+        }
+      }
+    });
+    $loc.__getattr__ = new Sk.builtin.func(function(mvPy, name) {
+      var mv = Sk.ffi.remapToJs(mvPy);
+      switch(name) {
+        case PROP_W: {
+          return Sk.builtin.assk$(mv.w, Sk.builtin.nmber.float$);
+        }
+        case PROP_X: {
+          return Sk.builtin.assk$(mv.x, Sk.builtin.nmber.float$);
+        }
+        case PROP_Y: {
+          return Sk.builtin.assk$(mv.y, Sk.builtin.nmber.float$);
+        }
+        case PROP_Z: {
+          return Sk.builtin.assk$(mv.z, Sk.builtin.nmber.float$);
+        }
+        case PROP_XY: {
+          return Sk.builtin.assk$(mv.xy, Sk.builtin.nmber.float$);
+        }
+        case PROP_YZ: {
+          return Sk.builtin.assk$(mv.yz, Sk.builtin.nmber.float$);
+        }
+        case PROP_ZX: {
+          return Sk.builtin.assk$(mv.zx, Sk.builtin.nmber.float$);
+        }
+        case PROP_XYZ: {
+          return Sk.builtin.assk$(mv.xyz, Sk.builtin.nmber.float$);
+        }
+        case METHOD_ADD: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_ADD;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, arg) {
+              arg  = Sk.ffi.remapToJs(arg);
+              mv.w += arg.w;
+              mv.x += arg.x;
+              mv.y += arg.y;
+              mv.z += arg.z;
+              mv.xy += arg.xy;
+              mv.yz += arg.yz;
+              mv.zx += arg.zx;
+              mv.xyz += arg.xyz;
+              return mvPy;
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_ADD);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_ADD);
+            });
+          }, METHOD_ADD, []));
+        }
+        case METHOD_CROSS: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_CROSS;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, vPy) {
+              var v  = Sk.ffi.remapToJs(vPy);
+              mv.w = 0;
+              mv[METHOD_CROSS](v);
+//            mv.x  = extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 1);
+//            mv.y  = extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 2);
+//            mv.z  = extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 3);
+              mv.xy = 0;
+              mv.yz = 0;
+              mv.zx = 0;
+              mv.xyz = 0;
+              return mvPy;
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_CROSS);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_CROSS);
+            });
+          }, METHOD_CROSS, []));
+        }
+        case METHOD_DOT: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_DOT;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, vPy) {
+              var v  = Sk.ffi.remapToJs(vPy);
+              return Sk.builtin.assk$(mv[METHOD_DOT](v), Sk.builtin.nmber.float$);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_DOT);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_DOT);
+            });
+          }, METHOD_DOT, []));
+        }
+        case METHOD_SET_X: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_SET_X;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, x) {
+              x  = Sk.ffi.remapToJs(x);
+              mv[METHOD_SET_X](x);
+              return mvPy;
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET_X);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET_X);
+            });
+          }, METHOD_SET_X, []));
+        }
+        case METHOD_SET_Y: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_SET_Y;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, y) {
+              y  = Sk.ffi.remapToJs(y);
+              mv[METHOD_SET_Y](y);
+              return mvPy;
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET_Y);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET_Y);
+            });
+          }, METHOD_SET_Y, []));
+        }
+        case METHOD_SET_Z: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_SET_Z;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, z) {
+              z  = Sk.ffi.remapToJs(z);
+              mv[METHOD_SET_Z](z);
+              return mvPy;
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET_Z);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET_Z);
+            });
+          }, METHOD_SET_Z, []));
+        }
+        case METHOD_GET_COMPONENT: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_GET_COMPONENT;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, index) {
+              index  = Sk.ffi.remapToJs(index);
+              return Sk.builtin.assk$(mv[METHOD_GET_COMPONENT](index), Sk.builtin.nmber.float$);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_GET_COMPONENT);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_GET_COMPONENT);
+            });
+          }, METHOD_GET_COMPONENT, []));
+        }
+        case METHOD_SET_COMPONENT: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_SET_COMPONENT;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, index, value) {
+              index  = Sk.ffi.remapToJs(index);
+              value  = Sk.ffi.remapToJs(value);
+              mv[METHOD_SET_COMPONENT](index, value);
+              return mvPy;
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET_COMPONENT);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET_COMPONENT);
+            });
+          }, METHOD_SET_COMPONENT, []));
+        }
+        case METHOD_SET: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_SET;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self, x, y, z) {
+              x  = Sk.ffi.remapToJs(x);
+              y  = Sk.ffi.remapToJs(y);
+              z  = Sk.ffi.remapToJs(z);
+              mv[METHOD_SET](x, y, z);
+              return mvPy;
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_SET);
+            });
+          }, METHOD_SET, []));
+        }
+        case METHOD_CLONE: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_CLONE;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self) {
+              return remapE3ToPy(mv.w, mv.x, mv.y, mv.z, mv.xy, mv.yz, mv.zx, mv.xyz);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_CLONE);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_CLONE);
+            });
+          }, METHOD_CLONE, []));
+        }
+        case METHOD_LENGTH: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_LENGTH;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self) {
+              return Sk.builtin.assk$(mv[METHOD_LENGTH](), Sk.builtin.nmber.float$);
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_LENGTH);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_LENGTH);
+            });
+          }, METHOD_LENGTH, []));
+        }
+        case METHOD_NORMALIZE: {
+          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
+            $loc.__init__ = new Sk.builtin.func(function(self) {
+              self.tp$name = METHOD_NORMALIZE;
+            });
+            $loc.__call__ = new Sk.builtin.func(function(self) {
+              mv[METHOD_NORMALIZE]();
+              return mvPy;
+            });
+            $loc.__str__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_NORMALIZE);
+            });
+            $loc.__repr__ = new Sk.builtin.func(function(self) {
+              return new Sk.builtin.str(METHOD_NORMALIZE);
+            });
+          }, METHOD_NORMALIZE, []));
+        }
+      }
+    });
+    $loc.__setattr__ = new Sk.builtin.func(function(mv, name, value) {
+      mv = Sk.ffi.remapToJs(mv);
+      value = Sk.ffi.remapToJs(value);
+      switch(name) {
+        case PROP_W: {
+          mv.w = value;
+        }
+        break;
+        case PROP_X: {
+          mv.x = value;
+        }
+        break;
+        case PROP_Y: {
+          mv.y = value;
+        }
+        break;
+        case PROP_Z: {
+          mv.z = value;
+        }
+        break;
+        case PROP_XY: {
+          mv.xy = value;
+        }
+        break;
+        case PROP_YZ: {
+          mv.yz = value;
+        }
+        break;
+        case PROP_ZX: {
+          mv.zx = value;
+        }
+        break;
+        case PROP_XYZ: {
+          mv.xyz = value;
+        }
+        break;
+        default: {
+          throw new Sk.builtin.AttributeError(name + " is not an attribute of " + EUCLIDEAN_3);
+        }
+      }
+    });
+    $loc.__repr__ = new Sk.builtin.func(function(m) {
+      m = Sk.ffi.remapToJs(m);
+      var grade0 = m.w !== 0;
+      var grade1 = m.x !== 0 || m.y != 0 || m.z !== 0;
+      var grade2 = m.xy !== 0 || m.yz !== 0 || m.zx !== 0;
+      var grade3 = m.xyz !== 0;
+      if (grade0 && !grade1 && !grade2 && !grade3) {
+        var args = [m.w];
+        return new Sk.builtin.str(SCALAR_3 + "(" + args.join(", ") + ")");
+      }
+      else if (!grade0 && grade1 && !grade2 && !grade3) {
+        var args = [m.x, m.y, m.z];
+        return new Sk.builtin.str(VECTOR_3 + "(" + args.join(", ") + ")");
+      }
+      else if (!grade0 && !grade1 && grade2 && !grade3) {
+        var args = [m.xy, m.yz, m.zx];
+        return new Sk.builtin.str(BIVECTOR_3 + "(" + args.join(", ") + ")");
+      }
+      else if (!grade0 && !grade1 && !grade2 && grade3) {
+        var args = [m.xyz];
+        return new Sk.builtin.str(PSEUDOSCALAR_3 + "(" + args.join(", ") + ")");
+      }
+      else {
+        var args = [m.w, m.x, m.y, m.z, m.xy, m.yz, m.zx, m.xyz];
+        return new Sk.builtin.str(EUCLIDEAN_3 + "(" + args.join(", ") + ")");
+      }
+    });
+    $loc.__str__ = new Sk.builtin.func(function(mv) {
+      mv = Sk.ffi.remapToJs(mv);
+      if (isDefined(mv)) {
+        return new Sk.builtin.str(stringFromCoordinates([mv.w, mv.x, mv.y, mv.z, mv.xy, mv.yz, mv.zx, mv.xyz], ["1", "i", "j", "k", "ij", "jk", "ki", "I"]));
+      }
+      else {
+        return new Sk.builtin.str("<type '" + EUCLIDEAN_3 + "'>");
+      }
+    });
+  }, EUCLIDEAN_3, []);
+};
