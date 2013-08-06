@@ -6,7 +6,6 @@ doc/static/davinci.min.js
 doc/static/davinciLib.js
 vendor/
 
-
 *.pyc
 .DS_Store
 

@@ -260,6 +260,42 @@ var $builtinmodule = function(name) {
     }
   }
 
+  function stringFromCoordinates(coordinates, labels) {
+    var append, i, sb, str, _i, _ref;
+    sb = [];
+    append = function(number, label) {
+      var n;
+      if (number !== 0) {
+        if (number >= 0) {
+          if (sb.length > 0) {
+            sb.push("+");
+          }
+        } else {
+          sb.push("-");
+        }
+        n = Math.abs(number);
+        if (n === 1) {
+          return sb.push(label);
+        } else {
+          sb.push(n.toString());
+          if (label !== "1") {
+            sb.push("*");
+            return sb.push(label);
+          }
+        }
+      }
+    };
+    for (i = _i = 0, _ref = coordinates.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+      append(coordinates[i], labels[i]);
+    }
+    if (sb.length > 0) {
+      str = sb.join("");
+    } else {
+      str = "0";
+    }
+    return str;
+  }
+
   function numberFromArg(arg, argName, functionName, lax) {
     if (isUndefined(argName)) {
       throw new Error("argName must be specified")
@@ -357,92 +393,6 @@ var $builtinmodule = function(name) {
     var yPy = Sk.builtin.assk$(y, Sk.builtin.nmber.float$);
     var zPy = Sk.builtin.assk$(z, Sk.builtin.nmber.float$);
     return Sk.misceval.callsim(mod[QUATERNION], xPy, yPy, zPy, wPy);
-  }
-
-  function divide(a000, a001, a010, a011, a100, a101, a110, a111, b000, b001, b010, b011, b100, b101, b110, b111, dst) {
-    // WARNING! bladeASM.mulE2 uses w,x,y,z,xy,yz,zx,xyz representation. Notice the ordering and sign change.
-    // TODO: Move everything to the more systematic bitmap representation.
-    // r = ~b = reverse(b)
-    var r000 = +b000; // w,   grade 0(+)
-    var r001 = +b001; // x,   grade 1(+)
-    var r010 = +b010; // y,   grade 1(+)
-    var r011 = -b011; // xy,  grade 2(-)
-    var r100 = +b100; // z,   grade 1(+)
-    var r101 = -b101; // yz,  grade 2(-)
-    var r110 = -b110; // yz,  grade 2(-)
-    var r111 = -b111; // xyz, grade 3(-)
-    // m = b * r = b * (~b)
-    // The grade 2 and grade 3 components evaluate to zero.
-    var m000 =  bladeASM.mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 0);
-    var m001 =  bladeASM.mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 1);
-    var m010 =  bladeASM.mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 2);
-    var m011 =  0;//bladeASM.mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 4);
-    var m100 =  bladeASM.mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 3);
-    var m101 =  0;//-bladeASM.mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 6);
-    var m110 =  0;//bladeASM.mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 5);
-    var m111 =  0;//bladeASM.mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 7);
-    // c = cliffordConjugate(m)
-    var c000 = +m000; // w,   grade 0(+)
-    var c001 = -m001; // x,   grade 1(-)
-    var c010 = -m010; // y,   grade 1(-)
-    var c011 = -m011; // xy,  grade 2(-)
-    var c100 = -m100; // z,   grade 1(-)
-    var c101 = -m101; // -zx, grade 2(-)
-    var c110 = -m110; // yz,  grade 2(-)
-    var c111 = +m111; // xyz, grade 3(+)
-    // s = r * c
-    // TODO: Presumably there is some simplified computation on account of the c's being sparse.
-    var s000 =  bladeASM.mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 0);
-    var s001 =  bladeASM.mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 1);
-    var s010 =  bladeASM.mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 2);
-    var s011 =  bladeASM.mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 4);
-    var s100 =  bladeASM.mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 3);
-    var s101 = -bladeASM.mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 6);
-    var s110 =  bladeASM.mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 5);
-    var s111 =  bladeASM.mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 7);
-    // k = b * s
-    var k000 =  bladeASM.mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, s000, s001, s010, s100, s011, s110, -s101, s111, 0);
-    // i = inverse(b)
-    var i000 = s000/k000;
-    var i001 = s001/k000;
-    var i010 = s010/k000;
-    var i011 = s011/k000;
-    var i100 = s100/k000;
-    var i101 = s101/k000;
-    var i110 = s110/k000;
-    var i111 = s111/k000;
-    // x = a * inverse(b)
-    var x000 =  bladeASM.mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 0);
-    var x001 =  bladeASM.mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 1);
-    var x010 =  bladeASM.mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 2);
-    var x011 =  bladeASM.mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 4);
-    var x100 =  bladeASM.mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 3);
-    var x101 = -bladeASM.mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 6);
-    var x110 =  bladeASM.mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 5);
-    var x111 =  bladeASM.mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 7);
-    // translate bitmap representation to Cartesian.
-    var w   =  x000;
-    var x   =  x001;
-    var y   =  x010;
-    var z   =  x100;
-    var xy  =  x011;
-    var yz  =  x110;
-    var zx  = -x101;
-    var xyz =  x111;
-    // return or populate the optional dst parameter.
-    if (typeof dst !== 'undefined') {
-      dst.w   = w;
-      dst.x   = x;
-      dst.y   = y;
-      dst.z   = z;
-      dst.xy  = xy;
-      dst.yz  = yz;
-      dst.zx  = zx;
-      dst.xyz = xyz;
-    }
-    else {
-      return remapE3ToPy(w, x, y, z, xy, yz, zx, xyz);
-    }
   }
 
   function multiVector3(w, vector, xy, yz, zx, xyz) {
@@ -840,7 +790,7 @@ var $builtinmodule = function(name) {
     $loc.__str__ = new Sk.builtin.func(function(quaternionPy) {
       var quaternion = Sk.ffi.remapToJs(quaternionPy);
       if (isDefined(quaternion)) {
-        return new Sk.builtin.str(bladeSTR.stringFromCoordinates([quaternion.w, quaternion.x, quaternion.y, quaternion.z], ["1", "i", "j", "k"]));
+        return new Sk.builtin.str(stringFromCoordinates([quaternion.w, quaternion.x, quaternion.y, quaternion.z], ["1", "i", "j", "k"]));
       }
       else {
         return new Sk.builtin.str("<type '" + QUATERNION + "'>");

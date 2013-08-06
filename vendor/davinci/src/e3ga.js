@@ -629,7 +629,7 @@ Sk.builtin.defineEuclidean3 = function(mod) {
   }
 
   function divide(a000, a001, a010, a011, a100, a101, a110, a111, b000, b001, b010, b011, b100, b101, b110, b111, dst) {
-    // WARNING! bladeASM.mulE2 uses w,x,y,z,xy,yz,zx,xyz representation. Notice the ordering and sign change.
+    // WARNING! mulE2 uses w,x,y,z,xy,yz,zx,xyz representation. Notice the ordering and sign change.
     // TODO: Move everything to the more systematic bitmap representation.
     // r = ~b = reverse(b)
     var r000 = +b000; // w,   grade 0(+)
