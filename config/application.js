@@ -87,6 +87,8 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('application
     },
     dist: {
       files: [
+        {src: "generated/css/app.css",                             dest: "dist/css/app.css"},
+        {src: "generated/js/app.js",                               dest: "dist/js/app.js"},
         {src: "vendor/font-awesome/font/FontAwesome.otf",          dest: "dist/img/FontAwesome.otf"},
         {src: "vendor/font-awesome/font/fontawesome-webfont.eot",  dest: "dist/img/fontawesome-webfont.eot"},
         {src: "vendor/font-awesome/font/fontawesome-webfont.svg",  dest: "dist/img/fontawesome-webfont.svg"},
