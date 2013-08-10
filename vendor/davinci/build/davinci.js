@@ -4267,6 +4267,9 @@ Sk.configure = function(options)
     Sk.inputfun = options["inputfun"] || Sk.inputfun;
     goog.asserts.assert(typeof Sk.inputfun === "function")
 
+    Sk.throwSystemExit = options["systemexit"] || false;
+    goog.asserts.assert(typeof Sk.throwSystemExit === "boolean")
+
     if (options["syspath"])
     {
         Sk.syspath = options["syspath"];
@@ -5270,7 +5273,8 @@ Sk.builtin.pow = function pow(a, b, c) {
 	    throw new Sk.builtin.TypeError("pow() 2nd argument cannot be negative when 3rd argument specified");
 	}
 
-	if (a instanceof Sk.builtin.lng || b instanceof Sk.builtin.lng || c instanceof Sk.builtin.lng)
+	if ((a instanceof Sk.builtin.lng || b instanceof Sk.builtin.lng || c instanceof Sk.builtin.lng)
+            || (Math.pow(a_num, b_num) === Infinity))
 	{
 	    // convert a to a long so that we can use biginteger's modPowInt method
 	    a = new Sk.builtin.lng(a);
@@ -5428,14 +5432,13 @@ Sk.builtin.Exception = function(args)
         // probably needs to be fixed.
         this.filename = "<unknown>";
     }
-
-    if (Sk.currLineNo > 0) 
-    {
-        this.lineno = Sk.currLineNo;
-    }
-    else if (this.args.sq$length() >= 3)
+    if (this.args.sq$length() >= 3)
     {
         this.lineno = this.args.v[2];
+    }
+    else if (Sk.currLineNo > 0) 
+    {
+        this.lineno = Sk.currLineNo;
     }
     else
     {
@@ -5461,7 +5464,7 @@ Sk.builtin.Exception.prototype.tp$str = function()
 
     ret += this.tp$name;
     if (this.args)
-        ret += ": " + this.args.v[0].v;
+        ret += ": " + (this.args.v.length > 0 ? this.args.v[0].v : '');
     ret += " on line " + this.lineno;
 
     if (this.args.v.length > 4)
@@ -5486,7 +5489,14 @@ goog.exportSymbol("Sk.builtin.Exception", Sk.builtin.Exception);
  * @extends Sk.builtin.Exception
  * @param {...*} args
  */
-Sk.builtin.AssertionError = function(args) { Sk.builtin.Exception.apply(this, arguments); };
+Sk.builtin.AssertionError = function(args) {
+    if (!(this instanceof Sk.builtin.AssertionError)) {
+        var o = Object.create(Sk.builtin.AssertionError.prototype);
+        o.constructor.apply(o, arguments);
+        return o;
+    }
+    Sk.builtin.Exception.apply(this, arguments);
+}
 goog.inherits(Sk.builtin.AssertionError, Sk.builtin.Exception);
 Sk.builtin.AssertionError.prototype.tp$name = "AssertionError";
 goog.exportSymbol("Sk.builtin.AssertionError", Sk.builtin.AssertionError);
@@ -5496,7 +5506,14 @@ goog.exportSymbol("Sk.builtin.AssertionError", Sk.builtin.AssertionError);
  * @extends Sk.builtin.Exception
  * @param {...*} args
  */
-Sk.builtin.AttributeError = function(args) { Sk.builtin.Exception.apply(this, arguments); };
+Sk.builtin.AttributeError = function(args) {
+    if (!(this instanceof Sk.builtin.AttributeError)) {
+        var o = Object.create(Sk.builtin.AttributeError.prototype);
+        o.constructor.apply(o, arguments);
+        return o;
+    }
+    Sk.builtin.Exception.apply(this, arguments);
+}
 goog.inherits(Sk.builtin.AttributeError, Sk.builtin.Exception);
 Sk.builtin.AttributeError.prototype.tp$name = "AttributeError";
 
@@ -5505,7 +5522,14 @@ Sk.builtin.AttributeError.prototype.tp$name = "AttributeError";
  * @extends Sk.builtin.Exception
  * @param {...*} args
  */
-Sk.builtin.ImportError = function(args) { Sk.builtin.Exception.apply(this, arguments); }
+Sk.builtin.ImportError = function(args) {
+    if (!(this instanceof Sk.builtin.ImportError)) {
+        var o = Object.create(Sk.builtin.ImportError.prototype);
+        o.constructor.apply(o, arguments);
+        return o;
+    }
+    Sk.builtin.Exception.apply(this, arguments);
+}
 goog.inherits(Sk.builtin.ImportError, Sk.builtin.Exception);
 Sk.builtin.ImportError.prototype.tp$name = "ImportError";
 
@@ -5514,7 +5538,14 @@ Sk.builtin.ImportError.prototype.tp$name = "ImportError";
  * @extends Sk.builtin.Exception
  * @param {...*} args
  */
-Sk.builtin.IndentationError = function(args) { Sk.builtin.Exception.apply(this, arguments); }
+Sk.builtin.IndentationError = function(args) {
+    if (!(this instanceof Sk.builtin.IndentationError)) {
+        var o = Object.create(Sk.builtin.IndentationError.prototype);
+        o.constructor.apply(o, arguments);
+        return o;
+    }
+    Sk.builtin.Exception.apply(this, arguments);
+}
 goog.inherits(Sk.builtin.IndentationError, Sk.builtin.Exception);
 Sk.builtin.IndentationError.prototype.tp$name = "IndentationError";
 
@@ -5523,7 +5554,14 @@ Sk.builtin.IndentationError.prototype.tp$name = "IndentationError";
  * @extends Sk.builtin.Exception
  * @param {...*} args
  */
-Sk.builtin.IndexError = function(args) { Sk.builtin.Exception.apply(this, arguments); }
+Sk.builtin.IndexError = function(args) {
+    if (!(this instanceof Sk.builtin.IndexError)) {
+        var o = Object.create(Sk.builtin.IndexError.prototype);
+        o.constructor.apply(o, arguments);
+        return o;
+    }
+    Sk.builtin.Exception.apply(this, arguments);
+}
 goog.inherits(Sk.builtin.IndexError, Sk.builtin.Exception);
 Sk.builtin.IndexError.prototype.tp$name = "IndexError";
 
@@ -5532,7 +5570,14 @@ Sk.builtin.IndexError.prototype.tp$name = "IndexError";
  * @extends Sk.builtin.Exception
  * @param {...*} args
  */
-Sk.builtin.KeyError = function(args) { Sk.builtin.Exception.apply(this, arguments); }
+Sk.builtin.KeyError = function(args) {
+    if (!(this instanceof Sk.builtin.KeyError)) {
+        var o = Object.create(Sk.builtin.KeyError.prototype);
+        o.constructor.apply(o, arguments);
+        return o;
+    }
+    Sk.builtin.Exception.apply(this, arguments);
+}
 goog.inherits(Sk.builtin.KeyError, Sk.builtin.Exception);
 Sk.builtin.KeyError.prototype.tp$name = "KeyError";
 
@@ -5541,7 +5586,14 @@ Sk.builtin.KeyError.prototype.tp$name = "KeyError";
  * @extends Sk.builtin.Exception
  * @param {...*} args
  */
-Sk.builtin.NameError = function(args) { Sk.builtin.Exception.apply(this, arguments); }
+Sk.builtin.NameError = function(args) {
+    if (!(this instanceof Sk.builtin.NameError)) {
+        var o = Object.create(Sk.builtin.NameError.prototype);
+        o.constructor.apply(o, arguments);
+        return o;
+    }
+    Sk.builtin.Exception.apply(this, arguments);
+}
 goog.inherits(Sk.builtin.NameError, Sk.builtin.Exception);
 Sk.builtin.NameError.prototype.tp$name = "NameError";
 
@@ -5550,7 +5602,14 @@ Sk.builtin.NameError.prototype.tp$name = "NameError";
  * @extends Sk.builtin.Exception
  * @param {...*} args
  */
-Sk.builtin.OverflowError = function(args) { Sk.builtin.Exception.apply(this, arguments); }
+Sk.builtin.OverflowError = function(args) {
+    if (!(this instanceof Sk.builtin.OverflowError)) {
+        var o = Object.create(Sk.builtin.OverflowError.prototype);
+        o.constructor.apply(o, arguments);
+        return o;
+    }
+    Sk.builtin.Exception.apply(this, arguments);
+}
 goog.inherits(Sk.builtin.OverflowError, Sk.builtin.Exception);
 Sk.builtin.OverflowError.prototype.tp$name = "OverflowError";
 
@@ -5560,7 +5619,14 @@ Sk.builtin.OverflowError.prototype.tp$name = "OverflowError";
  * @extends Sk.builtin.Exception
  * @param {...*} args
  */
-Sk.builtin.ParseError = function(args) { Sk.builtin.Exception.apply(this, arguments); }
+Sk.builtin.ParseError = function(args) {
+    if (!(this instanceof Sk.builtin.ParseError)) {
+        var o = Object.create(Sk.builtin.ParseError.prototype);
+        o.constructor.apply(o, arguments);
+        return o;
+    }
+    Sk.builtin.Exception.apply(this, arguments);
+}
 goog.inherits(Sk.builtin.ParseError, Sk.builtin.Exception);
 Sk.builtin.ParseError.prototype.tp$name = "ParseError";
 
@@ -5570,7 +5636,14 @@ Sk.builtin.ParseError.prototype.tp$name = "ParseError";
  * @extends Sk.builtin.Exception
  * @param {...*} args
  */
-Sk.builtin.SystemExit = function(args) { Sk.builtin.Exception.apply(this, arguments); }
+Sk.builtin.SystemExit = function(args) {
+    if (!(this instanceof Sk.builtin.SystemExit)) {
+        var o = Object.create(Sk.builtin.SystemExit.prototype);
+        o.constructor.apply(o, arguments);
+        return o;
+    }
+    Sk.builtin.Exception.apply(this, arguments);
+}
 goog.inherits(Sk.builtin.SystemExit, Sk.builtin.Exception);
 Sk.builtin.SystemExit.prototype.tp$name = "SystemExit";
 goog.exportSymbol("Sk.builtin.SystemExit", Sk.builtin.SystemExit);
@@ -5581,7 +5654,14 @@ goog.exportSymbol("Sk.builtin.SystemExit", Sk.builtin.SystemExit);
  * @extends Sk.builtin.Exception
  * @param {...*} args
  */
-Sk.builtin.SyntaxError = function(args) { Sk.builtin.Exception.apply(this, arguments); }
+Sk.builtin.SyntaxError = function(args) {
+    if (!(this instanceof Sk.builtin.SyntaxError)) {
+        var o = Object.create(Sk.builtin.SyntaxError.prototype);
+        o.constructor.apply(o, arguments);
+        return o;
+    }
+    Sk.builtin.Exception.apply(this, arguments);
+}
 goog.inherits(Sk.builtin.SyntaxError, Sk.builtin.Exception);
 Sk.builtin.SyntaxError.prototype.tp$name = "SyntaxError";
 
@@ -5590,7 +5670,14 @@ Sk.builtin.SyntaxError.prototype.tp$name = "SyntaxError";
  * @extends Sk.builtin.Exception
  * @param {...*} args
  */
-Sk.builtin.TokenError = function(args) { Sk.builtin.Exception.apply(this, arguments); }
+Sk.builtin.TokenError = function(args) {
+    if (!(this instanceof Sk.builtin.TokenError)) {
+        var o = Object.create(Sk.builtin.TokenError.prototype);
+        o.constructor.apply(o, arguments);
+        return o;
+    }
+    Sk.builtin.Exception.apply(this, arguments);
+}
 goog.inherits(Sk.builtin.TokenError, Sk.builtin.Exception);
 Sk.builtin.TokenError.prototype.tp$name = "TokenError";
 
@@ -5599,7 +5686,14 @@ Sk.builtin.TokenError.prototype.tp$name = "TokenError";
  * @extends Sk.builtin.Exception
  * @param {...*} args
  */
-Sk.builtin.TypeError = function(args) { Sk.builtin.Exception.apply(this, arguments); }
+Sk.builtin.TypeError = function(args) {
+    if (!(this instanceof Sk.builtin.TypeError)) {
+        var o = Object.create(Sk.builtin.TypeError.prototype);
+        o.constructor.apply(o, arguments);
+        return o;
+    }
+    Sk.builtin.Exception.apply(this, arguments);
+}
 goog.inherits(Sk.builtin.TypeError, Sk.builtin.Exception);
 Sk.builtin.TypeError.prototype.tp$name = "TypeError";
 goog.exportSymbol("Sk.builtin.TypeError", Sk.builtin.TypeError);
@@ -5608,7 +5702,14 @@ goog.exportSymbol("Sk.builtin.TypeError", Sk.builtin.TypeError);
  * @extends Sk.builtin.Exception
  * @param {...*} args
  */
-Sk.builtin.ValueError = function(args) { Sk.builtin.Exception.apply(this, arguments); }
+Sk.builtin.ValueError = function(args) {
+    if (!(this instanceof Sk.builtin.ValueError)) {
+        var o = Object.create(Sk.builtin.ValueError.prototype);
+        o.constructor.apply(o, arguments);
+        return o;
+    }
+    Sk.builtin.Exception.apply(this, arguments);
+}
 goog.inherits(Sk.builtin.ValueError, Sk.builtin.Exception);
 Sk.builtin.ValueError.prototype.tp$name = "ValueError";
 goog.exportSymbol("Sk.builtin.ValueError", Sk.builtin.ValueError);
@@ -5618,7 +5719,14 @@ goog.exportSymbol("Sk.builtin.ValueError", Sk.builtin.ValueError);
  * @extends Sk.builtin.Exception
  * @param {...*} args
  */
-Sk.builtin.ZeroDivisionError = function(args) { Sk.builtin.Exception.apply(this, arguments); }
+Sk.builtin.ZeroDivisionError = function(args) {
+    if (!(this instanceof Sk.builtin.ZeroDivisionError)) {
+        var o = Object.create(Sk.builtin.ZeroDivisionError.prototype);
+        o.constructor.apply(o, arguments);
+        return o;
+    }
+    Sk.builtin.Exception.apply(this, arguments);
+}
 goog.inherits(Sk.builtin.ZeroDivisionError, Sk.builtin.Exception);
 Sk.builtin.ZeroDivisionError.prototype.tp$name = "ZeroDivisionError";
 
@@ -5627,7 +5735,14 @@ Sk.builtin.ZeroDivisionError.prototype.tp$name = "ZeroDivisionError";
  * @extends Sk.builtin.Exception
  * @param {...*} args
  */
-Sk.builtin.TimeLimitError = function(args) { Sk.builtin.Exception.apply(this, arguments); }
+Sk.builtin.TimeLimitError = function(args) {
+    if (!(this instanceof Sk.builtin.TimeLimitError)) {
+        var o = Object.create(Sk.builtin.TimeLimitError.prototype);
+        o.constructor.apply(o, arguments);
+        return o;
+    }
+    Sk.builtin.Exception.apply(this, arguments);
+}
 goog.inherits(Sk.builtin.TimeLimitError, Sk.builtin.Exception);
 Sk.builtin.TimeLimitError.prototype.tp$name = "TimeLimitError";
 goog.exportSymbol("Sk.builtin.TimeLimitError", Sk.builtin.TimeLimitError);
@@ -5637,7 +5752,14 @@ goog.exportSymbol("Sk.builtin.TimeLimitError", Sk.builtin.TimeLimitError);
  * @extends Sk.builtin.Exception
  * @param {...*} args
  */
-Sk.builtin.IOError = function(args) { Sk.builtin.Exception.apply(this, arguments); }
+Sk.builtin.IOError = function(args) {
+    if (!(this instanceof Sk.builtin.IOError)) {
+        var o = Object.create(Sk.builtin.IOError.prototype);
+        o.constructor.apply(o, arguments);
+        return o;
+    }
+    Sk.builtin.Exception.apply(this, arguments);
+}
 goog.inherits(Sk.builtin.IOError, Sk.builtin.Exception);
 Sk.builtin.IOError.prototype.tp$name = "IOError";
 goog.exportSymbol("Sk.builtin.IOError", Sk.builtin.IOError);
@@ -5648,7 +5770,14 @@ goog.exportSymbol("Sk.builtin.IOError", Sk.builtin.IOError);
  * @extends Sk.builtin.Exception
  * @param {...*} args
  */
-Sk.builtin.NotImplementedError = function(args) { Sk.builtin.Exception.apply(this, arguments); }
+Sk.builtin.NotImplementedError = function(args) {
+    if (!(this instanceof Sk.builtin.NotImplementedError)) {
+        var o = Object.create(Sk.builtin.NotImplementedError.prototype);
+        o.constructor.apply(o, arguments);
+        return o;
+    }
+    Sk.builtin.Exception.apply(this, arguments);
+}
 goog.inherits(Sk.builtin.NotImplementedError, Sk.builtin.Exception);
 Sk.builtin.NotImplementedError.prototype.tp$name = "NotImplementedError";
 goog.exportSymbol("Sk.builtin.NotImplementedError", Sk.builtin.NotImplementedError);
@@ -5658,7 +5787,14 @@ goog.exportSymbol("Sk.builtin.NotImplementedError", Sk.builtin.NotImplementedErr
  * @extends Sk.builtin.Exception
  * @param {...*} args
  */
-Sk.builtin.NegativePowerError = function(args) { Sk.builtin.Exception.apply(this, arguments); }
+Sk.builtin.NegativePowerError = function(args) {
+    if (!(this instanceof Sk.builtin.NegativePowerError)) {
+        var o = Object.create(Sk.builtin.NegativePowerError.prototype);
+        o.constructor.apply(o, arguments);
+        return o;
+    }
+    Sk.builtin.Exception.apply(this, arguments);
+}
 goog.inherits(Sk.builtin.NegativePowerError, Sk.builtin.Exception);
 Sk.builtin.NegativePowerError.prototype.tp$name = "NegativePowerError";
 goog.exportSymbol("Sk.builtin.NegativePowerError", Sk.builtin.NegativePowerError);
@@ -5668,10 +5804,34 @@ goog.exportSymbol("Sk.builtin.NegativePowerError", Sk.builtin.NegativePowerError
  * @extends Sk.builtin.Exception
  * @param {...*} args
  */
-Sk.builtin.OperationError = function(args) { Sk.builtin.Exception.apply(this, arguments); }
+Sk.builtin.OperationError = function(args) {
+    if (!(this instanceof Sk.builtin.OperationError)) {
+        var o = Object.create(Sk.builtin.OperationError.prototype);
+        o.constructor.apply(o, arguments);
+        return o;
+    }
+    Sk.builtin.Exception.apply(this, arguments);
+}
 goog.inherits(Sk.builtin.OperationError, Sk.builtin.Exception);
 Sk.builtin.OperationError.prototype.tp$name = "OperationError";
 goog.exportSymbol("Sk.builtin.OperationError", Sk.builtin.OperationError);
+
+/**
+ * @constructor
+ * @extends Sk.builtin.Exception
+ * @param {...*} args
+ */
+Sk.builtin.SystemError = function(args) { 
+    if (!(this instanceof Sk.builtin.SystemError)) {
+        var o = Object.create(Sk.builtin.SystemError.prototype);
+        o.constructor.apply(o, arguments);
+        return o;
+    }
+    Sk.builtin.Exception.apply(this, arguments); 
+}
+goog.inherits(Sk.builtin.SystemError, Sk.builtin.Exception);
+Sk.builtin.SystemError.prototype.tp$name = "SystemError";
+goog.exportSymbol("Sk.builtin.SystemError", Sk.builtin.SystemError);
 
 Sk.currLineNo = -1;
 Sk.currColNo = -1;
@@ -5705,23 +5865,19 @@ Sk.builtin.type = function(name, bases, dict)
     if (bases === undefined && dict === undefined)
     {
         // 1 arg version of type()
+        // the argument is an object, not a name and returns a type object
         var obj = name;
-        if (obj === true || obj === false) return Sk.builtin.bool.prototype.ob$type;
-        if ((obj === null) || (obj instanceof Sk.builtin.none))
-	    return Sk.builtin.none.prototype.ob$type;
-        if (typeof obj === "number")
+        if (obj.constructor === Sk.builtin.nmber)
         {
-	    if (Math.floor(obj) === obj)
-                return Sk.builtin.int_.prototype.ob$type;
-            else
+	    if (obj.skType === Sk.builtin.nmber.int$)
+            {
+		return Sk.builtin.int_.prototype.ob$type;
+            }
+	    else
+            {
                 return Sk.builtin.float_.prototype.ob$type;
-        }
-		if (obj.constructor === Sk.builtin.nmber) {
-			if (obj.skType === "int")
-				return Sk.builtin.int_.prototype.ob$type;
-			else // if (obj.skType === "float")
-                return Sk.builtin.float_.prototype.ob$type;
-		}
+            }
+	}
         return obj.ob$type;
     }
     else
@@ -5833,7 +5989,7 @@ Sk.builtin.type = function(name, bases, dict)
 	    throw new Sk.builtin.TypeError("'" + Sk.abstr.typeName(this) + "' object does not support item assignment");
 	}
 
-        klass.tp$name = name;
+        klass.prototype.tp$name = name;
 
         if (bases)
         {
@@ -6177,7 +6333,7 @@ Sk.builtin.object.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('object', 
  */
 Sk.builtin.none = function() {};
 Sk.builtin.none.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('NoneType', Sk.builtin.none);
-Sk.builtin.none.prototype.tp$name = "None";
+Sk.builtin.none.prototype.tp$name = "NoneType";
 Sk.builtin.none.none$ = Object.create(Sk.builtin.none.prototype, {v: {value: null, enumerable: true}});
 
 goog.exportSymbol("Sk.builtin.none", Sk.builtin.none);
@@ -6291,6 +6447,11 @@ Sk.builtin.checkClass = function (arg) {
     return (arg !== null && arg.sk$type);
 };
 goog.exportSymbol("Sk.builtin.checkClass", Sk.builtin.checkClass);
+
+Sk.builtin.checkBool = function (arg) {
+    return (arg instanceof Sk.builtin.bool);
+};
+goog.exportSymbol("Sk.builtin.checkBool", Sk.builtin.checkBool);
 
 Sk.builtin.checkFunction = function (arg) {
     return (arg !== null && arg.tp$call !== undefined);  
@@ -6637,6 +6798,101 @@ Sk.misceval.swappedOp_ = {
 
 Sk.misceval.richCompareBool = function(v, w, op)
 {
+    // v and w must be Python objects. will return Javascript true or false for internal use only
+    // if you want to return a value from richCompareBool to Python you must wrap as Sk.builtin.bool first
+
+    goog.asserts.assert((v !== null) && (v !== undefined), "passed undefined or null parameter to Sk.misceval.richCompareBool");
+    goog.asserts.assert((w !== null) && (w !== undefined), "passed undefined or null parameter to Sk.misceval.richCompareBool");
+
+    var v_type = new Sk.builtin.type(v);
+    var w_type = new Sk.builtin.type(w);
+
+    // Python has specific rules when comparing two different builtin types
+    // currently, this code will execute even if the objects are not builtin types
+    // but will fall through and not return anything in this section
+    if ((v_type !== w_type)
+        && (op === 'GtE' || op === 'Gt' || op === 'LtE' || op === 'Lt'))
+    {
+        // note: sets are omitted here because they can only be compared to other sets
+        var numeric_types = [Sk.builtin.float_.prototype.ob$type,
+                             Sk.builtin.int_.prototype.ob$type,
+                             Sk.builtin.lng.prototype.ob$type,
+                             Sk.builtin.bool.prototype.ob$type];
+        var sequence_types = [Sk.builtin.dict.prototype.ob$type,
+                              Sk.builtin.enumerate.prototype.ob$type,
+                              Sk.builtin.list.prototype.ob$type,
+                              Sk.builtin.str.prototype.ob$type,
+                              Sk.builtin.tuple.prototype.ob$type];
+
+        var v_num_type = numeric_types.indexOf(v_type);
+        var v_seq_type = sequence_types.indexOf(v_type);
+        var w_num_type = numeric_types.indexOf(w_type);
+        var w_seq_type = sequence_types.indexOf(w_type);
+
+        // NoneTypes are considered less than any other type in Python
+        // note: this only handles comparing NoneType with any non-NoneType.
+        // Comparing NoneType with NoneType is handled further down.
+        if (v_type === Sk.builtin.none.prototype.ob$type)
+        {
+            switch (op)
+            {
+                case 'Lt':  return true;
+                case 'LtE': return true;
+                case 'Gt':  return false;
+                case 'GtE': return false;
+            }
+        }
+
+        if (w_type === Sk.builtin.none.prototype.ob$type)
+        {
+            switch (op)
+            {
+                case 'Lt':  return false;
+                case 'LtE': return false;
+                case 'Gt':  return true;
+                case 'GtE': return true;
+            }
+        }
+
+        // numeric types are always considered smaller than sequence types in Python
+        if (v_num_type !== -1 && w_seq_type !== -1)
+        {
+            switch (op)
+            {
+                case 'Lt':  return true;
+                case 'LtE': return true;
+                case 'Gt':  return false;
+                case 'GtE': return false;
+            }
+        }
+
+        if (v_seq_type !== -1 && w_num_type !== -1)
+        {
+            switch (op)
+            {
+                case 'Lt':  return false;
+                case 'LtE': return false;
+                case 'Gt':  return true;
+                case 'GtE': return true;
+            }
+        }
+
+        // in Python, different sequence types are ordered alphabetically
+        // by name so that dict < list < str < tuple
+        if (v_seq_type !== -1 && w_seq_type !== -1)
+        {
+            switch (op)
+            {
+                case 'Lt':  return v_seq_type < w_seq_type;
+                case 'LtE': return v_seq_type <= w_seq_type;
+                case 'Gt':  return v_seq_type > w_seq_type;
+                case 'GtE': return v_seq_type >= w_seq_type;
+            }
+        }
+    }
+
+
+    // handle identity and membership comparisons
     if (op === 'Is') {
 	if (v instanceof Sk.builtin.nmber && w instanceof Sk.builtin.nmber)
 	{
@@ -6663,132 +6919,81 @@ Sk.misceval.richCompareBool = function(v, w, op)
         return v !== w;
     }
 
-    if (v === w)
-    {
-        if (op === 'Eq')
-            return true;
-        else if (op === 'NotEq')
-            return false;
-    }
-
-    if (v instanceof Sk.builtin.str && w instanceof Sk.builtin.str)
-    {
-        if (op === 'Eq')
-            return v === w;
-        else if (op === 'NotEq')
-            return v !== w;
-    }
-
-    if (op === "In") return Sk.abstr.sequenceContains(w, v);
-    if (op === "NotIn") return !Sk.abstr.sequenceContains(w, v);
+    if (op === "In")
+        return Sk.abstr.sequenceContains(w, v);
+    if (op === "NotIn")
+        return !Sk.abstr.sequenceContains(w, v);
 
 
+    // use comparison methods if they are given for either object
     var res;
-    //print("  -- rcb:", JSON.stringify(v), JSON.stringify(w), op);
-    if (v && w && v.tp$richcompare && (res = v.tp$richcompare(w, op)) !== undefined)
+    if (v.tp$richcompare && (res = v.tp$richcompare(w, op)) !== undefined)
     {
         return res;
     }
-    else if (w && v && w.tp$richcompare && (res = w.tp$richcompare(v, Sk.misceval.swappedOp_[op])) !== undefined)
+
+    if (w.tp$richcompare && (res = w.tp$richcompare(v, Sk.misceval.swappedOp_[op])) !== undefined)
     {
         return res;
     }
-    else
+
+
+    // depending on the op, try left:op:right, and if not, then
+    // right:reversed-top:left
+
+    var op2method = {
+        'Eq': '__eq__',
+        'NotEq': '__ne__',
+        'Gt': '__gt__',
+        'GtE': '__ge__',
+        'Lt': '__lt__',
+        'LtE': '__le__'
+    };
+
+    var method = op2method[op];
+    var swapped_method = op2method[Sk.misceval.swappedOp_[op]];
+
+    if (v[method])
     {
-        // depending on the op, try left:op:right, and if not, then
-        // right:reversed-top:left
-        // yeah, a macro or 3 would be nice...
-        if (op === 'Eq') {
-            if (v && v['__eq__']) 
-                return Sk.misceval.callsim(v['__eq__'], v, w);
-            else if (w && w['__eq__'])
-                return Sk.misceval.callsim(w['__eq__'], w, v);
-        }
-        else if (op === 'NotEq') {
-            if (v && v['__ne__'])
-                return Sk.misceval.callsim(v['__ne__'], v, w);
-            else if (w && w['__ne__'])
-                return Sk.misceval.callsim(w['__ne__'], w, v);
-        }
-        else if (op === 'Gt') {
-            if (v && v['__gt__'])
-                return Sk.misceval.callsim(v['__gt__'], v, w);
-            else if (w && w['__le__'])
-                return Sk.misceval.callsim(w['__le__'], w, v);
-        }
-        else if (op === 'Lt') {
-            if (v && v['__lt__'])
-                return Sk.misceval.callsim(v['__lt__'], v, w);
-            else if (w && w['__ge__'])
-                return Sk.misceval.callsim(w['__ge__'], w, v);
-        }
-        else if (op === 'GtE') {
-            if (v && v['__ge__'])
-                return Sk.misceval.callsim(v['__ge__'], v, w);
-            else if (w && w['__lt__'])
-                return Sk.misceval.callsim(w['__lt__'], w, v);
-        }
-        else if (op === 'LtE') {
-            if (v && v['__le__'])
-                return Sk.misceval.callsim(v['__le__'], v, w);
-            else if (w && w['__gt__'])
-                return Sk.misceval.callsim(w['__gt__'], w, v);
-        }
-
-        if (v && v['__cmp__'])
-        {
-            var ret = Sk.misceval.callsim(v['__cmp__'], v, w);
-	    ret = Sk.builtin.asnum$(ret);
-            if (op === 'Eq') return ret === 0;
-            else if (op === 'NotEq') return ret !== 0;
-            else if (op === 'Lt') return ret < 0;
-            else if (op === 'Gt') return ret > 0;
-            else if (op === 'LtE') return ret <= 0;
-            else if (op === 'GtE') return ret >= 0;
-        }
-        else if (w && w['__cmp__'])
-        {
-            // note, flipped on return value and call
-            var ret = Sk.misceval.callsim(w['__cmp__'], w, v);
-	    ret = Sk.builtin.asnum$(ret);
-            if (op === 'Eq') return ret === 0;
-            else if (op === 'NotEq') return ret !== 0;
-            else if (op === 'Lt') return ret > 0;
-            else if (op === 'Gt') return ret < 0;
-            else if (op === 'LtE') return ret >= 0;
-            else if (op === 'GtE') return ret <= 0;
-        }
-
+        return Sk.misceval.callsim(v[method], v, w);
     }
-    if (typeof v !== typeof w) {
-        if (op === 'NotEq') return true;
-        else
-            return false;
+    else if (w[swapped_method])
+    {
+        return Sk.misceval.callsim(w[swapped_method], w, v);
     }
 
-    if (((v instanceof Sk.builtin.none) || (v instanceof Sk.builtin.bool))
-	&& ((w instanceof Sk.builtin.none) || (w instanceof Sk.builtin.bool)))
+    if (v['__cmp__'])
     {
+        var ret = Sk.misceval.callsim(v['__cmp__'], v, w);
+	ret = Sk.builtin.asnum$(ret);
+        if (op === 'Eq') return ret === 0;
+        else if (op === 'NotEq') return ret !== 0;
+        else if (op === 'Lt') return ret < 0;
+        else if (op === 'Gt') return ret > 0;
+        else if (op === 'LtE') return ret <= 0;
+        else if (op === 'GtE') return ret >= 0;
+    }
 
-	if ((v.v === false) && (w.v === null))
-	{
-	    if (op === 'Gt')
-		return true;
-	    if (op === 'LtE')
-		return false;
-	}
+    if (w['__cmp__'])
+    {
+        // note, flipped on return value and call
+        var ret = Sk.misceval.callsim(w['__cmp__'], w, v);
+	ret = Sk.builtin.asnum$(ret);
+        if (op === 'Eq') return ret === 0;
+        else if (op === 'NotEq') return ret !== 0;
+        else if (op === 'Lt') return ret > 0;
+        else if (op === 'Gt') return ret < 0;
+        else if (op === 'LtE') return ret >= 0;
+        else if (op === 'GtE') return ret <= 0;
+    }
 
-	if ((v.v === null) && (w.v === false))
-	{
-	    if (op === 'GtE')
-		return false;
-	    if (op === 'Lt')
-		return true;
-	}
-
-	// Except for the above special case with None and False,
-	// Javascript happens to return the same values when comparing null,
-	// true, and false as Python does when comparing None, True, and False
+    // handle special cases for comparing None with None or Bool with Bool
+    if (((v instanceof Sk.builtin.none) && (w instanceof Sk.builtin.none))
+	|| ((v instanceof Sk.builtin.bool) && (w instanceof Sk.builtin.bool)))
+    {
+	// Javascript happens to return the same values when comparing null
+        // with null or true/false with true/false as Python does when
+        // comparing None with None or True/False with True/False
 
 	if (op === 'Eq')
 	    return v.v === w.v;
@@ -6805,9 +7010,19 @@ Sk.misceval.richCompareBool = function(v, w, op)
     }
 
 
-    // todo; some defaults, mostly to handle diff types -> false. are these ok?
-    if (op === 'Eq') return v === w;
-    if (op === 'NotEq') return v !== w;
+    // handle equality comparisons for any remaining objects
+    if (op === 'Eq')
+    {
+        if ((v instanceof Sk.builtin.str) && (w instanceof Sk.builtin.str))
+            return v.v === w.v;
+        return v === w;
+    }
+    if (op === 'NotEq')
+    {
+        if ((v instanceof Sk.builtin.str) && (w instanceof Sk.builtin.str))
+            return v.v !== w.v;
+        return v !== w;
+    }
 
     var vname = Sk.abstr.typeName(v);
     var wname = Sk.abstr.typeName(w);
@@ -6834,7 +7049,14 @@ Sk.misceval.objectRepr = function(v)
         };
     }
     else if (v.constructor === Sk.builtin.nmber)
-        return new Sk.builtin.str("" + v.v);
+    {
+        if (v.v === Infinity)
+            return new Sk.builtin.str('inf');
+        else if (v.v === -Infinity)
+            return new Sk.builtin.str('-inf');
+        else
+            return new Sk.builtin.str("" + v.v);
+    }
     else
         return v['$r']();
 };
@@ -7125,20 +7347,12 @@ Sk.abstr = {};
 
 Sk.abstr.typeName = function(v) {
     var vtypename;
-    if (v instanceof Sk.builtin.none) {
-        vtypename = "NoneType";
-    } else if (v instanceof Sk.builtin.bool) {
-        vtypename = "bool";
-    } else if (typeof v === "number") {
-        vtypename = "number";
-    } else if (v instanceof Sk.builtin.nmber) {
+    if (v instanceof Sk.builtin.nmber) {
 	vtypename = v.skType;
     } else if (v.tp$name !== undefined) {
         vtypename = v.tp$name;
-    } else if (v.ob$type && (v.ob$type.tp$name !== undefined)) {
-        vtypename = v.ob$type.tp$name;
     } else {
-        vtypename = "unknown";
+        vtypename = "<invalid type>";
     };
     return vtypename;
 };
@@ -8188,11 +8402,12 @@ Sk.builtin.list.prototype.list_sort_ = function(self, cmp, key, reverse) {
     var timsort = new Sk.builtin.timSort(self);
 
     self.v = [];
+    var zero = new Sk.builtin.nmber(0, Sk.builtin.nmber.int$);
 
     if (has_key){
         if (has_cmp) {
             timsort.lt = function(a, b){
-                return Sk.misceval.richCompareBool(cmp.func_code(a[0], b[0]), 0, "Lt");
+                return Sk.misceval.richCompareBool(cmp.func_code(a[0], b[0]), zero, "Lt");
             };
         }
         else{
@@ -8207,7 +8422,7 @@ Sk.builtin.list.prototype.list_sort_ = function(self, cmp, key, reverse) {
         }
     } else if (has_cmp) {
         timsort.lt = function(a, b){
-            return Sk.misceval.richCompareBool(cmp.func_code(a, b), 0, "Lt");
+            return Sk.misceval.richCompareBool(cmp.func_code(a, b), zero, "Lt");
         };
     }
 
@@ -9899,6 +10114,7 @@ Sk.builtin.dict.prototype['values'] = new Sk.builtin.func(function(self)
     return new Sk.builtin.list(ret);
 });
 
+Sk.builtin.dict.prototype.tp$name = "dict";
 
 goog.exportSymbol("Sk.builtin.dict", Sk.builtin.dict);
 
@@ -13009,7 +13225,7 @@ Sk.builtin.set.prototype['isdisjoint'] = new Sk.builtin.func(function(self, othe
         var isIn = Sk.abstr.sequenceContains(other, item);
         if (isIn)
         {
-            return Sk.builtin.bool(false);
+            return Sk.builtin.bool.false$;
         }
     }
     return Sk.builtin.bool(true);
@@ -13022,17 +13238,17 @@ Sk.builtin.set.prototype['issubset'] = new Sk.builtin.func(function(self, other)
     if (selfLength > otherLength)
     {
         // every item in this set can't be in other if it's shorter!
-        return Sk.builtin.bool(false);
+        return Sk.builtin.bool.false$;
     }
     for (var it = self.tp$iter(), item = it.tp$iternext(); item !== undefined; item = it.tp$iternext())
     {
         var isIn = Sk.abstr.sequenceContains(other, item);
         if (!isIn)
         {
-            return Sk.builtin.bool(false);
+            return Sk.builtin.bool.false$;
         }
     }
-    return Sk.builtin.bool(true);
+    return Sk.builtin.bool.true$;
 });
 
 Sk.builtin.set.prototype['issuperset'] = new Sk.builtin.func(function(self, other)
@@ -20742,7 +20958,7 @@ Compiler.prototype.outputAllUnits = function()
             ret += "case " + i + ": /* --- " + blocks[i]._name + " --- */";
             ret += blocks[i].join('');
 
-            ret += "goog.asserts.fail('unterminated block');";
+            ret += "throw new Sk.builtin.SystemError('internal error: unterminated block');";
         }
         ret += unit.suffixCode;
     }
@@ -20882,17 +21098,25 @@ Compiler.prototype.craise = function(s)
     }
     else
     {
-        // todo;
         var inst = '';
         if (s.inst)
         {
+            // handles: raise Error, arguments
             inst = this.vexpr(s.inst);
-            out("throw new ", this.vexpr(s.type), "(", inst, ");");
+            out("throw ", this.vexpr(s.type), "(", inst, ");");
         }
-
-        if (s.type)
+        else if (s.type)
         {
-            out("throw ", this.vexpr(s.type), ";");
+            if (s.type.func)
+            {
+                // handles: raise Error(arguments)
+                out("throw ", this.vexpr(s.type), ";");
+            }
+            else
+            {
+                // handles: raise Error
+                out("throw ", this.vexpr(s.type), "('');");
+            }
         }
         else
         {
@@ -21815,7 +22039,7 @@ Compiler.prototype.cmod = function(mod)
 
     // New Code:
     this.u.switchCode = "try { while(true){try{ switch($blk){";
-    this.u.suffixCode = "} }catch(err){if ($exc.length>0) { $err = err; $blk=$exc.pop(); continue; } else { throw err; }} } }catch(err){ if (err instanceof Sk.builtin.SystemExit) { Sk.misceval.print_(err.toString() + '\\n'); return $loc; } else { throw err; } } });";
+    this.u.suffixCode = "} }catch(err){if ($exc.length>0) { $err = err; $blk=$exc.pop(); continue; } else { throw err; }} } }catch(err){ if (err instanceof Sk.builtin.SystemExit && !Sk.throwSystemExit) { Sk.misceval.print_(err.toString() + '\\n'); return $loc; } else { throw err; } } });";
 
     // Note - this change may need to be adjusted for all the other instances of
     // switchCode and suffixCode in this file.  Not knowing how to test those

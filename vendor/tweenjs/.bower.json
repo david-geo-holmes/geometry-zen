@@ -1,11 +1,11 @@
 {
   "name": "tweenjs",
   "homepage": "https://github.com/sole/tween.js",
-  "_release": "2b48d19ca4",
+  "_release": "5c9e9d961e",
   "_resolution": {
     "type": "branch",
     "branch": "master",
-    "commit": "2b48d19ca4a9fd2cd81cd920b437b7b9419a9048"
+    "commit": "5c9e9d961e0da72c96a4550517706e89daaad64b"
   },
   "_source": "git://github.com/sole/tween.js.git",
   "_target": "*"

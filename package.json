@@ -1,22 +1,28 @@
 {
   "name": "geometryzen",
+  "description": "Geometry Zen is an online application for learning Physics and Engineering using Geometric Algebra, Python programming, and WebGL visualization.",
+  "version": "0.1.14",
   "title": "Geometry Zen",
-  "version": "0.1.13",
   "private": false,
   "author": {
-    "name": "David Geo Holmes"
+    "name": "David Geo Holmes",
+    "email": "david.geo.holmes@gmail.com"
   },
-  "description": "Geometry Zen is an online application for learning Physics and Engineering using Geometric Algebra, Python programming, and WebGL visualization.",
+  "contributors": [
+    {
+      "name": "David Geo Holmes",
+      "email": "david.geo.holmes@gmail.com"
+    }
+  ],
   "url": "http://github.com/geometryzen/geometryzen",
   "keywords": ["geometric", "algebra", "geometry", "zen"],
-  "contributors": [],
   "scripts": {
     "start": "NODE_ENV=local nodemon web.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "coffee-script": "1.6.3",
-    "express": "3.2.6",
+    "express": "3.3.4",
     "jade": "0.31.2",
     "lactate": "0.13.12",
     "nconf": "0.6.7",

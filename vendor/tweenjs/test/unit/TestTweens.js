@@ -83,7 +83,49 @@ test( "Tween non-null property", function() {
 
 });
 
+test( "Tween function property", function() {
+
+	var my_function = function() {};
+
+	var obj = { x: my_function },
+		t = new TWEEN.Tween( obj );
+
+	t.to( { x: my_function } );
+	t.start( 0 );
+	t.update( 1000 );
+
+	ok( obj.x === my_function );
+
+});
+
+test( "Tween boolean property", function() {
+
+	var obj = { x: true },
+		t = new TWEEN.Tween( obj );
+
+	t.to( { x: function() {} } );
+	t.start( 0 );
+	t.update( 1000 );
+
+	ok( typeof obj.x === "boolean" );
+	ok( obj.x );
+
+});
+
 test( "Tween null property", function() {
+
+	var obj = { x: null },
+		t = new TWEEN.Tween( obj );
+
+	t.to( { x: 2 }, 1000 );
+	t.start( 0 );
+	t.update( 1000 );
+
+	deepEqual( obj.x, 2 );
+
+});
+
+test( "Tween undefined property", function() {
 
 	var obj = { },
 		t = new TWEEN.Tween( obj );
@@ -495,4 +537,61 @@ test( "Test tweening relatively with repeat", function() {
 	TWEEN.update( 200 );
 	equal( obj.x, 200 );
 	equal( obj.y, -200 );
+});
+
+test( "Test yoyo with repeat Infinity happens forever", function() {
+
+	TWEEN.removeAll();
+
+	var obj = { x: 0 },
+		t = new TWEEN.Tween( obj ).to( { x: 100 }, 100 ).repeat( Infinity ).yoyo(true);
+
+	t.start( 0 );
+
+	TWEEN.update( 0 );
+	equal( obj.x, 0 );
+
+	TWEEN.update( 25 );
+	equal( obj.x, 25 );
+
+	TWEEN.update( 100 );
+	equal( obj.x, 100 );
+
+	TWEEN.update( 125 );
+	equal( obj.x, 75 );
+
+	TWEEN.update( 200 );
+	equal( obj.x, 0 );
+
+	TWEEN.update( 225 );
+	equal( obj.x, 25 );
+
+});
+
+test( "Test yoyo with repeat 1 happens once", function() {
+
+	TWEEN.removeAll();
+
+	var obj = { x: 0 },
+		t = new TWEEN.Tween( obj ).to( { x: 100 }, 100 ).repeat( 1 ).yoyo(true);
+
+	t.start( 0 );
+
+	TWEEN.update( 0 );
+	equal( obj.x, 0 );
+
+	TWEEN.update( 25 );
+	equal( obj.x, 25 );
+
+	TWEEN.update( 100 );
+	equal( obj.x, 100 );
+
+	TWEEN.update( 125 );
+	equal( obj.x, 75 );
+
+	TWEEN.update( 200 );
+	equal( obj.x, 0 );
+
+	TWEEN.update( 225 );
+	equal( obj.x, 0 );
 });

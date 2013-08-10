@@ -740,7 +740,7 @@ Compiler.prototype.outputAllUnits = function()
             ret += "case " + i + ": /* --- " + blocks[i]._name + " --- */";
             ret += blocks[i].join('');
 
-            ret += "goog.asserts.fail('unterminated block');";
+            ret += "throw new Sk.builtin.SystemError('internal error: unterminated block');";
         }
         ret += unit.suffixCode;
     }
@@ -880,17 +880,25 @@ Compiler.prototype.craise = function(s)
     }
     else
     {
-        // todo;
         var inst = '';
         if (s.inst)
         {
+            // handles: raise Error, arguments
             inst = this.vexpr(s.inst);
-            out("throw new ", this.vexpr(s.type), "(", inst, ");");
+            out("throw ", this.vexpr(s.type), "(", inst, ");");
         }
-
-        if (s.type)
+        else if (s.type)
         {
-            out("throw ", this.vexpr(s.type), ";");
+            if (s.type.func)
+            {
+                // handles: raise Error(arguments)
+                out("throw ", this.vexpr(s.type), ";");
+            }
+            else
+            {
+                // handles: raise Error
+                out("throw ", this.vexpr(s.type), "('');");
+            }
         }
         else
         {
@@ -1813,7 +1821,7 @@ Compiler.prototype.cmod = function(mod)
 
     // New Code:
     this.u.switchCode = "try { while(true){try{ switch($blk){";
-    this.u.suffixCode = "} }catch(err){if ($exc.length>0) { $err = err; $blk=$exc.pop(); continue; } else { throw err; }} } }catch(err){ if (err instanceof Sk.builtin.SystemExit) { Sk.misceval.print_(err.toString() + '\\n'); return $loc; } else { throw err; } } });";
+    this.u.suffixCode = "} }catch(err){if ($exc.length>0) { $err = err; $blk=$exc.pop(); continue; } else { throw err; }} } }catch(err){ if (err instanceof Sk.builtin.SystemExit && !Sk.throwSystemExit) { Sk.misceval.print_(err.toString() + '\\n'); return $loc; } else { throw err; } } });";
 
     // Note - this change may need to be adjusted for all the other instances of
     // switchCode and suffixCode in this file.  Not knowing how to test those
