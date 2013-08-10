@@ -18,15 +18,6 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
   ngtemplates: {
     dest: "generated/angular/template-cache.js"
   },
-  less: {
-    compile: {
-      options: {
-        paths: [
-          "app/css/**/*.less"
-        ]
-      }
-    }
-  },
   js: {
     vendor: [
       "vendor/async/lib/async.js",
@@ -60,5 +51,14 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
       "app/js/app.js",
       "app/js/**/*.js"
     ]
+  },
+  less: {
+    compile: {
+      options: {
+        paths: [
+          "app/css/**/*.less"
+        ]
+      }
+    }
   }
 });

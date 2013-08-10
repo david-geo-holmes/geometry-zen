@@ -7,6 +7,33 @@
 
 module.exports = require(process.env['LINEMAN_MAIN']).config.extend('application', {
 
+  // html5push state simulation
+  server: {
+    pushState: true
+  },
+
+  // configure lineman to load additional angular related npm tasks
+  loadNpmTasks: [
+    "grunt-angular-templates",
+    "grunt-concat-sourcemap",
+    "grunt-ngmin"
+  ],
+
+  // we don't use the lineman default concat, handlebars, and jst tasks by default
+  removeTasks: {
+    common: ["concat", "handlebars", "jst"]
+  },
+
+  // task override configuration
+  prependTasks: {
+    dist: ["ngmin"],         // ngmin should run in dist only
+    common: ["ngtemplates"] // ngtemplates runs in dist and dev
+  },
+
+  // swaps concat_sourcemap in place of vanilla concat
+  appendTasks: {
+    common: ["concat_sourcemap"]
+  },
   // configuration for grunt-angular-templates
   ngtemplates: {
     app: { // "app" matches the name of the angular module defined in app.js
@@ -19,11 +46,38 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('application
     }
   },
 
+  // configuration for grunt-ngmin, this happens _after_ concat once, which is the ngmin ideal :)
+  ngmin: {
+    js: {
+      src: "<%= files.js.concatenated %>",
+      dest: "<%= files.js.concatenated %>"
+    }
+  },
+
+  // generates a sourcemap for js, specs, and css with inlined sources
+  // grunt-angular-templates expects that a module already be defined to inject into
+  // this configuration orders the template inclusion _after_ the app level module
+  concat_sourcemap: {
+    options: {
+      sourcesContent: true
+    },
+    js: {
+      src: ["<%= files.js.vendor %>", "<%= files.js.app %>", "<%= files.coffee.generated %>", "<%= files.ngtemplates.dest %>"],
+      dest: "<%= files.js.concatenated %>"
+    },
+    spec: {
+      src: ["<%= files.js.specHelpers %>", "<%= files.coffee.generatedSpecHelpers %>", "<%= files.js.spec %>", "<%= files.coffee.generatedSpec %>"],
+      dest: "<%= files.js.concatenatedSpec %>"
+    },
+    css: {
+      src: ["<%= files.less.generatedVendor %>", "<%= files.sass.generatedVendor %>", "<%= files.css.vendor %>", "<%= files.less.generatedApp %>", "<%= files.sass.generatedApp %>", "<%= files.css.app %>"],
+      dest: "<%= files.css.concatenated %>"
+    }
+  },
+
   copy: {
     dev: {
       files: [
-        {src: "vendor/bladejs/build/bladeASM.js",                  dest: "generated/js/bladeASM.js"},
-        {src: "vendor/bladejs/build/e2gaASM.js",                   dest: "generated/js/e2gaASM.js"},
         {src: "vendor/font-awesome/font/FontAwesome.otf",          dest: "generated/img/FontAwesome.otf"},
         {src: "vendor/font-awesome/font/fontawesome-webfont.eot",  dest: "generated/img/fontawesome-webfont.eot"},
         {src: "vendor/font-awesome/font/fontawesome-webfont.svg",  dest: "generated/img/fontawesome-webfont.svg"},
@@ -33,10 +87,6 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('application
     },
     dist: {
       files: [
-        {src: "generated/css/app.css",                             dest: "dist/css/app.css"},
-        {src: "generated/js/app.js",                               dest: "dist/js/app.js"},
-        {src: "vendor/bladejs/build/bladeASM.js",                  dest: "dist/js/bladeASM.js"},
-        {src: "vendor/bladejs/build/e2gaASM.js",                   dest: "dist/js/e2gaASM.js"},
         {src: "vendor/font-awesome/font/FontAwesome.otf",          dest: "dist/img/FontAwesome.otf"},
         {src: "vendor/font-awesome/font/fontawesome-webfont.eot",  dest: "dist/img/fontawesome-webfont.eot"},
         {src: "vendor/font-awesome/font/fontawesome-webfont.svg",  dest: "dist/img/fontawesome-webfont.svg"},
@@ -47,43 +97,47 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('application
   },
 
   // replaces linemans common lifecycle "handlebars" task with "ngtemplates"
-  // copies the bladeASM.js script (that we don't want to be compressed) to the appropriate js folder.
   appTasks: {
-    common: ["coffee", "less", "jshint", "ngtemplates", "jst", "configure", "concat:js", "concat:spec", "concat:css", "images:dev", "webfonts:dev", "homepage:dev"],
+    common: ["coffee", "less", "jshint", "handlebars", "jst", "concat", "images:dev", "webfonts:dev", "pages:dev"],
     dev: ["copy:dev", "server", "watch"],
-    dist: ["uglify", "cssmin", "images:dist", "webfonts:dist", "homepage:dist", "copy:dist"]
+    dist: ["uglify", "cssmin", "images:dist", "webfonts:dist", "pages:dist", "copy:dist"]
   },
 
-  // grunt-angular-templates expects that a module already be defined to inject into
-  // this configuration orders the template inclusion _after_ the app level module
-  concat: {
-    js: {
-      src: ["<banner:meta.banner>", "<%= files.js.vendor %>", "<%= files.coffee.generated %>", "<%= files.js.app %>", "<%= files.ngtemplates.dest %>"],
-      separator: ";"
-    }
-  },
-
-  // configures grunt-watch-nospawn to listen for changes to, and recompile angular templates
+  // configures grunt-watch-nospawn to listen for changes to
+  // and recompile angular templates, also swaps lineman default
+  // watch target concat with concat_sourcemap
   watch: {
     ngtemplates: {
       files: "app/templates/**/*.html",
-      tasks: ["configure", "ngtemplates", "configure", "concat:js"]
+      tasks: ["ngtemplates", "concat_sourcemap:js"]
+    },
+    js: {
+      files: ["<%= files.js.vendor %>", "<%= files.js.app %>"],
+      tasks: ["concat_sourcemap:js"]
+    },
+    coffee: {
+      files: "<%= files.coffee.app %>",
+      tasks: ["coffee", "concat_sourcemap:js"]
+    },
+    jsSpecs: {
+      files: ["<%= files.js.specHelpers %>", "<%= files.js.spec %>"],
+      tasks: ["concat_sourcemap:spec"]
+    },
+    coffeeSpecs: {
+      files: ["<%= files.coffee.specHelpers %>", "<%= files.coffee.spec %>"],
+      tasks: ["coffee", "concat_sourcemap:spec"]
+    },
+    css: {
+      files: ["<%= files.css.vendor %>", "<%= files.css.app %>"],
+      tasks: ["concat_sourcemap:css"]
+    },
+    less: {
+      files: ["<%= files.less.vendor %>", "<%= files.less.app %>"],
+      tasks: ["less", "concat_sourcemap:css"]
+    },
+    sass: {
+      files: ["<%= files.sass.vendor %>", "<%= files.sass.app %>"],
+      tasks: ["sass", "concat_sourcemap:css"]
     }
   }
-
-  // API Proxying
-  //
-  // During development, you'll likely want to make XHR (AJAX) requests to an API on the same
-  // port as your lineman development server. By enabling the API proxy and setting the port, all
-  // requests for paths that don't match a static asset in ./generated will be forwarded to
-  // whatever service might be running on the specified port.
-  //
-  // server: {
-  //   apiProxy: {
-  //     enabled: true,
-  //     host: 'localhost',
-  //     port: 3000
-  //   }
-  // }
-
 });
