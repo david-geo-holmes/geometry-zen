@@ -26106,6 +26106,30 @@ Sk.builtin.defineEuclidean3 = function(mod) {
     return pack(x0, x1, x2, x3, x4, x5, x6, x7);
   }
 
+  mod[SCALAR_3] = new Sk.builtin.func(function(w) {
+    w = Sk.ffi.remapToJs(w);
+    return remapE3ToPy(w, 0, 0, 0, 0, 0, 0, 0);
+  });
+
+  mod[VECTOR_3] = new Sk.builtin.func(function(x, y, z) {
+    x = Sk.ffi.remapToJs(x);
+    y = Sk.ffi.remapToJs(y);
+    z = Sk.ffi.remapToJs(z);
+    return remapE3ToPy(0, x, y, z, 0, 0, 0, 0);
+  });
+
+  mod[BIVECTOR_3] = new Sk.builtin.func(function(xy, yz, zx) {
+    xy = Sk.ffi.remapToJs(xy);
+    yz = Sk.ffi.remapToJs(yz);
+    zx = Sk.ffi.remapToJs(zx);
+    return remapE3ToPy(0, 0, 0, 0, xy, yz, zx, 0);
+  });
+
+  mod[PSEUDOSCALAR_3] = new Sk.builtin.func(function(xyz) {
+    xyz = Sk.ffi.remapToJs(xyz);
+    return remapE3ToPy(0, 0, 0, 0, 0, 0, 0, xyz);
+  });
+
   mod[EUCLIDEAN_3] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = new Sk.builtin.func(function(self, w, x, y, z, xy, yz, zx, xyz) {
       w = Sk.ffi.remapToJs(w);

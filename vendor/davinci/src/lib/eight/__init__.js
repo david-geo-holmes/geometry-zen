@@ -3513,29 +3513,5 @@ var $builtinmodule = function(name) {
     mod.SmoothShading = Sk.builtin.assk$(THREE.SmoothShading, Sk.builtin.nmber.int$);
   }
 
-  mod[SCALAR_3] = new Sk.builtin.func(function(w) {
-    w = Sk.ffi.remapToJs(w);
-    return remapE3ToPy(w, 0, 0, 0, 0, 0, 0, 0);
-  });
-
-  mod[VECTOR_3] = new Sk.builtin.func(function(x, y, z) {
-    x = Sk.ffi.remapToJs(x);
-    y = Sk.ffi.remapToJs(y);
-    z = Sk.ffi.remapToJs(z);
-    return remapE3ToPy(0, x, y, z, 0, 0, 0, 0);
-  });
-
-  mod[BIVECTOR_3] = new Sk.builtin.func(function(xy, yz, zx) {
-    xy = Sk.ffi.remapToJs(xy);
-    yz = Sk.ffi.remapToJs(yz);
-    zx = Sk.ffi.remapToJs(zx);
-    return remapE3ToPy(0, 0, 0, 0, xy, yz, zx, 0);
-  });
-
-  mod[PSEUDOSCALAR_3] = new Sk.builtin.func(function(xyz) {
-    xyz = Sk.ffi.remapToJs(xyz);
-    return remapE3ToPy(0, 0, 0, 0, 0, 0, 0, xyz);
-  });
-
   return mod;
 }
