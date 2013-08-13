@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.7
 
 #
-#   Note:  python2.6 is specified because that is what the davinci parser
+#   Note:  python2.6 is specified because that is what the cross compiler
 #          used as a reference.  This is only important when you are doing
 #          things like regenerating tests and/or regenerating symtabs
 #          If you do not have python 2.6 and you ARE NOT creating new tests
@@ -17,6 +17,17 @@ import shutil
 import re
 import pprint
 import json
+
+DISTRIBUTION = 'build'
+OUTFILE_DIR = DISTRIBUTION + '/'
+
+TEST = 'test'
+TEST_DIR = TEST + '/'
+
+OUTFILE_REG = "davinci.js"
+OUTFILE_MIN = "davinci.min.js"
+OUTFILE_LIB = "davinciLib.js"
+OUTFILE_MAP = "davinciLineMap.txt"
 try:
     from git import *
 except:
@@ -30,9 +41,9 @@ except:
 Files = [
         'support/closure-library/closure/goog/base.js',
         'support/closure-library/closure/goog/deps.js',
-        ('support/closure-library/closure/goog/string/string.js', 'build'),
-        ('support/closure-library/closure/goog/debug/error.js', 'build'),
-        ('support/closure-library/closure/goog/asserts/asserts.js', 'build'),
+        ('support/closure-library/closure/goog/string/string.js', DISTRIBUTION),
+        ('support/closure-library/closure/goog/debug/error.js', DISTRIBUTION),
+        ('support/closure-library/closure/goog/asserts/asserts.js', DISTRIBUTION),
         'src/env.js',
         'src/builtin.js',
         'src/errors.js',
@@ -77,7 +88,7 @@ Files = [
         'src/window.js',
         'src/e2ga.js',
         'src/e3ga.js',
-        ('support/jsbeautify/beautify.js', 'test'),
+        ('support/jsbeautify/beautify.js', TEST),
         ]
 
 TestFiles = [
@@ -88,9 +99,9 @@ TestFiles = [
         'support/closure-library/closure/goog/math/vec2.js',
         'support/closure-library/closure/goog/json/json.js',
         'support/jsbeautify/beautify.js',
-        'test/sprintf.js',
-        'test/json2.js',
-        'test/test.js'
+        TEST_DIR + 'sprintf.js',
+        TEST_DIR + 'json2.js',
+        TEST_DIR + 'test.js'
         ]
 
 def isClean():
@@ -135,7 +146,7 @@ else:
 
 def test():
     """runs the unit tests."""
-    return os.system("%s %s %s" % (jsengine, ' '.join(getFileList('test')), ' '.join(TestFiles)))
+    return os.system("%s %s %s" % (jsengine, ' '.join(getFileList(TEST)), ' '.join(TestFiles)))
 
 def debugbrowser():
     tmpl = """
@@ -179,7 +190,7 @@ def debugbrowser():
         os.mkdir("support/tmp")
     buildVFS()
     scripts = []
-    for f in getFileList('test') + ["test/browser-stubs.js", "support/tmp/vfs.js" ] + TestFiles:
+    for f in getFileList(TEST) + [TEST_DIR + "browser-stubs.js", "support/tmp/vfs.js" ] + TestFiles:
         scripts.append('<script type="text/javascript" src="%s"></script>' %
                 os.path.join('../..', f))
 
@@ -199,7 +210,7 @@ def buildVFS():
     with open("support/tmp/vfs.js", "w") as out:
         print >>out, "VFSData = {"
         all = []
-        for root in ("test", "src/builtin", "src/lib"):
+        for root in (TEST, "src/builtin", "src/lib"):
             for dirpath, dirnames, filenames in os.walk(root):
                 for filename in filenames:
                     f = os.path.join(dirpath, filename)
@@ -298,7 +309,7 @@ function quit(rc)
 }
 """ % getTip()
 
-    for f in ["test/browser-detect.js"] + getFileList('test') + TestFiles:
+    for f in [TEST_DIR + "browser-detect.js"] + getFileList(TEST) + TestFiles:
         print >>out, open(f).read()
 
     print >>out, """
@@ -333,33 +344,33 @@ def build():
         #raise SystemExit()
 
 
-    # print ". Nuking old build/"
-    os.system("rm -rf build/")
-    if not os.path.exists("build"): os.mkdir("build")
+    print ". Nuking old " + OUTFILE_DIR
+    os.system("rm -rf " + OUTFILE_DIR)
+    if not os.path.exists(DISTRIBUTION): os.mkdir(DISTRIBUTION)
 
 
     if len(sys.argv) > 2 and sys.argv[2] == '-u':
         # print ". Writing combined version..."
         combined = ''
-        linemap = open("build/davinciLineMap.txt", "w")
+        linemap = open(OUTFILE_DIR + OUTFILE_MAP, "w")
         curline = 1
-        for file in getFileList('build'):
+        for file in getFileList(DISTRIBUTION):
             curfiledata = open(file).read()
             combined += curfiledata
             print >>linemap, "%d:%s" % (curline, file)
             curline += len(curfiledata.split("\n")) - 1
         linemap.close()
-        uncompfn = "build/davinci.js"
+        uncompfn = OUTFILE_DIR + OUTFILE_REG
         open(uncompfn, "w").write(combined)
-        os.system("chmod 444 build/davinci.js") # just so i don't mistakenly edit it all the time
+        os.system("chmod 444 " + OUTFILE_DIR + OUTFILE_REG) # just so i don't mistakenly edit it all the time
 
 
     # make combined version
-    #uncompfn = "build/davinci.js"
-    compfn = "build/davinci.min.js"
-    builtinfn = "build/davinciLib.js"
+    #uncompfn = OUTFILE_DIR + OUTFILE_REG
+    compfn = OUTFILE_DIR + OUTFILE_MIN
+    builtinfn = OUTFILE_DIR + OUTFILE_LIB
     #open(uncompfn, "w").write(combined)
-    #os.system("chmod 444 build/davinci.js") # just so i don't mistakenly edit it all the time
+    #os.system("chmod 444 " + OUTFILE_DIR + OUTFILE_REG) # just so i don't mistakenly edit it all the time
 
     #buildBrowserTests()
 
@@ -371,7 +382,7 @@ def build():
         raise SystemExit()
 
     # compress
-    uncompfiles = ' '.join(['--js ' + x for x in getFileList('build')])
+    uncompfiles = ' '.join(['--js ' + x for x in getFileList(DISTRIBUTION)])
     # print ". Compressing..."
     ret = os.system("java -jar support/closure-compiler/compiler.jar --define goog.DEBUG=false --output_wrapper \"(function(){%%output%%}());\" --compilation_level SIMPLE_OPTIMIZATIONS --jscomp_error accessControls --jscomp_error checkRegExp --jscomp_error checkTypes --jscomp_error checkVars --jscomp_error deprecated --jscomp_off fileoverviewTags --jscomp_error invalidCasts --jscomp_error missingProperties --jscomp_error nonStandardJsDocs --jscomp_error strictModuleDepCheck --jscomp_error undefinedVars --jscomp_error unknownDefines --jscomp_error visibility %s --js_output_file %s" % (uncompfiles, compfn))
     # to disable asserts
@@ -393,26 +404,26 @@ def build():
         print "Tests failed on compressed version."
         raise SystemExit()
 
-    ret = os.system("cp %s build/tmp.js" % compfn)
+    ret = os.system(("cp %s " + OUTFILE_DIR + "tmp.js") % compfn)
     if ret != 0:
         print "Couldn't copy for gzip test."
         raise SystemExit()
 
-    ret = os.system("gzip -9 build/tmp.js")
+    ret = os.system("gzip -9 " + OUTFILE_DIR + "tmp.js")
     if ret != 0:
         print "Couldn't gzip to get final size."
         raise SystemExit()
 
-    size = os.path.getsize("build/tmp.js.gz")
-    os.unlink("build/tmp.js.gz")
+    size = os.path.getsize(OUTFILE_DIR + "tmp.js.gz")
+    os.unlink(OUTFILE_DIR + "tmp.js.gz")
 
     with open(builtinfn, "w") as f:
         f.write(getBuiltinsAsJson())
         # print ". Wrote %s" % builtinfn
 
     # update doc copy
-    ret = os.system("cp %s doc/static/davinci.min.js" % compfn)
-    ret |= os.system("cp %s doc/static/davinciLib.js" % builtinfn)
+    ret  = os.system(("cp %s doc/static/" + OUTFILE_MIN) % compfn)
+    ret |= os.system(("cp %s doc/static/" + OUTFILE_LIB) % builtinfn)
     if ret != 0:
         print "Couldn't copy to docs dir."
         raise SystemExit()
@@ -433,11 +444,11 @@ def regenparser():
     # sanity check that they at least parse
     #os.system(jsengine + " support/closure-library/closure/goog/base.js src/env.js src/tokenize.js gen/parse_tables.js gen/astnodes.js")
 
-def regenasttests(togen="test/run/*.py"):
+def regenasttests(togen=TEST_DIR + "run/*.py"):
     """regenerate the ast test files by running our helper script via real python"""
     for f in glob.glob(togen):
         transname = f.replace(".py", ".trans")
-        os.system("python test/astppdump.py %s > %s" % (f, transname))
+        os.system(("python " + TEST_DIR + "astppdump.py %s > %s") % (f, transname))
         forcename = f.replace(".py", ".trans.force")
         if os.path.exists(forcename):
             shutil.copy(forcename, transname)
@@ -445,7 +456,7 @@ def regenasttests(togen="test/run/*.py"):
             os.system("python %s %s" % (crlfprog, transname))
 
 
-def regenruntests(togen="test/run/*.py"):
+def regenruntests(togen=TEST_DIR + "run/*.py"):
     """regenerate the test data by running the tests on real python"""
     for f in glob.glob(togen):
         os.system("python %s > %s.real 2>&1" % (f, f))
@@ -454,7 +465,7 @@ def regenruntests(togen="test/run/*.py"):
             shutil.copy(forcename, "%s.real" % f)
         if crlfprog:
             os.system("python %s %s.real" % (crlfprog, f))
-    for f in glob.glob("test/interactive/*.py"):
+    for f in glob.glob(TEST_DIR + "interactive/*.py"):
         p = Popen("python -i > %s.real 2>%s" % (f, nul), shell=True, stdin=PIPE)
         p.communicate(open(f).read() + "\004")
         forcename = f + ".real.force"
@@ -513,7 +524,7 @@ def symtabdump(fn):
         return ret
     return getidents(mod)
 
-def regensymtabtests(togen="test/run/*.py"):
+def regensymtabtests(togen=TEST_DIR + "run/*.py"):
     """regenerate the test data by running the symtab dump via real python"""
     for fn in glob.glob(togen):
         outfn = "%s.symtab" % fn
@@ -532,7 +543,7 @@ def doctest():
     ret = os.system("python2.6 ~/Desktop/3rdparty/google_appengine/dev_appserver.py -p 20710 doc")
 
 def docbi():
-    builtinfn = "doc/static/davinciLib.js"
+    builtinfn = "doc/static/" + OUTFILE_LIB
     with open(builtinfn, "w") as f:
         f.write(getBuiltinsAsJson())
         # print ". Wrote %s" % builtinfn
@@ -560,9 +571,9 @@ print("-----");
     """ % (fn, os.path.split(fn)[0], p3on, modname))
     f.close()
     if opt:
-        os.system("%s build/davinci.min.js support/tmp/run.js" % jsengine)
+        os.system("%s " + OUTFILE_DIR + OUTFILE_MIN + " support/tmp/run.js" % jsengine)
     else:
-        os.system("%s %s %s support/tmp/run.js" % (jsengine, shell, ' '.join(getFileList('test'))))
+        os.system("%s %s %s support/tmp/run.js" % (jsengine, shell, ' '.join(getFileList(TEST))))
 
 def runopt(fn):
     run(fn, "", True)
@@ -575,12 +586,12 @@ def shell(fn):
 
 
 def repl():
-    os.system("%s dist/skulpt.js repl/repl.js" % jsengine)
+    os.system(("%s " + OUTFILE_DIR + OUTFILE_REG + " repl/repl.js") % jsengine)
 
 def nrt():
     """open a new run test"""
     for i in range(100000):
-        fn = "test/run/t%02d.py" % i
+        fn = (TEST_DIR + "run/t%02d.py") % i
         disfn = fn + ".disabled"
         if not os.path.exists(fn) and not os.path.exists(disfn):
             if 'EDITOR' in os.environ:
@@ -594,7 +605,7 @@ def nrt():
                 regenasttests(fn)
                 regenruntests(fn)
             else:
-                print "run ./m regentests t%02d.py" % i
+                print ("run ./m.py regentests t%02d.py") % i
             break
 
 def vmwareregr(names):
@@ -696,11 +707,11 @@ if __name__ == "__main__":
         print '''USAGE: m [command] [options] [.py file]
 Where command is one of:
 
-        run   -- given a .py file run it using davinci  ./m run myprog.py
+        run   -- given a .py file run it using davinci  ./m.py run myprog.py
         test  -- run all test cases in test/run
-        build -- create davinci.min.js and davinciLib.js  with -u also build
-                 uncompressed davinci for debugging
-        docbi -- regenerate davinciLib.js only and copy to doc/static
+        dist  -- create minified output and JavaScript library with -u also build
+                 uncompressed output for debugging
+        docbi -- regenerate built-in JavaScript library only and copy to doc/static
 
         regenparser      -- regenerate parser tests
         regenasttests    -- regen abstract symbol table tests
@@ -716,7 +727,7 @@ Where command is one of:
         browser -- run all tests in the browser
         shell   -- run a python program but keep a shell open (like python -i)
                    ./m shell myprog.py
-        vfs     -- Build a virtual file system to support davinci read tests
+        vfs     -- Build a virtual file system to support cross compiler read tests
 
         debugbrowser  -- debug in the browser -- open your javascript console
         '''
@@ -728,7 +739,7 @@ Where command is one of:
         cmd = sys.argv[1]
     if cmd == "test":
         test()
-    elif cmd == "build":
+    elif cmd == "dist":
         build()
     elif cmd == "regengooglocs":
         regengooglocs()
