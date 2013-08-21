@@ -78,7 +78,8 @@ Sk.builtin.buildEventClass = function(mod) {
               targetPy.v = event.target;
             });
             $loc.__getattr__ = new Sk.builtin.func(function(targetPy, name) {
-              return Sk.ffi.remapToPy(event.target[name])
+              // TODO: Do we need some kind of Variant class?
+              return Sk.ffi.remapToPy(event.target[name], "")
             })
             $loc.__setattr__ = new Sk.builtin.func(function(targetPy, name, valuePy) {
               event.target[name] = Sk.ffi.remapToJs(valuePy);
@@ -148,7 +149,8 @@ Sk.builtin.buildEventClass = function(mod) {
           }, METHOD_STOP_PROPAGATION, []));
         }
         default: {
-          return Sk.ffi.remapToPy(event[name]);
+          // TODO: Do we need some kind of Variant class?
+          return Sk.ffi.remapToPy(event[name], "");
         }
       }
     });

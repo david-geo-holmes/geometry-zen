@@ -8,5 +8,6 @@
     "commit": "923ab65e86dc56bae4d7fbc2967747f0ecb2d94f"
   },
   "_source": "git://github.com/mrdoob/stats.js.git",
-  "_target": "*"
+  "_target": "*",
+  "_originalSource": "stats.js"
 }

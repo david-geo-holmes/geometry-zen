@@ -70,7 +70,7 @@ Sk.builtin.buildDocumentClass = function(mod) {
             $loc.__call__ = new Sk.builtin.func(function(self, typePy, listenerPy, useCapture) {
               var type = Sk.ffi.remapToJs(typePy);
               var listener = function(event) {
-                var eventPy = Sk.misceval.callsim(mod[EVENT], Sk.ffi.referenceToPy(event, EVENT));
+                var eventPy = Sk.misceval.callsim(mod[EVENT], Sk.ffi.remapToPy(event, EVENT));
                 Sk.misceval.callsim(listenerPy, eventPy);
               };
               docListeners[type] = listener;

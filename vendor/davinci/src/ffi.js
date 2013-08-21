@@ -1,106 +1,291 @@
 Sk.ffi = Sk.ffi || {};
 
 /**
- * maps from Javascript Object/Array/string to Python dict/list/str.
+ * Usage:
  *
- * only works on basic objects that are being used as storage, doesn't handle
- * functions, etc.
+ * return Sk.ffi.booleanToJs(valueJs);
+ *
+ * @param {Object|string|number|boolean} valueJs
  */
-Sk.ffi.remapToPy = function(obj)
+Sk.ffi.booleanToPy = function(valueJs)
 {
-    if (Object.prototype.toString.call(obj) === "[object Array]")
+    var t = typeof valueJs;
+    if (t === 'boolean')
     {
-        var arr = [];
-        for (var i = 0; i < obj.length; ++i)
-            arr.push(Sk.ffi.remapToPy(obj[i]));
-        return new Sk.builtin.list(arr);
+        return valueJs ? Sk.builtin.bool.true$ : Sk.builtin.bool.false$;
     }
-    else if (typeof obj === "object")
+    else if (t === 'object' && valueJs === null)
     {
-        var kvs = [];
-        for (var k in obj)
-        {
-            kvs.push(Sk.ffi.remapToPy(k));
-            kvs.push(Sk.ffi.remapToPy(obj[k]));
-        }
-        return new Sk.builtin.dict(kvs);
+        return Sk.builtin.none.none$;
     }
-    else if (typeof obj === "string")
-        return new Sk.builtin.str(obj);
-    else if (typeof obj === "number")
-        return new Sk.builtin.nmber(obj, undefined);
-    else if (typeof obj === "boolean")
-        return obj;
-    goog.asserts.fail("unhandled remap type " + typeof(obj));
-};
-goog.exportSymbol("Sk.ffi.remapToPy", Sk.ffi.remapToPy);
+    else
+    {
+        goog.asserts.fail("f5008183-bfce-4842-9496-30b936ff73f3");
+    }
+}
+goog.exportSymbol("Sk.ffi.booleanToPy", Sk.ffi.booleanToPy);
 
-/*
- * Wraps a JavaScript object in the standard wrapper so the initializers by referemce work correctly.
+Sk.ffi.numberToPy = function(valueJs)
+{
+    var t = typeof valueJs;
+    if (t === 'number')
+    {
+        return new Sk.builtin.nmber(valueJs, Sk.builtin.nmber.float$);
+    }
+    else if (t === 'object' && valueJs === null)
+    {
+        return Sk.builtin.none.none$;
+    }
+    else
+    {
+        goog.asserts.fail("3c68a6b8-0314-49ab-99ac-a818324417d8");
+    }
+}
+goog.exportSymbol("Sk.ffi.numberToPy", Sk.ffi.numberToPy);
+
+Sk.ffi.remapNumberToIntPy = function(valueJs)
+{
+    var t = typeof valueJs;
+    if (t === 'number')
+    {
+        return new Sk.builtin.nmber(valueJs, Sk.builtin.nmber.int$);
+    }
+    else if (t === 'object' && valueJs === null)
+    {
+        return Sk.builtin.none.none$;
+    }
+    else
+    {
+        goog.asserts.fail("b451b411-151c-4430-82f2-d548e5514303");
+    }
+}
+goog.exportSymbol("Sk.ffi.remapNumberToIntPy", Sk.ffi.remapNumberToIntPy);
+
+Sk.ffi.stringToPy = function(valueJs)
+{
+    var t = typeof valueJs;
+    if (t === 'string')
+    {
+        return new Sk.builtin.str(valueJs);
+    }
+    else if (t === 'object' && valueJs === null)
+    {
+        return Sk.builtin.none.none$;
+    }
+    else
+    {
+        goog.asserts.fail("50730498-9d4c-4a28-ab50-fd6127dd6d8c");
+    }
+}
+goog.exportSymbol("Sk.ffi.stringToPy", Sk.ffi.stringToPy);
+
+/**
+ * Wraps a JavaScript class 
+ * Usage:
  *
- * This is used in conjuction with invocations of Sk.misceval.callsim.
+ * valuePy = Sk.ffi.referenceToPy(valueJs, "Classname");
+ *
+ * @param {Object|string|number|boolean} valueJs
+ * @param {string} tp$name
  */
-Sk.ffi.referenceToPy = function(obj, name) {
-  if (typeof obj === 'object') {
-    return {"v": obj, "tp$name": name};
-  }
-  else {
-    goog.asserts.fail("unhandled reference");
-  }
-};
+Sk.ffi.referenceToPy = function(valueJs, tp$name)
+{
+    var t = typeof valueJs;
+    if (t === 'object')
+    {
+        if (typeof tp$name === 'string')
+        {
+            return {"v": valueJs, "tp$name": tp$name};
+        }
+        else
+        {
+            goog.asserts.fail("9fad4b9e-4845-4a06-9bce-0aa7c68e1f03");
+        }
+    }
+    else
+    {
+        goog.asserts.fail("306f31df-f0a9-40a0-895b-d01308df8d6e");
+    }
+}
 goog.exportSymbol("Sk.ffi.referenceToPy", Sk.ffi.referenceToPy);
 
 /**
- * maps from Python dict/list/str to Javascript Object/Array/string.
+ * Wraps a JavaScript Object instance.
+ * 
+ * Usage:
+ *
+ * valuePy = Sk.ffi.remapToPy(valueJs, className);
+ *
+ * @param {Object|string|number|boolean} valueJs The JavaScript value that must be represented in Python.
+ * @param {string=} className The name of the class when wrapping a JavaScript object.
  */
-Sk.ffi.remapToJs = function(obj)
+Sk.ffi.remapToPy = function(valueJs, className)
 {
-    if (obj instanceof Sk.builtin.dict)
+    var t = typeof valueJs;
+    if (t === 'object') {
+        if (Object.prototype.toString.call(valueJs) === "[object Array]")
+        {
+            var arr = [];
+            for (var i = 0; i < valueJs.length; ++i) {
+                arr.push(Sk.ffi.remapToPy(valueJs[i]));
+            }
+            return new Sk.builtin.list(arr);
+        }
+        else if (typeof className === 'string')
+        {
+            return Sk.ffi.referenceToPy(valueJs, className);
+        }
+        else if (t === 'object' && valueJs === null)
+        {
+            return Sk.builtin.none.none$;
+        }
+        else
+        {
+            var kvs = [];
+            for (var k in valueJs)
+            {
+                kvs.push(Sk.ffi.remapToPy(k));
+                kvs.push(Sk.ffi.remapToPy(valueJs[k]));
+            }
+            return new Sk.builtin.dict(kvs);
+        }
+    }
+    else if (t === 'string')
+    {
+        return Sk.ffi.stringToPy(valueJs);
+    }
+    else if (t === 'number')
+    {
+        return Sk.ffi.numberToPy(valueJs);
+    }
+    else if (t === 'boolean')
+    {
+        return Sk.ffi.booleanToPy(valueJs);
+    }
+    else
+    {
+        goog.asserts.fail("unhandled remapToPy type " + t);
+    }
+};
+goog.exportSymbol("Sk.ffi.remapToPy", Sk.ffi.remapToPy);
+
+/**
+ * Usage:
+ *
+ * valueJs = Sk.ffi.booleanToJs(valuePy, "foo must be a <type 'bool'>");
+ *
+ * @param {Object} valuePy
+ * @param {string=} message
+ */
+Sk.ffi.booleanToJs = function(valuePy, message)
+{
+    if (valuePy === Sk.builtin.bool.true$)
+    {
+        return true;
+    }
+    else if (valuePy === Sk.builtin.bool.false$)
+    {
+        return false;
+    }
+    else
+    {
+        throw new Sk.builtin.AssertionError(message);
+    }
+}
+goog.exportSymbol("Sk.ffi.booleanToJs", Sk.ffi.booleanToJs);
+
+/**
+ * @param {string=} message Optional customizable assertion message.
+ *
+ * @return {number}
+ */
+Sk.ffi.numberToJs = function(valuePy, message)
+{
+    if (valuePy instanceof Sk.builtin.nmber)
+    {
+        return Sk.builtin.asnum$(valuePy);
+    }
+    else
+    {
+        if (typeof message === 'string')
+        {
+            throw new Sk.builtin.AssertionError(message);
+        }
+        else
+        {
+            goog.asserts.fail("e55f4353-0403-42f5-bd12-ec48459b3d2c");
+        }
+    }
+}
+goog.exportSymbol("Sk.ffi.numberToJs", Sk.ffi.numberToJs);
+
+/**
+ * Usage:
+ *
+ * valueJs = Sk.ffi.remapToJs(valuePy);
+ */
+Sk.ffi.remapToJs = function(valuePy)
+{
+    if (typeof valuePy === 'undefined')
+    {
+        // TODO: Probably should ultimately be an assertion since Python has no concept of undefined.
+        return valuePy;
+    }
+    else if (valuePy instanceof Sk.builtin.dict)
     {
         var ret = {};
-        for (var iter = obj.tp$iter(), k = iter.tp$iternext();
-                k !== undefined;
-                k = iter.tp$iternext())
+        for (var iter = valuePy.tp$iter(), k = iter.tp$iternext(); k !== undefined; k = iter.tp$iternext())
         {
-            var v = obj.mp$subscript(k);
-            if (v === undefined)
+            var v = valuePy.mp$subscript(k);
+            if (v === undefined) {
                 v = null;
+            }
             var kAsJs = Sk.ffi.remapToJs(k);
-            // todo; assert that this is a reasonble lhs?
             ret[kAsJs] = Sk.ffi.remapToJs(v);
         }
         return ret;
     }
-    else if (obj instanceof Sk.builtin.list)
+    else if (valuePy instanceof Sk.builtin.list)
     {
         var ret = [];
-        for (var i = 0; i < obj.v.length; ++i)
-            ret.push(Sk.ffi.remapToJs(obj.v[i]));
+        for (var i = 0; i < valuePy.v.length; ++i)
+        {
+            ret.push(Sk.ffi.remapToJs(valuePy.v[i]));
+        }
         return ret;
     }
-    else if (obj instanceof Sk.builtin.nmber)
+    else if (valuePy instanceof Sk.builtin.nmber)
     {
-        return Sk.builtin.asnum$(obj);
+        return Sk.builtin.asnum$(valuePy);
     }
-    else if (obj instanceof Sk.builtin.lng)
+    else if (valuePy instanceof Sk.builtin.lng)
     {
-        return Sk.builtin.asnum$(obj);
+        return Sk.builtin.asnum$(valuePy);
     }
-    else if (typeof obj === "number" || typeof obj === "boolean")
+    else if (valuePy === Sk.builtin.bool.true$)
     {
-        return obj;
+        return Sk.ffi.booleanToJs(valuePy);
     }
-    else if (typeof obj === "undefined")
+    else if (valuePy === Sk.builtin.bool.false$)
     {
-        return obj;
+        return Sk.ffi.booleanToJs(valuePy);
+    }
+    else if (typeof valuePy.v !== 'undefined')
+    {
+        // TODO: This is being exercised, but we should assert the tp$name.
+        // I think the pattern here suggests that we have a Sk.builtin.something
+        return valuePy.v;
     }
     else
     {
-        return obj.v;
+        // The following statement is provided because the proper representation of Python types in Skulpt is 'incorrect'.
+        // You might see JavaScript 'boolean' and 'string' values stored in the 'v' property.
+        return valuePy.v;
     }
 };
 goog.exportSymbol("Sk.ffi.remapToJs", Sk.ffi.remapToJs);
 
+// TODO: Deprecate and/or rename to remapFunctionToPy?
 Sk.ffi.callback = function(fn)
 {
     if (fn === undefined) return fn;
@@ -109,43 +294,3 @@ Sk.ffi.callback = function(fn)
     };
 };
 goog.exportSymbol("Sk.ffi.callback", Sk.ffi.callback);
-
-Sk.ffi.stdwrap = function(type, towrap)
-{
-    var inst = new type();
-    inst['v'] = towrap;
-    return inst;
-};
-goog.exportSymbol("Sk.ffi.stdwrap", Sk.ffi.stdwrap);
-
-/**
- * for when the return type might be one of a variety of basic types.
- * number|string, etc.
- */
-Sk.ffi.basicwrap = function(obj)
-{
-    if (obj instanceof Sk.builtin.nmber)
-        return Sk.builtin.asnum$(obj);
-    if (obj instanceof Sk.builtin.lng)
-        return Sk.builtin.asnum$(obj);
-    if (typeof obj === "number" || typeof obj === "boolean")
-        return obj;
-    if (typeof obj === "string")
-        return new Sk.builtin.str(obj);
-    goog.asserts.fail("unexpected type for basicwrap");
-};
-goog.exportSymbol("Sk.ffi.basicwrap", Sk.ffi.basicwrap);
-
-Sk.ffi.unwrapo = function(obj)
-{
-    if (obj === undefined) return undefined;
-    return obj['v'];
-};
-goog.exportSymbol("Sk.ffi.unwrapo", Sk.ffi.unwrapo);
-
-Sk.ffi.unwrapn = function(obj)
-{
-    if (obj === null) return null;
-    return obj['v'];
-};
-goog.exportSymbol("Sk.ffi.unwrapn", Sk.ffi.unwrapn);

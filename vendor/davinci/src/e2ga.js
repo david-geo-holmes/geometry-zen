@@ -110,17 +110,24 @@ Sk.builtin.defineEuclidean2 = function(mod) {
   }
 
   mod[SCALAR_2] = new Sk.builtin.func(function(w) {
+    Sk.builtin.pyCheckArgs(SCALAR_2, arguments, 1, 1);
+    Sk.builtin.pyCheckType("w", "Number", Sk.builtin.checkNumber(w));
     w = Sk.ffi.remapToJs(w);
     return remapE2ToPy(w, 0, 0, 0);
   });
 
   mod[VECTOR_2] = new Sk.builtin.func(function(x, y) {
+    Sk.builtin.pyCheckArgs(VECTOR_2, arguments, 1, 1);
+    Sk.builtin.pyCheckType("x", "Number", Sk.builtin.checkNumber(x));
+    Sk.builtin.pyCheckType("y", "Number", Sk.builtin.checkNumber(y));
     x = Sk.ffi.remapToJs(x);
     y = Sk.ffi.remapToJs(y);
     return remapE2ToPy(0, x, y, 0);
   });
 
   mod[PSEUDOSCALAR_2] = new Sk.builtin.func(function(xy) {
+    Sk.builtin.pyCheckArgs(PSEUDOSCALAR_2, arguments, 1, 1);
+    Sk.builtin.pyCheckType("xy", "Number", Sk.builtin.checkNumber(xy));
     xy = Sk.ffi.remapToJs(xy);
     return remapE2ToPy(0, 0, 0, xy);
   });

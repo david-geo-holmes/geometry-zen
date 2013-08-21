@@ -8,5 +8,6 @@
     "commit": "5c9e9d961e0da72c96a4550517706e89daaad64b"
   },
   "_source": "git://github.com/sole/tween.js.git",
-  "_target": "*"
+  "_target": "*",
+  "_originalSource": "tweenjs"
 }

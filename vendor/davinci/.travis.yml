@@ -3,11 +3,14 @@ python:
 - '2.6'
 install:
 - pip install GitPython --use-mirrors
+- mkdir -p vendors
+- wget http://googleappengine.googlecode.com/files/google_appengine_1.8.3.zip  -nv
+- unzip -qd ~/vendors google_appengine_1.8.3.zip
 script:
-- ./m dist
-after_succes:
+- ./skulpt.py dist
+after_script:
 - ./dist-update.sh
-- ./site-update.sh
 env:
   global:
-    secure: wOs3pE4/hXWhXjNTIEGOeca4dpn/gIxpBvmrzWsqaeEQdQ6c7q87iPBilQTCg3ET/ADOMUq1ZqL1yDZIOB7HfmNjR266aUxRz2cfYXi0bBnPlsOvO2QRcQRHRythroFTSu2eKFxHj2F+ea756I+xws1vc+2JiNqmWN/4zccuiwY=
+  - secure: c4X6Fg9g3Z27vweDsb6q4Is7cwt4TdKX/H0T9MaGRZEcBvA2ke05B2m7jcwz0Ml0JfwBq1fWzOEj+VNOkXD1CqtzQwKgd7hO094Jk/tXYtfSSHD4nmJ0HyrKMBZfic/Q9eYQoTfhuKez34dzxBiwI818q5B6oedo9ayzK3M7k6w=
+  - secure: UEg/9heIZjo2Jws047OO07T+MurWyDiQ3Hp7ow1jgfhYitntsEzJwJrs/UFsZDP01QWAviLFtEY/JDBPEUzPyEbWJe2YE65CSt4AM9Kt5sMADEnFF9ButNMCg5oKRB1neqotuGy6U+lzUQsZN0rzsTuVqxK1ODHz+2LwyvpgpZ8=
