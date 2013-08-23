@@ -1,0 +1,57 @@
+@import "variables.less";
+/*------------------------------------------------------------------
+[ Dropdown Menu / .dropdown-menu ]
+*/
+.dropdown-menu {
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+.dropdown-menu li > a {
+  padding: 5px 9px;
+  margin: 0 6px;
+  font-size: 12px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+}
+.dropdown-menu li > a:hover,
+.dropdown-menu li > a:focus,
+.dropdown-menu:hover > a {
+  color: #ffffff;
+  background-color: @themeBaseColor;
+  background-image: -moz-linear-gradient(top, @themeBaseColor, @themeBaseColor);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(@themeBaseColor), to(@themeBaseColor));
+  background-image: -webkit-linear-gradient(top, @themeBaseColor, @themeBaseColor);
+  background-image: -o-linear-gradient(top, @themeBaseColor, @themeBaseColor);
+  background-image: linear-gradient(to bottom, @themeBaseColor, @themeBaseColor);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffff9900', endColorstr='#ffff9900', GradientType=0);
+  background: @themeBaseColor;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+}
+.dropdown-menu .active > a,
+.dropdown-menu .active > a:hover {
+  color: #ffffff;
+  background: #bbbbbb;
+  text-shadow: none;
+}
+.dropdown-submenu > a::after {
+  margin-right: .25em;
+}
+body:not(:-moz-handler-blocked) .dropdown-submenu > a:after {
+  margin-top: -14px;
+}
+.dropdown-menu li > a:hover,
+.dropdown-menu li > a:focus,
+.dropdown-submenu:hover > a {
+  background-color: @themeBaseColor;
+  background-image: -moz-linear-gradient(top, @themeBaseColor, @themeBaseColor);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(@themeBaseColor), to(@themeBaseColor));
+  background-image: -webkit-linear-gradient(top, @themeBaseColor, @themeBaseColor);
+  background-image: -o-linear-gradient(top, @themeBaseColor, @themeBaseColor);
+  background-image: linear-gradient(to bottom, @themeBaseColor, @themeBaseColor);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffff9900', endColorstr='#ffff9900', GradientType=0);
+  background: @themeBaseColor;
+}

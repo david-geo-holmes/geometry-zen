@@ -14,18 +14,18 @@ html(lang="en", data-ng-app="app")
     link(rel="icon", type="image/png", href="/img/favicon-48x48.png")
   body
     header
-      div.navbar.navbar-inverse.navbar-fixed-top
+      div.navbar.navbar-fixed-top.navbar-inverse
         div.navbar-inner
           div.container
             a.btn.btn-navbar(data-toggle="collapse", data-target=".nav-collapse")
-              i.icon-cog
               a.brand(href="/")
                 span.brandname
                   | #{marketing.name}
                   sup
                     | #{marketing.version} #{npm.version}
+              ul.nav
             div.nav-collapse.collapse
-              ul.nav.pull-right
+              ul.nav.nav-pills.pull-right
     div#sticky-wrapper
       div#view(data-ng-view)
       div#sticky-push

@@ -1,0 +1,28 @@
+@import "variables.less";
+/*------------------------------------------------------------------
+[ Stacked / .stacked ]
+*/
+.stacked {
+  position: relative;
+}
+.stacked:after,
+.stacked:before {
+  content: '';
+  position: absolute;
+  display: block;
+  height: 1px;
+  bottom: -2px;
+  left: 3px;
+  right: 3px;
+  background-color: #ffffff;
+  -webkit-border-radius: 0 0 3px 3px;
+  -moz-border-radius: 0 0 3px 3px;
+  border-radius: 0 0 3px 3px;
+  border: 1px solid #d3d3d3;
+  border-top: 0;
+}
+.stacked:before {
+  bottom: -4px;
+  left: 6px;
+  right: 6px;
+}

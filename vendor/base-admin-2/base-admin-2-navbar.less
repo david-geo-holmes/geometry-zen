@@ -1,0 +1,65 @@
+@import "variables.less";
+/*------------------------------------------------------------------
+[ Navbar / .navbar ]
+*/
+.navbar.navbar-fixed-top {
+  position: static;
+}
+.navbar .container {
+  position: relative;
+}
+.navbar .navbar-inner,
+.navbar .navbar-inverse .navbar-inner {
+  padding: 7px 0;
+  background: #292929;
+  filter: none;
+  border-bottom: 1px solid #121212;
+  -moz-border-radius: 0;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+}
+.navbar .brand {
+  color: #CCC;
+  font-weight: 600;
+  position: relative;
+  top: 2px;
+}
+.navbar .brand:hover {
+  color: @navbarInverseLinkColorHover;
+}
+.navbar.navbar-inverse .navbar-search .search-query {
+  background-color: #333;
+  font-size: 11px;
+  font-weight: bold;
+  line-height: 20px;
+}
+.navbar.navbar-inverse .navbar-search .search-query:focus {
+  background-color: #FFF;
+}
+.navbar.navbar-inverse .navbar-search .search-query::-webkit-input-placeholder {
+  color: #666;
+}
+.navbar.navbar-inverse .navbar-search .search-query::-moz-placeholder {
+  color: #666;
+}
+.navbar .nav a {
+  font-size: 11px;
+}
+.navbar .btn-navbar {
+  margin-top: 4px;
+  margin-right: 0;
+  margin-left: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+.navbar .btn-navbar i {
+  color: #999;
+  font-size: 18px;
+  line-height: 18px;
+}
+.navbar .nav li.dropdown.open > .dropdown-toggle,
+.navbar .nav li.dropdown.active > .dropdown-toggle,
+.navbar .nav li.dropdown.open.active > .dropdown-toggle {
+  background-color: transparent;
+}

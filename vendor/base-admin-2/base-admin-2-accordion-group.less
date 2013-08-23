@@ -1,0 +1,70 @@
+@import "variables.less";
+/*------------------------------------------------------------------
+[ Accordion / .accordion-group ]
+*/
+.accordion-group {
+  margin-bottom: 3px;
+  border: none;
+}
+.accordion-group .accordion-heading {
+  -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  -moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  -webkit-border-top-right-radius: 4px;
+  -webkit-border-bottom-right-radius: 0;
+  -webkit-border-bottom-left-radius: 0;
+  -webkit-border-top-left-radius: 4px;
+  -moz-border-radius-topright: 4px;
+  -moz-border-radius-bottomright: 0;
+  -moz-border-radius-bottomleft: 0;
+  -moz-border-radius-topleft: 4px;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-left-radius: 4px;
+  -moz-background-clip: padding;
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+  color: #444444;
+  text-shadow: 0 -1px 0 rgba(255, 255, 255, 0.25);
+  background-color: #f8f8f8;
+  background-image: -moz-linear-gradient(top, #ffffff, #eeeeee);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), to(#eeeeee));
+  background-image: -webkit-linear-gradient(top, #ffffff, #eeeeee);
+  background-image: -o-linear-gradient(top, #ffffff, #eeeeee);
+  background-image: linear-gradient(to bottom, #ffffff, #eeeeee);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffffff', endColorstr='#ffeeeeee', GradientType=0);
+  border-color: #eeeeee #eeeeee #c8c8c8;
+  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+  border: 1px solid #dddddd;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+}
+.accordion-group .accordion-heading a {
+  color: #444444;
+  font-size: 13px;
+  font-weight: 600;
+}
+.accordion-group .accordion-heading a:hover {
+  text-decoration: none;
+}
+.accordion-group.open .accordion-heading {
+  color: #ffffff;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+  background-color: #4b4b4b;
+  background-image: -moz-linear-gradient(top, #555555, #3b3b3b);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#555555), to(#3b3b3b));
+  background-image: -webkit-linear-gradient(top, #555555, #3b3b3b);
+  background-image: -o-linear-gradient(top, #555555, #3b3b3b);
+  background-image: linear-gradient(to bottom, #555555, #3b3b3b);
+  background-repeat: repeat-x;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff555555', endColorstr='#ff3b3b3b', GradientType=0);
+  border-color: #3b3b3b #3b3b3b #151515;
+  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+  border-color: #222222;
+}
+.accordion-group.open .accordion-heading a {
+  color: #ffffff;
+}

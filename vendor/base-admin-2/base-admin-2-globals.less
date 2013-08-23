@@ -1,0 +1,77 @@
+@import "variables.less";
+/*------------------------------------------------------------------
+[ Global ]
+*/
+body {
+  background: @bodyBackground url(../img/background.png) repeat 0 0;
+  font: 13px/1.7em 'Open Sans';
+}
+.clearfix {
+  *zoom: 1;
+}
+.clearfix:before,
+.clearfix:after {
+  display: table;
+  content: "";
+  line-height: 0;
+}
+.clearfix:after {
+  clear: both;
+}
+.hide-text {
+  font: 0/0 a;
+  color: transparent;
+  text-shadow: none;
+  background-color: transparent;
+  border: 0;
+}
+.input-block-level {
+  display: block;
+  width: 100%;
+  min-height: 30px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+h1,
+h2,
+h3 {
+  font-weight: normal;
+}
+input,
+button,
+select,
+[class^="icon-"]:not(.ui-icon),
+[class*="icon-"]:not(.ui-icon) {
+  background: none;
+}
+[class^="icon-"] {
+  background: none\9;
+}
+.dropdown .dropdown-menu {
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  border-radius: 6px;
+}
+.btn-icon-only {
+  padding-right: 6px;
+  padding-left: 3px;
+}
+.table td {
+  vertical-align: middle;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 0;
+}
+.chart-holder {
+  width: 100%;
+  height: 250px;
+}
+.clear {
+  clear: both;
+}

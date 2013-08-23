@@ -1,3 +1,16 @@
+/*!
+ * This file is a customization of vendor/bootstrap/less/bootstrap.less.
+ *
+ *
+ * Bootstrap v2.3.2
+ *
+ * Copyright 2013 Twitter, Inc
+ * Licensed under the Apache License v2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Designed and built with all the love in the world by @mdo and @fat.
+ */
+
 // Core variables and mixins
 @import "variables.less"; // Modify this for custom colors, font-sizes, etc
 @import "../../vendor/bootstrap/less/mixins.less";
@@ -53,6 +66,8 @@
 
 // Utility classes
 @import "../../vendor/bootstrap/less/utilities.less"; // Has to be last to override when necessary
+
+// Bootstrap responsive CSS
 @import "../../vendor/bootstrap/less/responsive-utilities.less";
 
 @import "../../vendor/bootstrap/less/responsive-1200px-min.less";
@@ -63,8 +78,18 @@
 @import "../../vendor/bootstrap/less/responsive-767px-max.less";
 
 // Make it easier to maintain by putting further customization in a separate file.
-@import "base-admin-2.less";
-@import "base-admin-2-footer.less";
-@import "base-admin-2-news.less";
-@import "base-admin-2-responsive.less";
+@import "../../vendor/base-admin-2/base-admin-2-globals.less";
+@import "../../vendor/base-admin-2/base-admin-2-accordion-group.less";
+@import "../../vendor/base-admin-2/base-admin-2-btn.less";
+@import "../../vendor/base-admin-2/base-admin-2-extra.less";
+@import "../../vendor/base-admin-2/base-admin-2-footer.less";
+@import "../../vendor/base-admin-2/base-admin-2-main.less";
+@import "../../vendor/base-admin-2/base-admin-2-modal.less";
+@import "../../vendor/base-admin-2/base-admin-2-navbar.less";
+@import "../../vendor/base-admin-2/base-admin-2-news.less";
+@import "../../vendor/base-admin-2/base-admin-2-stacked.less";
+@import "../../vendor/base-admin-2/base-admin-2-subnavbar.less";
+@import "../../vendor/base-admin-2/base-admin-2-widget.less";
+@import "../../vendor/base-admin-2/base-admin-2-responsive.less";
+
 @import "custom.less";
