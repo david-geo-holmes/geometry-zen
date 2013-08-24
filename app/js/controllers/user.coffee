@@ -1,4 +1,4 @@
-angular.module("app").controller 'UserCtrl', ['$rootScope','$scope', 'GitHub', 'cookie', '$', '_', '$async', ($rootScope, $scope, github, cookie, $, _, $async) ->
+angular.module("app").controller 'UserCtrl', ['$rootScope','$scope', 'GitHub', 'cookie', '$', '_', 'async', ($rootScope, $scope, github, cookie, $, _, async) ->
 
   EVENT_CATEGORY = "user"
   ga('create', 'UA-41504069-1', 'geometryzen.org');
@@ -9,7 +9,7 @@ angular.module("app").controller 'UserCtrl', ['$rootScope','$scope', 'GitHub', '
   GITHUB_TOKEN_COOKIE_NAME = 'github-token'
   token = cookie.getItem(GITHUB_TOKEN_COOKIE_NAME)
 
-  $async.parallel([
+  async.parallel([
     (callback) ->
       github.getUser token, (err, user) ->
         if not err

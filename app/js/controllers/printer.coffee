@@ -1,4 +1,4 @@
-angular.module("app").controller 'PrinterCtrl', ['$scope', 'GitHub', 'cookie', '$', '_', '$async', ($scope, github, cookie, $, _, $async) ->
+angular.module("app").controller 'PrinterCtrl', ['$scope', ($scope) ->
 
   EVENT_CATEGORY = "printer"
   ga('create', 'UA-41504069-1', 'geometryzen.org');

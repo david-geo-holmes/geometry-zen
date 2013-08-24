@@ -1,1 +1,1 @@
-angular.module('jquery', []).factory '$', ['$window', (w) -> w.$]
+angular.module('jquery', []).factory '$', ['$window', ($window) -> $window.$]

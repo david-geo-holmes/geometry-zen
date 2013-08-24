@@ -1,4 +1,4 @@
-angular.module("app").controller 'NewFileCtrl', ['$scope', 'GitHub', 'Base64', 'cookie', '$', '_', '$async', ($scope, github, base64, cookie, $, _, $async) ->
+angular.module("app").controller 'NewFileCtrl', ['$scope', 'GitHub', 'Base64', 'cookie', '$', '_', ($scope, github, base64, cookie, $, _) ->
 
   EVENT_CATEGORY = "new-file"
   ga('create', 'UA-41504069-1', 'geometryzen.org');

@@ -1,4 +1,4 @@
-angular.module("app").controller 'NewRepoCtrl', ['$scope', 'GitHub', 'cookie', '$', '_', '$async', ($scope, github, cookie, $, _, $async) ->
+angular.module("app").controller 'NewRepoCtrl', ['$scope', 'GitHub', 'cookie', '$', '_', ($scope, github, cookie, $, _) ->
 
   EVENT_CATEGORY = "new-repo"
   ga('create', 'UA-41504069-1', 'geometryzen.org');

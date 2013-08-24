@@ -23,6 +23,7 @@ locale_data_multi =
 
 # This is the Jed shim for AngularJS.
 # It's purpose is to create an injectable service
+# Maybe should be a service, not a factory?
 angular.module('jed', []).factory 'i18n', ['$window', (w) ->
   return new w.Jed
     domain: "the_domain"

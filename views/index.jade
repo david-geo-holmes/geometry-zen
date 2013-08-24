@@ -14,85 +14,30 @@ html(lang="en", data-ng-app="app")
     link(rel="icon", type="image/png", href="/img/favicon-48x48.png")
   body
     header
-      div.navbar.navbar-fixed-top.navbar-inverse
-        div.navbar-inner
-          div.container
+      .navbar.navbar-fixed-top.navbar-inverse
+        .navbar-inner
+          .container
             a.btn.btn-navbar(data-toggle="collapse", data-target=".nav-collapse")
-              a.brand(href="/")
-                span.brandname
-                  | #{marketing.name}
-                  sup
-                    | #{marketing.version} #{npm.version}
-              ul.nav
-            div.nav-collapse.collapse
-              ul.nav.nav-pills.pull-right
-    div#sticky-wrapper
-      div#view(data-ng-view)
-      div#sticky-push
-    div#sticky-footer
-      div.extra
-        div.container-fluid
-          div.row-fluid
-            div.span4
-              h4 About
-              ul
-                li
-                  a(href="http://geometryzen.github.io/mission/", target="_blank")
-                    | Our Mission
-                li
-                  a(href="https://twitter.com/#!/geometryzen", target="_blank")
-                    | Twitter
-                li
-                  a(href="javascript:;")
-                    | Facebook
-                li
-                  a(href="https://plus.google.com/u/0/s/Geometry%20Zen/communities", target="_blank")
-                    | Google+
-            div.span4
-              h4 Support
-              ul
-                li
-                  a(href="http://geometryzen.github.io/faq/", target="_blank")
-                    | Frequently Asked Questions
-                li
-                  a(href="https://github.com/geometryzen/geometryzen/issues", target="_blank")
-                    | Ask a Question
-                li
-                  a(href="javascript:;")
-                    | Video Tutorial
-                li
-                  a(href="javascript:;")
-                    | Feedback
-                li
-                  a(href="https://github.com/geometryzen/geometryzen/issues", target="_blank")
-                    | Issue Tracker
-            div.span4
-              h4 Legal
-              ul
-                li
-                  a(href="javascript:;")
-                    | License
-                li
-                  a(href="javascript:;")
-                    | Terms of Use
-                li
-                  a(href="javascript:;")
-                    | Privacy Policy
-                li
-                  a(href="javascript:;")
-                    | Security
+              span.icon-bar
+              span.icon-bar
+              span.icon-bar
+
+            a.brand(href="/home")
+              span.brandname
+                | #{marketing.name}
+                sup
+                  | #{marketing.version} #{npm.version}
+            .nav-collapse.collapse
+              <user-links></user-links>
+    #sticky-wrapper
+      #view(data-ng-view)
+      #sticky-push
+    #sticky-footer
       footer
-        div.container-fluid
-          div.row-fluid
-            div#footer-contributors.span6
-              | By 
-              a(href="http://github.com/david-geo-holmes", target="_blank")
-                | David Geo Holmes
-              | .
-            div#footer-terms.span6
-          div.row-fluid
-            div#footer-copyright.span6
-              | &copy; 2013 David Geo Holmes
-            div#footer-terms.span6
+        .container-fluid
+          .row-fluid
+            #footer-copyright.span6
+              | &copy; 2013 <a href="http://github.com/david-geo-holmes", target="_blank">David Geo Holmes</a>
+            #footer-terms.span6
               | Dedicated to Geo
     script(src=js)

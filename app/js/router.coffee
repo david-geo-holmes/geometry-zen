@@ -1,11 +1,23 @@
-angular.module("app").config(['$routeProvider', '$locationProvider', ($routeProvider, $locationProvider) ->
+app = angular.module("app")
 
-  # The home page
+app.config(['$routeProvider', '$locationProvider', ($routeProvider, $locationProvider) ->
+
+  # The home page.
   $routeProvider.when '/',
     templateUrl: 'angular/home.html'
     controller: 'HomeCtrl'
 
-  # The work page
+  # The workbench page.
+  $routeProvider.when '/workbench',
+    templateUrl: 'angular/work.html'
+    controller: 'WorkCtrl'
+
+  # The workbench page for a Gist.
+  $routeProvider.when '/gists/:gistId',
+    templateUrl: 'angular/work.html'
+    controller: 'WorkCtrl'
+
+  # The workbench page for GitHub Repositories.
   $routeProvider.when '/users/:user/repos/:repo/blob/:branch/:step0/:step1/:step2',
     templateUrl: 'angular/work.html'
     controller: 'WorkCtrl'
@@ -18,7 +30,7 @@ angular.module("app").config(['$routeProvider', '$locationProvider', ($routeProv
     templateUrl: 'angular/work.html'
     controller: 'WorkCtrl'
 
-  # The tree page
+  # The tree page.
   $routeProvider.when '/users/:user/repos/:repo/tree/:branch/:step0/:step1',
     templateUrl: 'angular/tree.html'
     controller: 'TreeCtrl'
@@ -31,15 +43,10 @@ angular.module("app").config(['$routeProvider', '$locationProvider', ($routeProv
     templateUrl: 'angular/tree.html'
     controller: 'TreeCtrl'
 
-  # The user page
+  # The user page.
   $routeProvider.when '/users/:user',
     templateUrl: 'angular/user.html'
     controller: 'UserCtrl'
-
-  # The context-free work page
-  $routeProvider.when '/work',
-    templateUrl: 'angular/work.html'
-    controller: 'WorkCtrl'
 
   $routeProvider.otherwise redirectTo: '/'
 

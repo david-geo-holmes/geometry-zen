@@ -1,9 +1,11 @@
+# Maybe should be a service, not a factory?
 angular.module("app").factory('GitHub', ['$http', ($http) ->
 
   GITHUB_PROTOCOL = 'https'
   GITHUB_DOMAIN = 'api.github.com'
   HTTP_METHOD_DELETE = 'DELETE'
   HTTP_METHOD_GET = 'GET'
+  HTTP_METHOD_PATCH = 'PATCH'
   HTTP_METHOD_POST = 'POST'
   HTTP_METHOD_PUT = 'PUT'
 
@@ -85,6 +87,33 @@ angular.module("app").factory('GitHub', ['$http', ($http) ->
   postRepo: (token, name, description, priv, autoInit, done) ->
     url = "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/user/repos"
     data = name: name, description: description, "private": priv, auto_init: autoInit
+    headers = if (token) then "Authorization": "token #{token}" else {}
+    $http(method: HTTP_METHOD_POST, url: url, data: data, headers: headers)
+    .success (repo, status, headers, config) ->
+      done(null, repo, status, headers, config)
+    .error (response, status, headers, config) ->
+      done(new Error(response.message), response, status, headers, config)
+
+  getGist: (token, id, done) ->
+    url = "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/gists/#{id}"
+    headers = if (token) then "Authorization": "token #{token}" else {}
+    $http("method": HTTP_METHOD_GET, "url": url, "headers": headers)
+    .success (contents, status, headers, config) ->
+      done(null, contents, status, headers, config)
+    .error (response, status, headers, config) ->
+      done(new Error(response.message), response, status, headers, config)
+
+  patchGist: (token, gistId, data, done) ->
+    url = "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/gists/#{gistId}"
+    headers = if (token) then "Authorization": "token #{token}" else {}
+    $http(method: HTTP_METHOD_PATCH, url: url, data: data, headers: headers)
+    .success (file, status, headers, config) ->
+      done(null, file, status, headers, config)
+    .error (response, status, headers, config) ->
+      done(new Error(response.message), response, status, headers, config)
+
+  postGist: (token, data, done) ->
+    url = "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/gists"
     headers = if (token) then "Authorization": "token #{token}" else {}
     $http(method: HTTP_METHOD_POST, url: url, data: data, headers: headers)
     .success (repo, status, headers, config) ->

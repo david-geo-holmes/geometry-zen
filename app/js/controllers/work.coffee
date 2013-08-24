@@ -1,9 +1,13 @@
-angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$window', '$routeParams', '$', '_', 'GitHub', 'Base64', 'cookie', ($rootScope, $scope, $window, $routeParams, $, _, github, base64, cookie) ->
+angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location', '$window', '$routeParams', '$', '_', 'GitHub', 'Base64', 'cookie', 'GitHubAuthManager', ($rootScope, $scope, $location, $window, $routeParams, $, _, github, base64, cookie, authManager) ->
 
   EVENT_CATEGORY = "work"
   ga('create', 'UA-41504069-1', 'geometryzen.org');
   ga('set', 'page', '/work')
   ga('send', 'pageview')
+
+  authManager.handleLoginCallback (err, token) ->
+    if err
+      $window.alert err.message
 
   GITHUB_TOKEN_COOKIE_NAME = 'github-token'
   token = cookie.getItem(GITHUB_TOKEN_COOKIE_NAME)
@@ -11,9 +15,8 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$window', 
   # A message object has name, text and severity (error, warning, info, success)
   $scope.messages = []
 
-  $('.carousel').carousel({interval: false})
-
   $scope.contextItem = {}
+  $scope.contextGist = {}
   if ($routeParams.user and $routeParams.repo)
     $scope.user = login: $routeParams.user
     $scope.repo = name: $routeParams.repo
@@ -35,8 +38,18 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$window', 
           alert "Unknown encoding: #{file.encoding}"
       else
         alert("Error retrieving the page")
+  else if ($routeParams.gistId)
+    console.log "gistId: #{$routeParams.gistId}"
+    github.getGist token, $routeParams.gistId, (err, gist) ->
+      if not err
+        console.log JSON.stringify(gist,  null, 2)
+        $scope.contextGist = gist
+        $scope.contextItem.name = "main.py"
+        editor.setValue gist.files["main.py"].content
+      else
+        alert "Error retrieving the Gist."
   else
-    $scope.contextItem.name = ""
+    $scope.contextItem.name = "Untitled"
     $scope.contextItem.type = undefined
 
   winHeight = () -> $window.innerHeight || ($window.document.documentElement || $window.document.body).clientHeight
@@ -52,7 +65,7 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$window', 
       document.documentElement.style.overflow = "hidden"
     else
       wrapperElement.className = wrapperElement.className.replace(" CodeMirror-fullscreen", "")
-      wrapperElement.style.height = "800px"
+      wrapperElement.style.height = "600px"
       document.documentElement.style.overflow = ""
     cm.refresh()
 
@@ -109,12 +122,35 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$window', 
   $scope.saveFile = () ->
     ga('send', 'event', EVENT_CATEGORY, 'savePage')
     content = base64.encode(editor.getValue())
-    github.putFile token, $scope.user.login, $scope.repo.name, $scope.contextItem.path, "Save file.", content, $scope.contextItem.sha, (err, response, status, headers, config) ->
-      if not err
-        $scope.contextItem.sha = response.content.sha
+    if $scope.user
+      github.putFile token, $scope.user.login, $scope.repo.name, $scope.contextItem.path, "Save file.", content, $scope.contextItem.sha, (err, response, status, headers, config) ->
+        if not err
+          $scope.contextItem.sha = response.content.sha
+        else
+          # The cause given by the err is really for developer use only.
+          alert("Error saving file to repository. Cause: #{err.message}")
+    else
+      if $scope.contextGist.id
+        description = $scope.contextGist.description
+        files = {"main.py":{content:editor.getValue()}}
+        github.patchGist token, $scope.contextGist.id, {description:description, files:files}, (err, response, status, headers, config) ->
+          if not err
+          else
+            # The cause given by the err is really for developer use only.
+            alert("Error patching Gist. Cause: #{err.message}")
       else
-        # The cause given by the err is really for developer use only.
-        alert("Error saving file to repository. Cause: #{err.message}")
+        files = {"main.py":{content:editor.getValue()}}
+        data = {}
+        data.description = "GeometryZen Gist"
+        data.public = true
+        data.files = files
+        github.postGist token, data, (err, response, status, headers, config) ->
+          if not err
+            console.log JSON.stringify(response, null, 2)
+            $location.path("/gists/#{response.id}")
+          else
+            # The cause given by the err is really for developer use only.
+            alert("Error posting Gist. Cause: #{err.message}")
 
   $scope.homeBreadcrumbClass = () ->
     if $rootScope.breadcrumbStrategy.progressive then "active" else ""
@@ -133,7 +169,11 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$window', 
 
   $scope.saveEnabled = () ->
     # TODO: Rename so that the context and authenticated user are clearer.
-    return $scope.isLoggedIn() and $scope.userLogin() is $scope.user.login and $scope.contextItem and $scope.contextItem.type is "file"
+    if $scope.user
+      return $scope.isLoggedIn() and $scope.userLogin() is $scope.user.login and $scope.contextItem and $scope.contextItem.type is "file"
+    else
+      # We will be able to save the code as a GitHub Gist
+      return true
 
   $scope.runEnabled = () ->
     return $scope.workEnabled()
