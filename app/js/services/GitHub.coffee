@@ -14,12 +14,20 @@ angular.module("app").factory('GitHub', ['$http', ($http) ->
       @name = name
       @login = login
 
+  class Gist
+    constructor: (id, description, isPublic, files, html_url) ->
+      @id = id
+      @description = description
+      @public = isPublic
+      @files = files
+      @html_url = html_url
+
   class Repo
-    constructor: (name, description, language, github_html_url) ->
+    constructor: (name, description, language, html_url) ->
       @name = name
       @description = description
       @language = language
-      @github_html_url = github_html_url
+      @html_url = html_url
 
   getUser: (token, done) ->
     headers = if (token) then "Authorization": "token #{token}" else {}
@@ -94,6 +102,14 @@ angular.module("app").factory('GitHub', ['$http', ($http) ->
     .error (response, status, headers, config) ->
       done(new Error(response.message), response, status, headers, config)
 
+  deleteRepo: (token, owner, repo, done) ->
+    url = "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/repos/#{owner}/#{repo}"
+    $http(method: HTTP_METHOD_DELETE, url: url, headers: Authorization: "token #{token}")
+    .success (repo, status, headers, config) ->
+      done(null, repo, status, headers, config)
+    .error (response, status, headers, config) ->
+      done(new Error(response.message), response, status, headers, config)
+
   getGist: (token, id, done) ->
     url = "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/gists/#{id}"
     headers = if (token) then "Authorization": "token #{token}" else {}
@@ -116,8 +132,35 @@ angular.module("app").factory('GitHub', ['$http', ($http) ->
     url = "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/gists"
     headers = if (token) then "Authorization": "token #{token}" else {}
     $http(method: HTTP_METHOD_POST, url: url, data: data, headers: headers)
-    .success (repo, status, headers, config) ->
-      done(null, repo, status, headers, config)
+    .success (response, status, headers, config) ->
+      done(null, response, status, headers, config)
+    .error (response, status, headers, config) ->
+      done(new Error(response.message), response, status, headers, config)
+
+  deleteGist: (token, owner, id, done) ->
+    url = "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/gists/#{id}"
+    $http(method: HTTP_METHOD_DELETE, url: url, headers: Authorization: "token #{token}")
+    .success (response, status, headers, config) ->
+      done(null, response, status, headers, config)
+    .error (response, status, headers, config) ->
+      done(new Error(response.message), response, status, headers, config)
+
+  getUserGists: (token, user, done) ->
+    headers = if (token) then "Authorization": "token #{token}" else {}
+    $http(method: HTTP_METHOD_GET, url: "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/users/#{user}/gists", headers: headers)
+    .success (gists, status, headers, config) ->
+      gists = _.map(gists, (gist) -> gist)
+      done(null, gists, status, headers, config)
+    .error (response, status, headers, config) ->
+      done(new Error(response.message), response, status, headers, config)
+
+  getGists: (token, done) ->
+    headers = if (token) then "Authorization": "token #{token}" else {}
+    $http(method: HTTP_METHOD_GET, url: "#{GITHUB_PROTOCOL}://#{GITHUB_DOMAIN}/gists", headers: headers)
+    .success (gists, status, headers, config) ->
+      console.log
+      gists = _.map(gists, (gist) -> new Gist(gist.id, gist.description, gist.public, gist.files, gist.html_url))
+      done(null, gists, status, headers, config)
     .error (response, status, headers, config) ->
       done(new Error(response.message), response, status, headers, config)
 ])

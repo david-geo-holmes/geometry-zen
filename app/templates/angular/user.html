@@ -54,15 +54,11 @@
         <div class="widget stacked">
           <div class="widget-content">
             <ul class="nav nav-tabs" id="myTab">
-              <!--li><a data-target="#contributions" data-toggle="tab">Contributions</a></li-->
-              <li><a data-target="#repositories" data-toggle="tab">{{i18n.translate("Repo").ifPlural(2, "Repos").fetch()}}</a></li>
-              <!--li><a data-target="#activity" data-toggle="tab">Public Activity</a></li-->
+              <li><a data-target="#gists" data-toggle="tab">{{i18n.translate("Gist").ifPlural(2, "Gists").fetch()}}</a></li>
+              <li><a data-target="#repos" data-toggle="tab">{{i18n.translate("Repo").ifPlural(2, "Repos").fetch()}}</a></li>
             </ul>
             <div class="tab-content">
-              <div class="tab-pane" id="contributions">
-                <p>Under Construction: Contributions</p>
-              </div>
-              <div class="tab-pane" id="repositories">
+              <div class="tab-pane" id="gists">
                 <div class ="row-fluid">
                   <table class="table table-condensed">
                     <tbody>
@@ -71,7 +67,49 @@
                           <!--input type="text" placeHolder="Filter..."></input-->
                         </td>
                         <td nowrap=nowrap>
-                          <button ng-click="newRepo()" class="btn btn-primary">
+                          <button ng-click="newGist()" class="btn btn-primary">
+                            <i class="icon-plus-sign-alt"></i> <i class="{{i18n.translate('icon-gist').fetch()}}"></i>
+                            <span>{{i18n.translate("Create a New Gist").fetch()}}</span>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr ng-repeat="gist in gists">
+                        <td nowrap=nowrap>
+                          <h3>
+                            <i class="{{i18n.translate('icon-gist').fetch()}} muted"></i>
+                            <a href="/gists/{{gist.id}}" class="btn btn-link">
+                              <span>{{gist.id}}</span>
+                            </a>
+                          </h3>
+                          <p>{{gist.description}}</p>
+                        </td>
+                        <td nowrap=nowrap>
+                          <a href="{{gist.html_url}}" target="_blank" class="btn btn-secondary">
+                            <i class="icon-github"></i>
+                            <span>GitHub</span>
+                          </a>
+                          <!--
+                          <button ng-click="deleteGist(user.login, gist.id)" class="btn btn-tertiary">
+                            <i class="icon-minus-sign-alt"></i>
+                            <span>Delete</span>
+                          </button>
+                          -->
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="tab-pane" id="repos">
+                <div class ="row-fluid">
+                  <table class="table table-condensed">
+                    <tbody>
+                      <tr>
+                        <td nowrap=nowrap>
+                          <!--input type="text" placeHolder="Filter..."></input-->
+                        </td>
+                        <td nowrap=nowrap>
+                          <button ng-click="newRepo(user.login)" class="btn btn-primary">
                             <i class="icon-plus-sign-alt"></i> <i class="{{i18n.translate('icon-repo').fetch()}}"></i>
                             <span>{{i18n.translate("Create a New Repo").fetch()}}</span>
                           </button>
@@ -88,51 +126,60 @@
                           <p>{{repo.description}}</p>
                         </td>
                         <td nowrap=nowrap>
-                          <!-- HATEOAS GitHub link-->
-                          <!--
-                          <a href="{{repo.github_html_url}}" target="_blank" class="btn btn-secondary">
+                          <a href="{{repo.html_url}}" target="_blank" class="btn btn-secondary">
                             <i class="icon-github"></i>
                             <span>GitHub</span>
                           </a>
-                          -->
-                          <button ng-click="deleteRepo($index)" class="btn btn-tertiary">
+                          <!--
+                          <button ng-click="deleteRepo(user.login, repo.name)" class="btn btn-tertiary">
                             <i class="icon-minus-sign-alt"></i>
                             <span>Delete</span>
                           </button>
+                          -->
                         </td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
               </div>
-              <div class="tab-pane" id="activity">
-                <p>Under Construction: Public Activity</p>
-              </div>
             </div>
             <script>
               $(function () {
-                $('#myTab a[data-target="#repositories"]').tab('show');
+                $('#myTab a[data-target="#gists"]').tab('show');
               })
             </script>
             <script>
-              $('#myTab a[data-target="#contributions"]').click(function(e) {
+              $('#myTab a[data-target="#gists"]').click(function(e) {
                 e.preventDefault();
                 $(this).tab('show');
               });
             </script>
             <script>
-              $('#myTab a[data-target="#repositories"]').click(function(e) {
-                e.preventDefault();
-                $(this).tab('show');
-              });
-            </script>
-            <script>
-              $('#myTab a[data-target="#activity"]').click(function(e) {
+              $('#myTab a[data-target="#repos"]').click(function(e) {
                 e.preventDefault();
                 $(this).tab('show');
               });
             </script>
           </div>
+        </div>
+
+        <div id="new-gist-dialog" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="new-gist-dialog-label" aria-hidden="true">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3 id="new-gist-dialog-label"><i class="icon-plus-sign-alt muted"></i> <i class="{{i18n.translate('icon-gist').fetch()}} muted"></i> {{i18n.translate("Create a New Gist").fetch()}}</h3>
+          </div>
+          <form ng-controller="NewGistCtrl">
+            <fieldset>
+              <div class="modal-body">
+                <label>Description<span class="muted"> (optional)</span></label>
+                <input type="text" name="description" ng-model="gist.description"></input>
+              </div>
+              <div class="modal-footer">
+                <button id="btnCancel" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+                <button type="submit" ng-click="createGist()" id="btnOK" class="btn btn-primary">{{i18n.translate("Create gist").fetch()}}</button>
+              </div>
+            </fieldset>
+          </form>
         </div>
 
         <div id="new-repo-dialog" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="new-repo-dialog-label" aria-hidden="true">
@@ -174,6 +221,7 @@
             </fieldset>
           </form>
         </div>
+
       </div>
     </div>
   </div>

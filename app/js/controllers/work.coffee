@@ -39,10 +39,8 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
       else
         alert("Error retrieving the page")
   else if ($routeParams.gistId)
-    console.log "gistId: #{$routeParams.gistId}"
     github.getGist token, $routeParams.gistId, (err, gist) ->
       if not err
-        console.log JSON.stringify(gist,  null, 2)
         $scope.contextGist = gist
         $scope.contextItem.name = "main.py"
         editor.setValue gist.files["main.py"].content
@@ -146,7 +144,6 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
         data.files = files
         github.postGist token, data, (err, response, status, headers, config) ->
           if not err
-            console.log JSON.stringify(response, null, 2)
             $location.path("/gists/#{response.id}")
           else
             # The cause given by the err is really for developer use only.

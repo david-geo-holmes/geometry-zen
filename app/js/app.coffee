@@ -13,7 +13,6 @@ app.run(['$rootScope', '$window' , '$location', 'cookie', 'i18n', ($rootScope, $
   $rootScope.clientId = () -> cookie.getItem(GITHUB_APPLICATION_CLIENT_ID_COOKIE_NAME)
 
   $rootScope.log = (thing) ->
-    console.log thing
 
   $rootScope.alert = (thing) ->
     alert(thing)

@@ -27,22 +27,30 @@ locale_data_multi =
 angular.module('jed', []).factory 'i18n', ['$window', (w) ->
   return new w.Jed
     domain: "the_domain"
-    missing_key_callback: (key) ->
-      console.log key
+    missing_key_callback: (key) -> console.log key
     locale_data:
       "the_domain":
         "":
           domain: "the_domain"
           lang: "en"
           "plural-forms": "nplurals=2; plural=(n != 1);"
-        "Create a New Repo": [null, "Create a New Project"],
-        "Create repo": [null, "Create project"],
-        "Repo": [null, "Project", "Projects"],
-        "Repo name": [null, "Project name"],
-        "My Repo": [null, "My Project", "My Projects"],
-        "Great repo names are short and memorable.": [null, "Great project names are short and memorable."],
-        "Initialize this repo with a README.md": [null, "Initialize this project with a README.md"],
-        "This will allow you to clone the repo immediately in GitHub.": [null, "This will allow you to clone the project immediately in GitHub."],
+        "Create a New Gist": [null, "Create a New Gist"],
+        "Create gist": [null, "Create gist"],
+        "Gist": [null, "Gist", "Gists"],
+        "Gist name": [null, "Gist name"],
+        "My Gist": [null, "My Gist", "My Gists"],
+        "Great gist names are short and memorable.": [null, "Great gist names are short and memorable."],
+        "Initialize this gist with a README.md": [null, "Initialize this gist with a README.md"],
+        "This will allow you to clone the gist immediately in GitHub.": [null, "This will allow you to clone the gist immediately in GitHub."],
+
+        "Create a New Repo": [null, "Create a New Repository"],
+        "Create repo": [null, "Create repository"],
+        "Repo": [null, "Repository", "Repositories"],
+        "Repo name": [null, "Repository name"],
+        "My Repo": [null, "My Repository", "My Repository"],
+        "Great repo names are short and memorable.": [null, "Great repository names are short and memorable."],
+        "Initialize this repo with a README.md": [null, "Initialize this repository with a README.md"],
+        "This will allow you to clone the repo immediately in GitHub.": [null, "This will allow you to clone the repository immediately in GitHub."],
 
         "Create a New File": [null, "Create a New File"],
         "Create file": [null, "Create file"],
@@ -51,6 +59,7 @@ angular.module('jed', []).factory 'i18n', ['$window', (w) ->
 
         "My Space": [null, "My Universe"],
 
+        "icon-gist": [null, "icon-briefcase"],
         "icon-repo": [null, "icon-briefcase"],
         "icon-dir": [null, "icon-book"],
         "icon-file": [null, "icon-file-alt"],

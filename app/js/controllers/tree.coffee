@@ -32,12 +32,10 @@ angular.module("app").controller 'TreeCtrl', ['$rootScope','$scope', '$window', 
     github.getPathContents token, $scope.user.login, $scope.repo.name, $scope.path, (err, response, status, headers, config) ->
       if not err
         # status is 2xx
-        # console.log "err: #{err}, response: #{JSON.stringify(response, null, 2)}, status: #{status}, headers: #{JSON.stringify(headers(), null, 2)}, config: #{JSON.stringify(config, null, 2)}"
         $scope.contextItem.childItems = response
       else
         # TODO: Log this message to analytics as an exception.
         # status may be 401, 403
-        # console.log "err: #{err}, response: #{JSON.stringify(response, null, 2)}, status: #{status}, headers: #{JSON.stringify(headers(), null, 2)}, config: #{JSON.stringify(config, null, 2)}"
         alert "#{err.message}. Cause: #{response.message}."
   else
     $scope.contextItem.name = ""
@@ -54,7 +52,6 @@ angular.module("app").controller 'TreeCtrl', ['$rootScope','$scope', '$window', 
       alert "Create a New File is not enabled."
 
   $scope.$on 'createdFile', (e, user, repo, item, commit) ->
-    # console.log "#{JSON.stringify(item, undefined, 2)}"
     $scope.contextItem.childItems.push(item)
 
   $scope.isDeleteItemEnabled = () ->

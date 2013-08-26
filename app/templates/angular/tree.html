@@ -78,19 +78,10 @@
                         </h3>
                       </td>
                       <td nowrap=nowrap>
-                        <!-- Make use of the HATEOAS links -->
-                        <!--
-                        <h3>
-                          <i class="icon-github muted"></i>
-                          <a ng-href="{{item.html_url}}" target="_blank" class="btn btn-link">
-                            <span>GitHub</span>
-                          </a>
-                        </h3>
-                        -->
-                        <button ng-click="deleteItem($index)" ng-show="isDeleteItemEnabled()" class="btn btn-tertiary">
-                          <i class="icon-minus-sign-alt"></i>
-                          <span>Delete</span>
-                        </button>
+                        <a href="{{item.html_url}}" target="_blank" class="btn btn-secondary">
+                          <i class="icon-github"></i>
+                          <span>GitHub</span>
+                        </a>
                       </td>
                     </tr>
                   </tbody>

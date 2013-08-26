@@ -68126,7 +68126,6 @@ var Stats = function () {
         return cookie.getItem(GITHUB_APPLICATION_CLIENT_ID_COOKIE_NAME);
       };
       $rootScope.log = function (thing) {
-        return console.log(thing);
       };
       $rootScope.alert = function (thing) {
         return alert(thing);
@@ -68180,20 +68179,6 @@ var Stats = function () {
           return '/';
         }
       };
-    }
-  ]);
-}.call(this));
-(function () {
-  angular.module('app').controller('BrowseCtrl', [
-    '$scope',
-    '$window',
-    '$location',
-    function ($scope, $window, $location) {
-      var EVENT_CATEGORY;
-      EVENT_CATEGORY = 'browse';
-      ga('create', 'UA-41504069-1', 'geometryzen.org');
-      ga('set', 'page', '/browse');
-      return ga('send', 'pageview');
     }
   ]);
 }.call(this));
@@ -68283,6 +68268,59 @@ var Stats = function () {
   ]);
 }.call(this));
 (function () {
+  angular.module('app').controller('NewGistCtrl', [
+    '$scope',
+    'GitHub',
+    'cookie',
+    '$',
+    '_',
+    function ($scope, github, cookie, $, _) {
+      var EVENT_CATEGORY, GITHUB_TOKEN_COOKIE_NAME, token;
+      EVENT_CATEGORY = 'new-gist';
+      ga('create', 'UA-41504069-1', 'geometryzen.org');
+      ga('set', 'page', '/new-gist');
+      ga('send', 'pageview');
+      GITHUB_TOKEN_COOKIE_NAME = 'github-token';
+      token = cookie.getItem(GITHUB_TOKEN_COOKIE_NAME);
+      $('#new-gist-dialog').on('show', function () {
+        return $scope.gist = {
+          path: '',
+          description: '',
+          'private': 'false',
+          markdownReadme: true,
+          pythonReadme: true
+        };
+      });
+      $('#new-gist-dialog').on('shown', function () {
+      });
+      $('#new-gist-dialog').on('hide', function () {
+      });
+      $('#new-gist-dialog').on('hidden', function () {
+      });
+      return $scope.createGist = function () {
+        var data;
+        ga('send', 'event', EVENT_CATEGORY, 'createGist');
+        data = {};
+        data.description = $scope.gist.description;
+        data['public'] = true;
+        data.files = { 'main.py': { 'content': '# main.py' } };
+        return github.postGist(token, data, function (err, response, status, headers, config) {
+          var messages;
+          if (!err) {
+            $scope.$emit('createdGist', $scope.user, response);
+            return $('#new-gist-dialog').modal('hide');
+          } else {
+            messages = _.map(response.errors, function (error) {
+              return error.message;
+            }).join();
+            return alert(messages);
+          }
+        });
+      };
+    }
+  ]);
+}.call(this));
+(function () {
   angular.module('app').controller('NewRepoCtrl', [
     '$scope',
     'GitHub',
@@ -68317,7 +68355,6 @@ var Stats = function () {
         return github.postRepo(token, $scope.repo.name, $scope.repo.description, false, $scope.repo.markdownReadme, function (err, repo) {
           var messages;
           if (!err) {
-            console.log('repo: ' + JSON.stringify(repo, null, 2));
             $scope.$emit('createdRepo', $scope.user, repo);
             return $('#new-repo-dialog').modal('hide');
           } else {
@@ -68481,19 +68518,51 @@ var Stats = function () {
   angular.module('app').controller('UserCtrl', [
     '$rootScope',
     '$scope',
+    '$routeParams',
     'GitHub',
     'cookie',
     '$',
     '_',
     'async',
-    function ($rootScope, $scope, github, cookie, $, _, async) {
-      var EVENT_CATEGORY, GITHUB_TOKEN_COOKIE_NAME, token;
+    function ($rootScope, $scope, $routeParams, github, cookie, $, _, async) {
+      var EVENT_CATEGORY, GITHUB_TOKEN_COOKIE_NAME, findIndex, loadGists, loadRepos, token;
       EVENT_CATEGORY = 'user';
       ga('create', 'UA-41504069-1', 'geometryzen.org');
       ga('set', 'page', '/user');
       ga('send', 'pageview');
       GITHUB_TOKEN_COOKIE_NAME = 'github-token';
       token = cookie.getItem(GITHUB_TOKEN_COOKIE_NAME);
+      loadGists = function (callback) {
+        return github.getGists(token, function (err, gists) {
+          if (!err) {
+            console.log(JSON.stringify(gists, null, 2));
+            $scope.gists = _.filter(_.map(gists, function (gist) {
+              return {
+                'id': gist.id,
+                'description': gist.description,
+                'html_url': gist.html_url
+              };
+            }), function (gist) {
+              return true;
+            });
+          } else {
+            alert('Error retrieving user Gists');
+          }
+          return callback(err, gists);
+        });
+      };
+      loadRepos = function (callback) {
+        return github.getUserRepos(token, function (err, repos) {
+          if (!err) {
+            $scope.repos = _.filter(repos, function (repo) {
+              return repo.language === 'Python';
+            });
+          } else {
+            alert('Error retrieving user Repositories');
+          }
+          return callback(err, repos);
+        });
+      };
       async.parallel([
         function (callback) {
           return github.getUser(token, function (err, user) {
@@ -68506,16 +68575,10 @@ var Stats = function () {
           });
         },
         function (callback) {
-          return github.getUserRepos(token, function (err, repos) {
-            if (!err) {
-              $scope.repos = _.filter(repos, function (repo) {
-                return repo.language === 'Python';
-              });
-            } else {
-              alert('Error retrieving user repositories');
-            }
-            return callback(err, repos);
-          });
+          return loadRepos(callback);
+        },
+        function (callback) {
+          return loadGists(callback);
         }
       ], function (err, results) {
       });
@@ -68533,10 +68596,53 @@ var Stats = function () {
           return 'active distance-0';
         }
       };
-      $scope.newRepo = function () {
+      $scope.newGist = function () {
+        return $('#new-gist-dialog').modal({
+          show: true,
+          backdrop: true
+        });
+      };
+      findIndex = function (xs, match) {
+        var i, length, x, _i, _ref;
+        length = xs;
+        for (i = _i = 0, _ref = length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+          x = xs[i];
+          if (match(x)) {
+            return x;
+          }
+        }
+        return -1;
+      };
+      $scope.deleteGist = function (owner, id) {
+        ga('send', 'event', EVENT_CATEGORY, 'deleteGist');
+        return github.deleteGist(token, owner, id, function (err, response, status, headers, config) {
+          var index;
+          if (!err) {
+            index = findIndex($scope.gists, function (gist) {
+              return gist.id === id;
+            });
+            return $scope.gists.splice(index, 1);
+          } else {
+            return alert('Error deleting gist: ' + err);
+          }
+        });
+      };
+      $scope.$on('createdGist', function (e, user, gist) {
+        return $scope.gists.push(gist);
+      });
+      $scope.newRepo = function (owner) {
         return $('#new-repo-dialog').modal({
           show: true,
           backdrop: true
+        });
+      };
+      $scope.deleteRepo = function (owner, repo) {
+        ga('send', 'event', EVENT_CATEGORY, 'deleteRepo');
+        return github.deleteRepo(token, owner, repo, function (err, response, status, headers, config) {
+          if (!err) {
+          } else {
+            return alert('Error deleting repo: ' + err);
+          }
         });
       };
       return $scope.$on('createdRepo', function (e, user, repo) {
@@ -68609,10 +68715,8 @@ var Stats = function () {
           }
         });
       } else if ($routeParams.gistId) {
-        console.log('gistId: ' + $routeParams.gistId);
         github.getGist(token, $routeParams.gistId, function (err, gist) {
           if (!err) {
-            console.log(JSON.stringify(gist, null, 2));
             $scope.contextGist = gist;
             $scope.contextItem.name = 'main.py';
             return editor.setValue(gist.files['main.py'].content);
@@ -68745,7 +68849,6 @@ var Stats = function () {
             data.files = files;
             return github.postGist(token, data, function (err, response, status, headers, config) {
               if (!err) {
-                console.log(JSON.stringify(response, null, 2));
                 return $location.path('/gists/' + response.id);
               } else {
                 return alert('Error posting Gist. Cause: ' + err.message);
@@ -69004,7 +69107,7 @@ var Stats = function () {
   angular.module('app').factory('GitHub', [
     '$http',
     function ($http) {
-      var GITHUB_DOMAIN, GITHUB_PROTOCOL, HTTP_METHOD_DELETE, HTTP_METHOD_GET, HTTP_METHOD_PATCH, HTTP_METHOD_POST, HTTP_METHOD_PUT, Repo, User;
+      var GITHUB_DOMAIN, GITHUB_PROTOCOL, Gist, HTTP_METHOD_DELETE, HTTP_METHOD_GET, HTTP_METHOD_PATCH, HTTP_METHOD_POST, HTTP_METHOD_PUT, Repo, User;
       GITHUB_PROTOCOL = 'https';
       GITHUB_DOMAIN = 'api.github.com';
       HTTP_METHOD_DELETE = 'DELETE';
@@ -69019,12 +69122,22 @@ var Stats = function () {
         }
         return User;
       }();
+      Gist = function () {
+        function Gist(id, description, isPublic, files, html_url) {
+          this.id = id;
+          this.description = description;
+          this['public'] = isPublic;
+          this.files = files;
+          this.html_url = html_url;
+        }
+        return Gist;
+      }();
       Repo = function () {
-        function Repo(name, description, language, github_html_url) {
+        function Repo(name, description, language, html_url) {
           this.name = name;
           this.description = description;
           this.language = language;
-          this.github_html_url = github_html_url;
+          this.html_url = html_url;
         }
         return Repo;
       }();
@@ -69149,6 +69262,19 @@ var Stats = function () {
             return done(new Error(response.message), response, status, headers, config);
           });
         },
+        deleteRepo: function (token, owner, repo, done) {
+          var url;
+          url = '' + GITHUB_PROTOCOL + '://' + GITHUB_DOMAIN + '/repos/' + owner + '/' + repo;
+          return $http({
+            method: HTTP_METHOD_DELETE,
+            url: url,
+            headers: { Authorization: 'token ' + token }
+          }).success(function (repo, status, headers, config) {
+            return done(null, repo, status, headers, config);
+          }).error(function (response, status, headers, config) {
+            return done(new Error(response.message), response, status, headers, config);
+          });
+        },
         getGist: function (token, id, done) {
           var headers, url;
           url = '' + GITHUB_PROTOCOL + '://' + GITHUB_DOMAIN + '/gists/' + id;
@@ -69187,8 +69313,54 @@ var Stats = function () {
             url: url,
             data: data,
             headers: headers
-          }).success(function (repo, status, headers, config) {
-            return done(null, repo, status, headers, config);
+          }).success(function (response, status, headers, config) {
+            return done(null, response, status, headers, config);
+          }).error(function (response, status, headers, config) {
+            return done(new Error(response.message), response, status, headers, config);
+          });
+        },
+        deleteGist: function (token, owner, id, done) {
+          var url;
+          url = '' + GITHUB_PROTOCOL + '://' + GITHUB_DOMAIN + '/gists/' + id;
+          return $http({
+            method: HTTP_METHOD_DELETE,
+            url: url,
+            headers: { Authorization: 'token ' + token }
+          }).success(function (response, status, headers, config) {
+            return done(null, response, status, headers, config);
+          }).error(function (response, status, headers, config) {
+            return done(new Error(response.message), response, status, headers, config);
+          });
+        },
+        getUserGists: function (token, user, done) {
+          var headers;
+          headers = token ? { 'Authorization': 'token ' + token } : {};
+          return $http({
+            method: HTTP_METHOD_GET,
+            url: '' + GITHUB_PROTOCOL + '://' + GITHUB_DOMAIN + '/users/' + user + '/gists',
+            headers: headers
+          }).success(function (gists, status, headers, config) {
+            gists = _.map(gists, function (gist) {
+              return gist;
+            });
+            return done(null, gists, status, headers, config);
+          }).error(function (response, status, headers, config) {
+            return done(new Error(response.message), response, status, headers, config);
+          });
+        },
+        getGists: function (token, done) {
+          var headers;
+          headers = token ? { 'Authorization': 'token ' + token } : {};
+          return $http({
+            method: HTTP_METHOD_GET,
+            url: '' + GITHUB_PROTOCOL + '://' + GITHUB_DOMAIN + '/gists',
+            headers: headers
+          }).success(function (gists, status, headers, config) {
+            console.log;
+            gists = _.map(gists, function (gist) {
+              return new Gist(gist.id, gist.description, gist['public'], gist.files, gist.html_url);
+            });
+            return done(null, gists, status, headers, config);
           }).error(function (response, status, headers, config) {
             return done(new Error(response.message), response, status, headers, config);
           });
@@ -69365,39 +69537,73 @@ var Stats = function () {
               lang: 'en',
               'plural-forms': 'nplurals=2; plural=(n != 1);'
             },
+            'Create a New Gist': [
+              null,
+              'Create a New Gist'
+            ],
+            'Create gist': [
+              null,
+              'Create gist'
+            ],
+            'Gist': [
+              null,
+              'Gist',
+              'Gists'
+            ],
+            'Gist name': [
+              null,
+              'Gist name'
+            ],
+            'My Gist': [
+              null,
+              'My Gist',
+              'My Gists'
+            ],
+            'Great gist names are short and memorable.': [
+              null,
+              'Great gist names are short and memorable.'
+            ],
+            'Initialize this gist with a README.md': [
+              null,
+              'Initialize this gist with a README.md'
+            ],
+            'This will allow you to clone the gist immediately in GitHub.': [
+              null,
+              'This will allow you to clone the gist immediately in GitHub.'
+            ],
             'Create a New Repo': [
               null,
-              'Create a New Project'
+              'Create a New Repository'
             ],
             'Create repo': [
               null,
-              'Create project'
+              'Create repository'
             ],
             'Repo': [
               null,
-              'Project',
-              'Projects'
+              'Repository',
+              'Repositories'
             ],
             'Repo name': [
               null,
-              'Project name'
+              'Repository name'
             ],
             'My Repo': [
               null,
-              'My Project',
-              'My Projects'
+              'My Repository',
+              'My Repository'
             ],
             'Great repo names are short and memorable.': [
               null,
-              'Great project names are short and memorable.'
+              'Great repository names are short and memorable.'
             ],
             'Initialize this repo with a README.md': [
               null,
-              'Initialize this project with a README.md'
+              'Initialize this repository with a README.md'
             ],
             'This will allow you to clone the repo immediately in GitHub.': [
               null,
-              'This will allow you to clone the project immediately in GitHub.'
+              'This will allow you to clone the repository immediately in GitHub.'
             ],
             'Create a New File': [
               null,
@@ -69419,6 +69625,10 @@ var Stats = function () {
             'My Space': [
               null,
               'My Universe'
+            ],
+            'icon-gist': [
+              null,
+              'icon-briefcase'
             ],
             'icon-repo': [
               null,
@@ -69464,8 +69674,8 @@ angular.module('app').run([
     $templateCache.put('angular/a-home.html', '<a href="/">\n' + '  <i class="icon-home"></i>\n' + '  <span>Home</span>\n' + '</a>\n');
     $templateCache.put('angular/home.html', '<div id="home-view">\n' + '  <div class="subnavbar">\n' + '    <div class="subnavbar-inner">\n' + '      <div class="container">\n' + '        <a class="btn-subnavbar collapsed" data-toggle="collapse" data-target=".subnav-collapse">\n' + '          <i class="icon-reorder"></i>\n' + '        </a>\n' + '        <div class="subnav-collapse collapse">\n' + '          <ul class="mainnav">\n' + '            <li class="active">\n' + '              <a-home></a-home>\n' + '            </li>\n' + '            <li ng-show="isLoggedIn()">\n' + '              <a ng-href="/users/{{userLogin()}}">\n' + '                <i class="icon-user"></i>\n' + '                <span>{{i18n.translate("My Space").fetch()}}</span>\n' + '              </a>\n' + '            </li>\n' + '            <li class="dropdown">\n' + '              <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">\n' + '                <i class="icon-eye-open"></i>\n' + '                <span>Learn</span>\n' + '                <b class="caret"></b>\n' + '              </a>\n' + '              <ul class="dropdown-menu">\n' + '                <!--li><a href="http://www.youtube.com/user/geometryzen">Watch</a></li-->\n' + '                <li><a href="http://geometryzen.github.io/mission/" target="_blank">Our Mission</a></li>\n' + '                <li><a href="/users/geometryzen/repos/demos/tree/master">Browse Examples</a></li>\n' + '                <li><a href="http://geometryzen.github.io/start/" target="_blank">Getting Started</a></li>\n' + '              </ul>\n' + '            </li>\n' + '            <li class="dropdown">\n' + '              <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">\n' + '                <i class="icon-external-link"></i>\n' + '                <span>Discuss</span>\n' + '                <b class="caret"></b>\n' + '              </a>\n' + '              <ul class="dropdown-menu">\n' + '                <li><a href="http://groups.google.com/group/geometryzen?src=email&amp;hl=en" target="_blank">Mailing List</a></li>\n' + '                <li><a href="http://webchat.freenode.net/?channels=geometryzen&amp;uio=d4" target="_blank">Web Chat</a></li>\n' + '                <li class="divider"></li>\n' + '                <li><a href="https://twitter.com/#!/geometryzen" target="_blank">Twitter</a></li>\n' + '                <li><a href="https://plus.google.com/u/0/s/Geometry%20Zen/communities" target="_blank">Google+</a></li>\n' + '                <li class="divider"></li>\n' + '                <li class="dropdown-submenu">\n' + '                  <a href="#">Source Code</a>\n' + '                  <ul class="dropdown-menu">\n' + '                    <li><a href="https://github.com/david-geo-holmes/geometry-zen" target="_blank">Application Repository</a></li>\n' + '                    <li><a href="https://github.com/geometryzen/geometryzen.github.io" target="_blank">Documentation Repository</a></li>\n' + '                  </ul>\n' + '                </li>\n' + '                <li class="divider"></li>\n' + '                <li><a href="https://github.com/geometryzen/geometryzen/issues" target="_blank">Issue Tracker</a></li>\n' + '              </ul>\n' + '            </li>\n' + '            <li>\n' + '              <a href="http://geometryzen.github.io/faq/" target="_blank" style="text-decoration: none">\n' + '                <i class="icon-question-sign"></i>\n' + '                <span>FAQ</span>\n' + '              </a>\n' + '            </li>\n' + '            <li>\n' + '              <a href="http://geometryzen.github.io/" target="_blank" style="text-decoration: none">\n' + '                <i class="icon-book"></i>\n' + '                <span>Pages</span>\n' + '              </a>\n' + '            </li>\n' + '          </ul>\n' + '        </div>\n' + '      </div>\n' + '    </div>\n' + '  </div>\n' + '\n' + '  <div class="container-fluid">\n' + '    <div class="row-fluid">\n' + '      <div class="span12">\n' + '        <div class="widget">\n' + '          <div class="widget-header">\n' + '            <i class="icon-cogs"></i>\n' + '            <h3>Geometry Zen</h3>\n' + '          </div>\n' + '          <div class="widget-content">\n' + '            <div class="text-center">\n' + '              <h1>\n' + '                <large>Geometry Zen</large>\n' + '              </h1>\n' + '              <h1>\n' + '                <small><em>Looking at the multiverse from a Geometric Algebra perspective</em></small>\n' + '              </h1>\n' + '              <br/>\n' + '              <p><em>Geometry Zen</em> is a free, online, open-source, and collaborative tool for <em>Computational Modeling</em> combining the <em>Python</em> programming language, <em>WebGL</em> 3D visualization and <em>Geometric Algebra</em>.</p>\n' + '              <br/>\n' + '            </div>\n' + '            <div class="text-right">\n' + '              <blockquote>\n' + '                <p class="muted">...for geometry, you know, is the gate of science,<br/>and the gate is so low and small<br/>that one can only enter it as a little child.</p>\n' + '                <small>\n' + '                  <a href="http://en.wikipedia.org/wiki/William_Kingdon_Clifford" target="_blank">William K. Clifford</a> <cite title="Source Title"></cite>\n' + '                </small>\n' + '              </blockquote>\n' + '              <blockquote>\n' + '                <p class="muted">Geometry without algebra is dumb!<br/>Algebra without geometry is blind!</p>\n' + '                <small><a href="http://en.wikipedia.org/wiki/David_Hestenes" target="_blank">David O. Hestenes</a> <cite title="Source Title"></cite>\n' + '                </small>\n' + '              </blockquote>\n' + '            </div>\n' + '            <div class="text-center">\n' + '              <a href="/users/geometryzen/repos/demos/tree/master" class="btn btn-primary">\n' + '                <i class="icon-th"></i>\n' + '                <span>Browse Examples</span>\n' + '              </a>\n' + '              <a href="{{jumpHRef()}}" class="btn btn-secondary">\n' + '                <i class="{{jumpIcon()}}"></i>\n' + '                <span>{{jumpText()}}</span>\n' + '              </a>\n' + '            </div>\n' + '          </div>\n' + '        </div>\n' + '      </div>\n' + '    </div>\n' + '    <div class="row-fluid">\n' + '      <div class="span6">\n' + '        <div class="widget stacked">\n' + '          <div class="widget-header">\n' + '            <i class="icon-bullhorn"></i>\n' + '            <h3>Tell me More!</h3>\n' + '          </div>\n' + '          <div class="widget-content">\n' + '            <div id="introCarousel" class="carousel slide" data-interval="false">\n' + '              <ol class="carousel-indicators">\n' + '                <li data-target="#introCarousel" data-slide-to="0" class="active"></li>\n' + '                <li data-target="#introCarousel" data-slide-to="1"></li>\n' + '                <li data-target="#introCarousel" data-slide-to="2"></li>\n' + '                <li data-target="#introCarousel" data-slide-to="3"></li>\n' + '                <li data-target="#introCarousel" data-slide-to="4"></li>\n' + '                <li data-target="#introCarousel" data-slide-to="5"></li>\n' + '                <li data-target="#introCarousel" data-slide-to="6"></li>\n' + '              </ol>\n' + '              <div class="carousel-inner">\n' + '\n' + '                <div class="active item">\n' + '                  <img src="img/stand-back.jpg" width="1920" height="1200" alt>\n' + '                  <div class="carousel-caption">\n' + '                    <h4>How does Geometry Zen work?</h4>\n' + '                    <p>Students, researchers and educators construct a concise mathematical model of the system of interest using the Python programming language. They then get to experience their model through a WebGL 3D Visualization along with keyboard, mouse and touch interaction. Geometry Zen provides native tools for Multivectors (Geometric Numbers that generalize vectors and scalars), Dimensionality checking (Mass, Length, Time), automated Units of Measure conversion, and Coordinate systems.</p>\n' + '                    <h5 class="muted">[1 of 7]</h5>\n' + '                  </div>\n' + '                </div>\n' + '\n' + '                <div class="item">\n' + '                  <img src="img/stand-back.jpg" width="1920" height="1200" alt>\n' + '                  <div class="carousel-caption">\n' + '                    <h4>Will it do what I want?</h4>\n' + '                    <p>The Geometry Zen programming environment is completely general (there is full access to the browser window and document object model), allowing for the construction of arbitrarly complex demonstrations, problem sets, simulations, and even games. Models may be exchanged through GitHub private and public repositories or Gists allowing for collaborative development of learning materials and problem solving.</p>\n' + '                    <h5 class="muted">[2 of 7]</h5>\n' + '                  </div>\n' + '                </div>\n' + '\n' + '                <div class="item">\n' + '                  <img src="img/stand-back.jpg" width="1920" height="1200" alt>\n' + '                  <div class="carousel-caption">\n' + '                    <h4>Will it cost me anything?</h4>\n' + '                    <p>Geometry Zen is 100% free to use and is Open Source Software. Grants and donations are used to further develop and maintain the software through student workshops.</p>\n' + '                    <h5 class="muted">[3 of 7]</h5>\n' + '                  </div>\n' + '                </div>\n' + '\n' + '                <div class="item">\n' + '                  <img src="img/stand-back.jpg" width="1920" height="1200" alt>\n' + '                  <div class="carousel-caption">\n' + '                    <h4>What do I need to get started?</h4>\n' + '                    <p>Geometry Zen requires no software installation other than a WebGL compliant web browser. <a href="https://www.google.com/chrome" target="_blank">The Google Chrome browser</a> is strongly recommended. Geometry Zen is certified for use on a Personal Computer (Linux, Mac or Windows) and we are working out the kinks to have it run on Android and iOS tablets.</p>\n' + '                    <h5 class="muted">[4 of 7]</h5>\n' + '                  </div>\n' + '                </div>\n' + '\n' + '                <div class="item">\n' + '                  <img src="img/stand-back.jpg" width="1920" height="1200" alt>\n' + '                  <div class="carousel-caption">\n' + '                    <h4>How do I get started?</h4>\n' + '                    <p>Take a look at some of the examples in the tutorials and try them in the Modeling Workbench. Try your own examples in the Workbench and save them as anonymous Gists with sharable URLs. You\'ll soon want to Sign In and create yourself a GitHub account (if you don\'t have one already), that way you will be able to save your work to your own account and share it with others from there. GitHub provides a host of other useful features for storing content; it\'s what all the cool kids are using to manage content and code.</p>\n' + '                    <h5 class="muted">[5 of 7]</h5>\n' + '                  </div>\n' + '                </div>\n' + '\n' + '                <div class="item">\n' + '                  <img src="img/stand-back.jpg" width="1920" height="1200" alt>\n' + '                  <div class="carousel-caption">\n' + '                    <h4>What if I have more questions?</h4>\n' + '                    <p>The frequently asked questions page is probably you best next stop. There\'s also the Geometry Zen <em>pages</em> and the online Geometry Zen community.</p>\n' + '                    <h5 class="muted">[6 of 7]</h5>\n' + '                  </div>\n' + '                </div>\n' + '\n' + '                <div class="item">\n' + '                  <img src="img/stand-back.jpg" width="1920" height="1200" alt>\n' + '                  <div class="carousel-caption">\n' + '                    <h4>What if want to contribute or get involved?</h4>\n' + '                    <p>You can donate, <a href="https://github.com/david-geo-holmes/geometry-zen" target="_blank">write code</a>, create learning content, create documentation, and provide <a href="https://github.com/david-geo-holmes/geometry-zen/issues" target="_blank">feedback</a>.</p>\n' + '                    <h5 class="muted">[7 of 7]</h5>\n' + '                  </div>\n' + '                </div>\n' + '\n' + '              </div>\n' + '              <a class="carousel-control left" data-target="#introCarousel" data-slide="prev">&lsaquo;</a>\n' + '              <a class="carousel-control right" data-target="#introCarousel" data-slide="next">&rsaquo;</a>\n' + '            </div>\n' + '          </div>\n' + '        </div>\n' + '      </div>\n' + '      <div class="span6">\n' + '        <div class="widget">\n' + '          <div class="widget-header">\n' + '            <i class="icon-thumbs-up"></i>\n' + '            <h3>Features and Benefits</h3>\n' + '          </div>\n' + '          <div class="widget-content">\n' + '            <div class="accordion" id="fabAccordion">\n' + '              <!-- Web Browser Platform -->\n' + '              <div class="accordion-group">\n' + '                <div class="accordion-heading">\n' + '                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse0">\n' + '                    Web Browser Platform\n' + '                  </a>\n' + '                </div>\n' + '                <div id="fabCollapse0" class="accordion-body collapse">\n' + '                  <div class="accordion-inner">\n' + '                    <p>Nothing to install. Just use a WebGL compliant browser such as Chrome or Firefox.</p>\n' + '                  </div>\n' + '                </div>\n' + '              </div>\n' + '              <!-- Optimized for Mobile -->\n' + '              <div class="accordion-group">\n' + '                <div class="accordion-heading">\n' + '                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse1">\n' + '                    Optimized for Mobile\n' + '                  </a>\n' + '                </div>\n' + '                <div id="fabCollapse1" class="accordion-body collapse">\n' + '                  <div class="accordion-inner">\n' + '                    <p>Designed to be easily used on mobile tablet devices.</p>\n' + '                  </div>\n' + '                </div>\n' + '              </div>\n' + '              <!-- Modeling Workbench -->\n' + '              <div class="accordion-group">\n' + '                <div class="accordion-heading">\n' + '                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse2">\n' + '                    Modeling Workbench\n' + '                  </a>\n' + '                </div>\n' + '                <div id="fabCollapse2" class="accordion-body collapse">\n' + '                  <div class="accordion-inner">\n' + '                    <p>Juxtaposes an analytical programming editor with a 3D geometry view reinforcing the learning of the mathematical notation as well as the geometric interpretation.</p>\n' + '                  </div>\n' + '                </div>\n' + '              </div>\n' + '              <!-- Python Language -->\n' + '              <div class="accordion-group">\n' + '                <div class="accordion-heading">\n' + '                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse3">\n' + '                    Python Language\n' + '                  </a>\n' + '                </div>\n' + '                <div id="fabCollapse3" class="accordion-body collapse">\n' + '                  <div class="accordion-inner">\n' + '                    <p>Mathematical binary operators are natural to use. Easy to learn. Widely used in academia.</p>\n' + '                  </div>\n' + '                </div>\n' + '              </div>\n' + '              <!-- WebGL rendering -->\n' + '              <div class="accordion-group">\n' + '                <div class="accordion-heading">\n' + '                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse4">\n' + '                    WebGL 3D rendering\n' + '                  </a>\n' + '                </div>\n' + '                <div id="fabCollapse4" class="accordion-body collapse">\n' + '                  <div class="accordion-inner">\n' + '                    <p>Fast GPU-based rendering provides smooth animation of simulations.</p>\n' + '                  </div>\n' + '                </div>\n' + '              </div>\n' + '              <!-- Geometric Algebra-->\n' + '              <div class="accordion-group">\n' + '                <div class="accordion-heading">\n' + '                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse5">\n' + '                    Geometric Algebra(s)\n' + '                  </a>\n' + '                </div>\n' + '                <div id="fabCollapse5" class="accordion-body collapse">\n' + '                  <div class="accordion-inner">\n' + '                    <p>Support for 2D and 3D Euclidean (Now), Spacetime and Conformal algebras (Coming soon).</p>\n' + '                  </div>\n' + '                </div>\n' + '              </div>\n' + '              <!-- Dimensional Analysis-->\n' + '              <div class="accordion-group">\n' + '                <div class="accordion-heading">\n' + '                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse6">\n' + '                    Dimensional Analysis\n' + '                  </a>\n' + '                </div>\n' + '                <div id="fabCollapse6" class="accordion-body collapse">\n' + '                  <div class="accordion-inner">\n' + '                    <p>Automatic verification of the correctness of physical expressions (Coming soon).</p>\n' + '                  </div>\n' + '                </div>\n' + '              </div>\n' + '              <!-- Units of Measure-->\n' + '              <div class="accordion-group">\n' + '                <div class="accordion-heading">\n' + '                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse7">\n' + '                    Units of Measure\n' + '                  </a>\n' + '                </div>\n' + '                <div id="fabCollapse7" class="accordion-body collapse">\n' + '                  <div class="accordion-inner">\n' + '                    <p>Permits algebraic manipulations, even if the units differ, with automatic conversion (Coming soon).</p>\n' + '                  </div>\n' + '                </div>\n' + '              </div>\n' + '              <!-- Coordinate Systems-->\n' + '              <div class="accordion-group">\n' + '                <div class="accordion-heading">\n' + '                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse8">\n' + '                    Coordinate Systems\n' + '                  </a>\n' + '                </div>\n' + '                <div id="fabCollapse8" class="accordion-body collapse">\n' + '                  <div class="accordion-inner">\n' + '                    <p>Enter initial configuration in a coordinate system that reflects the symmetry of the system.</p>\n' + '                  </div>\n' + '                </div>\n' + '              </div>\n' + '              <!-- Tutorials-->\n' + '              <div class="accordion-group">\n' + '                <div class="accordion-heading">\n' + '                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse9">\n' + '                    Tutorials\n' + '                  </a>\n' + '                </div>\n' + '                <div id="fabCollapse9" class="accordion-body collapse">\n' + '                  <div class="accordion-inner">\n' + '                    <p>A comprehensive introduction to {{marketing.name}} and Geometric Algebra (Coming soon).</p>\n' + '                  </div>\n' + '                </div>\n' + '              </div>\n' + '              <!-- Examples-->\n' + '              <div class="accordion-group">\n' + '                <div class="accordion-heading">\n' + '                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse10">\n' + '                    Examples\n' + '                  </a>\n' + '                </div>\n' + '                <div id="fabCollapse10" class="accordion-body collapse">\n' + '                  <div class="accordion-inner">\n' + '                    <p>Allow you to explore the capabilities and potential of {{marketing.name}}.</p>\n' + '                  </div>\n' + '                </div>\n' + '              </div>\n' + '              <!-- Works disconnected-->\n' + '              <div class="accordion-group">\n' + '                <div class="accordion-heading">\n' + '                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse11">\n' + '                    Works disconnected\n' + '                  </a>\n' + '                </div>\n' + '                <div id="fabCollapse11" class="accordion-body collapse">\n' + '                  <div class="accordion-inner">\n' + '                    <p>No need to be connected to the internet unless you want to share your work with others.</p>\n' + '                  </div>\n' + '                </div>\n' + '              </div>\n' + '              <!-- OAuth authentication-->\n' + '              <div class="accordion-group">\n' + '                <div class="accordion-heading">\n' + '                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse13">\n' + '                    OAuth authentication\n' + '                  </a>\n' + '                </div>\n' + '                <div id="fabCollapse13" class="accordion-body collapse">\n' + '                  <div class="accordion-inner">\n' + '                    <p>Secure authentication and authorization using GitHub. No extra passwords to memorize.</p>\n' + '                  </div>\n' + '                </div>\n' + '              </div>\n' + '              <!-- GitHub repository-->\n' + '              <div class="accordion-group">\n' + '                <div class="accordion-heading">\n' + '                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse14">\n' + '                    GitHub repository\n' + '                  </a>\n' + '                </div>\n' + '                <div id="fabCollapse14" class="accordion-body collapse">\n' + '                  <div class="accordion-inner">\n' + '                    <p>Save and share your models in public repositories or use private repositories for assignments and problems. Search for public {{marketing.name}} models by other authors, improve on them, return the favor by offering back your changes.</p>\n' + '                  </div>\n' + '                </div>\n' + '              </div>\n' + '              <!-- Issue Tracking-->\n' + '              <div class="accordion-group">\n' + '                <div class="accordion-heading">\n' + '                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse15">\n' + '                    Issue Tracking\n' + '                  </a>\n' + '                </div>\n' + '                <div id="fabCollapse15" class="accordion-body collapse">\n' + '                  <div class="accordion-inner">\n' + '                    <p>Want something incorporated, fixed or improved? <a href="https://github.com/david-geo-holmes/geometry-zen/issues">Discuss your issue</a> with the {{marketing.name}} community!</p>\n' + '                  </div>\n' + '                </div>\n' + '              </div>\n' + '              <!-- 100% freedom-->\n' + '              <div class="accordion-group">\n' + '                <div class="accordion-heading">\n' + '                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse16">\n' + '                    100% freedom\n' + '                  </a>\n' + '                </div>\n' + '                <div id="fabCollapse16" class="accordion-body collapse">\n' + '                  <div class="accordion-inner">\n' + '                    <p>Freedom to run, copy, distribute, study, improve and change the software.</p>\n' + '                  </div>\n' + '                </div>\n' + '              </div>\n' + '              <!-- 100% free-->\n' + '              <div class="accordion-group">\n' + '                <div class="accordion-heading">\n' + '                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse17">\n' + '                    100% free\n' + '                  </a>\n' + '                </div>\n' + '                <div id="fabCollapse17" class="accordion-body collapse">\n' + '                  <div class="accordion-inner">\n' + '                    <p>That\'s right.</p>\n' + '                  </div>\n' + '                </div>\n' + '              </div>\n' + '              <!-- Open Source Software-->\n' + '              <div class="accordion-group">\n' + '                <div class="accordion-heading">\n' + '                  <a class="accordion-toggle" data-toggle="collapse" data-parent="#fabAccordion" data-target="#fabCollapse18">\n' + '                    Open Source Software\n' + '                  </a>\n' + '                </div> <!-- accordion-toggle -->\n' + '                <div id="fabCollapse18" class="accordion-body collapse">\n' + '                  <div class="accordion-inner">\n' + '                    <p>What else would it be? Just head over to the <a href="https://github.com/david-geo-holmes/geometry-zen">{{marketing.name}} GitHub project.</a></p>\n' + '                  </div> <!-- accordion-inner -->\n' + '                </div> <!-- accordion-body -->\n' + '              </div> <!-- accordion-group -->\n' + '            </div> <!-- accordion -->\n' + '          </div> <!-- div.widget-content -->\n' + '        </div> <!-- div.widget -->\n' + '      </div> <!-- div.span -->\n' + '    </div> <!-- div.row-fluid -->\n' + '    <div class="row-fluid">\n' + '      <div class="span6">\n' + '        <div class="widget">\n' + '          <div class="widget-header">\n' + '            <i class="icon-cogs"></i>\n' + '            <h3>Geometric Algebra</h3>\n' + '          </div>\n' + '          <div class="widget-content">\n' + '            <p>Geometry is a branch of mathematics with a tradition going back at least as far as Euclid.</p>\n' + '            <p>Descartes showed how geometric curve-drawing machines could be described mathematically using <em>Polynomials</em>. Finding the loci of points representing the curves involed solving the polynomial equations.</p>\n' + '            <p>An <em>Algebra</em> is the name given to a special kind of mathematical object. Roughly speaking, an Algebra is a <em>Linear Space</em>, whose elements are <em>vectors</em> and <em>scalars</em>, coupled with an operation called <em>multiplication</em> such that the result of multiplication always stays in the Linear Space (closure). Algebras are very useful because of the ease of computation and expressiveness of the notation.</p>\n' + '            <p><em>Geometric Algebra</em> is an Algebra with an <em>associative</em> multiplication property. Geometric Algebra can be thought of as the geralization of the concept of a number to describe geometric quantities and defines the rules for manipulating those numbers. In essence, Geometric Algebra is about learning how to correctly multiply and interpret Geometric Numbers.</p>\n' + '            <p>Many of the Physical Laws that describe the phenomena of nature are Geometric and Algebraic in Character. That is to say, the laws have a precise mathematical structure that is amenable to a geometric interpretation. Geometric Algebra unifies these two aspects in a single mathematical tool. By learning and using Geometric Algebra (and Geometric Calculus) the student gains a new perspective and a lasting foundation for understanding the universe and making new discoveries.</p>\n' + '          </div> <!-- div.widget-content -->\n' + '        </div> <!-- div.widget -->\n' + '      </div> <!-- div.span -->\n' + '      <div class="span6">\n' + '        <div class="widget">\n' + '          <div class="widget-header">\n' + '            <i class="icon-time"></i>\n' + '            <h3>Timeline</h3>\n' + '          </div>\n' + '          <div class="widget-content">\n' + '            <table class="table table-condensed">\n' + '              <tbody>\n' + '                <tr>\n' + '                  <td><span nowrap=nowrap>300 BCE</span></td>\n' + '                  <td>Euclid</td>\n' + '                  <td><em>Geometry</em></td>\n' + '                </tr>\n' + '                <tr>\n' + '                  <td><span nowrap=nowrap>250 CE</span></td>\n' + '                  <td>Diophantes</td>\n' + '                  <td><em>Algebra</em></td>\n' + '                </tr>\n' + '                <tr>\n' + '                  <td>1545</td>\n' + '                  <td>Cardano</td>\n' + '                  <td><em>Imaginary numbers</em></td>\n' + '                </tr>\n' + '                <tr>\n' + '                  <td>1637</td>\n' + '                  <td>Descartes</td>\n' + '                  <td><em>Coordinates, Algebraic Geometry</em></td>\n' + '                </tr>\n' + '                <tr>\n' + '                  <td>1798</td>\n' + '                  <td>Gauss</td>\n' + '                  <td><em>Complex Algebra</em></td>\n' + '                </tr>\n' + '                <tr>\n' + '                  <td>1840</td>\n' + '                  <td>Grassman</td>\n' + '                  <td><em>Linear Algebra, Vector Space</em></td>\n' + '                </tr>\n' + '                <tr>\n' + '                  <td>1843</td>\n' + '                  <td>Hamilton</td>\n' + '                  <td><em>Quaternions</em></td>\n' + '                </tr>\n' + '                <tr>\n' + '                  <td>1844</td>\n' + '                  <td>Grassman</td>\n' + '                  <td><em>Extensive Algebra</em></td>\n' + '                </tr>\n' + '                <tr>\n' + '                  <td>1854</td>\n' + '                  <td>Cayley</td>\n' + '                  <td><em>Matrix Algebra</em></td>\n' + '                </tr>\n' + '                <tr>\n' + '                  <td>1870</td>\n' + '                  <td>Gibbs and Heaviside</td>\n' + '                  <td><em>Vector Calculus</em></td>\n' + '                </tr>\n' + '                <tr>\n' + '                  <td>1878</td>\n' + '                  <td>Clifford</td>\n' + '                  <td><em>Geometric Algebra</em></td>\n' + '                </tr>\n' + '                <tr>\n' + '                  <td>1890</td>\n' + '                  <td>Ricci</td>\n' + '                  <td><em>Tensors</em></td>\n' + '                </tr>\n' + '                <tr>\n' + '                  <td>1899</td>\n' + '                  <td>Cartan</td>\n' + '                  <td><em>Differential Forms</em></td>\n' + '                </tr>\n' + '                <tr>\n' + '                  <td>1928</td>\n' + '                  <td>Dirac</td>\n' + '                  <td><em>Spin Algebra</em></td>\n' + '                </tr>\n' + '                <tr>\n' + '                  <td>1957</td>\n' + '                  <td>Riesz</td>\n' + '                  <td><em>Clifford Numbers, Spinors</em></td>\n' + '                </tr>\n' + '                <tr>\n' + '                  <td>1966</td>\n' + '                  <td>Hestenes</td>\n' + '                  <td><em>Space Time Algebra, Geometric Calculus</em></td>\n' + '                </tr>\n' + '              </tbody>\n' + '            </table> <!-- table.table-->\n' + '            <dl class="dl-horizontal">\n' + '            </dl>\n' + '          </div> <!-- dive.widget-content -->\n' + '        </div> <!-- div.widget -->\n' + '      </div> <!-- div.span4 -->\n' + '    </div> <!-- div.row-fluid -->\n' + '  </div> <!-- div.container-fluid -->\n' + '</div> <!-- div.home-view -->\n' + '<script>\n' + '  $(\'.accordion\').on(\'show\', function (e) {\n' + '    $(e.target).prev(\'.accordion-heading\').parent ().addClass(\'open\');\n' + '  });\n' + '\n' + '  $(\'.accordion\').on(\'hide\', function (e) {\n' + '    $(this).find(\'.accordion-toggle\').not($(e.target)).parents (\'.accordion-group\').removeClass(\'open\');\n' + '  });\n' + '    \n' + '  $(\'.accordion\').each (function () {       \n' + '    $(this).find (\'.accordion-body.in\').parent ().addClass (\'open\');\n' + '  });\n' + '</script>\n');
     $templateCache.put('angular/printer.html', '<div ng-controller="PrinterCtrl" class="container-fluid">\n' + '  <div class="row-fluid">\n' + '    <div class="span12">\n' + '      <!-- Using anything other than a pre(serve) element is likely too be slow -->\n' + '      <!-- PRESERVE_ELEMENT_ID is defined in the printer controller -->\n' + '      <pre id="a5f435e0-c92e-11e2-8b8b-0800200c9a66" class="printer"></pre>\n' + '    </div>\n' + '  </div>\n' + '</div>\n' + '\n');
-    $templateCache.put('angular/tree.html', '<div id="repo-view">\n' + '\n' + '  <div class="subnavbar">\n' + '    <div class="subnavbar-inner">\n' + '      <div class="container">\n' + '        <a class="btn-subnavbar collapsed" data-toggle="collapse" data-target=".subnav-collapse">\n' + '          <i class="icon-reorder"></i>\n' + '        </a>\n' + '        <div class="subnav-collapse collapse">\n' + '          <ul class="mainnav">\n' + '            <li ng-show="isLoggedIn()" class="{{userBreadcrumbClass()}}">\n' + '              <a ng-href="/users/{{user.login}}">\n' + '                <i class="icon-user"></i>\n' + '                <span>{{i18n.translate("My Space").fetch()}}</span>\n' + '              </a>\n' + '            </li>\n' + '            <li class="{{repoBreadcrumbClass()}}">\n' + '              <a ng-click="bookView()" href="#">\n' + '                <i class="{{i18n.translate(\'icon-repo\').fetch()}}"></i>\n' + '                <span>{{i18n.translate("Repo").fetch()}}</span>\n' + '              </a>\n' + '            </li>\n' + '          </ul>\n' + '        </div>\n' + '      </div>\n' + '    </div>\n' + '  </div>\n' + '  \n' + '  <div id="work-layout" class="container-fluid">\n' + '    <div class="row-fluid">\n' + '      <div class="widget">\n' + '        <div class="widget-header">\n' + '          <i class="{{i18n.translate(\'icon-repo\').fetch()}}"></i>\n' + '          <h3>{{repo.name}}</h3>\n' + '        </div>\n' + '        <div class="widget-content">\n' + '          <div>\n' + '            <!--\n' + '            <i class="icon-user muted"></i>\n' + '            <span><a ng-href="/users/{{user.login}}">{{user.login}}</a></span>\n' + '            -->\n' + '            <!--\n' + '            <a ng-href="https://github.com/{{user.login}}" target="_blank" class="muted">\n' + '              <i class="icon-github"></i>\n' + '            </a>\n' + '            -->\n' + '            <span>{{repo.description}}</span>\n' + '          </div>\n' + '          <ul class="nav nav-tabs" id="myTab">\n' + '            <li><a data-target="#items" data-toggle="tab">{{i18n.translate(\'File\').ifPlural(2, \'Files\').fetch()}}</a></li>\n' + '            <!--li><a data-target="#commits" data-toggle="tab">Commits</a></li-->\n' + '            <!--li><a data-target="#branches" data-toggle="tab">Branches</a></li-->\n' + '          </ul>\n' + '          <div class="tab-content">\n' + '            <div class="tab-pane" id="items">\n' + '              <div class ="row-fluid">\n' + '                <table class="table table-condensed">\n' + '                  <tbody>\n' + '                    <tr ng-show="isNewFileEnabled()">\n' + '                      <td nowrap=nowrap>\n' + '                        <!--input type="text" placeHolder="Filter..."></input-->\n' + '                      </td>\n' + '                      <td nowrap=nowrap>\n' + '                        <button ng-click="newFile()" ng-show="isNewFileEnabled()" class="btn btn-primary">\n' + '                          <i class="icon-plus-sign-alt"></i> <i class="{{i18n.translate(\'icon-file\').fetch()}}"></i>\n' + '                          <span>{{i18n.translate("Create a New File").fetch()}}</span>\n' + '                        </button>\n' + '                      </td>\n' + '                    </tr>\n' + '                    <!-- Reminder: An item is a book or a page -->\n' + '                    <tr ng-repeat="item in contextItem.childItems">\n' + '                      <td nowrap=nowrap>\n' + '                        <h3>\n' + '                          <i class="{{i18n.translate(iconFromItem(item)).fetch()}} muted"></i>\n' + '                          <a href="{{hrefFromItem(item)}}" class="btn btn-link">\n' + '                            <span>{{item.name}}</span>\n' + '                          </a>\n' + '                        </h3>\n' + '                      </td>\n' + '                      <td nowrap=nowrap>\n' + '                        <!-- Make use of the HATEOAS links -->\n' + '                        <!--\n' + '                        <h3>\n' + '                          <i class="icon-github muted"></i>\n' + '                          <a ng-href="{{item.html_url}}" target="_blank" class="btn btn-link">\n' + '                            <span>GitHub</span>\n' + '                          </a>\n' + '                        </h3>\n' + '                        -->\n' + '                        <button ng-click="deleteItem($index)" ng-show="isDeleteItemEnabled()" class="btn btn-tertiary">\n' + '                          <i class="icon-minus-sign-alt"></i>\n' + '                          <span>Delete</span>\n' + '                        </button>\n' + '                      </td>\n' + '                    </tr>\n' + '                  </tbody>\n' + '                </table>\n' + '              </div>\n' + '            </div>\n' + '            <div class="tab-pane" id="commits">\n' + '              <p>Under Construction: Commits</p>\n' + '            </div>\n' + '            <div class="tab-pane" id="branches">\n' + '              <p>Under Construction: Branches</p>\n' + '            </div>\n' + '          </div>\n' + '          <script>\n' + '            $(function () {\n' + '              $(\'#myTab a[data-target="#items"]\').tab(\'show\');\n' + '            })\n' + '          </script>\n' + '          <script>\n' + '            $(\'#myTab a[data-target="#items"]\').click(function(e) {\n' + '              e.preventDefault();\n' + '              $(this).tab(\'show\');\n' + '            });\n' + '          </script>\n' + '          <script>\n' + '            $(\'#myTab a[data-target="#commits"]\').click(function(e) {\n' + '              e.preventDefault();\n' + '              $(this).tab(\'show\');\n' + '            });\n' + '          </script>\n' + '          <script>\n' + '            $(\'#myTab a[data-target="#branches"]\').click(function(e) {\n' + '              e.preventDefault();\n' + '              $(this).tab(\'show\');\n' + '            });\n' + '          </script>\n' + '        </div> <!-- div.widget-content -->\n' + '      </div> <!-- div.widget -->\n' + '    </div> <!-- div.row-fluid -->\n' + '  </div> <!-- div.container-fluid -->\n' + '  <div id="new-file-dialog" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="new-file-dialog-label" aria-hidden="true">\n' + '    <div class="modal-header">\n' + '      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>\n' + '      <h3 id="new-file-dialog-label"><i class="icon-plus-sign-alt muted"></i> <i class="{{i18n.translate(\'icon-file\').fetch()}} muted"></i> {{i18n.translate("Create a New File").fetch()}}</h3>\n' + '    </div>\n' + '    <form ng-controller="NewFileCtrl">\n' + '      <fieldset>\n' + '        <div class="modal-body">\n' + '          <label>{{i18n.translate(\'File name\').fetch()}}</label>\n' + '          <input type="text" name="name" ng-model="file.name"></input>\n' + '          <label>Commit message:</label>\n' + '          <input type="text" name="message" ng-model="file.message" placeholder="{{i18n.translate(\'Create file\').fetch()}}"></input>\n' + '        </div>\n' + '        <div class="modal-footer">\n' + '          <button id="btnCancel" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>\n' + '          <button type="submit" ng-click="createFile()" id="btnOK" class="btn btn-primary">{{i18n.translate("Create file").fetch()}}</button>\n' + '        </div>\n' + '      </fieldset>\n' + '    </form>\n' + '  </div>\n' + '</div>\n');
-    $templateCache.put('angular/user.html', '<div id="user-view">\n' + '  <div class="subnavbar">\n' + '    <div class="subnavbar-inner">\n' + '      <div class="container">\n' + '        <a class="btn-subnavbar collapsed" data-toggle="collapse" data-target=".subnav-collapse">\n' + '          <i class="icon-reorder"></i>\n' + '        </a>\n' + '        <div class="subnav-collapse collapse">\n' + '          <ul class="mainnav">\n' + '            <li class="{{userBreadcrumbClass()}}">\n' + '              <a ng-href="/users/{{user.login}}">\n' + '                <i class="icon-user"></i>\n' + '                <span>{{i18n.translate("My Space").fetch()}}</span>\n' + '              </a>\n' + '            </li>\n' + '            <li>\n' + '              <a ng-href="/workbench" href="#">\n' + '                <i class="icon-edit"></i>\n' + '                <span>Workbench</span>\n' + '              </a>\n' + '            </li>\n' + '          </ul>\n' + '        </div> <!-- /.subnav-collapse -->\n' + '      </div> <!-- /container -->\n' + '    </div> <!-- /subnavbar-inner -->\n' + '  </div> <!-- /subnavbar -->\n' + '\n' + '  <div class="container-fluid">\n' + '    <div class="row-fluid">\n' + '      <div class="span4">\n' + '        <div class="widget">\n' + '          <div class="widget-header">\n' + '              <i class="icon-user"></i>\n' + '              <h3>Profile</h3>\n' + '          </div>\n' + '          <div class="widget-content">\n' + '            <h3>\n' + '              <span>{{user.name}}</span>\n' + '            </h3>\n' + '            <h4>\n' + '              <span>{{user.login}}</span>\n' + '            </h4>\n' + '            <!-- HATEOAS GitHub link? -->\n' + '            <!--\n' + '            <a href="https://github.com/{{user.login}}?tab=repositories" target="_blank" class="btn btn-secondary">\n' + '              <i class="icon-github"></i>\n' + '              <span>GitHub</span>\n' + '            </a>\n' + '            -->\n' + '          </div>\n' + '        </div>\n' + '      </div>\n' + '      <div class="span8">\n' + '        <div class="widget stacked">\n' + '          <div class="widget-content">\n' + '            <ul class="nav nav-tabs" id="myTab">\n' + '              <!--li><a data-target="#contributions" data-toggle="tab">Contributions</a></li-->\n' + '              <li><a data-target="#repositories" data-toggle="tab">{{i18n.translate("Repo").ifPlural(2, "Repos").fetch()}}</a></li>\n' + '              <!--li><a data-target="#activity" data-toggle="tab">Public Activity</a></li-->\n' + '            </ul>\n' + '            <div class="tab-content">\n' + '              <div class="tab-pane" id="contributions">\n' + '                <p>Under Construction: Contributions</p>\n' + '              </div>\n' + '              <div class="tab-pane" id="repositories">\n' + '                <div class ="row-fluid">\n' + '                  <table class="table table-condensed">\n' + '                    <tbody>\n' + '                      <tr>\n' + '                        <td nowrap=nowrap>\n' + '                          <!--input type="text" placeHolder="Filter..."></input-->\n' + '                        </td>\n' + '                        <td nowrap=nowrap>\n' + '                          <button ng-click="newRepo()" class="btn btn-primary">\n' + '                            <i class="icon-plus-sign-alt"></i> <i class="{{i18n.translate(\'icon-repo\').fetch()}}"></i>\n' + '                            <span>{{i18n.translate("Create a New Repo").fetch()}}</span>\n' + '                          </button>\n' + '                        </td>\n' + '                      </tr>\n' + '                      <tr ng-repeat="repo in repos">\n' + '                        <td nowrap=nowrap>\n' + '                          <h3>\n' + '                            <i class="{{i18n.translate(\'icon-repo\').fetch()}} muted"></i>\n' + '                            <a href="/users/{{user.login}}/repos/{{repo.name}}/tree/master" class="btn btn-link">\n' + '                              <span>{{repo.name}}</span>\n' + '                            </a>\n' + '                          </h3>\n' + '                          <p>{{repo.description}}</p>\n' + '                        </td>\n' + '                        <td nowrap=nowrap>\n' + '                          <!-- HATEOAS GitHub link-->\n' + '                          <!--\n' + '                          <a href="{{repo.github_html_url}}" target="_blank" class="btn btn-secondary">\n' + '                            <i class="icon-github"></i>\n' + '                            <span>GitHub</span>\n' + '                          </a>\n' + '                          -->\n' + '                          <button ng-click="deleteRepo($index)" class="btn btn-tertiary">\n' + '                            <i class="icon-minus-sign-alt"></i>\n' + '                            <span>Delete</span>\n' + '                          </button>\n' + '                        </td>\n' + '                      </tr>\n' + '                    </tbody>\n' + '                  </table>\n' + '                </div>\n' + '              </div>\n' + '              <div class="tab-pane" id="activity">\n' + '                <p>Under Construction: Public Activity</p>\n' + '              </div>\n' + '            </div>\n' + '            <script>\n' + '              $(function () {\n' + '                $(\'#myTab a[data-target="#repositories"]\').tab(\'show\');\n' + '              })\n' + '            </script>\n' + '            <script>\n' + '              $(\'#myTab a[data-target="#contributions"]\').click(function(e) {\n' + '                e.preventDefault();\n' + '                $(this).tab(\'show\');\n' + '              });\n' + '            </script>\n' + '            <script>\n' + '              $(\'#myTab a[data-target="#repositories"]\').click(function(e) {\n' + '                e.preventDefault();\n' + '                $(this).tab(\'show\');\n' + '              });\n' + '            </script>\n' + '            <script>\n' + '              $(\'#myTab a[data-target="#activity"]\').click(function(e) {\n' + '                e.preventDefault();\n' + '                $(this).tab(\'show\');\n' + '              });\n' + '            </script>\n' + '          </div>\n' + '        </div>\n' + '\n' + '        <div id="new-repo-dialog" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="new-repo-dialog-label" aria-hidden="true">\n' + '          <div class="modal-header">\n' + '            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>\n' + '            <h3 id="new-repo-dialog-label"><i class="icon-plus-sign-alt muted"></i> <i class="{{i18n.translate(\'icon-repo\').fetch()}} muted"></i> {{i18n.translate("Create a New Repo").fetch()}}</h3>\n' + '          </div>\n' + '          <form ng-controller="NewRepoCtrl">\n' + '            <fieldset>\n' + '              <div class="modal-body">\n' + '                <label>{{i18n.translate("Repo name").fetch()}}</label>\n' + '                <input type="text" name="repo" ng-model="repo.name"></input>\n' + '                <span class="help-block">{{i18n.translate("Great repo names are short and memorable.").fetch()}}</span>\n' + '                <label>Description<span class="muted"> (optional)</span></label>\n' + '                <input type="text" name="description" ng-model="repo.description"></input>\n' + '                <!--\n' + '                <hr/>\n' + '                <input type="radio" ng-model="repo.private" value="false"> <i class="{{i18n.translate(\'icon-repo\').fetch()}} muted"></i> Public<br/>\n' + '                <span class="help-block">Anyone can see this repository. You choose who can commit.</span>\n' + '                <input type="radio" ng-model="repo.private" value="true"> Private <br/>\n' + '                <span class="help-block">You choose who can see and commit to this repository.</span>\n' + '                -->\n' + '                <hr/>\n' + '                <label class="checkbox">\n' + '                  <input type="checkbox" name="markdown-readme" ng-model="repo.markdownReadme"> {{i18n.translate("Initialize this repo with a README.md").fetch()}}</input>\n' + '                </label>\n' + '                <span class="help-block">{{i18n.translate("This will allow you to clone the repo immediately in GitHub.").fetch()}}</span>\n' + '                <!--\n' + '                <label class="checkbox">\n' + '                  <input type="checkbox" name="python-readme" ng-model="repo.pythonReadme"> Initialize this book with a README.py</input>\n' + '                </label>\n' + '                <span class="help-block">Having at least one Python file will ensure that the GitHub repository is visible to Geometry Zen.</span>\n' + '                -->\n' + '              </div>\n' + '              <div class="modal-footer">\n' + '                <button id="btnCancel" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>\n' + '                <button type="submit" ng-click="createRepo()" id="btnOK" class="btn btn-primary">{{i18n.translate("Create repo").fetch()}}</button>\n' + '              </div>\n' + '            </fieldset>\n' + '          </form>\n' + '        </div>\n' + '      </div>\n' + '    </div>\n' + '  </div>\n' + '</div>');
+    $templateCache.put('angular/tree.html', '<div id="repo-view">\n' + '\n' + '  <div class="subnavbar">\n' + '    <div class="subnavbar-inner">\n' + '      <div class="container">\n' + '        <a class="btn-subnavbar collapsed" data-toggle="collapse" data-target=".subnav-collapse">\n' + '          <i class="icon-reorder"></i>\n' + '        </a>\n' + '        <div class="subnav-collapse collapse">\n' + '          <ul class="mainnav">\n' + '            <li ng-show="isLoggedIn()" class="{{userBreadcrumbClass()}}">\n' + '              <a ng-href="/users/{{user.login}}">\n' + '                <i class="icon-user"></i>\n' + '                <span>{{i18n.translate("My Space").fetch()}}</span>\n' + '              </a>\n' + '            </li>\n' + '            <li class="{{repoBreadcrumbClass()}}">\n' + '              <a ng-click="bookView()" href="#">\n' + '                <i class="{{i18n.translate(\'icon-repo\').fetch()}}"></i>\n' + '                <span>{{i18n.translate("Repo").fetch()}}</span>\n' + '              </a>\n' + '            </li>\n' + '          </ul>\n' + '        </div>\n' + '      </div>\n' + '    </div>\n' + '  </div>\n' + '  \n' + '  <div id="work-layout" class="container-fluid">\n' + '    <div class="row-fluid">\n' + '      <div class="widget">\n' + '        <div class="widget-header">\n' + '          <i class="{{i18n.translate(\'icon-repo\').fetch()}}"></i>\n' + '          <h3>{{repo.name}}</h3>\n' + '        </div>\n' + '        <div class="widget-content">\n' + '          <div>\n' + '            <!--\n' + '            <i class="icon-user muted"></i>\n' + '            <span><a ng-href="/users/{{user.login}}">{{user.login}}</a></span>\n' + '            -->\n' + '            <!--\n' + '            <a ng-href="https://github.com/{{user.login}}" target="_blank" class="muted">\n' + '              <i class="icon-github"></i>\n' + '            </a>\n' + '            -->\n' + '            <span>{{repo.description}}</span>\n' + '          </div>\n' + '          <ul class="nav nav-tabs" id="myTab">\n' + '            <li><a data-target="#items" data-toggle="tab">{{i18n.translate(\'File\').ifPlural(2, \'Files\').fetch()}}</a></li>\n' + '            <!--li><a data-target="#commits" data-toggle="tab">Commits</a></li-->\n' + '            <!--li><a data-target="#branches" data-toggle="tab">Branches</a></li-->\n' + '          </ul>\n' + '          <div class="tab-content">\n' + '            <div class="tab-pane" id="items">\n' + '              <div class ="row-fluid">\n' + '                <table class="table table-condensed">\n' + '                  <tbody>\n' + '                    <tr ng-show="isNewFileEnabled()">\n' + '                      <td nowrap=nowrap>\n' + '                        <!--input type="text" placeHolder="Filter..."></input-->\n' + '                      </td>\n' + '                      <td nowrap=nowrap>\n' + '                        <button ng-click="newFile()" ng-show="isNewFileEnabled()" class="btn btn-primary">\n' + '                          <i class="icon-plus-sign-alt"></i> <i class="{{i18n.translate(\'icon-file\').fetch()}}"></i>\n' + '                          <span>{{i18n.translate("Create a New File").fetch()}}</span>\n' + '                        </button>\n' + '                      </td>\n' + '                    </tr>\n' + '                    <!-- Reminder: An item is a book or a page -->\n' + '                    <tr ng-repeat="item in contextItem.childItems">\n' + '                      <td nowrap=nowrap>\n' + '                        <h3>\n' + '                          <i class="{{i18n.translate(iconFromItem(item)).fetch()}} muted"></i>\n' + '                          <a href="{{hrefFromItem(item)}}" class="btn btn-link">\n' + '                            <span>{{item.name}}</span>\n' + '                          </a>\n' + '                        </h3>\n' + '                      </td>\n' + '                      <td nowrap=nowrap>\n' + '                        <a href="{{item.html_url}}" target="_blank" class="btn btn-secondary">\n' + '                          <i class="icon-github"></i>\n' + '                          <span>GitHub</span>\n' + '                        </a>\n' + '                      </td>\n' + '                    </tr>\n' + '                  </tbody>\n' + '                </table>\n' + '              </div>\n' + '            </div>\n' + '            <div class="tab-pane" id="commits">\n' + '              <p>Under Construction: Commits</p>\n' + '            </div>\n' + '            <div class="tab-pane" id="branches">\n' + '              <p>Under Construction: Branches</p>\n' + '            </div>\n' + '          </div>\n' + '          <script>\n' + '            $(function () {\n' + '              $(\'#myTab a[data-target="#items"]\').tab(\'show\');\n' + '            })\n' + '          </script>\n' + '          <script>\n' + '            $(\'#myTab a[data-target="#items"]\').click(function(e) {\n' + '              e.preventDefault();\n' + '              $(this).tab(\'show\');\n' + '            });\n' + '          </script>\n' + '          <script>\n' + '            $(\'#myTab a[data-target="#commits"]\').click(function(e) {\n' + '              e.preventDefault();\n' + '              $(this).tab(\'show\');\n' + '            });\n' + '          </script>\n' + '          <script>\n' + '            $(\'#myTab a[data-target="#branches"]\').click(function(e) {\n' + '              e.preventDefault();\n' + '              $(this).tab(\'show\');\n' + '            });\n' + '          </script>\n' + '        </div> <!-- div.widget-content -->\n' + '      </div> <!-- div.widget -->\n' + '    </div> <!-- div.row-fluid -->\n' + '  </div> <!-- div.container-fluid -->\n' + '  <div id="new-file-dialog" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="new-file-dialog-label" aria-hidden="true">\n' + '    <div class="modal-header">\n' + '      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>\n' + '      <h3 id="new-file-dialog-label"><i class="icon-plus-sign-alt muted"></i> <i class="{{i18n.translate(\'icon-file\').fetch()}} muted"></i> {{i18n.translate("Create a New File").fetch()}}</h3>\n' + '    </div>\n' + '    <form ng-controller="NewFileCtrl">\n' + '      <fieldset>\n' + '        <div class="modal-body">\n' + '          <label>{{i18n.translate(\'File name\').fetch()}}</label>\n' + '          <input type="text" name="name" ng-model="file.name"></input>\n' + '          <label>Commit message:</label>\n' + '          <input type="text" name="message" ng-model="file.message" placeholder="{{i18n.translate(\'Create file\').fetch()}}"></input>\n' + '        </div>\n' + '        <div class="modal-footer">\n' + '          <button id="btnCancel" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>\n' + '          <button type="submit" ng-click="createFile()" id="btnOK" class="btn btn-primary">{{i18n.translate("Create file").fetch()}}</button>\n' + '        </div>\n' + '      </fieldset>\n' + '    </form>\n' + '  </div>\n' + '</div>\n');
+    $templateCache.put('angular/user.html', '<div id="user-view">\n' + '  <div class="subnavbar">\n' + '    <div class="subnavbar-inner">\n' + '      <div class="container">\n' + '        <a class="btn-subnavbar collapsed" data-toggle="collapse" data-target=".subnav-collapse">\n' + '          <i class="icon-reorder"></i>\n' + '        </a>\n' + '        <div class="subnav-collapse collapse">\n' + '          <ul class="mainnav">\n' + '            <li class="{{userBreadcrumbClass()}}">\n' + '              <a ng-href="/users/{{user.login}}">\n' + '                <i class="icon-user"></i>\n' + '                <span>{{i18n.translate("My Space").fetch()}}</span>\n' + '              </a>\n' + '            </li>\n' + '            <li>\n' + '              <a ng-href="/workbench" href="#">\n' + '                <i class="icon-edit"></i>\n' + '                <span>Workbench</span>\n' + '              </a>\n' + '            </li>\n' + '          </ul>\n' + '        </div> <!-- /.subnav-collapse -->\n' + '      </div> <!-- /container -->\n' + '    </div> <!-- /subnavbar-inner -->\n' + '  </div> <!-- /subnavbar -->\n' + '\n' + '  <div class="container-fluid">\n' + '    <div class="row-fluid">\n' + '      <div class="span4">\n' + '        <div class="widget">\n' + '          <div class="widget-header">\n' + '              <i class="icon-user"></i>\n' + '              <h3>Profile</h3>\n' + '          </div>\n' + '          <div class="widget-content">\n' + '            <h3>\n' + '              <span>{{user.name}}</span>\n' + '            </h3>\n' + '            <h4>\n' + '              <span>{{user.login}}</span>\n' + '            </h4>\n' + '            <!-- HATEOAS GitHub link? -->\n' + '            <!--\n' + '            <a href="https://github.com/{{user.login}}?tab=repositories" target="_blank" class="btn btn-secondary">\n' + '              <i class="icon-github"></i>\n' + '              <span>GitHub</span>\n' + '            </a>\n' + '            -->\n' + '          </div>\n' + '        </div>\n' + '      </div>\n' + '      <div class="span8">\n' + '        <div class="widget stacked">\n' + '          <div class="widget-content">\n' + '            <ul class="nav nav-tabs" id="myTab">\n' + '              <li><a data-target="#gists" data-toggle="tab">{{i18n.translate("Gist").ifPlural(2, "Gists").fetch()}}</a></li>\n' + '              <li><a data-target="#repos" data-toggle="tab">{{i18n.translate("Repo").ifPlural(2, "Repos").fetch()}}</a></li>\n' + '            </ul>\n' + '            <div class="tab-content">\n' + '              <div class="tab-pane" id="gists">\n' + '                <div class ="row-fluid">\n' + '                  <table class="table table-condensed">\n' + '                    <tbody>\n' + '                      <tr>\n' + '                        <td nowrap=nowrap>\n' + '                          <!--input type="text" placeHolder="Filter..."></input-->\n' + '                        </td>\n' + '                        <td nowrap=nowrap>\n' + '                          <button ng-click="newGist()" class="btn btn-primary">\n' + '                            <i class="icon-plus-sign-alt"></i> <i class="{{i18n.translate(\'icon-gist\').fetch()}}"></i>\n' + '                            <span>{{i18n.translate("Create a New Gist").fetch()}}</span>\n' + '                          </button>\n' + '                        </td>\n' + '                      </tr>\n' + '                      <tr ng-repeat="gist in gists">\n' + '                        <td nowrap=nowrap>\n' + '                          <h3>\n' + '                            <i class="{{i18n.translate(\'icon-gist\').fetch()}} muted"></i>\n' + '                            <a href="/gists/{{gist.id}}" class="btn btn-link">\n' + '                              <span>{{gist.id}}</span>\n' + '                            </a>\n' + '                          </h3>\n' + '                          <p>{{gist.description}}</p>\n' + '                        </td>\n' + '                        <td nowrap=nowrap>\n' + '                          <a href="{{gist.html_url}}" target="_blank" class="btn btn-secondary">\n' + '                            <i class="icon-github"></i>\n' + '                            <span>GitHub</span>\n' + '                          </a>\n' + '                          <!--\n' + '                          <button ng-click="deleteGist(user.login, gist.id)" class="btn btn-tertiary">\n' + '                            <i class="icon-minus-sign-alt"></i>\n' + '                            <span>Delete</span>\n' + '                          </button>\n' + '                          -->\n' + '                        </td>\n' + '                      </tr>\n' + '                    </tbody>\n' + '                  </table>\n' + '                </div>\n' + '              </div>\n' + '              <div class="tab-pane" id="repos">\n' + '                <div class ="row-fluid">\n' + '                  <table class="table table-condensed">\n' + '                    <tbody>\n' + '                      <tr>\n' + '                        <td nowrap=nowrap>\n' + '                          <!--input type="text" placeHolder="Filter..."></input-->\n' + '                        </td>\n' + '                        <td nowrap=nowrap>\n' + '                          <button ng-click="newRepo(user.login)" class="btn btn-primary">\n' + '                            <i class="icon-plus-sign-alt"></i> <i class="{{i18n.translate(\'icon-repo\').fetch()}}"></i>\n' + '                            <span>{{i18n.translate("Create a New Repo").fetch()}}</span>\n' + '                          </button>\n' + '                        </td>\n' + '                      </tr>\n' + '                      <tr ng-repeat="repo in repos">\n' + '                        <td nowrap=nowrap>\n' + '                          <h3>\n' + '                            <i class="{{i18n.translate(\'icon-repo\').fetch()}} muted"></i>\n' + '                            <a href="/users/{{user.login}}/repos/{{repo.name}}/tree/master" class="btn btn-link">\n' + '                              <span>{{repo.name}}</span>\n' + '                            </a>\n' + '                          </h3>\n' + '                          <p>{{repo.description}}</p>\n' + '                        </td>\n' + '                        <td nowrap=nowrap>\n' + '                          <a href="{{repo.html_url}}" target="_blank" class="btn btn-secondary">\n' + '                            <i class="icon-github"></i>\n' + '                            <span>GitHub</span>\n' + '                          </a>\n' + '                          <!--\n' + '                          <button ng-click="deleteRepo(user.login, repo.name)" class="btn btn-tertiary">\n' + '                            <i class="icon-minus-sign-alt"></i>\n' + '                            <span>Delete</span>\n' + '                          </button>\n' + '                          -->\n' + '                        </td>\n' + '                      </tr>\n' + '                    </tbody>\n' + '                  </table>\n' + '                </div>\n' + '              </div>\n' + '            </div>\n' + '            <script>\n' + '              $(function () {\n' + '                $(\'#myTab a[data-target="#gists"]\').tab(\'show\');\n' + '              })\n' + '            </script>\n' + '            <script>\n' + '              $(\'#myTab a[data-target="#gists"]\').click(function(e) {\n' + '                e.preventDefault();\n' + '                $(this).tab(\'show\');\n' + '              });\n' + '            </script>\n' + '            <script>\n' + '              $(\'#myTab a[data-target="#repos"]\').click(function(e) {\n' + '                e.preventDefault();\n' + '                $(this).tab(\'show\');\n' + '              });\n' + '            </script>\n' + '          </div>\n' + '        </div>\n' + '\n' + '        <div id="new-gist-dialog" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="new-gist-dialog-label" aria-hidden="true">\n' + '          <div class="modal-header">\n' + '            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>\n' + '            <h3 id="new-gist-dialog-label"><i class="icon-plus-sign-alt muted"></i> <i class="{{i18n.translate(\'icon-gist\').fetch()}} muted"></i> {{i18n.translate("Create a New Gist").fetch()}}</h3>\n' + '          </div>\n' + '          <form ng-controller="NewGistCtrl">\n' + '            <fieldset>\n' + '              <div class="modal-body">\n' + '                <label>Description<span class="muted"> (optional)</span></label>\n' + '                <input type="text" name="description" ng-model="gist.description"></input>\n' + '              </div>\n' + '              <div class="modal-footer">\n' + '                <button id="btnCancel" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>\n' + '                <button type="submit" ng-click="createGist()" id="btnOK" class="btn btn-primary">{{i18n.translate("Create gist").fetch()}}</button>\n' + '              </div>\n' + '            </fieldset>\n' + '          </form>\n' + '        </div>\n' + '\n' + '        <div id="new-repo-dialog" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="new-repo-dialog-label" aria-hidden="true">\n' + '          <div class="modal-header">\n' + '            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>\n' + '            <h3 id="new-repo-dialog-label"><i class="icon-plus-sign-alt muted"></i> <i class="{{i18n.translate(\'icon-repo\').fetch()}} muted"></i> {{i18n.translate("Create a New Repo").fetch()}}</h3>\n' + '          </div>\n' + '          <form ng-controller="NewRepoCtrl">\n' + '            <fieldset>\n' + '              <div class="modal-body">\n' + '                <label>{{i18n.translate("Repo name").fetch()}}</label>\n' + '                <input type="text" name="repo" ng-model="repo.name"></input>\n' + '                <span class="help-block">{{i18n.translate("Great repo names are short and memorable.").fetch()}}</span>\n' + '                <label>Description<span class="muted"> (optional)</span></label>\n' + '                <input type="text" name="description" ng-model="repo.description"></input>\n' + '                <!--\n' + '                <hr/>\n' + '                <input type="radio" ng-model="repo.private" value="false"> <i class="{{i18n.translate(\'icon-repo\').fetch()}} muted"></i> Public<br/>\n' + '                <span class="help-block">Anyone can see this repository. You choose who can commit.</span>\n' + '                <input type="radio" ng-model="repo.private" value="true"> Private <br/>\n' + '                <span class="help-block">You choose who can see and commit to this repository.</span>\n' + '                -->\n' + '                <hr/>\n' + '                <label class="checkbox">\n' + '                  <input type="checkbox" name="markdown-readme" ng-model="repo.markdownReadme"> {{i18n.translate("Initialize this repo with a README.md").fetch()}}</input>\n' + '                </label>\n' + '                <span class="help-block">{{i18n.translate("This will allow you to clone the repo immediately in GitHub.").fetch()}}</span>\n' + '                <!--\n' + '                <label class="checkbox">\n' + '                  <input type="checkbox" name="python-readme" ng-model="repo.pythonReadme"> Initialize this book with a README.py</input>\n' + '                </label>\n' + '                <span class="help-block">Having at least one Python file will ensure that the GitHub repository is visible to Geometry Zen.</span>\n' + '                -->\n' + '              </div>\n' + '              <div class="modal-footer">\n' + '                <button id="btnCancel" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>\n' + '                <button type="submit" ng-click="createRepo()" id="btnOK" class="btn btn-primary">{{i18n.translate("Create repo").fetch()}}</button>\n' + '              </div>\n' + '            </fieldset>\n' + '          </form>\n' + '        </div>\n' + '\n' + '      </div>\n' + '    </div>\n' + '  </div>\n' + '</div>');
     $templateCache.put('angular/work.html', '<div id="work-view">\n' + '  <div class="subnavbar">\n' + '    <div class="subnavbar-inner">\n' + '      <div class="container">\n' + '        <a class="btn-subnavbar collapsed" data-toggle="collapse" data-target=".subnav-collapse">\n' + '          <i class="icon-reorder"></i>\n' + '        </a>\n' + '        <div class="subnav-collapse collapse">\n' + '          <ul class="mainnav">\n' + '            <li ng-show="isLoggedIn()" class="{{userBreadcrumbClass()}}">\n' + '              <a ng-href="/users/{{user.name}}">\n' + '                <i class="icon-user"></i>\n' + '                <span>{{i18n.translate("My Space").fetch()}}</span>\n' + '              </a>\n' + '            </li>\n' + '            <li class="active">\n' + '              <a ng-click="reload()" href="#">\n' + '                <i class="icon-edit"></i>\n' + '                <span>Workbench</span>\n' + '              </a>\n' + '            </li>\n' + '            <li ng-show="saveEnabled()">\n' + '              <a ng-click="saveFile()" href="#">\n' + '                <i class="icon-save"></i>\n' + '                <span>Save</span>\n' + '              </a>\n' + '            </li>\n' + '            <li ng-show="runEnabled()">\n' + '              <a ng-click="run()" href="#">\n' + '                <i class="icon-cogs"></i>\n' + '                <span>Run</span>\n' + '              </a>\n' + '            </li>\n' + '          </ul>\n' + '        </div>\n' + '      </div>\n' + '    </div>\n' + '  </div>\n' + '  \n' + '  <div id="work-layout" class="container-fluid">\n' + '\n' + '    <div class="row-fluid">\n' + '      <div class="span12">\n' + '        <div class="widget">\n' + '          <div class="widget-header">\n' + '            <i class="icon-cogs"></i>\n' + '            <h3>Output</h3>\n' + '          </div>\n' + '          <div id="canvas-container" class="widget-plain"></div>\n' + '          <div id="printer-container" class="widget-content">\n' + '            <printer></printer>\n' + '          </div>\n' + '        </div>\n' + '      </div>\n' + '    </div>\n' + '\n' + '    <div class="row-fluid" ng-show="messages.length &gt; 0">\n' + '      <div class="span12">\n' + '        <div class="widget stacked">\n' + '          <div class="widget-header">\n' + '            <i class="icon-inbox"></i>\n' + '            <h3>Message</h3>\n' + '          </div>\n' + '          <div class="widget-content">\n' + '            <div class="alert alert-block alert-{{message.severity}}" ng-repeat="message in messages">\n' + '              <button type="button" class="close" data-dismiss="alert">&times;</button>\n' + '              <h4>{{message.name}}</h4>\n' + '              {{message.text}}\n' + '            </div>\n' + '          </div>\n' + '        </div>\n' + '      </div>\n' + '    </div>\n' + '\n' + '    <div class="row-fluid">\n' + '      <div class="span12">\n' + '        <div class="widget">\n' + '          <div class="widget-header">\n' + '            <i class="{{i18n.translate(\'icon-file\').fetch()}} muted"></i>\n' + '            <h3>{{contextItem.name}}</h3>\n' + '          </div>\n' + '          <div id="textarea-container" class="widget-plain">\n' + '            <textarea id="code"></textarea>\n' + '          </div>\n' + '        </div>\n' + '      </div>\n' + '    </div>\n' + '\n' + '  </div>\n' + '</div>');
   }
 ]);

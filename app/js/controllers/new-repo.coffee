@@ -23,7 +23,6 @@ angular.module("app").controller 'NewRepoCtrl', ['$scope', 'GitHub', 'cookie', '
     ga('send', 'event', EVENT_CATEGORY, 'createRepo')
     github.postRepo token, $scope.repo.name, $scope.repo.description, false, $scope.repo.markdownReadme, (err, repo) ->
       if not err
-        console.log "repo: #{JSON.stringify(repo, null, 2)}"
         $scope.$emit("createdRepo", $scope.user, repo)
         $('#new-repo-dialog').modal('hide')
       else
