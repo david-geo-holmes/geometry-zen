@@ -100,6 +100,8 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
     Sk.configure
       "output": (text) ->
         $rootScope.$broadcast('print', text)
+      "debugout": (arg) ->
+        console.log "#{JSON.stringify(arg, null, 2)}"
       "read": (searchPath) ->
         if Sk.builtinFiles is undefined or Sk.builtinFiles["files"][searchPath] is undefined
           throw new Error("File not found: '#{searchPath}'")

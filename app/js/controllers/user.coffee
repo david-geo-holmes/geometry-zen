@@ -12,7 +12,6 @@ angular.module("app").controller 'UserCtrl', ['$rootScope','$scope', '$routePara
   loadGists = (callback) ->
     github.getGists token, (err, gists) ->
       if not err
-        console.log JSON.stringify(gists, null, 2)
         $scope.gists = _.filter(_.map(gists, (gist) -> {"id": gist.id, "description": gist.description, "html_url": gist.html_url}), (gist) -> true)
       else
         alert("Error retrieving user Gists")
