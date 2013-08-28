@@ -43,7 +43,7 @@ Sk.ffi.numberToPy = function(valueJs)
 }
 goog.exportSymbol("Sk.ffi.numberToPy", Sk.ffi.numberToPy);
 
-Sk.ffi.remapNumberToIntPy = function(valueJs)
+Sk.ffi.numberToIntPy = function(valueJs)
 {
     var t = typeof valueJs;
     if (t === 'number')
@@ -59,7 +59,7 @@ Sk.ffi.remapNumberToIntPy = function(valueJs)
         goog.asserts.fail("b451b411-151c-4430-82f2-d548e5514303");
     }
 }
-goog.exportSymbol("Sk.ffi.remapNumberToIntPy", Sk.ffi.remapNumberToIntPy);
+goog.exportSymbol("Sk.ffi.numberToIntPy", Sk.ffi.numberToIntPy);
 
 Sk.ffi.stringToPy = function(valueJs)
 {
@@ -87,15 +87,16 @@ goog.exportSymbol("Sk.ffi.stringToPy", Sk.ffi.stringToPy);
  *
  * @param {Object|string|number|boolean} valueJs
  * @param {string} tp$name
+ * @param {Object=} custom Custom metadata that the caller wishes to retain.
  */
-Sk.ffi.referenceToPy = function(valueJs, tp$name)
+Sk.ffi.referenceToPy = function(valueJs, tp$name, custom)
 {
     var t = typeof valueJs;
     if (t === 'object')
     {
         if (typeof tp$name === 'string')
         {
-            return {"v": valueJs, "tp$name": tp$name};
+            return {"v": valueJs, "tp$name": tp$name, "custom": custom};
         }
         else
         {
@@ -118,8 +119,9 @@ goog.exportSymbol("Sk.ffi.referenceToPy", Sk.ffi.referenceToPy);
  *
  * @param {Object|string|number|boolean} valueJs The JavaScript value that must be represented in Python.
  * @param {string=} className The name of the class when wrapping a JavaScript object.
+ * @param {Object=} custom Custom metadata that the caller wishes to retain.
  */
-Sk.ffi.remapToPy = function(valueJs, className)
+Sk.ffi.remapToPy = function(valueJs, className, custom)
 {
     var t = typeof valueJs;
     if (t === 'object') {
@@ -133,7 +135,7 @@ Sk.ffi.remapToPy = function(valueJs, className)
         }
         else if (typeof className === 'string')
         {
-            return Sk.ffi.referenceToPy(valueJs, className);
+            return Sk.ffi.referenceToPy(valueJs, className, custom);
         }
         else if (t === 'object' && valueJs === null)
         {
@@ -218,6 +220,89 @@ Sk.ffi.numberToJs = function(valuePy, message)
     }
 }
 goog.exportSymbol("Sk.ffi.numberToJs", Sk.ffi.numberToJs);
+
+Sk.ffi.PY_TYPE_UNDEFINED  = 0;
+Sk.ffi.PY_TYPE_DICTIONARY = 1;
+Sk.ffi.PY_TYPE_LIST       = 2;
+Sk.ffi.PY_TYPE_BOOL       = 3;
+Sk.ffi.PY_TYPE_LONG       = 4;
+Sk.ffi.PY_TYPE_INT        = 5;
+Sk.ffi.PY_TYPE_FLOAT      = 6;
+Sk.ffi.PY_TYPE_STRING     = 7;
+Sk.ffi.PY_TYPE_REFERENCE  = 8;
+
+Sk.ffi.typeofPy = function(valuePy)
+{
+    if (typeof valuePy === 'undefined')
+    {
+        return Sk.ffi.PY_TYPE_UNDEFINED;
+    }
+    else if (valuePy instanceof Sk.builtin.dict)
+    {
+        return Sk.ffi.PY_TYPE_DICTIONARY;
+    }
+    else if (valuePy instanceof Sk.builtin.list)
+    {
+        return Sk.ffi.PY_TYPE_LIST;
+    }
+    else if (valuePy instanceof Sk.builtin.nmber)
+    {
+        if (valuePy.skType === Sk.builtin.nmber.float$)
+        {
+            return Sk.ffi.PY_TYPE_FLOAT;
+        }
+        else
+        {
+            throw new Error("typeofPy(" + valuePy + ") (Sk.builtin.nmber) skType=" + valuePy.skType);
+        }
+    }
+    else if (valuePy instanceof Sk.builtin.lng)
+    {
+        return Sk.ffi.PY_TYPE_LONG;
+    }
+    else if (valuePy === Sk.builtin.bool.true$)
+    {
+        return Sk.ffi.PY_TYPE_BOOL;
+    }
+    else if (valuePy === Sk.builtin.bool.false$)
+    {
+        return Sk.ffi.PY_TYPE_BOOL;
+    }
+    else
+    {
+        var x = typeof valuePy.v;
+        if (x !== 'undefined')
+        {
+            if (x === 'object')
+            {
+                return Sk.ffi.PY_TYPE_REFERENCE;
+            }
+            else
+            {
+                throw new Error("typeofPy(" + valuePy + ") (v is defined) typeof v => " + x);
+            }
+        }
+        else
+        {
+            throw new Error("typeofPy(" + valuePy + ") (v is undefined)");
+        }
+    }
+}
+
+Sk.ffi.typeName = function(valuePy)
+{
+    switch(Sk.ffi.typeofPy(valuePy))
+    {
+        case Sk.ffi.PY_TYPE_REFERENCE:
+        {
+            return Sk.abstr.typeName(valuePy);
+        }
+        default:
+        {
+            goog.asserts.fail("Sk.ffi.typeName(valuePy) must be Sk.ffi.PY_TYPE_REFERENCE");
+        }
+    }
+}
 
 /**
  * Usage:

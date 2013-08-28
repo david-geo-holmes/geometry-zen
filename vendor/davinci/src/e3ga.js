@@ -12,6 +12,8 @@ Sk.builtin.defineEuclidean3 = function(mod) {
   var VECTOR_3                   = "Vector3";
   var BIVECTOR_3                 = "Bivector3";
   var PSEUDOSCALAR_3             = "Pseudoscalar3";
+  var UNIT                       = "Unit";
+  var MEASURE                    = "Measure";
 
   var PROP_W                     = "w";
   var PROP_X                     = "x";
@@ -76,7 +78,6 @@ Sk.builtin.defineEuclidean3 = function(mod) {
         default: throw new Error("index is out of range: " + index);
       }
     },
-
     getComponent: function ( index ) {
       switch ( index ) {
         case 0: return this.x;
@@ -120,6 +121,23 @@ Sk.builtin.defineEuclidean3 = function(mod) {
       this.y = a.y - b.y;
       this.z = a.z - b.z;
       return this;
+    },
+    mul: function (rhs) {
+      if (typeof rhs === 'number') {
+        var mv = new Vector3(this.x * rhs, this.y * rhs, this.z * rhs);
+        mv.w   = this.w * rhs;
+        mv.xy  = this.xy * rhs;
+        mv.yz  = this.yz * rhs;
+        mv.zx  = this.zx * rhs;
+        mv.xyz = this.xyz * rhs;
+        return mv;
+      }
+      else if (rhs instanceof Vector3) {
+        return compute(mulE3, this, rhs, coord, remapE3ToJs);
+      }
+      else {
+        throw new Error(VECTOR_3 + ", Illegal rhs for multiplication: " + rhs);
+      }
     },
     multiply: function (v) {
       this.x *= v.x;
@@ -193,6 +211,12 @@ Sk.builtin.defineEuclidean3 = function(mod) {
       this.y = e[1] * x + e[5] * y + e[9]  * z;
       this.z = e[2] * x + e[6] * y + e[10] * z;
       this.normalize();
+      return this;
+    },
+    div: function (v) {
+      this.x /= v.x;
+      this.y /= v.y;
+      this.z /= v.z;
       return this;
     },
     divide: function (v) {
@@ -352,6 +376,9 @@ Sk.builtin.defineEuclidean3 = function(mod) {
     },
     clone: function () {
       return new Vector3( this.x, this.y, this.z );
+    },
+    toString: function () {
+      return stringFromCoordinates([this.w, this.x, this.y, this.z, this.xy, this.yz, this.zx, this.xyz], ["1", "i", "j", "k", "ij", "jk", "ki", "I"]);
     }
   };
 
@@ -735,6 +762,10 @@ Sk.builtin.defineEuclidean3 = function(mod) {
     return Sk.misceval.callsim(mod[EUCLIDEAN_3], w, x, y, z, xy, yz, zx, xyz);
   }
 
+  function remapE3ToJs(w, x, y, z, xy, yz, zx, xyz) {
+    return multiVector3(w, new Vector3(x, y, z), xy, yz, zx, xyz);
+  }
+
   function coord(mv, index) {
     switch(index) {
       case 0: {
@@ -951,7 +982,30 @@ Sk.builtin.defineEuclidean3 = function(mod) {
       }
       return selfPy;
     });
-    $loc.__mul__ = new Sk.builtin.func(function(a, b) {
+    $loc.__mul__ = new Sk.builtin.func(function(lhsPy, rhsPy) {
+      switch(Sk.ffi.typeofPy(rhsPy)) {
+        case Sk.ffi.PY_TYPE_REFERENCE: {
+          switch(Sk.ffi.typeName(rhsPy)) {
+            case EUCLIDEAN_3: {
+              var lhs = Sk.ffi.remapToJs(lhsPy);
+              var rhs = Sk.ffi.remapToJs(rhsPy);
+              return compute(mulE3, lhs, rhs, coord, remapE3ToPy);
+            }
+            break;
+            case UNIT: {
+              return Sk.misceval.callsim(mod[MEASURE], lhsPy, rhsPy);
+            }
+            default: {
+              throw new Sk.builtin.AssertionError(EUCLIDEAN_3 + " (__mul__) typeName(rhsPy) => " + Sk.ffi.typeName(rhsPy));
+            }
+          }
+        }
+        break;
+        default: {
+          throw new Sk.builtin.AssertionError(EUCLIDEAN_3 + " (__mul__) typeofPy(rhsPy) => " + Sk.ffi.typeofPy(rhsPy));
+        }
+      }
+      /*
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
       if (isNumber(b)) {
@@ -960,6 +1014,7 @@ Sk.builtin.defineEuclidean3 = function(mod) {
       else {
         return compute(mulE3, a, b, coord, remapE3ToPy);
       }
+      */
     });
     $loc.__rmul__ = new Sk.builtin.func(function(b, a) {
       a = Sk.ffi.remapToJs(a);

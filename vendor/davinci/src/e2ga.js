@@ -19,6 +19,24 @@ Sk.builtin.defineEuclidean2 = function(mod) {
   var METHOD_CLONE   = "clone";
   var METHOD_LENGTH  = "length";
 
+  /**
+   * Underlying JavaScript class.
+   *
+   * x00 <=> w
+   * x01 <=> x
+   * x10 <=> y
+   * x11 <=> xy
+   */
+  function Euclidean2(x00, x01, x10, x11) {
+    this.x00 = x00 || 0;
+    this.x01 = x01 || 0;
+    this.x10 = x10 || 0;
+    this.x11 = x11 || 0;
+  }
+  Euclidean2.prototype = {
+    constructor: Euclidean2
+  };
+
   function isNumber(x)    { return typeof x === 'number'; }
 
   function remapE2ToPy(x00, x01, x10, x11) {
@@ -117,7 +135,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
   });
 
   mod[VECTOR_2] = new Sk.builtin.func(function(x, y) {
-    Sk.builtin.pyCheckArgs(VECTOR_2, arguments, 1, 1);
+    Sk.builtin.pyCheckArgs(VECTOR_2, arguments, 2, 2);
     Sk.builtin.pyCheckType("x", "Number", Sk.builtin.checkNumber(x));
     Sk.builtin.pyCheckType("y", "Number", Sk.builtin.checkNumber(y));
     x = Sk.ffi.remapToJs(x);

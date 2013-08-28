@@ -8,6 +8,7 @@ var $builtinmodule = function(name) {
   var mod = {};
 
   Sk.builtin.defineEuclidean2(mod);
+  Sk.builtin.defineUnits(mod);
 
   return mod;
 }
