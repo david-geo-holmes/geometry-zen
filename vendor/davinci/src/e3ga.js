@@ -11,10 +11,10 @@ var BLADE = this.BLADE;
 Sk.builtin.defineEuclidean3 = function(mod) {
 
   var EUCLIDEAN_3                = "Euclidean3";
-  var SCALAR_3                   = "Scalar3";
-  var VECTOR_3                   = "Vector3";
-  var BIVECTOR_3                 = "Bivector3";
-  var PSEUDOSCALAR_3             = "Pseudoscalar3";
+  var SCALAR_E3                  = "ScalarE3";
+  var VECTOR_E3                  = "VectorE3";
+  var BIVECTOR_E3                = "BivectorE3";
+  var PSEUDOSCALAR_E3            = "PseudoscalarE3";
   var UNIT                       = "Unit";
   var MEASURE                    = "Measure";
 
@@ -472,15 +472,15 @@ Sk.builtin.defineEuclidean3 = function(mod) {
     return pack(x0, x1, x2, x3, x4, x5, x6, x7);
   }
 
-  mod[SCALAR_3] = new Sk.builtin.func(function(w) {
-    Sk.builtin.pyCheckArgs(SCALAR_3, arguments, 1, 1);
+  mod[SCALAR_E3] = new Sk.builtin.func(function(w) {
+    Sk.builtin.pyCheckArgs(SCALAR_E3, arguments, 1, 1);
     Sk.builtin.pyCheckType("w", "Number", Sk.builtin.checkNumber(w));
     w = Sk.ffi.numberToJs(w);
     return remapE3ToPy(w, 0, 0, 0, 0, 0, 0, 0);
   });
 
-  mod[VECTOR_3] = new Sk.builtin.func(function(x, y, z) {
-    Sk.builtin.pyCheckArgs(VECTOR_3, arguments, 3, 3);
+  mod[VECTOR_E3] = new Sk.builtin.func(function(x, y, z) {
+    Sk.builtin.pyCheckArgs(VECTOR_E3, arguments, 3, 3);
     Sk.builtin.pyCheckType("x", "Number", Sk.builtin.checkNumber(x));
     Sk.builtin.pyCheckType("y", "Number", Sk.builtin.checkNumber(y));
     Sk.builtin.pyCheckType("z", "Number", Sk.builtin.checkNumber(z));
@@ -490,8 +490,8 @@ Sk.builtin.defineEuclidean3 = function(mod) {
     return remapE3ToPy(0, x, y, z, 0, 0, 0, 0);
   });
 
-  mod[BIVECTOR_3] = new Sk.builtin.func(function(xy, yz, zx) {
-    Sk.builtin.pyCheckArgs(BIVECTOR_3, arguments, 3, 3);
+  mod[BIVECTOR_E3] = new Sk.builtin.func(function(xy, yz, zx) {
+    Sk.builtin.pyCheckArgs(BIVECTOR_E3, arguments, 3, 3);
     Sk.builtin.pyCheckType("xy", "Number", Sk.builtin.checkNumber(xy));
     Sk.builtin.pyCheckType("yz", "Number", Sk.builtin.checkNumber(yz));
     Sk.builtin.pyCheckType("zx", "Number", Sk.builtin.checkNumber(zx));
@@ -501,8 +501,8 @@ Sk.builtin.defineEuclidean3 = function(mod) {
     return remapE3ToPy(0, 0, 0, 0, xy, yz, zx, 0);
   });
 
-  mod[PSEUDOSCALAR_3] = new Sk.builtin.func(function(xyz) {
-    Sk.builtin.pyCheckArgs(PSEUDOSCALAR_3, arguments, 1, 1);
+  mod[PSEUDOSCALAR_E3] = new Sk.builtin.func(function(xyz) {
+    Sk.builtin.pyCheckArgs(PSEUDOSCALAR_E3, arguments, 1, 1);
     Sk.builtin.pyCheckType("xyz", "Number", Sk.builtin.checkNumber(xyz));
     xyz = Sk.ffi.numberToJs(xyz);
     return remapE3ToPy(0, 0, 0, 0, 0, 0, 0, xyz);
@@ -511,19 +511,19 @@ Sk.builtin.defineEuclidean3 = function(mod) {
   mod[EUCLIDEAN_3] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = new Sk.builtin.func(function(self, w, x, y, z, xy, yz, zx, xyz) {
       self.tp$name = EUCLIDEAN_3;
-      Sk.ffi.checkArgsPy(EUCLIDEAN_3, arguments, 2, 9);
-      switch(Sk.ffi.typeofPy(w)) {
+      Sk.ffi.checkArgCount(EUCLIDEAN_3, arguments, 2, 9);
+      switch(Sk.ffi.getType(w)) {
         case Sk.ffi.PyType.FLOAT:
         case Sk.ffi.PyType.INT: {
-          Sk.ffi.checkArgsPy(EUCLIDEAN_3, arguments, 9, 9);
-          Sk.ffi.checkArgTypePy("w",    "Number", Sk.ffi.isNumberPy(w));
-          Sk.ffi.checkArgTypePy("x",    "Number", Sk.ffi.isNumberPy(x));
-          Sk.ffi.checkArgTypePy("y",    "Number", Sk.ffi.isNumberPy(y));
-          Sk.ffi.checkArgTypePy("z",    "Number", Sk.ffi.isNumberPy(z));
-          Sk.ffi.checkArgTypePy("xy",   "Number", Sk.ffi.isNumberPy(xy));
-          Sk.ffi.checkArgTypePy("yz",   "Number", Sk.ffi.isNumberPy(yz));
-          Sk.ffi.checkArgTypePy("zx",   "Number", Sk.ffi.isNumberPy(zx));
-          Sk.ffi.checkArgTypePy("xyz",  "Number", Sk.ffi.isNumberPy(xyz));
+          Sk.ffi.checkArgCount(EUCLIDEAN_3, arguments, 9, 9);
+          Sk.ffi.checkArgType("w",    "Number", Sk.ffi.isNumberPy(w));
+          Sk.ffi.checkArgType("x",    "Number", Sk.ffi.isNumberPy(x));
+          Sk.ffi.checkArgType("y",    "Number", Sk.ffi.isNumberPy(y));
+          Sk.ffi.checkArgType("z",    "Number", Sk.ffi.isNumberPy(z));
+          Sk.ffi.checkArgType("xy",   "Number", Sk.ffi.isNumberPy(xy));
+          Sk.ffi.checkArgType("yz",   "Number", Sk.ffi.isNumberPy(yz));
+          Sk.ffi.checkArgType("zx",   "Number", Sk.ffi.isNumberPy(zx));
+          Sk.ffi.checkArgType("xyz",  "Number", Sk.ffi.isNumberPy(xyz));
           w   = Sk.ffi.remapToJs(w);
           x   = Sk.ffi.remapToJs(x);
           y   = Sk.ffi.remapToJs(y);
@@ -536,12 +536,12 @@ Sk.builtin.defineEuclidean3 = function(mod) {
         }
         break;
         case Sk.ffi.PyType.REFERENCE: {
-          Sk.ffi.checkArgsPy(EUCLIDEAN_3, arguments, 2, 2);
+          Sk.ffi.checkArgCount(EUCLIDEAN_3, arguments, 2, 2);
           self.v = Sk.ffi.remapToJs(w);
         }
         break;
         default: {
-          throw new Sk.builtin.AssertionError("Ouch " + Sk.ffi.typeofPy(w));
+          throw new Sk.builtin.AssertionError("Ouch " + Sk.ffi.getType(w));
         }
       }
     });
@@ -638,7 +638,7 @@ Sk.builtin.defineEuclidean3 = function(mod) {
       return selfPy;
     });
     $loc.__mul__ = new Sk.builtin.func(function(lhsPy, rhsPy) {
-      switch(Sk.ffi.typeofPy(rhsPy)) {
+      switch(Sk.ffi.getType(rhsPy)) {
         case Sk.ffi.PyType.REFERENCE: {
           switch(Sk.ffi.typeName(rhsPy)) {
             case EUCLIDEAN_3: {
@@ -661,7 +661,7 @@ Sk.builtin.defineEuclidean3 = function(mod) {
           return remapE3ToPy(a * b.w, a * b.x, a * b.y, a * b.z, a * b.xy, a * b.yz, a * b.zx, a * b.xyz);
         }
         default: {
-          throw new Sk.builtin.AssertionError(EUCLIDEAN_3 + " (__mul__) typeofPy(rhsPy) => " + Sk.ffi.typeofPy(rhsPy));
+          throw new Sk.builtin.AssertionError(EUCLIDEAN_3 + " (__mul__) typeofPy(rhsPy) => " + Sk.ffi.getType(rhsPy));
         }
       }
     });
@@ -1270,19 +1270,19 @@ Sk.builtin.defineEuclidean3 = function(mod) {
       var grade3 = m.xyz !== 0;
       if (grade0 && !grade1 && !grade2 && !grade3) {
         var args = [m.w];
-        return new Sk.builtin.str(SCALAR_3 + "(" + args.join(", ") + ")");
+        return new Sk.builtin.str(SCALAR_E3 + "(" + args.join(", ") + ")");
       }
       else if (!grade0 && grade1 && !grade2 && !grade3) {
         var args = [m.x, m.y, m.z];
-        return new Sk.builtin.str(VECTOR_3 + "(" + args.join(", ") + ")");
+        return new Sk.builtin.str(VECTOR_E3 + "(" + args.join(", ") + ")");
       }
       else if (!grade0 && !grade1 && grade2 && !grade3) {
         var args = [m.xy, m.yz, m.zx];
-        return new Sk.builtin.str(BIVECTOR_3 + "(" + args.join(", ") + ")");
+        return new Sk.builtin.str(BIVECTOR_E3 + "(" + args.join(", ") + ")");
       }
       else if (!grade0 && !grade1 && !grade2 && grade3) {
         var args = [m.xyz];
-        return new Sk.builtin.str(PSEUDOSCALAR_3 + "(" + args.join(", ") + ")");
+        return new Sk.builtin.str(PSEUDOSCALAR_E3 + "(" + args.join(", ") + ")");
       }
       else {
         var args = [m.w, m.x, m.y, m.z, m.xy, m.yz, m.zx, m.xyz];

@@ -2,15 +2,15 @@
 repr
 ----------
 Euclidean3(0, 0, 0, 0, 0, 0, 0, 0)
-Scalar3(1)
-Scalar3(2)
-Vector3(1, 0, 0)
-Vector3(0, 1, 0)
-Vector3(0, 0, 1)
-Bivector3(1, 0, 0)
-Bivector3(0, 1, 0)
-Bivector3(0, 0, 1)
-Pseudoscalar3(1)
+ScalarE3(1)
+ScalarE3(2)
+VectorE3(1, 0, 0)
+VectorE3(0, 1, 0)
+VectorE3(0, 0, 1)
+BivectorE3(1, 0, 0)
+BivectorE3(0, 1, 0)
+BivectorE3(0, 0, 1)
+PseudoscalarE3(1)
 ----------
 str
 ----------

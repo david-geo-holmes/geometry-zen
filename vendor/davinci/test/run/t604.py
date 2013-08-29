@@ -1,7 +1,7 @@
 # This program examines the vector cross-product from a Geometric Algebra perspective
 # and provides an alternative geometric formulation of the Lorentz force law.
 # It is not a complete pedagogical analysis, only a glimpse of the computations.
-from eight import *
+from e3ga import *
 from math import acos, fabs, pi, pow, sqrt
 
 def isCloseTo(expected, actual, precision):
@@ -19,8 +19,8 @@ def makeCoord(n):
     return n
 
 # Start with two random vectors a and b:
-a = Vector3(makeCoord(3), makeCoord(5), makeCoord(7))
-b = Vector3(makeCoord(2), makeCoord(4), makeCoord(6))
+a = VectorE3(makeCoord(3), makeCoord(5), makeCoord(7))
+b = VectorE3(makeCoord(2), makeCoord(4), makeCoord(6))
 
 print "a => " + str(a)
 print "b => " + str(b)
@@ -46,9 +46,9 @@ sinTheta = sqrt(1 - cosTheta * cosTheta)
 #print "|a cross b|= " + str(c.length())
 #print "|a||b|sin(theta)= " + str(a.length() * b.length() * sinTheta)
 print "3) The direction of a cross b follows the right-hand rule."
-i = Vector3(1, 0, 0)
-j = Vector3(0, 1, 0)
-k = Vector3(0, 0, 1)
+i = VectorE3(1, 0, 0)
+j = VectorE3(0, 1, 0)
+k = VectorE3(0, 0, 1)
 print "i cross j => " + str(i.clone().cross(j))
 print "j cross k => " + str(j.clone().cross(k))
 print "k cross i => " + str(k.clone().cross(i))
@@ -60,9 +60,9 @@ print "i, j and k are actually multivectors under the covers!"
 print "repr(i) => " + repr(i)
 print "repr(j) => " + repr(j)
 print "repr(k) => " + repr(k)
-I = Pseudoscalar3(1)
-print "Pseudoscalar3(1) => " + str(I)
-print "repr(Pseudoscalar3(1)) => " + repr(I)
+I = PseudoscalarE3(1)
+print "PseudoscalarE3(1) => " + str(I)
+print "repr(PseudoscalarE3(1)) => " + repr(I)
 print "ijk => " + str(i * j * k)
 dualB = -(b * I)
 print "dual(b) => " + str(dualB)
