@@ -1,11 +1,9 @@
 Sk.ffi = Sk.ffi || {};
 
 /**
- * Usage:
+ * Converts a JavaScript boolean or null to the internal Python bool representation.
  *
- * return Sk.ffi.booleanToJs(valueJs);
- *
- * @param {Object|string|number|boolean} valueJs
+ * @param {?boolean} valueJs
  */
 Sk.ffi.booleanToPy = function(valueJs)
 {
@@ -25,6 +23,11 @@ Sk.ffi.booleanToPy = function(valueJs)
 }
 goog.exportSymbol("Sk.ffi.booleanToPy", Sk.ffi.booleanToPy);
 
+/**
+ * Converts a JavaScript number or null to the internal Python float representation.
+ *
+ * @param {?number} valueJs
+ */
 Sk.ffi.numberToPy = function(valueJs)
 {
     var t = typeof valueJs;
@@ -43,6 +46,11 @@ Sk.ffi.numberToPy = function(valueJs)
 }
 goog.exportSymbol("Sk.ffi.numberToPy", Sk.ffi.numberToPy);
 
+/**
+ * Converts a JavaScript number or null to the internal Python int representation.
+ *
+ * @param {?number} valueJs
+ */
 Sk.ffi.numberToIntPy = function(valueJs)
 {
     var t = typeof valueJs;
@@ -61,6 +69,11 @@ Sk.ffi.numberToIntPy = function(valueJs)
 }
 goog.exportSymbol("Sk.ffi.numberToIntPy", Sk.ffi.numberToIntPy);
 
+/**
+ * Converts a JavaScript string or null to the internal Python string representation.
+ *
+ * @param {?string} valueJs
+ */
 Sk.ffi.stringToPy = function(valueJs)
 {
     var t = typeof valueJs;
@@ -154,15 +167,15 @@ Sk.ffi.remapToPy = function(valueJs, className, custom)
     }
     else if (t === 'string')
     {
-        return Sk.ffi.stringToPy(valueJs);
+        return Sk.ffi.stringToPy(String(valueJs));
     }
     else if (t === 'number')
     {
-        return Sk.ffi.numberToPy(valueJs);
+        return Sk.ffi.numberToPy(Number(valueJs));
     }
     else if (t === 'boolean')
     {
-        return Sk.ffi.booleanToPy(valueJs);
+        return Sk.ffi.booleanToPy(valueJs ? true : false);
     }
     else
     {
@@ -172,6 +185,8 @@ Sk.ffi.remapToPy = function(valueJs, className, custom)
 goog.exportSymbol("Sk.ffi.remapToPy", Sk.ffi.remapToPy);
 
 /**
+ * Converts the internal Python string representation to a JavaScript string.
+ *
  * Usage:
  *
  * valueJs = Sk.ffi.booleanToJs(valuePy, "foo must be a <type 'bool'>");
@@ -195,6 +210,33 @@ Sk.ffi.booleanToJs = function(valuePy, message)
     }
 }
 goog.exportSymbol("Sk.ffi.booleanToJs", Sk.ffi.booleanToJs);
+
+/**
+ * Determines whether the internal Python representation value type in an int.
+ */
+Sk.ffi.isIntPy = function(valuePy)
+{
+    return Sk.ffi.typeofPy(valuePy) === Sk.ffi.PyType.INT;
+}
+goog.exportSymbol("Sk.ffi.isIntPy", Sk.ffi.isIntPy);
+
+/**
+ * Determines whether the internal Python representation value type in a Number.
+ */
+Sk.ffi.isNumberPy = function(valuePy)
+{
+    return Sk.builtin.checkNumber(valuePy);
+}
+goog.exportSymbol("Sk.ffi.isNumberPy", Sk.ffi.isNumberPy);
+
+/**
+ * Determines whether the internal Python representation value type in an int.
+ */
+Sk.ffi.isReferencePy = function(valuePy)
+{
+    return Sk.ffi.typeofPy(valuePy) === Sk.ffi.PyType.REFERENCE;
+}
+goog.exportSymbol("Sk.ffi.isReferencePy", Sk.ffi.isReferencePy);
 
 /**
  * @param {string=} message Optional customizable assertion message.
@@ -221,52 +263,100 @@ Sk.ffi.numberToJs = function(valuePy, message)
 }
 goog.exportSymbol("Sk.ffi.numberToJs", Sk.ffi.numberToJs);
 
-Sk.ffi.PY_TYPE_UNDEFINED  = 0;
-Sk.ffi.PY_TYPE_DICTIONARY = 1;
-Sk.ffi.PY_TYPE_LIST       = 2;
-Sk.ffi.PY_TYPE_BOOL       = 3;
-Sk.ffi.PY_TYPE_LONG       = 4;
-Sk.ffi.PY_TYPE_INT        = 5;
-Sk.ffi.PY_TYPE_FLOAT      = 6;
-Sk.ffi.PY_TYPE_STRING     = 7;
-Sk.ffi.PY_TYPE_REFERENCE  = 8;
+/**
+ * Convenience function for asserting the number of arguments.
+ *
+ * @param {string} name the name of the function
+ * @param {Object} args the args passed to the function
+ * @param {number} minargs the minimum number of allowable arguments
+ * @param {number=} maxargs optional maximum number of allowable
+ * arguments (default: Infinity)
+ * @param {boolean=} kwargs optional true if kwargs, false otherwise
+ * (default: false)
+ * @param {boolean=} free optional true if free vars, false otherwise
+ * (default: false)
+ */
+Sk.ffi.checkArgsPy = function(name, args, minargs, maxargs, kwargs, free)
+{
+    return Sk.builtin.pyCheckArgs(name, args, minargs, maxargs, kwargs, free);
+}
+goog.exportSymbol("Sk.ffi.checkArgsPy", Sk.ffi.checkArgsPy);
 
+/**
+ * Convenience function for asserting the type of an argument.
+ *
+ * @param {string} name The argument name.
+ * @param {string} expectedType A string representation of the expected type.
+ * @param {boolean} condition The condition that must be true for the check to pass.
+ */
+Sk.ffi.checkArgTypePy = function(name, expectedType, condition)
+{
+    return Sk.builtin.pyCheckType(name, expectedType, condition);
+}
+goog.exportSymbol("Sk.ffi.checkArgTypePy", Sk.ffi.checkArgTypePy);
+
+/**
+ * Enumeration for internal Python types.
+ *
+ * @enum {number}
+ */
+Sk.ffi.PyType = {
+    'UNDEFINED':  0,
+    'DICTIONARY': 1,
+    'LIST':       2,
+    'BOOL':       3,
+    'LONG':       4,
+    'INT':        5,
+    'FLOAT':      6,
+    'STRING':     7,
+    'REFERENCE':  8
+}
+
+/**
+ * Computes the internal Python representation type for the provided value.
+ *
+ * @return {Sk.ffi.PyType} The Python type enumeration value.
+ */
 Sk.ffi.typeofPy = function(valuePy)
 {
     if (typeof valuePy === 'undefined')
     {
-        return Sk.ffi.PY_TYPE_UNDEFINED;
+        return Sk.ffi.PyType.UNDEFINED;
     }
     else if (valuePy instanceof Sk.builtin.dict)
     {
-        return Sk.ffi.PY_TYPE_DICTIONARY;
+        return Sk.ffi.PyType.DICTIONARY;
     }
     else if (valuePy instanceof Sk.builtin.list)
     {
-        return Sk.ffi.PY_TYPE_LIST;
+        return Sk.ffi.PyType.LIST;
     }
     else if (valuePy instanceof Sk.builtin.nmber)
     {
         if (valuePy.skType === Sk.builtin.nmber.float$)
         {
-            return Sk.ffi.PY_TYPE_FLOAT;
+            return Sk.ffi.PyType.FLOAT;
+        }
+        else if (valuePy.skType === Sk.builtin.nmber.int$)
+        {
+            return Sk.ffi.PyType.INT;
         }
         else
         {
-            throw new Error("typeofPy(" + valuePy + ") (Sk.builtin.nmber) skType=" + valuePy.skType);
+            throw new Sk.builtin.AssertionError("typeofPy(" + valuePy + ") (Sk.builtin.nmber) skType=" + valuePy.skType);
         }
     }
     else if (valuePy instanceof Sk.builtin.lng)
     {
-        return Sk.ffi.PY_TYPE_LONG;
+        return Sk.ffi.PyType.LONG;
     }
     else if (valuePy === Sk.builtin.bool.true$)
     {
-        return Sk.ffi.PY_TYPE_BOOL;
+        return Sk.ffi.PyType.BOOL;
     }
     else if (valuePy === Sk.builtin.bool.false$)
     {
-        return Sk.ffi.PY_TYPE_BOOL;
+        return Sk.ffi.PyType.BOOL;
     }
     else
     {
@@ -275,16 +365,16 @@ Sk.ffi.typeofPy = function(valuePy)
         {
             if (x === 'object')
             {
-                return Sk.ffi.PY_TYPE_REFERENCE;
+                return Sk.ffi.PyType.REFERENCE;
             }
             else
             {
-                throw new Error("typeofPy(" + valuePy + ") (v is defined) typeof v => " + x);
+                throw new Sk.builtin.AssertionError("typeofPy(" + valuePy + ") (v is defined) typeof v => " + x);
             }
         }
         else
         {
-            throw new Error("typeofPy(" + valuePy + ") (v is undefined)");
+            throw new Sk.builtin.AssertionError("typeofPy(" + valuePy + ") (v is undefined)");
         }
     }
 }
@@ -293,13 +383,13 @@ Sk.ffi.typeName = function(valuePy)
 {
     switch(Sk.ffi.typeofPy(valuePy))
     {
-        case Sk.ffi.PY_TYPE_REFERENCE:
+        case Sk.ffi.PyType.REFERENCE:
         {
             return Sk.abstr.typeName(valuePy);
         }
         default:
         {
-            goog.asserts.fail("Sk.ffi.typeName(valuePy) must be Sk.ffi.PY_TYPE_REFERENCE");
+            goog.asserts.fail("Sk.ffi.typeName(valuePy) must be Sk.ffi.PyType.REFERENCE");
         }
     }
 }
@@ -369,6 +459,35 @@ Sk.ffi.remapToJs = function(valuePy)
     }
 };
 goog.exportSymbol("Sk.ffi.remapToJs", Sk.ffi.remapToJs);
+
+Sk.ffi.buildClass = function(globals, func, name, bases)
+{
+    return Sk.misceval.buildClass(globals, func, name, bases);
+}
+goog.exportSymbol("Sk.ffi.buildClass", Sk.ffi.buildClass);
+
+/**
+ * Defines the implementation of a Python function in the internal representation.
+ *
+ * @param {function()} code The implementation of the function.
+ */
+Sk.ffi.defineFunctionPy = function(code)
+{
+    return new Sk.builtin.func(code);
+}
+
+/**
+ * 
+ * @param {Object} func the thing to call
+ * @param {...*} args stuff to pass it
+ */
+Sk.ffi.callsim = function(func, args)
+{
+    var args = Array.prototype.slice.call(arguments, 1);
+    return Sk.misceval.apply(func, undefined, undefined, undefined, args);
+//  return Sk.misceval.callsim(func, args)
+}
+goog.exportSymbol("Sk.ffi.callsim", Sk.ffi.callsim);
 
 // TODO: Deprecate and/or rename to remapFunctionToPy?
 Sk.ffi.callback = function(fn)

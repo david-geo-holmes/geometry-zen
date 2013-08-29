@@ -350,8 +350,6 @@ Sk.builtin.type.buildMRO_ = function(klass)
     // MERGE(klass + mro(bases) + bases)
     var all = [ [klass] ];
 
-    // Sk.debugout("buildMRO for", klass.tp$name);
-
     var kbases = klass['$d'].mp$subscript(Sk.builtin.type.basesStr_);
     for (var i = 0; i < kbases.v.length; ++i)
         all.push(Sk.builtin.type.buildMRO_(kbases.v[i]));

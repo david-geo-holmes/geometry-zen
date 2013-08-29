@@ -5,6 +5,9 @@
  *
  * Sk.builtin.defineEuclidean3(mod);
  */
+(function() {
+this.BLADE = this.BLADE || {};
+var BLADE = this.BLADE;
 Sk.builtin.defineEuclidean3 = function(mod) {
 
   var EUCLIDEAN_3                = "Euclidean3";
@@ -36,351 +39,6 @@ Sk.builtin.defineEuclidean3 = function(mod) {
   var METHOD_SET_Z               = "setZ";
   var METHOD_GET_COMPONENT       = "getComponent";
   var METHOD_SET_COMPONENT       = "setComponent";
-
-  /**
-   * Emulate ThreeJS Vector3 here to get interoperability.
-   *
-   * @constructor
-   * @param {number} x
-   * @param {number} y
-   * @param {number} z
-   */
-  function Vector3(x, y, z) {
-    this.x = x || 0;
-    this.y = y || 0;
-    this.z = z || 0;
-  }
-  Vector3.prototype = {
-    constructor: Vector3,
-    set: function (x, y, z) {
-      this.x = x;
-      this.y = y;
-      this.z = z;
-      return this;
-    },
-    setX: function (x) {
-      this.x = x;
-      return this;
-    },
-    setY: function (y) {
-      this.y = y;
-      return this;
-    },
-    setZ: function (z) {
-      this.z = z;
-      return this;
-    },
-    setComponent: function (index, value) {
-      switch (index) {
-        case 0: this.x = value; break;
-        case 1: this.y = value; break;
-        case 2: this.z = value; break;
-        default: throw new Error("index is out of range: " + index);
-      }
-    },
-    getComponent: function ( index ) {
-      switch ( index ) {
-        case 0: return this.x;
-        case 1: return this.y;
-        case 2: return this.z;
-        default: throw new Error("index is out of range: " + index);
-      }
-    },
-    copy: function (v) {
-      this.x = v.x;
-      this.y = v.y;
-      this.z = v.z;
-      return this;
-    },
-    add: function (v) {
-      this.x += v.x;
-      this.y += v.y;
-      this.z += v.z;
-      return this;
-    },
-    addScalar: function (s) {
-      this.x += s;
-      this.y += s;
-      this.z += s;
-      return this;
-    },
-    addVectors: function (a, b) {
-      this.x = a.x + b.x;
-      this.y = a.y + b.y;
-      this.z = a.z + b.z;
-      return this;
-    },
-    sub: function (v) {
-      this.x -= v.x;
-      this.y -= v.y;
-      this.z -= v.z;
-      return this;
-    },
-    subVectors: function (a, b) {
-      this.x = a.x - b.x;
-      this.y = a.y - b.y;
-      this.z = a.z - b.z;
-      return this;
-    },
-    mul: function (rhs) {
-      if (typeof rhs === 'number') {
-        var mv = new Vector3(this.x * rhs, this.y * rhs, this.z * rhs);
-        mv.w   = this.w * rhs;
-        mv.xy  = this.xy * rhs;
-        mv.yz  = this.yz * rhs;
-        mv.zx  = this.zx * rhs;
-        mv.xyz = this.xyz * rhs;
-        return mv;
-      }
-      else if (rhs instanceof Vector3) {
-        return compute(mulE3, this, rhs, coord, remapE3ToJs);
-      }
-      else {
-        throw new Error(VECTOR_3 + ", Illegal rhs for multiplication: " + rhs);
-      }
-    },
-    multiply: function (v) {
-      this.x *= v.x;
-      this.y *= v.y;
-      this.z *= v.z;
-      return this;
-    },
-    multiplyScalar: function (scalar) {
-      this.x *= scalar;
-      this.y *= scalar;
-      this.z *= scalar;
-      return this;
-    },
-    multiplyVectors: function (a, b) {
-      this.x = a.x * b.x;
-      this.y = a.y * b.y;
-      this.z = a.z * b.z;
-      return this;
-    },
-    applyMatrix3: function (m) {
-      var x = this.x;
-      var y = this.y;
-      var z = this.z;
-      var e = m.elements;
-      this.x = e[0] * x + e[3] * y + e[6] * z;
-      this.y = e[1] * x + e[4] * y + e[7] * z;
-      this.z = e[2] * x + e[5] * y + e[8] * z;
-      return this;
-    },
-    applyMatrix4: function (m) {
-      var x = this.x, y = this.y, z = this.z;
-      var e = m.elements;
-      this.x = e[0] * x + e[4] * y + e[8]  * z + e[12];
-      this.y = e[1] * x + e[5] * y + e[9]  * z + e[13];
-      this.z = e[2] * x + e[6] * y + e[10] * z + e[14];
-      return this;
-    },
-    applyProjection: function (m) {
-      var x = this.x, y = this.y, z = this.z;
-      var e = m.elements;
-      var d = 1 / ( e[3] * x + e[7] * y + e[11] * z + e[15] ); // perspective divide
-      this.x = ( e[0] * x + e[4] * y + e[8]  * z + e[12] ) * d;
-      this.y = ( e[1] * x + e[5] * y + e[9]  * z + e[13] ) * d;
-      this.z = ( e[2] * x + e[6] * y + e[10] * z + e[14] ) * d;
-      return this;
-    },
-    applyQuaternion: function (q) {
-      var x = this.x;
-      var y = this.y;
-      var z = this.z;
-      var qx = q.x;
-      var qy = q.y;
-      var qz = q.z;
-      var qw = q.w;
-      // calculate quat * vector
-      var ix =  qw * x + qy * z - qz * y;
-      var iy =  qw * y + qz * x - qx * z;
-      var iz =  qw * z + qx * y - qy * x;
-      var iw = -qx * x - qy * y - qz * z;
-      // calculate result * inverse quat
-      this.x = ix * qw + iw * -qx + iy * -qz - iz * -qy;
-      this.y = iy * qw + iw * -qy + iz * -qx - ix * -qz;
-      this.z = iz * qw + iw * -qz + ix * -qy - iy * -qx;
-      return this;
-    },
-    transformDirection: function (m) {
-      // vector interpreted as a direction
-      var x = this.x, y = this.y, z = this.z;
-      var e = m.elements;
-      this.x = e[0] * x + e[4] * y + e[8]  * z;
-      this.y = e[1] * x + e[5] * y + e[9]  * z;
-      this.z = e[2] * x + e[6] * y + e[10] * z;
-      this.normalize();
-      return this;
-    },
-    div: function (v) {
-      this.x /= v.x;
-      this.y /= v.y;
-      this.z /= v.z;
-      return this;
-    },
-    divide: function (v) {
-      this.x /= v.x;
-      this.y /= v.y;
-      this.z /= v.z;
-      return this;
-    },
-    divideScalar: function ( scalar ) {
-      if ( scalar !== 0 ) {
-        var invScalar = 1 / scalar;
-        this.x *= invScalar;
-        this.y *= invScalar;
-        this.z *= invScalar;
-      } else {
-        this.x = 0;
-        this.y = 0;
-        this.z = 0;
-      }
-      return this;
-    },
-    min: function ( v ) {
-      if ( this.x > v.x ) {
-        this.x = v.x;
-      }
-      if ( this.y > v.y ) {
-        this.y = v.y;
-      }
-      if ( this.z > v.z ) {
-        this.z = v.z;
-      }
-      return this;
-    },
-    max: function ( v ) {
-      if ( this.x < v.x ) {
-        this.x = v.x;
-      }
-      if ( this.y < v.y ) {
-        this.y = v.y;
-      }
-      if ( this.z < v.z ) {
-        this.z = v.z;
-      }
-      return this;
-    },
-    clamp: function ( min, max ) {
-      // This function assumes min < max, if this assumption isn't true it will not operate correctly
-      if ( this.x < min.x ) {
-        this.x = min.x;
-      } else if ( this.x > max.x ) {
-        this.x = max.x;
-      }
-      if ( this.y < min.y ) {
-        this.y = min.y;
-      } else if ( this.y > max.y ) {
-        this.y = max.y;
-      }
-      if ( this.z < min.z ) {
-        this.z = min.z;
-      } else if ( this.z > max.z ) {
-        this.z = max.z;
-      }
-      return this;
-    },
-    negate: function () {
-      return this.multiplyScalar( - 1 );
-    },
-    dot: function ( v ) {
-      return this.x * v.x + this.y * v.y + this.z * v.z;
-    },
-    lengthSq: function () {
-      return this.x * this.x + this.y * this.y + this.z * this.z;
-    },
-    length: function () {
-      return Math.sqrt( this.x * this.x + this.y * this.y + this.z * this.z );
-    },
-    lengthManhattan: function () {
-      return Math.abs( this.x ) + Math.abs( this.y ) + Math.abs( this.z );
-    },
-    normalize: function () {
-      return this.divideScalar( this.length() );
-    },
-    setLength: function ( l ) {
-      var oldLength = this.length();
-      if ( oldLength !== 0 && l !== oldLength  ) {
-        this.multiplyScalar( l / oldLength );
-      }
-      return this;
-    },
-    lerp: function ( v, alpha ) {
-      this.x += ( v.x - this.x ) * alpha;
-      this.y += ( v.y - this.y ) * alpha;
-      this.z += ( v.z - this.z ) * alpha;
-      return this;
-    },
-    cross: function (v) {
-      var x = this.x, y = this.y, z = this.z;
-      this.x = y * v.z - z * v.y;
-      this.y = z * v.x - x * v.z;
-      this.z = x * v.y - y * v.x;
-      return this;
-    },
-    crossVectors: function ( a, b ) {
-      this.x = a.y * b.z - a.z * b.y;
-      this.y = a.z * b.x - a.x * b.z;
-      this.z = a.x * b.y - a.y * b.x;
-      return this;
-    },
-    angleTo: function ( v ) {
-      var theta = this.dot( v ) / ( this.length() * v.length() );
-      // clamp, to handle numerical problems
-      return Math.acos( clamp( theta, -1, 1 ) );
-    },
-    distanceTo: function ( v ) {
-      return Math.sqrt( this.distanceToSquared( v ) );
-    },
-    distanceToSquared: function ( v ) {
-      var dx = this.x - v.x;
-      var dy = this.y - v.y;
-      var dz = this.z - v.z;
-      return dx * dx + dy * dy + dz * dz;
-    },
-    getPositionFromMatrix: function ( m ) {
-      this.x = m.elements[12];
-      this.y = m.elements[13];
-      this.z = m.elements[14];
-      return this;
-    },
-    getScaleFromMatrix: function ( m ) {
-      var sx = this.set( m.elements[0], m.elements[1], m.elements[2] ).length();
-      var sy = this.set( m.elements[4], m.elements[5], m.elements[6] ).length();
-      var sz = this.set( m.elements[8], m.elements[9], m.elements[10] ).length();
-      this.x = sx;
-      this.y = sy;
-      this.z = sz;
-      return this;
-    },
-    getColumnFromMatrix: function ( index, matrix ) {
-      var offset = index * 4;
-      var me = matrix.elements;
-      this.x = me[ offset ];
-      this.y = me[ offset + 1 ];
-      this.z = me[ offset + 2 ];
-      return this;
-    },
-    equals: function ( v ) {
-      return ( ( v.x === this.x ) && ( v.y === this.y ) && ( v.z === this.z ) );
-    },
-    fromArray: function ( array ) {
-      this.x = array[ 0 ];
-      this.y = array[ 1 ];
-      this.z = array[ 2 ];
-      return this;
-    },
-    toArray: function () {
-      return [ this.x, this.y, this.z ];
-    },
-    clone: function () {
-      return new Vector3( this.x, this.y, this.z );
-    },
-    toString: function () {
-      return stringFromCoordinates([this.w, this.x, this.y, this.z, this.xy, this.yz, this.zx, this.xyz], ["1", "i", "j", "k", "ij", "jk", "ki", "I"]);
-    }
-  };
 
   function clamp( x, a, b ) { return ( x < a ) ? a : ( ( x > b ) ? b : x ); }
   function isNumber(x)    { return typeof x === 'number'; }
@@ -741,15 +399,6 @@ Sk.builtin.defineEuclidean3 = function(mod) {
     }
   }
 
-  function multiVector3(w, vector, xy, yz, zx, xyz) {
-    vector.w = w;
-    vector.xy = xy;
-    vector.yz = yz;
-    vector.zx = zx;
-    vector.xyz = xyz;
-    return vector;
-  }
-
   function remapE3ToPy(w, x, y, z, xy, yz, zx, xyz) {
     w   = Sk.ffi.numberToPy(w);
     x   = Sk.ffi.numberToPy(x);
@@ -760,10 +409,6 @@ Sk.builtin.defineEuclidean3 = function(mod) {
     zx  = Sk.ffi.numberToPy(zx);
     xyz = Sk.ffi.numberToPy(xyz);
     return Sk.misceval.callsim(mod[EUCLIDEAN_3], w, x, y, z, xy, yz, zx, xyz);
-  }
-
-  function remapE3ToJs(w, x, y, z, xy, yz, zx, xyz) {
-    return multiVector3(w, new Vector3(x, y, z), xy, yz, zx, xyz);
   }
 
   function coord(mv, index) {
@@ -865,30 +510,40 @@ Sk.builtin.defineEuclidean3 = function(mod) {
 
   mod[EUCLIDEAN_3] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = new Sk.builtin.func(function(self, w, x, y, z, xy, yz, zx, xyz) {
-      w = Sk.ffi.remapToJs(w);
-      x = Sk.ffi.remapToJs(x);
-      y = Sk.ffi.remapToJs(y);
-      z = Sk.ffi.remapToJs(z);
-      xy = Sk.ffi.remapToJs(xy);
-      yz = Sk.ffi.remapToJs(yz);
-      zx = Sk.ffi.remapToJs(zx);
-      xyz = Sk.ffi.remapToJs(xyz);
-      if (isNumber(w) && isNumber(x) && isNumber(y) && isNumber(z) && isNumber(xy) && isNumber(yz) && isNumber(zx) && isNumber(xyz)) {
-        self.v = multiVector3(w, new Vector3(x, y, z), xy, yz, zx, xyz);
-      }
-      else if (isDefined(w) && isUndefined(x) && isUndefined(y) && isUndefined(z) && isUndefined(xy) && isUndefined(yz) && isUndefined(zx) && isUndefined(xyz)) {
-        self.v = multiVector3(w.w || 0, w, w.xy || 0, w.yz || 0, w.zx|| 0, w.xyz || 0);
-      }
-      else if (isDefined(w) && isUndefined(x) && isUndefined(y) && isUndefined(z) && isDefined(xy) && isDefined(yz) && isDefined(zx) && isDefined(xyz)) {
-        self.v = multiVector3(w, new Vector3(0, 0, 0), xy, yz, zx, xyz);
-      }
-      else if (isUndefined(w) && isUndefined(x) && isUndefined(y) && isUndefined(z) && isUndefined(xy) && isUndefined(yz) && isUndefined(zx) && isUndefined(xyz)) {
-        self.v = multiVector3(0, new Vector3(0, 0, 0), 0, 0, 0, 0);
-      }
-      else {
-        throw new Sk.builtin.AssertionError(EUCLIDEAN_3);
-      }
       self.tp$name = EUCLIDEAN_3;
+      Sk.ffi.checkArgsPy(EUCLIDEAN_3, arguments, 2, 9);
+      switch(Sk.ffi.typeofPy(w)) {
+        case Sk.ffi.PyType.FLOAT:
+        case Sk.ffi.PyType.INT: {
+          Sk.ffi.checkArgsPy(EUCLIDEAN_3, arguments, 9, 9);
+          Sk.ffi.checkArgTypePy("w",    "Number", Sk.ffi.isNumberPy(w));
+          Sk.ffi.checkArgTypePy("x",    "Number", Sk.ffi.isNumberPy(x));
+          Sk.ffi.checkArgTypePy("y",    "Number", Sk.ffi.isNumberPy(y));
+          Sk.ffi.checkArgTypePy("z",    "Number", Sk.ffi.isNumberPy(z));
+          Sk.ffi.checkArgTypePy("xy",   "Number", Sk.ffi.isNumberPy(xy));
+          Sk.ffi.checkArgTypePy("yz",   "Number", Sk.ffi.isNumberPy(yz));
+          Sk.ffi.checkArgTypePy("zx",   "Number", Sk.ffi.isNumberPy(zx));
+          Sk.ffi.checkArgTypePy("xyz",  "Number", Sk.ffi.isNumberPy(xyz));
+          w   = Sk.ffi.remapToJs(w);
+          x   = Sk.ffi.remapToJs(x);
+          y   = Sk.ffi.remapToJs(y);
+          z   = Sk.ffi.remapToJs(z);
+          xy  = Sk.ffi.remapToJs(xy);
+          yz  = Sk.ffi.remapToJs(yz);
+          zx  = Sk.ffi.remapToJs(zx);
+          xyz = Sk.ffi.remapToJs(xyz);
+          self.v = new BLADE.Euclidean3(w, x, y, z, xy, yz, zx, xyz);
+        }
+        break;
+        case Sk.ffi.PyType.REFERENCE: {
+          Sk.ffi.checkArgsPy(EUCLIDEAN_3, arguments, 2, 2);
+          self.v = Sk.ffi.remapToJs(w);
+        }
+        break;
+        default: {
+          throw new Sk.builtin.AssertionError("Ouch " + Sk.ffi.typeofPy(w));
+        }
+      }
     });
     $loc.__add__ = new Sk.builtin.func(function(a, b) {
       a = Sk.ffi.remapToJs(a);
@@ -971,27 +626,26 @@ Sk.builtin.defineEuclidean3 = function(mod) {
         self.w -= other;
       }
       else {
-        self.w -= other.w;
-        self.x -= other.x;
-        self.y -= other.y;
-        self.z -= other.z;
-        self.xy -= other.xy;
-        self.yz -= other.yz;
-        self.zx -= other.zx;
+        self.w   -= other.w;
+        self.x   -= other.x;
+        self.y   -= other.y;
+        self.z   -= other.z;
+        self.xy  -= other.xy;
+        self.yz  -= other.yz;
+        self.zx  -= other.zx;
         self.xyz -= other.xyz;
       }
       return selfPy;
     });
     $loc.__mul__ = new Sk.builtin.func(function(lhsPy, rhsPy) {
       switch(Sk.ffi.typeofPy(rhsPy)) {
-        case Sk.ffi.PY_TYPE_REFERENCE: {
+        case Sk.ffi.PyType.REFERENCE: {
           switch(Sk.ffi.typeName(rhsPy)) {
             case EUCLIDEAN_3: {
               var lhs = Sk.ffi.remapToJs(lhsPy);
               var rhs = Sk.ffi.remapToJs(rhsPy);
               return compute(mulE3, lhs, rhs, coord, remapE3ToPy);
             }
-            break;
             case UNIT: {
               return Sk.misceval.callsim(mod[MEASURE], lhsPy, rhsPy);
             }
@@ -1000,21 +654,16 @@ Sk.builtin.defineEuclidean3 = function(mod) {
             }
           }
         }
-        break;
+        case Sk.ffi.PyType.FLOAT:
+        case Sk.ffi.PyType.INT: {
+          var a = Sk.ffi.remapToJs(lhsPy);
+          var b = Sk.ffi.remapToJs(rhsPy);
+          return remapE3ToPy(a * b.w, a * b.x, a * b.y, a * b.z, a * b.xy, a * b.yz, a * b.zx, a * b.xyz);
+        }
         default: {
           throw new Sk.builtin.AssertionError(EUCLIDEAN_3 + " (__mul__) typeofPy(rhsPy) => " + Sk.ffi.typeofPy(rhsPy));
         }
       }
-      /*
-      a = Sk.ffi.remapToJs(a);
-      b = Sk.ffi.remapToJs(b);
-      if (isNumber(b)) {
-        return remapE3ToPy(a.w * b, a.x * b, a.y * b, a.z * b, a.xy * b, a.yz * b, a.zx * b, a.xyz * b);
-      }
-      else {
-        return compute(mulE3, a, b, coord, remapE3ToPy);
-      }
-      */
     });
     $loc.__rmul__ = new Sk.builtin.func(function(b, a) {
       a = Sk.ffi.remapToJs(a);
@@ -1382,18 +1031,9 @@ Sk.builtin.defineEuclidean3 = function(mod) {
             $loc.__init__ = new Sk.builtin.func(function(self) {
               self.tp$name = METHOD_CROSS;
             });
-            $loc.__call__ = new Sk.builtin.func(function(self, vPy) {
-              var v  = Sk.ffi.remapToJs(vPy);
-              mv.w = 0;
-              mv[METHOD_CROSS](v);
-//            mv.x  = extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 1);
-//            mv.y  = extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 2);
-//            mv.z  = extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 3);
-              mv.xy = 0;
-              mv.yz = 0;
-              mv.zx = 0;
-              mv.xyz = 0;
-              return mvPy;
+            $loc.__call__ = new Sk.builtin.func(function(self, vectorPy) {
+              var vectorJs  = Sk.ffi.remapToJs(vectorPy);
+              return Sk.misceval.callsim(mod[EUCLIDEAN_3], Sk.ffi.remapToPy(mv.cross(vectorJs), EUCLIDEAN_3));
             });
             $loc.__str__ = new Sk.builtin.func(function(self) {
               return new Sk.builtin.str(METHOD_CROSS);
@@ -1410,7 +1050,7 @@ Sk.builtin.defineEuclidean3 = function(mod) {
             });
             $loc.__call__ = new Sk.builtin.func(function(self, vPy) {
               var v  = Sk.ffi.remapToJs(vPy);
-              return Sk.ffi.numberToPy(mv[METHOD_DOT](v));
+              return Sk.ffi.numberToPy(mv.dot(v));
             });
             $loc.__str__ = new Sk.builtin.func(function(self) {
               return Sk.ffi.stringToPy(METHOD_DOT);
@@ -1552,7 +1192,7 @@ Sk.builtin.defineEuclidean3 = function(mod) {
               self.tp$name = METHOD_LENGTH;
             });
             $loc.__call__ = new Sk.builtin.func(function(self) {
-              return Sk.ffi.numberToPy(mv['length']());
+              return Sk.ffi.numberToPy(mv.length());
             });
             $loc.__str__ = new Sk.builtin.func(function(self) {
               return new Sk.builtin.str(METHOD_LENGTH);
@@ -1660,3 +1300,4 @@ Sk.builtin.defineEuclidean3 = function(mod) {
     });
   }, EUCLIDEAN_3, []);
 };
+}).call(this);

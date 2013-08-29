@@ -2020,7 +2020,6 @@ Sk.astDump = function(node)
         }
         else if (goog.isArrayLike(node))
         {
-            //Sk.debugout("arr", node.length);
             var elems = [];
             for (var i = 0; i < node.length; ++i)
             {

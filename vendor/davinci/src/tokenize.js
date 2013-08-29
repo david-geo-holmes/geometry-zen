@@ -400,7 +400,6 @@ Sk.Tokenizer.prototype.generateTokens = function(line)
             pos = end;
             var token = line.substring(start, end);
             var initial = line.charAt(start);
-            //Sk.debugout("token:",token, "initial:",initial, start, end);
             if (this.numchars.indexOf(initial) !== -1 || (initial === '.' && token !== '.'))
             {
                 if (this.callback(Sk.Tokenizer.Tokens.T_NUMBER, token, spos, epos, line)) return 'done';

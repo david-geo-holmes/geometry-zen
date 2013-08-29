@@ -184,42 +184,42 @@ Multiplication *=
 ----------
 Division /
 ----------
-0 / 0 => -NaN-NaN*i-NaN*j-NaN*I
+0 / 0 => NaN
 0 / 1 => 0
 0 / 2 => 0
 0 / i => 0
 0 / j => 0
 0 / I => 0
 
-1 / 0 => -NaN-NaN*i-NaN*j-NaN*I
+1 / 0 => NaN
 1 / 1 => 1
 1 / 2 => 0.5
 1 / i => i
 1 / j => j
 1 / I => -I
 
-2 / 0 => -NaN-NaN*i-NaN*j-NaN*I
+2 / 0 => NaN
 2 / 1 => 2
 2 / 2 => 1
 2 / i => 2*i
 2 / j => 2*j
 2 / I => -2*I
 
-i / 0 => -NaN-NaN*i-NaN*j-NaN*I
+i / 0 => NaN
 i / 1 => i
 i / 2 => 0.5*i
 i / i => 1
 i / j => I
 i / I => -j
 
-j / 0 => -NaN-NaN*i-NaN*j-NaN*I
+j / 0 => NaN
 j / 1 => j
 j / 2 => 0.5*j
 j / i => -I
 j / j => 1
 j / I => i
 
-I / 0 => -NaN-NaN*i-NaN*j-NaN*I
+I / 0 => NaN
 I / 1 => I
 I / 2 => 0.5*I
 I / i => -j
@@ -229,7 +229,7 @@ I / I => 1
 ----------
 Division /=
 ----------
-1+i+j+I /= 0 => -NaN-NaN*i-NaN*j-NaN*I
+1+i+j+I /= 0 => NaN
 1+i+j+I /= 1 => 1+i+j+I
 1+i+j+I /= 2 => 0.5+0.5*i+0.5*j+0.5*I
 1+i+j+I /= i => 1+i-j-I

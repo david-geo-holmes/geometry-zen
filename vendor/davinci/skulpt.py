@@ -108,7 +108,7 @@ Files = [
         'src/e2ga.js',
         'src/e3ga.js',
         'src/units.js',
-        "vendor/bladejs/dist/bladejs.js",
+        "../bladejs/generated/js/app.js",
         ("support/jsbeautify/beautify.js", FILE_TYPE_TEST),
         ]
 

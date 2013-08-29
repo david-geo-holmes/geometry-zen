@@ -21,11 +21,9 @@ Sk.importSearchPathForName = function(name, ext, failok)
         for (var j = 0; j < fns.length; ++j)
         {
             var fn = fns[j];
-            //Sk.debugout("  import search, trying", fn);
             try {
                 // todo; lame, this is the only way we have to test existence right now
                 Sk.read(fn);
-                //Sk.debugout("import search, found at", name, "type", ext, "at", fn);
                 return fn;
             } catch (e) {};
         }
@@ -33,7 +31,6 @@ Sk.importSearchPathForName = function(name, ext, failok)
    
     if (!failok)
         throw new Sk.builtin.ImportError("No module named " + name);
-    //Sk.debugout("import search, nothing found, but failure was ok");
 };
 
 Sk.doOneTimeInitialization = function()
@@ -177,9 +174,6 @@ Sk.importModuleInternal_ = function(name, dumpJS, modname, suppliedPyBody)
 
     var namestr = "new Sk.builtin.str('" + modname + "')";
     finalcode += "\n" + co.funcname + "(" + namestr + ");";
-
-//	if (Sk.debugCode)
-//		Sk.debugout(finalcode);
 
     var modlocs = goog.global['eval'](finalcode);
 
