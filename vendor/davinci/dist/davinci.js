@@ -13957,7 +13957,8 @@ Sk.ffi.PyType = {
     'INT':        5,
     'LONG':       6,
     'STRING':     7,
-    'REFERENCE':  8
+    'REFERENCE':  8,
+    'FUNCTION':   9
 }
 
 /**
@@ -14019,9 +14020,13 @@ Sk.ffi.getType = function(valuePy)
             {
                 return Sk.ffi.PyType.REFERENCE;
             }
+            else if (x === 'function')
+            {
+                return Sk.ffi.PyType.FUNCTION;
+            }
             else
             {
-                throw new Sk.builtin.AssertionError("bb971bb0-3751-49bb-ac24-8dab8a4bcd29 " + x);
+                throw new Sk.builtin.AssertionError("bb971bb0-3751-49bb-ac24-8dab8a4bcd29 (x:'" + x + "')");
             }
         }
         else
@@ -14115,6 +14120,10 @@ Sk.ffi.remapToJs = function(valuePy, targetPy)
             }
             // TODO: This is being exercised, but we should assert the tp$name.
             // I think the pattern here suggests that we have a Sk.builtin.something
+            return valuePy.v;
+        }
+        case Sk.ffi.PyType.FUNCTION:
+        {
             return valuePy.v;
         }
         case Sk.ffi.PyType.UNDEFINED:
