@@ -27088,13 +27088,13 @@
         });
       }, 'Rational', []);
       b.Dimensions = Sk.ffi.buildClass(b, function (c, e) {
-        e.__init__ = Sk.ffi.defineFunction(function (b, c, d, e) {
-          Sk.ffi.checkArgCount('Measure', arguments, 2, 4);
+        e.__init__ = Sk.ffi.defineFunction(function (b, c, d, e, k) {
+          Sk.ffi.checkArgCount('Measure', arguments, 2, 5);
           Sk.ffi.checkArgType('M', 'Rational or Dimensions', Sk.ffi.isReferencePy(c));
           b.tp$name = 'Dimensions';
           switch (Sk.ffi.typeName(c)) {
           case 'Rational':
-            b.v = new a.Dimensions(Sk.ffi.remapToJs(c), Sk.ffi.remapToJs(d), Sk.ffi.remapToJs(e));
+            b.v = new a.Dimensions(Sk.ffi.remapToJs(c), Sk.ffi.remapToJs(d), Sk.ffi.remapToJs(e), Sk.ffi.remapToJs(k));
             break;
           case 'Dimensions':
             b.v = Sk.ffi.remapToJs(c);
@@ -27112,20 +27112,22 @@
             return Sk.misceval.callsim(b.Rational, Sk.ffi.remapToPy(d.L, 'Rational'));
           case 'T':
             return Sk.misceval.callsim(b.Rational, Sk.ffi.remapToPy(d.T, 'Rational'));
+          case 'Q':
+            return Sk.misceval.callsim(b.Rational, Sk.ffi.remapToPy(d.Q, 'Rational'));
           }
         });
         e.__mul__ = Sk.ffi.defineFunction(function (a, c) {
           var d = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(c), d = d.mul(e);
-          return Sk.misceval.callsim(b.Dimensions, Sk.ffi.remapToPy(d.M, 'Rational'), Sk.ffi.remapToPy(d.L, 'Rational'), Sk.ffi.remapToPy(d.T, 'Rational'));
+          return Sk.misceval.callsim(b.Dimensions, Sk.ffi.remapToPy(d.M, 'Rational'), Sk.ffi.remapToPy(d.L, 'Rational'), Sk.ffi.remapToPy(d.T, 'Rational'), Sk.ffi.remapToPy(d.Q, 'Rational'));
         });
         e.__div__ = Sk.ffi.defineFunction(function (a, c) {
           var d = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(c), d = d.div(e);
-          return Sk.misceval.callsim(b.Dimensions, Sk.ffi.remapToPy(d.M, 'Rational'), Sk.ffi.remapToPy(d.L, 'Rational'), Sk.ffi.remapToPy(d.T, 'Rational'));
+          return Sk.misceval.callsim(b.Dimensions, Sk.ffi.remapToPy(d.M, 'Rational'), Sk.ffi.remapToPy(d.L, 'Rational'), Sk.ffi.remapToPy(d.T, 'Rational', Sk.ffi.remapToPy(d.Q, 'Rational')));
         });
         e.__pow__ = Sk.ffi.defineFunction(function (a, c) {
           Sk.ffi.checkArgCount('**', arguments, 2, 2);
           var d = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(c), d = d.pow(e);
-          return Sk.misceval.callsim(b.Dimensions, Sk.ffi.remapToPy(d.M, 'Rational'), Sk.ffi.remapToPy(d.L, 'Rational'), Sk.ffi.remapToPy(d.T, 'Rational'));
+          return Sk.misceval.callsim(b.Dimensions, Sk.ffi.remapToPy(d.M, 'Rational'), Sk.ffi.remapToPy(d.L, 'Rational'), Sk.ffi.remapToPy(d.T, 'Rational', Sk.ffi.remapToPy(d.Q, 'Rational')));
         });
         e.__str__ = Sk.ffi.defineFunction(function (a) {
           a = Sk.ffi.remapToJs(a);
@@ -27135,7 +27137,8 @@
           var b = [
               'M',
               'L',
-              'T'
+              'T',
+              'Q'
             ].map(function (b) {
               return Sk.abstr.gattr(a, b);
             }).map(function (a) {
@@ -27251,12 +27254,16 @@
           return Sk.ffi.remapToPy('Measure(' + b + ', ' + a + ')');
         });
       }, 'Measure', []);
-      b.kilogram = Sk.misceval.callsim(b.Unit, Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new a.Dimensions(1, 0, 0), 'Dimensions'), Sk.ffi.remapToPy(c));
-      b.meter = Sk.misceval.callsim(b.Unit, Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new a.Dimensions(0, 1, 0), 'Dimensions'), Sk.ffi.remapToPy(c));
-      b.second = Sk.misceval.callsim(b.Unit, Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new a.Dimensions(0, 0, 1), 'Dimensions'), Sk.ffi.remapToPy(c));
-      b.newton = Sk.misceval.callsim(b.Unit, Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new a.Dimensions(1, 1, -2), 'Dimensions'), Sk.ffi.remapToPy(c));
-      b.joule = Sk.misceval.callsim(b.Unit, Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new a.Dimensions(1, 2, -2), 'Dimensions'), Sk.ffi.remapToPy(c));
-      b.watt = Sk.misceval.callsim(b.Unit, Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new a.Dimensions(1, 2, -3), 'Dimensions'), Sk.ffi.remapToPy(c));
+      b.kilogram = Sk.misceval.callsim(b.Unit, Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new a.Dimensions(1, 0, 0, 0), 'Dimensions'), Sk.ffi.remapToPy(c));
+      b.meter = Sk.misceval.callsim(b.Unit, Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new a.Dimensions(0, 1, 0, 0), 'Dimensions'), Sk.ffi.remapToPy(c));
+      b.second = Sk.misceval.callsim(b.Unit, Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new a.Dimensions(0, 0, 1, 0), 'Dimensions'), Sk.ffi.remapToPy(c));
+      b.coulomb = Sk.misceval.callsim(b.Unit, Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new a.Dimensions(0, 0, 0, 1), 'Dimensions'), Sk.ffi.remapToPy(c));
+      b.newton = Sk.misceval.callsim(b.Unit, Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new a.Dimensions(1, 1, -2, 0), 'Dimensions'), Sk.ffi.remapToPy(c));
+      b.joule = Sk.misceval.callsim(b.Unit, Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new a.Dimensions(1, 2, -2, 0), 'Dimensions'), Sk.ffi.remapToPy(c));
+      b.watt = Sk.misceval.callsim(b.Unit, Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new a.Dimensions(1, 2, -3, 0), 'Dimensions'), Sk.ffi.remapToPy(c));
+      b.ampere = Sk.misceval.callsim(b.Unit, Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new a.Dimensions(0, 0, -1, 1), 'Dimensions'), Sk.ffi.remapToPy(c));
+      b.volt = Sk.misceval.callsim(b.Unit, Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new a.Dimensions(1, 2, -2, -1), 'Dimensions'), Sk.ffi.remapToPy(c));
+      b.tesla = Sk.misceval.callsim(b.Unit, Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new a.Dimensions(1, 1, -2, -1), 'Dimensions'), Sk.ffi.remapToPy(c));
     };
   }.call(this));
   (function () {
@@ -27269,25 +27276,37 @@
       return 0 === a.numer ? null : 1 === a.denom ? 1 === a.numer ? '' + b : '' + b + ' ** ' + a.numer : '' + b + ' ** ' + a;
     };
     b = function () {
-      function b(c, d, g) {
-        this.M = 'number' === typeof c ? new a.Rational(c, 1) : c;
+      function b(c, d, g, h) {
+        if ('number' === typeof c)
+          this.M = new a.Rational(c, 1);
+        else if (c instanceof a.Rational)
+          this.M = c;
+        else
+          throw Error('mass must be a Rational or number');
         this.L = 'number' === typeof d ? new a.Rational(d, 1) : d;
         this.T = 'number' === typeof g ? new a.Rational(g, 1) : g;
+        if ('number' === typeof h)
+          this.Q = new a.Rational(h, 1);
+        else if (h instanceof a.Rational)
+          this.Q = h;
+        else
+          throw Error('charge must be a Rational or number');
       }
       b.prototype.mul = function (b) {
-        return new a.Dimensions(this.M.add(b.M), this.L.add(b.L), this.T.add(b.T));
+        return new a.Dimensions(this.M.add(b.M), this.L.add(b.L), this.T.add(b.T), this.Q.add(b.Q));
       };
       b.prototype.div = function (b) {
-        return new a.Dimensions(this.M.sub(b.M), this.L.sub(b.L), this.T.sub(b.T));
+        return new a.Dimensions(this.M.sub(b.M), this.L.sub(b.L), this.T.sub(b.T), this.Q.sub(b.Q));
       };
       b.prototype.pow = function (b) {
-        return new a.Dimensions(this.M.mul(b), this.L.mul(b), this.T.mul(b));
+        return new a.Dimensions(this.M.mul(b), this.L.mul(b), this.T.mul(b), this.Q.mul(b));
       };
       b.prototype.toString = function () {
         return [
           c(this.M, 'M'),
           c(this.L, 'L'),
-          c(this.T, 'T')
+          c(this.T, 'T'),
+          c(this.Q, 'Q')
         ].filter(function (a) {
           return 'string' === typeof a;
         }).join(' * ');
@@ -28169,7 +28188,8 @@
         b = [
           c(this.dimensions.M, this.labels[0]),
           c(this.dimensions.L, this.labels[1]),
-          c(this.dimensions.T, this.labels[2])
+          c(this.dimensions.T, this.labels[2]),
+          c(this.dimensions.Q, this.labels[3])
         ].filter(function (a) {
           return 'string' === typeof a;
         }).join(' ');

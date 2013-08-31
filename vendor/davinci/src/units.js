@@ -23,7 +23,7 @@ Sk.builtin.defineUnits = function(mod) {
   var PROP_M          = "M";
   var PROP_L          = "L";
   var PROP_T          = "T";
-  var PROP_C          = "C";
+  var PROP_Q          = "Q";
 
   var KILOGRAM        = "kilogram";
   var METER           = "meter";
@@ -33,6 +33,9 @@ Sk.builtin.defineUnits = function(mod) {
   var NEWTON          = "newton";
   var JOULE           = "joule";
   var WATT            = "watt";
+  var AMPERE          = "ampere";
+  var VOLT            = "volt";
+  var TESLA           = "tesla";
 
   mod[RATIONAL] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = Sk.ffi.defineFunction(function(self, numer, denom) {
@@ -110,13 +113,13 @@ Sk.builtin.defineUnits = function(mod) {
   }, RATIONAL, []);
   
   mod[DIMENSIONS] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, M, L, T) {
-      Sk.ffi.checkArgCount(MEASURE, arguments, 2, 4);
+    $loc.__init__ = Sk.ffi.defineFunction(function(self, M, L, T, Q) {
+      Sk.ffi.checkArgCount(MEASURE, arguments, 2, 5);
       Sk.ffi.checkArgType("M", [RATIONAL, DIMENSIONS].join(" or "), Sk.ffi.isReferencePy(M));
       self.tp$name = DIMENSIONS;
       switch(Sk.ffi.typeName(M)) {
         case RATIONAL: {
-          self.v = new BLADE.Dimensions(Sk.ffi.remapToJs(M), Sk.ffi.remapToJs(L), Sk.ffi.remapToJs(T));
+          self.v = new BLADE.Dimensions(Sk.ffi.remapToJs(M), Sk.ffi.remapToJs(L), Sk.ffi.remapToJs(T), Sk.ffi.remapToJs(Q));
         }
         break;
         case DIMENSIONS: {
@@ -140,33 +143,36 @@ Sk.builtin.defineUnits = function(mod) {
         case PROP_T: {
           return Sk.misceval.callsim(mod[RATIONAL], Sk.ffi.remapToPy(dimensions[PROP_T], RATIONAL));
         }
+        case PROP_Q: {
+          return Sk.misceval.callsim(mod[RATIONAL], Sk.ffi.remapToPy(dimensions[PROP_Q], RATIONAL));
+        }
       }
     });
     $loc.__mul__ = Sk.ffi.defineFunction(function(aPy, bPy) {
       var a = Sk.ffi.remapToJs(aPy);
       var b = Sk.ffi.remapToJs(bPy);
       var c = a.mul(b);
-      return Sk.misceval.callsim(mod[DIMENSIONS], Sk.ffi.remapToPy(c.M, RATIONAL), Sk.ffi.remapToPy(c.L, RATIONAL), Sk.ffi.remapToPy(c.T, RATIONAL));
+      return Sk.misceval.callsim(mod[DIMENSIONS], Sk.ffi.remapToPy(c.M, RATIONAL), Sk.ffi.remapToPy(c.L, RATIONAL), Sk.ffi.remapToPy(c.T, RATIONAL), Sk.ffi.remapToPy(c.Q, RATIONAL));
     });
     $loc.__div__ = Sk.ffi.defineFunction(function(aPy, bPy) {
       var a = Sk.ffi.remapToJs(aPy);
       var b = Sk.ffi.remapToJs(bPy);
       var c = a.div(b);
-      return Sk.misceval.callsim(mod[DIMENSIONS], Sk.ffi.remapToPy(c.M, RATIONAL), Sk.ffi.remapToPy(c.L, RATIONAL), Sk.ffi.remapToPy(c.T, RATIONAL));
+      return Sk.misceval.callsim(mod[DIMENSIONS], Sk.ffi.remapToPy(c.M, RATIONAL), Sk.ffi.remapToPy(c.L, RATIONAL), Sk.ffi.remapToPy(c.T, RATIONAL, Sk.ffi.remapToPy(c.Q, RATIONAL)));
     });
     $loc.__pow__ = Sk.ffi.defineFunction(function(basePy, exponentPy) {
       Sk.ffi.checkArgCount("**", arguments, 2, 2);
       var base = Sk.ffi.remapToJs(basePy);
       var exponent = Sk.ffi.remapToJs(exponentPy);
       var x = base.pow(exponent);
-      return Sk.misceval.callsim(mod[DIMENSIONS], Sk.ffi.remapToPy(x.M, RATIONAL), Sk.ffi.remapToPy(x.L, RATIONAL), Sk.ffi.remapToPy(x.T, RATIONAL));
+      return Sk.misceval.callsim(mod[DIMENSIONS], Sk.ffi.remapToPy(x.M, RATIONAL), Sk.ffi.remapToPy(x.L, RATIONAL), Sk.ffi.remapToPy(x.T, RATIONAL, Sk.ffi.remapToPy(x.Q, RATIONAL)));
     });
     $loc.__str__ = Sk.ffi.defineFunction(function(dimensionsPy) {
       var dimensions = Sk.ffi.remapToJs(dimensionsPy);
       return Sk.ffi.remapToPy("" + dimensions);
     });
     $loc.__repr__ = Sk.ffi.defineFunction(function(dimensionsPy) {
-      var names = [PROP_M, PROP_L, PROP_T];
+      var names = [PROP_M, PROP_L, PROP_T, PROP_Q];
       var attrs = names.map(function(name) { return Sk.abstr.gattr(dimensionsPy, name); });
       var reprs = attrs.map(function(attr) { return Sk.ffi.remapToJs(Sk.misceval.callsim(attr["__repr__"], attr)); });
       return Sk.ffi.remapToPy(DIMENSIONS + "(" + reprs.join(" , ")  + ")");
@@ -309,11 +315,16 @@ Sk.builtin.defineUnits = function(mod) {
     });
   }, MEASURE, []);
 
-  mod[KILOGRAM] = Sk.misceval.callsim(mod[UNIT], Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new BLADE.Dimensions(1, 0, 0),  DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS));
-  mod[METER]    = Sk.misceval.callsim(mod[UNIT], Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new BLADE.Dimensions(0, 1, 0),  DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS));
-  mod[SECOND]   = Sk.misceval.callsim(mod[UNIT], Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new BLADE.Dimensions(0, 0, 1),  DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS));
-  mod[NEWTON]   = Sk.misceval.callsim(mod[UNIT], Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new BLADE.Dimensions(1, 1, -2), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS));
-  mod[JOULE]    = Sk.misceval.callsim(mod[UNIT], Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new BLADE.Dimensions(1, 2, -2), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS));
-  mod[WATT]     = Sk.misceval.callsim(mod[UNIT], Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new BLADE.Dimensions(1, 2, -3), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS));
+  mod[KILOGRAM] = Sk.misceval.callsim(mod[UNIT], Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new BLADE.Dimensions(1, 0, 0, 0),  DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS));
+  mod[METER]    = Sk.misceval.callsim(mod[UNIT], Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new BLADE.Dimensions(0, 1, 0, 0),  DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS));
+  mod[SECOND]   = Sk.misceval.callsim(mod[UNIT], Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new BLADE.Dimensions(0, 0, 1, 0),  DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS));
+  mod[COULOMB]  = Sk.misceval.callsim(mod[UNIT], Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new BLADE.Dimensions(0, 0, 0, 1),  DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS));
+
+  mod[NEWTON]   = Sk.misceval.callsim(mod[UNIT], Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new BLADE.Dimensions(1, 1, -2,  0), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS));
+  mod[JOULE]    = Sk.misceval.callsim(mod[UNIT], Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new BLADE.Dimensions(1, 2, -2,  0), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS));
+  mod[WATT]     = Sk.misceval.callsim(mod[UNIT], Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new BLADE.Dimensions(1, 2, -3,  0), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS));
+  mod[AMPERE]   = Sk.misceval.callsim(mod[UNIT], Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new BLADE.Dimensions(0, 0, -1,  1), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS));
+  mod[VOLT]     = Sk.misceval.callsim(mod[UNIT], Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new BLADE.Dimensions(1, 2, -2, -1), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS));
+  mod[TESLA]    = Sk.misceval.callsim(mod[UNIT], Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new BLADE.Dimensions(1, 1, -2, -1), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS));
 };
 }).call(this);
