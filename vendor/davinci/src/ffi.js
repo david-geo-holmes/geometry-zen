@@ -20,7 +20,7 @@ Sk.ffi.booleanToPy = function(valueJs)
     {
         goog.asserts.fail("f5008183-bfce-4842-9496-30b936ff73f3");
     }
-}
+};
 goog.exportSymbol("Sk.ffi.booleanToPy", Sk.ffi.booleanToPy);
 
 /**
@@ -43,7 +43,7 @@ Sk.ffi.numberToPy = function(valueJs)
     {
         goog.asserts.fail("3c68a6b8-0314-49ab-99ac-a818324417d8");
     }
-}
+};
 goog.exportSymbol("Sk.ffi.numberToPy", Sk.ffi.numberToPy);
 
 /**
@@ -66,15 +66,16 @@ Sk.ffi.numberToIntPy = function(valueJs)
     {
         goog.asserts.fail("b451b411-151c-4430-82f2-d548e5514303");
     }
-}
+};
 goog.exportSymbol("Sk.ffi.numberToIntPy", Sk.ffi.numberToIntPy);
 
 /**
  * Converts a JavaScript string or null to the internal Python string representation.
  *
  * @param {?string} valueJs
+ * @param {string=} defaultJs
  */
-Sk.ffi.stringToPy = function(valueJs)
+Sk.ffi.stringToPy = function(valueJs, defaultJs)
 {
     var t = typeof valueJs;
     if (t === 'string')
@@ -85,11 +86,22 @@ Sk.ffi.stringToPy = function(valueJs)
     {
         return Sk.builtin.none.none$;
     }
+    else if (t === 'undefined')
+    {
+        if (typeof defaultJs === 'string')
+        {
+            return Sk.ffi.stringToPy(defaultJs);
+        }
+        else
+        {
+            throw new Sk.builtin.AssertionError("f8db3019-c641-4ab2-8bbe-50aa9bfa8b39, defaultJs must be a string");
+        }
+    }
     else
     {
-        goog.asserts.fail("50730498-9d4c-4a28-ab50-fd6127dd6d8c");
+        throw new Sk.builtin.AssertionError("50730498-9d4c-4a28-ab50-fd6127dd6d8c, typeof valueJs => '" + t + "'");
     }
-}
+};
 goog.exportSymbol("Sk.ffi.stringToPy", Sk.ffi.stringToPy);
 
 /**
@@ -120,7 +132,7 @@ Sk.ffi.referenceToPy = function(valueJs, tp$name, custom)
     {
         goog.asserts.fail("306f31df-f0a9-40a0-895b-d01308df8d6e");
     }
-}
+};
 goog.exportSymbol("Sk.ffi.referenceToPy", Sk.ffi.referenceToPy);
 
 /**
@@ -208,35 +220,32 @@ Sk.ffi.booleanToJs = function(valuePy, message)
     {
         throw new Sk.builtin.AssertionError(message);
     }
-}
+};
 goog.exportSymbol("Sk.ffi.booleanToJs", Sk.ffi.booleanToJs);
 
-/**
- * Determines whether the internal Python representation value type in an int.
- */
-Sk.ffi.isIntPy = function(valuePy)
-{
-    return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.INT;
-}
-goog.exportSymbol("Sk.ffi.isIntPy", Sk.ffi.isIntPy);
+Sk.ffi.isDictionary = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.DICTIONARY; };
+goog.exportSymbol("Sk.ffi.isDictionary", Sk.ffi.isDictionary);
 
-/**
- * Determines whether the internal Python representation value type in a Number.
- */
-Sk.ffi.isNumberPy = function(valuePy)
-{
-    return Sk.builtin.checkNumber(valuePy);
-}
-goog.exportSymbol("Sk.ffi.isNumberPy", Sk.ffi.isNumberPy);
+Sk.ffi.isFunction = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.CALLBACK; };
+goog.exportSymbol("Sk.ffi.isFunction", Sk.ffi.isFunction);
 
-/**
- * Determines whether the internal Python representation value type in an int.
- */
-Sk.ffi.isReferencePy = function(valuePy)
-{
-    return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.REFERENCE;
-}
+Sk.ffi.isInt = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.INT; };
+goog.exportSymbol("Sk.ffi.isInt", Sk.ffi.isInt);
+
+Sk.ffi.isNone = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.NONE; };
+goog.exportSymbol("Sk.ffi.isNone", Sk.ffi.isNone);
+
+Sk.ffi.isNumber = function(valuePy) { return Sk.builtin.checkNumber(valuePy); };
+goog.exportSymbol("Sk.ffi.isNumber", Sk.ffi.isNumber);
+
+Sk.ffi.isReferencePy = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.REFERENCE; };
 goog.exportSymbol("Sk.ffi.isReferencePy", Sk.ffi.isReferencePy);
+
+Sk.ffi.isString = function(valuePy) { return Sk.builtin.checkString(valuePy); };
+goog.exportSymbol("Sk.ffi.isString", Sk.ffi.isString);
+
+Sk.ffi.isUndefined = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.UNDEFINED; };
+goog.exportSymbol("Sk.ffi.isUndefined", Sk.ffi.isUndefined);
 
 /**
  * @param {string=} message Optional customizable assertion message.
@@ -260,7 +269,7 @@ Sk.ffi.numberToJs = function(valuePy, message)
             goog.asserts.fail("e55f4353-0403-42f5-bd12-ec48459b3d2c");
         }
     }
-}
+};
 goog.exportSymbol("Sk.ffi.numberToJs", Sk.ffi.numberToJs);
 
 /**
@@ -279,7 +288,7 @@ goog.exportSymbol("Sk.ffi.numberToJs", Sk.ffi.numberToJs);
 Sk.ffi.checkArgCount = function(name, args, minargs, maxargs, kwargs, free)
 {
     return Sk.builtin.pyCheckArgs(name, args, minargs, maxargs, kwargs, free);
-}
+};
 goog.exportSymbol("Sk.ffi.checkArgCount", Sk.ffi.checkArgCount);
 
 /**
@@ -295,7 +304,7 @@ Sk.ffi.checkArgType = function(name, expectedType, condition)
     {
         throw new Sk.builtin.TypeError(name + " must be a " + expectedType);
     }
-}
+};
 goog.exportSymbol("Sk.ffi.checkArgType", Sk.ffi.checkArgType);
 
 /**
@@ -313,8 +322,10 @@ Sk.ffi.PyType = {
     'LONG':       6,
     'STRING':     7,
     'REFERENCE':  8,
-    'FUNCTION':   9
-}
+    'NONE':       9,
+    'FUNCTION':  10,
+    'CALLBACK':  11
+};
 
 /**
  * Computes the internal Python representation type for the provided value.
@@ -362,6 +373,10 @@ Sk.ffi.getType = function(valuePy)
     {
         return Sk.ffi.PyType.BOOL;
     }
+    else if (valuePy === Sk.builtin.none.none$)
+    {
+        return Sk.ffi.PyType.NONE;
+    }
     else
     {
         var x = typeof valuePy.v;
@@ -386,10 +401,12 @@ Sk.ffi.getType = function(valuePy)
         }
         else
         {
-            throw new Sk.builtin.AssertionError("6f625233-1f0b-419f-b062-5ce600db774f");
+            // TODO: It works, but why functions and callbacks?
+            return Sk.ffi.PyType.CALLBACK;
         }
     }
-}
+};
+goog.exportSymbol("Sk.ffi.getType", Sk.ffi.getType);
 
 Sk.ffi.typeName = function(valuePy)
 {
@@ -404,7 +421,8 @@ Sk.ffi.typeName = function(valuePy)
             goog.asserts.fail("Sk.ffi.typeName(valuePy) must be Sk.ffi.PyType.REFERENCE");
         }
     }
-}
+};
+goog.exportSymbol("Sk.ffi.typeName", Sk.ffi.typeName);
 
 /**
  * Usage:
@@ -485,6 +503,16 @@ Sk.ffi.remapToJs = function(valuePy, targetPy)
         {
             return undefined;
         }
+        case Sk.ffi.PyType.NONE:
+        {
+            return null;
+        }
+        case Sk.ffi.PyType.CALLBACK: {
+            return function() {
+                var argsPy = Array.prototype.slice.call(arguments, 0).map(function(argJs) {return Sk.ffi.remapToPy(argJs);});
+                return Sk.ffi.remapToJs(Sk.misceval.apply(valuePy, undefined, undefined, undefined, argsPy));
+            };
+        }
         default:
         {
             throw new Sk.builtin.AssertionError("20be4da2-63e8-4fff-9359-7ab46eba4702 " + Sk.ffi.getType(valuePy));
@@ -496,7 +524,7 @@ goog.exportSymbol("Sk.ffi.remapToJs", Sk.ffi.remapToJs);
 Sk.ffi.buildClass = function(globals, func, name, bases)
 {
     return Sk.misceval.buildClass(globals, func, name, bases);
-}
+};
 goog.exportSymbol("Sk.ffi.buildClass", Sk.ffi.buildClass);
 
 /**
@@ -507,7 +535,7 @@ goog.exportSymbol("Sk.ffi.buildClass", Sk.ffi.buildClass);
 Sk.ffi.defineFunction = function(code)
 {
     return new Sk.builtin.func(code);
-}
+};
 goog.exportSymbol("Sk.ffi.defineFunction", Sk.ffi.defineFunction);
 
 /**
@@ -519,15 +547,45 @@ Sk.ffi.callsim = function(func, args)
 {
     var args = Array.prototype.slice.call(arguments, 1);
     return Sk.misceval.apply(func, undefined, undefined, undefined, args);
-}
+};
 goog.exportSymbol("Sk.ffi.callsim", Sk.ffi.callsim);
 
-// TODO: Deprecate and/or rename to remapFunctionToPy?
-Sk.ffi.callback = function(fn)
+/**
+ * @param {...*} args
+ * @return {!Sk.builtin.AssertionError}
+ */
+Sk.ffi.assertionError = function(args)
 {
-    if (fn === undefined) return fn;
-    return function() {
-        return Sk.misceval.apply(fn, undefined, undefined, undefined, Array.prototype.slice.call(arguments, 0));
-    };
+    return new Sk.builtin.AssertionError(args);
 };
-goog.exportSymbol("Sk.ffi.callback", Sk.ffi.callback);
+goog.exportSymbol("Sk.ffi.assertionError", Sk.ffi.assertionError);
+
+/**
+ * @param {...*} args
+ * @return {!Sk.builtin.IndexError}
+ */
+Sk.ffi.indexError = function(args)
+{
+    return new Sk.builtin.IndexError(args);
+};
+goog.exportSymbol("Sk.ffi.indexError", Sk.ffi.indexError);
+
+/**
+ * @param {...*} args
+ * @return {!Sk.builtin.TypeError}
+ */
+Sk.ffi.typeError = function(args)
+{
+    return new Sk.builtin.TypeError(args);
+};
+goog.exportSymbol("Sk.ffi.typeError", Sk.ffi.typeError);
+
+/**
+ * @param {...*} args
+ * @return {!Sk.builtin.ValueError}
+ */
+Sk.ffi.valueError = function(args)
+{
+    return new Sk.builtin.ValueError(args);
+};
+goog.exportSymbol("Sk.ffi.valueError", Sk.ffi.valueError);

@@ -403,9 +403,9 @@ var $builtinmodule = function(name) {
           case Sk.ffi.PyType.INT:
           case Sk.ffi.PyType.LONG: {
             Sk.ffi.checkArgCount(VECTOR_3, arguments, 4, 4);
-            Sk.ffi.checkArgType('x', "Number", Sk.ffi.isNumberPy(x));
-            Sk.ffi.checkArgType('y', "Number", Sk.ffi.isNumberPy(y));
-            Sk.ffi.checkArgType('z', "Number", Sk.ffi.isNumberPy(z));
+            Sk.ffi.checkArgType('x', "Number", Sk.ffi.isNumber(x));
+            Sk.ffi.checkArgType('y', "Number", Sk.ffi.isNumber(y));
+            Sk.ffi.checkArgType('z', "Number", Sk.ffi.isNumber(z));
             selfPy.tp$name = VECTOR_3;
             selfPy.v = new THREE.Vector3(Sk.ffi.remapToJs(x), Sk.ffi.remapToJs(y), Sk.ffi.remapToJs(z));
           }
@@ -453,7 +453,7 @@ var $builtinmodule = function(name) {
     $loc.__mul__ = Sk.ffi.defineFunction(function(lhsPy, rhsPy) {
       Sk.ffi.checkArgCount("-", arguments, 2, 2);
       Sk.ffi.checkArgType('lhs', VECTOR_3, isVector(lhsPy));
-      Sk.ffi.checkArgType('rhs', "Number", Sk.ffi.isNumberPy(rhsPy));
+      Sk.ffi.checkArgType('rhs', "Number", Sk.ffi.isNumber(rhsPy));
       var a = Sk.ffi.remapToJs(lhsPy);
       var b = Sk.ffi.remapToJs(rhsPy);
       var x = a.x * b;
@@ -463,7 +463,7 @@ var $builtinmodule = function(name) {
     });
     $loc.__rmul__ = Sk.ffi.defineFunction(function(rhsPy, lhsPy) {
       Sk.ffi.checkArgCount("-", arguments, 2, 2);
-      Sk.ffi.checkArgType('lhs', "Number", Sk.ffi.isNumberPy(lhsPy));
+      Sk.ffi.checkArgType('lhs', "Number", Sk.ffi.isNumber(lhsPy));
       Sk.ffi.checkArgType('rhs', VECTOR_3, isVector(rhsPy));
       var a = Sk.ffi.remapToJs(lhsPy);
       var b = Sk.ffi.remapToJs(rhsPy);
@@ -519,9 +519,9 @@ var $builtinmodule = function(name) {
             });
             $loc.__call__ = Sk.ffi.defineFunction(function(methodPy, x, y, z) {
               Sk.ffi.checkArgCount(METHOD_SET, arguments, 4, 4);
-              Sk.ffi.checkArgType("x", "Number", Sk.ffi.isNumberPy(x));
-              Sk.ffi.checkArgType("y", "Number", Sk.ffi.isNumberPy(y));
-              Sk.ffi.checkArgType("z", "Number", Sk.ffi.isNumberPy(z));
+              Sk.ffi.checkArgType("x", "Number", Sk.ffi.isNumber(x));
+              Sk.ffi.checkArgType("y", "Number", Sk.ffi.isNumber(y));
+              Sk.ffi.checkArgType("z", "Number", Sk.ffi.isNumber(z));
               x  = Sk.ffi.remapToJs(x);
               y  = Sk.ffi.remapToJs(y);
               z  = Sk.ffi.remapToJs(z);
@@ -537,7 +537,7 @@ var $builtinmodule = function(name) {
             });
             $loc.__call__ = Sk.ffi.defineFunction(function(self, valuePy) {
               Sk.ffi.checkArgCount(METHOD_SET_X, arguments, 2, 2);
-              Sk.ffi.checkArgType(PROP_X, "Number", Sk.ffi.isNumberPy(valuePy));
+              Sk.ffi.checkArgType(PROP_X, "Number", Sk.ffi.isNumber(valuePy));
               vector[METHOD_SET_X](Sk.ffi.remapToJs(valuePy));
               return vectorPy;
             });
@@ -550,7 +550,7 @@ var $builtinmodule = function(name) {
             });
             $loc.__call__ = Sk.ffi.defineFunction(function(self, valuePy) {
               Sk.ffi.checkArgCount(METHOD_SET_Y, arguments, 2, 2);
-              Sk.ffi.checkArgType(PROP_Y, "Number", Sk.ffi.isNumberPy(valuePy));
+              Sk.ffi.checkArgType(PROP_Y, "Number", Sk.ffi.isNumber(valuePy));
               vector[METHOD_SET_Y](Sk.ffi.remapToJs(valuePy));
               return vectorPy;
             });
@@ -563,7 +563,7 @@ var $builtinmodule = function(name) {
             });
             $loc.__call__ = Sk.ffi.defineFunction(function(self, valuePy) {
               Sk.ffi.checkArgCount(METHOD_SET_Z, arguments, 2, 2);
-              Sk.ffi.checkArgType(PROP_Z, "Number", Sk.ffi.isNumberPy(valuePy));
+              Sk.ffi.checkArgType(PROP_Z, "Number", Sk.ffi.isNumber(valuePy));
               vector[METHOD_SET_Z](Sk.ffi.remapToJs(valuePy));
               return vectorPy;
             });
@@ -577,7 +577,7 @@ var $builtinmodule = function(name) {
         case PROP_X:
         case PROP_Y:
         case PROP_Z: {
-          Sk.ffi.checkArgType(name, "Number", Sk.ffi.isNumberPy(valuePy));
+          Sk.ffi.checkArgType(name, "Number", Sk.ffi.isNumber(valuePy));
           vector[name] = Sk.ffi.remapToJs(valuePy);
         }
         break;

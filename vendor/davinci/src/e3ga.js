@@ -438,7 +438,7 @@ Sk.builtin.defineEuclidean3 = function(mod) {
         return mv.xyz;
       }
       default: {
-        throw new Sk.builtin.AssertionError("" + index + " is not a valid multivector coordinate index");
+        throw Sk.ffi.assertionError("" + index + " is not a valid multivector coordinate index");
       }
     }
   }
@@ -516,14 +516,14 @@ Sk.builtin.defineEuclidean3 = function(mod) {
         case Sk.ffi.PyType.FLOAT:
         case Sk.ffi.PyType.INT: {
           Sk.ffi.checkArgCount(EUCLIDEAN_3, arguments, 9, 9);
-          Sk.ffi.checkArgType("w",    "Number", Sk.ffi.isNumberPy(w));
-          Sk.ffi.checkArgType("x",    "Number", Sk.ffi.isNumberPy(x));
-          Sk.ffi.checkArgType("y",    "Number", Sk.ffi.isNumberPy(y));
-          Sk.ffi.checkArgType("z",    "Number", Sk.ffi.isNumberPy(z));
-          Sk.ffi.checkArgType("xy",   "Number", Sk.ffi.isNumberPy(xy));
-          Sk.ffi.checkArgType("yz",   "Number", Sk.ffi.isNumberPy(yz));
-          Sk.ffi.checkArgType("zx",   "Number", Sk.ffi.isNumberPy(zx));
-          Sk.ffi.checkArgType("xyz",  "Number", Sk.ffi.isNumberPy(xyz));
+          Sk.ffi.checkArgType("w",    "Number", Sk.ffi.isNumber(w));
+          Sk.ffi.checkArgType("x",    "Number", Sk.ffi.isNumber(x));
+          Sk.ffi.checkArgType("y",    "Number", Sk.ffi.isNumber(y));
+          Sk.ffi.checkArgType("z",    "Number", Sk.ffi.isNumber(z));
+          Sk.ffi.checkArgType("xy",   "Number", Sk.ffi.isNumber(xy));
+          Sk.ffi.checkArgType("yz",   "Number", Sk.ffi.isNumber(yz));
+          Sk.ffi.checkArgType("zx",   "Number", Sk.ffi.isNumber(zx));
+          Sk.ffi.checkArgType("xyz",  "Number", Sk.ffi.isNumber(xyz));
           w   = Sk.ffi.remapToJs(w);
           x   = Sk.ffi.remapToJs(x);
           y   = Sk.ffi.remapToJs(y);

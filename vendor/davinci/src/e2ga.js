@@ -112,15 +112,15 @@ Sk.builtin.defineEuclidean2 = function(mod) {
 
   mod[SCALAR_2] = Sk.ffi.defineFunction(function(w) {
     Sk.ffi.checkArgCount(SCALAR_2, arguments, 1, 1);
-    Sk.ffi.checkArgType("w", "Number", Sk.ffi.isNumberPy(w));
+    Sk.ffi.checkArgType("w", "Number", Sk.ffi.isNumber(w));
     w = Sk.ffi.remapToJs(w);
     return remapE2ToPy(w, 0, 0, 0);
   });
 
   mod[VECTOR_2] = Sk.ffi.defineFunction(function(x, y) {
     Sk.ffi.checkArgCount(VECTOR_2, arguments, 2, 2);
-    Sk.ffi.checkArgType("x", "Number", Sk.ffi.isNumberPy(x));
-    Sk.ffi.checkArgType("y", "Number", Sk.ffi.isNumberPy(y));
+    Sk.ffi.checkArgType("x", "Number", Sk.ffi.isNumber(x));
+    Sk.ffi.checkArgType("y", "Number", Sk.ffi.isNumber(y));
     x = Sk.ffi.remapToJs(x);
     y = Sk.ffi.remapToJs(y);
     return remapE2ToPy(0, x, y, 0);
@@ -128,7 +128,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
 
   mod[PSEUDOSCALAR_2] = Sk.ffi.defineFunction(function(xy) {
     Sk.ffi.checkArgCount(PSEUDOSCALAR_2, arguments, 1, 1);
-    Sk.ffi.checkArgType("xy", "Number", Sk.ffi.isNumberPy(xy));
+    Sk.ffi.checkArgType("xy", "Number", Sk.ffi.isNumber(xy));
     xy = Sk.ffi.remapToJs(xy);
     return remapE2ToPy(0, 0, 0, xy);
   });
@@ -141,10 +141,10 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         case Sk.ffi.PyType.FLOAT:
         case Sk.ffi.PyType.INT: {
           Sk.ffi.checkArgCount(EUCLIDEAN_2, arguments, 5, 5);
-          Sk.ffi.checkArgType("w",  "Number", Sk.ffi.isNumberPy(x00));
-          Sk.ffi.checkArgType("x",  "Number", Sk.ffi.isNumberPy(x01));
-          Sk.ffi.checkArgType("y",  "Number", Sk.ffi.isNumberPy(x10));
-          Sk.ffi.checkArgType("xy", "Number", Sk.ffi.isNumberPy(x11));
+          Sk.ffi.checkArgType("w",  "Number", Sk.ffi.isNumber(x00));
+          Sk.ffi.checkArgType("x",  "Number", Sk.ffi.isNumber(x01));
+          Sk.ffi.checkArgType("y",  "Number", Sk.ffi.isNumber(x10));
+          Sk.ffi.checkArgType("xy", "Number", Sk.ffi.isNumber(x11));
           x00 = Sk.ffi.remapToJs(x00);
           x01 = Sk.ffi.remapToJs(x01);
           x10 = Sk.ffi.remapToJs(x10);

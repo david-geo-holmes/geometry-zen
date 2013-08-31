@@ -44,8 +44,8 @@ Sk.builtin.defineUnits = function(mod) {
       }
       else {
         Sk.ffi.checkArgCount(RATIONAL, arguments, 3, 3);
-        Sk.ffi.checkArgType("numer", "<type 'int'>", Sk.ffi.isIntPy(numer));
-        Sk.ffi.checkArgType("denom", "<type 'int'>", Sk.ffi.isIntPy(denom));
+        Sk.ffi.checkArgType("numer", "<type 'int'>", Sk.ffi.isInt(numer));
+        Sk.ffi.checkArgType("denom", "<type 'int'>", Sk.ffi.isInt(denom));
         self.v = new BLADE.Rational(Sk.ffi.remapToJs(numer), Sk.ffi.remapToJs(denom));
       }
     });
@@ -72,7 +72,7 @@ Sk.builtin.defineUnits = function(mod) {
       var a = Sk.ffi.remapToJs(aPy);
       var b = Sk.ffi.remapToJs(bPy);
       if (typeof b === 'number') {
-        Sk.ffi.checkArgType("rhs", "<type 'int'>", Sk.ffi.isIntPy(bPy));
+        Sk.ffi.checkArgType("rhs", "<type 'int'>", Sk.ffi.isInt(bPy));
         numer = a.numer * b;
         denom = a.denom;
         return Sk.misceval.callsim(mod[RATIONAL], Sk.ffi.numberToIntPy(numer), Sk.ffi.numberToIntPy(denom));
@@ -89,7 +89,7 @@ Sk.builtin.defineUnits = function(mod) {
       var a = Sk.ffi.remapToJs(aPy);
       var b = Sk.ffi.remapToJs(bPy);
       if (typeof b === 'number') {
-        Sk.ffi.checkArgType("rhs", "<type 'int'>", Sk.ffi.isIntPy(bPy));
+        Sk.ffi.checkArgType("rhs", "<type 'int'>", Sk.ffi.isInt(bPy));
         numer = a.numer;
         denom = a.denom * b;
         return Sk.misceval.callsim(mod[RATIONAL], Sk.ffi.numberToIntPy(numer), Sk.ffi.numberToIntPy(denom));
@@ -214,7 +214,7 @@ Sk.builtin.defineUnits = function(mod) {
       return Sk.misceval.callsim(mod[UNIT], Sk.ffi.remapToPy(c.scale), Sk.ffi.remapToPy(c.dimensions, DIMENSIONS), Sk.ffi.remapToPy(c.labels));
     });
     $loc.__rmul__ = Sk.ffi.defineFunction(function(rhsPy, lhsPy) {
-      Sk.ffi.checkArgType("lhs", "Number", Sk.ffi.isNumberPy(lhsPy));
+      Sk.ffi.checkArgType("lhs", "Number", Sk.ffi.isNumber(lhsPy));
       Sk.ffi.checkArgType("rhs", UNIT, rhsPy.tp$name === UNIT);
       var lhs = Sk.ffi.remapToJs(lhsPy);
       var rhs = Sk.ffi.remapToJs(rhsPy);
