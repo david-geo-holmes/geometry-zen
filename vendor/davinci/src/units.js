@@ -213,6 +213,17 @@ Sk.builtin.defineUnits = function(mod) {
         }
       }
     });
+    $loc.__add__ = Sk.ffi.defineFunction(function(lhsPy, rhsPy) {
+      var lhs = Sk.ffi.remapToJs(lhsPy);
+      var rhs = Sk.ffi.remapToJs(rhsPy);
+      try {
+        var c = lhs.add(rhs);
+        return Sk.misceval.callsim(mod[UNIT], Sk.ffi.remapToPy(c.scale), Sk.ffi.remapToPy(c.dimensions, DIMENSIONS), Sk.ffi.remapToPy(c.labels));
+      }
+      catch(e) {
+        throw Sk.ffi.assertionError(e.message)
+      }
+    });
     $loc.__mul__ = Sk.ffi.defineFunction(function(lhsPy, rhsPy) {
       var lhs = Sk.ffi.remapToJs(lhsPy);
       var rhs = Sk.ffi.remapToJs(rhsPy);
@@ -281,6 +292,30 @@ Sk.builtin.defineUnits = function(mod) {
         case PROP_UOM: {
           return Sk.misceval.callsim(mod[UNIT], Sk.ffi.remapToPy(measure[PROP_UOM], UNIT));
         }
+      }
+    });
+    $loc.__add__ = Sk.ffi.defineFunction(function(aPy, bPy) {
+      var a = Sk.ffi.remapToJs(aPy);
+      var b = Sk.ffi.remapToJs(bPy);
+      var quantityPy = Sk.abstr.gattr(aPy, PROP_QUANTITY);
+      var custom = {"quantity": Sk.ffi.typeName(quantityPy)};
+      try {
+        return Sk.misceval.callsim(mod[MEASURE], Sk.ffi.remapToPy(a.add(b), MEASURE, custom));
+      }
+      catch(e) {
+        throw Sk.ffi.assertionError(e.message);
+      }
+    });
+    $loc.__sub__ = Sk.ffi.defineFunction(function(aPy, bPy) {
+      var a = Sk.ffi.remapToJs(aPy);
+      var b = Sk.ffi.remapToJs(bPy);
+      var quantityPy = Sk.abstr.gattr(aPy, PROP_QUANTITY);
+      var custom = {"quantity": Sk.ffi.typeName(quantityPy)};
+      try {
+        return Sk.misceval.callsim(mod[MEASURE], Sk.ffi.remapToPy(a.sub(b), MEASURE, custom));
+      }
+      catch(e) {
+        throw Sk.ffi.assertionError(e.message);
       }
     });
     $loc.__mul__ = Sk.ffi.defineFunction(function(aPy, bPy) {

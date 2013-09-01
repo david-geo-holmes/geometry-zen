@@ -113,6 +113,7 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
         eval(Sk.importMainWithBody("<stdin>", false, prog.trim()))
       catch e
         # Unfortunately, we have to parse the string representation of the message.
+        # It would be nice if exceptions had the standard name and message.
         message = e.toString()
         name = message.substring(0, message.indexOf(":"))
         text = message.substring(message.indexOf(":") + 1)

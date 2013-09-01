@@ -5480,7 +5480,8 @@ Sk.builtin.AssertionError = function(args) {
     Sk.builtin.Exception.apply(this, arguments);
 }
 goog.inherits(Sk.builtin.AssertionError, Sk.builtin.Exception);
-Sk.builtin.AssertionError.prototype.tp$name = "AssertionError";
+Sk.builtin.AssertionError.prototype.name = "AssertionError";
+Sk.builtin.AssertionError.prototype.tp$name = Sk.builtin.AssertionError.prototype.name;
 goog.exportSymbol("Sk.builtin.AssertionError", Sk.builtin.AssertionError);
 
 /**
@@ -27282,6 +27283,17 @@ Sk.builtin.defineUnits = function(mod) {
         }
       }
     });
+    $loc.__add__ = Sk.ffi.defineFunction(function(lhsPy, rhsPy) {
+      var lhs = Sk.ffi.remapToJs(lhsPy);
+      var rhs = Sk.ffi.remapToJs(rhsPy);
+      try {
+        var c = lhs.add(rhs);
+        return Sk.misceval.callsim(mod[UNIT], Sk.ffi.remapToPy(c.scale), Sk.ffi.remapToPy(c.dimensions, DIMENSIONS), Sk.ffi.remapToPy(c.labels));
+      }
+      catch(e) {
+        throw Sk.ffi.assertionError(e.message)
+      }
+    });
     $loc.__mul__ = Sk.ffi.defineFunction(function(lhsPy, rhsPy) {
       var lhs = Sk.ffi.remapToJs(lhsPy);
       var rhs = Sk.ffi.remapToJs(rhsPy);
@@ -27350,6 +27362,30 @@ Sk.builtin.defineUnits = function(mod) {
         case PROP_UOM: {
           return Sk.misceval.callsim(mod[UNIT], Sk.ffi.remapToPy(measure[PROP_UOM], UNIT));
         }
+      }
+    });
+    $loc.__add__ = Sk.ffi.defineFunction(function(aPy, bPy) {
+      var a = Sk.ffi.remapToJs(aPy);
+      var b = Sk.ffi.remapToJs(bPy);
+      var quantityPy = Sk.abstr.gattr(aPy, PROP_QUANTITY);
+      var custom = {"quantity": Sk.ffi.typeName(quantityPy)};
+      try {
+        return Sk.misceval.callsim(mod[MEASURE], Sk.ffi.remapToPy(a.add(b), MEASURE, custom));
+      }
+      catch(e) {
+        throw Sk.ffi.assertionError(e.message);
+      }
+    });
+    $loc.__sub__ = Sk.ffi.defineFunction(function(aPy, bPy) {
+      var a = Sk.ffi.remapToJs(aPy);
+      var b = Sk.ffi.remapToJs(bPy);
+      var quantityPy = Sk.abstr.gattr(aPy, PROP_QUANTITY);
+      var custom = {"quantity": Sk.ffi.typeName(quantityPy)};
+      try {
+        return Sk.misceval.callsim(mod[MEASURE], Sk.ffi.remapToPy(a.sub(b), MEASURE, custom));
+      }
+      catch(e) {
+        throw Sk.ffi.assertionError(e.message);
       }
     });
     $loc.__mul__ = Sk.ffi.defineFunction(function(aPy, bPy) {
@@ -27452,9 +27488,23 @@ Sk.builtin.defineUnits = function(mod) {
       } else if (charge instanceof BLADE.Rational) {
         this.Q = charge;
       } else {
-        throw new Error("charge must be a Rational or number");
+        throw {
+          name: "DimensionError",
+          message: "charge must be a Rational or number"
+        };
       }
     }
+
+    Dimensions.prototype.compatible = function(rhs) {
+      if (this.M.equals(rhs.M) && this.L.equals(rhs.L) && this.T.equals(rhs.T) && this.Q.equals(rhs.Q)) {
+        return this;
+      } else {
+        throw {
+          name: "DimensionError",
+          message: "Dimensions must be equal +(" + this + ", " + rhs + ")"
+        };
+      }
+    };
 
     Dimensions.prototype.mul = function(rhs) {
       return new BLADE.Dimensions(this.M.add(rhs.M), this.L.add(rhs.L), this.T.add(rhs.T), this.Q.add(rhs.Q));
@@ -28189,6 +28239,22 @@ Sk.builtin.defineUnits = function(mod) {
       }
     }
 
+    Measure.prototype.add = function(rhs) {
+      if (rhs instanceof BLADE.Measure) {
+        return new BLADE.Measure(this.quantity.add(rhs.quantity), this.uom.compatible(rhs.uom));
+      } else {
+        throw new Error("...");
+      }
+    };
+
+    Measure.prototype.sub = function(rhs) {
+      if (rhs instanceof BLADE.Measure) {
+        return new BLADE.Measure(this.quantity.sub(rhs.quantity), this.uom.compatible(rhs.uom));
+      } else {
+        throw new Error("...");
+      }
+    };
+
     Measure.prototype.mul = function(rhs) {
       if (rhs instanceof BLADE.Measure) {
         return new BLADE.Measure(this.quantity.mul(rhs.quantity), this.uom.mul(rhs.uom));
@@ -28378,6 +28444,14 @@ Sk.builtin.defineUnits = function(mod) {
       return new BLADE.Rational(this.numer * rhs.denom, this.denom * rhs.numer);
     };
 
+    Rational.prototype.equals = function(other) {
+      if (other instanceof BLADE.Rational) {
+        return (this.numer * other.denom) === (this.denom * other.numer);
+      } else {
+        return false;
+      }
+    };
+
     Rational.prototype.toString = function() {
       return "" + this.numer + "/" + this.denom;
     };
@@ -28418,6 +28492,33 @@ Sk.builtin.defineUnits = function(mod) {
       this.dimensions = dimensions;
       this.labels = labels;
     }
+
+    Unit.prototype.compatible = function(rhs) {
+      var dimensions;
+
+      if (rhs instanceof Unit) {
+        dimensions = this.dimensions.compatible(rhs.dimensions);
+        return this["this"];
+      } else {
+        throw new Error("Illegal Argument for Unit.compatible: " + rhs);
+      }
+    };
+
+    Unit.prototype.add = function(rhs) {
+      if (rhs instanceof Unit) {
+        return new BLADE.Unit(this.scale + rhs.scale, this.dimensions.compatible(rhs.dimensions), this.labels);
+      } else {
+        throw new Error("Illegal Argument for Unit.add: " + rhs);
+      }
+    };
+
+    Unit.prototype.sub = function(rhs) {
+      if (rhs instanceof Unit) {
+        return new BLADE.Unit(this.scale - rhs.scale, this.dimensions.compatible(rhs.dimensions), this.labels);
+      } else {
+        throw new Error("Illegal Argument for Unit.sub: " + rhs);
+      }
+    };
 
     Unit.prototype.mul = function(rhs) {
       if (typeof rhs === 'number') {
