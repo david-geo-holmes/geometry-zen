@@ -442,7 +442,7 @@ var $builtinmodule = function(name) {
       a.z += b.z;
       return lhsPy;
     });
-    $loc.__sub__ = Sk.ffi.defineFunction(function(a, b) {
+    $loc.__sub__ = Sk.ffi.defineFunction(function(lhsPy, rhsPy) {
       Sk.ffi.checkArgCount("-", arguments, 2, 2);
       Sk.ffi.checkArgType('lhs', VECTOR_3, isVector(lhsPy));
       Sk.ffi.checkArgType('rhs', VECTOR_3, isVector(rhsPy));
