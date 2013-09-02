@@ -1,6 +1,6 @@
 {
   "name": "davinci",
-  "version": "0.0.87",
+  "version": "0.0.88",
   "main": "./build/davinci.min.js",
   "description": "Python to JavaScript cross compiler",
   "author": {
@@ -25,13 +25,13 @@
   },
   "ignore": [],
   "homepage": "https://github.com/geometryzen/davinci",
-  "_release": "0.0.87",
+  "_release": "0.0.88",
   "_resolution": {
     "type": "version",
-    "tag": "0.0.87",
-    "commit": "0f43cca9ede23ae743598569bad31e834b3a3350"
+    "tag": "0.0.88",
+    "commit": "56ddbaa515216cb66a64d22fec5a25d289cfb314"
   },
   "_source": "git://github.com/geometryzen/davinci.git",
-  "_target": "0.0.87",
+  "_target": "0.0.88",
   "_originalSource": "davinci"
 }

@@ -421,7 +421,6 @@ var $builtinmodule = function(name) {
       }
     });
     $loc.__add__ = Sk.ffi.defineFunction(function(lhsPy, rhsPy) {
-      Sk.ffi.checkArgCount("-", arguments, 2, 2);
       Sk.ffi.checkArgType('lhs', VECTOR_3, isVector(lhsPy));
       Sk.ffi.checkArgType('rhs', VECTOR_3, isVector(rhsPy));
       var a = Sk.ffi.remapToJs(lhsPy);
@@ -432,7 +431,6 @@ var $builtinmodule = function(name) {
       return vector3ToPy(x, y, z);
     });
     $loc.__iadd__ = Sk.ffi.defineFunction(function(lhsPy, rhsPy) {
-      Sk.ffi.checkArgCount("-", arguments, 2, 2);
       Sk.ffi.checkArgType('lhs', VECTOR_3, isVector(lhsPy));
       Sk.ffi.checkArgType('rhs', VECTOR_3, isVector(rhsPy));
       var a = Sk.ffi.remapToJs(lhsPy);
@@ -443,7 +441,6 @@ var $builtinmodule = function(name) {
       return lhsPy;
     });
     $loc.__sub__ = Sk.ffi.defineFunction(function(lhsPy, rhsPy) {
-      Sk.ffi.checkArgCount("-", arguments, 2, 2);
       Sk.ffi.checkArgType('lhs', VECTOR_3, isVector(lhsPy));
       Sk.ffi.checkArgType('rhs', VECTOR_3, isVector(rhsPy));
       var a = Sk.ffi.remapToJs(lhsPy);
@@ -454,7 +451,6 @@ var $builtinmodule = function(name) {
       return vector3ToPy(x, y, z);
     });
     $loc.__mul__ = Sk.ffi.defineFunction(function(lhsPy, rhsPy) {
-      Sk.ffi.checkArgCount("-", arguments, 2, 2);
       Sk.ffi.checkArgType('lhs', VECTOR_3, isVector(lhsPy));
       Sk.ffi.checkArgType('rhs', "Number", Sk.ffi.isNumber(rhsPy));
       var a = Sk.ffi.remapToJs(lhsPy);
@@ -465,7 +461,6 @@ var $builtinmodule = function(name) {
       return vector3ToPy(x, y, z);
     });
     $loc.__rmul__ = Sk.ffi.defineFunction(function(rhsPy, lhsPy) {
-      Sk.ffi.checkArgCount("-", arguments, 2, 2);
       Sk.ffi.checkArgType('lhs', "Number", Sk.ffi.isNumber(lhsPy));
       Sk.ffi.checkArgType('rhs', VECTOR_3, isVector(rhsPy));
       var a = Sk.ffi.remapToJs(lhsPy);
@@ -509,7 +504,7 @@ var $builtinmodule = function(name) {
               self.tp$name = METHOD_NORMALIZE;
             });
             $loc.__call__ = Sk.ffi.defineFunction(function(self) {
-              Sk.ffi.checkArgCount(VECTOR_3, arguments, 1, 1);
+              Sk.ffi.checkMethodArgs(VECTOR_3, arguments, 0, 0);
               vector[METHOD_NORMALIZE]();
               return vectorPy;
             });
@@ -534,7 +529,7 @@ var $builtinmodule = function(name) {
               self.tp$name = METHOD_SET_X;
             });
             $loc.__call__ = Sk.ffi.defineFunction(function(self, valuePy) {
-              Sk.ffi.checkArgCount(METHOD_SET_X, arguments, 2, 2);
+              Sk.ffi.checkMethodArgs(METHOD_SET_X, arguments, 1, 1);
               Sk.ffi.checkArgType(PROP_X, "Number", Sk.ffi.isNumber(valuePy));
               vector[METHOD_SET_X](Sk.ffi.remapToJs(valuePy));
               return vectorPy;
@@ -547,7 +542,7 @@ var $builtinmodule = function(name) {
               self.tp$name = METHOD_SET_Y;
             });
             $loc.__call__ = Sk.ffi.defineFunction(function(self, valuePy) {
-              Sk.ffi.checkArgCount(METHOD_SET_Y, arguments, 2, 2);
+              Sk.ffi.checkMethodArgs(METHOD_SET_Y, arguments, 1, 1);
               Sk.ffi.checkArgType(PROP_Y, "Number", Sk.ffi.isNumber(valuePy));
               vector[METHOD_SET_Y](Sk.ffi.remapToJs(valuePy));
               return vectorPy;
@@ -560,7 +555,7 @@ var $builtinmodule = function(name) {
               self.tp$name = METHOD_SET_Z;
             });
             $loc.__call__ = Sk.ffi.defineFunction(function(self, valuePy) {
-              Sk.ffi.checkArgCount(METHOD_SET_Z, arguments, 2, 2);
+              Sk.ffi.checkMethodArgs(METHOD_SET_Z, arguments, 1, 1);
               Sk.ffi.checkArgType(PROP_Z, "Number", Sk.ffi.isNumber(valuePy));
               vector[METHOD_SET_Z](Sk.ffi.remapToJs(valuePy));
               return vectorPy;
@@ -1116,7 +1111,7 @@ var $builtinmodule = function(name) {
   }, SCENE, []);
 
   mod[WORLD] = Sk.ffi.defineFunction(function() {
-    Sk.ffi.checkArgCount(WORLD, arguments, 0, 0);
+    Sk.ffi.checkFunctionArgs(WORLD, arguments, 0, 0);
     var scenePy = Sk.ffi.callsim(mod[SCENE]);
     var scene = Sk.ffi.remapToJs(scenePy);
 
@@ -1138,7 +1133,7 @@ var $builtinmodule = function(name) {
   });
 
   mod[CUBE] = Sk.nativejs.func(function box(width, height, depth) {
-    Sk.ffi.checkArgCount(CUBE, arguments, 0, 3);
+    Sk.ffi.checkFunctionArgs(CUBE, arguments, 0, 3);
     var materialPy = Sk.ffi.callsim(mod[MESH_LAMBERT_MATERIAL], Sk.ffi.remapToPy({"color": 0x0000FF}));
     width  = Sk.ffi.remapToJs(width,  1);
     height = Sk.ffi.remapToJs(height, 1);
@@ -1148,7 +1143,7 @@ var $builtinmodule = function(name) {
   });
 
   mod[CYLINDER] = Sk.nativejs.func(function box(radiusTop, radiusBottom, height) {
-    Sk.ffi.checkArgCount(CYLINDER, arguments, 0, 3);
+    Sk.ffi.checkFunctionArgs(CYLINDER, arguments, 0, 3);
     var materialPy = Sk.ffi.callsim(mod[MESH_LAMBERT_MATERIAL], Sk.ffi.remapToPy({"color": 0x00FF00}));
     radiusBottom = Sk.ffi.remapToJs(radiusBottom, 1);
     radiusTop  = Sk.ffi.remapToJs(radiusTop,  radiusBottom);
@@ -1162,7 +1157,7 @@ var $builtinmodule = function(name) {
   });
 
   mod[SPHERE] = Sk.nativejs.func(function box(radius) {
-    Sk.ffi.checkArgCount(SPHERE, arguments, 0, 3);
+    Sk.ffi.checkFunctionArgs(SPHERE, arguments, 0, 1);
     var materialPy = Sk.ffi.callsim(mod[MESH_LAMBERT_MATERIAL], Sk.ffi.remapToPy({"color": 0xFF0000}));
     radius = Sk.ffi.remapToJs(radius,  1);
     radius = Sk.ffi.remapToPy(radius);

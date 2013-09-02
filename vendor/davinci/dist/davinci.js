@@ -7326,27 +7326,27 @@ Sk.abstr = {};
 //
 //
 
-Sk.abstr.typeName = function(v) {
-    var vtypename;
-    if (v instanceof Sk.builtin.nmber) {
-        vtypename = v.skType;
+Sk.abstr.typeName = function(valuePy) {
+    if (valuePy instanceof Sk.builtin.nmber)
+    {
+        return valuePy.skType;
     }
-    else if (v.tp$name !== undefined) {
-        vtypename = v.tp$name;
+    else if (valuePy.tp$name !== undefined)
+    {
+        return valuePy.tp$name;
     }
-    else {
-        vtypename = "<invalid type>";
-    };
-    return vtypename;
+    else 
+    {
+        return "<invalid type>";
+    }
 };
 
-Sk.abstr.binop_type_error = function(v, w, name)
+Sk.abstr.binop_type_error = function(lhsPy, rhsPy, name)
 {
-    var vtypename = Sk.abstr.typeName(v);
-    var wtypename = Sk.abstr.typeName(w);
+    var lhs = Sk.abstr.typeName(lhsPy);
+    var rhs = Sk.abstr.typeName(rhsPy);
 
-    throw new Sk.builtin.TypeError("unsupported operand type(s) for " + name + ": '"
-            + vtypename + "' and '" + wtypename + "'");
+    throw new Sk.builtin.TypeError("unsupported operand type(s) for " + name + ": '" + lhs + "' and '" + rhs + "'");
 };
 
 Sk.abstr.boNameToSlotFuncLhs_ = function(obj, name) {
@@ -7389,7 +7389,13 @@ Sk.abstr.boNameToSlotFuncRhs_ = function(obj, name) {
   }
 };
 
+/**
+ * In-place operations (+=, -=, *=, /=, //=, %=, **=, <<=, >>=, &=, ^=, |=)
+ */
 Sk.abstr.iboNameToSlotFunc_ = function(obj, name) {
+  if (obj === null) {
+    return undefined;
+  };
   switch (name) {
     case "Add":      return obj.nb$inplace_add          ? obj.nb$inplace_add          : obj['__iadd__'];
     case "Sub":      return obj.nb$inplace_subtract     ? obj.nb$inplace_subtract     : obj['__isub__'];
@@ -7625,23 +7631,59 @@ Sk.abstr.numberInplaceBinOp = function(v, w, op)
 };
 goog.exportSymbol("Sk.abstr.numberInplaceBinOp", Sk.abstr.numberInplaceBinOp);
 
-Sk.abstr.numberUnaryOp = function(v, op)
+/**
+ * Unary arithmetic operations (-, +, abs(), and ~)
+ */
+Sk.abstr.uboNameToSlotFunc_ = function(obj, name) {
+  if (obj === null) {
+    return undefined;
+  };
+  switch (name) {
+    case "USub": {
+        return obj.nb$negative          ? obj.nb$negative        : obj['__neg__'];
+    }
+    case "Invert": {
+        return obj.nb$invert            ? obj.nb$invert          : obj['__invert__'];
+    }
+    case "UAdd": {
+        return obj.nb$positive          ? obj.nb$positive        : obj['__pos__'];
+    }
+    default: {
+        throw new Sk.builtin.AssertionError("7fb8237f-879b-4192-89ce-13ad6fa3b2d8 " + name);
+    }
+  }
+};
+
+Sk.abstr.numberUnaryOp = function(valuePy, op)
 {
-    if (op === "Not") return Sk.misceval.isTrue(v) ? Sk.builtin.bool.false$ : Sk.builtin.bool.true$;
-    else if (v instanceof Sk.builtin.nmber || v instanceof Sk.builtin.bool) {
-    var value = Sk.builtin.asnum$(v);
-    if (op === "USub") return new Sk.builtin.nmber(-value, value.skType);
-        if (op === "UAdd") return new Sk.builtin.nmber(value, value.skType);
+    if (op === "Not")
+    {
+        return Sk.misceval.isTrue(valuePy) ? Sk.builtin.bool.false$ : Sk.builtin.bool.true$;
+    }
+    else if (valuePy instanceof Sk.builtin.nmber || valuePy instanceof Sk.builtin.bool)
+    {
+        var value = Sk.builtin.asnum$(valuePy);
+        if (op === "USub") return new Sk.builtin.nmber(-value, value.skType);
         if (op === "Invert") return new Sk.builtin.nmber(~value, value.skType);
+        if (op === "UAdd") return new Sk.builtin.nmber(value, value.skType);
     }
     else
     {
-        if (op === "USub" && v.nb$negative) return v.nb$negative();
-        if (op === "UAdd" && v.nb$positive) return v.nb$positive();
-        if (op === "Invert" && v.nb$invert) return v.nb$invert();
+        var uop = Sk.abstr.uboNameToSlotFunc_(valuePy, op);
+        if (uop != undefined)
+        {
+            if (uop.call)
+            {
+                return uop.call(valuePy);
+            }
+            else
+            {
+                return Sk.misceval.callsim(uop, valuePy);
+            }
+        }
     }
 
-    var vtypename = Sk.abstr.typeName(v);
+    var vtypename = Sk.abstr.typeName(valuePy);
     throw new Sk.builtin.TypeError("unsupported operand type for " + op + " '" + vtypename + "'");
 };
 goog.exportSymbol("Sk.abstr.numberUnaryOp", Sk.abstr.numberUnaryOp);
@@ -13726,7 +13768,14 @@ Sk.ffi.stringToPy = function(valueJs, defaultJs)
     var t = typeof valueJs;
     if (t === 'string')
     {
-        return new Sk.builtin.str(valueJs);
+        if (valueJs.length > 0)
+        {
+            return new Sk.builtin.str(valueJs);
+        }
+        else
+        {
+            return Sk.builtin.str.$emptystr;
+        }
     }
     else if (t === 'object' && valueJs === null)
     {
@@ -13822,6 +13871,17 @@ Sk.ffi.callableToPy = function(mod, targetJs, nameJs, functionJs)
     }, nameJs, []));
 };
 goog.exportSymbol("Sk.ffi.callableToPy", Sk.ffi.callableToPy);
+
+/**
+ * TODO: How does the tuple differ from a list?
+ * TODO: Why does this not appear in the remapToPy function?
+ * @param {Array.<Object>|Object} xs
+ */
+Sk.ffi.tuple = function(xs)
+{
+    return new Sk.builtin.tuple(xs);
+}
+goog.exportSymbol("Sk.ffi.tuple", Sk.ffi.tuple);
 
 /**
  * Wraps a JavaScript Object instance.
@@ -13932,7 +13992,7 @@ goog.exportSymbol("Sk.ffi.isObjectRef", Sk.ffi.isObjectRef);
 Sk.ffi.isFunctionRef = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.FUNREF; };
 goog.exportSymbol("Sk.ffi.isFunctionRef", Sk.ffi.isFunctionRef);
 
-Sk.ffi.isReference = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.OBJREF; };
+Sk.ffi.isReference = function(valuePy) { return Sk.ffi.isObjectRef(valuePy) || Sk.ffi.isFunctionRef(valuePy); };
 goog.exportSymbol("Sk.ffi.isReference", Sk.ffi.isReference);
 
 Sk.ffi.isString = function(valuePy) { return Sk.builtin.checkString(valuePy); };
@@ -13965,25 +14025,6 @@ Sk.ffi.numberToJs = function(valuePy, message)
     }
 };
 goog.exportSymbol("Sk.ffi.numberToJs", Sk.ffi.numberToJs);
-
-/**
- * @deprecated Use Sk.ffi.checkFunctionArgs
- *
- * @param {string} name the name of the attribute
- * @param {{length: number}} args the args passed to the attribute
- * @param {number} minargs the minimum number of allowable arguments
- * @param {number=} maxargs optional maximum number of allowable
- * arguments (default: Infinity)
- * @param {boolean=} kwargs optional true if kwargs, false otherwise
- * (default: false)
- * @param {boolean=} free optional true if free vars, false otherwise
- * (default: false)
- */
-Sk.ffi.checkArgCount = function(name, args, minargs, maxargs, kwargs, free)
-{
-    return Sk.ffi.checkFunctionArgs(name, args, minargs, maxargs, kwargs, free);
-};
-goog.exportSymbol("Sk.ffi.checkArgCount", Sk.ffi.checkArgCount);
 
 /**
  * Convenience function for asserting the number of arguments to a function.
@@ -14039,7 +14080,7 @@ goog.exportSymbol("Sk.ffi.checkFunctionArgs", Sk.ffi.checkFunctionArgs);
  */
 Sk.ffi.checkMethodArgs = function(name, args, minargs, maxargs, kwargs, free)
 {
-    return Sk.ffi.checkArgCount(name, Array.prototype.slice.call(args, 1), minargs, maxargs, kwargs, free);
+    return Sk.ffi.checkFunctionArgs(name, Array.prototype.slice.call(args, 1), minargs, maxargs, kwargs, free);
 };
 goog.exportSymbol("Sk.ffi.checkMethodArgs", Sk.ffi.checkMethodArgs);
 
@@ -14054,7 +14095,7 @@ Sk.ffi.checkArgType = function(name, expectedType, condition)
 {
     if (!condition)
     {
-        throw new Sk.builtin.TypeError(name + " must be a " + expectedType);
+        throw Sk.ffi.err.argument(name).mustBeA(expectedType);
     }
 };
 goog.exportSymbol("Sk.ffi.checkArgType", Sk.ffi.checkArgType);
@@ -14068,15 +14109,16 @@ Sk.ffi.PyType = {
     'UNDEFINED':  0,
     'DICTIONARY': 1,
     'LIST':       2,
-    'BOOL':       3,
-    'FLOAT':      4,
-    'INT':        5,
-    'LONG':       6,
-    'STRING':     7,
-    'OBJREF':     8,
-    'FUNREF':     9,
-    'NONE':      10,
-    'FUNCTION':  11
+    'TUPLE':      3,
+    'BOOL':       4,
+    'FLOAT':      5,
+    'INT':        6,
+    'LONG':       7,
+    'STRING':     8,
+    'OBJREF':     9,
+    'FUNREF':    10,
+    'NONE':      11,
+    'FUNCTION':  12
 };
 
 /**
@@ -14097,6 +14139,10 @@ Sk.ffi.getType = function(valuePy)
     else if (valuePy instanceof Sk.builtin.list)
     {
         return Sk.ffi.PyType.LIST;
+    }
+    else if (valuePy instanceof Sk.builtin.tuple)
+    {
+        return Sk.ffi.PyType.TUPLE;
     }
     else if (valuePy instanceof Sk.builtin.nmber)
     {
@@ -14193,7 +14239,7 @@ goog.exportSymbol("Sk.ffi.typeName", Sk.ffi.typeName);
  */
 Sk.ffi.remapToJs = function(valuePy, defaultJs)
 {
-    Sk.ffi.checkArgCount("Sk.ffi.remapToJs", arguments, 1, 2);
+    Sk.ffi.checkFunctionArgs("Sk.ffi.remapToJs", arguments, 1, 2);
     switch(Sk.ffi.getType(valuePy))
     {
         case Sk.ffi.PyType.STRING:
@@ -14215,6 +14261,15 @@ Sk.ffi.remapToJs = function(valuePy, defaultJs)
             return ret;
         }
         case Sk.ffi.PyType.LIST:
+        {
+            var ret = [];
+            for (var i = 0; i < valuePy.v.length; ++i)
+            {
+                ret.push(Sk.ffi.remapToJs(valuePy.v[i]));
+            }
+            return ret;
+        }
+        case Sk.ffi.PyType.TUPLE:
         {
             var ret = [];
             for (var i = 0; i < valuePy.v.length; ++i)
@@ -14344,6 +14399,30 @@ Sk.ffi.valueError = function(args)
     return new Sk.builtin.ValueError(args);
 };
 goog.exportSymbol("Sk.ffi.valueError", Sk.ffi.valueError);
+
+/**
+ * Fluid API for building messages.
+ *
+ * TODO: Localization.
+ */
+Sk.ffi.err =
+{
+    argument: function(name) {
+        return {
+            mustBeA: function(expectedType) {
+                return Sk.ffi.typeError(name + " must be a " + expectedType);
+            }
+        };
+    },
+    expectArg: function(name) {
+        return {
+            toHaveType: function(expectedType) {
+                return Sk.ffi.typeError("Expecting argument '" + name + "' to have type '" + expectedType + "'.");
+            }
+        };
+    }
+}
+goog.exportSymbol("Sk.ffi.message", Sk.ffi.message);
 
 /**
  * @deprecated Use Sk.ffi.remapToJs
@@ -27275,7 +27354,7 @@ Sk.builtin.defineUnits = function(mod) {
       return Sk.misceval.callsim(mod[RATIONAL], Sk.ffi.remapToPy(a.add(b), RATIONAL));
     });
     $loc.__sub__ = Sk.ffi.defineFunction(function(aPy, bPy) {
-      Sk.ffi.checkArgCount("+", arguments, 2, 2);
+      Sk.ffi.checkFunctionArgs("+", arguments, 2, 2);
       Sk.ffi.checkArgType("lhs", RATIONAL, aPy.tp$name === RATIONAL);
       var numer, denom;
       var a = Sk.ffi.remapToJs(aPy);
@@ -27283,7 +27362,7 @@ Sk.builtin.defineUnits = function(mod) {
       return Sk.misceval.callsim(mod[RATIONAL], Sk.ffi.remapToPy(a.sub(b), RATIONAL));
     });
     $loc.__mul__ = Sk.ffi.defineFunction(function(aPy, bPy) {
-      Sk.ffi.checkArgCount("+", arguments, 2, 2);
+      Sk.ffi.checkFunctionArgs("+", arguments, 2, 2);
       Sk.ffi.checkArgType("lhs", RATIONAL, aPy.tp$name === RATIONAL);
       var numer, denom;
       var a = Sk.ffi.remapToJs(aPy);
@@ -27300,7 +27379,7 @@ Sk.builtin.defineUnits = function(mod) {
       }
     });
     $loc.__div__ = Sk.ffi.defineFunction(function(aPy, bPy) {
-      Sk.ffi.checkArgCount("+", arguments, 2, 2);
+      Sk.ffi.checkFunctionArgs("+", arguments, 2, 2);
       Sk.ffi.checkArgType("lhs", RATIONAL, aPy.tp$name === RATIONAL);
       var numer, denom;
       var a = Sk.ffi.remapToJs(aPy);
@@ -27328,7 +27407,7 @@ Sk.builtin.defineUnits = function(mod) {
   
   mod[DIMENSIONS] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = Sk.ffi.defineFunction(function(self, M, L, T, Q) {
-      Sk.ffi.checkArgCount(MEASURE, arguments, 2, 5);
+      Sk.ffi.checkMethodArgs(MEASURE, arguments, 1, 4);
       Sk.ffi.checkArgType("M", [RATIONAL, DIMENSIONS].join(" or "), Sk.ffi.isReference(M));
       self.tp$name = DIMENSIONS;
       switch(Sk.ffi.typeName(M)) {
@@ -27375,7 +27454,7 @@ Sk.builtin.defineUnits = function(mod) {
       return Sk.misceval.callsim(mod[DIMENSIONS], Sk.ffi.remapToPy(c.M, RATIONAL), Sk.ffi.remapToPy(c.L, RATIONAL), Sk.ffi.remapToPy(c.T, RATIONAL, Sk.ffi.remapToPy(c.Q, RATIONAL)));
     });
     $loc.__pow__ = Sk.ffi.defineFunction(function(basePy, exponentPy) {
-      Sk.ffi.checkArgCount("**", arguments, 2, 2);
+      Sk.ffi.checkFunctionArgs("**", arguments, 2, 2);
       var base = Sk.ffi.remapToJs(basePy);
       var exponent = Sk.ffi.remapToJs(exponentPy);
       var x = base.pow(exponent);
@@ -27396,15 +27475,15 @@ Sk.builtin.defineUnits = function(mod) {
   mod[UNIT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = Sk.ffi.defineFunction(function(self, scalePy, dimensionsPy, labelsPy) {
       self.tp$name = UNIT;
-      Sk.ffi.checkArgCount(UNIT, arguments, 2, 4);
+      Sk.ffi.checkMethodArgs(UNIT, arguments, 1, 3);
       switch(Sk.ffi.getType(scalePy)) {
         case Sk.ffi.PyType.FLOAT: {
-          Sk.ffi.checkArgCount(UNIT, arguments, 4, 4);
+          Sk.ffi.checkMethodArgs(UNIT, arguments, 3, 3);
           self.v = new BLADE.Unit(Sk.ffi.remapToJs(scalePy), Sk.ffi.remapToJs(dimensionsPy), Sk.ffi.remapToJs(labelsPy));
         }
         break;
         case Sk.ffi.PyType.OBJREF: {
-          Sk.ffi.checkArgCount(UNIT, arguments, 2, 2);
+          Sk.ffi.checkMethodArgs(UNIT, arguments, 1, 1);
           self.v = Sk.ffi.remapToJs(scalePy);
         }
         break;
@@ -27480,21 +27559,16 @@ Sk.builtin.defineUnits = function(mod) {
   }, UNIT, []);
 
   mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, quantityPy, unitPy) {
-      Sk.ffi.checkArgCount(MEASURE, arguments, 2, 3);
+    $loc.__init__ = Sk.ffi.defineFunction(function(selfPy, quantityPy, unitPy) {
+      Sk.ffi.checkMethodArgs(MEASURE, arguments, 1, 2);
       Sk.ffi.checkArgType("quantityPy", ["Reference", MEASURE].join(" or "), Sk.ffi.isReference(quantityPy));
       if (Sk.ffi.typeName(quantityPy) === MEASURE)
       {
-        // TODO: Notice that remapToJs could/should return the tuple. 
-        self.tp$name = MEASURE;
-        self.v = Sk.ffi.remapToJs(quantityPy);
-        self.custom =  quantityPy.custom;
+        Sk.ffi.referenceToPy(Sk.ffi.remapToJs(quantityPy), MEASURE, quantityPy.custom, selfPy);
       }
       else
       {
-        self.tp$name = MEASURE;
-        self.v = new BLADE.Measure(Sk.ffi.remapToJs(quantityPy), Sk.ffi.remapToJs(unitPy));
-        self.custom = {"quantity": Sk.ffi.typeName(quantityPy)};
+        Sk.ffi.referenceToPy(new BLADE.Measure(Sk.ffi.remapToJs(quantityPy), Sk.ffi.remapToJs(unitPy)), MEASURE, {"quantity": Sk.ffi.typeName(quantityPy)}, selfPy);
       }
     });
     $loc.__getattr__ = Sk.ffi.defineFunction(function(measurePy, name) {

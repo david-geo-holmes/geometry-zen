@@ -10,27 +10,27 @@ Sk.abstr = {};
 //
 //
 
-Sk.abstr.typeName = function(v) {
-    var vtypename;
-    if (v instanceof Sk.builtin.nmber) {
-        vtypename = v.skType;
+Sk.abstr.typeName = function(valuePy) {
+    if (valuePy instanceof Sk.builtin.nmber)
+    {
+        return valuePy.skType;
     }
-    else if (v.tp$name !== undefined) {
-        vtypename = v.tp$name;
+    else if (valuePy.tp$name !== undefined)
+    {
+        return valuePy.tp$name;
     }
-    else {
-        vtypename = "<invalid type>";
-    };
-    return vtypename;
+    else 
+    {
+        return "<invalid type>";
+    }
 };
 
-Sk.abstr.binop_type_error = function(v, w, name)
+Sk.abstr.binop_type_error = function(lhsPy, rhsPy, name)
 {
-    var vtypename = Sk.abstr.typeName(v);
-    var wtypename = Sk.abstr.typeName(w);
+    var lhs = Sk.abstr.typeName(lhsPy);
+    var rhs = Sk.abstr.typeName(rhsPy);
 
-    throw new Sk.builtin.TypeError("unsupported operand type(s) for " + name + ": '"
-            + vtypename + "' and '" + wtypename + "'");
+    throw new Sk.builtin.TypeError("unsupported operand type(s) for " + name + ": '" + lhs + "' and '" + rhs + "'");
 };
 
 Sk.abstr.boNameToSlotFuncLhs_ = function(obj, name) {
@@ -73,7 +73,13 @@ Sk.abstr.boNameToSlotFuncRhs_ = function(obj, name) {
   }
 };
 
+/**
+ * In-place operations (+=, -=, *=, /=, //=, %=, **=, <<=, >>=, &=, ^=, |=)
+ */
 Sk.abstr.iboNameToSlotFunc_ = function(obj, name) {
+  if (obj === null) {
+    return undefined;
+  };
   switch (name) {
     case "Add":      return obj.nb$inplace_add          ? obj.nb$inplace_add          : obj['__iadd__'];
     case "Sub":      return obj.nb$inplace_subtract     ? obj.nb$inplace_subtract     : obj['__isub__'];
@@ -309,23 +315,59 @@ Sk.abstr.numberInplaceBinOp = function(v, w, op)
 };
 goog.exportSymbol("Sk.abstr.numberInplaceBinOp", Sk.abstr.numberInplaceBinOp);
 
-Sk.abstr.numberUnaryOp = function(v, op)
+/**
+ * Unary arithmetic operations (-, +, abs(), and ~)
+ */
+Sk.abstr.uboNameToSlotFunc_ = function(obj, name) {
+  if (obj === null) {
+    return undefined;
+  };
+  switch (name) {
+    case "USub": {
+        return obj.nb$negative          ? obj.nb$negative        : obj['__neg__'];
+    }
+    case "Invert": {
+        return obj.nb$invert            ? obj.nb$invert          : obj['__invert__'];
+    }
+    case "UAdd": {
+        return obj.nb$positive          ? obj.nb$positive        : obj['__pos__'];
+    }
+    default: {
+        throw new Sk.builtin.AssertionError("7fb8237f-879b-4192-89ce-13ad6fa3b2d8 " + name);
+    }
+  }
+};
+
+Sk.abstr.numberUnaryOp = function(valuePy, op)
 {
-    if (op === "Not") return Sk.misceval.isTrue(v) ? Sk.builtin.bool.false$ : Sk.builtin.bool.true$;
-    else if (v instanceof Sk.builtin.nmber || v instanceof Sk.builtin.bool) {
-    var value = Sk.builtin.asnum$(v);
-    if (op === "USub") return new Sk.builtin.nmber(-value, value.skType);
-        if (op === "UAdd") return new Sk.builtin.nmber(value, value.skType);
+    if (op === "Not")
+    {
+        return Sk.misceval.isTrue(valuePy) ? Sk.builtin.bool.false$ : Sk.builtin.bool.true$;
+    }
+    else if (valuePy instanceof Sk.builtin.nmber || valuePy instanceof Sk.builtin.bool)
+    {
+        var value = Sk.builtin.asnum$(valuePy);
+        if (op === "USub") return new Sk.builtin.nmber(-value, value.skType);
         if (op === "Invert") return new Sk.builtin.nmber(~value, value.skType);
+        if (op === "UAdd") return new Sk.builtin.nmber(value, value.skType);
     }
     else
     {
-        if (op === "USub" && v.nb$negative) return v.nb$negative();
-        if (op === "UAdd" && v.nb$positive) return v.nb$positive();
-        if (op === "Invert" && v.nb$invert) return v.nb$invert();
+        var uop = Sk.abstr.uboNameToSlotFunc_(valuePy, op);
+        if (uop != undefined)
+        {
+            if (uop.call)
+            {
+                return uop.call(valuePy);
+            }
+            else
+            {
+                return Sk.misceval.callsim(uop, valuePy);
+            }
+        }
     }
 
-    var vtypename = Sk.abstr.typeName(v);
+    var vtypename = Sk.abstr.typeName(valuePy);
     throw new Sk.builtin.TypeError("unsupported operand type for " + op + " '" + vtypename + "'");
 };
 goog.exportSymbol("Sk.abstr.numberUnaryOp", Sk.abstr.numberUnaryOp);

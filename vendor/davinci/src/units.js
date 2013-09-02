@@ -61,7 +61,7 @@ Sk.builtin.defineUnits = function(mod) {
       return Sk.misceval.callsim(mod[RATIONAL], Sk.ffi.remapToPy(a.add(b), RATIONAL));
     });
     $loc.__sub__ = Sk.ffi.defineFunction(function(aPy, bPy) {
-      Sk.ffi.checkArgCount("+", arguments, 2, 2);
+      Sk.ffi.checkFunctionArgs("+", arguments, 2, 2);
       Sk.ffi.checkArgType("lhs", RATIONAL, aPy.tp$name === RATIONAL);
       var numer, denom;
       var a = Sk.ffi.remapToJs(aPy);
@@ -69,7 +69,7 @@ Sk.builtin.defineUnits = function(mod) {
       return Sk.misceval.callsim(mod[RATIONAL], Sk.ffi.remapToPy(a.sub(b), RATIONAL));
     });
     $loc.__mul__ = Sk.ffi.defineFunction(function(aPy, bPy) {
-      Sk.ffi.checkArgCount("+", arguments, 2, 2);
+      Sk.ffi.checkFunctionArgs("+", arguments, 2, 2);
       Sk.ffi.checkArgType("lhs", RATIONAL, aPy.tp$name === RATIONAL);
       var numer, denom;
       var a = Sk.ffi.remapToJs(aPy);
@@ -86,7 +86,7 @@ Sk.builtin.defineUnits = function(mod) {
       }
     });
     $loc.__div__ = Sk.ffi.defineFunction(function(aPy, bPy) {
-      Sk.ffi.checkArgCount("+", arguments, 2, 2);
+      Sk.ffi.checkFunctionArgs("+", arguments, 2, 2);
       Sk.ffi.checkArgType("lhs", RATIONAL, aPy.tp$name === RATIONAL);
       var numer, denom;
       var a = Sk.ffi.remapToJs(aPy);
@@ -114,7 +114,7 @@ Sk.builtin.defineUnits = function(mod) {
   
   mod[DIMENSIONS] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = Sk.ffi.defineFunction(function(self, M, L, T, Q) {
-      Sk.ffi.checkArgCount(MEASURE, arguments, 2, 5);
+      Sk.ffi.checkMethodArgs(MEASURE, arguments, 1, 4);
       Sk.ffi.checkArgType("M", [RATIONAL, DIMENSIONS].join(" or "), Sk.ffi.isReference(M));
       self.tp$name = DIMENSIONS;
       switch(Sk.ffi.typeName(M)) {
@@ -161,7 +161,7 @@ Sk.builtin.defineUnits = function(mod) {
       return Sk.misceval.callsim(mod[DIMENSIONS], Sk.ffi.remapToPy(c.M, RATIONAL), Sk.ffi.remapToPy(c.L, RATIONAL), Sk.ffi.remapToPy(c.T, RATIONAL, Sk.ffi.remapToPy(c.Q, RATIONAL)));
     });
     $loc.__pow__ = Sk.ffi.defineFunction(function(basePy, exponentPy) {
-      Sk.ffi.checkArgCount("**", arguments, 2, 2);
+      Sk.ffi.checkFunctionArgs("**", arguments, 2, 2);
       var base = Sk.ffi.remapToJs(basePy);
       var exponent = Sk.ffi.remapToJs(exponentPy);
       var x = base.pow(exponent);
@@ -182,15 +182,15 @@ Sk.builtin.defineUnits = function(mod) {
   mod[UNIT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = Sk.ffi.defineFunction(function(self, scalePy, dimensionsPy, labelsPy) {
       self.tp$name = UNIT;
-      Sk.ffi.checkArgCount(UNIT, arguments, 2, 4);
+      Sk.ffi.checkMethodArgs(UNIT, arguments, 1, 3);
       switch(Sk.ffi.getType(scalePy)) {
         case Sk.ffi.PyType.FLOAT: {
-          Sk.ffi.checkArgCount(UNIT, arguments, 4, 4);
+          Sk.ffi.checkMethodArgs(UNIT, arguments, 3, 3);
           self.v = new BLADE.Unit(Sk.ffi.remapToJs(scalePy), Sk.ffi.remapToJs(dimensionsPy), Sk.ffi.remapToJs(labelsPy));
         }
         break;
         case Sk.ffi.PyType.OBJREF: {
-          Sk.ffi.checkArgCount(UNIT, arguments, 2, 2);
+          Sk.ffi.checkMethodArgs(UNIT, arguments, 1, 1);
           self.v = Sk.ffi.remapToJs(scalePy);
         }
         break;
@@ -266,21 +266,16 @@ Sk.builtin.defineUnits = function(mod) {
   }, UNIT, []);
 
   mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, quantityPy, unitPy) {
-      Sk.ffi.checkArgCount(MEASURE, arguments, 2, 3);
+    $loc.__init__ = Sk.ffi.defineFunction(function(selfPy, quantityPy, unitPy) {
+      Sk.ffi.checkMethodArgs(MEASURE, arguments, 1, 2);
       Sk.ffi.checkArgType("quantityPy", ["Reference", MEASURE].join(" or "), Sk.ffi.isReference(quantityPy));
       if (Sk.ffi.typeName(quantityPy) === MEASURE)
       {
-        // TODO: Notice that remapToJs could/should return the tuple. 
-        self.tp$name = MEASURE;
-        self.v = Sk.ffi.remapToJs(quantityPy);
-        self.custom =  quantityPy.custom;
+        Sk.ffi.referenceToPy(Sk.ffi.remapToJs(quantityPy), MEASURE, quantityPy.custom, selfPy);
       }
       else
       {
-        self.tp$name = MEASURE;
-        self.v = new BLADE.Measure(Sk.ffi.remapToJs(quantityPy), Sk.ffi.remapToJs(unitPy));
-        self.custom = {"quantity": Sk.ffi.typeName(quantityPy)};
+        Sk.ffi.referenceToPy(new BLADE.Measure(Sk.ffi.remapToJs(quantityPy), Sk.ffi.remapToJs(unitPy)), MEASURE, {"quantity": Sk.ffi.typeName(quantityPy)}, selfPy);
       }
     });
     $loc.__getattr__ = Sk.ffi.defineFunction(function(measurePy, name) {

@@ -1,7 +1,12 @@
 var $builtinmodule = function(name) {
 
+  var COMPLEX = "complex";
+  var PROP_REAL = "real";
+  var PROP_IMAG = "imag";
+
   function isNumber(x) {return typeof x === 'number';}
   function isUndefined(x) {return typeof x === 'undefined';}
+  function isComplex(argPy) { return Sk.ffi.isObjectRef(argPy) && Sk.ffi.typeName(argPy) === COMPLEX;};
 
   function phase(x, y) {
     return Math.atan2(y, x);
@@ -47,19 +52,20 @@ var $builtinmodule = function(name) {
     return str;
   }
 
-  // This is what you would use in code. e.g. i = complex(0.0, 1.0)
-  var COMPLEX_CONSTRUCTOR_NAME = "complex";
-  var PROP_REAL = "real";
-  var PROP_IMAG = "imag";
-
   var mod = {};
 
-  mod[COMPLEX_CONSTRUCTOR_NAME] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = new Sk.builtin.func(function(self, re, im) {
-      self.tp$name = COMPLEX_CONSTRUCTOR_NAME;
-      self.v = {"x": Sk.ffi.remapToJs(re), "y": Sk.ffi.remapToJs(im)};
+  function cartesianToComplexPy(x, y) {
+    return Sk.ffi.callsim(mod[COMPLEX], Sk.ffi.numberToPy(x), Sk.ffi.numberToPy(y));
+  }
+
+  mod[COMPLEX] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
+    $loc.__init__ = Sk.ffi.defineFunction(function(selfPy, rePy, imPy) {
+      Sk.ffi.checkMethodArgs(COMPLEX, arguments, 2, 2);
+      Sk.ffi.checkArgType(PROP_REAL, "Number", Sk.ffi.isNumber(rePy));
+      Sk.ffi.checkArgType(PROP_IMAG, "Number", Sk.ffi.isNumber(imPy));
+      Sk.ffi.referenceToPy({"x": Sk.ffi.remapToJs(rePy), "y": Sk.ffi.remapToJs(imPy)}, COMPLEX, undefined, selfPy);
     });
-    $loc.__getattr__ = new Sk.builtin.func(function(z, name) {
+    $loc.__getattr__ = Sk.ffi.defineFunction(function(z, name) {
       z = Sk.ffi.remapToJs(z);
       switch(name) {
         case PROP_REAL: {
@@ -70,40 +76,26 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__add__ = new Sk.builtin.func(function(a, b) {
-      var x, y;
-      a = Sk.ffi.remapToJs(a);
-      b = Sk.ffi.remapToJs(b);
-      if (isNumber(b)) {
-        x = a.x + b;
-        y = a.y;
+    $loc.__add__ = Sk.ffi.defineFunction(function(selfPy, otherPy) {
+      var a = Sk.ffi.remapToJs(selfPy);
+      var b = Sk.ffi.remapToJs(otherPy);
+      if (isComplex(otherPy)) {
+        return cartesianToComplexPy(a.x + b.x, a.y + b.y);
+      }
+      else if (Sk.ffi.isNumber(otherPy)) {
+        return cartesianToComplexPy(a.x + b, a.y);
       }
       else {
-        x = a.x + b.x;
-        y = a.y + b.y;
-      }
-      return Sk.misceval.callsim(
-        mod[COMPLEX_CONSTRUCTOR_NAME],
-        Sk.builtin.assk$(x, Sk.builtin.nmber.float$),
-        Sk.builtin.assk$(y, Sk.builtin.nmber.float$));
-    });
-    $loc.__radd__ = new Sk.builtin.func(function(b, a) {
-      var x, y;
-      a = Sk.ffi.remapToJs(a);
-      b = Sk.ffi.remapToJs(b);
-      if (isNumber(a)) {
-        x = a + b.x;
-        y = b.y;
-        return Sk.misceval.callsim(
-          mod[COMPLEX_CONSTRUCTOR_NAME],
-          Sk.builtin.assk$(x, Sk.builtin.nmber.float$),
-          Sk.builtin.assk$(y, Sk.builtin.nmber.float$));
-      }
-      else {
-        throw new Sk.builtin.AssertionError();
+        throw Sk.ffi.err.expectArg("other").toHaveType(COMPLEX);
       }
     });
-    $loc.__iadd__ = new Sk.builtin.func(function(aPy, b) {
+    $loc.__radd__ = Sk.ffi.defineFunction(function(otherPy, selfPy) {
+      Sk.ffi.checkArgType("self", "Number", Sk.ffi.isNumber(selfPy));
+      var a = Sk.ffi.remapToJs(selfPy);
+      var b = Sk.ffi.remapToJs(otherPy);
+      return cartesianToComplexPy(a + b.x, b.y);
+    });
+    $loc.__iadd__ = Sk.ffi.defineFunction(function(aPy, b) {
       var a = Sk.ffi.remapToJs(aPy);
       b = Sk.ffi.remapToJs(b);
       if (isNumber(b)) {
@@ -115,40 +107,33 @@ var $builtinmodule = function(name) {
       }
       return aPy;
     });
-    $loc.__sub__ = new Sk.builtin.func(function(a, b) {
-      var x, y;
-      a = Sk.ffi.remapToJs(a);
-      b = Sk.ffi.remapToJs(b);
-      if (isNumber(b)) {
-        x = a.x - b;
-        y = a.y;
+    $loc.__sub__ = Sk.ffi.defineFunction(function(selfPy, otherPy) {
+      var a = Sk.ffi.remapToJs(selfPy);
+      var b = Sk.ffi.remapToJs(otherPy);
+      if (isComplex(otherPy)) {
+        return cartesianToComplexPy(a.x - b.x, a.y - b.y);
+      }
+      else if (Sk.ffi.isNumber(otherPy)) {
+        return cartesianToComplexPy(a.x - b, a.y);
       }
       else {
-        x = a.x - b.x;
-        y = a.y - b.y;
+        throw Sk.ffi.err.expectArg("other").toHaveType(COMPLEX);
       }
-      return Sk.misceval.callsim(
-        mod[COMPLEX_CONSTRUCTOR_NAME],
-        Sk.builtin.assk$(x, Sk.builtin.nmber.float$),
-        Sk.builtin.assk$(y, Sk.builtin.nmber.float$));
     });
-    $loc.__rsub__ = new Sk.builtin.func(function(b, a) {
+    $loc.__rsub__ = Sk.ffi.defineFunction(function(b, a) {
       var x, y;
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
       if (isNumber(a)) {
         x = a - b.x;
         y = -b.y;
-        return Sk.misceval.callsim(
-          mod[COMPLEX_CONSTRUCTOR_NAME],
-          Sk.builtin.assk$(x, Sk.builtin.nmber.float$),
-          Sk.builtin.assk$(y, Sk.builtin.nmber.float$));
+        return cartesianToComplexPy(x, y);
       }
       else {
-        throw new Sk.builtin.AssertionError();
+        throw Sk.ffi.err.expectArg("a").toHaveType("Number");
       }
     });
-    $loc.__isub__ = new Sk.builtin.func(function(aPy, b) {
+    $loc.__isub__ = Sk.ffi.defineFunction(function(aPy, b) {
       var a = Sk.ffi.remapToJs(aPy);
       b = Sk.ffi.remapToJs(b);
       if (isNumber(b)) {
@@ -160,7 +145,7 @@ var $builtinmodule = function(name) {
       }
       return aPy;
     });
-    $loc.__mul__ = new Sk.builtin.func(function(a, b) {
+    $loc.__mul__ = Sk.ffi.defineFunction(function(a, b) {
       var x, y;
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
@@ -172,28 +157,22 @@ var $builtinmodule = function(name) {
         x = a.x * b.x - a.y * b.y;
         y = a.y * b.x + a.x * b.y;
       }
-      return Sk.misceval.callsim(
-        mod[COMPLEX_CONSTRUCTOR_NAME],
-        Sk.builtin.assk$(x, Sk.builtin.nmber.float$),
-        Sk.builtin.assk$(y, Sk.builtin.nmber.float$));
+      return cartesianToComplexPy(x, y);
     });
-    $loc.__rmul__ = new Sk.builtin.func(function(b, a) {
+    $loc.__rmul__ = Sk.ffi.defineFunction(function(b, a) {
       var x, y;
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
       if (isNumber(a)) {
         x = a * b.x;
         y = a * b.y;
-        return Sk.misceval.callsim(
-          mod[COMPLEX_CONSTRUCTOR_NAME],
-          Sk.builtin.assk$(x, Sk.builtin.nmber.float$),
-          Sk.builtin.assk$(y, Sk.builtin.nmber.float$));
+        return cartesianToComplexPy(x, y);
       }
       else {
-        throw new Sk.builtin.AssertionError();
+        throw Sk.ffi.err.expectArg("a").toHaveType("Number");
       }
     });
-    $loc.__imul__ = new Sk.builtin.func(function(aPy, b) {
+    $loc.__imul__ = Sk.ffi.defineFunction(function(aPy, b) {
       var a = Sk.ffi.remapToJs(aPy);
       var aX = a.x;
       var aY = a.y;
@@ -208,7 +187,7 @@ var $builtinmodule = function(name) {
       }
       return aPy;
     });
-    $loc.__div__ = new Sk.builtin.func(function(a, b) {
+    $loc.__div__ = Sk.ffi.defineFunction(function(a, b) {
       var x, y;
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
@@ -221,12 +200,9 @@ var $builtinmodule = function(name) {
         x = (a.x * b.x + a.y * b.y) / factor;
         y = (a.y * b.x - a.x * b.y) / factor;
       }
-      return Sk.misceval.callsim(
-        mod[COMPLEX_CONSTRUCTOR_NAME],
-        Sk.builtin.assk$(x, Sk.builtin.nmber.float$),
-        Sk.builtin.assk$(y, Sk.builtin.nmber.float$));
+      return cartesianToComplexPy(x, y);
     });
-    $loc.__rdiv__ = new Sk.builtin.func(function(b, a) {
+    $loc.__rdiv__ = Sk.ffi.defineFunction(function(b, a) {
       var x, y;
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
@@ -234,16 +210,13 @@ var $builtinmodule = function(name) {
         var factor = b.x * b.x + b.y * b.y;
         x = (a * b.x) / factor;
         y = (-a * b.y) / factor;
-        return Sk.misceval.callsim(
-          mod[COMPLEX_CONSTRUCTOR_NAME],
-          Sk.builtin.assk$(x, Sk.builtin.nmber.float$),
-          Sk.builtin.assk$(y, Sk.builtin.nmber.float$));
+        return cartesianToComplexPy(x, y);
       }
       else {
-        throw new Sk.builtin.AssertionError();
+        throw Sk.ffi.err.expectArg("a").toHaveType("Number");
       }
     });
-    $loc.__idiv__ = new Sk.builtin.func(function(aPy, b) {
+    $loc.__idiv__ = Sk.ffi.defineFunction(function(aPy, b) {
       var a = Sk.ffi.remapToJs(aPy);
       var aX = a.x;
       var aY = a.y;
@@ -259,69 +232,69 @@ var $builtinmodule = function(name) {
       }
       return aPy;
     });
-    $loc.__str__ = new Sk.builtin.func(function(z) {
-      z = Sk.ffi.remapToJs(z);
-      if (!isUndefined(z)) {
-        return new Sk.builtin.str("(" + stringFromCoordinates([z.x, z.y], ["1", "j"], "") + ")");
-      }
-      else {
-        return new Sk.builtin.str("<type '" + COMPLEX_CONSTRUCTOR_NAME + "'>");
-      }
+    $loc.__pos__ = Sk.ffi.defineFunction(function(selfPy) {
+      return selfPy;
     });
-    $loc.__repr__ = new Sk.builtin.func(function(z) {
-      z = Sk.ffi.remapToJs(z);
-      if (!isUndefined(z)) {
-        return new Sk.builtin.str(COMPLEX_CONSTRUCTOR_NAME + '(' + z.x + ', ' + z.y + ')');
-      }
-      else {
-        return new Sk.builtin.str("__repr__(z)");
-      }
+    $loc.__neg__ = Sk.ffi.defineFunction(function(selfPy) {
+      var z = Sk.ffi.remapToJs(selfPy);
+      return cartesianToComplexPy(-z.x, -z.y);
     });
-    $loc.__eq__ = new Sk.builtin.func(function(a, b) {
+    $loc.__invert__ = Sk.ffi.defineFunction(function(selfPy) {
+      var onePy = cartesianToComplexPy(1, 0);
+      return Sk.ffi.callsim(selfPy['__div__'], onePy, selfPy);
+    });
+    $loc.__str__ = Sk.ffi.defineFunction(function(z) {
+      z = Sk.ffi.remapToJs(z);
+      return Sk.ffi.stringToPy("(" + stringFromCoordinates([z.x, z.y], ["1", "j"], "") + ")");
+    });
+    $loc.__repr__ = Sk.ffi.defineFunction(function(z) {
+      z = Sk.ffi.remapToJs(z);
+      return Sk.ffi.stringToPy(COMPLEX + '(' + z.x + ', ' + z.y + ')');
+    });
+    $loc.__eq__ = Sk.ffi.defineFunction(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
       return (a.x === b.x) && (a.y === b.y);
     });
-    $loc.__ne__ = new Sk.builtin.func(function(a, b) {
+    $loc.__ne__ = Sk.ffi.defineFunction(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
       return (a.x !== b.x) || (a.y !== b.y);
     });
-  }, COMPLEX_CONSTRUCTOR_NAME, []);
+  }, COMPLEX, []);
 
   // Conversions to and from polar coordinates
-  mod.phase = new Sk.builtin.func(function(z) {
-    z = Sk.ffi.remapToJs(z);
-    if (isNumber(z.x) && isNumber(z.y)) {
-      // The argument is a complex number.
-      return Sk.builtin.assk$(phase(z.x, z.y), Sk.builtin.nmber.float$)
+  mod.phase = Sk.ffi.defineFunction(function(xPy) {
+    Sk.ffi.checkFunctionArgs("phase", arguments, 1, 1);
+    if (isComplex(xPy)) {
+      var z = Sk.ffi.remapToJs(xPy);
+      return Sk.ffi.numberToPy(phase(z.x, z.y));
     }
-    else if (isNumber(z)) {
-      // The argument should be considered as a real number with no imaginary part.
-      return Math.atan2(0, z);
+    else if (Sk.ffi.isNumber(xPy)) {
+      return Sk.ffi.numberToPy(Math.atan2(0, Sk.ffi.remapToJs(xPy)));
     }
     else {
-      return z;
+      Sk.ffi.checkArgType("x", COMPLEX, false);
     }
   });
 
-  mod.polar = new Sk.builtin.func(function(z) {
-    z = Sk.ffi.remapToJs(z);
-    if (isNumber(z.x) && isNumber(z.y)) {
-      return new Sk.builtin.tuple([norm(z.x, z.y), phase(z.x, z.y)]);
+  mod.polar = Sk.ffi.defineFunction(function(xPy) {
+    Sk.ffi.checkFunctionArgs("polar", arguments, 1, 1);
+    if (isComplex(xPy)) {
+      var z = Sk.ffi.remapToJs(xPy);
+      return Sk.ffi.tuple([Sk.ffi.remapToPy(norm(z.x, z.y)), Sk.ffi.remapToPy(phase(z.x, z.y))]);
     }
-    else if (isNumber(z)) {
-      // The argument should be considered as a real number with no imaginary part.
-      return Math.atan2(0, z);
+    else if (Sk.ffi.isNumber(xPy)) {
+      return Sk.ffi.tuple([Sk.ffi.remapToPy(norm(Sk.ffi.remapToJs(xPy), 0)), Sk.ffi.remapToPy(0)]);
     }
     else {
-      // What do we do with illegal arguments?
+      Sk.ffi.checkArgType("x", COMPLEX, false);
     }
   });
 
   // Constants
-  mod.pi = Sk.builtin.assk$(Math.PI, Sk.builtin.nmber.float$);
-  mod.e =  Sk.builtin.assk$(Math.E, Sk.builtin.nmber.float$);
+  mod.pi = Sk.ffi.numberToPy(Math.PI);
+  mod.e =  Sk.ffi.numberToPy(Math.E);
 
   return mod;
 };

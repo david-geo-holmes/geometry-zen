@@ -80,7 +80,14 @@ Sk.ffi.stringToPy = function(valueJs, defaultJs)
     var t = typeof valueJs;
     if (t === 'string')
     {
-        return new Sk.builtin.str(valueJs);
+        if (valueJs.length > 0)
+        {
+            return new Sk.builtin.str(valueJs);
+        }
+        else
+        {
+            return Sk.builtin.str.$emptystr;
+        }
     }
     else if (t === 'object' && valueJs === null)
     {
@@ -176,6 +183,17 @@ Sk.ffi.callableToPy = function(mod, targetJs, nameJs, functionJs)
     }, nameJs, []));
 };
 goog.exportSymbol("Sk.ffi.callableToPy", Sk.ffi.callableToPy);
+
+/**
+ * TODO: How does the tuple differ from a list?
+ * TODO: Why does this not appear in the remapToPy function?
+ * @param {Array.<Object>|Object} xs
+ */
+Sk.ffi.tuple = function(xs)
+{
+    return new Sk.builtin.tuple(xs);
+}
+goog.exportSymbol("Sk.ffi.tuple", Sk.ffi.tuple);
 
 /**
  * Wraps a JavaScript Object instance.
@@ -286,7 +304,7 @@ goog.exportSymbol("Sk.ffi.isObjectRef", Sk.ffi.isObjectRef);
 Sk.ffi.isFunctionRef = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.FUNREF; };
 goog.exportSymbol("Sk.ffi.isFunctionRef", Sk.ffi.isFunctionRef);
 
-Sk.ffi.isReference = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.OBJREF; };
+Sk.ffi.isReference = function(valuePy) { return Sk.ffi.isObjectRef(valuePy) || Sk.ffi.isFunctionRef(valuePy); };
 goog.exportSymbol("Sk.ffi.isReference", Sk.ffi.isReference);
 
 Sk.ffi.isString = function(valuePy) { return Sk.builtin.checkString(valuePy); };
@@ -319,25 +337,6 @@ Sk.ffi.numberToJs = function(valuePy, message)
     }
 };
 goog.exportSymbol("Sk.ffi.numberToJs", Sk.ffi.numberToJs);
-
-/**
- * @deprecated Use Sk.ffi.checkFunctionArgs
- *
- * @param {string} name the name of the attribute
- * @param {{length: number}} args the args passed to the attribute
- * @param {number} minargs the minimum number of allowable arguments
- * @param {number=} maxargs optional maximum number of allowable
- * arguments (default: Infinity)
- * @param {boolean=} kwargs optional true if kwargs, false otherwise
- * (default: false)
- * @param {boolean=} free optional true if free vars, false otherwise
- * (default: false)
- */
-Sk.ffi.checkArgCount = function(name, args, minargs, maxargs, kwargs, free)
-{
-    return Sk.ffi.checkFunctionArgs(name, args, minargs, maxargs, kwargs, free);
-};
-goog.exportSymbol("Sk.ffi.checkArgCount", Sk.ffi.checkArgCount);
 
 /**
  * Convenience function for asserting the number of arguments to a function.
@@ -393,7 +392,7 @@ goog.exportSymbol("Sk.ffi.checkFunctionArgs", Sk.ffi.checkFunctionArgs);
  */
 Sk.ffi.checkMethodArgs = function(name, args, minargs, maxargs, kwargs, free)
 {
-    return Sk.ffi.checkArgCount(name, Array.prototype.slice.call(args, 1), minargs, maxargs, kwargs, free);
+    return Sk.ffi.checkFunctionArgs(name, Array.prototype.slice.call(args, 1), minargs, maxargs, kwargs, free);
 };
 goog.exportSymbol("Sk.ffi.checkMethodArgs", Sk.ffi.checkMethodArgs);
 
@@ -408,7 +407,7 @@ Sk.ffi.checkArgType = function(name, expectedType, condition)
 {
     if (!condition)
     {
-        throw new Sk.builtin.TypeError(name + " must be a " + expectedType);
+        throw Sk.ffi.err.argument(name).mustBeA(expectedType);
     }
 };
 goog.exportSymbol("Sk.ffi.checkArgType", Sk.ffi.checkArgType);
@@ -422,15 +421,16 @@ Sk.ffi.PyType = {
     'UNDEFINED':  0,
     'DICTIONARY': 1,
     'LIST':       2,
-    'BOOL':       3,
-    'FLOAT':      4,
-    'INT':        5,
-    'LONG':       6,
-    'STRING':     7,
-    'OBJREF':     8,
-    'FUNREF':     9,
-    'NONE':      10,
-    'FUNCTION':  11
+    'TUPLE':      3,
+    'BOOL':       4,
+    'FLOAT':      5,
+    'INT':        6,
+    'LONG':       7,
+    'STRING':     8,
+    'OBJREF':     9,
+    'FUNREF':    10,
+    'NONE':      11,
+    'FUNCTION':  12
 };
 
 /**
@@ -451,6 +451,10 @@ Sk.ffi.getType = function(valuePy)
     else if (valuePy instanceof Sk.builtin.list)
     {
         return Sk.ffi.PyType.LIST;
+    }
+    else if (valuePy instanceof Sk.builtin.tuple)
+    {
+        return Sk.ffi.PyType.TUPLE;
     }
     else if (valuePy instanceof Sk.builtin.nmber)
     {
@@ -547,7 +551,7 @@ goog.exportSymbol("Sk.ffi.typeName", Sk.ffi.typeName);
  */
 Sk.ffi.remapToJs = function(valuePy, defaultJs)
 {
-    Sk.ffi.checkArgCount("Sk.ffi.remapToJs", arguments, 1, 2);
+    Sk.ffi.checkFunctionArgs("Sk.ffi.remapToJs", arguments, 1, 2);
     switch(Sk.ffi.getType(valuePy))
     {
         case Sk.ffi.PyType.STRING:
@@ -569,6 +573,15 @@ Sk.ffi.remapToJs = function(valuePy, defaultJs)
             return ret;
         }
         case Sk.ffi.PyType.LIST:
+        {
+            var ret = [];
+            for (var i = 0; i < valuePy.v.length; ++i)
+            {
+                ret.push(Sk.ffi.remapToJs(valuePy.v[i]));
+            }
+            return ret;
+        }
+        case Sk.ffi.PyType.TUPLE:
         {
             var ret = [];
             for (var i = 0; i < valuePy.v.length; ++i)
@@ -698,6 +711,30 @@ Sk.ffi.valueError = function(args)
     return new Sk.builtin.ValueError(args);
 };
 goog.exportSymbol("Sk.ffi.valueError", Sk.ffi.valueError);
+
+/**
+ * Fluid API for building messages.
+ *
+ * TODO: Localization.
+ */
+Sk.ffi.err =
+{
+    argument: function(name) {
+        return {
+            mustBeA: function(expectedType) {
+                return Sk.ffi.typeError(name + " must be a " + expectedType);
+            }
+        };
+    },
+    expectArg: function(name) {
+        return {
+            toHaveType: function(expectedType) {
+                return Sk.ffi.typeError("Expecting argument '" + name + "' to have type '" + expectedType + "'.");
+            }
+        };
+    }
+}
+goog.exportSymbol("Sk.ffi.message", Sk.ffi.message);
 
 /**
  * @deprecated Use Sk.ffi.remapToJs
