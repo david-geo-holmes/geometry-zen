@@ -13841,7 +13841,7 @@ Sk.ffi.referenceToPy = function(valueJs, tp$name, custom, targetPy)
     }
     else
     {
-        throw Sk.ffi.assertionError("306f31df-f0a9-40a0-895b-d01308df8d6e");
+        throw Sk.ffi.assertionError("306f31df-f0a9-40a0-895b-d01308df8d6e typeof valueJs => " + t);
     }
 };
 goog.exportSymbol("Sk.ffi.referenceToPy", Sk.ffi.referenceToPy);
@@ -13857,7 +13857,12 @@ Sk.ffi.callableToPy = function(mod, targetJs, nameJs, functionJs)
       {
         // Tucking away the reference is not critical. Other approaches are possible.
         // Would be nice to have a default implementation that maps the arguments.
-        Sk.ffi.referenceToPy(targetJs[nameJs], nameJs, undefined, selfPy);
+        if (targetJs[nameJs]) {
+            Sk.ffi.referenceToPy(targetJs[nameJs], nameJs, undefined, selfPy);
+        }
+        else {
+            throw Sk.ffi.assertionError("c308ee41-f856-41a4-9aef-abd302b6a5aa nameJs => " + nameJs);
+        }
       });
       $loc.__call__ = Sk.ffi.defineFunction(functionJs);
       $loc.__str__ = Sk.ffi.defineFunction(function(self)
