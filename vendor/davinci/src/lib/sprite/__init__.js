@@ -1331,6 +1331,9 @@ var $builtinmodule = function(name) {
 
   var mod = {};
 
+  Sk.builtin.defineEuclidean2(mod);
+  Sk.builtin.defineUnits(mod);
+
   // The exported name of the SPRITE class.
   var SPRITE = "Sprite";
 
@@ -1466,26 +1469,10 @@ var $builtinmodule = function(name) {
           }, COLOR, []));
         }
         case DOWN: {
-          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
-
-            $loc.__init__ = new Sk.builtin.func(function(self) {
-              self.tp$name = DOWN;
-            });
-
-            $loc.__call__ = new Sk.builtin.func(function(self) {
-              checkArgs(1, arguments.length, DOWN);
-              target.pen_down();
-            });
-
-            $loc.__str__ = new Sk.builtin.func(function(self) {
-              return new Sk.builtin.str(DOWN)
-            })
-
-            $loc.__repr__ = new Sk.builtin.func(function(self, arg) {
-              return new Sk.builtin.str(DOWN)
-            })
-
-          }, DOWN, []));
+          return Sk.ffi.callableToPy(mod, target, DOWN, function(self) {
+            Sk.ffi.checkMethodArgs(DOWN, arguments, 0, 0);
+            target.pen_down();
+          });
         }
         case END_FILL: {
           return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
@@ -1735,26 +1722,10 @@ var $builtinmodule = function(name) {
           }, STAMP, []));
         }
         case UP: {
-          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
-
-            $loc.__init__ = new Sk.builtin.func(function(self) {
-              self.tp$name = UP;
-            });
-
-            $loc.__call__ = new Sk.builtin.func(function(self) {
-              checkArgs(1, arguments.length, UP);
-              target.pen_up();
-            });
-
-            $loc.__str__ = new Sk.builtin.func(function(self) {
-              return new Sk.builtin.str(UP)
-            })
-
-            $loc.__repr__ = new Sk.builtin.func(function(self, arg) {
-              return new Sk.builtin.str(UP)
-            })
-
-          }, UP, []));
+          return Sk.ffi.callableToPy(mod, target, UP, function(self) {
+            Sk.ffi.checkMethodArgs(UP, arguments, 0, 0);
+            target.pen_up();
+          });
         }
         default: {
           // Do nothing
@@ -1762,39 +1733,40 @@ var $builtinmodule = function(name) {
       }
     });
 
-    $loc.__setattr__ = new Sk.builtin.func(function(self, name, value) {
+    $loc.__setattr__ = new Sk.builtin.func(function(selfPy, name, valuePy) {
 
       var COLOR = "color";
       var FILL_COLOR = "fillcolor";
       var POSITION = "position";
       var SHAPE = "shape";
+      var EUCLIDEAN_2 = "Euclidean2";
 
       switch(name) {
         case COLOR: {
-          if(value) {
-            var color = value.v || self.v.context.fillStyle;
-            self.v.set_pen_color(color);
-            self.v.set_fill_color(color);
+          if(valuePy) {
+            var color = valuePy.v || selfPy.v.context.fillStyle;
+            selfPy.v.set_pen_color(color);
+            selfPy.v.set_fill_color(color);
           }
         }
         break;
         case FILL_COLOR: {
-          if (value) {
-            self.v.set_fill_color(value.v || self.v.context.fillStyle);
+          if (valuePy) {
+            selfPy.v.set_fill_color(valuePy.v || selfPy.v.context.fillStyle);
           }
         }
         break;
         case POSITION: {
-          if (value) {
-            checkArgs(3, arguments.length, SHAPE);
-            self.v.goto(value.v[1], value.v[2]);
-          }
+          Sk.ffi.checkArgType("value", EUCLIDEAN_2, Sk.ffi.isObjectRef(valuePy) && Sk.ffi.typeName(valuePy) === EUCLIDEAN_2);
+          var xPy = Sk.ffi.gattr(valuePy, "x");
+          var yPy = Sk.ffi.gattr(valuePy, "y");
+          selfPy.v.goto(Sk.ffi.remapToJs(xPy), Sk.ffi.remapToJs(yPy));
         }
         break;
         case SHAPE: {
-          if (value) {
+          if (valuePy) {
             checkArgs(3, arguments.length, SHAPE);
-            self.v.shape(value.v);
+            selfPy.v.shape(valuePy.v);
           }
         }
         break;

@@ -673,6 +673,15 @@ Sk.ffi.callsim = function(func, args)
 goog.exportSymbol("Sk.ffi.callsim", Sk.ffi.callsim);
 
 /**
+ *
+ */
+Sk.ffi.gattr = function(objectPy, name)
+{
+    return Sk.abstr.gattr(objectPy, name);
+}
+goog.exportSymbol("Sk.ffi.gattr", Sk.ffi.gattr);
+
+/**
  * @param {...*} args
  * @return {!Sk.builtin.AssertionError}
  */

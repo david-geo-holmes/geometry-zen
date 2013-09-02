@@ -14361,6 +14361,15 @@ Sk.ffi.callsim = function(func, args)
 goog.exportSymbol("Sk.ffi.callsim", Sk.ffi.callsim);
 
 /**
+ *
+ */
+Sk.ffi.gattr = function(objectPy, name)
+{
+    return Sk.abstr.gattr(objectPy, name);
+}
+goog.exportSymbol("Sk.ffi.gattr", Sk.ffi.gattr);
+
+/**
  * @param {...*} args
  * @return {!Sk.builtin.AssertionError}
  */
@@ -27466,7 +27475,7 @@ Sk.builtin.defineUnits = function(mod) {
     });
     $loc.__repr__ = Sk.ffi.defineFunction(function(dimensionsPy) {
       var names = [PROP_M, PROP_L, PROP_T, PROP_Q];
-      var attrs = names.map(function(name) { return Sk.abstr.gattr(dimensionsPy, name); });
+      var attrs = names.map(function(name) { return Sk.ffi.gattr(dimensionsPy, name); });
       var reprs = attrs.map(function(attr) { return Sk.ffi.remapToJs(Sk.misceval.callsim(attr["__repr__"], attr)); });
       return Sk.ffi.remapToPy(DIMENSIONS + "(" + reprs.join(" , ")  + ")");
     });
@@ -27548,7 +27557,7 @@ Sk.builtin.defineUnits = function(mod) {
     });
     $loc.__repr__ = Sk.ffi.defineFunction(function(unitPy) {
       var props = [{"name":PROP_DIMENSIONS,"kind":"__repr__"}];
-      var attrs = props.map(function(prop) { return {"value": Sk.abstr.gattr(unitPy, prop.name), "prop":prop}; });
+      var attrs = props.map(function(prop) { return {"value": Sk.ffi.gattr(unitPy, prop.name), "prop":prop}; });
       var reprs = attrs.map(function(attr) { return Sk.ffi.remapToJs(Sk.misceval.callsim(attr.value[attr.prop.kind], attr.value)); });
       var unit = Sk.ffi.remapToJs(unitPy);
       var scale = "" + unit.scale;
@@ -27585,7 +27594,7 @@ Sk.builtin.defineUnits = function(mod) {
     $loc.__add__ = Sk.ffi.defineFunction(function(aPy, bPy) {
       var a = Sk.ffi.remapToJs(aPy);
       var b = Sk.ffi.remapToJs(bPy);
-      var quantityPy = Sk.abstr.gattr(aPy, PROP_QUANTITY);
+      var quantityPy = Sk.ffi.gattr(aPy, PROP_QUANTITY);
       var custom = {"quantity": Sk.ffi.typeName(quantityPy)};
       try {
         return Sk.misceval.callsim(mod[MEASURE], Sk.ffi.remapToPy(a.add(b), MEASURE, custom));
@@ -27597,7 +27606,7 @@ Sk.builtin.defineUnits = function(mod) {
     $loc.__sub__ = Sk.ffi.defineFunction(function(aPy, bPy) {
       var a = Sk.ffi.remapToJs(aPy);
       var b = Sk.ffi.remapToJs(bPy);
-      var quantityPy = Sk.abstr.gattr(aPy, PROP_QUANTITY);
+      var quantityPy = Sk.ffi.gattr(aPy, PROP_QUANTITY);
       var custom = {"quantity": Sk.ffi.typeName(quantityPy)};
       try {
         return Sk.misceval.callsim(mod[MEASURE], Sk.ffi.remapToPy(a.sub(b), MEASURE, custom));
@@ -27609,29 +27618,29 @@ Sk.builtin.defineUnits = function(mod) {
     $loc.__mul__ = Sk.ffi.defineFunction(function(aPy, bPy) {
       var a = Sk.ffi.remapToJs(aPy);
       var b = Sk.ffi.remapToJs(bPy);
-      var quantityPy = Sk.abstr.gattr(aPy, PROP_QUANTITY);
+      var quantityPy = Sk.ffi.gattr(aPy, PROP_QUANTITY);
       var custom = {"quantity": Sk.ffi.typeName(quantityPy)};
       return Sk.misceval.callsim(mod[MEASURE], Sk.ffi.remapToPy(a.mul(b), MEASURE, custom));
     });
     $loc.__div__ = Sk.ffi.defineFunction(function(aPy, bPy) {
       var a = Sk.ffi.remapToJs(aPy);
       var b = Sk.ffi.remapToJs(bPy);
-      var quantityPy = Sk.abstr.gattr(aPy, PROP_QUANTITY);
+      var quantityPy = Sk.ffi.gattr(aPy, PROP_QUANTITY);
       var custom = {"quantity": Sk.ffi.typeName(quantityPy)};
       return Sk.misceval.callsim(mod[MEASURE], Sk.ffi.remapToPy(a.div(b), MEASURE, custom));
     });
     $loc.__str__ = Sk.ffi.defineFunction(function(measurePy) {
-      var quantityPy = Sk.abstr.gattr(measurePy, PROP_QUANTITY);
+      var quantityPy = Sk.ffi.gattr(measurePy, PROP_QUANTITY);
       var quantityStr = Sk.ffi.remapToJs(Sk.misceval.callsim(quantityPy["__str__"], quantityPy));
-      var uomPy = Sk.abstr.gattr(measurePy, PROP_UOM);
+      var uomPy = Sk.ffi.gattr(measurePy, PROP_UOM);
       var uomStr = Sk.ffi.remapToJs(Sk.misceval.callsim(uomPy["__str__"], uomPy));
       return Sk.ffi.remapToPy("" + quantityStr + " " + uomStr);
     });
     $loc.__repr__ = Sk.ffi.defineFunction(function(measurePy) {
-      var quantityPy = Sk.abstr.gattr(measurePy, PROP_QUANTITY);
+      var quantityPy = Sk.ffi.gattr(measurePy, PROP_QUANTITY);
       var quantityRepr = Sk.ffi.remapToJs(Sk.misceval.callsim(quantityPy["__repr__"], quantityPy));
 
-      var uomPy = Sk.abstr.gattr(measurePy, PROP_UOM);
+      var uomPy = Sk.ffi.gattr(measurePy, PROP_UOM);
       var uomRepr = Sk.ffi.remapToJs(Sk.misceval.callsim(uomPy["__repr__"], uomPy));
 
       return Sk.ffi.remapToPy(MEASURE + "(" + quantityRepr + ", " + uomRepr + ")");
