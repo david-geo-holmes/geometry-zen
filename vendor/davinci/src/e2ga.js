@@ -111,14 +111,14 @@ Sk.builtin.defineEuclidean2 = function(mod) {
   }
 
   mod[SCALAR_2] = Sk.ffi.defineFunction(function(w) {
-    Sk.ffi.checkArgCount(SCALAR_2, arguments, 1, 1);
+    Sk.ffi.checkFunctionArgs(SCALAR_2, arguments, 1, 1);
     Sk.ffi.checkArgType("w", "Number", Sk.ffi.isNumber(w));
     w = Sk.ffi.remapToJs(w);
     return remapE2ToPy(w, 0, 0, 0);
   });
 
   mod[VECTOR_2] = Sk.ffi.defineFunction(function(x, y) {
-    Sk.ffi.checkArgCount(VECTOR_2, arguments, 2, 2);
+    Sk.ffi.checkFunctionArgs(VECTOR_2, arguments, 2, 2);
     Sk.ffi.checkArgType("x", "Number", Sk.ffi.isNumber(x));
     Sk.ffi.checkArgType("y", "Number", Sk.ffi.isNumber(y));
     x = Sk.ffi.remapToJs(x);
@@ -127,7 +127,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
   });
 
   mod[PSEUDOSCALAR_2] = Sk.ffi.defineFunction(function(xy) {
-    Sk.ffi.checkArgCount(PSEUDOSCALAR_2, arguments, 1, 1);
+    Sk.ffi.checkFunctionArgs(PSEUDOSCALAR_2, arguments, 1, 1);
     Sk.ffi.checkArgType("xy", "Number", Sk.ffi.isNumber(xy));
     xy = Sk.ffi.remapToJs(xy);
     return remapE2ToPy(0, 0, 0, xy);
@@ -136,11 +136,11 @@ Sk.builtin.defineEuclidean2 = function(mod) {
   mod[EUCLIDEAN_2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = Sk.ffi.defineFunction(function(self, x00, x01, x10, x11) {
       self.tp$name = EUCLIDEAN_2;
-      Sk.ffi.checkArgCount(EUCLIDEAN_2, arguments, 2, 5);
+      Sk.ffi.checkMethodArgs(EUCLIDEAN_2, arguments, 1, 4);
       switch(Sk.ffi.getType(x00)) {
         case Sk.ffi.PyType.FLOAT:
         case Sk.ffi.PyType.INT: {
-          Sk.ffi.checkArgCount(EUCLIDEAN_2, arguments, 5, 5);
+          Sk.ffi.checkMethodArgs(EUCLIDEAN_2, arguments, 4, 4);
           Sk.ffi.checkArgType("w",  "Number", Sk.ffi.isNumber(x00));
           Sk.ffi.checkArgType("x",  "Number", Sk.ffi.isNumber(x01));
           Sk.ffi.checkArgType("y",  "Number", Sk.ffi.isNumber(x10));
@@ -152,8 +152,8 @@ Sk.builtin.defineEuclidean2 = function(mod) {
           self.v = new BLADE.Euclidean2(x00, x01, x10, x11);
         }
         break;
-        case Sk.ffi.PyType.REFERENCE: {
-          Sk.ffi.checkArgCount(EUCLIDEAN_2, arguments, 2, 2);
+        case Sk.ffi.PyType.OBJREF: {
+          Sk.ffi.checkMethodArgs(EUCLIDEAN_2, arguments, 1, 1);
           self.v = Sk.ffi.remapToJs(x00);
         }
         break;
@@ -234,7 +234,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
     });
     $loc.__mul__ = Sk.ffi.defineFunction(function(lhsPy, rhsPy) {
       switch(Sk.ffi.getType(rhsPy)) {
-        case Sk.ffi.PyType.REFERENCE: {
+        case Sk.ffi.PyType.OBJREF: {
           switch(Sk.ffi.typeName(rhsPy)) {
             case EUCLIDEAN_2: {
               var a = Sk.ffi.remapToJs(lhsPy);

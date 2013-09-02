@@ -41,19 +41,19 @@ Sk.builtin.defineUnits = function(mod) {
     $loc.__init__ = Sk.ffi.defineFunction(function(self, numer, denom) {
       self.tp$name = RATIONAL;
       if (typeof denom === 'undefined') {
-        Sk.ffi.checkArgCount(RATIONAL, arguments, 2, 2);
+        Sk.ffi.checkMethodArgs(RATIONAL, arguments, 2, 2);
         Sk.ffi.checkArgType("numer", RATIONAL, numer.tp$name === RATIONAL);
         self.v = Sk.ffi.remapToJs(numer);
       }
       else {
-        Sk.ffi.checkArgCount(RATIONAL, arguments, 3, 3);
+        Sk.ffi.checkMethodArgs(RATIONAL, arguments, 3, 3);
         Sk.ffi.checkArgType("numer", "<type 'int'>", Sk.ffi.isInt(numer));
         Sk.ffi.checkArgType("denom", "<type 'int'>", Sk.ffi.isInt(denom));
         self.v = new BLADE.Rational(Sk.ffi.remapToJs(numer), Sk.ffi.remapToJs(denom));
       }
     });
     $loc.__add__ = Sk.ffi.defineFunction(function(aPy, bPy) {
-      Sk.ffi.checkArgCount("+", arguments, 2, 2);
+      Sk.ffi.checkFunctionArgs("+", arguments, 2, 2);
       Sk.ffi.checkArgType("lhs", RATIONAL, aPy.tp$name === RATIONAL);
       var numer, denom;
       var a = Sk.ffi.remapToJs(aPy);
@@ -115,7 +115,7 @@ Sk.builtin.defineUnits = function(mod) {
   mod[DIMENSIONS] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = Sk.ffi.defineFunction(function(self, M, L, T, Q) {
       Sk.ffi.checkArgCount(MEASURE, arguments, 2, 5);
-      Sk.ffi.checkArgType("M", [RATIONAL, DIMENSIONS].join(" or "), Sk.ffi.isReferencePy(M));
+      Sk.ffi.checkArgType("M", [RATIONAL, DIMENSIONS].join(" or "), Sk.ffi.isReference(M));
       self.tp$name = DIMENSIONS;
       switch(Sk.ffi.typeName(M)) {
         case RATIONAL: {
@@ -189,7 +189,7 @@ Sk.builtin.defineUnits = function(mod) {
           self.v = new BLADE.Unit(Sk.ffi.remapToJs(scalePy), Sk.ffi.remapToJs(dimensionsPy), Sk.ffi.remapToJs(labelsPy));
         }
         break;
-        case Sk.ffi.PyType.REFERENCE: {
+        case Sk.ffi.PyType.OBJREF: {
           Sk.ffi.checkArgCount(UNIT, arguments, 2, 2);
           self.v = Sk.ffi.remapToJs(scalePy);
         }
@@ -268,7 +268,7 @@ Sk.builtin.defineUnits = function(mod) {
   mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = Sk.ffi.defineFunction(function(self, quantityPy, unitPy) {
       Sk.ffi.checkArgCount(MEASURE, arguments, 2, 3);
-      Sk.ffi.checkArgType("quantityPy", ["Reference", MEASURE].join(" or "), Sk.ffi.isReferencePy(quantityPy));
+      Sk.ffi.checkArgType("quantityPy", ["Reference", MEASURE].join(" or "), Sk.ffi.isReference(quantityPy));
       if (Sk.ffi.typeName(quantityPy) === MEASURE)
       {
         // TODO: Notice that remapToJs could/should return the tuple. 

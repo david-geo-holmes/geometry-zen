@@ -108,32 +108,74 @@ goog.exportSymbol("Sk.ffi.stringToPy", Sk.ffi.stringToPy);
  * Wraps a JavaScript class 
  * Usage:
  *
- * valuePy = Sk.ffi.referenceToPy(valueJs, "Classname");
+ * valuePy = Sk.ffi.referenceToPy(valueJs, "Classname", custom);
+ *
+ * - This form is useful when calling a constructor to wrap a JavaScript object.
+ *
+ * or
+ *
+ * Sk.ffi.referenceToPy(valueJs, "Classname", custom, selfPy);
+ *
+ * - This form is useful in initialization functions.
  *
  * @param {Object|string|number|boolean} valueJs
  * @param {string} tp$name
  * @param {Object=} custom Custom metadata that the caller wishes to retain.
+ * @param {Object=} targetPy An optional destination for mapping reference types.
  */
-Sk.ffi.referenceToPy = function(valueJs, tp$name, custom)
+Sk.ffi.referenceToPy = function(valueJs, tp$name, custom, targetPy)
 {
     var t = typeof valueJs;
-    if (t === 'object')
+    if (t === 'object' || t === 'function')
     {
         if (typeof tp$name === 'string')
         {
-            return {"v": valueJs, "tp$name": tp$name, "custom": custom};
+            if (targetPy) {
+                targetPy.v = valueJs;
+                targetPy.tp$name = tp$name;
+                targetPy.custom = custom;
+            }
+            else {
+                return {"v": valueJs, "tp$name": tp$name, "custom": custom};
+            }
         }
         else
         {
-            goog.asserts.fail("9fad4b9e-4845-4a06-9bce-0aa7c68e1f03");
+            throw Sk.ffi.assertionError("9fad4b9e-4845-4a06-9bce-0aa7c68e1f03");
         }
     }
     else
     {
-        goog.asserts.fail("306f31df-f0a9-40a0-895b-d01308df8d6e");
+        throw Sk.ffi.assertionError("306f31df-f0a9-40a0-895b-d01308df8d6e");
     }
 };
 goog.exportSymbol("Sk.ffi.referenceToPy", Sk.ffi.referenceToPy);
+
+/**
+ * Convenience function for implementing callable attributes.
+ */
+Sk.ffi.callableToPy = function(mod, targetJs, nameJs, functionJs)
+{
+    return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc)
+    {
+      $loc.__init__ = Sk.ffi.defineFunction(function(selfPy)
+      {
+        // Tucking away the reference is not critical. Other approaches are possible.
+        // Would be nice to have a default implementation that maps the arguments.
+        Sk.ffi.referenceToPy(targetJs[nameJs], nameJs, undefined, selfPy);
+      });
+      $loc.__call__ = Sk.ffi.defineFunction(functionJs);
+      $loc.__str__ = Sk.ffi.defineFunction(function(self)
+      {
+        return Sk.ffi.stringToPy(nameJs);
+      });
+      $loc.__repr__ = Sk.ffi.defineFunction(function(self)
+      {
+        return Sk.ffi.stringToPy(nameJs);
+      });
+    }, nameJs, []));
+};
+goog.exportSymbol("Sk.ffi.callableToPy", Sk.ffi.callableToPy);
 
 /**
  * Wraps a JavaScript Object instance.
@@ -226,7 +268,7 @@ goog.exportSymbol("Sk.ffi.booleanToJs", Sk.ffi.booleanToJs);
 Sk.ffi.isDictionary = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.DICTIONARY; };
 goog.exportSymbol("Sk.ffi.isDictionary", Sk.ffi.isDictionary);
 
-Sk.ffi.isFunction = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.CALLBACK; };
+Sk.ffi.isFunction = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.FUNCTION; };
 goog.exportSymbol("Sk.ffi.isFunction", Sk.ffi.isFunction);
 
 Sk.ffi.isInt = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.INT; };
@@ -238,8 +280,14 @@ goog.exportSymbol("Sk.ffi.isNone", Sk.ffi.isNone);
 Sk.ffi.isNumber = function(valuePy) { return Sk.builtin.checkNumber(valuePy); };
 goog.exportSymbol("Sk.ffi.isNumber", Sk.ffi.isNumber);
 
-Sk.ffi.isReferencePy = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.REFERENCE; };
-goog.exportSymbol("Sk.ffi.isReferencePy", Sk.ffi.isReferencePy);
+Sk.ffi.isObjectRef = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.OBJREF; };
+goog.exportSymbol("Sk.ffi.isObjectRef", Sk.ffi.isObjectRef);
+
+Sk.ffi.isFunctionRef = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.FUNREF; };
+goog.exportSymbol("Sk.ffi.isFunctionRef", Sk.ffi.isFunctionRef);
+
+Sk.ffi.isReference = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.OBJREF; };
+goog.exportSymbol("Sk.ffi.isReference", Sk.ffi.isReference);
 
 Sk.ffi.isString = function(valuePy) { return Sk.builtin.checkString(valuePy); };
 goog.exportSymbol("Sk.ffi.isString", Sk.ffi.isString);
@@ -273,10 +321,10 @@ Sk.ffi.numberToJs = function(valuePy, message)
 goog.exportSymbol("Sk.ffi.numberToJs", Sk.ffi.numberToJs);
 
 /**
- * Convenience function for asserting the number of arguments.
+ * @deprecated Use Sk.ffi.checkFunctionArgs
  *
- * @param {string} name the name of the function
- * @param {Object} args the args passed to the function
+ * @param {string} name the name of the attribute
+ * @param {{length: number}} args the args passed to the attribute
  * @param {number} minargs the minimum number of allowable arguments
  * @param {number=} maxargs optional maximum number of allowable
  * arguments (default: Infinity)
@@ -287,9 +335,67 @@ goog.exportSymbol("Sk.ffi.numberToJs", Sk.ffi.numberToJs);
  */
 Sk.ffi.checkArgCount = function(name, args, minargs, maxargs, kwargs, free)
 {
-    return Sk.builtin.pyCheckArgs(name, args, minargs, maxargs, kwargs, free);
+    return Sk.ffi.checkFunctionArgs(name, args, minargs, maxargs, kwargs, free);
 };
 goog.exportSymbol("Sk.ffi.checkArgCount", Sk.ffi.checkArgCount);
+
+/**
+ * Convenience function for asserting the number of arguments to a function.
+ *
+ * Use this function whenever there is no self argument.
+ *
+ * @param {string} name the name of the attribute
+ * @param {{length: number}} args the args passed to the attribute
+ * @param {number} minargs the minimum number of allowable arguments
+ * @param {number=} maxargs optional maximum number of allowable
+ * arguments (default: Infinity)
+ * @param {boolean=} kwargs optional true if kwargs, false otherwise
+ * (default: false)
+ * @param {boolean=} free optional true if free vars, false otherwise
+ * (default: false)
+ */
+Sk.ffi.checkFunctionArgs = function(name, args, minargs, maxargs, kwargs, free)
+{
+    var nargs = args.length;
+    var msg = "";
+
+    if (maxargs === undefined) { maxargs = Infinity; }
+    if (kwargs) { nargs -= 1; }
+    if (free) { nargs -= 1; }
+    if ((nargs < minargs) || (nargs > maxargs)) {
+        if (minargs === maxargs) {
+            msg = name + "() takes exactly " + minargs + " arguments";
+        } else if (nargs < minargs) {
+            msg = name + "() takes at least " + minargs + " arguments";
+        } else {
+            msg = name + "() takes at most " + maxargs + " arguments";
+        }
+        msg += " (" + nargs + " given)";
+        throw new Sk.builtin.AssertionError(msg);
+    };
+};
+goog.exportSymbol("Sk.ffi.checkFunctionArgs", Sk.ffi.checkFunctionArgs);
+
+/**
+ * Convenience function for asserting the number of arguments to a method (callable attribute).
+ *
+ * Use this function whenever you want to ignore the first (self) argument.
+ *
+ * @param {string} name the name of the attribute
+ * @param {{length: number}} args the args passed to the attribute
+ * @param {number} minargs the minimum number of allowable arguments
+ * @param {number=} maxargs optional maximum number of allowable
+ * arguments (default: Infinity)
+ * @param {boolean=} kwargs optional true if kwargs, false otherwise
+ * (default: false)
+ * @param {boolean=} free optional true if free vars, false otherwise
+ * (default: false)
+ */
+Sk.ffi.checkMethodArgs = function(name, args, minargs, maxargs, kwargs, free)
+{
+    return Sk.ffi.checkArgCount(name, Array.prototype.slice.call(args, 1), minargs, maxargs, kwargs, free);
+};
+goog.exportSymbol("Sk.ffi.checkMethodArgs", Sk.ffi.checkMethodArgs);
 
 /**
  * Convenience function for asserting the type of an argument.
@@ -321,10 +427,10 @@ Sk.ffi.PyType = {
     'INT':        5,
     'LONG':       6,
     'STRING':     7,
-    'REFERENCE':  8,
-    'NONE':       9,
-    'FUNCTION':  10,
-    'CALLBACK':  11
+    'OBJREF':     8,
+    'FUNREF':     9,
+    'NONE':      10,
+    'FUNCTION':  11
 };
 
 /**
@@ -388,11 +494,18 @@ Sk.ffi.getType = function(valuePy)
             }
             else if (x === 'object')
             {
-                return Sk.ffi.PyType.REFERENCE;
+                if (valuePy.tp$name)
+                {
+                    return Sk.ffi.PyType.OBJREF;
+                }
+                else
+                {
+                    throw new Sk.builtin.AssertionError("0a459acc-9540-466b-ba1a-333f8215b61e");
+                }
             }
             else if (x === 'function')
             {
-                return Sk.ffi.PyType.FUNCTION;
+                return Sk.ffi.PyType.FUNREF;
             }
             else
             {
@@ -401,8 +514,8 @@ Sk.ffi.getType = function(valuePy)
         }
         else
         {
-            // TODO: It works, but why functions and callbacks?
-            return Sk.ffi.PyType.CALLBACK;
+            // TODO: It works, but why are there two ways of doing it?
+            return Sk.ffi.PyType.FUNCTION;
         }
     }
 };
@@ -412,13 +525,13 @@ Sk.ffi.typeName = function(valuePy)
 {
     switch(Sk.ffi.getType(valuePy))
     {
-        case Sk.ffi.PyType.REFERENCE:
+        case Sk.ffi.PyType.OBJREF:
         {
             return Sk.abstr.typeName(valuePy);
         }
         default:
         {
-            goog.asserts.fail("Sk.ffi.typeName(valuePy) must be Sk.ffi.PyType.REFERENCE");
+            goog.asserts.fail("Sk.ffi.typeName(valuePy) must be Sk.ffi.PyType.OBJREF");
         }
     }
 };
@@ -430,10 +543,11 @@ goog.exportSymbol("Sk.ffi.typeName", Sk.ffi.typeName);
  * valueJs = Sk.ffi.remapToJs(valuePy);
  *
  * @param {Object} valuePy The Python value to be mapped.
- * @param {Object=} targetPy An optional destination for mapping reference types.
+ * @param {Object=} defaultJs The optional default JavaScript value to use when the type of the value is undefined.
  */
-Sk.ffi.remapToJs = function(valuePy, targetPy)
+Sk.ffi.remapToJs = function(valuePy, defaultJs)
 {
+    Sk.ffi.checkArgCount("Sk.ffi.remapToJs", arguments, 1, 2);
     switch(Sk.ffi.getType(valuePy))
     {
         case Sk.ffi.PyType.STRING:
@@ -484,30 +598,25 @@ Sk.ffi.remapToJs = function(valuePy, targetPy)
         {
             return Sk.builtin.asnum$(valuePy);
         }
-        case Sk.ffi.PyType.REFERENCE:
+        case Sk.ffi.PyType.OBJREF:
         {
-            if (typeof targetPy !== 'undefined')
-            {
-                targetPy.tp$name = valuePy.tp$name;
-                targetPy.v       = valuePy.v;
-            }
             // TODO: This is being exercised, but we should assert the tp$name.
             // I think the pattern here suggests that we have a Sk.builtin.something
             return valuePy.v;
         }
-        case Sk.ffi.PyType.FUNCTION:
+        case Sk.ffi.PyType.FUNREF:
         {
             return valuePy.v;
         }
         case Sk.ffi.PyType.UNDEFINED:
         {
-            return undefined;
+            return defaultJs;
         }
         case Sk.ffi.PyType.NONE:
         {
             return null;
         }
-        case Sk.ffi.PyType.CALLBACK: {
+        case Sk.ffi.PyType.FUNCTION: {
             return function() {
                 var argsPy = Array.prototype.slice.call(arguments, 0).map(function(argJs) {return Sk.ffi.remapToPy(argJs);});
                 return Sk.ffi.remapToJs(Sk.misceval.apply(valuePy, undefined, undefined, undefined, argsPy));
@@ -589,3 +698,38 @@ Sk.ffi.valueError = function(args)
     return new Sk.builtin.ValueError(args);
 };
 goog.exportSymbol("Sk.ffi.valueError", Sk.ffi.valueError);
+
+/**
+ * @deprecated Use Sk.ffi.remapToJs
+ */
+Sk.ffi.callback = function(functionPy) { return Sk.ffi.remapToJs(functionPy); };
+goog.exportSymbol("Sk.ffi.callback", Sk.ffi.callback);
+
+/**
+ * @deprecated Use Sk.ffi.referenceToPy (carefully).
+ */
+Sk.ffi.stdwrap = function(type, towrap)
+{
+    var inst = new type();
+    inst['v'] = towrap;
+    return inst;
+};
+goog.exportSymbol("Sk.ffi.stdwrap", Sk.ffi.stdwrap);
+
+/**
+ * @deprecated Use Sk.ffi.remapToPy
+ */
+Sk.ffi.basicwrap = function(obj) { return Sk.ffi.remapToPy(obj); };
+goog.exportSymbol("Sk.ffi.basicwrap", Sk.ffi.basicwrap);
+
+/**
+ * @deprecated Use Sk.ffi.remapToJs
+ */
+Sk.ffi.unwrapo = function(obj) { return Sk.ffi.remapToJs(obj); };
+goog.exportSymbol("Sk.ffi.unwrapo", Sk.ffi.unwrapo);
+
+/**
+ * @deprecated Use Sk.ffi.remapToJs
+ */
+Sk.ffi.unwrapn = function(obj) { return Sk.ffi.remapToJs(obj); };
+goog.exportSymbol("Sk.ffi.unwrapn", Sk.ffi.unwrapn);

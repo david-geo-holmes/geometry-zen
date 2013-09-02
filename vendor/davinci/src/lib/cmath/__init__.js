@@ -54,7 +54,7 @@ var $builtinmodule = function(name) {
 
   var mod = {};
 
-  mod[COMPLEX_CONSTRUCTOR_NAME] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
+  mod[COMPLEX_CONSTRUCTOR_NAME] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = new Sk.builtin.func(function(self, re, im) {
       self.tp$name = COMPLEX_CONSTRUCTOR_NAME;
       self.v = {"x": Sk.ffi.remapToJs(re), "y": Sk.ffi.remapToJs(im)};
@@ -63,10 +63,10 @@ var $builtinmodule = function(name) {
       z = Sk.ffi.remapToJs(z);
       switch(name) {
         case PROP_REAL: {
-          return Sk.builtin.assk$(z.x, Sk.builtin.nmber.float$);
+          return Sk.ffi.numberToPy(z.x);
         }
         case PROP_IMAG: {
-          return Sk.builtin.assk$(z.y, Sk.builtin.nmber.float$);
+          return Sk.ffi.numberToPy(z.y);
         }
       }
     });

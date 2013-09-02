@@ -51,7 +51,7 @@ var $builtinmodule = function(name)
     };
 
     mod.split = Sk.nativejs.func(function split(pattern, string, maxsplit, flags) {
-        Sk.ffi.checkArgCount("split", arguments, 2, 4);
+        Sk.ffi.checkFunctionArgs("split", arguments, 2, 4);
         if (!Sk.ffi.isString(pattern)) {
             throw Sk.ffi.typeError("pattern must be a string");
         };
@@ -116,7 +116,7 @@ var $builtinmodule = function(name)
     });
 
     mod.findall = Sk.nativejs.func(function findall(pattern, string, flags) {
-        Sk.ffi.checkArgCount("findall", arguments, 2, 3);
+        Sk.ffi.checkFunctionArgs("findall", arguments, 2, 3);
         if (!Sk.ffi.isString(pattern)) {
             throw Sk.ffi.typeError("pattern must be a string");
         };
@@ -223,7 +223,7 @@ var $builtinmodule = function(name)
     }
 
     mod.search = Sk.ffi.defineFunction(function(patternPy, stringPy, flagsPy) {
-        Sk.ffi.checkArgCount('search', arguments, 2, 3);
+        Sk.ffi.checkFunctionArgs('search', arguments, 2, 3);
         Sk.ffi.checkArgType("pattern", "string", Sk.ffi.isString(patternPy));
         Sk.ffi.checkArgType("string", "string", Sk.ffi.isString(stringPy));
         Sk.ffi.checkArgType("flags", "Number", Sk.ffi.isNumber(flagsPy) || flagsPy === undefined);
@@ -240,7 +240,7 @@ var $builtinmodule = function(name)
     });
 
     mod.match = Sk.ffi.defineFunction(function(patternPy, stringPy, flags) {
-        Sk.ffi.checkArgCount('match', arguments, 2, 3);
+        Sk.ffi.checkFunctionArgs('match', arguments, 2, 3);
         Sk.ffi.checkArgType("pattern", "string", Sk.ffi.isString(patternPy));
         Sk.ffi.checkArgType("string", "string", Sk.ffi.isString(stringPy));
         Sk.ffi.checkArgType("flags", "Number", Sk.ffi.isNumber(flags) || flags === undefined);

@@ -511,11 +511,11 @@ Sk.builtin.defineEuclidean3 = function(mod) {
   mod[EUCLIDEAN_3] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = new Sk.builtin.func(function(self, w, x, y, z, xy, yz, zx, xyz) {
       self.tp$name = EUCLIDEAN_3;
-      Sk.ffi.checkArgCount(EUCLIDEAN_3, arguments, 2, 9);
+      Sk.ffi.checkMethodArgs(EUCLIDEAN_3, arguments, 1, 8);
       switch(Sk.ffi.getType(w)) {
         case Sk.ffi.PyType.FLOAT:
         case Sk.ffi.PyType.INT: {
-          Sk.ffi.checkArgCount(EUCLIDEAN_3, arguments, 9, 9);
+          Sk.ffi.checkMethodArgs(EUCLIDEAN_3, arguments, 8, 8);
           Sk.ffi.checkArgType("w",    "Number", Sk.ffi.isNumber(w));
           Sk.ffi.checkArgType("x",    "Number", Sk.ffi.isNumber(x));
           Sk.ffi.checkArgType("y",    "Number", Sk.ffi.isNumber(y));
@@ -535,9 +535,9 @@ Sk.builtin.defineEuclidean3 = function(mod) {
           self.v = new BLADE.Euclidean3(w, x, y, z, xy, yz, zx, xyz);
         }
         break;
-        case Sk.ffi.PyType.REFERENCE: {
-          Sk.ffi.checkArgCount(EUCLIDEAN_3, arguments, 2, 2);
-          self.v = Sk.ffi.remapToJs(w);
+        case Sk.ffi.PyType.OBJREF: {
+          Sk.ffi.checkMethodArgs(EUCLIDEAN_3, arguments, 1, 1);
+          Sk.ffi.referenceToPy(Sk.ffi.remapToJs(w), EUCLIDEAN_3, undefined, self);
         }
         break;
         default: {
@@ -639,7 +639,7 @@ Sk.builtin.defineEuclidean3 = function(mod) {
     });
     $loc.__mul__ = new Sk.builtin.func(function(lhsPy, rhsPy) {
       switch(Sk.ffi.getType(rhsPy)) {
-        case Sk.ffi.PyType.REFERENCE: {
+        case Sk.ffi.PyType.OBJREF: {
           switch(Sk.ffi.typeName(rhsPy)) {
             case EUCLIDEAN_3: {
               var lhs = Sk.ffi.remapToJs(lhsPy);
