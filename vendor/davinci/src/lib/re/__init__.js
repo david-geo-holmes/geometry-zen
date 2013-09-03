@@ -175,15 +175,15 @@ var $builtinmodule = function(name)
 
 
     var matchobj = function($gbl, $loc) {
-        $loc.__init__ = Sk.ffi.defineFunction(function(self,thematch, pattern, string) {
+        $loc.__init__ = Sk.ffi.functionPy(function(self,thematch, pattern, string) {
             self.thematch = thematch;
             self.re = pattern;
             self.string = string;
         });
-        $loc.groups = Sk.ffi.defineFunction(function(self) {
+        $loc.groups = Sk.ffi.functionPy(function(self) {
             return new Sk.builtin.tuple(self.thematch.v.slice(1))
         });
-        $loc.group = Sk.ffi.defineFunction(function(self,grpnum) {
+        $loc.group = Sk.ffi.functionPy(function(self,grpnum) {
             if (grpnum === undefined) {
                 grpnum = 0;
             }
@@ -222,7 +222,7 @@ var $builtinmodule = function(name)
         return retval;
     }
 
-    mod.search = Sk.ffi.defineFunction(function(patternPy, stringPy, flagsPy) {
+    mod.search = Sk.ffi.functionPy(function(patternPy, stringPy, flagsPy) {
         Sk.ffi.checkFunctionArgs('search', arguments, 2, 3);
         Sk.ffi.checkArgType("pattern", "string", Sk.ffi.isString(patternPy));
         Sk.ffi.checkArgType("string", "string", Sk.ffi.isString(stringPy));
@@ -239,7 +239,7 @@ var $builtinmodule = function(name)
         return mob;
     });
 
-    mod.match = Sk.ffi.defineFunction(function(patternPy, stringPy, flags) {
+    mod.match = Sk.ffi.functionPy(function(patternPy, stringPy, flags) {
         Sk.ffi.checkFunctionArgs('match', arguments, 2, 3);
         Sk.ffi.checkArgType("pattern", "string", Sk.ffi.isString(patternPy));
         Sk.ffi.checkArgType("string", "string", Sk.ffi.isString(stringPy));

@@ -18,7 +18,7 @@ Sk.ffi.booleanToPy = function(valueJs)
     }
     else
     {
-        goog.asserts.fail("f5008183-bfce-4842-9496-30b936ff73f3");
+        throw Sk.ffi.assertionError("f5008183-bfce-4842-9496-30b936ff73f3");
     }
 };
 goog.exportSymbol("Sk.ffi.booleanToPy", Sk.ffi.booleanToPy);
@@ -41,7 +41,7 @@ Sk.ffi.numberToPy = function(valueJs)
     }
     else
     {
-        goog.asserts.fail("3c68a6b8-0314-49ab-99ac-a818324417d8");
+        throw Sk.ffi.assertionError("3c68a6b8-0314-49ab-99ac-a818324417d8");
     }
 };
 goog.exportSymbol("Sk.ffi.numberToPy", Sk.ffi.numberToPy);
@@ -64,7 +64,7 @@ Sk.ffi.numberToIntPy = function(valueJs)
     }
     else
     {
-        goog.asserts.fail("b451b411-151c-4430-82f2-d548e5514303");
+        throw Sk.ffi.assertionError("b451b411-151c-4430-82f2-d548e5514303");
     }
 };
 goog.exportSymbol("Sk.ffi.numberToIntPy", Sk.ffi.numberToIntPy);
@@ -101,12 +101,12 @@ Sk.ffi.stringToPy = function(valueJs, defaultJs)
         }
         else
         {
-            throw new Sk.builtin.AssertionError("f8db3019-c641-4ab2-8bbe-50aa9bfa8b39, defaultJs must be a string");
+            throw Sk.ffi.assertionError("f8db3019-c641-4ab2-8bbe-50aa9bfa8b39, defaultJs must be a string");
         }
     }
     else
     {
-        throw new Sk.builtin.AssertionError("50730498-9d4c-4a28-ab50-fd6127dd6d8c, typeof valueJs => '" + t + "'");
+        throw Sk.ffi.assertionError("50730498-9d4c-4a28-ab50-fd6127dd6d8c, typeof valueJs => '" + t + "'");
     }
 };
 goog.exportSymbol("Sk.ffi.stringToPy", Sk.ffi.stringToPy);
@@ -159,46 +159,37 @@ Sk.ffi.referenceToPy = function(valueJs, tp$name, custom, targetPy)
 goog.exportSymbol("Sk.ffi.referenceToPy", Sk.ffi.referenceToPy);
 
 /**
- * Convenience function for implementing callable attributes.
+ * Constructs a Python function.
+ *
+ * @param {function()} code The implementation of the function.
  */
-Sk.ffi.callableToPy = function(mod, targetJs, nameJs, functionJs)
+Sk.ffi.functionPy = function(code)
 {
-    return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc)
-    {
-      $loc.__init__ = Sk.ffi.defineFunction(function(selfPy)
-      {
-        // Tucking away the reference is not critical. Other approaches are possible.
-        // Would be nice to have a default implementation that maps the arguments.
-        if (targetJs[nameJs]) {
-            Sk.ffi.referenceToPy(targetJs[nameJs], nameJs, undefined, selfPy);
-        }
-        else {
-            throw Sk.ffi.assertionError("c308ee41-f856-41a4-9aef-abd302b6a5aa nameJs => " + nameJs);
-        }
-      });
-      $loc.__call__ = Sk.ffi.defineFunction(functionJs);
-      $loc.__str__ = Sk.ffi.defineFunction(function(self)
-      {
-        return Sk.ffi.stringToPy(nameJs);
-      });
-      $loc.__repr__ = Sk.ffi.defineFunction(function(self)
-      {
-        return Sk.ffi.stringToPy(nameJs);
-      });
-    }, nameJs, []));
+    return new Sk.builtin.func(code);
 };
-goog.exportSymbol("Sk.ffi.callableToPy", Sk.ffi.callableToPy);
+goog.exportSymbol("Sk.ffi.functionPy", Sk.ffi.functionPy);
 
 /**
- * TODO: How does the tuple differ from a list?
- * TODO: Why does this not appear in the remapToPy function?
- * @param {Array.<Object>|Object} xs
+ * Constructs a Python list.
+ *
+ * @param {Array.<Object>=} valuesPy A JavaScript array of Python values.
  */
-Sk.ffi.tuple = function(xs)
+Sk.ffi.listPy = function(valuesPy)
 {
-    return new Sk.builtin.tuple(xs);
+    return new Sk.builtin.list(valuesPy);
 }
-goog.exportSymbol("Sk.ffi.tuple", Sk.ffi.tuple);
+goog.exportSymbol("Sk.ffi.listPy", Sk.ffi.listPy);
+
+/**
+ * Constructs a Python tuple.
+ *
+ * @param {Array.<Object>|Object} valuesPy A JavaScript array of Python values.
+ */
+Sk.ffi.tuplePy = function(valuesPy)
+{
+    return new Sk.builtin.tuple(valuesPy);
+}
+goog.exportSymbol("Sk.ffi.tuplePy", Sk.ffi.tuplePy);
 
 /**
  * Wraps a JavaScript Object instance.
@@ -217,11 +208,11 @@ Sk.ffi.remapToPy = function(valueJs, className, custom)
     if (t === 'object') {
         if (Object.prototype.toString.call(valueJs) === "[object Array]")
         {
-            var arr = [];
+            var valuesPy = [];
             for (var i = 0; i < valueJs.length; ++i) {
-                arr.push(Sk.ffi.remapToPy(valueJs[i]));
+                valuesPy.push(Sk.ffi.remapToPy(valueJs[i]));
             }
-            return new Sk.builtin.list(arr);
+            return Sk.ffi.listPy(valuesPy);
         }
         else if (typeof className === 'string')
         {
@@ -233,13 +224,13 @@ Sk.ffi.remapToPy = function(valueJs, className, custom)
         }
         else
         {
-            var kvs = [];
+            var kvsPy = [];
             for (var k in valueJs)
             {
-                kvs.push(Sk.ffi.remapToPy(k));
-                kvs.push(Sk.ffi.remapToPy(valueJs[k]));
+                kvsPy.push(Sk.ffi.remapToPy(k));
+                kvsPy.push(Sk.ffi.remapToPy(valueJs[k]));
             }
-            return new Sk.builtin.dict(kvs);
+            return new Sk.builtin.dict(kvsPy);
         }
     }
     else if (t === 'string')
@@ -260,33 +251,6 @@ Sk.ffi.remapToPy = function(valueJs, className, custom)
     }
 };
 goog.exportSymbol("Sk.ffi.remapToPy", Sk.ffi.remapToPy);
-
-/**
- * Converts the internal Python string representation to a JavaScript string.
- *
- * Usage:
- *
- * valueJs = Sk.ffi.booleanToJs(valuePy, "foo must be a <type 'bool'>");
- *
- * @param {Object} valuePy
- * @param {string=} message
- */
-Sk.ffi.booleanToJs = function(valuePy, message)
-{
-    if (valuePy === Sk.builtin.bool.true$)
-    {
-        return true;
-    }
-    else if (valuePy === Sk.builtin.bool.false$)
-    {
-        return false;
-    }
-    else
-    {
-        throw new Sk.builtin.AssertionError(message);
-    }
-};
-goog.exportSymbol("Sk.ffi.booleanToJs", Sk.ffi.booleanToJs);
 
 Sk.ffi.isDictionary = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.DICTIONARY; };
 goog.exportSymbol("Sk.ffi.isDictionary", Sk.ffi.isDictionary);
@@ -319,32 +283,9 @@ Sk.ffi.isUndefined = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.f
 goog.exportSymbol("Sk.ffi.isUndefined", Sk.ffi.isUndefined);
 
 /**
- * @param {string=} message Optional customizable assertion message.
- *
- * @return {number}
- */
-Sk.ffi.numberToJs = function(valuePy, message)
-{
-    if (valuePy instanceof Sk.builtin.nmber)
-    {
-        return Sk.builtin.asnum$(valuePy);
-    }
-    else
-    {
-        if (typeof message === 'string')
-        {
-            throw new Sk.builtin.AssertionError(message);
-        }
-        else
-        {
-            goog.asserts.fail("e55f4353-0403-42f5-bd12-ec48459b3d2c");
-        }
-    }
-};
-goog.exportSymbol("Sk.ffi.numberToJs", Sk.ffi.numberToJs);
-
-/**
  * Convenience function for asserting the number of arguments to a function.
+ *
+ * Returns the number of arguments if within the specified bounds.
  *
  * Use this function whenever there is no self argument.
  *
@@ -357,6 +298,7 @@ goog.exportSymbol("Sk.ffi.numberToJs", Sk.ffi.numberToJs);
  * (default: false)
  * @param {boolean=} free optional true if free vars, false otherwise
  * (default: false)
+ * @return {number} The number of arguments.
  */
 Sk.ffi.checkFunctionArgs = function(name, args, minargs, maxargs, kwargs, free)
 {
@@ -366,22 +308,34 @@ Sk.ffi.checkFunctionArgs = function(name, args, minargs, maxargs, kwargs, free)
     if (maxargs === undefined) { maxargs = Infinity; }
     if (kwargs) { nargs -= 1; }
     if (free) { nargs -= 1; }
-    if ((nargs < minargs) || (nargs > maxargs)) {
-        if (minargs === maxargs) {
+    if (nargs < minargs || nargs > maxargs)
+    {
+        if (minargs === maxargs)
+        {
             msg = name + "() takes exactly " + minargs + " arguments";
-        } else if (nargs < minargs) {
+        }
+        else if (nargs < minargs)
+        {
             msg = name + "() takes at least " + minargs + " arguments";
-        } else {
+        }
+        else
+        {
             msg = name + "() takes at most " + maxargs + " arguments";
         }
         msg += " (" + nargs + " given)";
         throw new Sk.builtin.AssertionError(msg);
-    };
+    }
+    else
+    {
+        return nargs;
+    }
 };
 goog.exportSymbol("Sk.ffi.checkFunctionArgs", Sk.ffi.checkFunctionArgs);
 
 /**
  * Convenience function for asserting the number of arguments to a method (callable attribute).
+ *
+ * Returns the number of arguments if within the specified bounds.
  *
  * Use this function whenever you want to ignore the first (self) argument.
  *
@@ -394,6 +348,7 @@ goog.exportSymbol("Sk.ffi.checkFunctionArgs", Sk.ffi.checkFunctionArgs);
  * (default: false)
  * @param {boolean=} free optional true if free vars, false otherwise
  * (default: false)
+ * @return {number} The number of arguments.
  */
 Sk.ffi.checkMethodArgs = function(name, args, minargs, maxargs, kwargs, free)
 {
@@ -547,6 +502,58 @@ Sk.ffi.typeName = function(valuePy)
 goog.exportSymbol("Sk.ffi.typeName", Sk.ffi.typeName);
 
 /**
+ * Converts the internal Python string representation to a JavaScript string.
+ *
+ * Usage:
+ *
+ * valueJs = Sk.ffi.booleanToJs(valuePy, "foo must be a <type 'bool'>");
+ *
+ * @param {Object} valuePy
+ * @param {string=} message
+ */
+Sk.ffi.booleanToJs = function(valuePy, message)
+{
+    if (valuePy === Sk.builtin.bool.true$)
+    {
+        return true;
+    }
+    else if (valuePy === Sk.builtin.bool.false$)
+    {
+        return false;
+    }
+    else
+    {
+        throw new Sk.builtin.AssertionError(message);
+    }
+};
+goog.exportSymbol("Sk.ffi.booleanToJs", Sk.ffi.booleanToJs);
+
+/**
+ * @param {string=} message Optional customizable assertion message.
+ *
+ * @return {number}
+ */
+Sk.ffi.numberToJs = function(valuePy, message)
+{
+    if (valuePy instanceof Sk.builtin.nmber)
+    {
+        return Sk.builtin.asnum$(valuePy);
+    }
+    else
+    {
+        if (typeof message === 'string')
+        {
+            throw new Sk.builtin.AssertionError(message);
+        }
+        else
+        {
+            goog.asserts.fail("e55f4353-0403-42f5-bd12-ec48459b3d2c");
+        }
+    }
+};
+goog.exportSymbol("Sk.ffi.numberToJs", Sk.ffi.numberToJs);
+
+/**
  * Usage:
  *
  * valueJs = Sk.ffi.remapToJs(valuePy);
@@ -655,17 +662,6 @@ Sk.ffi.buildClass = function(globals, func, name, bases)
 goog.exportSymbol("Sk.ffi.buildClass", Sk.ffi.buildClass);
 
 /**
- * Defines the implementation of a Python function in the internal representation.
- *
- * @param {function()} code The implementation of the function.
- */
-Sk.ffi.defineFunction = function(code)
-{
-    return new Sk.builtin.func(code);
-};
-goog.exportSymbol("Sk.ffi.defineFunction", Sk.ffi.defineFunction);
-
-/**
  * 
  * @param {Object} func the thing to call
  * @param {...*} args stuff to pass it
@@ -676,6 +672,37 @@ Sk.ffi.callsim = function(func, args)
     return Sk.misceval.apply(func, undefined, undefined, undefined, args);
 };
 goog.exportSymbol("Sk.ffi.callsim", Sk.ffi.callsim);
+
+/**
+ * Convenience function for implementing callable attributes.
+ */
+Sk.ffi.callableToPy = function(mod, targetJs, nameJs, functionJs)
+{
+    return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc)
+    {
+      $loc.__init__ = Sk.ffi.functionPy(function(selfPy)
+      {
+        // Tucking away the reference is not critical. Other approaches are possible.
+        // Would be nice to have a default implementation that maps the arguments.
+        if (targetJs[nameJs]) {
+            Sk.ffi.referenceToPy(targetJs[nameJs], nameJs, undefined, selfPy);
+        }
+        else {
+            throw Sk.ffi.assertionError("c308ee41-f856-41a4-9aef-abd302b6a5aa nameJs => " + nameJs);
+        }
+      });
+      $loc.__call__ = Sk.ffi.functionPy(functionJs);
+      $loc.__str__ = Sk.ffi.functionPy(function(self)
+      {
+        return Sk.ffi.stringToPy(nameJs);
+      });
+      $loc.__repr__ = Sk.ffi.functionPy(function(self)
+      {
+        return Sk.ffi.stringToPy(nameJs);
+      });
+    }, nameJs, []));
+};
+goog.exportSymbol("Sk.ffi.callableToPy", Sk.ffi.callableToPy);
 
 /**
  *

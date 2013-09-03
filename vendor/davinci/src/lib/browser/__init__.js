@@ -23,7 +23,7 @@ var $builtinmodule = function(name) {
   mod['document'] = Sk.ffi.callsim(Sk.builtin.buildDocumentClass(mod));
 
   mod[WINDOW_ANIMATION_RUNNER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(selfPy, windowPy, tickPy, terminatePy, setUpPy, tearDownPy) {
+    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, windowPy, tickPy, terminatePy, setUpPy, tearDownPy) {
       Sk.ffi.checkMethodArgs(WINDOW_ANIMATION_RUNNER, arguments, 5, 5);
       Sk.ffi.checkArgType("window",    WINDOW,   Sk.ffi.isObjectRef(windowPy) && Sk.ffi.typeName(windowPy) === WINDOW);
       Sk.ffi.checkArgType("tick",      FUNCTION, Sk.ffi.isFunction(tickPy));
@@ -74,7 +74,7 @@ var $builtinmodule = function(name) {
       };
       Sk.ffi.referenceToPy(new WindowAnimationRunner(), WINDOW_ANIMATION_RUNNER, undefined, selfPy);
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(selfPy, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
       var war = Sk.ffi.remapToJs(selfPy);
       switch(name) {
         case METHOD_START: {
@@ -85,10 +85,10 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(selfPy) {
+    $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
       return Sk.ffi.stringToPy(WINDOW_ANIMATION_RUNNER);
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(selfPy) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
       return Sk.ffi.stringToPy(WINDOW_ANIMATION_RUNNER + "(" + ")");
     });
   }, WINDOW_ANIMATION_RUNNER, []);

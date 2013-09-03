@@ -110,14 +110,14 @@ Sk.builtin.defineEuclidean2 = function(mod) {
     }
   }
 
-  mod[SCALAR_2] = Sk.ffi.defineFunction(function(w) {
+  mod[SCALAR_2] = Sk.ffi.functionPy(function(w) {
     Sk.ffi.checkFunctionArgs(SCALAR_2, arguments, 1, 1);
     Sk.ffi.checkArgType("w", "Number", Sk.ffi.isNumber(w));
     w = Sk.ffi.remapToJs(w);
     return remapE2ToPy(w, 0, 0, 0);
   });
 
-  mod[VECTOR_2] = Sk.ffi.defineFunction(function(x, y) {
+  mod[VECTOR_2] = Sk.ffi.functionPy(function(x, y) {
     Sk.ffi.checkFunctionArgs(VECTOR_2, arguments, 2, 2);
     Sk.ffi.checkArgType("x", "Number", Sk.ffi.isNumber(x));
     Sk.ffi.checkArgType("y", "Number", Sk.ffi.isNumber(y));
@@ -126,7 +126,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
     return remapE2ToPy(0, x, y, 0);
   });
 
-  mod[PSEUDOSCALAR_2] = Sk.ffi.defineFunction(function(xy) {
+  mod[PSEUDOSCALAR_2] = Sk.ffi.functionPy(function(xy) {
     Sk.ffi.checkFunctionArgs(PSEUDOSCALAR_2, arguments, 1, 1);
     Sk.ffi.checkArgType("xy", "Number", Sk.ffi.isNumber(xy));
     xy = Sk.ffi.remapToJs(xy);
@@ -134,7 +134,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
   });
 
   mod[EUCLIDEAN_2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, x00, x01, x10, x11) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self, x00, x01, x10, x11) {
       self.tp$name = EUCLIDEAN_2;
       Sk.ffi.checkMethodArgs(EUCLIDEAN_2, arguments, 1, 4);
       switch(Sk.ffi.getType(x00)) {
@@ -162,7 +162,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         }
       }
     });
-    $loc.__add__ = Sk.ffi.defineFunction(function(lhs, rhs) {
+    $loc.__add__ = Sk.ffi.functionPy(function(lhs, rhs) {
       lhs = Sk.ffi.remapToJs(lhs);
       rhs = Sk.ffi.remapToJs(rhs);
       if (isNumber(rhs)) {
@@ -172,7 +172,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         return remapE2ToPy(lhs.w + rhs.w, lhs.x + rhs.x, lhs.y + rhs.y, lhs.xy + rhs.xy);
       }
     });
-    $loc.__radd__ = Sk.ffi.defineFunction(function(rhs, lhs) {
+    $loc.__radd__ = Sk.ffi.functionPy(function(rhs, lhs) {
       lhs = Sk.ffi.remapToJs(lhs);
       rhs = Sk.ffi.remapToJs(rhs);
       if (isNumber(lhs)) {
@@ -182,7 +182,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " + " + JSON.stringify(rhs, null, 2));
       }
     });
-    $loc.__iadd__ = Sk.ffi.defineFunction(function(selfPy, otherPy) {
+    $loc.__iadd__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
       var self = Sk.ffi.remapToJs(selfPy);
       var other = Sk.ffi.remapToJs(otherPy);
       if (isNumber(other)) {
@@ -197,7 +197,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         return selfPy;
       }
     });
-    $loc.__sub__ = Sk.ffi.defineFunction(function(lhs, rhs) {
+    $loc.__sub__ = Sk.ffi.functionPy(function(lhs, rhs) {
       lhs = Sk.ffi.remapToJs(lhs);
       rhs = Sk.ffi.remapToJs(rhs);
       if (isNumber(rhs)) {
@@ -207,7 +207,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         return remapE2ToPy(lhs.w - rhs.w, lhs.x - rhs.x, lhs.y - rhs.y, lhs.xy - rhs.xy);
       }
     });
-    $loc.__rsub__ = Sk.ffi.defineFunction(function(rhs, lhs) {
+    $loc.__rsub__ = Sk.ffi.functionPy(function(rhs, lhs) {
       lhs = Sk.ffi.remapToJs(lhs);
       rhs = Sk.ffi.remapToJs(rhs);
       if (isNumber(lhs)) {
@@ -217,7 +217,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " - " + JSON.stringify(rhs, null, 2));
       }
     });
-    $loc.__isub__ = Sk.ffi.defineFunction(function(selfPy, otherPy) {
+    $loc.__isub__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
       var self = Sk.ffi.remapToJs(selfPy);
       var other = Sk.ffi.remapToJs(otherPy);
       if (isNumber(other)) {
@@ -232,7 +232,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         return selfPy;
       }
     });
-    $loc.__mul__ = Sk.ffi.defineFunction(function(lhsPy, rhsPy) {
+    $loc.__mul__ = Sk.ffi.functionPy(function(lhsPy, rhsPy) {
       switch(Sk.ffi.getType(rhsPy)) {
         case Sk.ffi.PyType.OBJREF: {
           switch(Sk.ffi.typeName(rhsPy)) {
@@ -272,7 +272,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         }
       }
     });
-    $loc.__rmul__ = Sk.ffi.defineFunction(function(rhs, lhs) {
+    $loc.__rmul__ = Sk.ffi.functionPy(function(rhs, lhs) {
       lhs = Sk.ffi.remapToJs(lhs);
       rhs = Sk.ffi.remapToJs(rhs);
       if (isNumber(lhs)) {
@@ -282,7 +282,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " * " + JSON.stringify(rhs, null, 2));
       }
     });
-    $loc.__imul__ = Sk.ffi.defineFunction(function(selfPy, otherPy) {
+    $loc.__imul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
       var self = Sk.ffi.remapToJs(selfPy);
       var other = Sk.ffi.remapToJs(otherPy);
       if (isNumber(other)) {
@@ -308,7 +308,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         return selfPy;
       }
     });
-    $loc.__div__ = Sk.ffi.defineFunction(function(a, b) {
+    $loc.__div__ = Sk.ffi.functionPy(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
       if (isNumber(b)) {
@@ -318,7 +318,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         return divide(a.w, a.x, a.y, a.xy, b.w, b.x, b.y, b.xy, undefined);
       }
     });
-    $loc.__rdiv__ = Sk.ffi.defineFunction(function(rhs, lhs) {
+    $loc.__rdiv__ = Sk.ffi.functionPy(function(rhs, lhs) {
       lhs = Sk.ffi.remapToJs(lhs);
       rhs = Sk.ffi.remapToJs(rhs);
       if (isNumber(lhs)) {
@@ -328,7 +328,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " / " + JSON.stringify(rhs, null, 2));
       }
     });
-    $loc.__idiv__ = Sk.ffi.defineFunction(function(selfPy, otherPy) {
+    $loc.__idiv__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
       var self = Sk.ffi.remapToJs(selfPy);
       var other = Sk.ffi.remapToJs(otherPy);
       if (isNumber(other)) {
@@ -340,7 +340,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         return selfPy;
       }
     });
-    $loc.__xor__ = Sk.ffi.defineFunction(function(a, b) {
+    $loc.__xor__ = Sk.ffi.functionPy(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
       if (isNumber(b)) {
@@ -362,7 +362,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         return remapE2ToPy(x00, x01, x10, x11);
       }
     });
-    $loc.__rxor__ = Sk.ffi.defineFunction(function(rhs, lhs) {
+    $loc.__rxor__ = Sk.ffi.functionPy(function(rhs, lhs) {
       lhs = Sk.ffi.remapToJs(lhs);
       rhs = Sk.ffi.remapToJs(rhs);
       if (isNumber(lhs)) {
@@ -372,7 +372,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " ^ " + JSON.stringify(rhs, null, 2));
       }
     });
-    $loc.__ixor__ = Sk.ffi.defineFunction(function(selfPy, otherPy) {
+    $loc.__ixor__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
       var self = Sk.ffi.remapToJs(selfPy);
       var other = Sk.ffi.remapToJs(otherPy);
       if (isNumber(other)) {
@@ -398,7 +398,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         return selfPy;
       }
     });
-    $loc.__lshift__ = Sk.ffi.defineFunction(function(a, b) {
+    $loc.__lshift__ = Sk.ffi.functionPy(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
       if (isNumber(b)) {
@@ -420,7 +420,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         return remapE2ToPy(x00, x01, x10, x11);
       }
     });
-    $loc.__rlshift__ = Sk.ffi.defineFunction(function(rhs, lhs) {
+    $loc.__rlshift__ = Sk.ffi.functionPy(function(rhs, lhs) {
       lhs = Sk.ffi.remapToJs(lhs);
       rhs = Sk.ffi.remapToJs(rhs);
       if (isNumber(lhs)) {
@@ -430,7 +430,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " << " + JSON.stringify(rhs, null, 2));
       }
     });
-    $loc.__ilshift__ = Sk.ffi.defineFunction(function(selfPy, otherPy) {
+    $loc.__ilshift__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
       var self = Sk.ffi.remapToJs(selfPy);
       var other = Sk.ffi.remapToJs(otherPy);
       if (isNumber(other)) {
@@ -456,7 +456,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         return selfPy;
       }
     });
-    $loc.__rshift__ = Sk.ffi.defineFunction(function(a, b) {
+    $loc.__rshift__ = Sk.ffi.functionPy(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
       if (isNumber(b)) {
@@ -478,7 +478,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         return remapE2ToPy(x00, x01, x10, x11);
       }
     });
-    $loc.__rrshift__ = Sk.ffi.defineFunction(function(rhs, lhs) {
+    $loc.__rrshift__ = Sk.ffi.functionPy(function(rhs, lhs) {
       lhs = Sk.ffi.remapToJs(lhs);
       rhs = Sk.ffi.remapToJs(rhs);
       if (isNumber(lhs)) {
@@ -488,7 +488,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " >> " + JSON.stringify(rhs, null, 2));
       }
     });
-    $loc.__irshift__ = Sk.ffi.defineFunction(function(selfPy, otherPy) {
+    $loc.__irshift__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
       var self = Sk.ffi.remapToJs(selfPy);
       var other = Sk.ffi.remapToJs(otherPy);
       if (isNumber(other)) {
@@ -533,7 +533,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
       var self = Sk.ffi.remapToJs(this);
       return remapE2ToPy(self.w, self.x, self.y, -self.xy);
     };
-    $loc.__getitem__ = Sk.ffi.defineFunction(function(mv, index) {
+    $loc.__getitem__ = Sk.ffi.functionPy(function(mv, index) {
       mv = Sk.ffi.remapToJs(mv);
       index = Sk.ffi.remapToJs(index);
       switch(index) {
@@ -548,11 +548,11 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         }
       }
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(mv) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(mv) {
       mv = Sk.ffi.remapToJs(mv);
       return Sk.ffi.stringToPy(EUCLIDEAN_2 + "(" + [mv.w, mv.x, mv.y, mv.xy].map(function(x) {return String(x);}).join(", ") + ")");
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(mv) {
+    $loc.__str__ = Sk.ffi.functionPy(function(mv) {
       mv = Sk.ffi.remapToJs(mv);
       if (mv.isNaN()) {
         return Sk.ffi.stringToPy("NaN");
@@ -561,17 +561,17 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         return Sk.ffi.stringToPy(stringFromCoordinates([mv.w, mv.x, mv.y, mv.xy], ["1", "i", "j", "I"], "*"));
       }
     });
-    $loc.__eq__ = Sk.ffi.defineFunction(function(a, b) {
+    $loc.__eq__ = Sk.ffi.functionPy(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
       return (a.w === b.w) && (a.x === b.x) && (a.y === b.y) && (a.xy === b.xy);
     });
-    $loc.__ne__ = Sk.ffi.defineFunction(function(a, b) {
+    $loc.__ne__ = Sk.ffi.functionPy(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
       return (a.w !== b.w) || (a.x !== b.x) || (a.y !== b.y) || (a.xy !== b.xy);
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(mvPy, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(mvPy, name) {
       var mv = Sk.ffi.remapToJs(mvPy);
       switch(name) {
         case PROP_W: {
@@ -588,39 +588,39 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         }
         case METHOD_CLONE: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(methodPy) {
+            $loc.__init__ = Sk.ffi.functionPy(function(methodPy) {
               methodPy.tp$name = METHOD_CLONE;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(methodPy) {
+            $loc.__call__ = Sk.ffi.functionPy(function(methodPy) {
               return remapE2ToPy(mv.w, mv.x, mv.y, mv.xy);
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(methodPy) {
+            $loc.__str__ = Sk.ffi.functionPy(function(methodPy) {
               return Sk.ffi.stringToPy(METHOD_CLONE);
             });
-            $loc.__repr__ = Sk.ffi.defineFunction(function(methodPy) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(methodPy) {
               return Sk.ffi.stringToPy(METHOD_CLONE);
             });
           }, METHOD_CLONE, []));
         }
         case METHOD_LENGTH: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_LENGTH;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.numberToIntPy(4);
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_LENGTH);
             });
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_LENGTH);
             });
           }, METHOD_LENGTH, []));
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(selfPy, name, valuePy) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(selfPy, name, valuePy) {
       var self = Sk.ffi.remapToJs(selfPy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {

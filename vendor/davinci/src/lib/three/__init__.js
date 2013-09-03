@@ -1,12 +1,15 @@
 /**
- * three is a foreign function interface over Three.js for the DaVinci Python to JavaScript cross-compiler.
+ * The 'three' module is a foreign function interface over Three.js for the DaVinci Python to JavaScript cross-compiler.
  *
- * The three module is in most respects API-compatible with the Three.js library.
+ * The 'three' module is in core respects API-compatible with the Three.js library.
+ *
+ * The 'three' module contains additional helper functions for Physicists.
  *
  * David Holmes (david.geo.holmes@gmail.com)
  */
 var $builtinmodule = function(name) {
-  
+
+  var NODE                       = "Node";
   var VECTOR_3                   = "Vector3";
 
   var QUATERNION                 = "Quaternion";
@@ -121,6 +124,8 @@ var $builtinmodule = function(name) {
 
   var mod = {};
 
+  mod[NODE]  = Sk.builtin.buildNodeClass(mod);
+
   function isBoolean(x)   { return typeof x === 'boolean'; }
   function isFunction(x)  { return typeof x === 'function'; }
   function isNumber(x)    { return typeof x === 'number'; }
@@ -143,17 +148,17 @@ var $builtinmodule = function(name) {
       throw new Sk.builtin.AssertionError("target must have an 'add' function.");
     }
     return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-      $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+      $loc.__init__ = Sk.ffi.functionPy(function(self) {
         self.tp$name = METHOD_ADD;
       });
-      $loc.__call__ = Sk.ffi.defineFunction(function(self, childPy) {
+      $loc.__call__ = Sk.ffi.functionPy(function(self, childPy) {
         var child = Sk.ffi.remapToJs(childPy);
         target[METHOD_ADD](child);
       });
-      $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+      $loc.__str__ = Sk.ffi.functionPy(function(self) {
         return Sk.ffi.stringToPy(METHOD_ADD)
       })
-      $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+      $loc.__repr__ = Sk.ffi.functionPy(function(self) {
         return Sk.ffi.stringToPy(METHOD_ADD)
       })
     }, METHOD_ADD, []));
@@ -167,17 +172,17 @@ var $builtinmodule = function(name) {
       throw new Sk.builtin.AssertionError("target must have a 'remove' function.");
     }
     return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-      $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+      $loc.__init__ = Sk.ffi.functionPy(function(self) {
         self.tp$name = METHOD_REMOVE;
       });
-      $loc.__call__ = Sk.ffi.defineFunction(function(self, childPy) {
+      $loc.__call__ = Sk.ffi.functionPy(function(self, childPy) {
         var child = Sk.ffi.remapToJs(childPy);
         target[METHOD_REMOVE](child);
       });
-      $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+      $loc.__str__ = Sk.ffi.functionPy(function(self) {
         return Sk.ffi.stringToPy(METHOD_REMOVE)
       })
-      $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+      $loc.__repr__ = Sk.ffi.functionPy(function(self) {
         return Sk.ffi.stringToPy(METHOD_REMOVE)
       })
     }, METHOD_REMOVE, []));
@@ -185,40 +190,40 @@ var $builtinmodule = function(name) {
 
   function verticesPy(vertices) {
     return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-      $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+      $loc.__init__ = Sk.ffi.functionPy(function(self) {
         self.tp$name = PROP_VERTICES;
         self.v = vertices;
       });
-      $loc.__getattr__ = Sk.ffi.defineFunction(function(verticesPy, name) {
+      $loc.__getattr__ = Sk.ffi.functionPy(function(verticesPy, name) {
         var METHOD_APPEND = "append";
         switch(name) {
           case METHOD_APPEND: {
             return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-              $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+              $loc.__init__ = Sk.ffi.functionPy(function(self) {
                 self.tp$name = METHOD_APPEND;
               });
-              $loc.__call__ = Sk.ffi.defineFunction(function(self, vectorPy) {
+              $loc.__call__ = Sk.ffi.functionPy(function(self, vectorPy) {
                 vertices.push(Sk.ffi.remapToJs(vectorPy));
               });
-              $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+              $loc.__str__ = Sk.ffi.functionPy(function(self) {
                 return Sk.ffi.stringToPy(METHOD_APPEND)
               });
-              $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+              $loc.__repr__ = Sk.ffi.functionPy(function(self) {
                 return Sk.ffi.stringToPy(METHOD_APPEND)
               });
             }, METHOD_APPEND, []));
           }
         }
       });
-      $loc.__getitem__ = Sk.ffi.defineFunction(function(verticesPy, indexPy) {
+      $loc.__getitem__ = Sk.ffi.functionPy(function(verticesPy, indexPy) {
         var index = Sk.ffi.remapToJs(indexPy);
         return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(vertices[index], VECTOR_3));
       });
       $loc.mp$length = function() {return vertices.length;};
-      $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+      $loc.__str__ = Sk.ffi.functionPy(function(self) {
         return Sk.ffi.stringToPy(PROP_VERTICES)
       });
-      $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+      $loc.__repr__ = Sk.ffi.functionPy(function(self) {
         return Sk.ffi.stringToPy(PROP_VERTICES)
       });
     }, PROP_VERTICES, []));
@@ -390,7 +395,7 @@ var $builtinmodule = function(name) {
   Sk.builtin.defineEuclidean3(mod);
 
   mod[VECTOR_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(selfPy, x, y, z) {
+    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, x, y, z) {
       Sk.ffi.checkMethodArgs(VECTOR_3, arguments, 0, 4);
       if (isUndefined(x) && isUndefined(y) && isUndefined(z)) {
         Sk.ffi.referenceToPy(new THREE.Vector3(), VECTOR_3, undefined, selfPy);
@@ -420,7 +425,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__add__ = Sk.ffi.defineFunction(function(lhsPy, rhsPy) {
+    $loc.__add__ = Sk.ffi.functionPy(function(lhsPy, rhsPy) {
       Sk.ffi.checkArgType('lhs', VECTOR_3, isVector(lhsPy));
       Sk.ffi.checkArgType('rhs', VECTOR_3, isVector(rhsPy));
       var a = Sk.ffi.remapToJs(lhsPy);
@@ -430,7 +435,7 @@ var $builtinmodule = function(name) {
       var z = a.z + b.z;
       return vector3ToPy(x, y, z);
     });
-    $loc.__iadd__ = Sk.ffi.defineFunction(function(lhsPy, rhsPy) {
+    $loc.__iadd__ = Sk.ffi.functionPy(function(lhsPy, rhsPy) {
       Sk.ffi.checkArgType('lhs', VECTOR_3, isVector(lhsPy));
       Sk.ffi.checkArgType('rhs', VECTOR_3, isVector(rhsPy));
       var a = Sk.ffi.remapToJs(lhsPy);
@@ -440,7 +445,7 @@ var $builtinmodule = function(name) {
       a.z += b.z;
       return lhsPy;
     });
-    $loc.__sub__ = Sk.ffi.defineFunction(function(lhsPy, rhsPy) {
+    $loc.__sub__ = Sk.ffi.functionPy(function(lhsPy, rhsPy) {
       Sk.ffi.checkArgType('lhs', VECTOR_3, isVector(lhsPy));
       Sk.ffi.checkArgType('rhs', VECTOR_3, isVector(rhsPy));
       var a = Sk.ffi.remapToJs(lhsPy);
@@ -450,7 +455,7 @@ var $builtinmodule = function(name) {
       var z = a.z - b.z;
       return vector3ToPy(x, y, z);
     });
-    $loc.__mul__ = Sk.ffi.defineFunction(function(lhsPy, rhsPy) {
+    $loc.__mul__ = Sk.ffi.functionPy(function(lhsPy, rhsPy) {
       Sk.ffi.checkArgType('lhs', VECTOR_3, isVector(lhsPy));
       Sk.ffi.checkArgType('rhs', "Number", Sk.ffi.isNumber(rhsPy));
       var a = Sk.ffi.remapToJs(lhsPy);
@@ -460,7 +465,7 @@ var $builtinmodule = function(name) {
       var z = a.z * b;
       return vector3ToPy(x, y, z);
     });
-    $loc.__rmul__ = Sk.ffi.defineFunction(function(rhsPy, lhsPy) {
+    $loc.__rmul__ = Sk.ffi.functionPy(function(rhsPy, lhsPy) {
       Sk.ffi.checkArgType('lhs', "Number", Sk.ffi.isNumber(lhsPy));
       Sk.ffi.checkArgType('rhs', VECTOR_3, isVector(rhsPy));
       var a = Sk.ffi.remapToJs(lhsPy);
@@ -470,7 +475,7 @@ var $builtinmodule = function(name) {
       var z = a * b.z;
       return vector3ToPy(x, y, z);
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(vectorPy, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(vectorPy, name) {
       var vector = Sk.ffi.remapToJs(vectorPy);
       switch(name) {
         case PROP_X:
@@ -480,30 +485,30 @@ var $builtinmodule = function(name) {
         }
         case METHOD_CLONE: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_CLONE;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self) {
               return vector3ToPy(vector.x, vector.y, vector.z);
             });
           }, METHOD_CLONE, []));
         }
         case METHOD_LENGTH: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_LENGTH;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.numberToPy(vector.length());
             });
           }, METHOD_LENGTH, []));
         }
         case METHOD_NORMALIZE: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_NORMALIZE;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self) {
               Sk.ffi.checkMethodArgs(VECTOR_3, arguments, 0, 0);
               vector[METHOD_NORMALIZE]();
               return vectorPy;
@@ -525,10 +530,10 @@ var $builtinmodule = function(name) {
         }
         case METHOD_SET_X: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_SET_X;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self, valuePy) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self, valuePy) {
               Sk.ffi.checkMethodArgs(METHOD_SET_X, arguments, 1, 1);
               Sk.ffi.checkArgType(PROP_X, "Number", Sk.ffi.isNumber(valuePy));
               vector[METHOD_SET_X](Sk.ffi.remapToJs(valuePy));
@@ -538,10 +543,10 @@ var $builtinmodule = function(name) {
         }
         case METHOD_SET_Y: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_SET_Y;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self, valuePy) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self, valuePy) {
               Sk.ffi.checkMethodArgs(METHOD_SET_Y, arguments, 1, 1);
               Sk.ffi.checkArgType(PROP_Y, "Number", Sk.ffi.isNumber(valuePy));
               vector[METHOD_SET_Y](Sk.ffi.remapToJs(valuePy));
@@ -551,10 +556,10 @@ var $builtinmodule = function(name) {
         }
         case METHOD_SET_Z: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_SET_Z;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self, valuePy) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self, valuePy) {
               Sk.ffi.checkMethodArgs(METHOD_SET_Z, arguments, 1, 1);
               Sk.ffi.checkArgType(PROP_Z, "Number", Sk.ffi.isNumber(valuePy));
               vector[METHOD_SET_Z](Sk.ffi.remapToJs(valuePy));
@@ -564,7 +569,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(selfPy, name, valuePy) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(selfPy, name, valuePy) {
       var vector = Sk.ffi.remapToJs(selfPy);
       switch(name) {
         case PROP_X:
@@ -579,19 +584,19 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(selfPy) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
       var vector = Sk.ffi.remapToJs(selfPy);
       var args = [vector.x, vector.y, vector.z];
       return Sk.ffi.stringToPy(VECTOR_3 + "(" + args.join(", ") + ")");
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(selfPy) {
+    $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
       var vector = Sk.ffi.remapToJs(selfPy);
       return Sk.ffi.stringToPy(stringFromCoordinates([vector.x, vector.y, vector.z], ["i", "j", "k"]));
     });
   }, VECTOR_3, []);
 
   mod[QUATERNION] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, x, y, z, w) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self, x, y, z, w) {
       x = Sk.ffi.remapToJs(x);
       y = Sk.ffi.remapToJs(y);
       z = Sk.ffi.remapToJs(z);
@@ -604,7 +609,7 @@ var $builtinmodule = function(name) {
       }
       self.tp$name = QUATERNION;
     });
-    $loc.__add__ = Sk.ffi.defineFunction(function(a, b) {
+    $loc.__add__ = Sk.ffi.functionPy(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
       if (isNumber(b)) {
@@ -618,7 +623,7 @@ var $builtinmodule = function(name) {
         return wxyzToPy(w, x, y, z);
       }
     });
-    $loc.__radd__ = Sk.ffi.defineFunction(function(b, a) {
+    $loc.__radd__ = Sk.ffi.functionPy(function(b, a) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
       if (isNumber(a)) {
@@ -628,7 +633,7 @@ var $builtinmodule = function(name) {
         throw new Sk.builtin.AssertionError();
       }
     });
-    $loc.__iadd__ = Sk.ffi.defineFunction(function(selfPy, otherPy) {
+    $loc.__iadd__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
       var self = Sk.ffi.remapToJs(selfPy);
       var other = Sk.ffi.remapToJs(otherPy);
       if (isNumber(other)) {
@@ -642,7 +647,7 @@ var $builtinmodule = function(name) {
       }
       return selfPy;
     });
-    $loc.__sub__ = Sk.ffi.defineFunction(function(a, b) {
+    $loc.__sub__ = Sk.ffi.functionPy(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
       if (isNumber(b)) {
@@ -656,7 +661,7 @@ var $builtinmodule = function(name) {
         return wxyzToPy(w, x, y, z);
       }
     });
-    $loc.__rsub__ = Sk.ffi.defineFunction(function(b, a) {
+    $loc.__rsub__ = Sk.ffi.functionPy(function(b, a) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
       if (isNumber(a)) {
@@ -666,7 +671,7 @@ var $builtinmodule = function(name) {
         throw new Sk.builtin.AssertionError();
       }
     });
-    $loc.__isub__ = Sk.ffi.defineFunction(function(selfPy, otherPy) {
+    $loc.__isub__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
       var self = Sk.ffi.remapToJs(selfPy);
       var other = Sk.ffi.remapToJs(otherPy);
       if (isNumber(other)) {
@@ -680,7 +685,7 @@ var $builtinmodule = function(name) {
       }
       return selfPy;
     });
-    $loc.__mul__ = Sk.ffi.defineFunction(function(a, b) {
+    $loc.__mul__ = Sk.ffi.functionPy(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
       if (isNumber(b)) {
@@ -691,7 +696,7 @@ var $builtinmodule = function(name) {
         return Sk.ffi.callsim(mod[QUATERNION], Sk.ffi.referenceToPy(ab, QUATERNION));
       }
     });
-    $loc.__rmul__ = Sk.ffi.defineFunction(function(b, a) {
+    $loc.__rmul__ = Sk.ffi.functionPy(function(b, a) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
       if (isNumber(a)) {
@@ -701,7 +706,7 @@ var $builtinmodule = function(name) {
         throw new Sk.builtin.AssertionError();
       }
     });
-    $loc.__imul__ = Sk.ffi.defineFunction(function(selfPy, otherPy) {
+    $loc.__imul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
       var a = Sk.ffi.remapToJs(selfPy);
       var b = Sk.ffi.remapToJs(otherPy);
       var a0 = a.w;
@@ -727,17 +732,17 @@ var $builtinmodule = function(name) {
       var mv = Sk.ffi.remapToJs(this);
       return quaternionToPy(-mv.x, -mv.y, -mv.z, -mv.w);
     };
-    $loc.__eq__ = Sk.ffi.defineFunction(function(a, b) {
+    $loc.__eq__ = Sk.ffi.functionPy(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
       return a.w === b.w && a.x === b.x && a.y === b.y && a.z === b.z;
     });
-    $loc.__ne__ = Sk.ffi.defineFunction(function(a, b) {
+    $loc.__ne__ = Sk.ffi.functionPy(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
       return a.w !== b.w || a.x !== b.x || a.y !== b.y || a.z !== b.z;
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(quaternionPy, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(quaternionPy, name) {
       var quaternion = Sk.ffi.remapToJs(quaternionPy);
       switch(name) {
         case PROP_X: {
@@ -754,10 +759,10 @@ var $builtinmodule = function(name) {
         }
         case METHOD_COPY: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_COPY;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self, qPy) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self, qPy) {
               var q  = Sk.ffi.remapToJs(qPy);
               quaternion.x = q.x;
               quaternion.y = q.y;
@@ -765,111 +770,111 @@ var $builtinmodule = function(name) {
               quaternion.w = q.w;
               return quaternionPy;
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_COPY);
             });
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_COPY);
             });
           }, METHOD_COPY, []));
         }
         case METHOD_SET_FROM_AXIS_ANGLE: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_SET_FROM_AXIS_ANGLE;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self, axisPy, anglePy) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self, axisPy, anglePy) {
               var axis = Sk.ffi.remapToJs(axisPy);
               var angle = Sk.ffi.remapToJs(anglePy);
               quaternion[METHOD_SET_FROM_AXIS_ANGLE](axis, angle);
               return quaternionPy;
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_SET_FROM_AXIS_ANGLE);
             });
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_SET_FROM_AXIS_ANGLE);
             });
           }, METHOD_SET_FROM_AXIS_ANGLE, []));
         }
         case METHOD_SET_FROM_EULER: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_SET_FROM_EULER;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self, vectorPy, orderPy) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self, vectorPy, orderPy) {
               var vector = Sk.ffi.remapToJs(vectorPy);
               var order = Sk.ffi.remapToJs(orderPy);
               quaternion[METHOD_SET_FROM_EULER](vector, order);
               return quaternionPy;
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_SET_FROM_EULER);
             });
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_SET_FROM_EULER);
             });
           }, METHOD_SET_FROM_EULER, []));
         }
         case METHOD_SET: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_SET;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self, x, y, z, w) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self, x, y, z, w) {
               quaternion.x = Sk.ffi.remapToJs(x);
               quaternion.y = Sk.ffi.remapToJs(y);
               quaternion.z = Sk.ffi.remapToJs(z);
               quaternion.w = Sk.ffi.remapToJs(w);
               return quaternionPy;
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_SET);
             });
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_SET);
             });
           }, METHOD_SET, []));
         }
         case METHOD_CLONE: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_CLONE;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self) {
               return wxyzToPy(quaternion.w, quaternion.x, quaternion.y, quaternion.z);
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_CLONE);
             });
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_CLONE);
             });
           }, METHOD_CLONE, []));
         }
         case METHOD_CONJUGATE: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_CONJUGATE;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self) {
               quaternion[METHOD_CONJUGATE]();
               return quaternionPy;
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_CONJUGATE);
             });
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_CONJUGATE);
             });
           }, METHOD_CONJUGATE, []));
         }
         case METHOD_INVERSE: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_INVERSE;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self) {
               var k = 1.0 / quaternion.lengthSq();
               quaternion[METHOD_CONJUGATE]();
               quaternion.w *= k;
@@ -878,66 +883,66 @@ var $builtinmodule = function(name) {
               quaternion.z *= k;
               return quaternionPy;
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_INVERSE);
             });
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_INVERSE);
             });
           }, METHOD_INVERSE, []));
         }
         case METHOD_LENGTH: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_LENGTH;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self) {
               return Sk.builtin.assk$(quaternion[METHOD_LENGTH](), Sk.builtin.nmber.float$);
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_LENGTH);
             });
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_LENGTH);
             });
           }, METHOD_LENGTH, []));
         }
         case METHOD_LENGTH_SQ: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_LENGTH_SQ;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self) {
               return Sk.builtin.assk$(quaternion[METHOD_LENGTH_SQ](), Sk.builtin.nmber.float$);
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_LENGTH_SQ);
             });
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_LENGTH_SQ);
             });
           }, METHOD_LENGTH_SQ, []));
         }
         case METHOD_NORMALIZE: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_NORMALIZE;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self) {
               quaternion[METHOD_NORMALIZE]();
               return quaternionPy;
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_NORMALIZE);
             });
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_NORMALIZE);
             });
           }, METHOD_NORMALIZE, []));
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(quaternionPy, name, valuePy) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(quaternionPy, name, valuePy) {
       var quaternion = Sk.ffi.remapToJs(quaternionPy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
@@ -962,12 +967,12 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(quaternionPy) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(quaternionPy) {
       var quaternion = Sk.ffi.remapToJs(quaternionPy);
       var args = [quaternion.x, quaternion.y, quaternion.z, quaternion.w];
       return Sk.ffi.stringToPy(QUATERNION + "(" + args.join(", ") + ")");
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(quaternionPy) {
+    $loc.__str__ = Sk.ffi.functionPy(function(quaternionPy) {
       var quaternion = Sk.ffi.remapToJs(quaternionPy);
       if (isDefined(quaternion)) {
         return Sk.ffi.stringToPy(stringFromCoordinates([quaternion.w, quaternion.x, quaternion.y, quaternion.z], ["1", "i", "j", "k"]));
@@ -1010,11 +1015,11 @@ var $builtinmodule = function(name) {
   }((typeof window === 'object') ? window : void 0));
 
   mod[SCENE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(selfPy) {
+    $loc.__init__ = Sk.ffi.functionPy(function(selfPy) {
       Sk.ffi.checkMethodArgs(SCENE, arguments, 0, 0);
       Sk.ffi.referenceToPy(new THREE.Scene(), SCENE, undefined, selfPy);
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(scenePy, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(scenePy, name) {
       var scene = Sk.ffi.remapToJs(scenePy);
       switch(name) {
         case PROP_POSITION: {
@@ -1040,17 +1045,17 @@ var $builtinmodule = function(name) {
         }
         case METHOD_LOOK_AT: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_LOOK_AT;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self, vectorPy) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self, vectorPy) {
               scene.lookAt(Sk.ffi.remapToJs(vectorPy));
               return scenePy;
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_LOOK_AT);
             })
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_LOOK_AT);
             })
           }, METHOD_LOOK_AT, []));
@@ -1063,7 +1068,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(scenePy, name, valuePy) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(scenePy, name, valuePy) {
       var scene = Sk.ffi.remapToJs(scenePy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
@@ -1105,12 +1110,12 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__str__ = Sk.ffi.functionPy(function(self) {
       return Sk.ffi.stringToPy(SCENE);
     });
   }, SCENE, []);
 
-  mod[WORLD] = Sk.ffi.defineFunction(function() {
+  mod[WORLD] = Sk.ffi.functionPy(function() {
     Sk.ffi.checkFunctionArgs(WORLD, arguments, 0, 0);
     var scenePy = Sk.ffi.callsim(mod[SCENE]);
     var scene = Sk.ffi.remapToJs(scenePy);
@@ -1174,14 +1179,14 @@ var $builtinmodule = function(name) {
     var PROP_GAMMA_INPUT  = "gammaInput";
     var PROP_GAMMA_OUTPUT = "gammaOutput";
     var PROP_SORT_OBJECTS = "sortObjects";
-    $loc.__init__ = Sk.ffi.defineFunction(function(selfPy, parametersPy) {
+    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, parametersPy) {
       var parameters = Sk.ffi.remapToJs(parametersPy);
       Sk.ffi.referenceToPy(new THREE[CANVAS_RENDERER](parameters), CANVAS_RENDERER, undefined, selfPy);
     });
-    $loc.setSize = Sk.ffi.defineFunction(function(self, width, height) {
+    $loc.setSize = Sk.ffi.functionPy(function(self, width, height) {
       self.v.setSize(Sk.builtin.asnum$(width), Sk.builtin.asnum$(height));
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(self, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(self, name) {
       var METHOD_RENDER = "render";
       var METHOD_GET_CLEAR_COLOR = "getClearColor";
       var METHOD_SET_CLEAR_COLOR = "setClearColor";
@@ -1208,71 +1213,71 @@ var $builtinmodule = function(name) {
         }
         case METHOD_RENDER: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_RENDER;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self, scene, camera) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self, scene, camera) {
               scene  = Sk.ffi.remapToJs(scene);
               camera = Sk.ffi.remapToJs(camera);
               renderer.render(scene, camera);
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_RENDER);
             })
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_RENDER);
             })
           }, METHOD_RENDER, []));
         }
         case METHOD_GET_CLEAR_COLOR: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_GET_CLEAR_COLOR;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.callsim(mod[COLOR], Sk.ffi.referenceToPy(renderer.getClearColor(), COLOR));
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_GET_CLEAR_COLOR);
             });
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_GET_CLEAR_COLOR);
             });
           }, METHOD_GET_CLEAR_COLOR, []));
         }
         case METHOD_SET_CLEAR_COLOR: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_SET_CLEAR_COLOR;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self, color, alpha) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self, color, alpha) {
               color  = Sk.ffi.remapToJs(color);
               alpha = Sk.ffi.remapToJs(alpha);
               renderer.setClearColor(color, alpha);
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_SET_CLEAR_COLOR);
             });
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_SET_CLEAR_COLOR);
             });
           }, METHOD_SET_CLEAR_COLOR, []));
         }
         case METHOD_SET_SIZE: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_SET_SIZE;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self, width, height, updateStyle) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self, width, height, updateStyle) {
               width  = Sk.ffi.remapToJs(width);
               height = Sk.ffi.remapToJs(height);
               updateStyle = Sk.ffi.remapToJs(updateStyle);
               renderer.setSize(width, height, updateStyle);
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_SET_SIZE);
             });
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_SET_SIZE);
             });
           }, METHOD_SET_SIZE, []));
@@ -1283,7 +1288,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(self, name, value) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(self, name, value) {
       var renderer  = Sk.ffi.remapToJs(self);
       value = Sk.ffi.remapToJs(value);
       switch(name) {
@@ -1334,7 +1339,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__str__ = Sk.ffi.functionPy(function(self) {
       var renderer = self.v;
       var args = {};
       args[PROP_AUTO_CLEAR] = renderer[PROP_AUTO_CLEAR];
@@ -1342,7 +1347,7 @@ var $builtinmodule = function(name) {
       args[PROP_GAMMA_OUTPUT] = renderer[PROP_GAMMA_OUTPUT];
       return Sk.ffi.stringToPy(CANVAS_RENDERER + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(self) {
       var renderer = self.v;
       var autoClear = renderer[PROP_AUTO_CLEAR];
       // Note: The WebGLRenderer takes only one argument, but it is a dictionary.
@@ -1358,14 +1363,17 @@ var $builtinmodule = function(name) {
     var PROP_GAMMA_INPUT  = "gammaInput";
     var PROP_GAMMA_OUTPUT = "gammaOutput";
     var PROP_SORT_OBJECTS = "sortObjects";
-    $loc.__init__ = Sk.ffi.defineFunction(function(selfPy, parametersPy) {
+    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, parametersPy) {
+      if (Sk.ffi.checkMethodArgs(WEBGL_RENDERER, arguments, 0, 1) > 0) {
+        Sk.ffi.checkArgType("parameters", "dict" + Sk.ffi.getType(parametersPy), Sk.ffi.isDictionary(parametersPy));
+      }
       var parameters = Sk.ffi.remapToJs(parametersPy);
       Sk.ffi.referenceToPy(new THREE[WEBGL_RENDERER](parameters), WEBGL_RENDERER, undefined, selfPy);
     });
-    $loc.setSize = Sk.ffi.defineFunction(function(self, width, height) {
+    $loc.setSize = Sk.ffi.functionPy(function(self, width, height) {
       self.v.setSize(Sk.builtin.asnum$(width), Sk.builtin.asnum$(height));
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(self, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(self, name) {
       var METHOD_RENDER = "render";
       var METHOD_GET_CLEAR_COLOR = "getClearColor";
       var METHOD_SET_CLEAR_COLOR = "setClearColor";
@@ -1373,13 +1381,13 @@ var $builtinmodule = function(name) {
       var renderer  = Sk.ffi.remapToJs(self);
       switch(name) {
         case PROP_AUTO_CLEAR: {
-          return renderer[PROP_AUTO_CLEAR];
+          return Sk.ffi.booleanToPy(renderer[PROP_AUTO_CLEAR]);
         }
         case PROP_GAMMA_INPUT: {
-          return renderer[PROP_GAMMA_INPUT];
+          return Sk.ffi.booleanToPy(renderer[PROP_GAMMA_INPUT]);
         }
         case PROP_GAMMA_OUTPUT: {
-          return renderer[PROP_GAMMA_OUTPUT];
+          return Sk.ffi.booleanToPy(renderer[PROP_GAMMA_OUTPUT]);
         }
         case PROP_SORT_OBJECTS: {
           return renderer[PROP_SORT_OBJECTS];
@@ -1413,19 +1421,19 @@ var $builtinmodule = function(name) {
         }
         case METHOD_SET_SIZE: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_SET_SIZE;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self, width, height, updateStyle) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self, width, height, updateStyle) {
               width  = Sk.ffi.remapToJs(width);
               height = Sk.ffi.remapToJs(height);
               updateStyle = Sk.ffi.remapToJs(updateStyle);
               renderer.setSize(width, height, updateStyle);
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_SET_SIZE);
             });
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_SET_SIZE);
             });
           }, METHOD_SET_SIZE, []));
@@ -1436,7 +1444,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(self, name, value) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(self, name, value) {
       var renderer  = Sk.ffi.remapToJs(self);
       value = Sk.ffi.remapToJs(value);
       switch(name) {
@@ -1487,7 +1495,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__str__ = Sk.ffi.functionPy(function(self) {
       var renderer = self.v;
       var args = {};
       args[PROP_AUTO_CLEAR] = renderer[PROP_AUTO_CLEAR];
@@ -1495,7 +1503,7 @@ var $builtinmodule = function(name) {
       args[PROP_GAMMA_OUTPUT] = renderer[PROP_GAMMA_OUTPUT];
       return Sk.ffi.stringToPy(WEBGL_RENDERER + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(self) {
       var renderer = self.v;
       var autoClear = renderer[PROP_AUTO_CLEAR];
       // Note: The WebGLRenderer takes only one argument, but it is a dictionary.
@@ -1508,7 +1516,7 @@ var $builtinmodule = function(name) {
     var PROP_R = "r";
     var PROP_G = "g";
     var PROP_B = "b";
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, value) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self, value) {
       value = Sk.ffi.remapToJs(value);
       self.tp$name = COLOR;
       if (isUndefined(value)) {
@@ -1526,7 +1534,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(colorPy, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(colorPy, name) {
       var color = Sk.ffi.remapToJs(colorPy);
       switch(name) {
         case PROP_R: {
@@ -1540,27 +1548,27 @@ var $builtinmodule = function(name) {
         }
         case METHOD_SET_RGB: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_SET_RGB;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self, rPy, gPy, bPy) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self, rPy, gPy, bPy) {
               var r  = Sk.ffi.remapToJs(rPy);
               var g  = Sk.ffi.remapToJs(gPy);
               var b  = Sk.ffi.remapToJs(bPy);
               color.setRGB(r, g, b);
               return colorPy;
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_SET_RGB);
             });
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_SET_RGB);
             });
           }, METHOD_SET_RGB, []));
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(colorPy, name, valuePy) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(colorPy, name, valuePy) {
       var color = Sk.ffi.remapToJs(colorPy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
@@ -1581,7 +1589,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__str__ = Sk.ffi.functionPy(function(self) {
       var color = self.v;
       var args = {};
       args[PROP_R] = color[PROP_R];
@@ -1589,7 +1597,7 @@ var $builtinmodule = function(name) {
       args[PROP_B] = color[PROP_B];
       return Sk.ffi.stringToPy(COLOR + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(self) {
       var color = self.v;
       var r = color[PROP_R];
       var g = color[PROP_G];
@@ -1600,7 +1608,7 @@ var $builtinmodule = function(name) {
   }, COLOR, []);
 
   mod[PERSPECTIVE_CAMERA] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, fov, aspect, near, far) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self, fov, aspect, near, far) {
       var fieldOfView = Sk.builtin.asnum$(fov)
       var aspectRatio = Sk.builtin.asnum$(aspect)
       var nearPlane = Sk.builtin.asnum$(near)
@@ -1609,7 +1617,7 @@ var $builtinmodule = function(name) {
       self.tp$name = PERSPECTIVE_CAMERA;
     });
 
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(cameraPy, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(cameraPy, name) {
       camera = Sk.ffi.remapToJs(cameraPy);
       var UPDATE_PROJECTION_MATRIX = "updateProjectionMatrix"
       switch(name) {
@@ -1639,35 +1647,35 @@ var $builtinmodule = function(name) {
         }
         case METHOD_LOOK_AT: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(methodPy) {
+            $loc.__init__ = Sk.ffi.functionPy(function(methodPy) {
               // We probably need to save the scope to make references work properly?
               Sk.ffi.referenceToPy(camera.lookAt, METHOD_LOOK_AT, undefined, methodPy);
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(methodPy, vectorPy) {
+            $loc.__call__ = Sk.ffi.functionPy(function(methodPy, vectorPy) {
               // Sk.ffi.remapToJs(methodPy)(Sk.ffi.remapToJs(vectorPy));
               camera.lookAt(Sk.ffi.remapToJs(vectorPy));
               return cameraPy;
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_LOOK_AT);
             })
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_LOOK_AT);
             })
           }, METHOD_LOOK_AT, []));
         }
         case UPDATE_PROJECTION_MATRIX: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = UPDATE_PROJECTION_MATRIX;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self) {
               camera[name]();
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(UPDATE_PROJECTION_MATRIX)
             })
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(UPDATE_PROJECTION_MATRIX)
             })
           }, UPDATE_PROJECTION_MATRIX, []));
@@ -1677,7 +1685,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(cameraPy, name, valuePy) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(cameraPy, name, valuePy) {
       var camera = Sk.ffi.remapToJs(cameraPy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
@@ -1723,13 +1731,13 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__str__ = Sk.ffi.functionPy(function(self) {
       return Sk.ffi.stringToPy(PERSPECTIVE_CAMERA);
     });
   }, PERSPECTIVE_CAMERA, []);
 
   mod[ORTHOGRAPHIC_CAMERA] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, leftPy, rightPy, topPy, bottomPy, nearPy, farPy) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self, leftPy, rightPy, topPy, bottomPy, nearPy, farPy) {
       var left = Sk.builtin.asnum$(leftPy)
       var right = Sk.builtin.asnum$(rightPy)
       var top = Sk.builtin.asnum$(topPy)
@@ -1740,7 +1748,7 @@ var $builtinmodule = function(name) {
       self.tp$name = ORTHOGRAPHIC_CAMERA;
     });
 
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(cameraPy, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(cameraPy, name) {
       camera = Sk.ffi.remapToJs(cameraPy);
       var UPDATE_PROJECTION_MATRIX = "updateProjectionMatrix"
       switch(name) {
@@ -1770,17 +1778,17 @@ var $builtinmodule = function(name) {
         }
         case METHOD_LOOK_AT: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_LOOK_AT;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self, vectorPy) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self, vectorPy) {
               camera.lookAt(Sk.ffi.remapToJs(vectorPy));
               return cameraPy;
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_LOOK_AT);
             })
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_LOOK_AT);
             })
           }, METHOD_LOOK_AT, []));
@@ -1788,19 +1796,19 @@ var $builtinmodule = function(name) {
         case UPDATE_PROJECTION_MATRIX: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
 
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = UPDATE_PROJECTION_MATRIX;
             });
 
-            $loc.__call__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self) {
               camera[name]();
             });
 
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(UPDATE_PROJECTION_MATRIX)
             })
 
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(UPDATE_PROJECTION_MATRIX)
             })
 
@@ -1811,7 +1819,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(cameraPy, name, valuePy) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(cameraPy, name, valuePy) {
       var camera = Sk.ffi.remapToJs(cameraPy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
@@ -1869,18 +1877,18 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(cameraPy) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(cameraPy) {
       var camera = Sk.ffi.remapToJs(cameraPy);
       var args = [camera[PROP_LEFT], camera[PROP_RIGHT], camera[PROP_TOP], camera[PROP_BOTTOM], camera[PROP_NEAR], camera[PROP_FAR]];
       return Sk.ffi.stringToPy(ORTHOGRAPHIC_CAMERA + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__str__ = Sk.ffi.functionPy(function(self) {
       return Sk.ffi.stringToPy(ORTHOGRAPHIC_CAMERA);
     });
   }, ORTHOGRAPHIC_CAMERA, []);
 
   mod[ARROW_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, length, segments, radiusShaft, radiusCone, lengthCone) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self, length, segments, radiusShaft, radiusCone, lengthCone) {
       length = Sk.ffi.remapToJs(length) || 1;
       segments = Sk.ffi.remapToJs(segments);
       radiusShaft = Sk.ffi.remapToJs(radiusShaft) || 0.01;
@@ -1896,7 +1904,7 @@ var $builtinmodule = function(name) {
       self.v = new THREE.LatheGeometry(points, segments);
       self.tp$name = ARROW_GEOMETRY;
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(geometryPy, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(geometryPy, name) {
       var geometry = Sk.ffi.remapToJs(geometryPy);
       switch(name) {
         case PROP_ID: {
@@ -1910,7 +1918,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(geometryPy, name, valuePy) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(geometryPy, name, valuePy) {
       var geometry = Sk.ffi.remapToJs(geometryPy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
@@ -1928,12 +1936,12 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__str__ = Sk.ffi.functionPy(function(self) {
       var geometry = Sk.ffi.remapToJs(self);
       var args = {};
       return Sk.ffi.stringToPy(ARROW_GEOMETRY + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(self) {
       var geometry = Sk.ffi.remapToJs(self);
       var args = [];
       return Sk.ffi.stringToPy(ARROW_GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
@@ -1941,7 +1949,7 @@ var $builtinmodule = function(name) {
   }, ARROW_GEOMETRY, []);
 
    mod[CIRCLE_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, radius, segments, thetaStart, thetaLength) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self, radius, segments, thetaStart, thetaLength) {
       radius      = numberFromArg(radius,          PROP_RADIUS,       CIRCLE_GEOMETRY);
       segments    = numberFromIntegerArg(segments, PROP_SEGMENTS,     CIRCLE_GEOMETRY);
       thetaStart  = numberFromArg(thetaStart,      PROP_THETA_START,  CIRCLE_GEOMETRY);
@@ -1949,11 +1957,11 @@ var $builtinmodule = function(name) {
       self.v = new THREE[CIRCLE_GEOMETRY](radius, segments, thetaStart, thetaLength);
       self.tp$name = CIRCLE_GEOMETRY;
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(self, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(self, name) {
       switch(name) {
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(geometryPy, name, valuePy) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(geometryPy, name, valuePy) {
       var geometry = Sk.ffi.remapToJs(geometryPy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
@@ -1962,12 +1970,12 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__str__ = Sk.ffi.functionPy(function(self) {
       var sphere = self.v;
       var args = {};
       return Sk.ffi.stringToPy(CIRCLE_GEOMETRY + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(self) {
       var sphere = self.v;
       var args = [];
       return Sk.ffi.stringToPy(CIRCLE_GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
@@ -1981,7 +1989,7 @@ var $builtinmodule = function(name) {
     var PROP_WIDTH_SEGMENTS  = "widthSegments";
     var PROP_HEIGHT_SEGMENTS = "heightSegments";
     var PROP_DEPTH_SEGMENTS  = "depthSegments";
-    $loc.__init__ = Sk.ffi.defineFunction(function(selfPy, width, height, depth, widthSegments, heightSegments, depthSegments) {
+    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, width, height, depth, widthSegments, heightSegments, depthSegments) {
       Sk.ffi.checkMethodArgs(CUBE_GEOMETRY, arguments, 3, 6);
       width          = numberFromArg(width,                 PROP_WIDTH,           CUBE_GEOMETRY);
       height         = numberFromArg(height,                PROP_HEIGHT,          CUBE_GEOMETRY);
@@ -1991,7 +1999,7 @@ var $builtinmodule = function(name) {
       depthSegments  = numberFromIntegerArg(depthSegments,  PROP_DEPTH_SEGMENTS,  CUBE_GEOMETRY);
       Sk.ffi.referenceToPy(new THREE[CUBE_GEOMETRY](width, height, depth, widthSegments, heightSegments, depthSegments), CUBE_GEOMETRY, undefined, selfPy);
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(self, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(self, name) {
       switch(name) {
         case PROP_WIDTH: {
           return Sk.builtin.assk$(self.v[PROP_WIDTH], Sk.builtin.nmber.float$);
@@ -2013,7 +2021,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(geometryPy, name, valuePy) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(geometryPy, name, valuePy) {
       var geometry = Sk.ffi.remapToJs(geometryPy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
@@ -2022,7 +2030,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__str__ = Sk.ffi.functionPy(function(self) {
       var cube = self.v;
       var args = {};
       args[PROP_WIDTH]  = cube[PROP_WIDTH];
@@ -2030,7 +2038,7 @@ var $builtinmodule = function(name) {
       args[PROP_DEPTH]  = cube[PROP_DEPTH];
       return Sk.ffi.stringToPy(CUBE_GEOMETRY + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(self) {
       var cube = self.v;
       var width          = cube[PROP_WIDTH];
       var height         = cube[PROP_HEIGHT];
@@ -2050,7 +2058,7 @@ var $builtinmodule = function(name) {
     var PROP_RADIUS_SEGMENTS = "radiusSegments";
     var PROP_HEIGHT_SEGMENTS = "heightSegments";
     var PROP_OPEN_ENDED      = "openEnded";
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, radiusTop, radiusBottom, height, radiusSegments, heightSegments, openEnded) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self, radiusTop, radiusBottom, height, radiusSegments, heightSegments, openEnded) {
       radiusTop      = numberFromArg(radiusTop,             PROP_RADIUS_TOP,      CYLINDER_GEOMETRY);
       radiusBottom   = numberFromArg(radiusBottom,          PROP_RADIUS_BOTTOM,   CYLINDER_GEOMETRY);
       height         = numberFromArg(height,                PROP_HEIGHT,          CYLINDER_GEOMETRY);
@@ -2060,7 +2068,7 @@ var $builtinmodule = function(name) {
       self.v = new THREE[CYLINDER_GEOMETRY](radiusTop, radiusBottom, height, radiusSegments, heightSegments, openEnded);
       self.tp$name = CYLINDER_GEOMETRY;
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(self, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(self, name) {
       switch(name) {
         case PROP_RADIUS_TOP: {
           return Sk.builtin.assk$(self.v[PROP_RADIUS_TOP], Sk.builtin.nmber.float$);
@@ -2085,7 +2093,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(geometryPy, name, valuePy) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(geometryPy, name, valuePy) {
       var geometry = Sk.ffi.remapToJs(geometryPy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
@@ -2094,7 +2102,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__str__ = Sk.ffi.functionPy(function(self) {
       var cylinder = self.v;
       var args = {};
       args[PROP_RADIUS_TOP] = cylinder[PROP_RADIUS_TOP];
@@ -2104,7 +2112,7 @@ var $builtinmodule = function(name) {
       // TODO: Need a Python.stringify because Boolean is {True, False} etc.
       return Sk.ffi.stringToPy(CYLINDER_GEOMETRY + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(self) {
       var cylinder = self.v;
       var radiusTop      = cylinder[PROP_RADIUS_TOP];
       var radiusBottom   = cylinder[PROP_RADIUS_BOTTOM];
@@ -2118,7 +2126,7 @@ var $builtinmodule = function(name) {
   }, CYLINDER_GEOMETRY, []);
 
   mod[LATHE_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, pointsPy, segmentsPy, phiStart, phiLength) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self, pointsPy, segmentsPy, phiStart, phiLength) {
       var points = Sk.ffi.remapToJs(pointsPy);
       var segments = Sk.ffi.remapToJs(segmentsPy);
       phiStart = Sk.ffi.remapToJs(phiStart);
@@ -2126,7 +2134,7 @@ var $builtinmodule = function(name) {
       self.v = new THREE[LATHE_GEOMETRY](points, segments, phiStart, phiLength);
       self.tp$name = LATHE_GEOMETRY;
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(geometryPy, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(geometryPy, name) {
       var geometry = Sk.ffi.remapToJs(geometryPy);
       switch(name) {
         case PROP_ID: {
@@ -2140,7 +2148,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(geometryPy, name, valuePy) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(geometryPy, name, valuePy) {
       var geometry = Sk.ffi.remapToJs(geometryPy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
@@ -2158,12 +2166,12 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__str__ = Sk.ffi.functionPy(function(self) {
       var latheGeometry = self.v;
       var args = {};
       return Sk.ffi.stringToPy(LATHE_GEOMETRY + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(self) {
       var latheGeometry = self.v;
       var args = [];
       return Sk.ffi.stringToPy(LATHE_GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
@@ -2171,13 +2179,13 @@ var $builtinmodule = function(name) {
   }, LATHE_GEOMETRY, []);
 
   mod[ICOSAHEDRON_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, radius, detail) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self, radius, detail) {
       radius = numberFromArg(radius,        PROP_RADIUS, ICOSAHEDRON_GEOMETRY);
       detail = numberFromIntegerArg(detail, PROP_DETAIL, ICOSAHEDRON_GEOMETRY);
       self.v = new THREE[ICOSAHEDRON_GEOMETRY](radius, detail);
       self.tp$name = ICOSAHEDRON_GEOMETRY;
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(self, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(self, name) {
       switch(name) {
         case PROP_RADIUS: {
           return Sk.builtin.assk$(self.v[PROP_RADIUS], Sk.builtin.nmber.float$);
@@ -2190,7 +2198,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(geometryPy, name, valuePy) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(geometryPy, name, valuePy) {
       var geometry = Sk.ffi.remapToJs(geometryPy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
@@ -2199,14 +2207,14 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__str__ = Sk.ffi.functionPy(function(self) {
       var icosahedron = self.v;
       var args = {};
       args[PROP_RADIUS] = icosahedron[PROP_RADIUS];
       args[PROP_DETAIL] = icosahedron[PROP_DETAIL];
       return Sk.ffi.stringToPy(ICOSAHEDRON_GEOMETRY + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(self) {
       var icosahedron = self.v;
       var radius = icosahedron[PROP_RADIUS];
       var detail = icosahedron[PROP_DETAIL];
@@ -2217,7 +2225,7 @@ var $builtinmodule = function(name) {
 
   mod[OCTAHEDRON_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var PROP_DETAIL = "detail";
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, radius, detail) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self, radius, detail) {
       radius = numberFromArg(radius,        PROP_RADIUS, OCTAHEDRON_GEOMETRY);
       detail = numberFromIntegerArg(detail, PROP_DETAIL, OCTAHEDRON_GEOMETRY);
       self.v = new THREE[OCTAHEDRON_GEOMETRY](radius, detail);
@@ -2225,7 +2233,7 @@ var $builtinmodule = function(name) {
       self.v.detail = detail; // workaround for THREE not caching detail.
       self.tp$name = OCTAHEDRON_GEOMETRY;
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(self, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(self, name) {
       switch(name) {
         case PROP_RADIUS: {
           return Sk.builtin.assk$(self.v[PROP_RADIUS], Sk.builtin.nmber.float$);
@@ -2238,7 +2246,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(geometryPy, name, valuePy) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(geometryPy, name, valuePy) {
       var geometry = Sk.ffi.remapToJs(geometryPy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
@@ -2247,14 +2255,14 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__str__ = Sk.ffi.functionPy(function(self) {
       var octahedron = self.v;
       var args = {};
       args[PROP_RADIUS] = octahedron[PROP_RADIUS];
       args[PROP_DETAIL] = octahedron[PROP_DETAIL];
       return Sk.ffi.stringToPy(OCTAHEDRON_GEOMETRY + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(self) {
       var octahedron = self.v;
       var radius = octahedron[PROP_RADIUS];
       var detail = octahedron[PROP_DETAIL];
@@ -2268,7 +2276,7 @@ var $builtinmodule = function(name) {
     var PROP_HEIGHT          = "height";
     var PROP_WIDTH_SEGMENTS  = "widthSegments";
     var PROP_HEIGHT_SEGMENTS = "heightSegments";
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, width, height, widthSegments, heightSegments) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self, width, height, widthSegments, heightSegments) {
       width          = numberFromArg(width,                 PROP_WIDTH,           PLANE_GEOMETRY);
       height         = numberFromArg(height,                PROP_HEIGHT,          PLANE_GEOMETRY);
       widthSegments  = numberFromIntegerArg(widthSegments,  PROP_WIDTH_SEGMENTS,  PLANE_GEOMETRY);
@@ -2276,7 +2284,7 @@ var $builtinmodule = function(name) {
       self.v = new THREE[PLANE_GEOMETRY](width, height, widthSegments, heightSegments);
       self.tp$name = PLANE_GEOMETRY;
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(self, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(self, name) {
       switch(name) {
         case PROP_WIDTH: {
           return Sk.builtin.assk$(self.v[PROP_WIDTH], Sk.builtin.nmber.float$);
@@ -2292,7 +2300,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(geometryPy, name, valuePy) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(geometryPy, name, valuePy) {
       var geometry = Sk.ffi.remapToJs(geometryPy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
@@ -2301,14 +2309,14 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__str__ = Sk.ffi.functionPy(function(self) {
       var plane = self.v;
       var args = {};
       args[PROP_WIDTH]  = plane[PROP_WIDTH];
       args[PROP_HEIGHT] = plane[PROP_HEIGHT];
       return Sk.ffi.stringToPy(PLANE_GEOMETRY + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(self) {
       var plane = self.v;
       var width          = plane[PROP_WIDTH];
       var height         = plane[PROP_HEIGHT];
@@ -2324,7 +2332,7 @@ var $builtinmodule = function(name) {
     var PROP_HEIGHT_SEGMENTS = "heightSegments";
     var PROP_PHI_START       = "phiStart";
     var PROP_PHI_LENGTH      = "phiLength";
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self, radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
       radius         = numberFromArg(radius,                PROP_RADIUS,          SPHERE_GEOMETRY);
       widthSegments  = numberFromIntegerArg(widthSegments,  PROP_WIDTH_SEGMENTS,  SPHERE_GEOMETRY);
       heightSegments = numberFromIntegerArg(heightSegments, PROP_HEIGHT_SEGMENTS, SPHERE_GEOMETRY);
@@ -2335,7 +2343,7 @@ var $builtinmodule = function(name) {
       self.v = new THREE[SPHERE_GEOMETRY](radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength);
       self.tp$name = SPHERE_GEOMETRY;
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(self, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(self, name) {
       switch(name) {
         case PROP_RADIUS: {
           return Sk.builtin.assk$(self.v[PROP_RADIUS], Sk.builtin.nmber.float$);
@@ -2360,7 +2368,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(geometryPy, name, valuePy) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(geometryPy, name, valuePy) {
       var geometry = Sk.ffi.remapToJs(geometryPy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
@@ -2369,14 +2377,14 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__str__ = Sk.ffi.functionPy(function(self) {
       var sphere = self.v;
       var radius = sphere[PROP_RADIUS];
       var args = {};
       args[PROP_RADIUS] = radius;
       return Sk.ffi.stringToPy(SPHERE_GEOMETRY + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(self) {
       var sphere = self.v;
       var radius         = sphere[PROP_RADIUS];
       var widthSegments  = sphere[PROP_WIDTH_SEGMENTS];
@@ -2392,7 +2400,7 @@ var $builtinmodule = function(name) {
 
   mod[TETRAHEDRON_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var PROP_DETAIL = "detail";
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, radius, detail) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self, radius, detail) {
       radius = numberFromArg(radius,        PROP_RADIUS, TETRAHEDRON_GEOMETRY);
       detail = numberFromIntegerArg(detail, PROP_DETAIL, TETRAHEDRON_GEOMETRY);
       self.v = new THREE[TETRAHEDRON_GEOMETRY](radius, detail);
@@ -2400,7 +2408,7 @@ var $builtinmodule = function(name) {
       self.v.detail = detail; // workaround for THREE not caching detail.
       self.tp$name = TETRAHEDRON_GEOMETRY;
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(self, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(self, name) {
       switch(name) {
         case PROP_RADIUS: {
           return Sk.builtin.assk$(self.v[PROP_RADIUS], Sk.builtin.nmber.float$);
@@ -2410,7 +2418,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(geometryPy, name, valuePy) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(geometryPy, name, valuePy) {
       var geometry = Sk.ffi.remapToJs(geometryPy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
@@ -2419,14 +2427,14 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__str__ = Sk.ffi.functionPy(function(self) {
       var tetrahedron = self.v;
       var args = {};
       args[PROP_RADIUS] = tetrahedron[PROP_RADIUS];
       args[PROP_DETAIL] = tetrahedron[PROP_DETAIL];
       return Sk.ffi.stringToPy(TETRAHEDRON_GEOMETRY + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(self) {
       var tetrahedron = self.v;
       var radius = tetrahedron[PROP_RADIUS];
       var detail = tetrahedron[PROP_DETAIL];
@@ -2436,16 +2444,16 @@ var $builtinmodule = function(name) {
   }, TETRAHEDRON_GEOMETRY, []);
 
    mod[TEXT_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, text, parameters) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self, text, parameters) {
       text = Sk.ffi.remapToJs(text);
       parameters = Sk.ffi.remapToJs(parameters);
       self.v = new THREE[TEXT_GEOMETRY](text, parameters);
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(self, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(self, name) {
       switch(name) {
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(geometryPy, name, valuePy) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(geometryPy, name, valuePy) {
       var geometry = Sk.ffi.remapToJs(geometryPy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
@@ -2454,12 +2462,12 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__str__ = Sk.ffi.functionPy(function(self) {
       var text = Sk.ffi.remapToJs(self);
       var args = {};
       return Sk.ffi.stringToPy(TEXT_GEOMETRY + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(self) {
       var text = Sk.ffi.remapToJs(self);
       var args = [];
       return Sk.ffi.stringToPy(TEXT_GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
@@ -2471,7 +2479,7 @@ var $builtinmodule = function(name) {
     var PROP_RADIAL_SEGMENTS  = "radialSegments";
     var PROP_TUBULAR_SEGMENTS = "tubularSegments";
     var PROP_ARC              = "arc";
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, radius, tube, radialSegments, tubularSegments, arc) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self, radius, tube, radialSegments, tubularSegments, arc) {
       radius = numberFromArg(radius,                          PROP_RADIUS,           TORUS_GEOMETRY);
       tube = numberFromArg(tube,                              PROP_TUBE,             TORUS_GEOMETRY);
       radialSegments = numberFromIntegerArg(radialSegments,   PROP_RADIAL_SEGMENTS,  TORUS_GEOMETRY);
@@ -2479,7 +2487,7 @@ var $builtinmodule = function(name) {
       arc = numberFromArg(arc,                                PROP_ARC,              TORUS_GEOMETRY);
       self.v = new THREE[TORUS_GEOMETRY](radius, tube, radialSegments, tubularSegments, arc);
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(self, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(self, name) {
       switch(name) {
         case PROP_RADIUS: {
           return Sk.builtin.assk$(self.v[PROP_RADIUS], Sk.builtin.nmber.float$);
@@ -2498,7 +2506,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(geometryPy, name, valuePy) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(geometryPy, name, valuePy) {
       var geometry = Sk.ffi.remapToJs(geometryPy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
@@ -2507,7 +2515,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__str__ = Sk.ffi.functionPy(function(self) {
       var torus = self.v;
       var args = {};
       args[PROP_RADIUS] = torus[PROP_RADIUS];
@@ -2515,7 +2523,7 @@ var $builtinmodule = function(name) {
       args[PROP_ARC]    = torus[PROP_ARC];
       return Sk.ffi.stringToPy(TORUS_GEOMETRY + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(self) {
       var torus = self.v;
       var radius          = torus[PROP_RADIUS];
       var tube            = torus[PROP_TUBE];
@@ -2528,7 +2536,7 @@ var $builtinmodule = function(name) {
   }, TORUS_GEOMETRY, []);
 
    mod[GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, geometryPy) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self, geometryPy) {
       if (isDefined(geometryPy)) {
         self.v = Sk.ffi.remapToJs(geometryPy);
         self.tp$name = geometryPy.tp$name;
@@ -2538,7 +2546,7 @@ var $builtinmodule = function(name) {
         self.tp$name = GEOMETRY;
       }
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(geometryPy, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(geometryPy, name) {
       var geometry = Sk.ffi.remapToJs(geometryPy);
       switch(name) {
         case PROP_ID: {
@@ -2552,7 +2560,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(geometryPy, name, valuePy) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(geometryPy, name, valuePy) {
       var geometry = Sk.ffi.remapToJs(geometryPy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
@@ -2561,7 +2569,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(geometryPy) {
+    $loc.__str__ = Sk.ffi.functionPy(function(geometryPy) {
       var geometry = Sk.ffi.remapToJs(geometryPy);
       if (isDefined(geometry)) {
         var args = {};
@@ -2571,7 +2579,7 @@ var $builtinmodule = function(name) {
         return Sk.ffi.stringToPy("<type '" + GEOMETRY + "'>");
       }
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(geometry) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(geometry) {
       geometry = Sk.ffi.remapToJs(geometry);
       var args = [];
       return Sk.ffi.stringToPy(GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
@@ -2579,11 +2587,11 @@ var $builtinmodule = function(name) {
   }, GEOMETRY, []);
 
   mod[OBJECT_3D] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self) {
       self.tp$name = OBJECT_3D;
       self.v = new THREE[OBJECT_3D]();
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(objPy, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(objPy, name) {
       var obj = Sk.ffi.remapToJs(objPy);
       switch(name) {
         case PROP_POSITION: {
@@ -2615,7 +2623,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(obj, name, value) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(obj, name, value) {
       obj = Sk.ffi.remapToJs(obj);
       value = Sk.ffi.remapToJs(value);
       switch(name) {
@@ -2657,7 +2665,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(obj) {
+    $loc.__str__ = Sk.ffi.functionPy(function(obj) {
       obj = Sk.ffi.remapToJs(obj);
       if (isDefined(obj)) {
         var args = {};
@@ -2667,7 +2675,7 @@ var $builtinmodule = function(name) {
         return Sk.ffi.stringToPy("<type '" + OBJECT_3D + "'>");
       }
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(obj) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(obj) {
       obj = Sk.ffi.remapToJs(obj);
       var args = [];
       return Sk.ffi.stringToPy(OBJECT_3D + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
@@ -2675,12 +2683,12 @@ var $builtinmodule = function(name) {
   }, OBJECT_3D, []);
 
   mod[AMBIENT_LIGHT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, color) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self, color) {
       self.tp$name = AMBIENT_LIGHT;
       color = Sk.ffi.remapToJs(color);
       self.v = new THREE[AMBIENT_LIGHT](color);
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(lightPy, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(lightPy, name) {
       var light = Sk.ffi.remapToJs(lightPy);
       switch(name) {
         case PROP_COLOR: {
@@ -2688,7 +2696,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(lightPy, name, valuePy) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(lightPy, name, valuePy) {
       var light = Sk.ffi.remapToJs(lightPy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
@@ -2701,7 +2709,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(light) {
+    $loc.__str__ = Sk.ffi.functionPy(function(light) {
       light = Sk.ffi.remapToJs(light);
       if (isDefined(light)) {
         var args = {};
@@ -2712,7 +2720,7 @@ var $builtinmodule = function(name) {
         return Sk.ffi.stringToPy("<type '" + AMBIENT_LIGHT + "'>");
       }
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(light) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(light) {
       light = Sk.ffi.remapToJs(light);
       var args = [light[PROP_COLOR]];
       return Sk.ffi.stringToPy(AMBIENT_LIGHT + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
@@ -2722,14 +2730,14 @@ var $builtinmodule = function(name) {
   mod[DIRECTIONAL_LIGHT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var PROP_INTENSITY = "intensity";
     var PROP_DISTANCE = "distance";
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, color, intensity, distance) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self, color, intensity, distance) {
       self.tp$name = DIRECTIONAL_LIGHT;
       color = Sk.ffi.remapToJs(color);
       intensity = Sk.ffi.remapToJs(intensity);
       distance = Sk.ffi.remapToJs(distance);
       self.v = new THREE[DIRECTIONAL_LIGHT](color, intensity, distance);
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(lightPy, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(lightPy, name) {
       var light = Sk.ffi.remapToJs(lightPy);
       switch(name) {
         case PROP_COLOR: {
@@ -2764,24 +2772,24 @@ var $builtinmodule = function(name) {
         }
         case METHOD_LOOK_AT: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_LOOK_AT;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self, vectorPy) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self, vectorPy) {
               light.lookAt(Sk.ffi.remapToJs(vectorPy));
               return lightPy;
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_LOOK_AT);
             })
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_LOOK_AT);
             })
           }, METHOD_LOOK_AT, []));
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(light, name, value) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(light, name, value) {
       light = Sk.ffi.remapToJs(light);
       value = Sk.ffi.remapToJs(value);
       switch(name) {
@@ -2845,7 +2853,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(light) {
+    $loc.__str__ = Sk.ffi.functionPy(function(light) {
       light = Sk.ffi.remapToJs(light);
       if (isDefined(light)) {
         var args = {};
@@ -2858,7 +2866,7 @@ var $builtinmodule = function(name) {
         return Sk.ffi.stringToPy("<type '" + DIRECTIONAL_LIGHT + "'>");
       }
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(light) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(light) {
       light = Sk.ffi.remapToJs(light);
       var args = [light[PROP_COLOR], light[PROP_INTENSITY], light[PROP_DISTANCE]];
       return Sk.ffi.stringToPy(DIRECTIONAL_LIGHT + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
@@ -2868,14 +2876,14 @@ var $builtinmodule = function(name) {
   mod[POINT_LIGHT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var PROP_INTENSITY = "intensity";
     var PROP_DISTANCE = "distance";
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, color, intensity, distance) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self, color, intensity, distance) {
       self.tp$name = POINT_LIGHT;
       color = Sk.ffi.remapToJs(color);
       intensity = Sk.ffi.remapToJs(intensity);
       distance = Sk.ffi.remapToJs(distance);
       self.v = new THREE[POINT_LIGHT](color, intensity, distance);
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(lightPy, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(lightPy, name) {
       var light = Sk.ffi.remapToJs(lightPy);
       switch(name) {
         case PROP_COLOR: {
@@ -2910,24 +2918,24 @@ var $builtinmodule = function(name) {
         }
         case METHOD_LOOK_AT: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_LOOK_AT;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self, vectorPy) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self, vectorPy) {
               light.lookAt(Sk.ffi.remapToJs(vectorPy));
               return lightPy;
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_LOOK_AT);
             })
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_LOOK_AT);
             })
           }, METHOD_LOOK_AT, []));
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(light, name, value) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(light, name, value) {
       light = Sk.ffi.remapToJs(light);
       value = Sk.ffi.remapToJs(value);
       switch(name) {
@@ -2991,7 +2999,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(light) {
+    $loc.__str__ = Sk.ffi.functionPy(function(light) {
       light = Sk.ffi.remapToJs(light);
       if (isDefined(light)) {
         var args = {};
@@ -3004,7 +3012,7 @@ var $builtinmodule = function(name) {
         return Sk.ffi.stringToPy("<type '" + POINT_LIGHT + "'>");
       }
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(light) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(light) {
       light = Sk.ffi.remapToJs(light);
       var args = [light[PROP_COLOR], light[PROP_INTENSITY], light[PROP_DISTANCE]];
       return Sk.ffi.stringToPy(POINT_LIGHT + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
@@ -3012,13 +3020,13 @@ var $builtinmodule = function(name) {
   }, POINT_LIGHT, []);
 
   mod[LINE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, geometryPy, materialPy, typePy) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self, geometryPy, materialPy, typePy) {
       var geometry = Sk.ffi.remapToJs(geometryPy)
       var material = Sk.ffi.remapToJs(materialPy)
       var type = Sk.ffi.remapToJs(typePy)
       self.v = new THREE[LINE](geometry, material, type);
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(linePy, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(linePy, name) {
       var line = Sk.ffi.remapToJs(linePy);
       switch(name) {
         case PROP_POSITION: {
@@ -3044,17 +3052,17 @@ var $builtinmodule = function(name) {
         }
         case METHOD_LOOK_AT: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_LOOK_AT;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self, vectorPy) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self, vectorPy) {
               line.lookAt(Sk.ffi.remapToJs(vectorPy));
               return linePy;
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_LOOK_AT);
             })
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_LOOK_AT);
             })
           }, METHOD_LOOK_AT, []));
@@ -3064,7 +3072,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(linePy, name, value) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(linePy, name, value) {
       var line = Sk.ffi.remapToJs(linePy);
       value = Sk.ffi.remapToJs(value);
       switch(name) {
@@ -3082,21 +3090,21 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__str__ = Sk.ffi.functionPy(function(self) {
       return Sk.ffi.stringToPy(LINE);
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(self) {
       return Sk.ffi.stringToPy(LINE);
     });
   }, LINE, []);
 
   mod[LINE_BASIC_MATERIAL] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, parameters) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self, parameters) {
       self.tp$name = LINE_BASIC_MATERIAL;
       parameters = Sk.ffi.remapToJs(parameters);
       self.v = new THREE[LINE_BASIC_MATERIAL](parameters);
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(material, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(material, name) {
       material = Sk.ffi.remapToJs(material);
       switch(name) {
         case PROP_COLOR: {
@@ -3107,7 +3115,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(material, name, value) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(material, name, value) {
       material = Sk.ffi.remapToJs(material);
       value = Sk.ffi.remapToJs(value);
       switch(name) {
@@ -3134,14 +3142,14 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(material) {
+    $loc.__str__ = Sk.ffi.functionPy(function(material) {
       material = Sk.ffi.remapToJs(material);
       var args = {};
       args[PROP_COLOR] = material[PROP_COLOR];
       args[PROP_OPACITY] = material[PROP_OPACITY];
       return Sk.ffi.stringToPy(LINE_BASIC_MATERIAL + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(material) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(material) {
       material = Sk.ffi.remapToJs(material);
       var args = [{}];
       return Sk.ffi.stringToPy(LINE_BASIC_MATERIAL + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
@@ -3149,12 +3157,12 @@ var $builtinmodule = function(name) {
   }, LINE_BASIC_MATERIAL, []);
 
   mod[MESH] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(selfPy, geometryPy, materialPy) {
+    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, geometryPy, materialPy) {
       Sk.ffi.checkMethodArgs(MESH, arguments, 1, 2);
       Sk.ffi.checkArgType("geometry", "Geometry", Sk.ffi.isObjectRef(geometryPy));
       Sk.ffi.referenceToPy(new THREE[MESH](Sk.ffi.remapToJs(geometryPy), Sk.ffi.remapToJs(materialPy)), MESH, undefined, selfPy);
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(meshPy, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(meshPy, name) {
       var mesh = Sk.ffi.remapToJs(meshPy);
       switch(name) {
         case PROP_ID: {
@@ -3204,57 +3212,57 @@ var $builtinmodule = function(name) {
         }
         case METHOD_LOOK_AT: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_LOOK_AT;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self, vectorPy) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self, vectorPy) {
               mesh.lookAt(Sk.ffi.remapToJs(vectorPy));
               return meshPy;
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_LOOK_AT);
             })
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_LOOK_AT);
             })
           }, METHOD_LOOK_AT, []));
         }
         case METHOD_SET_GEOMETRY: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_SET_GEOMETRY;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self, geometryPy) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self, geometryPy) {
               var geometry = Sk.ffi.remapToJs(geometryPy);
               mesh[METHOD_SET_GEOMETRY](geometry);
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_SET_GEOMETRY)
             })
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_SET_GEOMETRY)
             })
           }, METHOD_SET_GEOMETRY, []));
         }
         case METHOD_UPDATE_MATRIX: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__init__ = Sk.ffi.functionPy(function(self) {
               self.tp$name = METHOD_UPDATE_MATRIX;
             });
-            $loc.__call__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__call__ = Sk.ffi.functionPy(function(self) {
               mesh[METHOD_UPDATE_MATRIX]();
             });
-            $loc.__str__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__str__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_UPDATE_MATRIX)
             })
-            $loc.__repr__ = Sk.ffi.defineFunction(function(self) {
+            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
               return Sk.ffi.stringToPy(METHOD_UPDATE_MATRIX)
             })
           }, METHOD_UPDATE_MATRIX, []));
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(mesh, name, valuePy) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(mesh, name, valuePy) {
       mesh = Sk.ffi.remapToJs(mesh);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
@@ -3336,14 +3344,14 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(mesh) {
+    $loc.__str__ = Sk.ffi.functionPy(function(mesh) {
       mesh = Sk.ffi.remapToJs(mesh);
       var args = {};
       args[PROP_ID] = mesh[PROP_ID];
       args[PROP_NAME] = mesh[PROP_NAME];
       return Sk.ffi.stringToPy(MESH + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(mesh) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(mesh) {
       mesh = Sk.ffi.remapToJs(mesh);
       var args = [/*mesh[PROP_GEOMETRY], mesh[PROP_MATERIAL]*/];
       return Sk.ffi.stringToPy(MESH + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
@@ -3351,12 +3359,12 @@ var $builtinmodule = function(name) {
   }, MESH, []);
 
   mod[MESH_BASIC_MATERIAL] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, parameters) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self, parameters) {
       self.tp$name = MESH_BASIC_MATERIAL;
       parameters = Sk.ffi.remapToJs(parameters);
       self.v = new THREE[MESH_BASIC_MATERIAL](parameters);
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(materialPy, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(materialPy, name) {
       var material = Sk.ffi.remapToJs(materialPy);
       switch(name) {
         case PROP_ID: {
@@ -3391,7 +3399,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(materialPy, name, valuePy) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(materialPy, name, valuePy) {
       var material = Sk.ffi.remapToJs(materialPy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
@@ -3476,7 +3484,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(materialPy) {
+    $loc.__str__ = Sk.ffi.functionPy(function(materialPy) {
       var material = Sk.ffi.remapToJs(materialPy);
       var args = {};
       args[PROP_COLOR] = material[PROP_COLOR];
@@ -3484,7 +3492,7 @@ var $builtinmodule = function(name) {
       args[PROP_WIREFRAME_LINEWIDTH] = material[PROP_WIREFRAME_LINEWIDTH];
       return Sk.ffi.stringToPy(MESH_BASIC_MATERIAL + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(material) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(material) {
       material = Sk.ffi.remapToJs(material);
       var parameters = {};
       parameters[PROP_COLOR] = material[PROP_COLOR];
@@ -3496,12 +3504,12 @@ var $builtinmodule = function(name) {
   }, MESH_BASIC_MATERIAL, []);
 
   mod[MESH_LAMBERT_MATERIAL] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, parametersPy) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self, parametersPy) {
       Sk.ffi.checkMethodArgs(MESH_LAMBERT_MATERIAL, arguments, 0, 1);
       var parameters = Sk.ffi.remapToJs(parametersPy);
       Sk.ffi.referenceToPy(new THREE[MESH_LAMBERT_MATERIAL](parameters), MESH_LAMBERT_MATERIAL, undefined, self);
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(materialPy, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(materialPy, name) {
       var material = Sk.ffi.remapToJs(materialPy);
       switch(name) {
         case PROP_ID: {
@@ -3530,7 +3538,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(materialPy, name, valuePy) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(materialPy, name, valuePy) {
       var material = Sk.ffi.remapToJs(materialPy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
@@ -3615,12 +3623,12 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(material) {
+    $loc.__str__ = Sk.ffi.functionPy(function(material) {
       material = Sk.ffi.remapToJs(material);
       var args = {};
       return Sk.ffi.stringToPy(MESH_LAMBERT_MATERIAL + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(material) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(material) {
       material = Sk.ffi.remapToJs(material);
       var parameters = {};
       parameters[PROP_COLOR] = material[PROP_COLOR];
@@ -3630,24 +3638,24 @@ var $builtinmodule = function(name) {
   }, MESH_LAMBERT_MATERIAL, []);
 
   mod[MESH_NORMAL_MATERIAL] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, parameters) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self, parameters) {
       self.tp$name = MESH_NORMAL_MATERIAL;
       parameters = Sk.ffi.remapToJs(parameters);
       self.v = new THREE[MESH_NORMAL_MATERIAL](parameters);
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(self, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(self, name) {
       switch(name) {
         default: {
           throw new Error(name + " is not an attribute of " + MESH_NORMAL_MATERIAL);
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(material) {
+    $loc.__str__ = Sk.ffi.functionPy(function(material) {
       material = Sk.ffi.remapToJs(material);
       var args = {};
       return Sk.ffi.stringToPy(MESH_NORMAL_MATERIAL + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(material) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(material) {
       material = Sk.ffi.remapToJs(material);
       var args = [{}];
       return Sk.ffi.stringToPy(MESH_NORMAL_MATERIAL + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
@@ -3655,19 +3663,19 @@ var $builtinmodule = function(name) {
   }, MESH_NORMAL_MATERIAL, []);
 
   mod[MESH_PHONG_MATERIAL] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(self, parameters) {
+    $loc.__init__ = Sk.ffi.functionPy(function(self, parameters) {
       self.tp$name = MESH_PHONG_MATERIAL;
       parameters = Sk.ffi.remapToJs(parameters);
       self.v = new THREE[MESH_PHONG_MATERIAL](parameters);
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(self, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(self, name) {
       switch(name) {
         default: {
           throw new Error(name + " is not an attribute of " + MESH_PHONG_MATERIAL);
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.defineFunction(function(materialPy, name, valuePy) {
+    $loc.__setattr__ = Sk.ffi.functionPy(function(materialPy, name, valuePy) {
       var material = Sk.ffi.remapToJs(materialPy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
@@ -3676,12 +3684,12 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(material) {
+    $loc.__str__ = Sk.ffi.functionPy(function(material) {
       material = Sk.ffi.remapToJs(material);
       var args = {};
       return Sk.ffi.stringToPy(MESH_PHONG_MATERIAL + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(material) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(material) {
       material = Sk.ffi.remapToJs(material);
       var args = [{}];
       return Sk.ffi.stringToPy(MESH_PHONG_MATERIAL + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");

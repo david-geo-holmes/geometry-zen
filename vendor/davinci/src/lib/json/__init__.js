@@ -5,7 +5,7 @@ var $builtinmodule = function(name)
     var FUNCTION_PARSE     = "parse";
     var FUNCTION_STRINGIFY = "stringify";
 
-    mod[FUNCTION_PARSE] = Sk.ffi.defineFunction(function(textPy, reviverPy) {
+    mod[FUNCTION_PARSE] = Sk.ffi.functionPy(function(textPy, reviverPy) {
         Sk.ffi.checkFunctionArgs(FUNCTION_PARSE, arguments, 1, 1);
         Sk.ffi.checkArgType("text",    "string",   Sk.ffi.isString(textPy));
         Sk.ffi.checkArgType("reviver", "function", Sk.ffi.isUndefined(reviverPy) || isFunction(reviverPy));
@@ -14,7 +14,7 @@ var $builtinmodule = function(name)
         return Sk.ffi.remapToPy(JSON.parse(text, reviver));
     });
 
-    mod[FUNCTION_STRINGIFY] = Sk.ffi.defineFunction(function(valuePy, replacerPy, spacePy) {
+    mod[FUNCTION_STRINGIFY] = Sk.ffi.functionPy(function(valuePy, replacerPy, spacePy) {
         Sk.ffi.checkFunctionArgs(FUNCTION_STRINGIFY, arguments, 1, 3);
         Sk.ffi.checkArgType("value",    "dict",     Sk.ffi.isDictionary(valuePy));
         Sk.ffi.checkArgType("replacer", "function", Sk.ffi.isUndefined(replacerPy) || Sk.ffi.isNone(replacerPy) || Sk.ffi.isFunction(replacerPy));

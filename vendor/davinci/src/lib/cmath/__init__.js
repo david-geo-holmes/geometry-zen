@@ -59,13 +59,13 @@ var $builtinmodule = function(name) {
   }
 
   mod[COMPLEX] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(selfPy, rePy, imPy) {
+    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, rePy, imPy) {
       Sk.ffi.checkMethodArgs(COMPLEX, arguments, 2, 2);
       Sk.ffi.checkArgType(PROP_REAL, "Number", Sk.ffi.isNumber(rePy));
       Sk.ffi.checkArgType(PROP_IMAG, "Number", Sk.ffi.isNumber(imPy));
       Sk.ffi.referenceToPy({"x": Sk.ffi.remapToJs(rePy), "y": Sk.ffi.remapToJs(imPy)}, COMPLEX, undefined, selfPy);
     });
-    $loc.__getattr__ = Sk.ffi.defineFunction(function(z, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(z, name) {
       z = Sk.ffi.remapToJs(z);
       switch(name) {
         case PROP_REAL: {
@@ -76,7 +76,7 @@ var $builtinmodule = function(name) {
         }
       }
     });
-    $loc.__add__ = Sk.ffi.defineFunction(function(selfPy, otherPy) {
+    $loc.__add__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
       var a = Sk.ffi.remapToJs(selfPy);
       var b = Sk.ffi.remapToJs(otherPy);
       if (isComplex(otherPy)) {
@@ -89,13 +89,13 @@ var $builtinmodule = function(name) {
         throw Sk.ffi.err.expectArg("other").toHaveType(COMPLEX);
       }
     });
-    $loc.__radd__ = Sk.ffi.defineFunction(function(otherPy, selfPy) {
+    $loc.__radd__ = Sk.ffi.functionPy(function(otherPy, selfPy) {
       Sk.ffi.checkArgType("self", "Number", Sk.ffi.isNumber(selfPy));
       var a = Sk.ffi.remapToJs(selfPy);
       var b = Sk.ffi.remapToJs(otherPy);
       return cartesianToComplexPy(a + b.x, b.y);
     });
-    $loc.__iadd__ = Sk.ffi.defineFunction(function(aPy, b) {
+    $loc.__iadd__ = Sk.ffi.functionPy(function(aPy, b) {
       var a = Sk.ffi.remapToJs(aPy);
       b = Sk.ffi.remapToJs(b);
       if (isNumber(b)) {
@@ -107,7 +107,7 @@ var $builtinmodule = function(name) {
       }
       return aPy;
     });
-    $loc.__sub__ = Sk.ffi.defineFunction(function(selfPy, otherPy) {
+    $loc.__sub__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
       var a = Sk.ffi.remapToJs(selfPy);
       var b = Sk.ffi.remapToJs(otherPy);
       if (isComplex(otherPy)) {
@@ -120,7 +120,7 @@ var $builtinmodule = function(name) {
         throw Sk.ffi.err.expectArg("other").toHaveType(COMPLEX);
       }
     });
-    $loc.__rsub__ = Sk.ffi.defineFunction(function(b, a) {
+    $loc.__rsub__ = Sk.ffi.functionPy(function(b, a) {
       var x, y;
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
@@ -133,7 +133,7 @@ var $builtinmodule = function(name) {
         throw Sk.ffi.err.expectArg("a").toHaveType("Number");
       }
     });
-    $loc.__isub__ = Sk.ffi.defineFunction(function(aPy, b) {
+    $loc.__isub__ = Sk.ffi.functionPy(function(aPy, b) {
       var a = Sk.ffi.remapToJs(aPy);
       b = Sk.ffi.remapToJs(b);
       if (isNumber(b)) {
@@ -145,7 +145,7 @@ var $builtinmodule = function(name) {
       }
       return aPy;
     });
-    $loc.__mul__ = Sk.ffi.defineFunction(function(a, b) {
+    $loc.__mul__ = Sk.ffi.functionPy(function(a, b) {
       var x, y;
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
@@ -159,7 +159,7 @@ var $builtinmodule = function(name) {
       }
       return cartesianToComplexPy(x, y);
     });
-    $loc.__rmul__ = Sk.ffi.defineFunction(function(b, a) {
+    $loc.__rmul__ = Sk.ffi.functionPy(function(b, a) {
       var x, y;
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
@@ -172,7 +172,7 @@ var $builtinmodule = function(name) {
         throw Sk.ffi.err.expectArg("a").toHaveType("Number");
       }
     });
-    $loc.__imul__ = Sk.ffi.defineFunction(function(aPy, b) {
+    $loc.__imul__ = Sk.ffi.functionPy(function(aPy, b) {
       var a = Sk.ffi.remapToJs(aPy);
       var aX = a.x;
       var aY = a.y;
@@ -187,7 +187,7 @@ var $builtinmodule = function(name) {
       }
       return aPy;
     });
-    $loc.__div__ = Sk.ffi.defineFunction(function(a, b) {
+    $loc.__div__ = Sk.ffi.functionPy(function(a, b) {
       var x, y;
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
@@ -202,7 +202,7 @@ var $builtinmodule = function(name) {
       }
       return cartesianToComplexPy(x, y);
     });
-    $loc.__rdiv__ = Sk.ffi.defineFunction(function(b, a) {
+    $loc.__rdiv__ = Sk.ffi.functionPy(function(b, a) {
       var x, y;
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
@@ -216,7 +216,7 @@ var $builtinmodule = function(name) {
         throw Sk.ffi.err.expectArg("a").toHaveType("Number");
       }
     });
-    $loc.__idiv__ = Sk.ffi.defineFunction(function(aPy, b) {
+    $loc.__idiv__ = Sk.ffi.functionPy(function(aPy, b) {
       var a = Sk.ffi.remapToJs(aPy);
       var aX = a.x;
       var aY = a.y;
@@ -232,31 +232,31 @@ var $builtinmodule = function(name) {
       }
       return aPy;
     });
-    $loc.__pos__ = Sk.ffi.defineFunction(function(selfPy) {
+    $loc.__pos__ = Sk.ffi.functionPy(function(selfPy) {
       return selfPy;
     });
-    $loc.__neg__ = Sk.ffi.defineFunction(function(selfPy) {
+    $loc.__neg__ = Sk.ffi.functionPy(function(selfPy) {
       var z = Sk.ffi.remapToJs(selfPy);
       return cartesianToComplexPy(-z.x, -z.y);
     });
-    $loc.__invert__ = Sk.ffi.defineFunction(function(selfPy) {
+    $loc.__invert__ = Sk.ffi.functionPy(function(selfPy) {
       var onePy = cartesianToComplexPy(1, 0);
       return Sk.ffi.callsim(selfPy['__div__'], onePy, selfPy);
     });
-    $loc.__str__ = Sk.ffi.defineFunction(function(z) {
+    $loc.__str__ = Sk.ffi.functionPy(function(z) {
       z = Sk.ffi.remapToJs(z);
       return Sk.ffi.stringToPy("(" + stringFromCoordinates([z.x, z.y], ["1", "j"], "") + ")");
     });
-    $loc.__repr__ = Sk.ffi.defineFunction(function(z) {
+    $loc.__repr__ = Sk.ffi.functionPy(function(z) {
       z = Sk.ffi.remapToJs(z);
       return Sk.ffi.stringToPy(COMPLEX + '(' + z.x + ', ' + z.y + ')');
     });
-    $loc.__eq__ = Sk.ffi.defineFunction(function(a, b) {
+    $loc.__eq__ = Sk.ffi.functionPy(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
       return (a.x === b.x) && (a.y === b.y);
     });
-    $loc.__ne__ = Sk.ffi.defineFunction(function(a, b) {
+    $loc.__ne__ = Sk.ffi.functionPy(function(a, b) {
       a = Sk.ffi.remapToJs(a);
       b = Sk.ffi.remapToJs(b);
       return (a.x !== b.x) || (a.y !== b.y);
@@ -264,7 +264,7 @@ var $builtinmodule = function(name) {
   }, COMPLEX, []);
 
   // Conversions to and from polar coordinates
-  mod.phase = Sk.ffi.defineFunction(function(xPy) {
+  mod.phase = Sk.ffi.functionPy(function(xPy) {
     Sk.ffi.checkFunctionArgs("phase", arguments, 1, 1);
     if (isComplex(xPy)) {
       var z = Sk.ffi.remapToJs(xPy);
@@ -278,14 +278,14 @@ var $builtinmodule = function(name) {
     }
   });
 
-  mod.polar = Sk.ffi.defineFunction(function(xPy) {
+  mod.polar = Sk.ffi.functionPy(function(xPy) {
     Sk.ffi.checkFunctionArgs("polar", arguments, 1, 1);
     if (isComplex(xPy)) {
       var z = Sk.ffi.remapToJs(xPy);
-      return Sk.ffi.tuple([Sk.ffi.remapToPy(norm(z.x, z.y)), Sk.ffi.remapToPy(phase(z.x, z.y))]);
+      return Sk.ffi.tuplePy([Sk.ffi.remapToPy(norm(z.x, z.y)), Sk.ffi.remapToPy(phase(z.x, z.y))]);
     }
     else if (Sk.ffi.isNumber(xPy)) {
-      return Sk.ffi.tuple([Sk.ffi.remapToPy(norm(Sk.ffi.remapToJs(xPy), 0)), Sk.ffi.remapToPy(0)]);
+      return Sk.ffi.tuplePy([Sk.ffi.remapToPy(norm(Sk.ffi.remapToJs(xPy), 0)), Sk.ffi.remapToPy(0)]);
     }
     else {
       Sk.ffi.checkArgType("x", COMPLEX, false);
