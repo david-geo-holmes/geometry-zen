@@ -8,6 +8,7 @@ var $builtinmodule = function(name) {
   var mod = {};
 
   var EVENT                    = 'Event';
+  var FUNCTION                 = 'function';
   var NODE                     = 'Node';
   var WINDOW                   = 'Window';
   var WINDOW_ANIMATION_RUNNER  = 'WindowAnimationRunner';
@@ -22,40 +23,47 @@ var $builtinmodule = function(name) {
   mod['document'] = Sk.ffi.callsim(Sk.builtin.buildDocumentClass(mod));
 
   mod[WINDOW_ANIMATION_RUNNER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.defineFunction(function(selfPy, windowPy, renderPy) {
-      Sk.ffi.checkMethodArgs(WINDOW_ANIMATION_RUNNER, arguments, 2, 2);
-      Sk.ffi.checkArgType("window", WINDOW,     Sk.ffi.isObjectRef(windowPy) && Sk.ffi.typeName(windowPy) === WINDOW);
-      Sk.ffi.checkArgType("render", "function", Sk.ffi.isFunction(renderPy));
+    $loc.__init__ = Sk.ffi.defineFunction(function(selfPy, windowPy, tickPy, terminatePy, setUpPy, tearDownPy) {
+      Sk.ffi.checkMethodArgs(WINDOW_ANIMATION_RUNNER, arguments, 5, 5);
+      Sk.ffi.checkArgType("window",    WINDOW,   Sk.ffi.isObjectRef(windowPy) && Sk.ffi.typeName(windowPy) === WINDOW);
+      Sk.ffi.checkArgType("tick",      FUNCTION, Sk.ffi.isFunction(tickPy));
+      Sk.ffi.checkArgType("terminate", FUNCTION, Sk.ffi.isFunction(terminatePy));
+      Sk.ffi.checkArgType("setUp",     FUNCTION, Sk.ffi.isFunction(setUpPy));
+      Sk.ffi.checkArgType("tearDown",  FUNCTION, Sk.ffi.isFunction(tearDownPy));
       var WindowAnimationRunner = function() {
-        this.window      = Sk.ffi.remapToJs(windowPy);
-        this.render      = Sk.ffi.remapToJs(renderPy);
-        this.startTime   = null;
-        this.progress    = null;
-        this.requestID   = null;
-        this.progressEnd = 6000;
+        this.window    = Sk.ffi.remapToJs(windowPy);
+        this.tick      = Sk.ffi.remapToJs(tickPy);
+        this.terminate = Sk.ffi.remapToJs(terminatePy);
+        this.setUp     = Sk.ffi.remapToJs(setUpPy);
+        this.tearDown  = Sk.ffi.remapToJs(tearDownPy);
+        this.startTime = null;
+        this.elapsed   = null;
+        this.requestID = null;
       };
       WindowAnimationRunner.prototype = {
         constructor: WindowAnimationRunner,
         start: function() {
           var war = this;
+          war.setUp();
           var animate = function(timestamp) {
             if (war.startTime) {
-              war.progress = timestamp - war.startTime;
+              war.elapsed = timestamp - war.startTime;
             }
             else {
               if (timestamp) {
                 war.startTime = timestamp;
               }
               else {
-                war.progress = 0;
+                war.elapsed = 0;
               }
             }
-            if (war.progress < war.progressEnd) {
-              war.requestID = war.window.requestAnimationFrame(animate);
-              war.render(timestamp);
+            if (war.terminate(war.elapsed)) {
+              war.window.cancelAnimationFrame(war.requestID);
+              war.tearDown();
             }
             else {
-              war.window.cancelAnimationFrame(war.requestID);
+              war.requestID = war.window.requestAnimationFrame(animate);
+              war.tick(war.elapsed);
             }
           };
           animate(null);
