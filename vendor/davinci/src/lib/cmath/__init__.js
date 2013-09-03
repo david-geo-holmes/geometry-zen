@@ -1,8 +1,9 @@
 var $builtinmodule = function(name) {
 
-  var COMPLEX = "complex";
+  var COMPLEX   = "complex";
   var PROP_REAL = "real";
   var PROP_IMAG = "imag";
+  var NUMBER   = "Number";
 
   function isNumber(x) {return typeof x === 'number';}
   function isUndefined(x) {return typeof x === 'undefined';}
@@ -61,8 +62,8 @@ var $builtinmodule = function(name) {
   mod[COMPLEX] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = Sk.ffi.functionPy(function(selfPy, rePy, imPy) {
       Sk.ffi.checkMethodArgs(COMPLEX, arguments, 2, 2);
-      Sk.ffi.checkArgType(PROP_REAL, "Number", Sk.ffi.isNumber(rePy));
-      Sk.ffi.checkArgType(PROP_IMAG, "Number", Sk.ffi.isNumber(imPy));
+      Sk.ffi.checkArgType(PROP_REAL, NUMBER, Sk.ffi.isNumber(rePy));
+      Sk.ffi.checkArgType(PROP_IMAG, NUMBER, Sk.ffi.isNumber(imPy));
       Sk.ffi.referenceToPy({"x": Sk.ffi.remapToJs(rePy), "y": Sk.ffi.remapToJs(imPy)}, COMPLEX, undefined, selfPy);
     });
     $loc.__getattr__ = Sk.ffi.functionPy(function(z, name) {
@@ -89,15 +90,15 @@ var $builtinmodule = function(name) {
         throw Sk.ffi.err.expectArg("other").toHaveType(COMPLEX);
       }
     });
-    $loc.__radd__ = Sk.ffi.functionPy(function(otherPy, selfPy) {
-      Sk.ffi.checkArgType("self", "Number", Sk.ffi.isNumber(selfPy));
-      var a = Sk.ffi.remapToJs(selfPy);
-      var b = Sk.ffi.remapToJs(otherPy);
+    $loc.__radd__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+      Sk.ffi.checkArgType("other", NUMBER, Sk.ffi.isNumber(otherPy));
+      var a = Sk.ffi.remapToJs(otherPy);
+      var b = Sk.ffi.remapToJs(selfPy);
       return cartesianToComplexPy(a + b.x, b.y);
     });
-    $loc.__iadd__ = Sk.ffi.functionPy(function(aPy, b) {
-      var a = Sk.ffi.remapToJs(aPy);
-      b = Sk.ffi.remapToJs(b);
+    $loc.__iadd__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+      var a = Sk.ffi.remapToJs(selfPy);
+      var b = Sk.ffi.remapToJs(otherPy);
       if (isNumber(b)) {
         a.x += b;
       }
@@ -105,7 +106,7 @@ var $builtinmodule = function(name) {
         a.x += b.x;
         a.y += b.y;
       }
-      return aPy;
+      return selfPy;
     });
     $loc.__sub__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
       var a = Sk.ffi.remapToJs(selfPy);
@@ -130,7 +131,7 @@ var $builtinmodule = function(name) {
         return cartesianToComplexPy(x, y);
       }
       else {
-        throw Sk.ffi.err.expectArg("a").toHaveType("Number");
+        throw Sk.ffi.err.expectArg("a").toHaveType(NUMBER);
       }
     });
     $loc.__isub__ = Sk.ffi.functionPy(function(aPy, b) {
@@ -169,7 +170,7 @@ var $builtinmodule = function(name) {
         return cartesianToComplexPy(x, y);
       }
       else {
-        throw Sk.ffi.err.expectArg("a").toHaveType("Number");
+        throw Sk.ffi.err.expectArg("a").toHaveType(NUMBER);
       }
     });
     $loc.__imul__ = Sk.ffi.functionPy(function(aPy, b) {
@@ -187,33 +188,62 @@ var $builtinmodule = function(name) {
       }
       return aPy;
     });
-    $loc.__div__ = Sk.ffi.functionPy(function(a, b) {
-      var x, y;
-      a = Sk.ffi.remapToJs(a);
-      b = Sk.ffi.remapToJs(b);
-      if (isNumber(b)) {
-        x = a.x / b;
-        y = a.y / b;
+    // TODO: Use of nb$* will require fixes in abstract.js
+    /*
+    $loc.nb$divide = function(otherPy) {
+      Sk.ffi.checkFunctionArgs("nb$divide", arguments, 1, 1);
+      Sk.ffi.checkArgType("self",  COMPLEX, isComplex(this));
+      var a = Sk.ffi.remapToJs(this);
+      var b = Sk.ffi.remapToJs(otherPy);
+      if (isComplex(otherPy)) {
+        var factor = b.x * b.x + b.y * b.y;
+        return cartesianToComplexPy((a.x * b.x + a.y * b.y) / factor, (a.y * b.x - a.x * b.y) / factor);
+      }
+      else if (Sk.ffi.isNumber(otherPy)) {
+        return cartesianToComplexPy(a.x / b, a.y / b);
       }
       else {
-        var factor = b.x * b.x + b.y * b.y;
-        x = (a.x * b.x + a.y * b.y) / factor;
-        y = (a.y * b.x - a.x * b.y) / factor;
+        throw Sk.ffi.err.expectArg("other").toHaveType([COMPLEX, NUMBER].join(" or "));
       }
-      return cartesianToComplexPy(x, y);
+    };
+    $loc.nb$rdiv = function(otherPy) {
+      Sk.ffi.checkFunctionArgs("nb$rdiv", arguments, 1, 1);
+      Sk.ffi.checkArgType("self",  COMPLEX, isComplex(this));
+      Sk.ffi.checkArgType("other", NUMBER,  Sk.ffi.isNumber(otherPy));
+      var a = Sk.ffi.remapToJs(otherPy);
+      var b = Sk.ffi.remapToJs(this);
+      var factor = b.x * b.x + b.y * b.y;
+      return cartesianToComplexPy((a * b.x) / factor, (-a * b.y) / factor);
+    };
+    */
+    $loc.__div__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+      Sk.ffi.checkFunctionArgs("__div__", arguments, 2, 2);
+      Sk.ffi.checkArgType("self",  COMPLEX, isComplex(selfPy));
+      var a = Sk.ffi.remapToJs(selfPy);
+      var b = Sk.ffi.remapToJs(otherPy);
+      if (isComplex(otherPy)) {
+        var factor = b.x * b.x + b.y * b.y;
+        return cartesianToComplexPy((a.x * b.x + a.y * b.y) / factor, (a.y * b.x - a.x * b.y) / factor);
+      }
+      else if (Sk.ffi.isNumber(otherPy)) {
+        return cartesianToComplexPy(a.x / b, a.y / b);
+      }
+      else {
+        Sk.ffi.checkArgType("other", [COMPLEX, NUMBER].join(" or "), false);
+      }
     });
-    $loc.__rdiv__ = Sk.ffi.functionPy(function(b, a) {
-      var x, y;
-      a = Sk.ffi.remapToJs(a);
-      b = Sk.ffi.remapToJs(b);
-      if (isNumber(a)) {
+    $loc.__rdiv__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+      Sk.ffi.checkFunctionArgs("__rdiv__", arguments, 2, 2);
+      Sk.ffi.checkArgType("self",  COMPLEX, isComplex(selfPy));
+      Sk.ffi.checkArgType("other", NUMBER,  Sk.ffi.isNumber(otherPy));
+      var a = Sk.ffi.remapToJs(otherPy);
+      var b = Sk.ffi.remapToJs(selfPy);
+      if (Sk.ffi.isNumber(otherPy)) {
         var factor = b.x * b.x + b.y * b.y;
-        x = (a * b.x) / factor;
-        y = (-a * b.y) / factor;
-        return cartesianToComplexPy(x, y);
+        return cartesianToComplexPy((a * b.x) / factor, (-a * b.y) / factor);
       }
       else {
-        throw Sk.ffi.err.expectArg("a").toHaveType("Number");
+        throw Sk.ffi.err.expectArg("other").toHaveType(NUMBER);
       }
     });
     $loc.__idiv__ = Sk.ffi.functionPy(function(aPy, b) {
