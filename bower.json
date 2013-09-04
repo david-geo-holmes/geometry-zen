@@ -1,6 +1,6 @@
 {
   "name": "geometryzen",
-  "version": "0.9.27",
+  "version": "0.9.28",
   "main": "./app/js/main.js",
   "description": "Geometry Zen is the way of looking at nature through a Geometric Algebra perspective.",
   "author": {
@@ -25,7 +25,7 @@
     "angular": "1.0.7",
     "async": "0.2.5",
     "bootstrap": "2.3.2",
-    "davinci": "0.9.27",
+    "davinci": "0.9.28",
     "font-awesome": "3.2.1",
     "jed": "0.5.4",
     "jquery": "2.0.3",

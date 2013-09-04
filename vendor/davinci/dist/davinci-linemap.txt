@@ -48,5 +48,5 @@
 25519:src/e2ga.js
 26169:src/e3ga.js
 27472:src/units.js
-27839:src/vector3.js
-28181:../bladejs/generated/js/app.js
+27849:src/vector3.js
+28191:../bladejs/generated/js/app.js

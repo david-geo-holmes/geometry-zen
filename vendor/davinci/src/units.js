@@ -48,15 +48,25 @@ Sk.builtin.defineUnits = function(mod) {
 
   mod[RATIONAL] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = Sk.ffi.functionPy(function(selfPy, numerPy, denomPy) {
-      if (typeof denomPy === 'undefined') {
-        Sk.ffi.checkMethodArgs(RATIONAL, arguments, 2, 2);
-        Sk.ffi.checkArgType("numer", RATIONAL, isRational(numerPy));
-        Sk.ffi.referenceToPy(Sk.ffi.remapToJs(numerPy), RATIONAL, undefined, selfPy);
+      if (Sk.ffi.isUndefined(denomPy)) {
+        if (isRational(numerPy)) {
+          Sk.ffi.checkMethodArgs(RATIONAL, arguments, 1, 1);
+          Sk.ffi.referenceToPy(Sk.ffi.remapToJs(numerPy), RATIONAL, undefined, selfPy);
+        }
+        else if (Sk.ffi.isNumber(numerPy)) {
+          Sk.ffi.checkArgType("numerator", INT, Sk.ffi.isInt(numerPy));
+          var numer = Sk.ffi.remapToJs(numerPy);
+          Sk.ffi.referenceToPy(new BLADE.Rational(numer, 1), RATIONAL, undefined, selfPy);
+
+        }
+        else {
+          Sk.ffi.checkMethodArgs(RATIONAL, arguments, 2, 2);
+        }
       }
       else {
-        Sk.ffi.checkMethodArgs(RATIONAL, arguments, 3, 3);
-        Sk.ffi.checkArgType("numer", INT, Sk.ffi.isInt(numerPy));
-        Sk.ffi.checkArgType("denom", INT, Sk.ffi.isInt(denomPy));
+        Sk.ffi.checkMethodArgs(RATIONAL, arguments, 2, 2);
+        Sk.ffi.checkArgType("numerator", INT, Sk.ffi.isInt(numerPy));
+        Sk.ffi.checkArgType("denominator", INT, Sk.ffi.isInt(denomPy));
         var numer = Sk.ffi.remapToJs(numerPy);
         var denom = Sk.ffi.remapToJs(denomPy);
         Sk.ffi.referenceToPy(new BLADE.Rational(numer, denom), RATIONAL, undefined, selfPy);

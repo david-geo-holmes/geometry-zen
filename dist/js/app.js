@@ -26649,13 +26649,13 @@
         return e(c, z, E, J, K, L, O, a);
       }
       var m = 'Euclidean3';
-      b.ScalarE3 = new Sk.builtin.func(function (a) {
+      b.ScalarE3 = Sk.ffi.functionPy(function (a) {
         Sk.builtin.pyCheckArgs('ScalarE3', arguments, 1, 1);
         Sk.builtin.pyCheckType('w', 'Number', Sk.builtin.checkNumber(a));
         a = Sk.ffi.numberToJs(a);
         return l(a, 0, 0, 0, 0, 0, 0, 0);
       });
-      b.VectorE3 = new Sk.builtin.func(function (a, b, c) {
+      b.VectorE3 = Sk.ffi.functionPy(function (a, b, c) {
         Sk.builtin.pyCheckArgs('VectorE3', arguments, 3, 3);
         Sk.builtin.pyCheckType('x', 'Number', Sk.builtin.checkNumber(a));
         Sk.builtin.pyCheckType('y', 'Number', Sk.builtin.checkNumber(b));
@@ -26665,7 +26665,7 @@
         c = Sk.ffi.numberToJs(c);
         return l(0, a, b, c, 0, 0, 0, 0);
       });
-      b.BivectorE3 = new Sk.builtin.func(function (a, b, c) {
+      b.BivectorE3 = Sk.ffi.functionPy(function (a, b, c) {
         Sk.builtin.pyCheckArgs('BivectorE3', arguments, 3, 3);
         Sk.builtin.pyCheckType('xy', 'Number', Sk.builtin.checkNumber(a));
         Sk.builtin.pyCheckType('yz', 'Number', Sk.builtin.checkNumber(b));
@@ -26675,14 +26675,14 @@
         c = Sk.ffi.numberToJs(c);
         return l(0, 0, 0, 0, a, b, c, 0);
       });
-      b.PseudoscalarE3 = new Sk.builtin.func(function (a) {
+      b.PseudoscalarE3 = Sk.ffi.functionPy(function (a) {
         Sk.builtin.pyCheckArgs('PseudoscalarE3', arguments, 1, 1);
         Sk.builtin.pyCheckType('xyz', 'Number', Sk.builtin.checkNumber(a));
         a = Sk.ffi.numberToJs(a);
         return l(0, 0, 0, 0, 0, 0, 0, a);
       });
       b[m] = Sk.misceval.buildClass(b, function (q, r) {
-        r.__init__ = new Sk.builtin.func(function (b, c, d, e, f, g, h, k, l) {
+        r.__init__ = Sk.ffi.functionPy(function (b, c, d, e, f, g, h, k, l) {
           b.tp$name = m;
           Sk.ffi.checkMethodArgs(m, arguments, 1, 8);
           switch (Sk.ffi.getType(c)) {
@@ -26715,41 +26715,41 @@
             throw new Sk.builtin.AssertionError('Ouch ' + Sk.ffi.getType(c));
           }
         });
-        r.__add__ = new Sk.builtin.func(function (a, b) {
+        r.__add__ = Sk.ffi.functionPy(function (a, b) {
           a = Sk.ffi.remapToJs(a);
           b = Sk.ffi.remapToJs(b);
           return c(b) ? l(a.w + b, a.x, a.y, a.z, a.xy, a.yz, a.zx, a.xyz) : l(a.w + b.w, a.x + b.x, a.y + b.y, a.z + b.z, a.xy + b.xy, a.yz + b.yz, a.zx + b.zx, a.xyz + b.xyz);
         });
-        r.__radd__ = new Sk.builtin.func(function (a, b) {
+        r.__radd__ = Sk.ffi.functionPy(function (a, b) {
           b = Sk.ffi.remapToJs(b);
           a = Sk.ffi.remapToJs(a);
           if (c(b))
             return l(b + a.w, a.x, a.y, a.z, a.xy, a.yz, a.zx, a.xyz);
           throw new Sk.builtin.AssertionError();
         });
-        r.__iadd__ = new Sk.builtin.func(function (a, b) {
+        r.__iadd__ = Sk.ffi.functionPy(function (a, b) {
           var d = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(b);
           c(e) ? d.w += e : (d.w += e.w, d.x += e.x, d.y += e.y, d.z += e.z, d.xy += e.xy, d.yz += e.yz, d.zx += e.zx, d.xyz += e.xyz);
           return a;
         });
-        r.__sub__ = new Sk.builtin.func(function (a, b) {
+        r.__sub__ = Sk.ffi.functionPy(function (a, b) {
           a = Sk.ffi.remapToJs(a);
           b = Sk.ffi.remapToJs(b);
           return c(b) ? l(a.w - b, a.x, a.y, a.z, a.xy, a.yz, a.zx, a.xyz) : l(a.w - b.w, a.x - b.x, a.y - b.y, a.z - b.z, a.xy - b.xy, a.yz - b.yz, a.zx - b.zx, a.xyz - b.xyz);
         });
-        r.__rsub__ = new Sk.builtin.func(function (a, b) {
+        r.__rsub__ = Sk.ffi.functionPy(function (a, b) {
           b = Sk.ffi.remapToJs(b);
           a = Sk.ffi.remapToJs(a);
           if (c(b))
             return l(b - a.w, -a.x, -a.y, -a.z, -a.xy, -a.yz, -a.zx, -a.xyz);
           throw new Sk.builtin.AssertionError();
         });
-        r.__isub__ = new Sk.builtin.func(function (a, b) {
+        r.__isub__ = Sk.ffi.functionPy(function (a, b) {
           var d = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(b);
           c(e) ? d.w -= e : (d.w -= e.w, d.x -= e.x, d.y -= e.y, d.z -= e.z, d.xy -= e.xy, d.yz -= e.yz, d.zx -= e.zx, d.xyz -= e.xyz);
           return a;
         });
-        r.__mul__ = new Sk.builtin.func(function (a, c) {
+        r.__mul__ = Sk.ffi.functionPy(function (a, c) {
           switch (Sk.ffi.getType(c)) {
           case Sk.ffi.PyType.OBJREF:
             switch (Sk.ffi.typeName(c)) {
@@ -26759,23 +26759,27 @@
             case 'Unit':
               return Sk.misceval.callsim(b.Measure, a, c);
             default:
-              throw new Sk.builtin.AssertionError(m + ' (__mul__) typeName(rhsPy) => ' + Sk.ffi.typeName(c));
+              throw new Sk.builtin.AssertionError(m + ' (__mul__) typeName(otherPy) => ' + Sk.ffi.typeName(c));
             }
           case Sk.ffi.PyType.FLOAT:
           case Sk.ffi.PyType.INT:
-            return d = Sk.ffi.remapToJs(a), f = Sk.ffi.remapToJs(c), l(d * f.w, d * f.x, d * f.y, d * f.z, d * f.xy, d * f.yz, d * f.zx, d * f.xyz);
+            return d = Sk.ffi.remapToJs(a), f = Sk.ffi.remapToJs(c), l(d.w * f, d.x * f, d.y * f, d.z * f, d.xy * f, d.yz * f, d.zx * f, d.xyz * f);
           default:
-            throw new Sk.builtin.AssertionError(m + ' (__mul__) typeofPy(rhsPy) => ' + Sk.ffi.getType(c));
+            throw Sk.ffi.err.expectArg('other').inFunction('*(' + m + ', other)').toHaveType([
+              m,
+              'Number',
+              'Unit'
+            ]);
           }
         });
-        r.__rmul__ = new Sk.builtin.func(function (a, b) {
+        r.__rmul__ = Sk.ffi.functionPy(function (a, b) {
           b = Sk.ffi.remapToJs(b);
           a = Sk.ffi.remapToJs(a);
           if (c(b))
             return l(b * a.w, b * a.x, b * a.y, b * a.z, b * a.xy, b * a.yz, b * a.zx, b * a.xyz);
           throw new Sk.builtin.AssertionError();
         });
-        r.__imul__ = new Sk.builtin.func(function (a, b) {
+        r.__imul__ = Sk.ffi.functionPy(function (a, b) {
           var d = Sk.ffi.remapToJs(a), f = Sk.ffi.remapToJs(b), g = d.w, h = d.x, k = d.y, l = d.z, n = d.xy, m = d.yz, p = d.zx, q = d.xyz, r, t, y, s, x, z, E;
           c(f) ? (r = f, f = E = z = x = s = y = t = 0) : (r = f.w, t = f.x, y = f.y, s = f.z, x = f.xy, z = f.yz, E = f.zx, f = f.xyz);
           d.w = e(g, h, k, l, n, m, p, q, r, t, y, s, x, z, E, f, 0);
@@ -26788,36 +26792,36 @@
           d.xyz = e(g, h, k, l, n, m, p, q, r, t, y, s, x, z, E, f, 7);
           return a;
         });
-        r.__div__ = new Sk.builtin.func(function (a, b) {
+        r.__div__ = Sk.ffi.functionPy(function (a, b) {
           a = Sk.ffi.remapToJs(a);
           b = Sk.ffi.remapToJs(b);
           return c(b) ? k(a.w, a.x, a.y, a.xy, a.z, -a.zx, a.yz, a.xyz, b, 0, 0, 0, 0, 0, 0, 0, void 0) : k(a.w, a.x, a.y, a.xy, a.z, -a.zx, a.yz, a.xyz, b.w, b.x, b.y, b.xy, b.z, -b.zx, b.yz, b.xyz, void 0);
         });
-        r.__rdiv__ = new Sk.builtin.func(function (a, b) {
+        r.__rdiv__ = Sk.ffi.functionPy(function (a, b) {
           b = Sk.ffi.remapToJs(b);
           a = Sk.ffi.remapToJs(a);
           if (c(b))
             return k(b, 0, 0, 0, 0, 0, 0, 0, a.w, a.x, a.y, a.xy, a.z, -a.zx, a.yz, a.xyz, void 0);
           throw new Sk.builtin.AssertionError('' + JSON.stringify(b, null, 2) + ' / ' + JSON.stringify(a, null, 2));
         });
-        r.__idiv__ = new Sk.builtin.func(function (a, b) {
+        r.__idiv__ = Sk.ffi.functionPy(function (a, b) {
           var d = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(b);
           c(e) ? k(d.w, d.x, d.y, d.xy, d.z, -d.zx, d.yz, d.xyz, e, 0, 0, 0, 0, 0, 0, 0, d) : k(d.w, d.x, d.y, d.xy, d.z, -d.zx, d.yz, d.xyz, e.w, e.x, e.y, e.xy, e.z, -e.zx, e.yz, e.xyz, d);
           return a;
         });
-        r.__xor__ = new Sk.builtin.func(function (a, b) {
+        r.__xor__ = Sk.ffi.functionPy(function (a, b) {
           a = Sk.ffi.remapToJs(a);
           b = Sk.ffi.remapToJs(b);
           return c(b) ? l(a.w * b, a.x * b, a.y * b, a.z * b, a.xy * b, a.yz * b, a.zx * b, a.xyz * b) : p(f, a, b, n, l);
         });
-        r.__rxor__ = new Sk.builtin.func(function (a, b) {
+        r.__rxor__ = Sk.ffi.functionPy(function (a, b) {
           b = Sk.ffi.remapToJs(b);
           a = Sk.ffi.remapToJs(a);
           if (c(b))
             return l(b * a.w, b * a.x, b * a.y, b * a.z, b * a.xy, b * a.yz, b * a.zx, b * a.xyz);
           throw new Sk.builtin.AssertionError();
         });
-        r.__ixor__ = new Sk.builtin.func(function (a, b) {
+        r.__ixor__ = Sk.ffi.functionPy(function (a, b) {
           var d = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(b), g = d.w, h = d.x, k = d.y, l = d.z, n = d.xy, m = d.yz, p = d.zx, q = d.xyz, r, t, y, s, x, z, E;
           c(e) ? (r = e, e = E = z = x = s = y = t = 0) : (r = e.w, t = e.x, y = e.y, s = e.z, x = e.xy, z = e.yz, E = e.zx, e = e.xyz);
           d.w = f(g, h, k, l, n, m, p, q, r, t, y, s, x, z, E, e, 0);
@@ -26830,19 +26834,19 @@
           d.xyz = f(g, h, k, l, n, m, p, q, r, t, y, s, x, z, E, e, 7);
           return a;
         });
-        r.__lshift__ = new Sk.builtin.func(function (a, b) {
+        r.__lshift__ = Sk.ffi.functionPy(function (a, b) {
           a = Sk.ffi.remapToJs(a);
           b = Sk.ffi.remapToJs(b);
           return c(b) ? l(a.w * b, 0, 0, 0, 0, 0, 0, 0) : p(g, a, b, n, l);
         });
-        r.__rlshift__ = new Sk.builtin.func(function (a, b) {
+        r.__rlshift__ = Sk.ffi.functionPy(function (a, b) {
           b = Sk.ffi.remapToJs(b);
           a = Sk.ffi.remapToJs(a);
           if (c(b))
             return l(b * a.w, b * a.x, b * a.y, b * a.z, b * a.xy, b * a.yz, b * a.zx, b * a.xyz);
           throw new Sk.builtin.AssertionError();
         });
-        r.__ilshift__ = new Sk.builtin.func(function (a, b) {
+        r.__ilshift__ = Sk.ffi.functionPy(function (a, b) {
           var d = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(b), f = d.w, h = d.x, k = d.y, l = d.z, n = d.xy, m = d.yz, p = d.zx, q = d.xyz, r, t, y, s, x, z, E;
           c(e) ? (r = e, e = E = z = x = s = y = t = 0) : (r = e.w, t = e.x, y = e.y, s = e.z, x = e.xy, z = e.yz, E = e.zx, e = e.xyz);
           d.w = g(f, h, k, l, n, m, p, q, r, t, y, s, x, z, E, e, 0);
@@ -26855,19 +26859,19 @@
           d.xyz = g(f, h, k, l, n, m, p, q, r, t, y, s, x, z, E, e, 7);
           return a;
         });
-        r.__rshift__ = new Sk.builtin.func(function (a, b) {
+        r.__rshift__ = Sk.ffi.functionPy(function (a, b) {
           a = Sk.ffi.remapToJs(a);
           b = Sk.ffi.remapToJs(b);
           return c(b) ? l(a.w * b, a.x * b, a.y * b, a.z * b, a.xy * b, a.yz * b, a.zx * b, a.xyz * b) : p(h, a, b, n, l);
         });
-        r.__rrshift__ = new Sk.builtin.func(function (a, b) {
+        r.__rrshift__ = Sk.ffi.functionPy(function (a, b) {
           b = Sk.ffi.remapToJs(b);
           a = Sk.ffi.remapToJs(a);
           if (c(b))
             return l(b * a.w, 0, 0, 0, 0, 0, 0, 0);
           throw new Sk.builtin.AssertionError();
         });
-        r.__irshift__ = new Sk.builtin.func(function (a, b) {
+        r.__irshift__ = Sk.ffi.functionPy(function (a, b) {
           var d = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(b), f = d.w, g = d.x, k = d.y, l = d.z, n = d.xy, m = d.yz, p = d.zx, q = d.xyz, r, t, y, s, x, z, E;
           c(e) ? (r = e, e = E = z = x = s = y = t = 0) : (r = e.w, t = e.x, y = e.y, s = e.z, x = e.xy, z = e.yz, E = e.zx, e = e.xyz);
           d.w = h(f, g, k, l, n, m, p, q, r, t, y, s, x, z, E, e, 0);
@@ -26891,17 +26895,17 @@
           var a = Sk.ffi.remapToJs(this);
           return l(a.w, a.x, a.y, a.z, -a.xy, -a.yz, -a.zx, -a.xyz);
         };
-        r.__eq__ = new Sk.builtin.func(function (a, b) {
+        r.__eq__ = Sk.ffi.functionPy(function (a, b) {
           a = Sk.ffi.remapToJs(a);
           b = Sk.ffi.remapToJs(b);
           return a.w === b.w && a.x === b.x && a.y === b.y && a.z === b.z && a.xy === b.xy && a.yz === b.yz && a.zx === b.zx && a.xyz === b.xyz;
         });
-        r.__ne__ = new Sk.builtin.func(function (a, b) {
+        r.__ne__ = Sk.ffi.functionPy(function (a, b) {
           a = Sk.ffi.remapToJs(a);
           b = Sk.ffi.remapToJs(b);
           return a.w !== b.w || a.x !== b.x || a.y !== b.y || a.z !== b.z || a.xy !== b.xy || a.yz !== b.yz || a.zx !== b.zx || a.xyz !== b.xyz;
         });
-        r.__getitem__ = new Sk.builtin.func(function (a, b) {
+        r.__getitem__ = Sk.ffi.functionPy(function (a, b) {
           a = Sk.ffi.remapToJs(a);
           b = Sk.builtin.asnum$(b);
           switch (b) {
@@ -26915,7 +26919,7 @@
             return l(0, 0, 0, 0, 0, 0, 0, a.xyz);
           }
         });
-        r.__getattr__ = new Sk.builtin.func(function (a, c) {
+        r.__getattr__ = Sk.ffi.functionPy(function (a, c) {
           var d = Sk.ffi.remapToJs(a);
           switch (c) {
           case 'w':
@@ -26936,10 +26940,10 @@
             return Sk.ffi.numberToPy(d.xyz);
           case 'add':
             return Sk.misceval.callsim(Sk.misceval.buildClass(b, function (b, c) {
-              c.__init__ = new Sk.builtin.func(function (a) {
+              c.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'add';
               });
-              c.__call__ = new Sk.builtin.func(function (b, c) {
+              c.__call__ = Sk.ffi.functionPy(function (b, c) {
                 c = Sk.ffi.remapToJs(c);
                 d.w += c.w;
                 d.x += c.x;
@@ -26951,198 +26955,198 @@
                 d.xyz += c.xyz;
                 return a;
               });
-              c.__str__ = new Sk.builtin.func(function (a) {
+              c.__str__ = Sk.ffi.functionPy(function (a) {
                 return new Sk.builtin.str('add');
               });
-              c.__repr__ = new Sk.builtin.func(function (a) {
+              c.__repr__ = Sk.ffi.functionPy(function (a) {
                 return new Sk.builtin.str('add');
               });
             }, 'add', []));
           case 'cross':
             return Sk.misceval.callsim(Sk.misceval.buildClass(b, function (a, c) {
-              c.__init__ = new Sk.builtin.func(function (a) {
+              c.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'cross';
               });
-              c.__call__ = new Sk.builtin.func(function (a, c) {
+              c.__call__ = Sk.ffi.functionPy(function (a, c) {
                 var e = Sk.ffi.remapToJs(c);
                 return Sk.misceval.callsim(b[m], Sk.ffi.remapToPy(d.cross(e), m));
               });
-              c.__str__ = new Sk.builtin.func(function (a) {
+              c.__str__ = Sk.ffi.functionPy(function (a) {
                 return new Sk.builtin.str('cross');
               });
-              c.__repr__ = new Sk.builtin.func(function (a) {
+              c.__repr__ = Sk.ffi.functionPy(function (a) {
                 return new Sk.builtin.str('cross');
               });
             }, 'cross', []));
           case 'dot':
             return Sk.misceval.callsim(Sk.misceval.buildClass(b, function (a, b) {
-              b.__init__ = new Sk.builtin.func(function (a) {
+              b.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'dot';
               });
-              b.__call__ = new Sk.builtin.func(function (a, b) {
+              b.__call__ = Sk.ffi.functionPy(function (a, b) {
                 var c = Sk.ffi.remapToJs(b);
                 return Sk.ffi.numberToPy(d.dot(c));
               });
-              b.__str__ = new Sk.builtin.func(function (a) {
+              b.__str__ = Sk.ffi.functionPy(function (a) {
                 return Sk.ffi.stringToPy('dot');
               });
-              b.__repr__ = new Sk.builtin.func(function (a) {
+              b.__repr__ = Sk.ffi.functionPy(function (a) {
                 return Sk.ffi.stringToPy('dot');
               });
             }, 'dot', []));
           case 'setX':
             return Sk.misceval.callsim(Sk.misceval.buildClass(b, function (b, c) {
-              c.__init__ = new Sk.builtin.func(function (a) {
+              c.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'setX';
               });
-              c.__call__ = new Sk.builtin.func(function (b, c) {
+              c.__call__ = Sk.ffi.functionPy(function (b, c) {
                 c = Sk.ffi.remapToJs(c);
                 d.setX(c);
                 return a;
               });
-              c.__str__ = new Sk.builtin.func(function (a) {
+              c.__str__ = Sk.ffi.functionPy(function (a) {
                 return new Sk.builtin.str('setX');
               });
-              c.__repr__ = new Sk.builtin.func(function (a) {
+              c.__repr__ = Sk.ffi.functionPy(function (a) {
                 return new Sk.builtin.str('setX');
               });
             }, 'setX', []));
           case 'setY':
             return Sk.misceval.callsim(Sk.misceval.buildClass(b, function (b, c) {
-              c.__init__ = new Sk.builtin.func(function (a) {
+              c.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'setY';
               });
-              c.__call__ = new Sk.builtin.func(function (b, c) {
+              c.__call__ = Sk.ffi.functionPy(function (b, c) {
                 c = Sk.ffi.remapToJs(c);
                 d.setY(c);
                 return a;
               });
-              c.__str__ = new Sk.builtin.func(function (a) {
+              c.__str__ = Sk.ffi.functionPy(function (a) {
                 return new Sk.builtin.str('setY');
               });
-              c.__repr__ = new Sk.builtin.func(function (a) {
+              c.__repr__ = Sk.ffi.functionPy(function (a) {
                 return new Sk.builtin.str('setY');
               });
             }, 'setY', []));
           case 'setZ':
             return Sk.misceval.callsim(Sk.misceval.buildClass(b, function (b, c) {
-              c.__init__ = new Sk.builtin.func(function (a) {
+              c.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'setZ';
               });
-              c.__call__ = new Sk.builtin.func(function (b, c) {
+              c.__call__ = Sk.ffi.functionPy(function (b, c) {
                 c = Sk.ffi.remapToJs(c);
                 d.setZ(c);
                 return a;
               });
-              c.__str__ = new Sk.builtin.func(function (a) {
+              c.__str__ = Sk.ffi.functionPy(function (a) {
                 return new Sk.builtin.str('setZ');
               });
-              c.__repr__ = new Sk.builtin.func(function (a) {
+              c.__repr__ = Sk.ffi.functionPy(function (a) {
                 return new Sk.builtin.str('setZ');
               });
             }, 'setZ', []));
           case 'getComponent':
             return Sk.misceval.callsim(Sk.misceval.buildClass(b, function (a, b) {
-              b.__init__ = new Sk.builtin.func(function (a) {
+              b.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'getComponent';
               });
-              b.__call__ = new Sk.builtin.func(function (a, b) {
+              b.__call__ = Sk.ffi.functionPy(function (a, b) {
                 b = Sk.ffi.remapToJs(b);
                 return Sk.ffi.numberToPy(d.getComponent(b));
               });
-              b.__str__ = new Sk.builtin.func(function (a) {
+              b.__str__ = Sk.ffi.functionPy(function (a) {
                 return new Sk.builtin.str('getComponent');
               });
-              b.__repr__ = new Sk.builtin.func(function (a) {
+              b.__repr__ = Sk.ffi.functionPy(function (a) {
                 return new Sk.builtin.str('getComponent');
               });
             }, 'getComponent', []));
           case 'setComponent':
             return Sk.misceval.callsim(Sk.misceval.buildClass(b, function (b, c) {
-              c.__init__ = new Sk.builtin.func(function (a) {
+              c.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'setComponent';
               });
-              c.__call__ = new Sk.builtin.func(function (b, c, e) {
+              c.__call__ = Sk.ffi.functionPy(function (b, c, e) {
                 c = Sk.ffi.remapToJs(c);
                 e = Sk.ffi.remapToJs(e);
                 d.setComponent(c, e);
                 return a;
               });
-              c.__str__ = new Sk.builtin.func(function (a) {
+              c.__str__ = Sk.ffi.functionPy(function (a) {
                 return new Sk.builtin.str('setComponent');
               });
-              c.__repr__ = new Sk.builtin.func(function (a) {
+              c.__repr__ = Sk.ffi.functionPy(function (a) {
                 return new Sk.builtin.str('setComponent');
               });
             }, 'setComponent', []));
           case 'set':
             return Sk.misceval.callsim(Sk.misceval.buildClass(b, function (b, c) {
-              c.__init__ = new Sk.builtin.func(function (a) {
+              c.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'set';
               });
-              c.__call__ = new Sk.builtin.func(function (b, c, e, f) {
+              c.__call__ = Sk.ffi.functionPy(function (b, c, e, f) {
                 c = Sk.ffi.remapToJs(c);
                 e = Sk.ffi.remapToJs(e);
                 f = Sk.ffi.remapToJs(f);
                 d.set(c, e, f);
                 return a;
               });
-              c.__str__ = new Sk.builtin.func(function (a) {
+              c.__str__ = Sk.ffi.functionPy(function (a) {
                 return new Sk.builtin.str('set');
               });
-              c.__repr__ = new Sk.builtin.func(function (a) {
+              c.__repr__ = Sk.ffi.functionPy(function (a) {
                 return new Sk.builtin.str('set');
               });
             }, 'set', []));
           case 'clone':
             return Sk.misceval.callsim(Sk.misceval.buildClass(b, function (a, b) {
-              b.__init__ = new Sk.builtin.func(function (a) {
+              b.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'clone';
               });
-              b.__call__ = new Sk.builtin.func(function (a) {
+              b.__call__ = Sk.ffi.functionPy(function (a) {
                 return l(d.w, d.x, d.y, d.z, d.xy, d.yz, d.zx, d.xyz);
               });
-              b.__str__ = new Sk.builtin.func(function (a) {
+              b.__str__ = Sk.ffi.functionPy(function (a) {
                 return new Sk.builtin.str('clone');
               });
-              b.__repr__ = new Sk.builtin.func(function (a) {
+              b.__repr__ = Sk.ffi.functionPy(function (a) {
                 return new Sk.builtin.str('clone');
               });
             }, 'clone', []));
           case 'length':
             return Sk.misceval.callsim(Sk.misceval.buildClass(b, function (a, b) {
-              b.__init__ = new Sk.builtin.func(function (a) {
+              b.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'length';
               });
-              b.__call__ = new Sk.builtin.func(function (a) {
+              b.__call__ = Sk.ffi.functionPy(function (a) {
                 return Sk.ffi.numberToPy(d.length());
               });
-              b.__str__ = new Sk.builtin.func(function (a) {
+              b.__str__ = Sk.ffi.functionPy(function (a) {
                 return new Sk.builtin.str('length');
               });
-              b.__repr__ = new Sk.builtin.func(function (a) {
+              b.__repr__ = Sk.ffi.functionPy(function (a) {
                 return new Sk.builtin.str('length');
               });
             }, 'length', []));
           case 'normalize':
             return Sk.misceval.callsim(Sk.misceval.buildClass(b, function (b, c) {
-              c.__init__ = new Sk.builtin.func(function (a) {
+              c.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'normalize';
               });
-              c.__call__ = new Sk.builtin.func(function (b) {
+              c.__call__ = Sk.ffi.functionPy(function (b) {
                 d.normalize();
                 return a;
               });
-              c.__str__ = new Sk.builtin.func(function (a) {
+              c.__str__ = Sk.ffi.functionPy(function (a) {
                 return new Sk.builtin.str('normalize');
               });
-              c.__repr__ = new Sk.builtin.func(function (a) {
+              c.__repr__ = Sk.ffi.functionPy(function (a) {
                 return new Sk.builtin.str('normalize');
               });
             }, 'normalize', []));
           }
         });
-        r.__setattr__ = new Sk.builtin.func(function (a, b, c) {
+        r.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
           a = Sk.ffi.remapToJs(a);
           c = Sk.ffi.remapToJs(c);
           switch (b) {
@@ -27174,7 +27178,7 @@
             throw new Sk.builtin.AttributeError(b + ' is not an attribute of ' + m);
           }
         });
-        r.__repr__ = new Sk.builtin.func(function (a) {
+        r.__repr__ = Sk.ffi.functionPy(function (a) {
           a = Sk.ffi.remapToJs(a);
           var b = 0 !== a.w, c = 0 !== a.x || 0 != a.y || 0 !== a.z, d = 0 !== a.xy || 0 !== a.yz || 0 !== a.zx, e = 0 !== a.xyz;
           if (!b || c || d || e) {
@@ -27211,7 +27215,7 @@
           a = [a.w];
           return new Sk.builtin.str('ScalarE3(' + a.join(', ') + ')');
         });
-        r.__str__ = new Sk.builtin.func(function (a) {
+        r.__str__ = Sk.ffi.functionPy(function (a) {
           a = Sk.ffi.remapToJs(a);
           return 'undefined' !== typeof a ? new Sk.builtin.str(d([
             a.w,
@@ -27240,12 +27244,19 @@
         };
       b.Rational = Sk.ffi.buildClass(b, function (c, f) {
         f.__init__ = Sk.ffi.functionPy(function (b, c, e) {
-          if ('undefined' === typeof e)
-            Sk.ffi.checkMethodArgs('Rational', arguments, 2, 2), Sk.ffi.checkArgType('numer', 'Rational', d(c)), Sk.ffi.referenceToPy(Sk.ffi.remapToJs(c), 'Rational', void 0, b);
+          if (Sk.ffi.isUndefined(e))
+            if (d(c))
+              Sk.ffi.checkMethodArgs('Rational', arguments, 1, 1), Sk.ffi.referenceToPy(Sk.ffi.remapToJs(c), 'Rational', void 0, b);
+            else if (Sk.ffi.isNumber(c)) {
+              Sk.ffi.checkArgType('numerator', 'int', Sk.ffi.isInt(c));
+              var f = Sk.ffi.remapToJs(c);
+              Sk.ffi.referenceToPy(new a.Rational(f, 1), 'Rational', void 0, b);
+            } else
+              Sk.ffi.checkMethodArgs('Rational', arguments, 2, 2);
           else {
-            Sk.ffi.checkMethodArgs('Rational', arguments, 3, 3);
-            Sk.ffi.checkArgType('numer', 'int', Sk.ffi.isInt(c));
-            Sk.ffi.checkArgType('denom', 'int', Sk.ffi.isInt(e));
+            Sk.ffi.checkMethodArgs('Rational', arguments, 2, 2);
+            Sk.ffi.checkArgType('numerator', 'int', Sk.ffi.isInt(c));
+            Sk.ffi.checkArgType('denominator', 'int', Sk.ffi.isInt(e));
             var f = Sk.ffi.remapToJs(c), n = Sk.ffi.remapToJs(e);
             Sk.ffi.referenceToPy(new a.Rational(f, n), 'Rational', void 0, b);
           }
