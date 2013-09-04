@@ -1,24 +1,84 @@
 Sk.ffi = Sk.ffi || {};
 
 /**
+ * Enumeration for JavaScript types.
+ *
+ * These are string constants for comparing with the result of the typeof operator.
+ *
+ * @enum {string}
+ */
+Sk.ffi.JsType = {
+    'UNDEFINED':  'undefined',
+    'OBJECT':     'object',
+    'STRING':     'string',
+    'NUMBER':     'number',
+    'BOOLEAN':    'boolean',
+    'FUNCTION':   'function'
+};
+
+/**
+ * Enumeration for Python bool values.
+ *
+ * @enum {!Object}
+ */
+Sk.ffi.bool = {True: Sk.builtin.bool.true$, False: Sk.builtin.bool.false$};
+goog.exportSymbol("Sk.ffi.bool", Sk.ffi.bool);
+
+/**
+ * Singleton Python None value.
+ *
+ * @enum {!Object}
+ */
+Sk.ffi.none = {None: Sk.builtin.none.none$};
+goog.exportSymbol("Sk.ffi.none", Sk.ffi.none);
+
+/**
  * Converts a JavaScript boolean or null to the internal Python bool representation.
  *
  * @param {?boolean} valueJs
+ * @param {boolean=} defaultJs
+ * @return {Sk.ffi.bool|Sk.ffi.none|undefined}
  */
-Sk.ffi.booleanToPy = function(valueJs)
+Sk.ffi.booleanToPy = function(valueJs, defaultJs)
 {
     var t = typeof valueJs;
-    if (t === 'boolean')
+    if (t === Sk.ffi.JsType.BOOLEAN)
     {
-        return valueJs ? Sk.builtin.bool.true$ : Sk.builtin.bool.false$;
+        return valueJs ? Sk.ffi.bool.True : Sk.ffi.bool.False;
     }
-    else if (t === 'object' && valueJs === null)
+    else if (t === Sk.ffi.JsType.OBJECT && valueJs === null)
     {
-        return Sk.builtin.none.none$;
+        return Sk.ffi.none.None;
+    }
+    else if (t === Sk.ffi.JsType.UNDEFINED)
+    {
+        var d = typeof defaultJs;
+        if (d === Sk.ffi.JsType.BOOLEAN)
+        {
+            return Sk.ffi.booleanToPy(Boolean(defaultJs));
+        }
+        else if (d === Sk.ffi.JsType.UNDEFINED)
+        {
+            return undefined;
+        }
+        else if (d === Sk.ffi.JsType.OBJECT && defaultJs === null)
+        {
+            return Sk.ffi.none.None;
+        }
+        else
+        {
+            throw Sk.ffi.err.
+                expectArg("defaultJs").
+                inFunction("Sk.ffi.booleanToPy").
+                toHaveType([Sk.ffi.JsType.BOOLEAN, 'null', Sk.ffi.JsType.UNDEFINED].join(" or "));
+        }
     }
     else
     {
-        throw Sk.ffi.assertionError("f5008183-bfce-4842-9496-30b936ff73f3");
+        throw Sk.ffi.err.
+            expectArg("valueJs").
+            inFunction("Sk.ffi.booleanToPy").
+            toHaveType([Sk.ffi.JsType.BOOLEAN, 'null', Sk.ffi.JsType.UNDEFINED].join(" or "));
     }
 };
 goog.exportSymbol("Sk.ffi.booleanToPy", Sk.ffi.booleanToPy);
@@ -27,21 +87,49 @@ goog.exportSymbol("Sk.ffi.booleanToPy", Sk.ffi.booleanToPy);
  * Converts a JavaScript number or null to the internal Python float representation.
  *
  * @param {?number} valueJs
+ * @param {number=} defaultJs
+ * @return {Object|Sk.ffi.none|undefined}
  */
-Sk.ffi.numberToPy = function(valueJs)
+Sk.ffi.numberToPy = function(valueJs, defaultJs)
 {
     var t = typeof valueJs;
-    if (t === 'number')
+    if (t === Sk.ffi.JsType.NUMBER)
     {
         return new Sk.builtin.nmber(valueJs, Sk.builtin.nmber.float$);
     }
-    else if (t === 'object' && valueJs === null)
+    else if (t === Sk.ffi.JsType.OBJECT && valueJs === null)
     {
-        return Sk.builtin.none.none$;
+        return Sk.ffi.none.None;
+    }
+    else if (t === Sk.ffi.JsType.UNDEFINED)
+    {
+        var d = typeof defaultJs;
+        if (d === Sk.ffi.JsType.NUMBER)
+        {
+            return Sk.ffi.numberToPy(Number(defaultJs));
+        }
+        else if (d === Sk.ffi.JsType.UNDEFINED)
+        {
+            return undefined;
+        }
+        else if (d === Sk.ffi.JsType.OBJECT && defaultJs === null)
+        {
+            return Sk.ffi.none.None;
+        }
+        else
+        {
+            throw Sk.ffi.err.
+                expectArg("defaultJs").
+                inFunction("Sk.ffi.numberToPy").
+                toHaveType([Sk.ffi.JsType.NUMBER, 'null', Sk.ffi.JsType.UNDEFINED].join(" or "));
+        }
     }
     else
     {
-        throw Sk.ffi.assertionError("3c68a6b8-0314-49ab-99ac-a818324417d8");
+        throw Sk.ffi.err.
+            expectArg("valueJs").
+            inFunction("Sk.ffi.numberToPy").
+            toHaveType([Sk.ffi.JsType.NUMBER, 'null', Sk.ffi.JsType.UNDEFINED].join(" or "));
     }
 };
 goog.exportSymbol("Sk.ffi.numberToPy", Sk.ffi.numberToPy);
@@ -50,21 +138,49 @@ goog.exportSymbol("Sk.ffi.numberToPy", Sk.ffi.numberToPy);
  * Converts a JavaScript number or null to the internal Python int representation.
  *
  * @param {?number} valueJs
+ * @param {number=} defaultJs
+ * @return {Object|Sk.ffi.none|undefined}
  */
-Sk.ffi.numberToIntPy = function(valueJs)
+Sk.ffi.numberToIntPy = function(valueJs, defaultJs)
 {
     var t = typeof valueJs;
-    if (t === 'number')
+    if (t === Sk.ffi.JsType.NUMBER)
     {
         return new Sk.builtin.nmber(valueJs, Sk.builtin.nmber.int$);
     }
-    else if (t === 'object' && valueJs === null)
+    else if (t === Sk.ffi.JsType.OBJECT && valueJs === null)
     {
-        return Sk.builtin.none.none$;
+        return Sk.ffi.none.None;
+    }
+    else if (t === Sk.ffi.JsType.UNDEFINED)
+    {
+        var d = typeof defaultJs;
+        if (d === Sk.ffi.JsType.NUMBER)
+        {
+            return Sk.ffi.numberToIntPy(Number(defaultJs));
+        }
+        else if (d === Sk.ffi.JsType.UNDEFINED)
+        {
+            return undefined;
+        }
+        else if (d === Sk.ffi.JsType.OBJECT && defaultJs === null)
+        {
+            return Sk.ffi.none.None;
+        }
+        else
+        {
+            throw Sk.ffi.err.
+                expectArg("defaultJs").
+                inFunction("Sk.ffi.numberToIntPy").
+                toHaveType([Sk.ffi.JsType.NUMBER, 'null', Sk.ffi.JsType.UNDEFINED].join(" or "));
+        }
     }
     else
     {
-        throw Sk.ffi.assertionError("b451b411-151c-4430-82f2-d548e5514303");
+        throw Sk.ffi.err.
+            expectArg("valueJs").
+            inFunction("Sk.ffi.numberToIntPy").
+            toHaveType([Sk.ffi.JsType.NUMBER, 'null', Sk.ffi.JsType.UNDEFINED].join(" or "));
     }
 };
 goog.exportSymbol("Sk.ffi.numberToIntPy", Sk.ffi.numberToIntPy);
@@ -78,7 +194,7 @@ goog.exportSymbol("Sk.ffi.numberToIntPy", Sk.ffi.numberToIntPy);
 Sk.ffi.stringToPy = function(valueJs, defaultJs)
 {
     var t = typeof valueJs;
-    if (t === 'string')
+    if (t === Sk.ffi.JsType.STRING)
     {
         if (valueJs.length > 0)
         {
@@ -89,24 +205,39 @@ Sk.ffi.stringToPy = function(valueJs, defaultJs)
             return Sk.builtin.str.$emptystr;
         }
     }
-    else if (t === 'object' && valueJs === null)
+    else if (t === Sk.ffi.JsType.OBJECT && valueJs === null)
     {
-        return Sk.builtin.none.none$;
+        return Sk.ffi.none.None;
     }
-    else if (t === 'undefined')
+    else if (t === Sk.ffi.JsType.UNDEFINED)
     {
-        if (typeof defaultJs === 'string')
+        var d = typeof defaultJs;
+        if (d === Sk.ffi.JsType.STRING)
         {
-            return Sk.ffi.stringToPy(defaultJs);
+            return Sk.ffi.stringToPy(defaultJs.toString());
+        }
+        else if (d === Sk.ffi.JsType.UNDEFINED)
+        {
+            return undefined;
+        }
+        else if (d === Sk.ffi.JsType.OBJECT && defaultJs === null)
+        {
+            return Sk.ffi.none.None;
         }
         else
         {
-            throw Sk.ffi.assertionError("f8db3019-c641-4ab2-8bbe-50aa9bfa8b39, defaultJs must be a string");
+            throw Sk.ffi.err.
+                expectArg("defaultJs").
+                inFunction("Sk.ffi.stringToPy").
+                toHaveType([Sk.ffi.JsType.STRING, Sk.ffi.JsType.UNDEFINED, 'null'].join(" or "));
         }
     }
     else
     {
-        throw Sk.ffi.assertionError("50730498-9d4c-4a28-ab50-fd6127dd6d8c, typeof valueJs => '" + t + "'");
+        throw Sk.ffi.err.
+            expectArg("valueJs").
+            inFunction("Sk.ffi.stringToPy").
+            toHaveType([Sk.ffi.JsType.STRING, 'null', Sk.ffi.JsType.UNDEFINED].join(" or "));
     }
 };
 goog.exportSymbol("Sk.ffi.stringToPy", Sk.ffi.stringToPy);
@@ -133,9 +264,9 @@ goog.exportSymbol("Sk.ffi.stringToPy", Sk.ffi.stringToPy);
 Sk.ffi.referenceToPy = function(valueJs, tp$name, custom, targetPy)
 {
     var t = typeof valueJs;
-    if (t === 'object' || t === 'function')
+    if (t === Sk.ffi.JsType.OBJECT || t === Sk.ffi.JsType.FUNCTION)
     {
-        if (typeof tp$name === 'string')
+        if (typeof tp$name === Sk.ffi.JsType.STRING)
         {
             if (targetPy) {
                 targetPy.v = valueJs;
@@ -205,7 +336,7 @@ goog.exportSymbol("Sk.ffi.tuplePy", Sk.ffi.tuplePy);
 Sk.ffi.remapToPy = function(valueJs, className, custom)
 {
     var t = typeof valueJs;
-    if (t === 'object') {
+    if (t === Sk.ffi.JsType.OBJECT) {
         if (Object.prototype.toString.call(valueJs) === "[object Array]")
         {
             var valuesPy = [];
@@ -214,13 +345,13 @@ Sk.ffi.remapToPy = function(valueJs, className, custom)
             }
             return Sk.ffi.listPy(valuesPy);
         }
-        else if (typeof className === 'string')
+        else if (typeof className === Sk.ffi.JsType.STRING)
         {
-            return Sk.ffi.referenceToPy(valueJs, className, custom);
+            return Sk.ffi.referenceToPy(valueJs, className.toString(), custom);
         }
-        else if (t === 'object' && valueJs === null)
+        else if (t === Sk.ffi.JsType.OBJECT && valueJs === null)
         {
-            return Sk.builtin.none.none$;
+            return Sk.ffi.none.None;
         }
         else
         {
@@ -233,15 +364,15 @@ Sk.ffi.remapToPy = function(valueJs, className, custom)
             return new Sk.builtin.dict(kvsPy);
         }
     }
-    else if (t === 'string')
+    else if (t === Sk.ffi.JsType.STRING)
     {
         return Sk.ffi.stringToPy(String(valueJs));
     }
-    else if (t === 'number')
+    else if (t === Sk.ffi.JsType.NUMBER)
     {
         return Sk.ffi.numberToPy(Number(valueJs));
     }
-    else if (t === 'boolean')
+    else if (t === Sk.ffi.JsType.BOOLEAN)
     {
         return Sk.ffi.booleanToPy(valueJs ? true : false);
     }
@@ -393,6 +524,8 @@ Sk.ffi.PyType = {
     'FUNCTION':  12
 };
 
+
+
 /**
  * Computes the internal Python representation type for the provided value.
  *
@@ -400,7 +533,7 @@ Sk.ffi.PyType = {
  */
 Sk.ffi.getType = function(valuePy)
 {
-    if (typeof valuePy === 'undefined')
+    if (typeof valuePy === Sk.ffi.JsType.UNDEFINED)
     {
         return Sk.ffi.PyType.UNDEFINED;
     }
@@ -443,20 +576,20 @@ Sk.ffi.getType = function(valuePy)
     {
         return Sk.ffi.PyType.BOOL;
     }
-    else if (valuePy === Sk.builtin.none.none$)
+    else if (valuePy === Sk.ffi.none.None)
     {
         return Sk.ffi.PyType.NONE;
     }
     else
     {
         var x = typeof valuePy.v;
-        if (x !== 'undefined')
+        if (x !== Sk.ffi.JsType.UNDEFINED)
         {
-            if (x === 'string')
+            if (x === Sk.ffi.JsType.STRING)
             {
                 return Sk.ffi.PyType.STRING;
             }
-            else if (x === 'object')
+            else if (x === Sk.ffi.JsType.OBJECT)
             {
                 if (valuePy.tp$name)
                 {
@@ -467,7 +600,7 @@ Sk.ffi.getType = function(valuePy)
                     throw new Sk.builtin.AssertionError("0a459acc-9540-466b-ba1a-333f8215b61e");
                 }
             }
-            else if (x === 'function')
+            else if (x === Sk.ffi.JsType.FUNCTION)
             {
                 return Sk.ffi.PyType.FUNREF;
             }
@@ -490,12 +623,16 @@ Sk.ffi.typeName = function(valuePy)
     switch(Sk.ffi.getType(valuePy))
     {
         case Sk.ffi.PyType.OBJREF:
+        case Sk.ffi.PyType.BOOL:
+        case Sk.ffi.PyType.FLOAT:
+        case Sk.ffi.PyType.INT:
+        case Sk.ffi.PyType.STRING:
         {
             return Sk.abstr.typeName(valuePy);
         }
         default:
         {
-            goog.asserts.fail("Sk.ffi.typeName(valuePy) must be Sk.ffi.PyType.OBJREF");
+            throw Sk.ffi.assertionError("0d35490f-ac78-45d7-ac5e-af6ef09278b1, Sk.ffi.getType(valuePy) => " + Sk.ffi.getType(valuePy));
         }
     }
 };
@@ -541,7 +678,7 @@ Sk.ffi.numberToJs = function(valuePy, message)
     }
     else
     {
-        if (typeof message === 'string')
+        if (typeof message === Sk.ffi.JsType.STRING)
         {
             throw new Sk.builtin.AssertionError(message);
         }
@@ -725,6 +862,16 @@ goog.exportSymbol("Sk.ffi.assertionError", Sk.ffi.assertionError);
 
 /**
  * @param {...*} args
+ * @return {!Sk.builtin.AttributeError}
+ */
+Sk.ffi.attributeError = function(args)
+{
+    return new Sk.builtin.AttributeError(args);
+};
+goog.exportSymbol("Sk.ffi.attributeError", Sk.ffi.attributeError);
+
+/**
+ * @param {...*} args
  * @return {!Sk.builtin.IndexError}
  */
 Sk.ffi.indexError = function(args)
@@ -760,6 +907,16 @@ goog.exportSymbol("Sk.ffi.valueError", Sk.ffi.valueError);
  */
 Sk.ffi.err =
 {
+    attribute: function(name) {
+        return {
+            isNotGetableOnType: function(targetType) {
+                return Sk.ffi.attributeError(name + " is not a getable attribute of " + targetType);
+            },
+            isNotSetableOnType: function(targetType) {
+                return Sk.ffi.attributeError(name + " is not a setable attribute of " + targetType);
+            }
+        };
+    },
     argument: function(name) {
         return {
             mustBeA: function(expectedType) {
@@ -769,6 +926,13 @@ Sk.ffi.err =
     },
     expectArg: function(name) {
         return {
+            inFunction: function(functionName) {
+                return {
+                    toHaveType: function(expectedType) {
+                        return Sk.ffi.typeError("Expecting argument '" + name + "' in function '" + functionName + "' to have type '" + expectedType + "'.");
+                    }
+                };
+            },
             toHaveType: function(expectedType) {
                 return Sk.ffi.typeError("Expecting argument '" + name + "' to have type '" + expectedType + "'.");
             }

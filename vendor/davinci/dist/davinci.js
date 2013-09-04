@@ -13689,24 +13689,84 @@ goog.exportSymbol("Sk.builtin.file", Sk.builtin.file);
 Sk.ffi = Sk.ffi || {};
 
 /**
+ * Enumeration for JavaScript types.
+ *
+ * These are string constants for comparing with the result of the typeof operator.
+ *
+ * @enum {string}
+ */
+Sk.ffi.JsType = {
+    'UNDEFINED':  'undefined',
+    'OBJECT':     'object',
+    'STRING':     'string',
+    'NUMBER':     'number',
+    'BOOLEAN':    'boolean',
+    'FUNCTION':   'function'
+};
+
+/**
+ * Enumeration for Python bool values.
+ *
+ * @enum {!Object}
+ */
+Sk.ffi.bool = {True: Sk.builtin.bool.true$, False: Sk.builtin.bool.false$};
+goog.exportSymbol("Sk.ffi.bool", Sk.ffi.bool);
+
+/**
+ * Singleton Python None value.
+ *
+ * @enum {!Object}
+ */
+Sk.ffi.none = {None: Sk.builtin.none.none$};
+goog.exportSymbol("Sk.ffi.none", Sk.ffi.none);
+
+/**
  * Converts a JavaScript boolean or null to the internal Python bool representation.
  *
  * @param {?boolean} valueJs
+ * @param {boolean=} defaultJs
+ * @return {Sk.ffi.bool|Sk.ffi.none|undefined}
  */
-Sk.ffi.booleanToPy = function(valueJs)
+Sk.ffi.booleanToPy = function(valueJs, defaultJs)
 {
     var t = typeof valueJs;
-    if (t === 'boolean')
+    if (t === Sk.ffi.JsType.BOOLEAN)
     {
-        return valueJs ? Sk.builtin.bool.true$ : Sk.builtin.bool.false$;
+        return valueJs ? Sk.ffi.bool.True : Sk.ffi.bool.False;
     }
-    else if (t === 'object' && valueJs === null)
+    else if (t === Sk.ffi.JsType.OBJECT && valueJs === null)
     {
-        return Sk.builtin.none.none$;
+        return Sk.ffi.none.None;
+    }
+    else if (t === Sk.ffi.JsType.UNDEFINED)
+    {
+        var d = typeof defaultJs;
+        if (d === Sk.ffi.JsType.BOOLEAN)
+        {
+            return Sk.ffi.booleanToPy(Boolean(defaultJs));
+        }
+        else if (d === Sk.ffi.JsType.UNDEFINED)
+        {
+            return undefined;
+        }
+        else if (d === Sk.ffi.JsType.OBJECT && defaultJs === null)
+        {
+            return Sk.ffi.none.None;
+        }
+        else
+        {
+            throw Sk.ffi.err.
+                expectArg("defaultJs").
+                inFunction("Sk.ffi.booleanToPy").
+                toHaveType([Sk.ffi.JsType.BOOLEAN, 'null', Sk.ffi.JsType.UNDEFINED].join(" or "));
+        }
     }
     else
     {
-        throw Sk.ffi.assertionError("f5008183-bfce-4842-9496-30b936ff73f3");
+        throw Sk.ffi.err.
+            expectArg("valueJs").
+            inFunction("Sk.ffi.booleanToPy").
+            toHaveType([Sk.ffi.JsType.BOOLEAN, 'null', Sk.ffi.JsType.UNDEFINED].join(" or "));
     }
 };
 goog.exportSymbol("Sk.ffi.booleanToPy", Sk.ffi.booleanToPy);
@@ -13715,21 +13775,49 @@ goog.exportSymbol("Sk.ffi.booleanToPy", Sk.ffi.booleanToPy);
  * Converts a JavaScript number or null to the internal Python float representation.
  *
  * @param {?number} valueJs
+ * @param {number=} defaultJs
+ * @return {Object|Sk.ffi.none|undefined}
  */
-Sk.ffi.numberToPy = function(valueJs)
+Sk.ffi.numberToPy = function(valueJs, defaultJs)
 {
     var t = typeof valueJs;
-    if (t === 'number')
+    if (t === Sk.ffi.JsType.NUMBER)
     {
         return new Sk.builtin.nmber(valueJs, Sk.builtin.nmber.float$);
     }
-    else if (t === 'object' && valueJs === null)
+    else if (t === Sk.ffi.JsType.OBJECT && valueJs === null)
     {
-        return Sk.builtin.none.none$;
+        return Sk.ffi.none.None;
+    }
+    else if (t === Sk.ffi.JsType.UNDEFINED)
+    {
+        var d = typeof defaultJs;
+        if (d === Sk.ffi.JsType.NUMBER)
+        {
+            return Sk.ffi.numberToPy(Number(defaultJs));
+        }
+        else if (d === Sk.ffi.JsType.UNDEFINED)
+        {
+            return undefined;
+        }
+        else if (d === Sk.ffi.JsType.OBJECT && defaultJs === null)
+        {
+            return Sk.ffi.none.None;
+        }
+        else
+        {
+            throw Sk.ffi.err.
+                expectArg("defaultJs").
+                inFunction("Sk.ffi.numberToPy").
+                toHaveType([Sk.ffi.JsType.NUMBER, 'null', Sk.ffi.JsType.UNDEFINED].join(" or "));
+        }
     }
     else
     {
-        throw Sk.ffi.assertionError("3c68a6b8-0314-49ab-99ac-a818324417d8");
+        throw Sk.ffi.err.
+            expectArg("valueJs").
+            inFunction("Sk.ffi.numberToPy").
+            toHaveType([Sk.ffi.JsType.NUMBER, 'null', Sk.ffi.JsType.UNDEFINED].join(" or "));
     }
 };
 goog.exportSymbol("Sk.ffi.numberToPy", Sk.ffi.numberToPy);
@@ -13738,21 +13826,49 @@ goog.exportSymbol("Sk.ffi.numberToPy", Sk.ffi.numberToPy);
  * Converts a JavaScript number or null to the internal Python int representation.
  *
  * @param {?number} valueJs
+ * @param {number=} defaultJs
+ * @return {Object|Sk.ffi.none|undefined}
  */
-Sk.ffi.numberToIntPy = function(valueJs)
+Sk.ffi.numberToIntPy = function(valueJs, defaultJs)
 {
     var t = typeof valueJs;
-    if (t === 'number')
+    if (t === Sk.ffi.JsType.NUMBER)
     {
         return new Sk.builtin.nmber(valueJs, Sk.builtin.nmber.int$);
     }
-    else if (t === 'object' && valueJs === null)
+    else if (t === Sk.ffi.JsType.OBJECT && valueJs === null)
     {
-        return Sk.builtin.none.none$;
+        return Sk.ffi.none.None;
+    }
+    else if (t === Sk.ffi.JsType.UNDEFINED)
+    {
+        var d = typeof defaultJs;
+        if (d === Sk.ffi.JsType.NUMBER)
+        {
+            return Sk.ffi.numberToIntPy(Number(defaultJs));
+        }
+        else if (d === Sk.ffi.JsType.UNDEFINED)
+        {
+            return undefined;
+        }
+        else if (d === Sk.ffi.JsType.OBJECT && defaultJs === null)
+        {
+            return Sk.ffi.none.None;
+        }
+        else
+        {
+            throw Sk.ffi.err.
+                expectArg("defaultJs").
+                inFunction("Sk.ffi.numberToIntPy").
+                toHaveType([Sk.ffi.JsType.NUMBER, 'null', Sk.ffi.JsType.UNDEFINED].join(" or "));
+        }
     }
     else
     {
-        throw Sk.ffi.assertionError("b451b411-151c-4430-82f2-d548e5514303");
+        throw Sk.ffi.err.
+            expectArg("valueJs").
+            inFunction("Sk.ffi.numberToIntPy").
+            toHaveType([Sk.ffi.JsType.NUMBER, 'null', Sk.ffi.JsType.UNDEFINED].join(" or "));
     }
 };
 goog.exportSymbol("Sk.ffi.numberToIntPy", Sk.ffi.numberToIntPy);
@@ -13766,7 +13882,7 @@ goog.exportSymbol("Sk.ffi.numberToIntPy", Sk.ffi.numberToIntPy);
 Sk.ffi.stringToPy = function(valueJs, defaultJs)
 {
     var t = typeof valueJs;
-    if (t === 'string')
+    if (t === Sk.ffi.JsType.STRING)
     {
         if (valueJs.length > 0)
         {
@@ -13777,24 +13893,39 @@ Sk.ffi.stringToPy = function(valueJs, defaultJs)
             return Sk.builtin.str.$emptystr;
         }
     }
-    else if (t === 'object' && valueJs === null)
+    else if (t === Sk.ffi.JsType.OBJECT && valueJs === null)
     {
-        return Sk.builtin.none.none$;
+        return Sk.ffi.none.None;
     }
-    else if (t === 'undefined')
+    else if (t === Sk.ffi.JsType.UNDEFINED)
     {
-        if (typeof defaultJs === 'string')
+        var d = typeof defaultJs;
+        if (d === Sk.ffi.JsType.STRING)
         {
-            return Sk.ffi.stringToPy(defaultJs);
+            return Sk.ffi.stringToPy(defaultJs.toString());
+        }
+        else if (d === Sk.ffi.JsType.UNDEFINED)
+        {
+            return undefined;
+        }
+        else if (d === Sk.ffi.JsType.OBJECT && defaultJs === null)
+        {
+            return Sk.ffi.none.None;
         }
         else
         {
-            throw Sk.ffi.assertionError("f8db3019-c641-4ab2-8bbe-50aa9bfa8b39, defaultJs must be a string");
+            throw Sk.ffi.err.
+                expectArg("defaultJs").
+                inFunction("Sk.ffi.stringToPy").
+                toHaveType([Sk.ffi.JsType.STRING, Sk.ffi.JsType.UNDEFINED, 'null'].join(" or "));
         }
     }
     else
     {
-        throw Sk.ffi.assertionError("50730498-9d4c-4a28-ab50-fd6127dd6d8c, typeof valueJs => '" + t + "'");
+        throw Sk.ffi.err.
+            expectArg("valueJs").
+            inFunction("Sk.ffi.stringToPy").
+            toHaveType([Sk.ffi.JsType.STRING, 'null', Sk.ffi.JsType.UNDEFINED].join(" or "));
     }
 };
 goog.exportSymbol("Sk.ffi.stringToPy", Sk.ffi.stringToPy);
@@ -13821,9 +13952,9 @@ goog.exportSymbol("Sk.ffi.stringToPy", Sk.ffi.stringToPy);
 Sk.ffi.referenceToPy = function(valueJs, tp$name, custom, targetPy)
 {
     var t = typeof valueJs;
-    if (t === 'object' || t === 'function')
+    if (t === Sk.ffi.JsType.OBJECT || t === Sk.ffi.JsType.FUNCTION)
     {
-        if (typeof tp$name === 'string')
+        if (typeof tp$name === Sk.ffi.JsType.STRING)
         {
             if (targetPy) {
                 targetPy.v = valueJs;
@@ -13893,7 +14024,7 @@ goog.exportSymbol("Sk.ffi.tuplePy", Sk.ffi.tuplePy);
 Sk.ffi.remapToPy = function(valueJs, className, custom)
 {
     var t = typeof valueJs;
-    if (t === 'object') {
+    if (t === Sk.ffi.JsType.OBJECT) {
         if (Object.prototype.toString.call(valueJs) === "[object Array]")
         {
             var valuesPy = [];
@@ -13902,13 +14033,13 @@ Sk.ffi.remapToPy = function(valueJs, className, custom)
             }
             return Sk.ffi.listPy(valuesPy);
         }
-        else if (typeof className === 'string')
+        else if (typeof className === Sk.ffi.JsType.STRING)
         {
-            return Sk.ffi.referenceToPy(valueJs, className, custom);
+            return Sk.ffi.referenceToPy(valueJs, className.toString(), custom);
         }
-        else if (t === 'object' && valueJs === null)
+        else if (t === Sk.ffi.JsType.OBJECT && valueJs === null)
         {
-            return Sk.builtin.none.none$;
+            return Sk.ffi.none.None;
         }
         else
         {
@@ -13921,15 +14052,15 @@ Sk.ffi.remapToPy = function(valueJs, className, custom)
             return new Sk.builtin.dict(kvsPy);
         }
     }
-    else if (t === 'string')
+    else if (t === Sk.ffi.JsType.STRING)
     {
         return Sk.ffi.stringToPy(String(valueJs));
     }
-    else if (t === 'number')
+    else if (t === Sk.ffi.JsType.NUMBER)
     {
         return Sk.ffi.numberToPy(Number(valueJs));
     }
-    else if (t === 'boolean')
+    else if (t === Sk.ffi.JsType.BOOLEAN)
     {
         return Sk.ffi.booleanToPy(valueJs ? true : false);
     }
@@ -14081,6 +14212,8 @@ Sk.ffi.PyType = {
     'FUNCTION':  12
 };
 
+
+
 /**
  * Computes the internal Python representation type for the provided value.
  *
@@ -14088,7 +14221,7 @@ Sk.ffi.PyType = {
  */
 Sk.ffi.getType = function(valuePy)
 {
-    if (typeof valuePy === 'undefined')
+    if (typeof valuePy === Sk.ffi.JsType.UNDEFINED)
     {
         return Sk.ffi.PyType.UNDEFINED;
     }
@@ -14131,20 +14264,20 @@ Sk.ffi.getType = function(valuePy)
     {
         return Sk.ffi.PyType.BOOL;
     }
-    else if (valuePy === Sk.builtin.none.none$)
+    else if (valuePy === Sk.ffi.none.None)
     {
         return Sk.ffi.PyType.NONE;
     }
     else
     {
         var x = typeof valuePy.v;
-        if (x !== 'undefined')
+        if (x !== Sk.ffi.JsType.UNDEFINED)
         {
-            if (x === 'string')
+            if (x === Sk.ffi.JsType.STRING)
             {
                 return Sk.ffi.PyType.STRING;
             }
-            else if (x === 'object')
+            else if (x === Sk.ffi.JsType.OBJECT)
             {
                 if (valuePy.tp$name)
                 {
@@ -14155,7 +14288,7 @@ Sk.ffi.getType = function(valuePy)
                     throw new Sk.builtin.AssertionError("0a459acc-9540-466b-ba1a-333f8215b61e");
                 }
             }
-            else if (x === 'function')
+            else if (x === Sk.ffi.JsType.FUNCTION)
             {
                 return Sk.ffi.PyType.FUNREF;
             }
@@ -14178,12 +14311,16 @@ Sk.ffi.typeName = function(valuePy)
     switch(Sk.ffi.getType(valuePy))
     {
         case Sk.ffi.PyType.OBJREF:
+        case Sk.ffi.PyType.BOOL:
+        case Sk.ffi.PyType.FLOAT:
+        case Sk.ffi.PyType.INT:
+        case Sk.ffi.PyType.STRING:
         {
             return Sk.abstr.typeName(valuePy);
         }
         default:
         {
-            goog.asserts.fail("Sk.ffi.typeName(valuePy) must be Sk.ffi.PyType.OBJREF");
+            throw Sk.ffi.assertionError("0d35490f-ac78-45d7-ac5e-af6ef09278b1, Sk.ffi.getType(valuePy) => " + Sk.ffi.getType(valuePy));
         }
     }
 };
@@ -14229,7 +14366,7 @@ Sk.ffi.numberToJs = function(valuePy, message)
     }
     else
     {
-        if (typeof message === 'string')
+        if (typeof message === Sk.ffi.JsType.STRING)
         {
             throw new Sk.builtin.AssertionError(message);
         }
@@ -14413,6 +14550,16 @@ goog.exportSymbol("Sk.ffi.assertionError", Sk.ffi.assertionError);
 
 /**
  * @param {...*} args
+ * @return {!Sk.builtin.AttributeError}
+ */
+Sk.ffi.attributeError = function(args)
+{
+    return new Sk.builtin.AttributeError(args);
+};
+goog.exportSymbol("Sk.ffi.attributeError", Sk.ffi.attributeError);
+
+/**
+ * @param {...*} args
  * @return {!Sk.builtin.IndexError}
  */
 Sk.ffi.indexError = function(args)
@@ -14448,6 +14595,16 @@ goog.exportSymbol("Sk.ffi.valueError", Sk.ffi.valueError);
  */
 Sk.ffi.err =
 {
+    attribute: function(name) {
+        return {
+            isNotGetableOnType: function(targetType) {
+                return Sk.ffi.attributeError(name + " is not a getable attribute of " + targetType);
+            },
+            isNotSetableOnType: function(targetType) {
+                return Sk.ffi.attributeError(name + " is not a setable attribute of " + targetType);
+            }
+        };
+    },
     argument: function(name) {
         return {
             mustBeA: function(expectedType) {
@@ -14457,6 +14614,13 @@ Sk.ffi.err =
     },
     expectArg: function(name) {
         return {
+            inFunction: function(functionName) {
+                return {
+                    toHaveType: function(expectedType) {
+                        return Sk.ffi.typeError("Expecting argument '" + name + "' in function '" + functionName + "' to have type '" + expectedType + "'.");
+                    }
+                };
+            },
             toHaveType: function(expectedType) {
                 return Sk.ffi.typeError("Expecting argument '" + name + "' to have type '" + expectedType + "'.");
             }
@@ -27671,6 +27835,348 @@ Sk.builtin.defineUnits = function(mod) {
   mod[VOLT]     = Sk.ffi.callsim(mod[UNIT], Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new BLADE.Dimensions(1, 2, -2, -1), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS));
   mod[TESLA]    = Sk.ffi.callsim(mod[UNIT], Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new BLADE.Dimensions(1, 1, -2, -1), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS));
 };
+}).call(this);
+/**
+ * Convenience function for incorporating a Vector3 class into a module.
+ *
+ * Usage:
+ *
+ * Sk.builtin.defineVector3(mod, "Vector3", function(x,y,x) {return new THREE.Vector3(x,y,z)});
+ */
+(function() {
+  /**
+   * @param {Array.<number>} coordinates
+   * @param {Array.<string>} labels
+   * @return {string}
+   */
+  var stringFromCoordinates = function(coordinates, labels) {
+    var append, i, sb, str, _i, _ref;
+    sb = [];
+    append = function(number, label) {
+      var n;
+      if (number !== 0) {
+        if (number >= 0) {
+          if (sb.length > 0) {
+            sb.push("+");
+          }
+        } else {
+          sb.push("-");
+        }
+        n = Math.abs(number);
+        if (n === 1) {
+          return sb.push(label);
+        } else {
+          sb.push(n.toString());
+          if (label !== "1") {
+            sb.push("*");
+            return sb.push(label);
+          }
+        }
+      }
+    };
+    for (i = _i = 0, _ref = coordinates.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+      append(coordinates[i], labels[i]);
+    }
+    if (sb.length > 0) {
+      str = sb.join("");
+    } else {
+      str = "0";
+    }
+    return str;
+  };
+  /**
+   * @const
+   * @type {string}
+   */
+  var PROP_X                     = "x";
+  /**
+   * @const
+   * @type {string}
+   */
+  var PROP_Y                     = "y";
+  /**
+   * @const
+   * @type {string}
+   */
+  var PROP_Z                     = "z";
+  /**
+   * @const
+   * @type {string}
+   */
+  var NUMBER                     = "Number";
+  /**
+   * @const
+   * @type {string}
+   */
+  var INT                        = "int";
+  /**
+   * @const
+   * @type {string}
+   */
+  var METHOD_CLONE               = "clone";
+  /**
+   * @const
+   * @type {string}
+   */
+  var METHOD_GET_COMPONENT       = "getComponent";
+  /**
+   * @const
+   * @type {string}
+   */
+  var METHOD_LENGTH              = "length";
+  /**
+   * @const
+   * @type {string}
+   */
+  var METHOD_NORMALIZE           = "normalize";
+  /**
+   * @const
+   * @type {string}
+   */
+  var METHOD_SET                 = "set";
+  /**
+   * @const
+   * @type {string}
+   */
+  var METHOD_SET_COMPONENT       = "setComponent";
+  /**
+   * @const
+   * @type {string}
+   */
+  var METHOD_SET_X               = "setX";
+  /**
+   * @const
+   * @type {string}
+   */
+  var METHOD_SET_Y               = "setY";
+  /**
+   * @const
+   * @type {string}
+   */
+  var METHOD_SET_Z               = "setZ";
+  /**
+   * @const
+   * @type {string}
+   */
+  var SELF                       = "self";
+  /**
+   * @const
+   * @type {string}
+   */
+  var OTHER                      = "other";
+  /**
+   * @param {string} VECTOR_3
+   * @param {function(number, number, number): string} vector3
+   */
+  Sk.builtin.defineVector3 = function(mod, VECTOR_3, vector3) {
+    Sk.ffi.checkFunctionArgs("defineVector3", arguments, 3, 3);
+    /**
+     * @param {Object} valuePy
+     * @return {boolean} true if the thing is a vector, otherwise false.
+     */
+    var isVector = function(valuePy) {
+      return Sk.ffi.isReference(valuePy) && Sk.ffi.typeName(valuePy) === VECTOR_3;
+    };
+    /**
+     * @param {number} x The x-coordinate of the vector.
+     * @param {number} y The y-coordinate of the vector.
+     * @param {number} z The z-coordinate of the vector.
+     */
+    var vector3ToPy = function(x, y, z) {
+      return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.numberToPy(x), Sk.ffi.numberToPy(y), Sk.ffi.numberToPy(z));
+    };
+    mod[VECTOR_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
+      $loc.__init__ = Sk.ffi.functionPy(function(selfPy, x, y, z) {
+        Sk.ffi.checkMethodArgs(VECTOR_3, arguments, 0, 4);
+        if (Sk.ffi.isUndefined(x) && Sk.ffi.isUndefined(y) && Sk.ffi.isUndefined(z)) {
+          Sk.ffi.referenceToPy(vector3(0, 0, 0), VECTOR_3, undefined, selfPy);
+        }
+        else {
+          switch(Sk.ffi.getType(x)) {
+            case Sk.ffi.PyType.OBJREF: {
+              Sk.ffi.checkMethodArgs(VECTOR_3, arguments, 1, 1);
+              Sk.ffi.checkArgType(PROP_X, VECTOR_3, isVector(x));
+              Sk.ffi.referenceToPy(Sk.ffi.remapToJs(x), VECTOR_3, undefined, selfPy);
+            }
+            break;
+            case Sk.ffi.PyType.FLOAT:
+            case Sk.ffi.PyType.INT:
+            case Sk.ffi.PyType.LONG: {
+              Sk.ffi.checkMethodArgs(VECTOR_3, arguments, 3, 3);
+              Sk.ffi.checkArgType(PROP_X, NUMBER, Sk.ffi.isNumber(x));
+              Sk.ffi.checkArgType(PROP_Y, NUMBER, Sk.ffi.isNumber(y));
+              Sk.ffi.checkArgType(PROP_Z, NUMBER, Sk.ffi.isNumber(z));
+              Sk.ffi.referenceToPy(vector3(Sk.ffi.remapToJs(x), Sk.ffi.remapToJs(y), Sk.ffi.remapToJs(z)), VECTOR_3, undefined, selfPy);
+            }
+            break
+            default: {
+              Sk.ffi.checkArgType(PROP_X, [NUMBER, VECTOR_3].join(" or "), false);
+            }
+          }
+        }
+      });
+      $loc.__add__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+        Sk.ffi.checkArgType(SELF,  VECTOR_3, isVector(selfPy));
+        Sk.ffi.checkArgType(OTHER, VECTOR_3, isVector(otherPy));
+        var a = Sk.ffi.remapToJs(selfPy);
+        var b = Sk.ffi.remapToJs(otherPy);
+        var x = a.x + b.x;
+        var y = a.y + b.y;
+        var z = a.z + b.z;
+        return vector3ToPy(x, y, z);
+      });
+      $loc.__iadd__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+        Sk.ffi.checkArgType(SELF,  VECTOR_3, isVector(selfPy));
+        Sk.ffi.checkArgType(OTHER, VECTOR_3, isVector(otherPy));
+        var a = Sk.ffi.remapToJs(selfPy);
+        var b = Sk.ffi.remapToJs(otherPy);
+        a.x += b.x;
+        a.y += b.y;
+        a.z += b.z;
+        return selfPy;
+      });
+      $loc.__sub__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+        Sk.ffi.checkArgType(SELF,  VECTOR_3, isVector(selfPy));
+        Sk.ffi.checkArgType(OTHER, VECTOR_3, isVector(otherPy));
+        var a = Sk.ffi.remapToJs(selfPy);
+        var b = Sk.ffi.remapToJs(otherPy);
+        var x = a.x - b.x;
+        var y = a.y - b.y;
+        var z = a.z - b.z;
+        return vector3ToPy(x, y, z);
+      });
+      $loc.__mul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+        Sk.ffi.checkArgType(SELF,  VECTOR_3, isVector(selfPy));
+        Sk.ffi.checkArgType(OTHER, NUMBER, Sk.ffi.isNumber(otherPy));
+        var a = Sk.ffi.remapToJs(selfPy);
+        var b = Sk.ffi.remapToJs(otherPy);
+        var x = a.x * b;
+        var y = a.y * b;
+        var z = a.z * b;
+        return vector3ToPy(x, y, z);
+      });
+      $loc.__rmul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+        Sk.ffi.checkArgType(OTHER, NUMBER, Sk.ffi.isNumber(otherPy));
+        Sk.ffi.checkArgType(SELF,  VECTOR_3, isVector(selfPy));
+        var a = Sk.ffi.remapToJs(otherPy);
+        var b = Sk.ffi.remapToJs(selfPy);
+        var x = a * b.x;
+        var y = a * b.y;
+        var z = a * b.z;
+        return vector3ToPy(x, y, z);
+      });
+      $loc.__getattr__ = Sk.ffi.functionPy(function(vectorPy, name) {
+        var vector = Sk.ffi.remapToJs(vectorPy);
+        switch(name) {
+          case PROP_X:
+          case PROP_Y:
+          case PROP_Z: {
+            return Sk.ffi.numberToPy(vector[name]);
+          }
+          case METHOD_CLONE: {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+              $loc.__init__ = Sk.ffi.functionPy(function(self) {
+                self.tp$name = METHOD_CLONE;
+              });
+              $loc.__call__ = Sk.ffi.functionPy(function(self) {
+                return vector3ToPy(vector.x, vector.y, vector.z);
+              });
+            }, METHOD_CLONE, []));
+          }
+          case METHOD_GET_COMPONENT: {
+            return Sk.ffi.callableToPy(mod, vector, METHOD_GET_COMPONENT, function(methodPy, indexPy) {
+              Sk.ffi.checkMethodArgs(METHOD_GET_COMPONENT, arguments, 1, 1);
+              Sk.ffi.checkArgType("index", INT, Sk.ffi.isNumber(indexPy));
+              return Sk.ffi.remapToPy(vector[METHOD_GET_COMPONENT](Sk.ffi.remapToJs(indexPy)));
+            });
+          }
+          case METHOD_LENGTH: {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+              $loc.__init__ = Sk.ffi.functionPy(function(self) {
+                self.tp$name = METHOD_LENGTH;
+              });
+              $loc.__call__ = Sk.ffi.functionPy(function(self) {
+                return Sk.ffi.numberToPy(vector.length());
+              });
+            }, METHOD_LENGTH, []));
+          }
+          case METHOD_NORMALIZE: {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+              $loc.__init__ = Sk.ffi.functionPy(function(self) {
+                self.tp$name = METHOD_NORMALIZE;
+              });
+              $loc.__call__ = Sk.ffi.functionPy(function(self) {
+                Sk.ffi.checkMethodArgs(VECTOR_3, arguments, 0, 0);
+                vector[METHOD_NORMALIZE]();
+                return vectorPy;
+              });
+            }, METHOD_NORMALIZE, []));
+          }
+          case METHOD_SET: {
+            return Sk.ffi.callableToPy(mod, vector, METHOD_SET, function(methodPy, x, y, z) {
+              Sk.ffi.checkMethodArgs(METHOD_SET, arguments, 3, 3);
+              Sk.ffi.checkArgType(PROP_X, NUMBER, Sk.ffi.isNumber(x));
+              Sk.ffi.checkArgType(PROP_Y, NUMBER, Sk.ffi.isNumber(y));
+              Sk.ffi.checkArgType(PROP_Z, NUMBER, Sk.ffi.isNumber(z));
+              x  = Sk.ffi.remapToJs(x);
+              y  = Sk.ffi.remapToJs(y);
+              z  = Sk.ffi.remapToJs(z);
+              vector.set(x, y, z);
+              return vectorPy;
+            });
+          }
+          case METHOD_SET_COMPONENT: {
+            return Sk.ffi.callableToPy(mod, vector, METHOD_SET_COMPONENT, function(methodPy, indexPy, valuePy) {
+              Sk.ffi.checkMethodArgs(METHOD_SET_COMPONENT, arguments, 2, 2);
+              Sk.ffi.checkArgType("index", INT, Sk.ffi.isInt(indexPy));
+              Sk.ffi.checkArgType("value", NUMBER, Sk.ffi.isNumber(valuePy));
+              var index = Sk.ffi.remapToJs(indexPy);
+              var value = Sk.ffi.remapToJs(valuePy);
+              vector[METHOD_SET_COMPONENT](index, value);
+              return vectorPy;
+            });
+          }
+          case METHOD_SET_X:
+          case METHOD_SET_Y:
+          case METHOD_SET_Z: {
+            return Sk.ffi.callableToPy(mod, vector, name, function(methodPy, valuePy) {
+              Sk.ffi.checkMethodArgs(name, arguments, 1, 1);
+              Sk.ffi.checkArgType("value", NUMBER, Sk.ffi.isNumber(valuePy));
+              vector[name](Sk.ffi.remapToJs(valuePy));
+              return vectorPy;
+            });
+          }
+          default: {
+            throw Sk.ffi.err.attribute(name).isNotGetableOnType(VECTOR_3);
+          }
+        }
+      });
+      $loc.__setattr__ = Sk.ffi.functionPy(function(selfPy, name, valuePy) {
+        switch(name) {
+          case PROP_X:
+          case PROP_Y:
+          case PROP_Z: {
+            Sk.ffi.checkArgType(name, NUMBER, Sk.ffi.isNumber(valuePy));
+            var vector = Sk.ffi.remapToJs(selfPy);
+            vector[name] = Sk.ffi.remapToJs(valuePy);
+          }
+          break;
+          default: {
+            throw Sk.ffi.err.attribute(name).isNotSetableOnType(VECTOR_3);
+          }
+        }
+      });
+      $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
+        var vector = Sk.ffi.remapToJs(selfPy);
+        var args = [vector.x, vector.y, vector.z];
+        return Sk.ffi.stringToPy(VECTOR_3 + "(" + args.join(", ") + ")");
+      });
+      $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
+        var vector = Sk.ffi.remapToJs(selfPy);
+        return Sk.ffi.stringToPy(stringFromCoordinates([vector.x, vector.y, vector.z], ["i", "j", "k"]));
+      });
+    }, VECTOR_3, []);
+  };
 }).call(this);
 /* bladejs - 0.0.50
  * JavaScript Geometric Algebra library.
