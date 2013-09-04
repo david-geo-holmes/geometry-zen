@@ -491,7 +491,7 @@ goog.exportSymbol("Sk.ffi.checkMethodArgs", Sk.ffi.checkMethodArgs);
  * Convenience function for asserting the type of an argument.
  *
  * @param {string} name The argument name.
- * @param {string} expectedType A string representation of the expected type.
+ * @param {string|Array.<string>} expectedType A string representation of the expected type or types.
  * @param {boolean} condition The condition that must be true for the check to pass.
  */
 Sk.ffi.checkArgType = function(name, expectedType, condition)
@@ -917,8 +917,14 @@ Sk.ffi.err =
             }
         };
     },
+    /**
+     * @param {string} name The name of the argument.
+     */
     argument: function(name) {
         return {
+            /**
+             * @param {string} expectedType The name of the type.
+             */
             mustBeA: function(expectedType) {
                 return Sk.ffi.typeError(name + " must be a " + expectedType);
             }

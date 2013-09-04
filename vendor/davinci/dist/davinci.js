@@ -14179,7 +14179,7 @@ goog.exportSymbol("Sk.ffi.checkMethodArgs", Sk.ffi.checkMethodArgs);
  * Convenience function for asserting the type of an argument.
  *
  * @param {string} name The argument name.
- * @param {string} expectedType A string representation of the expected type.
+ * @param {string|Array.<string>} expectedType A string representation of the expected type or types.
  * @param {boolean} condition The condition that must be true for the check to pass.
  */
 Sk.ffi.checkArgType = function(name, expectedType, condition)
@@ -14605,8 +14605,14 @@ Sk.ffi.err =
             }
         };
     },
+    /**
+     * @param {string} name The name of the argument.
+     */
     argument: function(name) {
         return {
+            /**
+             * @param {string} expectedType The name of the type.
+             */
             mustBeA: function(expectedType) {
                 return Sk.ffi.typeError(name + " must be a " + expectedType);
             }
@@ -27477,126 +27483,47 @@ Sk.builtin.defineEuclidean3 = function(mod) {
  * Sk.builtin.defineUnits(mod);
  */
 (function() {
+
 this.BLADE = this.BLADE || {};
-var BLADE = this.BLADE;
+var  BLADE = this.BLADE;
+
 Sk.builtin.defineUnits = function(mod) {
 
-  var DIMENSIONS      = "Dimensions";
-  var MEASURE         = "Measure";
-  var RATIONAL        = "Rational";
-  var UNIT            = "Unit";
-  var INT             = "int";
-  var NUMBER          = "Number";
+  var DIMENSIONS       = "Dimensions";
+  var MEASURE          = "Measure";
+  var RATIONAL         = "Rational";
+  var UNIT             = "Unit";
+  var INT              = "int";
+  var NUMBER           = "Number";
 
-  var PROP_QUANTITY   = "quantity";
-  var PROP_UOM        = "uom";
-  var PROP_SCALE      = "scale";
-  var PROP_DIMENSIONS = "dimensions";
-  var PROP_LABELS     = "labels";
-  var PROP_M          = "M";
-  var PROP_L          = "L";
-  var PROP_T          = "T";
-  var PROP_Q          = "Q";
+  var PROP_QUANTITY    = "quantity";
+  var PROP_UOM         = "uom";
+  var PROP_SCALE       = "scale";
+  var PROP_DIMENSIONS  = "dimensions";
+  var PROP_LABELS      = "labels";
+  var PROP_M           = "M";
+  var PROP_L           = "L";
+  var PROP_T           = "T";
+  var PROP_Q           = "Q";
 
-  var KILOGRAM        = "kilogram";
-  var METER           = "meter";
-  var SECOND          = "second";
-  var COULOMB         = "coulomb";
-  var SI_LABELS       = ["kg", "m", "s", "C"];
-  var NEWTON          = "newton";
-  var JOULE           = "joule";
-  var WATT            = "watt";
-  var AMPERE          = "ampere";
-  var VOLT            = "volt";
-  var TESLA           = "tesla";
+  var KILOGRAM         = "kilogram";
+  var METER            = "meter";
+  var SECOND           = "second";
+  var COULOMB          = "coulomb";
+  var SI_LABELS        = ["kg", "m", "s", "C"];
+  var NEWTON           = "newton";
+  var JOULE            = "joule";
+  var WATT             = "watt";
+  var AMPERE           = "ampere";
+  var VOLT             = "volt";
+  var TESLA            = "tesla";
 
-  var isRational = function(valuePy) {
-    return Sk.ffi.isObjectRef(valuePy) && Sk.ffi.typeName(valuePy) === RATIONAL;
-  }
   var isUnit = function(valuePy) {
     return Sk.ffi.isObjectRef(valuePy) && Sk.ffi.typeName(valuePy) === UNIT;
   }
 
-  mod[RATIONAL] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, numerPy, denomPy) {
-      if (Sk.ffi.isUndefined(denomPy)) {
-        if (isRational(numerPy)) {
-          Sk.ffi.checkMethodArgs(RATIONAL, arguments, 1, 1);
-          Sk.ffi.referenceToPy(Sk.ffi.remapToJs(numerPy), RATIONAL, undefined, selfPy);
-        }
-        else if (Sk.ffi.isNumber(numerPy)) {
-          Sk.ffi.checkArgType("numerator", INT, Sk.ffi.isInt(numerPy));
-          var numer = Sk.ffi.remapToJs(numerPy);
-          Sk.ffi.referenceToPy(new BLADE.Rational(numer, 1), RATIONAL, undefined, selfPy);
+  Sk.builtin.defineFractions(mod, RATIONAL, function(n, d) {return new BLADE.Rational(n, d)});
 
-        }
-        else {
-          Sk.ffi.checkMethodArgs(RATIONAL, arguments, 2, 2);
-        }
-      }
-      else {
-        Sk.ffi.checkMethodArgs(RATIONAL, arguments, 2, 2);
-        Sk.ffi.checkArgType("numerator", INT, Sk.ffi.isInt(numerPy));
-        Sk.ffi.checkArgType("denominator", INT, Sk.ffi.isInt(denomPy));
-        var numer = Sk.ffi.remapToJs(numerPy);
-        var denom = Sk.ffi.remapToJs(denomPy);
-        Sk.ffi.referenceToPy(new BLADE.Rational(numer, denom), RATIONAL, undefined, selfPy);
-      }
-    });
-    $loc.__add__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-      Sk.ffi.checkFunctionArgs("+", arguments, 2, 2);
-      Sk.ffi.checkArgType("self",  RATIONAL, isRational(selfPy));
-      Sk.ffi.checkArgType("other", RATIONAL, isRational(otherPy));
-      var a = Sk.ffi.remapToJs(selfPy);
-      var b = Sk.ffi.remapToJs(otherPy);
-      return Sk.ffi.callsim(mod[RATIONAL], Sk.ffi.remapToPy(a.add(b), RATIONAL));
-    });
-    $loc.__sub__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-      Sk.ffi.checkFunctionArgs("+", arguments, 2, 2);
-      Sk.ffi.checkArgType("self",  RATIONAL, isRational(selfPy));
-      Sk.ffi.checkArgType("other", RATIONAL, isRational(otherPy));
-      var a = Sk.ffi.remapToJs(selfPy);
-      var b = Sk.ffi.remapToJs(otherPy);
-      return Sk.ffi.callsim(mod[RATIONAL], Sk.ffi.remapToPy(a.sub(b), RATIONAL));
-    });
-    $loc.__mul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-      Sk.ffi.checkFunctionArgs("+", arguments, 2, 2);
-      Sk.ffi.checkArgType("self",  RATIONAL, isRational(selfPy));
-      var a = Sk.ffi.remapToJs(selfPy);
-      var b = Sk.ffi.remapToJs(otherPy);
-      if (typeof b === 'number') {
-        Sk.ffi.checkArgType("other", INT, Sk.ffi.isInt(otherPy));
-        return Sk.ffi.callsim(mod[RATIONAL], Sk.ffi.numberToIntPy(a.numer * b), Sk.ffi.numberToIntPy(a.denom));
-      }
-      else {
-        Sk.ffi.checkArgType("other", RATIONAL, isRational(otherPy));
-        return Sk.ffi.callsim(mod[RATIONAL], Sk.ffi.remapToPy(a.mul(b), RATIONAL));
-      }
-    });
-    $loc.__div__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-      Sk.ffi.checkFunctionArgs("+", arguments, 2, 2);
-      Sk.ffi.checkArgType("self",  RATIONAL, isRational(selfPy));
-      var a = Sk.ffi.remapToJs(selfPy);
-      var b = Sk.ffi.remapToJs(otherPy);
-      if (typeof b === 'number') {
-        Sk.ffi.checkArgType("other", INT, Sk.ffi.isInt(otherPy));
-        return Sk.ffi.callsim(mod[RATIONAL], Sk.ffi.numberToIntPy(a.numer), Sk.ffi.numberToIntPy(a.denom * b));
-      }
-      else {
-        Sk.ffi.checkArgType("other", RATIONAL, isRational(otherPy));
-        return Sk.ffi.callsim(mod[RATIONAL], Sk.ffi.remapToPy(a.div(b), RATIONAL));
-      }
-    });
-    $loc.__repr__ = Sk.ffi.functionPy(function(rationalPy) {
-      var rational = Sk.ffi.remapToJs(rationalPy);
-      return Sk.ffi.remapToPy(RATIONAL + "(" + rational.numer + "," + rational.denom + ")");
-    });
-    $loc.__str__ = Sk.ffi.functionPy(function(rationalPy) {
-      var rational = Sk.ffi.remapToJs(rationalPy);
-      return Sk.ffi.remapToPy("" + rational);
-    });
-  }, RATIONAL, []);
-  
   mod[DIMENSIONS] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = Sk.ffi.functionPy(function(selfPy, M, L, T, Q) {
       Sk.ffi.checkMethodArgs(MEASURE, arguments, 1, 4);
@@ -28187,6 +28114,265 @@ Sk.builtin.defineUnits = function(mod) {
       });
     }, VECTOR_3, []);
   };
+}).call(this);
+/**
+ * Convenience function for incorporating fractions into a module.
+ *
+ * Usage:
+ *
+ * Sk.builtin.defineFractions(mod);
+ */
+(function() {
+
+/**
+ * @const
+ * @type {string}
+ */
+var INT              = "int";
+/**
+ * @const
+ * @type {string}
+ */
+var NUMBER           = "Number";
+/**
+ * @const
+ * @type {string}
+ */
+var PROP_NUMERATOR   = "numerator";
+/**
+ * @const
+ * @type {string}
+ */
+var PROP_NUMER       = "numer";
+/**
+ * @const
+ * @type {string}
+ */
+var PROP_DENOMINATOR = "denominator";
+/**
+ * @const
+ * @type {string}
+ */
+var PROP_DENOM       = "denom";
+/**
+ * @const
+ * @type {string}
+ */
+var ARG_SELF         = "self";
+/**
+ * @const
+ * @type {string}
+ */
+var ARG_OTHER        = "other";
+/**
+ * @const
+ * @type {string}
+ */
+var OP_ADD           = "+";
+/**
+ * @const
+ * @type {string}
+ */
+var OP_SUB           = "-";
+/**
+ * @const
+ * @type {string}
+ */
+var OP_MUL           = "*";
+/**
+ * @const
+ * @type {string}
+ */
+var OP_DIV           = "/";
+/**
+ * @const
+ * @type {string}
+ */
+var DENOMINATOR_ZERO = "denominator must not be zero";
+
+/**
+ * @param {string} RATIONAL The name to be given to the fraction class, usually Rational or Fraction.
+ * @param {function(number, number): Object} factory
+ */
+Sk.builtin.defineFractions = function(mod, RATIONAL, factory) {
+  Sk.ffi.checkFunctionArgs("defineFractions", arguments, 3, 3);
+  /**
+   * @param {Object} valuePy
+   * @return {boolean} true if the thing is a vector, otherwise false.
+   */
+  var isRational = function(valuePy) {
+    return Sk.ffi.isObjectRef(valuePy) && Sk.ffi.typeName(valuePy) === RATIONAL;
+  }
+  /**
+   * @param {number} numerator
+   * @param {number} denominator
+   */
+  var rationalToPy = function(numerator, denominator) {
+    return Sk.ffi.callsim(mod[RATIONAL], Sk.ffi.numberToPy(numerator), Sk.ffi.numberToPy(denominator));
+  };
+  mod[RATIONAL] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
+    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, numerPy, denomPy) {
+      if (!Sk.ffi.isUndefined(denomPy)) {
+        Sk.ffi.checkMethodArgs(RATIONAL, arguments, 2, 2);
+        Sk.ffi.checkArgType(PROP_NUMERATOR, INT, Sk.ffi.isInt(numerPy));
+        Sk.ffi.checkArgType(PROP_DENOMINATOR, INT, Sk.ffi.isInt(denomPy));
+        var numer = Sk.ffi.remapToJs(numerPy);
+        var denom = Sk.ffi.remapToJs(denomPy);
+        if (denom != 0) {
+          Sk.ffi.referenceToPy(factory(numer, denom), RATIONAL, undefined, selfPy);
+        }
+        else {
+          throw new Sk.builtin.ZeroDivisionError(DENOMINATOR_ZERO);
+        }
+      }
+      else {
+        if (Sk.ffi.isUndefined(numerPy)) {
+          Sk.ffi.referenceToPy(factory(0, 1), RATIONAL, undefined, selfPy);
+        }
+        else {
+          if (isRational(numerPy)) {
+            Sk.ffi.checkMethodArgs(RATIONAL, arguments, 1, 1);
+            Sk.ffi.referenceToPy(Sk.ffi.remapToJs(numerPy), RATIONAL, undefined, selfPy);
+          }
+          else if (Sk.ffi.isNumber(numerPy)) {
+            Sk.ffi.checkArgType(PROP_NUMERATOR, INT, Sk.ffi.isInt(numerPy));
+            var numer = Sk.ffi.remapToJs(numerPy);
+            Sk.ffi.referenceToPy(factory(numer, 1), RATIONAL, undefined, selfPy);
+          }
+          else {
+            Sk.ffi.checkMethodArgs(RATIONAL, arguments, 2, 2);
+          }
+        }
+      }
+    });
+    $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
+      var rational = Sk.ffi.remapToJs(selfPy);
+      switch(name) {
+        case PROP_NUMER:
+        case PROP_NUMERATOR: {
+          return Sk.ffi.numberToIntPy(rational.numer);
+        }
+        case PROP_DENOM:
+        case PROP_DENOMINATOR: {
+          return Sk.ffi.numberToIntPy(rational.denom);
+        }
+        default: {
+          throw Sk.ffi.err.attribute(name).isNotGetableOnType(RATIONAL);
+        }
+      }
+    });
+    $loc.__add__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+      Sk.ffi.checkFunctionArgs(OP_ADD, arguments, 2, 2);
+      Sk.ffi.checkArgType(ARG_SELF,  RATIONAL, isRational(selfPy));
+      Sk.ffi.checkArgType(ARG_OTHER, [RATIONAL, INT], isRational(otherPy) || Sk.ffi.isInt(otherPy));
+      var a = Sk.ffi.remapToJs(selfPy);
+      var b = Sk.ffi.remapToJs(otherPy);
+      return Sk.ffi.callsim(mod[RATIONAL], Sk.ffi.remapToPy(a.add(b), RATIONAL));
+    });
+    $loc.__radd__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+      Sk.ffi.checkFunctionArgs(OP_ADD, arguments, 2, 2);
+      Sk.ffi.checkArgType(ARG_SELF,  RATIONAL, isRational(selfPy));
+      Sk.ffi.checkArgType(ARG_OTHER, INT, Sk.ffi.isInt(otherPy));
+      var self = Sk.ffi.remapToJs(selfPy);
+      var other = factory(Sk.ffi.remapToJs(otherPy), 1);
+      return Sk.ffi.callsim(mod[RATIONAL], Sk.ffi.remapToPy(other.add(self), RATIONAL));
+    });
+    $loc.__sub__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+      Sk.ffi.checkFunctionArgs(OP_SUB, arguments, 2, 2);
+      Sk.ffi.checkArgType(ARG_SELF,  RATIONAL, isRational(selfPy));
+      Sk.ffi.checkArgType(ARG_OTHER, [RATIONAL, INT], isRational(otherPy) || Sk.ffi.isInt(otherPy));
+      var a = Sk.ffi.remapToJs(selfPy);
+      var b = Sk.ffi.remapToJs(otherPy);
+      return Sk.ffi.callsim(mod[RATIONAL], Sk.ffi.remapToPy(a.sub(b), RATIONAL));
+    });
+    $loc.__rsub__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+      Sk.ffi.checkFunctionArgs(OP_ADD, arguments, 2, 2);
+      Sk.ffi.checkArgType(ARG_SELF,  RATIONAL, isRational(selfPy));
+      Sk.ffi.checkArgType(ARG_OTHER, INT, Sk.ffi.isInt(otherPy));
+      var self = Sk.ffi.remapToJs(selfPy);
+      var other = factory(Sk.ffi.remapToJs(otherPy), 1);
+      return Sk.ffi.callsim(mod[RATIONAL], Sk.ffi.remapToPy(other.sub(self), RATIONAL));
+    });
+    $loc.__mul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+      Sk.ffi.checkFunctionArgs(OP_MUL, arguments, 2, 2);
+      Sk.ffi.checkArgType(ARG_SELF,  RATIONAL, isRational(selfPy));
+      var a = Sk.ffi.remapToJs(selfPy);
+      var b = Sk.ffi.remapToJs(otherPy);
+      if (Sk.ffi.isNumber(otherPy)) {
+        Sk.ffi.checkArgType(ARG_OTHER, INT, Sk.ffi.isInt(otherPy));
+        return Sk.ffi.callsim(mod[RATIONAL], Sk.ffi.numberToIntPy(a.numer * b), Sk.ffi.numberToIntPy(a.denom));
+      }
+      else {
+        Sk.ffi.checkArgType(ARG_OTHER, RATIONAL, isRational(otherPy));
+        return Sk.ffi.callsim(mod[RATIONAL], Sk.ffi.remapToPy(a.mul(b), RATIONAL));
+      }
+    });
+    $loc.__rmul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+      Sk.ffi.checkFunctionArgs(OP_ADD, arguments, 2, 2);
+      Sk.ffi.checkArgType(ARG_SELF,  RATIONAL, isRational(selfPy));
+      Sk.ffi.checkArgType(ARG_OTHER, INT, Sk.ffi.isInt(otherPy));
+      var self = Sk.ffi.remapToJs(selfPy);
+      var other = factory(Sk.ffi.remapToJs(otherPy), 1);
+      return Sk.ffi.callsim(mod[RATIONAL], Sk.ffi.remapToPy(other.mul(self), RATIONAL));
+    });
+    $loc.__div__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+      Sk.ffi.checkFunctionArgs(OP_DIV, arguments, 2, 2);
+      Sk.ffi.checkArgType(ARG_SELF,  RATIONAL, isRational(selfPy));
+      var numer = Sk.ffi.remapToJs(selfPy);
+      var denom = Sk.ffi.remapToJs(otherPy);
+      if (Sk.ffi.isNumber(otherPy)) {
+        Sk.ffi.checkArgType(ARG_OTHER, INT, Sk.ffi.isInt(otherPy));
+        if (denom != 0) {
+          return Sk.ffi.callsim(mod[RATIONAL], Sk.ffi.numberToIntPy(numer.numer), Sk.ffi.numberToIntPy(numer.denom * denom));
+        }
+        else {
+          throw new Sk.builtin.ZeroDivisionError(DENOMINATOR_ZERO);
+        }
+      }
+      else {
+        Sk.ffi.checkArgType(ARG_OTHER, RATIONAL, isRational(otherPy));
+        if (denom.numer != 0) {
+          return Sk.ffi.callsim(mod[RATIONAL], Sk.ffi.remapToPy(numer.div(denom), RATIONAL));
+        }
+        else {
+          throw new Sk.builtin.ZeroDivisionError(DENOMINATOR_ZERO);
+        }
+      }
+    });
+    $loc.__rdiv__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+      Sk.ffi.checkFunctionArgs(OP_ADD, arguments, 2, 2);
+      Sk.ffi.checkArgType(ARG_SELF,  RATIONAL, isRational(selfPy));
+      Sk.ffi.checkArgType(ARG_OTHER, INT, Sk.ffi.isInt(otherPy));
+      var self = Sk.ffi.remapToJs(selfPy);
+      var other = factory(Sk.ffi.remapToJs(otherPy), 1);
+      if (self.numer != 0) {
+        return Sk.ffi.callsim(mod[RATIONAL], Sk.ffi.remapToPy(other.div(self), RATIONAL));
+      }
+      else {
+        throw new Sk.builtin.ZeroDivisionError(DENOMINATOR_ZERO);
+      }
+    });
+    $loc.__eq__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+      Sk.ffi.checkFunctionArgs(OP_DIV, arguments, 2, 2);
+      if (isRational(selfPy) && isRational(otherPy)) {
+        var a = Sk.ffi.remapToJs(selfPy);
+        var b = Sk.ffi.remapToJs(otherPy);
+        return Sk.ffi.booleanToPy(a.equals(b));
+      }
+      else {
+        return Sk.ffi.bool.False;
+      }
+    });
+    $loc.__repr__ = Sk.ffi.functionPy(function(rationalPy) {
+      var rational = Sk.ffi.remapToJs(rationalPy);
+      return Sk.ffi.remapToPy(RATIONAL + "(" + rational.numer + "," + rational.denom + ")");
+    });
+    $loc.__str__ = Sk.ffi.functionPy(function(rationalPy) {
+      var rational = Sk.ffi.remapToJs(rationalPy);
+      return Sk.ffi.remapToPy("" + rational);
+    });
+  }, RATIONAL, []);
+};
 }).call(this);
 /* bladejs - 0.0.50
  * JavaScript Geometric Algebra library.

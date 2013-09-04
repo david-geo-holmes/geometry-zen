@@ -226,5 +226,14 @@ var $builtinmodule = function(name)
         return new Sk.builtin.nmber(r, Sk.builtin.nmber.int$);
     });
 
+    mod.modf = Sk.ffi.functionPy(function(xPy) {
+      Sk.ffi.checkFunctionArgs("modf", arguments, 1, 1);
+      Sk.ffi.checkArgType("x", "number", Sk.ffi.isNumber(xPy));
+      var x = Sk.ffi.remapToJs(xPy);
+      var integerPart = x|0;
+      var fractionalPart = x - integerPart;
+      return Sk.ffi.tuplePy([Sk.ffi.numberToPy(fractionalPart), Sk.ffi.numberToPy(integerPart)]);
+    });
+
     return mod;
 }

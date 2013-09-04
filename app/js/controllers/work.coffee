@@ -114,10 +114,15 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
       catch e
         # Unfortunately, we have to parse the string representation of the message.
         # It would be nice if exceptions had the standard name and message.
-        message = e.toString()
-        name = message.substring(0, message.indexOf(":"))
-        text = message.substring(message.indexOf(":") + 1)
-        $scope.messages.push name: name, text: text, severity: 'error'
+        if typeof e isnt 'undefined'
+          if typeof e.toString is 'function'
+            message = e.toString()
+            name = message.substring(0, message.indexOf(":"))
+            text = message.substring(message.indexOf(":") + 1)
+            $scope.messages.push name: name, text: text, severity: 'error'
+          else
+            # Messages raised don't all support toString
+            console.log JSON.stringify(e, null, 2)
 
   # This is the save event handler for an existing page, as evident by the provision of the SHA.
   $scope.saveFile = () ->

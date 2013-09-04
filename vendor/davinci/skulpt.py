@@ -109,6 +109,7 @@ Files = [
         'src/e3ga.js',
         'src/units.js',
         'src/vector3.js',
+        'src/fractions.js',
         "../bladejs/generated/js/app.js",
         ("support/jsbeautify/beautify.js", FILE_TYPE_TEST),
         ]
