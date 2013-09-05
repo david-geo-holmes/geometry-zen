@@ -108,6 +108,7 @@ Files = [
         'src/e2ga.js',
         'src/e3ga.js',
         'src/units.js',
+        'src/three.js',
         'src/vector3.js',
         'src/fractions.js',
         "../bladejs/generated/js/app.js",
