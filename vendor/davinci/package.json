@@ -1,12 +1,12 @@
 {
-  "name": "davinci",
-  "version": "0.9.32",
-  "description": "Python to JavaScript cross compiler",
+  "name": "davinci-tools",
+  "version": "0.9.35",
+  "description": "Python to JavaScript cross compiler tooling",
   "author": {
     "name": "David Holmes",
     "email": "david.geo.holmes@gmail.com"
   },
-  "main": "./build/davinci.min.js",
+  "main": ["./dist/davinci-tools.js", "./dist/davinci-tools.min.js"],
   "repository": {
     "type": "git",
     "url": "git://github.com/geometryzen/davinci.git"
@@ -17,7 +17,7 @@
   "licenses": [
     {
       "type": "MIT",
-      "url": "https://github.com/geometryzen/davinci/LICENSE-MIT"
+      "url": "https://github.com/geometryzen/davinci/LICENSE"
     }
   ],
   "dependencies": {
@@ -25,5 +25,7 @@
   },
   "devDependencies": {
   },
-  "keywords": []
+  "keywords": [],
+  "ignore": [
+  ]
 }

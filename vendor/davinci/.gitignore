@@ -1,19 +1,19 @@
+# Ignore stuff from the Google Closure compiler.
 support/tmp/
-doc/static/builtin.js
-doc/static/skulpt.js
+
+# Ignore ALL distribution files.
+dist/
+
+# Ignore distribution that is copied into the samples location.
 doc/static/davinci.js
 doc/static/davinci.min.js
 doc/static/davinci-stdlib.js
-vendor/
 
-*.pyc
-.DS_Store
+# Ignore Bower dependencies, as the node project is not "deployed" per se: http://www.mikealrogers.com/posts/nodemodules-in-git.html
+# But we do embed the BladeJS JavaScript library.
+vendor/threejs
 
-/.d8_history
-/.idea
-/.vagrant
-
-# Ignore node_modules, as the node project is not "deployed" per se: http://www.mikealrogers.com/posts/nodemodules-in-git.html
+# Ignore tools dependencies
 /node_modules
 
 # Ignore the files generated for Jasmine testing.
@@ -21,3 +21,6 @@ vendor/
 
 # Ignore this log file which makes an appearance due to Google Chrome being used to inspect the Jasmine results.
 libpeerconnection.log
+
+# Ignore iOS junk.
+.DS_Store

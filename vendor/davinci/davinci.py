@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python2.6
 
 #
 #   Note:  python2.6 is specified because that is what the skulpt parser
@@ -101,6 +101,7 @@ Files = [
         'src/import.js',
         'src/timsort.js',
         'src/builtindict.js',
+        'src/complex.js',
         'src/document.js',
         'src/event.js',
         'src/node.js',
@@ -111,7 +112,7 @@ Files = [
         'src/three.js',
         'src/vector3.js',
         'src/fractions.js',
-        "../bladejs/generated/js/app.js",
+        "vendor/bladejs/dist/bladejs.js",
         ("support/jsbeautify/beautify.js", FILE_TYPE_TEST),
         ]
 
@@ -391,9 +392,13 @@ def dist(options):
         print "+----------------------------------------------------------------------------+"
 
     if options.verbose:
-        print ". Removing distribution directory, '{0}/'.".format(DIST_DIR)
+        print ". Cleaning distribution directory, '{0}'.".format(DIST_DIR)
 
-    os.system("rm -rf {0}/".format(DIST_DIR))
+    # We don't delete the entire distribution directory so as to leave the tools for testing.
+    os.system("rm -rf {0}/{1}".format(DIST_DIR, OUTFILE_REG))
+    os.system("rm -rf {0}/{1}".format(DIST_DIR, OUTFILE_MIN))
+    os.system("rm -rf {0}/{1}".format(DIST_DIR, OUTFILE_LIB))
+    os.system("rm -rf {0}/{1}".format(DIST_DIR, OUTFILE_MAP))
     if not os.path.exists(DIST_DIR): os.mkdir(DIST_DIR)
 
     if options.uncompressed:

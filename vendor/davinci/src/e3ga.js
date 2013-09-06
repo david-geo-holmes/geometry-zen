@@ -661,7 +661,7 @@ Sk.builtin.defineEuclidean3 = function(mod) {
           return remapE3ToPy(a.w * b, a.x * b, a.y * b, a.z * b, a.xy * b, a.yz * b, a.zx * b, a.xyz * b);
         }
         default: {
-          throw Sk.ffi.err.expectArg('other').inFunction('*(' + EUCLIDEAN_3 + ', other)').toHaveType([EUCLIDEAN_3, "Number", UNIT]);
+          throw Sk.ffi.err.argument('other').inFunction('*(' + EUCLIDEAN_3 + ', other)').mustHaveType([EUCLIDEAN_3, "Number", UNIT]);
         }
       }
     });
