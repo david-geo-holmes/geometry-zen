@@ -1,6 +1,6 @@
 {
   "name": "bladejs",
-  "version": "0.0.57",
+  "version": "0.9.0",
   "description": "JavaScript Geometric Algebra library",
   "author": {
     "name": "David Holmes",
@@ -25,13 +25,13 @@
     "node_modules"
   ],
   "homepage": "https://github.com/geometryzen/bladejs",
-  "_release": "0.0.57",
+  "_release": "0.9.0",
   "_resolution": {
     "type": "version",
-    "tag": "0.0.57",
-    "commit": "2f57a57fa1f51dee624f7a250c83fd63af507e6d"
+    "tag": "0.9.0",
+    "commit": "cb03bc968d7ddfaa79b543895292b62398b596f6"
   },
   "_source": "git://github.com/geometryzen/bladejs.git",
-  "_target": "0.0.57",
+  "_target": "0.9.0",
   "_originalSource": "bladejs"
 }
