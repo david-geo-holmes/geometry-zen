@@ -22,10 +22,12 @@ app.run(['$rootScope', '$window' , '$location', 'cookie', 'i18n', ($rootScope, $
   $rootScope.loginEnabled = () -> not cookie.hasItem(GITHUB_TOKEN_COOKIE_NAME)
 
   $rootScope.logout = () ->
+    console.log "logout"
     cookie.removeItem(GITHUB_TOKEN_COOKIE_NAME)
     cookie.removeItem(GITHUB_LOGIN_COOKIE_NAME)
 
   $rootScope.login = () ->
+    console.log "login"
     clientId = cookie.getItem(GITHUB_APPLICATION_CLIENT_ID_COOKIE_NAME)
     $window.location.href = "https://github.com/login/oauth/authorize?client_id=#{clientId}&amp;scope=repo,user,gist"
 
@@ -33,6 +35,7 @@ app.run(['$rootScope', '$window' , '$location', 'cookie', 'i18n', ($rootScope, $
 
   isMenuLocation = () ->
     if $window.location and $window.location.href
+      # Note: The $ isn't a typo - it means there is nothing more.
       return not $window.location.href.match(new RegExp("/workbench$")) and
              not $window.location.href.match(new RegExp("/users/")) and
              not $window.location.href.match(new RegExp("/gists/"))
