@@ -25128,166 +25128,371 @@ Sk.builtin.addEventListener = function (mod, eventTarget) {
  * Sk.builtin.defineGeometry(mod);
  */
 (function() {
-  /**
-   * @param {string} moduleName The name of the module.
-   */
-  Sk.builtin.defineGeometry = function(mod, THREE, moduleName) {
-    Sk.ffi.checkFunctionArgs("defineGeometry", arguments, 3, 3);
-    /**
-     * A Euclidean space described by Cartesian coordinates with 3 dimensions.
-     *
-     * @const
-     * @type {string}
-     */
-    var CARTESIAN_SPACE                 = "CartesianSpace";
-    /**
-     * @const
-     * @type {string}
-     */
-    var SCENE                           = "Scene";
-    /**
-     * @const
-     * @type {string}
-     */
-    var PERSPECTIVE_CAMERA              = "PerspectiveCamera";
-    /**
-     * @const
-     * @type {string}
-     */
-    var WEBGL_RENDERER                  = "WebGLRenderer";
-    /**
-     * @const
-     * @type {string}
-     */
-    var PROP_ORIGIN                     = "origin";
-    /**
-     * @const
-     * @type {string}
-     */
-    var PROP_CAMERA                     = "camera";
-    /**
-     * @const
-     * @type {string}
-     */
-    var PROP_RENDERER                   = "renderer";
-    /**
-     * @const
-     * @type {string}
-     */
-    var PROP_SCENE                      = "scene";
-    /**
-     * @const
-     * @type {string}
-     */
-    var PROP_WIDTH                      = "width";
-    /**
-     * @const
-     * @type {string}
-     */
-    var PROP_HEIGHT                     = "height";
-    /**
-     * @const
-     * @type {string}
-     */
-    var METHOD_ADD                      = "add";
-    /**
-     * @const
-     * @type {string}
-     */
-    var METHOD_LOOK_AT                  = "lookAt";
-    /**
-     * @const
-     * @type {string}
-     */
-    var METHOD_SET_CLEAR_COLOR          = "setClearColor";
-    /**
-     * @const
-     * @type {string}
-     */
-    var METHOD_RENDER                   = "render";
-    /**
-     * @const
-     * @type {string}
-     */
-    var METHOD_VIEW_SIZE                = "viewSize";
-    /**
-     * @const
-     * @type {string}
-     */
-    var METHOD_SET_SIZE                 = "setSize";
-    /**
-     * @const
-     * @type {string}
-     */
-    var METHOD_UPDATE_PROJECTION_MATRIX = "updateProjectionMatrix";
+/**
+* @param {string} moduleName The name of the module.
+*/
+Sk.builtin.defineGeometry = function(mod, THREE, moduleName) {
+Sk.ffi.checkFunctionArgs("defineGeometry", arguments, 3, 3);
+/**
+ * A Euclidean space described by Cartesian coordinates with 3 dimensions.
+ *
+ * @const
+ * @type {string}
+ */
+var CARTESIAN_SPACE                 = "CartesianSpace";
+/**
+ * @const
+ * @type {string}
+ */
+var SCENE                           = "Scene";
+/**
+ * @const
+ * @type {string}
+ */
+var PERSPECTIVE_CAMERA              = "PerspectiveCamera";
+/**
+ * @const
+ * @type {string}
+ */
+var WEBGL_RENDERER                  = "WebGLRenderer";
+/**
+ * @const
+ * @type {string}
+ */
+var PROP_ORIGIN                     = "origin";
+/**
+ * @const
+ * @type {string}
+ */
+var PROP_CAMERA                     = "camera";
+/**
+ * @const
+ * @type {string}
+ */
+var PROP_RENDERER                   = "renderer";
+/**
+ * @const
+ * @type {string}
+ */
+var PROP_VERTICES                   = "vertices";
+/**
+ * @const
+ * @type {string}
+ */
+var PROP_SCENE                      = "scene";
+/**
+ * @const
+ * @type {string}
+ */
+var PROP_WIDTH                      = "width";
+/**
+ * @const
+ * @type {string}
+ */
+var PROP_HEIGHT                     = "height";
+/**
+ * @const
+ * @type {string}
+ */
+var PROP_POSITION                   = "position";
+/**
+ * @const
+ * @type {string}
+ */
+var PROP_UP                         = "up";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_ADD                      = "add";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_LOOK_AT                  = "lookAt";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_SET_CLEAR_COLOR          = "setClearColor";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_RENDER                   = "render";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_VIEW_SIZE                = "viewSize";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_SET_SIZE                 = "setSize";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_UPDATE_PROJECTION_MATRIX = "updateProjectionMatrix";
+/**
+ * @const
+ * @type {string}
+ */
+var WORLD                           = "world";
+/**
+ * @const
+ * @type {string}
+ */
+var CUBE                            = "cube";
+/**
+ * @const
+ * @type {string}
+ */
+var CYLINDER                        = "cylinder";
+/**
+ * @const
+ * @type {string}
+ */
+var SPHERE                          = "sphere";
+/**
+ * @const
+ * @type {string}
+ */
+var POINT_LIGHT                     = "PointLight";
+/**
+ * @const
+ * @type {string}
+ */
+var LINE_BASIC_MATERIAL             = "LineBasicMaterial";
+/**
+ * @const
+ * @type {string}
+ */
+var MESH_LAMBERT_MATERIAL           = "MeshLambertMaterial";
+/**
+ * @const
+ * @type {string}
+ */
+var CUBE_GEOMETRY                   = "CubeGeometry";
+/**
+ * @const
+ * @type {string}
+ */
+var CYLINDER_GEOMETRY               = "CylinderGeometry";
+/**
+ * @const
+ * @type {string}
+ */
+var SPHERE_GEOMETRY                 = "SphereGeometry";
+/**
+ * @const
+ * @type {string}
+ */
+var LINE                            = "Line";
+/**
+ * @const
+ * @type {string}
+ */
+var MESH                            = "Mesh";
+/**
+ * @const
+ * @type {string}
+ */
+var GEOMETRY                        = "Geometry";
+/**
+ * @const
+ * @type {string}
+ */
+var OBJECT_3D                       = "Object3D";
+/**
+ * @const
+ * @type {string}
+ */
+var VECTOR_3                        = "Vector3";
+/**
+ * @const
+ * @type {number}
+ */
+var COLOR_GRID = 0x66A1D2
+var MATERIAL_GRID_MAJOR = new THREE[LINE_BASIC_MATERIAL]({"color": COLOR_GRID,"opacity":0.20,"transparent":true});
+var MATERIAL_GRID_MINOR = new THREE[LINE_BASIC_MATERIAL]({"color": COLOR_GRID,"opacity":0.02,"transparent":true});
+var e1 = new THREE[VECTOR_3](1, 0, 0);
+var e2 = new THREE[VECTOR_3](0, 1, 0);
+var e3 = new THREE[VECTOR_3](0, 0, 1);
 
-    mod[CARTESIAN_SPACE] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
-      $loc.__init__ = Sk.ffi.functionPy(function(selfPy, scenePy) {
-        Sk.ffi.checkMethodArgs(CARTESIAN_SPACE, arguments, 0, 0);
-        var scenePy = Sk.ffi.callsim(mod['world']);
-        var scene = Sk.ffi.remapToJs(scenePy);
-        var cameraPy = Sk.ffi.callsim(mod[PERSPECTIVE_CAMERA], Sk.ffi.numberToPy(45), Sk.ffi.numberToPy(1.0), Sk.ffi.numberToPy(0.1), Sk.ffi.numberToPy(10000));
-        var camera = Sk.ffi.remapToJs(cameraPy);
-        camera.position.set(8, 8, 8);
-        camera[METHOD_LOOK_AT](scene.position);
-        var rendererPy = Sk.ffi.callsim(mod[WEBGL_RENDERER]);
-        var renderer = Sk.ffi.remapToJs(rendererPy);
-        renderer[METHOD_SET_CLEAR_COLOR](0x080808, 1.0);
-        Sk.ffi.referenceToPy({scenePy: scenePy, cameraPy: cameraPy, rendererPy: rendererPy}, CARTESIAN_SPACE, undefined, selfPy);
-      });
-      $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
-        var space = Sk.ffi.remapToJs(selfPy);
-        switch(name) {
-          case PROP_CAMERA: {
-            return space.cameraPy;
-          }
-          case PROP_ORIGIN: {
-            return Sk.ffi.gattr(space.scenePy, 'position');
-          }
-          case PROP_RENDERER: {
-            return space.rendererPy;
-          }
-          case PROP_SCENE: {
-            return space.scenePy;
-          }
-          case METHOD_ADD: {
-            return Sk.ffi.gattr(space.scenePy, METHOD_ADD);
-          }
-          case METHOD_RENDER: {
-            return Sk.ffi.callableToPy(mod, METHOD_RENDER, function() {
-              var methodPy = Sk.ffi.gattr(space.rendererPy, METHOD_RENDER);
-              return Sk.ffi.callsim(methodPy, space.scenePy, space.cameraPy);
-            });
-          }
-          case METHOD_VIEW_SIZE: {
-            return Sk.ffi.callableToPy(mod, METHOD_RENDER, function(methodPy, widthPy, heightPy) {
-                Sk.ffi.checkMethodArgs(METHOD_VIEW_SIZE, arguments, 2, 2);
-                Sk.ffi.checkArgType(PROP_WIDTH, Sk.ffi.PyType.INT, Sk.ffi.isInt(widthPy), widthPy);
-                Sk.ffi.checkArgType(PROP_HEIGHT, Sk.ffi.PyType.INT, Sk.ffi.isInt(heightPy), heightPy);
-                var width  = Sk.ffi.remapToJs(widthPy);
-                var height = Sk.ffi.remapToJs(heightPy);
-                var renderer = Sk.ffi.remapToJs(space.rendererPy);
-                renderer.setSize(width, height);
-                var camera = Sk.ffi.remapToJs(space.cameraPy);
-                camera.aspect = width / height;
-                camera[METHOD_UPDATE_PROJECTION_MATRIX]();
-            });
-          }
-          default: {
-            throw Sk.ffi.err.attribute(name).isNotGetableOnType(CARTESIAN_SPACE);
-          }
-        }
-      });
-      $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
-        var space = Sk.ffi.remapToJs(selfPy);
-        return Sk.ffi.stringToPy("" + space)
-      })
-      $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
-        var space = Sk.ffi.remapToJs(selfPy);
-        return Sk.ffi.stringToPy("" + space)
-      })
-    }, CARTESIAN_SPACE, []);
-  };
+mod[WORLD] = Sk.ffi.functionPy(function() {
+  Sk.ffi.checkFunctionArgs(WORLD, arguments, 0, 0);
+  var scenePy = Sk.ffi.callsim(mod[SCENE]);
+  var scene = Sk.ffi.remapToJs(scenePy);
+
+  var pointLight = new THREE[POINT_LIGHT](0xFFFFFF);
+  pointLight.position.set(4, 4, 4);
+  scene.add(pointLight);
+
+  return scenePy;
+});
+
+mod[CUBE] = Sk.nativejs.func(function box(width, height, depth) {
+  Sk.ffi.checkFunctionArgs(CUBE, arguments, 0, 3);
+  var materialPy = Sk.ffi.callsim(mod[MESH_LAMBERT_MATERIAL], Sk.ffi.remapToPy({"color": 0x0000FF}));
+  width  = Sk.ffi.remapToJs(width) || 1;
+  height = Sk.ffi.remapToJs(height) || 1;
+  depth  = Sk.ffi.remapToJs(depth) || 1;
+  var geometryPy = Sk.ffi.callsim(mod[CUBE_GEOMETRY], Sk.ffi.remapToPy(width), Sk.ffi.remapToPy(height), Sk.ffi.remapToPy(depth));
+  return Sk.ffi.callsim(mod[MESH], geometryPy, materialPy);
+});
+
+mod[CYLINDER] = Sk.nativejs.func(function box(radiusTop, radiusBottom, height) {
+  Sk.ffi.checkFunctionArgs(CYLINDER, arguments, 0, 3);
+  var materialPy = Sk.ffi.callsim(mod[MESH_LAMBERT_MATERIAL], Sk.ffi.remapToPy({"color": 0x00FF00}));
+  radiusBottom = Sk.ffi.remapToJs(radiusBottom) || 0.682784063;
+  radiusTop  = Sk.ffi.remapToJs(radiusTop,  radiusBottom);
+  height  = Sk.ffi.remapToJs(height) || 1;
+  radiusTop          = Sk.ffi.remapToPy(radiusTop);
+  radiusBottom       = Sk.ffi.remapToPy(radiusBottom);
+  height             = Sk.ffi.remapToPy(height);
+  var radialSegments = Sk.ffi.remapToPy(32);
+  var geometryPy = Sk.ffi.callsim(mod[CYLINDER_GEOMETRY], radiusTop, radiusBottom, height, radialSegments);
+  return Sk.ffi.callsim(mod[MESH], geometryPy, materialPy);
+});
+
+mod[SPHERE] = Sk.nativejs.func(function box(radius) {
+  Sk.ffi.checkFunctionArgs(SPHERE, arguments, 0, 1);
+  var materialPy = Sk.ffi.callsim(mod[MESH_LAMBERT_MATERIAL], Sk.ffi.remapToPy({"color": 0xFF0000}));
+  radius = Sk.ffi.remapToJs(radius) || 0.620350491;
+  radius = Sk.ffi.remapToPy(radius);
+  var widthSegments = Sk.ffi.remapToPy(24);
+  var heightSegments = Sk.ffi.remapToPy(18);
+  var geometryPy = Sk.ffi.callsim(mod[SPHERE_GEOMETRY], radius, widthSegments, heightSegments);
+  return Sk.ffi.callsim(mod[MESH], geometryPy, materialPy);
+});
+
+/**
+ * @param {number} size The extent of the axes.
+ */
+function createCartesianAxes(size) {
+  var COLOR_X_AXIS = 0xFF0000;
+  var COLOR_Y_AXIS = 0x00FF00;
+  var COLOR_Z_AXIS = 0x0000FF;
+  var geometries = [[+size,0,0],[0,+size,0],[0,0,+size],[-size,0,0],[0,-size,0],[0,0,-size]].map(function(v) {
+    var geometry = new THREE[GEOMETRY]();
+    geometry[PROP_VERTICES].push(new THREE[VECTOR_3](0, 0, 0));
+    geometry[PROP_VERTICES].push(new THREE[VECTOR_3](v[0], v[1], v[2]));
+    return geometry;
+  });
+
+  var axes = new THREE[OBJECT_3D]();
+  axes.add(new THREE[LINE](geometries[0], new THREE[LINE_BASIC_MATERIAL]({"color":COLOR_X_AXIS, "opacity": 0.5, "transparent":true})));
+  axes.add(new THREE[LINE](geometries[1], new THREE[LINE_BASIC_MATERIAL]({"color":COLOR_Y_AXIS, "opacity": 0.5, "transparent":true})));
+  axes.add(new THREE[LINE](geometries[2], new THREE[LINE_BASIC_MATERIAL]({"color":COLOR_Z_AXIS, "opacity": 0.5, "transparent":true})));
+  axes.add(new THREE[LINE](geometries[3], new THREE[LINE_BASIC_MATERIAL]({"color":COLOR_X_AXIS, "opacity": 0.2, "transparent":true})));
+  axes.add(new THREE[LINE](geometries[4], new THREE[LINE_BASIC_MATERIAL]({"color":COLOR_Y_AXIS, "opacity": 0.2, "transparent":true})));
+  axes.add(new THREE[LINE](geometries[5], new THREE[LINE_BASIC_MATERIAL]({"color":COLOR_Z_AXIS, "opacity": 0.2, "transparent":true})));
+  return axes;
+}
+
+/**
+ * @param {number} majorSteps
+ * @param {number} minorsPerMajorMark
+ * @param {number} majorScale
+ * @param {!Object} e
+ * @param {!Object} o
+ */
+function createCartesianLines(majorSteps, minorsPerMajorMark, majorScale, e, o) {
+  var grid = new THREE[OBJECT_3D]();
+  var steps = majorSteps * minorsPerMajorMark;
+  var minorScale = majorScale / minorsPerMajorMark;
+  var extent = majorSteps * majorScale;
+  var extentX = o.x * extent;
+  var extentY = o.y * extent;
+  var extentZ = o.z * extent;
+  for (var i = -steps; i <= steps; i += 1) {
+    if (i != 0) {
+      var t = i * minorScale;
+      var gridLineGeometry = new THREE[GEOMETRY]();
+      gridLineGeometry[PROP_VERTICES].push(new THREE[VECTOR_3](e.x*t-extentX, e.y*t-extentY, e.z*t-extentZ));
+      gridLineGeometry[PROP_VERTICES].push(new THREE[VECTOR_3](e.x*t+extentX, e.y*t+extentY, e.z*t+extentZ));
+      var material = (i % minorsPerMajorMark === 0) ? MATERIAL_GRID_MAJOR : MATERIAL_GRID_MINOR;
+      var line = new THREE[LINE](gridLineGeometry, material);
+      grid.add(line);
+    }
+  }
+  return grid;
+}
+
+mod[CARTESIAN_SPACE] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
+  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, scenePy) {
+    Sk.ffi.checkMethodArgs(CARTESIAN_SPACE, arguments, 0, 0);
+    var scenePy = Sk.ffi.callsim(mod[WORLD]);
+    var scene = Sk.ffi.remapToJs(scenePy);
+    var cameraPy = Sk.ffi.callsim(mod[PERSPECTIVE_CAMERA], Sk.ffi.numberToPy(45), Sk.ffi.numberToPy(1.0), Sk.ffi.numberToPy(0.1), Sk.ffi.numberToPy(10000));
+    var camera = Sk.ffi.remapToJs(cameraPy);
+    camera[PROP_UP].set(0, 0, 1);
+    camera[PROP_POSITION].set(+8, -8, +8);
+    camera[METHOD_LOOK_AT](scene.position);
+    var rendererPy = Sk.ffi.callsim(mod[WEBGL_RENDERER], Sk.ffi.remapToPy({"antialias":true}));
+    var renderer = Sk.ffi.remapToJs(rendererPy);
+    renderer[METHOD_SET_CLEAR_COLOR](0x080808, 1.0);
+    scene.add(createCartesianAxes(1000));
+    scene.add(createCartesianLines(5, 10, 1.0, e1, e2));
+    scene.add(createCartesianLines(5, 10, 1.0, e2, e1));
+    Sk.ffi.referenceToPy({scenePy: scenePy, cameraPy: cameraPy, rendererPy: rendererPy}, CARTESIAN_SPACE, undefined, selfPy);
+  });
+  $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
+    var space = Sk.ffi.remapToJs(selfPy);
+    switch(name) {
+      case PROP_CAMERA: {
+        return space.cameraPy;
+      }
+      case PROP_ORIGIN: {
+        return Sk.ffi.gattr(space.scenePy, PROP_POSITION);
+      }
+      case PROP_RENDERER: {
+        return space.rendererPy;
+      }
+      case PROP_SCENE: {
+        return space.scenePy;
+      }
+      case METHOD_ADD: {
+        return Sk.ffi.gattr(space.scenePy, METHOD_ADD);
+      }
+      case METHOD_RENDER: {
+        return Sk.ffi.callableToPy(mod, METHOD_RENDER, function(methodPy) {
+          // Delegate the call to the renderer with scene and camera arguments.
+          methodPy = Sk.ffi.gattr(space.rendererPy, METHOD_RENDER);
+          return Sk.ffi.callsim(methodPy, space.scenePy, space.cameraPy);
+        });
+      }
+      case METHOD_VIEW_SIZE: {
+        return Sk.ffi.callableToPy(mod, METHOD_RENDER, function(methodPy, widthPy, heightPy) {
+          Sk.ffi.checkMethodArgs(METHOD_VIEW_SIZE, arguments, 2, 2);
+          Sk.ffi.checkArgType(PROP_WIDTH, Sk.ffi.PyType.INT, Sk.ffi.isInt(widthPy), widthPy);
+          Sk.ffi.checkArgType(PROP_HEIGHT, Sk.ffi.PyType.INT, Sk.ffi.isInt(heightPy), heightPy);
+          var width  = Sk.ffi.remapToJs(widthPy);
+          var height = Sk.ffi.remapToJs(heightPy);
+          var renderer = Sk.ffi.remapToJs(space.rendererPy);
+          renderer.setSize(width, height);
+          var camera = Sk.ffi.remapToJs(space.cameraPy);
+          camera.aspect = width / height;
+          camera[METHOD_UPDATE_PROJECTION_MATRIX]();
+        });
+      }
+      default: {
+        throw Sk.ffi.err.attribute(name).isNotGetableOnType(CARTESIAN_SPACE);
+      }
+    }
+  });
+  $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
+    var space = Sk.ffi.remapToJs(selfPy);
+    return Sk.ffi.stringToPy("" + space)
+  })
+  $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
+    var space = Sk.ffi.remapToJs(selfPy);
+    return Sk.ffi.stringToPy("" + space)
+  })
+}, CARTESIAN_SPACE, []);
+};
 }).call(this);
 /**
  * Convenience function for incorporating a Node class into a module.
@@ -28816,21 +29021,73 @@ var  BLADE = this.BLADE;
 
 Sk.builtin.defineUnits = function(mod) {
 
+  /**
+   * @const
+   * @type {string}
+   */
   var DIMENSIONS       = "Dimensions";
+  /**
+   * @const
+   * @type {string}
+   */
   var MEASURE          = "Measure";
+  /**
+   * @const
+   * @type {string}
+   */
   var RATIONAL         = "Rational";
+  /**
+   * @const
+   * @type {string}
+   */
   var UNIT             = "Unit";
   var INT              = "int";
   var NUMBER           = "Number";
 
+  /**
+   * @const
+   * @type {string}
+   */
   var PROP_QUANTITY    = "quantity";
+  /**
+   * @const
+   * @type {string}
+   */
   var PROP_UOM         = "uom";
+  /**
+   * @const
+   * @type {string}
+   */
   var PROP_SCALE       = "scale";
+  /**
+   * @const
+   * @type {string}
+   */
   var PROP_DIMENSIONS  = "dimensions";
+  /**
+   * @const
+   * @type {string}
+   */
   var PROP_LABELS      = "labels";
+  /**
+   * @const
+   * @type {string}
+   */
   var PROP_M           = "M";
+  /**
+   * @const
+   * @type {string}
+   */
   var PROP_L           = "L";
+  /**
+   * @const
+   * @type {string}
+   */
   var PROP_T           = "T";
+  /**
+   * @const
+   * @type {string}
+   */
   var PROP_Q           = "Q";
   /**
    * @const
@@ -28869,6 +29126,10 @@ Sk.builtin.defineUnits = function(mod) {
   var AMPERE           = "ampere";
   var VOLT             = "volt";
   var TESLA            = "tesla";
+
+  var isDimensions = function(valuePy) {
+    return Sk.ffi.isClass(valuePy) && Sk.ffi.typeName(valuePy) === DIMENSIONS;
+  }
 
   var isUnit = function(valuePy) {
     return Sk.ffi.isClass(valuePy) && Sk.ffi.typeName(valuePy) === UNIT;
@@ -28911,9 +29172,10 @@ Sk.builtin.defineUnits = function(mod) {
         }
       }
     });
-    $loc.__mul__ = Sk.ffi.functionPy(function(aPy, bPy) {
-      var a = Sk.ffi.remapToJs(aPy);
-      var b = Sk.ffi.remapToJs(bPy);
+    $loc.__mul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+      Sk.ffi.checkRhsOperandType(OP_MUL, DIMENSIONS, isDimensions(otherPy), otherPy);
+      var a = Sk.ffi.remapToJs(selfPy);
+      var b = Sk.ffi.remapToJs(otherPy);
       var c = a.mul(b);
       return Sk.ffi.callsim(mod[DIMENSIONS], Sk.ffi.remapToPy(c.M, RATIONAL), Sk.ffi.remapToPy(c.L, RATIONAL), Sk.ffi.remapToPy(c.T, RATIONAL), Sk.ffi.remapToPy(c.Q, RATIONAL));
     });
@@ -28991,15 +29253,15 @@ Sk.builtin.defineUnits = function(mod) {
         throw Sk.ffi.assertionError(e.message)
       }
     });
-    $loc.__mul__ = Sk.ffi.functionPy(function(lhsPy, rhsPy) {
-      var lhs = Sk.ffi.remapToJs(lhsPy);
-      var rhs = Sk.ffi.remapToJs(rhsPy);
+    $loc.__mul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+      Sk.ffi.checkRhsOperandType(OP_MUL, UNIT, isUnit(otherPy), otherPy);
+      var lhs = Sk.ffi.remapToJs(selfPy);
+      var rhs = Sk.ffi.remapToJs(otherPy);
       var c = lhs.mul(rhs);
       return Sk.ffi.callsim(mod[UNIT], Sk.ffi.remapToPy(c.scale), Sk.ffi.remapToPy(c.dimensions, DIMENSIONS), Sk.ffi.remapToPy(c.labels));
     });
     $loc.__rmul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
       Sk.ffi.checkLhsOperandType(OP_MUL, NUMBER, Sk.ffi.isNumber(otherPy), otherPy);
-      Sk.ffi.checkRhsOperandType(OP_MUL, UNIT, isUnit(selfPy), selfPy);
       var lhs = Sk.ffi.remapToJs(otherPy);
       var rhs = Sk.ffi.remapToJs(selfPy);
       return Sk.ffi.callsim(mod[UNIT], Sk.ffi.remapToPy(lhs * rhs.scale), Sk.ffi.remapToPy(rhs.dimensions, DIMENSIONS), Sk.ffi.remapToPy(rhs.labels));
@@ -29136,9 +29398,9 @@ Sk.builtin.defineThree = function(mod, THREE) {
   var NODE                       = "Node";
 /**
  * @const
- * @type {string}
+ * @type {!Array.<Sk.ffi.PyType>}
  */
-  var NUMBER                     = "Number";
+  var NUMBER                     = [Sk.ffi.PyType.FLOAT, Sk.ffi.PyType.INT, Sk.ffi.PyType.LONG];
 /**
  * @const
  * @type {string}
@@ -29303,26 +29565,6 @@ Sk.builtin.defineThree = function(mod, THREE) {
  * @const
  * @type {string}
  */
-  var WORLD                      = "world";
-/**
- * @const
- * @type {string}
- */
-  var CUBE                       = "cube";
-/**
- * @const
- * @type {string}
- */
-  var CYLINDER                   = "cylinder";
-/**
- * @const
- * @type {string}
- */
-  var SPHERE                     = "sphere";
-/**
- * @const
- * @type {string}
- */
   var PROP_BOTTOM                = "bottom";
 /**
  * @const
@@ -29334,6 +29576,11 @@ Sk.builtin.defineThree = function(mod, THREE) {
  * @type {string}
  */
   var PROP_DETAIL                = "detail";
+/**
+ * @const
+ * @type {string}
+ */
+  var PROP_DISTANCE              = "distance";
 /**
  * @const
  * @type {string}
@@ -29528,6 +29775,26 @@ Sk.builtin.defineThree = function(mod, THREE) {
  * @const
  * @type {string}
  */
+  var METHOD_ROTATE_ON_AXIS      = "rotateOnAxis";
+/**
+ * @const
+ * @type {string}
+ */
+  var METHOD_ROTATE_X            = "rotateX";
+/**
+ * @const
+ * @type {string}
+ */
+  var METHOD_ROTATE_Y            = "rotateY";
+/**
+ * @const
+ * @type {string}
+ */
+  var METHOD_ROTATE_Z            = "rotateZ";
+/**
+ * @const
+ * @type {string}
+ */
   var METHOD_SET_X               = "setX";
 /**
  * @const
@@ -29569,6 +29836,26 @@ Sk.builtin.defineThree = function(mod, THREE) {
  * @type {string}
  */
   var METHOD_SET_GEOMETRY        = "setGeometry";
+/**
+ * @const
+ * @type {string}
+ */
+  var METHOD_TRANSLATE_ON_AXIS   = "translateOnAxis";
+/**
+ * @const
+ * @type {string}
+ */
+  var METHOD_TRANSLATE_X         = "translateX";
+/**
+ * @const
+ * @type {string}
+ */
+  var METHOD_TRANSLATE_Y         = "translateY";
+/**
+ * @const
+ * @type {string}
+ */
+  var METHOD_TRANSLATE_Z         = "translateZ";
 /**
  * @const
  * @type {string}
@@ -29639,6 +29926,11 @@ Sk.builtin.defineThree = function(mod, THREE) {
  * @type {string}
  */
   var METHOD_SET_RGB             = "setRGB";
+  /**
+   * @const
+   * @type {string}
+   */
+  var ARG_AXIS                   = "axis";
 
   mod[NODE]  = Sk.builtin.buildNodeClass(mod);
 
@@ -29662,16 +29954,20 @@ Sk.builtin.defineThree = function(mod, THREE) {
   function isDefined(x)   { return typeof x !== 'undefined'; }
   function isNull(x)      { return typeof x === 'object' && x === null; }
 
-  function isVector(valuePy) {
-    return Sk.ffi.isReference(valuePy) && Sk.ffi.typeName(valuePy) === VECTOR_3;
+  function isVector3(valuePy) {
+    return Sk.ffi.isClass(valuePy) && Sk.ffi.typeName(valuePy) === VECTOR_3;
+  }
+  function isGeometry(valuePy) {
+    // TODO: Need to include sub-classes too.
+    return Sk.ffi.isClass(valuePy) && Sk.ffi.typeName(valuePy) === GEOMETRY;
   }
 
   function methodAdd(target) {
     if (!isObject(target)) {
-      throw new Sk.builtin.AssertionError("target must be an object.");
+      throw Sk.ffi.assertionError("target must be an object.");
     }
     if (!isFunction(target[METHOD_ADD])) {
-      throw new Sk.builtin.AssertionError("target must have an 'add' function.");
+      throw Sk.ffi.assertionError("target must have an 'add' function.");
     }
     return Sk.ffi.callableToPy(mod, METHOD_ADD, function(methodPy, childPy) {
       var child = Sk.ffi.remapToJs(childPy);
@@ -29681,10 +29977,10 @@ Sk.builtin.defineThree = function(mod, THREE) {
 
   function methodRemove(target) {
     if (!isObject(target)) {
-      throw new Sk.builtin.AssertionError("target must be an object.");
+      throw Sk.ffi.assertionError("target must be an object.");
     }
     if (!isFunction(target[METHOD_REMOVE])) {
-      throw new Sk.builtin.AssertionError("target must have a 'remove' function.");
+      throw Sk.ffi.assertionError("target must have a 'remove' function.");
     }
     return Sk.ffi.callableToPy(mod, METHOD_ADD, function(methodPy, childPy) {
       var child = Sk.ffi.remapToJs(childPy);
@@ -29694,9 +29990,8 @@ Sk.builtin.defineThree = function(mod, THREE) {
 
   function verticesPy(vertices) {
     return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-      $loc.__init__ = Sk.ffi.functionPy(function(self) {
-        self.tp$name = PROP_VERTICES;
-        self.v = vertices;
+      $loc.__init__ = Sk.ffi.functionPy(function(selfPy) {
+        Sk.ffi.referenceToPy(vertices, PROP_VERTICES, undefined, selfPy);
       });
       $loc.__getattr__ = Sk.ffi.functionPy(function(verticesPy, name) {
         var METHOD_APPEND = "append";
@@ -30435,63 +30730,6 @@ Sk.builtin.defineThree = function(mod, THREE) {
     });
   }, SCENE, []);
 
-  mod[WORLD] = Sk.ffi.functionPy(function() {
-    Sk.ffi.checkFunctionArgs(WORLD, arguments, 0, 0);
-    var scenePy = Sk.ffi.callsim(mod[SCENE]);
-    var scene = Sk.ffi.remapToJs(scenePy);
-
-    var pointLight = new THREE[POINT_LIGHT](0xFFFFFF);
-    pointLight.position.set(4, 4, 4);
-    scene.add(pointLight);
-
-    var grid = new THREE['GridHelper'](3, 0.5);
-    scene.add( grid );
-
-    var axes = new THREE['AxisHelper'](2);
-//    axes.material.depthTest = false;
-//    axes.material.transparent = false;
-//    axes.matrixAutoUpdate = false;
-//    axes.visible = true;/*false;*/
-    scene.add( axes );
-
-    return scenePy;
-  });
-
-  mod[CUBE] = Sk.nativejs.func(function box(width, height, depth) {
-    Sk.ffi.checkFunctionArgs(CUBE, arguments, 0, 3);
-    var materialPy = Sk.ffi.callsim(mod[MESH_LAMBERT_MATERIAL], Sk.ffi.remapToPy({"color": 0x0000FF}));
-    width  = Sk.ffi.remapToJs(width) || 1;
-    height = Sk.ffi.remapToJs(height) || 1;
-    depth  = Sk.ffi.remapToJs(depth) || 1;
-    var geometryPy = Sk.ffi.callsim(mod[CUBE_GEOMETRY], Sk.ffi.remapToPy(width), Sk.ffi.remapToPy(height), Sk.ffi.remapToPy(depth));
-    return Sk.ffi.callsim(mod[MESH], geometryPy, materialPy);
-  });
-
-  mod[CYLINDER] = Sk.nativejs.func(function box(radiusTop, radiusBottom, height) {
-    Sk.ffi.checkFunctionArgs(CYLINDER, arguments, 0, 3);
-    var materialPy = Sk.ffi.callsim(mod[MESH_LAMBERT_MATERIAL], Sk.ffi.remapToPy({"color": 0x00FF00}));
-    radiusBottom = Sk.ffi.remapToJs(radiusBottom) || 1;
-    radiusTop  = Sk.ffi.remapToJs(radiusTop,  radiusBottom);
-    height  = Sk.ffi.remapToJs(height) || 1;
-    radiusTop          = Sk.ffi.remapToPy(radiusTop);
-    radiusBottom       = Sk.ffi.remapToPy(radiusBottom);
-    height             = Sk.ffi.remapToPy(height);
-    var radialSegments = Sk.ffi.remapToPy(32);
-    var geometryPy = Sk.ffi.callsim(mod[CYLINDER_GEOMETRY], radiusTop, radiusBottom, height, radialSegments);
-    return Sk.ffi.callsim(mod[MESH], geometryPy, materialPy);
-  });
-
-  mod[SPHERE] = Sk.nativejs.func(function box(radius) {
-    Sk.ffi.checkFunctionArgs(SPHERE, arguments, 0, 1);
-    var materialPy = Sk.ffi.callsim(mod[MESH_LAMBERT_MATERIAL], Sk.ffi.remapToPy({"color": 0xFF0000}));
-    radius = Sk.ffi.remapToJs(radius) || 1;
-    radius = Sk.ffi.remapToPy(radius);
-    var widthSegments = Sk.ffi.remapToPy(24);
-    var heightSegments = Sk.ffi.remapToPy(18);
-    var geometryPy = Sk.ffi.callsim(mod[SPHERE_GEOMETRY], radius, widthSegments, heightSegments);
-    return Sk.ffi.callsim(mod[MESH], geometryPy, materialPy);
-  });
-
   mod[CANVAS_RENDERER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var PROP_AUTO_CLEAR   = "autoClear";
     var PROP_CLEAR_COLOR  = "clearColor";
@@ -30718,7 +30956,7 @@ Sk.builtin.defineThree = function(mod, THREE) {
           return {v: renderer[PROP_DOM_ELEMENT]};
         }
         case METHOD_RENDER: {
-          return Sk.ffi.callableToPy(mod, METHOD_RENDER, function(selfPy, scenePy, cameraPy) {
+          return Sk.ffi.callableToPy(mod, METHOD_RENDER, function(methodPy, scenePy, cameraPy) {
             Sk.ffi.checkMethodArgs(METHOD_GET_CLEAR_COLOR, arguments, 2, 2);
             var scene  = Sk.ffi.remapToJs(scenePy);
             var camera = Sk.ffi.remapToJs(cameraPy);
@@ -30726,13 +30964,13 @@ Sk.builtin.defineThree = function(mod, THREE) {
           });
         }
         case METHOD_GET_CLEAR_COLOR: {
-          return Sk.ffi.callableToPy(mod, METHOD_GET_CLEAR_COLOR, function(selfPy) {
+          return Sk.ffi.callableToPy(mod, METHOD_GET_CLEAR_COLOR, function(methodPy) {
             Sk.ffi.checkMethodArgs(METHOD_GET_CLEAR_COLOR, arguments, 0, 0);
             return Sk.ffi.callsim(mod[COLOR], Sk.ffi.referenceToPy(renderer[METHOD_GET_CLEAR_COLOR](), COLOR));
           });
         }
         case METHOD_SET_CLEAR_COLOR: {
-          return Sk.ffi.callableToPy(mod, METHOD_SET_CLEAR_COLOR, function(self, color, alpha) {
+          return Sk.ffi.callableToPy(mod, METHOD_SET_CLEAR_COLOR, function(methodPy, color, alpha) {
             Sk.ffi.checkMethodArgs(METHOD_GET_CLEAR_COLOR, arguments, 2, 2);
             color  = Sk.ffi.remapToJs(color);
             alpha = Sk.ffi.remapToJs(alpha);
@@ -32048,7 +32286,6 @@ Sk.builtin.defineThree = function(mod, THREE) {
 
   mod[DIRECTIONAL_LIGHT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var PROP_INTENSITY = "intensity";
-    var PROP_DISTANCE = "distance";
     $loc.__init__ = Sk.ffi.functionPy(function(self, color, intensity, distance) {
       self.tp$name = DIRECTIONAL_LIGHT;
       color = Sk.ffi.remapToJs(color);
@@ -32194,7 +32431,6 @@ Sk.builtin.defineThree = function(mod, THREE) {
 
   mod[POINT_LIGHT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var PROP_INTENSITY = "intensity";
-    var PROP_DISTANCE = "distance";
     $loc.__init__ = Sk.ffi.functionPy(function(self, color, intensity, distance) {
       self.tp$name = POINT_LIGHT;
       color = Sk.ffi.remapToJs(color);
@@ -32320,16 +32556,11 @@ Sk.builtin.defineThree = function(mod, THREE) {
     });
     $loc.__str__ = Sk.ffi.functionPy(function(light) {
       light = Sk.ffi.remapToJs(light);
-      if (isDefined(light)) {
-        var args = {};
-        args[PROP_COLOR] = light[PROP_COLOR];
-        args[PROP_INTENSITY] = light[PROP_INTENSITY];
-        args[PROP_DISTANCE] = light[PROP_DISTANCE];
-        return Sk.ffi.stringToPy(POINT_LIGHT + "(" + JSON.stringify(args) + ")");
-      }
-      else {
-        return Sk.ffi.stringToPy("<type '" + POINT_LIGHT + "'>");
-      }
+      var args = {};
+      args[PROP_COLOR] = light[PROP_COLOR];
+      args[PROP_INTENSITY] = light[PROP_INTENSITY];
+      args[PROP_DISTANCE] = light[PROP_DISTANCE];
+      return Sk.ffi.stringToPy(POINT_LIGHT + "(" + JSON.stringify(args) + ")");
     });
     $loc.__repr__ = Sk.ffi.functionPy(function(light) {
       light = Sk.ffi.remapToJs(light);
@@ -32478,7 +32709,7 @@ Sk.builtin.defineThree = function(mod, THREE) {
   mod[MESH] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = Sk.ffi.functionPy(function(selfPy, geometryPy, materialPy) {
       Sk.ffi.checkMethodArgs(MESH, arguments, 1, 2);
-      Sk.ffi.checkArgType("geometry", GEOMETRY, Sk.ffi.isClass(geometryPy), geometryPy);
+      Sk.ffi.checkArgType(PROP_GEOMETRY, GEOMETRY, Sk.ffi.isClass(geometryPy), geometryPy);
       Sk.ffi.referenceToPy(new THREE[MESH](Sk.ffi.remapToJs(geometryPy), Sk.ffi.remapToJs(materialPy)), MESH, undefined, selfPy);
     });
     $loc.__getattr__ = Sk.ffi.functionPy(function(meshPy, name) {
@@ -32546,6 +32777,25 @@ Sk.builtin.defineThree = function(mod, THREE) {
             })
           }, METHOD_LOOK_AT, []));
         }
+        case METHOD_ROTATE_ON_AXIS: {
+          return Sk.ffi.callableToPy(mod, METHOD_ROTATE_ON_AXIS, function(methodPy, axisPy, anglePy) {
+            Sk.ffi.checkMethodArgs(METHOD_ROTATE_ON_AXIS, arguments, 2, 2);
+            Sk.ffi.checkArgType(ARG_AXIS, VECTOR_3, isVector3(axisPy), axisPy);
+            Sk.ffi.checkArgType("angle", NUMBER, Sk.ffi.isNumber(anglePy), anglePy);
+            mesh[METHOD_ROTATE_ON_AXIS](Sk.ffi.remapToJs(axisPy), Sk.ffi.remapToJs(anglePy));
+            return meshPy;
+          });
+        }
+        case METHOD_ROTATE_X:
+        case METHOD_ROTATE_Y:
+        case METHOD_ROTATE_Z: {
+          return Sk.ffi.callableToPy(mod, name, function(methodPy, axisPy) {
+            Sk.ffi.checkMethodArgs(name, arguments, 1, 1);
+            Sk.ffi.checkArgType(ARG_AXIS, NUMBER, Sk.ffi.isNumber(axisPy), axisPy);
+            mesh[name](Sk.ffi.remapToJs(axisPy));
+            return meshPy;
+          });
+        }
         case METHOD_SET_GEOMETRY: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
             $loc.__init__ = Sk.ffi.functionPy(function(self) {
@@ -32563,21 +32813,30 @@ Sk.builtin.defineThree = function(mod, THREE) {
             })
           }, METHOD_SET_GEOMETRY, []));
         }
+        case METHOD_TRANSLATE_ON_AXIS: {
+          return Sk.ffi.callableToPy(mod, METHOD_TRANSLATE_ON_AXIS, function(methodPy, axisPy, distancePy) {
+            Sk.ffi.checkMethodArgs(METHOD_TRANSLATE_ON_AXIS, arguments, 2, 2);
+            Sk.ffi.checkArgType(ARG_AXIS, VECTOR_3, isVector3(axisPy), axisPy);
+            Sk.ffi.checkArgType(PROP_DISTANCE, NUMBER, Sk.ffi.isNumber(distancePy), distancePy);
+            mesh[METHOD_TRANSLATE_ON_AXIS](Sk.ffi.remapToJs(axisPy), Sk.ffi.remapToJs(distancePy));
+            return meshPy;
+          });
+        }
+        case METHOD_TRANSLATE_X:
+        case METHOD_TRANSLATE_Y:
+        case METHOD_TRANSLATE_Z: {
+          return Sk.ffi.callableToPy(mod, name, function(methodPy, distancePy) {
+            Sk.ffi.checkMethodArgs(name, arguments, 1, 1);
+            Sk.ffi.checkArgType(PROP_DISTANCE, NUMBER, Sk.ffi.isNumber(distancePy), distancePy);
+            mesh[name](Sk.ffi.remapToJs(distancePy));
+            return meshPy;
+          });
+        }
         case METHOD_UPDATE_MATRIX: {
-          return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.functionPy(function(self) {
-              self.tp$name = METHOD_UPDATE_MATRIX;
-            });
-            $loc.__call__ = Sk.ffi.functionPy(function(self) {
-              mesh[METHOD_UPDATE_MATRIX]();
-            });
-            $loc.__str__ = Sk.ffi.functionPy(function(self) {
-              return Sk.ffi.stringToPy(METHOD_UPDATE_MATRIX)
-            })
-            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-              return Sk.ffi.stringToPy(METHOD_UPDATE_MATRIX)
-            })
-          }, METHOD_UPDATE_MATRIX, []));
+          return Sk.ffi.callableToPy(mod, METHOD_UPDATE_MATRIX, function(methodPy) {
+            Sk.ffi.checkMethodArgs(METHOD_UPDATE_MATRIX, arguments, 0, 0);
+            mesh[METHOD_UPDATE_MATRIX]();
+          });
         }
       }
     });
@@ -32607,7 +32866,7 @@ Sk.builtin.defineThree = function(mod, THREE) {
         }
         break;
         case PROP_POSITION: {
-          Sk.ffi.checkArgType(PROP_POSITION, VECTOR_3, isVector(valuePy), valuePy);
+          Sk.ffi.checkArgType(PROP_POSITION, VECTOR_3, isVector3(valuePy), valuePy);
           mesh[PROP_POSITION] = value;
         }
         break;
