@@ -25605,11 +25605,13 @@ mod[CONE_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           }
           Sk.ffi.checkMethodArgs(METHOD_BUILD, arguments, 0, 0);
           var dimensions = dimensionCone();
-          var radiusTop      = Sk.ffi.remapToPy(0);
-          var radiusBottom   = Sk.ffi.remapToPy(dimensions[PROP_RADIUS]);
-          var height         = Sk.ffi.remapToPy(dimensions[PROP_HEIGHT]);
-          var radialSegments = Sk.ffi.remapToPy(32);
-          var geometryPy = Sk.ffi.callsim(mod[CYLINDER_GEOMETRY], radiusTop, radiusBottom, height, radialSegments);
+          var radiusTop      = Sk.ffi.numberToPy(0);
+          var radiusBottom   = Sk.ffi.numberToPy(dimensions[PROP_RADIUS]);
+          var height         = Sk.ffi.numberToPy(dimensions[PROP_HEIGHT]);
+          var radialSegments = Sk.ffi.numberToIntPy(32);
+          var heightSegments = Sk.ffi.numberToIntPy(1);
+          var openEnded      = Sk.ffi.booleanToPy(false);
+          var geometryPy = Sk.ffi.callsim(mod[CYLINDER_GEOMETRY], radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded);
           var parameters = {};
           parameters[PROP_COLOR]     = self[PROP_COLOR];
           parameters[PROP_WIREFRAME] = self[PROP_WIREFRAME];
@@ -25840,11 +25842,13 @@ mod[CYLINDER_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           }
           Sk.ffi.checkMethodArgs(METHOD_BUILD, arguments, 0, 0);
           var dimensions = dimensionCylinder();
-          var radiusTop      = Sk.ffi.remapToPy(dimensions.a);
-          var radiusBottom   = Sk.ffi.remapToPy(dimensions.b);
-          var height         = Sk.ffi.remapToPy(dimensions.h);
-          var radialSegments = Sk.ffi.remapToPy(32);
-          var geometryPy = Sk.ffi.callsim(mod[CYLINDER_GEOMETRY], radiusTop, radiusBottom, height, radialSegments);
+          var radiusTop      = Sk.ffi.numberToPy(dimensions.a);
+          var radiusBottom   = Sk.ffi.numberToPy(dimensions.b);
+          var height         = Sk.ffi.numberToPy(dimensions.h);
+          var radialSegments = Sk.ffi.numberToIntPy(32);
+          var heightSegments = Sk.ffi.numberToIntPy(1);
+          var openEnded      = Sk.ffi.booleanToPy(false);
+          var geometryPy = Sk.ffi.callsim(mod[CYLINDER_GEOMETRY], radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded);
           var parameters = {};
           parameters[PROP_COLOR]     = self[PROP_COLOR];
           parameters[PROP_WIREFRAME] = self[PROP_WIREFRAME];
@@ -30133,6 +30137,36 @@ Sk.builtin.defineThree = function(mod, THREE) {
  * @const
  * @type {string}
  */
+  var PROP_RADIUS_TOP            = "radiusTop";
+/**
+ * @const
+ * @type {string}
+ */
+  var PROP_RADIUS_BOTTOM         = "radiusBottom";
+/**
+ * @const
+ * @type {string}
+ */
+  var PROP_HEIGHT                = "height";
+/**
+ * @const
+ * @type {string}
+ */
+  var PROP_RADIAL_SEGMENTS       = "radialSegments";
+/**
+ * @const
+ * @type {string}
+ */
+  var PROP_HEIGHT_SEGMENTS       = "heightSegments";
+/**
+ * @const
+ * @type {string}
+ */
+  var PROP_OPEN_ENDED            = "openEnded";
+/**
+ * @const
+ * @type {string}
+ */
   var PROP_RIGHT                 = "right";
 /**
  * @const
@@ -32079,58 +32113,64 @@ Sk.builtin.defineThree = function(mod, THREE) {
   }, CUBE_GEOMETRY, []);
 
   mod[CYLINDER_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    var PROP_RADIUS_TOP      = "radiusTop";
-    var PROP_RADIUS_BOTTOM   = "radiusBottom";
-    var PROP_HEIGHT          = "height";
-    var PROP_RADIUS_SEGMENTS = "radiusSegments";
-    var PROP_HEIGHT_SEGMENTS = "heightSegments";
-    var PROP_OPEN_ENDED      = "openEnded";
-    $loc.__init__ = Sk.ffi.functionPy(function(self, radiusTop, radiusBottom, height, radiusSegments, heightSegments, openEnded) {
-      radiusTop      = numberFromArg(radiusTop,             PROP_RADIUS_TOP,      CYLINDER_GEOMETRY);
-      radiusBottom   = numberFromArg(radiusBottom,          PROP_RADIUS_BOTTOM,   CYLINDER_GEOMETRY);
-      height         = numberFromArg(height,                PROP_HEIGHT,          CYLINDER_GEOMETRY);
-      radiusSegments = numberFromIntegerArg(radiusSegments, PROP_RADIUS_SEGMENTS, CYLINDER_GEOMETRY);
-      heightSegments = numberFromIntegerArg(heightSegments, PROP_HEIGHT_SEGMENTS, CYLINDER_GEOMETRY);
-      openEnded      = Sk.ffi.remapToJs(openEnded);
-      self.v = new THREE[CYLINDER_GEOMETRY](radiusTop, radiusBottom, height, radiusSegments, heightSegments, openEnded);
-      self.tp$name = CYLINDER_GEOMETRY;
+    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, radiusTopPy, radiusBottomPy, heightPy, radialSegmentsPy, heightSegmentsPy, openEndedPy) {
+      if (Sk.ffi.isClass(radiusTopPy) && Sk.ffi.typeName(radiusTopPy) === CYLINDER_GEOMETRY) {
+        Sk.ffi.referenceToPy(Sk.ffi.remapToJs(radiusTopPy), CYLINDER_GEOMETRY, undefined, selfPy);
+      }
+      else {
+        Sk.ffi.checkMethodArgs(CYLINDER_GEOMETRY, arguments, 0, 6);
+        Sk.ffi.checkArgType(PROP_RADIUS_TOP, NUMBER, Sk.ffi.isNumber(radiusTopPy)||Sk.ffi.isUndefined(radiusTopPy), radiusTopPy);
+        Sk.ffi.checkArgType(PROP_RADIUS_BOTTOM, NUMBER, Sk.ffi.isNumber(radiusBottomPy)||Sk.ffi.isUndefined(radiusBottomPy), radiusBottomPy);
+        Sk.ffi.checkArgType(PROP_HEIGHT, NUMBER, Sk.ffi.isNumber(heightPy)||Sk.ffi.isUndefined(heightPy), heightPy);
+        Sk.ffi.checkArgType(PROP_RADIAL_SEGMENTS, Sk.ffi.PyType.INT, Sk.ffi.isInt(radialSegmentsPy)||Sk.ffi.isUndefined(radialSegmentsPy), radialSegmentsPy);
+        Sk.ffi.checkArgType(PROP_HEIGHT_SEGMENTS, Sk.ffi.PyType.INT, Sk.ffi.isInt(heightSegmentsPy)||Sk.ffi.isUndefined(heightSegmentsPy), heightSegmentsPy);
+        Sk.ffi.checkArgType(PROP_OPEN_ENDED, Sk.ffi.PyType.BOOL, Sk.ffi.isBool(openEndedPy)||Sk.ffi.isUndefined(openEndedPy), openEndedPy);
+        var radiusTop = Sk.ffi.remapToJs(radiusTopPy);
+        var radiusBottom = Sk.ffi.remapToJs(radiusBottomPy);
+        var height = Sk.ffi.remapToJs(heightPy);
+        var radialSegments = Sk.ffi.remapToJs(radialSegmentsPy);
+        var heightSegments = Sk.ffi.remapToJs(heightSegmentsPy);
+        var openEnded = Sk.ffi.remapToJs(openEndedPy);
+        Sk.ffi.referenceToPy(new THREE[CYLINDER_GEOMETRY](radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded), CYLINDER_GEOMETRY, undefined, selfPy);
+      }
     });
-    $loc.__getattr__ = Sk.ffi.functionPy(function(self, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
+      var cylinder = Sk.ffi.remapToJs(selfPy);
       switch(name) {
         case PROP_RADIUS_TOP: {
-          return Sk.builtin.assk$(self.v[PROP_RADIUS_TOP], Sk.builtin.nmber.float$);
+          return Sk.ffi.numberToPy(cylinder[PROP_RADIUS_TOP]);
         }
         case PROP_RADIUS_BOTTOM: {
-          return Sk.builtin.assk$(self.v[PROP_RADIUS_BOTTOM], Sk.builtin.nmber.float$);
+          return Sk.ffi.numberToPy(cylinder[PROP_RADIUS_BOTTOM]);
         }
         case PROP_HEIGHT: {
-          return Sk.builtin.assk$(self.v[PROP_HEIGHT], Sk.builtin.nmber.float$);
+          return Sk.ffi.numberToPy(cylinder[PROP_HEIGHT]);
         }
-        case PROP_RADIUS_SEGMENTS: {
-          return Sk.builtin.assk$(self.v[PROP_RADIUS_SEGMENTS], Sk.builtin.nmber.int$);
+        case PROP_RADIAL_SEGMENTS: {
+          return Sk.ffi.numberToIntPy(cylinder[PROP_RADIAL_SEGMENTS]);
         }
         case PROP_HEIGHT_SEGMENTS: {
-          return Sk.builtin.assk$(self.v[PROP_HEIGHT_SEGMENTS], Sk.builtin.nmber.int$);
+          return Sk.ffi.numberToIntPy(cylinder[PROP_HEIGHT_SEGMENTS]);
         }
         case PROP_OPEN_ENDED: {
-          return self.v[PROP_OPEN_ENDED];
+          return Sk.ffi.booleanToPy(cylinder[PROP_OPEN_ENDED]);
         }
         default: {
-          // Framework will take care of the error message.
+          throw Sk.ffi.err.attribute(name).isNotGetableOnType(CYLINDER_GEOMETRY);
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.functionPy(function(geometryPy, name, valuePy) {
-      var geometry = Sk.ffi.remapToJs(geometryPy);
+    $loc.__setattr__ = Sk.ffi.functionPy(function(selfPy, name, valuePy) {
+      var cylinder = Sk.ffi.remapToJs(selfPy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
         default: {
-          throw new Error(name + " is not an attribute of " + CYLINDER_GEOMETRY);
+          throw Sk.ffi.err.attribute(name).isNotSetableOnType(CYLINDER_GEOMETRY);
         }
       }
     });
-    $loc.__str__ = Sk.ffi.functionPy(function(self) {
-      var cylinder = self.v;
+    $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
+      var cylinder = Sk.ffi.remapToJs(selfPy);
       var args = {};
       args[PROP_RADIUS_TOP] = cylinder[PROP_RADIUS_TOP];
       args[PROP_RADIUS_BOTTOM] = cylinder[PROP_RADIUS_BOTTOM];
@@ -32139,15 +32179,15 @@ Sk.builtin.defineThree = function(mod, THREE) {
       // TODO: Need a Python.stringify because Boolean is {True, False} etc.
       return Sk.ffi.stringToPy(CYLINDER_GEOMETRY + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-      var cylinder = self.v;
+    $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
+      var cylinder = Sk.ffi.remapToJs(selfPy);
       var radiusTop      = cylinder[PROP_RADIUS_TOP];
       var radiusBottom   = cylinder[PROP_RADIUS_BOTTOM];
       var height         = cylinder[PROP_HEIGHT];
-      var radiusSegments = cylinder[PROP_RADIUS_SEGMENTS];
+      var radialSegments = cylinder[PROP_RADIAL_SEGMENTS];
       var heightSegments = cylinder[PROP_HEIGHT_SEGMENTS];
       var openEnded      = cylinder[PROP_OPEN_ENDED];
-      var args = [radiusTop, radiusBottom, height, radiusSegments, heightSegments, openEnded];
+      var args = [radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded];
       return Sk.ffi.stringToPy(CYLINDER_GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
     });
   }, CYLINDER_GEOMETRY, []);
@@ -33183,7 +33223,9 @@ Sk.builtin.defineThree = function(mod, THREE) {
     $loc.__init__ = Sk.ffi.functionPy(function(selfPy, geometryPy, materialPy) {
       Sk.ffi.checkMethodArgs(MESH, arguments, 1, 2);
       Sk.ffi.checkArgType(PROP_GEOMETRY, GEOMETRY, Sk.ffi.isClass(geometryPy), geometryPy);
-      Sk.ffi.referenceToPy(new THREE[MESH](Sk.ffi.remapToJs(geometryPy), Sk.ffi.remapToJs(materialPy)), MESH, undefined, selfPy);
+      var custom = {};
+      custom[PROP_GEOMETRY] = Sk.ffi.typeName(geometryPy);
+      Sk.ffi.referenceToPy(new THREE[MESH](Sk.ffi.remapToJs(geometryPy), Sk.ffi.remapToJs(materialPy)), MESH, custom, selfPy);
     });
     $loc.__getattr__ = Sk.ffi.functionPy(function(meshPy, name) {
       var mesh = Sk.ffi.remapToJs(meshPy);
@@ -33193,7 +33235,8 @@ Sk.builtin.defineThree = function(mod, THREE) {
         }
         case PROP_GEOMETRY: {
           var geometry = mesh[PROP_GEOMETRY];
-          return Sk.ffi.callsim(mod[GEOMETRY], Sk.ffi.referenceToPy(mesh[PROP_GEOMETRY], GEOMETRY));
+          var className = meshPy.custom[PROP_GEOMETRY];
+          return Sk.ffi.callsim(mod[className], Sk.ffi.referenceToPy(geometry, className));
         }
         case PROP_MATRIX_AUTO_UPDATE: {
           return mesh[PROP_MATRIX_AUTO_UPDATE];
