@@ -30837,7 +30837,7 @@
     Sk.builtin.defineVector3 = function (e, f, g) {
       Sk.ffi.checkFunctionArgs('defineVector3', arguments, 3, 3);
       var h = function (a) {
-          return Sk.ffi.isReference(a) && Sk.ffi.typeName(a) === f;
+          return Sk.ffi.isClass(a) && Sk.ffi.typeName(a) === f;
         }, k = function (a, b, c) {
           return Sk.ffi.callsim(e[f], Sk.ffi.numberToPy(a), Sk.ffi.numberToPy(b), Sk.ffi.numberToPy(c));
         };
@@ -30930,6 +30930,13 @@
           case 'y':
           case 'z':
             return Sk.ffi.numberToPy(h[g]);
+          case 'applyQuaternion':
+            return Sk.ffi.callableToPy(e, 'applyQuaternion', function (b, c) {
+              Sk.ffi.checkMethodArgs('applyQuaternion', arguments, 1, 1);
+              Sk.ffi.checkArgType('q', 'Quaternion', Sk.ffi.isClass(c) && 'Quaternion' === Sk.ffi.typeName(c), c);
+              h.applyQuaternion(Sk.ffi.remapToJs(c));
+              return a;
+            });
           case 'clone':
             return Sk.ffi.callsim(Sk.ffi.buildClass(e, function (a, b) {
               b.__init__ = Sk.ffi.functionPy(function (a) {
@@ -30948,12 +30955,12 @@
           case d:
             return Sk.ffi.callsim(Sk.ffi.buildClass(e, function (a, b) {
               b.__init__ = Sk.ffi.functionPy(function (a) {
-                a.tp$name = d;
+                a.tp$name = 'length';
               });
               b.__call__ = Sk.ffi.functionPy(function (a) {
                 return Sk.ffi.numberToPy(h.length());
               });
-            }, d, []));
+            }, 'length', []));
           case 'normalize':
             return Sk.ffi.callsim(Sk.ffi.buildClass(e, function (b, c) {
               c.__init__ = Sk.ffi.functionPy(function (a) {

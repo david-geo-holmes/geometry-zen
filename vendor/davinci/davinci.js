@@ -33997,6 +33997,16 @@ Sk.builtin.defineThree = function(mod, THREE) {
    * @const
    * @type {string}
    */
+  var QUATERNION                 = "Quaternion";
+  /**
+   * @const
+   * @type {string}
+   */
+  var METHOD_APPLY_QUATERNION    = "applyQuaternion";
+  /**
+   * @const
+   * @type {string}
+   */
   var METHOD_CLONE               = "clone";
   /**
    * @const
@@ -34007,7 +34017,12 @@ Sk.builtin.defineThree = function(mod, THREE) {
    * @const
    * @type {string}
    */
-  var METHOD_LENGTH              = Sk.ffi.mangleName("length");
+  var METHOD_LENGTH              = "length";
+  /**
+   * @const
+   * @type {string}
+   */
+  var METHOD_LENGTH_MANGLED      = Sk.ffi.mangleName(METHOD_LENGTH);
   /**
    * @const
    * @type {string}
@@ -34042,27 +34057,27 @@ Sk.builtin.defineThree = function(mod, THREE) {
    * @const
    * @type {string}
    */
-  var OP_ADD           = "add";
+  var OP_ADD                     = "add";
   /**
    * @const
    * @type {string}
    */
-  var OP_SUB           = "subtract";
+  var OP_SUB                     = "subtract";
   /**
    * @const
    * @type {string}
    */
-  var OP_MUL           = "multiply";
+  var OP_MUL                     = "multiply";
   /**
    * @const
    * @type {string}
    */
-  var OP_DIV           = "divide";
+  var OP_DIV                     = "divide";
   /**
    * @const
    * @type {string}
    */
-  var OP_EQ            = "equal";
+  var OP_EQ                      = "equal";
   /**
    * @param {string} VECTOR_3
    * @param {function(number, number, number): string} factory
@@ -34071,17 +34086,24 @@ Sk.builtin.defineThree = function(mod, THREE) {
     Sk.ffi.checkFunctionArgs("defineVector3", arguments, 3, 3);
     /**
      * @param {Object} valuePy
+     * @return {boolean} true if the thing is a quaternion, otherwise false.
+     */
+    var isQuaternionPy = function(valuePy) {
+      return Sk.ffi.isClass(valuePy) && Sk.ffi.typeName(valuePy) === QUATERNION;
+    };
+    /**
+     * @param {Object} valuePy
      * @return {boolean} true if the thing is a vector, otherwise false.
      */
-    var isVector3 = function(valuePy) {
-      return Sk.ffi.isReference(valuePy) && Sk.ffi.typeName(valuePy) === VECTOR_3;
+    var isVector3Py = function(valuePy) {
+      return Sk.ffi.isClass(valuePy) && Sk.ffi.typeName(valuePy) === VECTOR_3;
     };
     /**
      * @param {number} x The x-coordinate of the vector.
      * @param {number} y The y-coordinate of the vector.
      * @param {number} z The z-coordinate of the vector.
      */
-    var vector3ToPy = function(x, y, z) {
+    var xyzJsToVector3Py = function(x, y, z) {
       return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.numberToPy(x), Sk.ffi.numberToPy(y), Sk.ffi.numberToPy(z));
     };
     mod[VECTOR_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
@@ -34094,7 +34116,7 @@ Sk.builtin.defineThree = function(mod, THREE) {
           switch(Sk.ffi.getType(x)) {
             case Sk.ffi.PyType.CLASS: {
               Sk.ffi.checkMethodArgs(VECTOR_3, arguments, 1, 1);
-              Sk.ffi.checkArgType(PROP_X, VECTOR_3, isVector3(x), x);
+              Sk.ffi.checkArgType(PROP_X, VECTOR_3, isVector3Py(x), x);
               Sk.ffi.referenceToPy(Sk.ffi.remapToJs(x), VECTOR_3, undefined, selfPy);
             }
             break;
@@ -34115,18 +34137,18 @@ Sk.builtin.defineThree = function(mod, THREE) {
         }
       });
       $loc.__add__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-        Sk.ffi.checkLhsOperandType(OP_ADD, VECTOR_3, isVector3(selfPy), selfPy);
-        Sk.ffi.checkRhsOperandType(OP_ADD, VECTOR_3, isVector3(otherPy), otherPy);
+        Sk.ffi.checkLhsOperandType(OP_ADD, VECTOR_3, isVector3Py(selfPy), selfPy);
+        Sk.ffi.checkRhsOperandType(OP_ADD, VECTOR_3, isVector3Py(otherPy), otherPy);
         var a = Sk.ffi.remapToJs(selfPy);
         var b = Sk.ffi.remapToJs(otherPy);
         var x = a.x + b.x;
         var y = a.y + b.y;
         var z = a.z + b.z;
-        return vector3ToPy(x, y, z);
+        return xyzJsToVector3Py(x, y, z);
       });
       $loc.__iadd__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-        Sk.ffi.checkLhsOperandType(OP_ADD, VECTOR_3, isVector3(selfPy), selfPy);
-        Sk.ffi.checkRhsOperandType(OP_ADD, VECTOR_3, isVector3(otherPy), otherPy);
+        Sk.ffi.checkLhsOperandType(OP_ADD, VECTOR_3, isVector3Py(selfPy), selfPy);
+        Sk.ffi.checkRhsOperandType(OP_ADD, VECTOR_3, isVector3Py(otherPy), otherPy);
         var a = Sk.ffi.remapToJs(selfPy);
         var b = Sk.ffi.remapToJs(otherPy);
         a.x += b.x;
@@ -34135,18 +34157,18 @@ Sk.builtin.defineThree = function(mod, THREE) {
         return selfPy;
       });
       $loc.__sub__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-        Sk.ffi.checkLhsOperandType(OP_SUB, VECTOR_3, isVector3(selfPy), selfPy);
-        Sk.ffi.checkRhsOperandType(OP_SUB, VECTOR_3, isVector3(otherPy), otherPy);
+        Sk.ffi.checkLhsOperandType(OP_SUB, VECTOR_3, isVector3Py(selfPy), selfPy);
+        Sk.ffi.checkRhsOperandType(OP_SUB, VECTOR_3, isVector3Py(otherPy), otherPy);
         var a = Sk.ffi.remapToJs(selfPy);
         var b = Sk.ffi.remapToJs(otherPy);
         var x = a.x - b.x;
         var y = a.y - b.y;
         var z = a.z - b.z;
-        return vector3ToPy(x, y, z);
+        return xyzJsToVector3Py(x, y, z);
       });
       $loc.__isub__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-        Sk.ffi.checkLhsOperandType(OP_ADD, VECTOR_3, isVector3(selfPy), selfPy);
-        Sk.ffi.checkRhsOperandType(OP_ADD, VECTOR_3, isVector3(otherPy), otherPy);
+        Sk.ffi.checkLhsOperandType(OP_ADD, VECTOR_3, isVector3Py(selfPy), selfPy);
+        Sk.ffi.checkRhsOperandType(OP_ADD, VECTOR_3, isVector3Py(otherPy), otherPy);
         var a = Sk.ffi.remapToJs(selfPy);
         var b = Sk.ffi.remapToJs(otherPy);
         a.x -= b.x;
@@ -34155,44 +34177,44 @@ Sk.builtin.defineThree = function(mod, THREE) {
         return selfPy;
       });
       $loc.__mul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-        Sk.ffi.checkLhsOperandType(OP_MUL, VECTOR_3, isVector3(selfPy), selfPy);
+        Sk.ffi.checkLhsOperandType(OP_MUL, VECTOR_3, isVector3Py(selfPy), selfPy);
         Sk.ffi.checkRhsOperandType(OP_MUL, NUMBER, Sk.ffi.isNumber(otherPy), otherPy);
         var a = Sk.ffi.remapToJs(selfPy);
         var b = Sk.ffi.remapToJs(otherPy);
         var x = a.x * b;
         var y = a.y * b;
         var z = a.z * b;
-        return vector3ToPy(x, y, z);
+        return xyzJsToVector3Py(x, y, z);
       });
       $loc.__rmul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
         Sk.ffi.checkLhsOperandType(OP_MUL, NUMBER, Sk.ffi.isNumber(otherPy), otherPy);
-        Sk.ffi.checkRhsOperandType(OP_MUL, VECTOR_3, isVector3(selfPy), selfPy);
+        Sk.ffi.checkRhsOperandType(OP_MUL, VECTOR_3, isVector3Py(selfPy), selfPy);
         var a = Sk.ffi.remapToJs(otherPy);
         var b = Sk.ffi.remapToJs(selfPy);
         var x = a * b.x;
         var y = a * b.y;
         var z = a * b.z;
-        return vector3ToPy(x, y, z);
+        return xyzJsToVector3Py(x, y, z);
       });
       $loc.__div__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-        Sk.ffi.checkLhsOperandType(OP_DIV, VECTOR_3, isVector3(selfPy), selfPy);
+        Sk.ffi.checkLhsOperandType(OP_DIV, VECTOR_3, isVector3Py(selfPy), selfPy);
         Sk.ffi.checkRhsOperandType(OP_DIV, NUMBER, Sk.ffi.isNumber(otherPy), otherPy);
         var a = Sk.ffi.remapToJs(selfPy);
         var b = Sk.ffi.remapToJs(otherPy);
         var x = a.x / b;
         var y = a.y / b;
         var z = a.z / b;
-        return vector3ToPy(x, y, z);
+        return xyzJsToVector3Py(x, y, z);
       });
       $loc.__rdiv__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
         Sk.ffi.checkLhsOperandType(OP_DIV, NUMBER, Sk.ffi.isNumber(otherPy), otherPy);
-        Sk.ffi.checkRhsOperandType(OP_DIV, VECTOR_3, isVector3(selfPy), selfPy);
+        Sk.ffi.checkRhsOperandType(OP_DIV, VECTOR_3, isVector3Py(selfPy), selfPy);
         var a = Sk.ffi.remapToJs(otherPy);
         var b = Sk.ffi.remapToJs(selfPy);
         var x = b.x / a;
         var y = b.y / a;
         var z = b.z / a;
-        return vector3ToPy(x, y, z);
+        return xyzJsToVector3Py(x, y, z);
       });
       $loc.__getattr__ = Sk.ffi.functionPy(function(vectorPy, name) {
         var vector = Sk.ffi.remapToJs(vectorPy);
@@ -34202,13 +34224,21 @@ Sk.builtin.defineThree = function(mod, THREE) {
           case PROP_Z: {
             return Sk.ffi.numberToPy(vector[name]);
           }
+          case METHOD_APPLY_QUATERNION: {
+            return Sk.ffi.callableToPy(mod, METHOD_APPLY_QUATERNION, function(methodPy, qPy) {
+              Sk.ffi.checkMethodArgs(METHOD_APPLY_QUATERNION, arguments, 1, 1);
+              Sk.ffi.checkArgType("q", QUATERNION, isQuaternionPy(qPy), qPy);
+              vector[METHOD_APPLY_QUATERNION](Sk.ffi.remapToJs(qPy));
+              return vectorPy;
+            });
+          }
           case METHOD_CLONE: {
             return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
               $loc.__init__ = Sk.ffi.functionPy(function(self) {
                 self.tp$name = METHOD_CLONE;
               });
               $loc.__call__ = Sk.ffi.functionPy(function(self) {
-                return vector3ToPy(vector.x, vector.y, vector.z);
+                return xyzJsToVector3Py(vector.x, vector.y, vector.z);
               });
             }, METHOD_CLONE, []));
           }
@@ -34219,7 +34249,7 @@ Sk.builtin.defineThree = function(mod, THREE) {
               return Sk.ffi.remapToPy(vector[METHOD_GET_COMPONENT](Sk.ffi.remapToJs(indexPy)));
             });
           }
-          case METHOD_LENGTH: {
+          case METHOD_LENGTH_MANGLED: {
             return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
               $loc.__init__ = Sk.ffi.functionPy(function(self) {
                 self.tp$name = METHOD_LENGTH;
