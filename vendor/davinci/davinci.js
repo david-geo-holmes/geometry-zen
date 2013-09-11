@@ -14757,7 +14757,7 @@ Sk.ffi.callableToPy = function(mod, nameJs, functionJs)
 {
     return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc)
     {
-        $loc.__init__ = Sk.ffi.functionPy(function(selfPy) {});
+        $loc.__init__ = Sk.ffi.functionPy(function(selfPy) {Sk.ffi.referenceToPy(null, nameJs, null, selfPy);});
         $loc.__call__ = Sk.ffi.functionPy(functionJs);
         $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {return Sk.ffi.stringToPy(nameJs);});
         $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {return Sk.ffi.stringToPy(nameJs);});
@@ -24656,6 +24656,520 @@ goog.exportSymbol("Sk.builtins", Sk.builtins);
   };
 }).call(this);
 /**
+ * Convenience function for incorporating quaternion into a module.
+ *
+ * Usage:
+ *
+ * Sk.builtin.defineQuaternion(mod);
+ */
+(function() {
+/**
+ * @param {!Object} mod
+ * @param {string} QUATERNION
+ * @param {function(number, number, number, number): !Object} xyzwToJs
+ */
+Sk.builtin.defineQuaternion = function(mod, QUATERNION, xyzwToJs) {
+Sk.ffi.checkFunctionArgs("defineQuaternion", arguments, 3, 3);
+/**
+* @const
+* @type {string}
+*/
+var PROP_X                     = "x";
+/**
+* @const
+* @type {string}
+*/
+var PROP_Y                     = "y";
+/**
+* @const
+* @type {string}
+*/
+var PROP_Z                     = "z";
+/**
+* @const
+* @type {string}
+*/
+var PROP_W                     = "w";
+/**
+* @const
+* @type {!Array.<Sk.ffi.PyType>}
+*/
+var NUMBER                     = [Sk.ffi.PyType.FLOAT, Sk.ffi.PyType.INT, Sk.ffi.PyType.LONG];
+/**
+ * @const
+ * @type {string}
+ */
+var OP_ADD                     = "+";
+/**
+ * @const
+ * @type {string}
+ */
+var OP_SUB                     = "-";
+/**
+ * @const
+ * @type {string}
+ */
+var OP_MUL                     = "*";
+/**
+ * @const
+ * @type {string}
+ */
+var OP_DIV                     = "/";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_CLONE               = "clone";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_CONJUGATE           = "conjugate";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_COPY                = "copy";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_INVERSE             = "inverse";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_LENGTH              = "length";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_LENGTH_MANGLED      = Sk.ffi.mangleName(METHOD_LENGTH);
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_LENGTH_SQ           = "lengthSq";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_NORMALIZE           = "normalize";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_SET                 = "set";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_SET_FROM_AXIS_ANGLE = "setFromAxisAngle";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_SET_FROM_EULER      = "setFromEuler";
+/**
+ * @const
+ * @type {string}
+ */
+var ARG_OTHER                  = "other";
+/**
+ * @param {Object} valuePy
+ * @return {boolean}
+ */
+function isQuaternionPy(valuePy) {return Sk.ffi.isClass(valuePy) && Sk.ffi.typeName(valuePy) === QUATERNION;};
+/**
+ * @param {!Array.<number>} coordinates
+ * @param {!Array.<string>} labels
+ * @param {string=} multiplier
+ */
+function stringFromCoordinates(coordinates, labels, multiplier) {
+  var append, i, sb, str, _i, _ref;
+  sb = [];
+  append = function(number, label) {
+    var n;
+    if (number !== 0) {
+      if (number >= 0) {
+        if (sb.length > 0) {
+          sb.push("+");
+        }
+      } else {
+        sb.push("-");
+      }
+      n = Math.abs(number);
+      if (n === 1) {
+        return sb.push(label);
+      } else {
+        sb.push(n.toString());
+        if (label !== "1") {
+          sb.push(multiplier);
+          return sb.push(label);
+        }
+      }
+    }
+  };
+  for (i = _i = 0, _ref = coordinates.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+    append(coordinates[i], labels[i]);
+  }
+  if (sb.length > 0) {
+    str = sb.join("");
+  } else {
+    str = "0";
+  }
+  return str;
+}
+/**
+ * @param {number} w
+ * @param {number} x
+ * @param {number} y
+ * @param {number} z
+ * @return {!Object}
+ */
+function wxyzToPy(w, x, y, z) {
+  // The arguments to Quaternion in Python are in the order x, y, z, w!
+  return Sk.ffi.callsim(mod[QUATERNION], Sk.ffi.numberToPy(x), Sk.ffi.numberToPy(y), Sk.ffi.numberToPy(z), Sk.ffi.numberToPy(w));
+}
+/**
+ *
+ */
+mod[QUATERNION] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
+  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, xPy, yPy, zPy, wPy) {
+    if (isQuaternionPy(xPy)) {
+      Sk.ffi.referenceToPy(Sk.ffi.remapToJs(xPy), QUATERNION, undefined, selfPy);
+    }
+    else {
+      var x = Sk.ffi.remapToJs(xPy);
+      var y = Sk.ffi.remapToJs(yPy);
+      var z = Sk.ffi.remapToJs(zPy);
+      var w = Sk.ffi.remapToJs(wPy);
+      Sk.ffi.referenceToPy(xyzwToJs(x, y, z, w), QUATERNION, undefined, selfPy);
+    }
+  });
+  $loc.__add__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+    var a = Sk.ffi.remapToJs(selfPy);
+    var b = Sk.ffi.remapToJs(otherPy);
+    if (Sk.ffi.isNumber(otherPy)) {
+      return wxyzToPy(a.w + b, a.x, a.y, a.z);
+    }
+    else {
+      var w = a.w + b.w;
+      var x = a.x + b.x;
+      var y = a.y + b.y;
+      var z = a.z + b.z;
+      return wxyzToPy(w, x, y, z);
+    }
+  });
+  $loc.__radd__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+    var a = Sk.ffi.remapToJs(otherPy);
+    var b = Sk.ffi.remapToJs(selfPy);
+    if (Sk.ffi.isNumber(otherPy)) {
+      return wxyzToPy(a + b.w, b.x, b.y, b.z);
+    }
+    else {
+      throw Sk.ffi.err.operand(ARG_OTHER).toOperation(OP_ADD).mustHaveType(QUATERNION);
+    }
+  });
+  $loc.__iadd__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+    var self = Sk.ffi.remapToJs(selfPy);
+    var other = Sk.ffi.remapToJs(otherPy);
+    if (Sk.ffi.isNumber(otherPy)) {
+      self.w += other;
+    }
+    else {
+      self.w += other.w;
+      self.x += other.x;
+      self.y += other.y;
+      self.z += other.z;
+    }
+    return selfPy;
+  });
+  $loc.__sub__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+    var a = Sk.ffi.remapToJs(selfPy);
+    var b = Sk.ffi.remapToJs(otherPy);
+    if (Sk.ffi.isNumber(otherPy)) {
+      return wxyzToPy(a.w - b, a.x, a.y, a.z);
+    }
+    else {
+      var w = a.w - b.w;
+      var x = a.x - b.x;
+      var y = a.y - b.y;
+      var z = a.z - b.z;
+      return wxyzToPy(w, x, y, z);
+    }
+  });
+  $loc.__rsub__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+    var a = Sk.ffi.remapToJs(otherPy);
+    var b = Sk.ffi.remapToJs(selfPy);
+    if (Sk.ffi.isNumber(otherPy)) {
+      return wxyzToPy(a - b.w, -b.x, -b.y, -b.z);
+    }
+    else {
+      throw Sk.ffi.err.operand(ARG_OTHER).toOperation(OP_SUB).mustHaveType(QUATERNION);
+    }
+  });
+  $loc.__isub__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+    var self = Sk.ffi.remapToJs(selfPy);
+    var other = Sk.ffi.remapToJs(otherPy);
+    if (Sk.ffi.isNumber(otherPy)) {
+      self.w -= other;
+    }
+    else {
+      self.w -= other.w;
+      self.x -= other.x;
+      self.y -= other.y;
+      self.z -= other.z;
+    }
+    return selfPy;
+  });
+  $loc.__mul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+    var a = Sk.ffi.remapToJs(selfPy);
+    var b = Sk.ffi.remapToJs(otherPy);
+    if (Sk.ffi.isNumber(otherPy)) {
+      return wxyzToPy(a.w * b, a.x * b, a.y * b, a.z * b);
+    }
+    else {
+      var ab = xyzwToJs(0, 0, 0, 1)['multiplyQuaternions'](a, b);
+      return Sk.ffi.callsim(mod[QUATERNION], Sk.ffi.referenceToPy(ab, QUATERNION));
+    }
+  });
+  $loc.__rmul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+    var a = Sk.ffi.remapToJs(otherPy);
+    var b = Sk.ffi.remapToJs(selfPy);
+    if (Sk.ffi.isNumber(otherPy)) {
+      return wxyzToPy(a * b.w, a * b.x, a * b.y, a * b.z);
+    }
+    else {
+      throw Sk.ffi.err.operand(ARG_OTHER).toOperation(OP_MUL).mustHaveType(QUATERNION);
+    }
+  });
+  $loc.__imul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+    var a = Sk.ffi.remapToJs(selfPy);
+    var b = Sk.ffi.remapToJs(otherPy);
+    var a0 = a.w;
+    var a1 = a.x;
+    var a2 = a.y;
+    var a3 = a.z;
+    var b0, b1, b2, b3, b4, b5, b6, b7;
+    if (Sk.ffi.isNumber(otherPy)) {
+      a.w *= b;
+      a.x *= b;
+      a.y *= b;
+      a.z *= b;
+    }
+    else {
+      a.multiply(b);
+    }
+    return selfPy;
+  });
+  $loc.nb$positive = function() {
+    return this;
+  };
+  $loc.nb$negative = function() {
+    var q = Sk.ffi.remapToJs(this);
+    return wxyzToPy(-q.w, -q.x, -q.y, -q.z);
+  };
+  $loc.__eq__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+    if (isQuaternionPy(otherPy)) {
+      var a = Sk.ffi.remapToJs(selfPy);
+      var b = Sk.ffi.remapToJs(otherPy);
+      return Sk.ffi.booleanToPy(a.w === b.w && a.x === b.x && a.y === b.y && a.z === b.z);
+    }
+    else {
+      return Sk.ffi.bool.False;
+    }
+  });
+  $loc.__ne__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+    if (isQuaternionPy(otherPy)) {
+      var a = Sk.ffi.remapToJs(selfPy);
+      var b = Sk.ffi.remapToJs(otherPy);
+      return Sk.ffi.booleanToPy(a.w !== b.w || a.x !== b.x || a.y !== b.y || a.z !== b.z);
+    }
+    else {
+      return Sk.ffi.bool.True;
+    }
+  });
+  $loc.__getattr__ = Sk.ffi.functionPy(function(quaternionPy, name) {
+    var quaternion = Sk.ffi.remapToJs(quaternionPy);
+    switch(name) {
+      case PROP_X: {
+        return Sk.ffi.numberToPy(quaternion.x);
+      }
+      case PROP_Y: {
+        return Sk.ffi.numberToPy(quaternion.y);
+      }
+      case PROP_Z: {
+        return Sk.ffi.numberToPy(quaternion.z);
+      }
+      case PROP_W: {
+        return Sk.ffi.numberToPy(quaternion.w);
+      }
+      case METHOD_COPY: {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+          $loc.__init__ = Sk.ffi.functionPy(function(methodPy) {
+            Sk.ffi.referenceToPy(null, METHOD_COPY, null, methodPy);
+          });
+          $loc.__call__ = Sk.ffi.functionPy(function(methodPy, qPy) {
+            Sk.ffi.checkMethodArgs(METHOD_COPY, arguments, 1, 1);
+            Sk.ffi.checkArgType("q", QUATERNION, isQuaternionPy(qPy), qPy);
+            var q  = Sk.ffi.remapToJs(qPy);
+            quaternion.copy(q);
+            return quaternionPy;
+          });
+        }, METHOD_COPY, []));
+      }
+      case METHOD_SET_FROM_AXIS_ANGLE: {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+          $loc.__init__ = Sk.ffi.functionPy(function(methodPy) {
+            Sk.ffi.referenceToPy(null, METHOD_SET_FROM_AXIS_ANGLE, null, methodPy);
+          });
+          $loc.__call__ = Sk.ffi.functionPy(function(self, axisPy, anglePy) {
+            var axis = Sk.ffi.remapToJs(axisPy);
+            var angle = Sk.ffi.remapToJs(anglePy);
+            quaternion[METHOD_SET_FROM_AXIS_ANGLE](axis, angle);
+            return quaternionPy;
+          });
+        }, METHOD_SET_FROM_AXIS_ANGLE, []));
+      }
+      case METHOD_SET_FROM_EULER: {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+          $loc.__init__ = Sk.ffi.functionPy(function(methodPy) {
+            Sk.ffi.referenceToPy(null, METHOD_SET_FROM_EULER, null, methodPy);
+          });
+          $loc.__call__ = Sk.ffi.functionPy(function(self, vectorPy, orderPy) {
+            var vector = Sk.ffi.remapToJs(vectorPy);
+            var order = Sk.ffi.remapToJs(orderPy);
+            quaternion[METHOD_SET_FROM_EULER](vector, order);
+            return quaternionPy;
+          });
+        }, METHOD_SET_FROM_EULER, []));
+      }
+      case METHOD_SET: {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+          $loc.__init__ = Sk.ffi.functionPy(function(methodPy) {
+            Sk.ffi.referenceToPy(null, METHOD_SET, null, methodPy);
+          });
+          $loc.__call__ = Sk.ffi.functionPy(function(self, x, y, z, w) {
+            quaternion.x = Sk.ffi.remapToJs(x);
+            quaternion.y = Sk.ffi.remapToJs(y);
+            quaternion.z = Sk.ffi.remapToJs(z);
+            quaternion.w = Sk.ffi.remapToJs(w);
+            return quaternionPy;
+          });
+        }, METHOD_SET, []));
+      }
+      case METHOD_CLONE: {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+          $loc.__init__ = Sk.ffi.functionPy(function(methodPy) {
+            Sk.ffi.referenceToPy(null, METHOD_CLONE, null, methodPy);
+          });
+          $loc.__call__ = Sk.ffi.functionPy(function(self) {
+            return wxyzToPy(quaternion.w, quaternion.x, quaternion.y, quaternion.z);
+          });
+        }, METHOD_CLONE, []));
+      }
+      case METHOD_CONJUGATE: {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+          $loc.__init__ = Sk.ffi.functionPy(function(methodPy) {
+            Sk.ffi.referenceToPy(null, METHOD_CONJUGATE, null, methodPy);
+          });
+          $loc.__call__ = Sk.ffi.functionPy(function(methodPy) {
+            quaternion[METHOD_CONJUGATE]();
+            return quaternionPy;
+          });
+        }, METHOD_CONJUGATE, []));
+      }
+      case METHOD_INVERSE: {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+          $loc.__init__ = Sk.ffi.functionPy(function(methodPy) {
+            Sk.ffi.referenceToPy(null, METHOD_INVERSE, null, methodPy);
+          });
+          $loc.__call__ = Sk.ffi.functionPy(function(methodPy) {
+            var k = 1.0 / quaternion[METHOD_LENGTH_SQ]();
+            quaternion[METHOD_CONJUGATE]();
+            quaternion.w *= k;
+            quaternion.x *= k;
+            quaternion.y *= k;
+            quaternion.z *= k;
+            return quaternionPy;
+          });
+        }, METHOD_INVERSE, []));
+      }
+      case METHOD_LENGTH_MANGLED: {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+          $loc.__init__ = Sk.ffi.functionPy(function(methodPy) {
+            Sk.ffi.referenceToPy(null, METHOD_LENGTH, null, methodPy);
+          });
+          $loc.__call__ = Sk.ffi.functionPy(function(methodPy) {
+            return Sk.ffi.numberToPy(quaternion.length());
+          });
+        }, METHOD_LENGTH, []));
+      }
+      case METHOD_LENGTH_SQ: {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+          $loc.__init__ = Sk.ffi.functionPy(function(methodPy) {
+            Sk.ffi.referenceToPy(null, METHOD_LENGTH_SQ, null, methodPy);
+          });
+          $loc.__call__ = Sk.ffi.functionPy(function(methodPy) {
+            return Sk.ffi.numberToPy(quaternion[METHOD_LENGTH_SQ]());
+          });
+        }, METHOD_LENGTH_SQ, []));
+      }
+      case METHOD_NORMALIZE: {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+          $loc.__init__ = Sk.ffi.functionPy(function(methodPy) {
+            Sk.ffi.referenceToPy(null, METHOD_NORMALIZE, null, methodPy);
+          });
+          $loc.__call__ = Sk.ffi.functionPy(function(methodPy) {
+            quaternion[METHOD_NORMALIZE]();
+            return quaternionPy;
+          });
+        }, METHOD_NORMALIZE, []));
+      }
+      default: {
+        throw Sk.ffi.err.attribute(name).isNotGetableOnType(QUATERNION);
+      }
+    }
+  });
+  $loc.__setattr__ = Sk.ffi.functionPy(function(quaternionPy, name, valuePy) {
+    var quaternion = Sk.ffi.remapToJs(quaternionPy);
+    var value = Sk.ffi.remapToJs(valuePy);
+    switch(name) {
+      case PROP_X: {
+        quaternion.x = value;
+      }
+      break;
+      case PROP_Y: {
+        quaternion.y = value;
+      }
+      break;
+      case PROP_Z: {
+        quaternion.z = value;
+      }
+      break;
+      case PROP_W: {
+        quaternion.w = value;
+      }
+      break;
+      default: {
+        throw Sk.ffi.err.attribute(name).isNotSetableOnType(QUATERNION);
+      }
+    }
+  });
+  $loc.__repr__ = Sk.ffi.functionPy(function(quaternionPy) {
+    var quaternion = Sk.ffi.remapToJs(quaternionPy);
+    var args = [quaternion.x, quaternion.y, quaternion.z, quaternion.w];
+    return Sk.ffi.stringToPy(QUATERNION + "(" + args.join(", ") + ")");
+  });
+  $loc.__str__ = Sk.ffi.functionPy(function(quaternionPy) {
+    var quaternion = Sk.ffi.remapToJs(quaternionPy);
+    return Sk.ffi.stringToPy(stringFromCoordinates([quaternion.w, quaternion.x, quaternion.y, quaternion.z], ["1", "i", "j", "k"]));
+  });
+}, QUATERNION, []);
+};
+}).call(this);
+/**
  * Convenience function for incorporating a Window class into a module.
  *
  * Usage:
@@ -30383,21 +30897,6 @@ Sk.builtin.defineThree = function(mod, THREE) {
  * @const
  * @type {string}
  */
-  var METHOD_SET                 = "set";
-/**
- * @const
- * @type {string}
- */
-  var METHOD_SET_FROM_AXIS_ANGLE = "setFromAxisAngle";
-/**
- * @const
- * @type {string}
- */
-  var METHOD_SET_FROM_EULER      = "setFromEuler";
-/**
- * @const
- * @type {string}
- */
   var METHOD_SET_GEOMETRY        = "setGeometry";
 /**
  * @const
@@ -30433,21 +30932,6 @@ Sk.builtin.defineThree = function(mod, THREE) {
  * @const
  * @type {string}
  */
-  var METHOD_CLONE               = "clone";
-/**
- * @const
- * @type {string}
- */
-  var METHOD_CONJUGATE           = "conjugate";
-/**
- * @const
- * @type {string}
- */
-  var METHOD_COPY                = "copy";
-/**
- * @const
- * @type {string}
- */
   var METHOD_CROSS               = "cross";
 /**
  * @const
@@ -30458,27 +30942,7 @@ Sk.builtin.defineThree = function(mod, THREE) {
  * @const
  * @type {string}
  */
-  var METHOD_INVERSE             = "inverse";
-/**
- * @const
- * @type {string}
- */
-  var METHOD_LENGTH              = "length";
-/**
- * @const
- * @type {string}
- */
-  var METHOD_LENGTH_SQ           = "lengthSq";
-/**
- * @const
- * @type {string}
- */
   var METHOD_LOOK_AT             = "lookAt";
-/**
- * @const
- * @type {string}
- */
-  var METHOD_NORMALIZE           = "normalize";
 /**
  * @const
  * @type {string}
@@ -30761,394 +31225,7 @@ Sk.builtin.defineThree = function(mod, THREE) {
 
   Sk.builtin.defineEuclidean3(mod);
   Sk.builtin.defineVector3(mod, VECTOR_3, function(x, y, z) {return new THREE[VECTOR_3](x, y, z)});
-
-  mod[QUATERNION] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.functionPy(function(self, x, y, z, w) {
-      x = Sk.ffi.remapToJs(x);
-      y = Sk.ffi.remapToJs(y);
-      z = Sk.ffi.remapToJs(z);
-      w = Sk.ffi.remapToJs(w);
-      if (isObject(x) && isUndefined(y) && isUndefined(z) && isUndefined(w)) {
-        self.v = x;
-      }
-      else {
-        self.v = new THREE[QUATERNION](x, y, z, w);
-      }
-      self.tp$name = QUATERNION;
-    });
-    $loc.__add__ = Sk.ffi.functionPy(function(a, b) {
-      a = Sk.ffi.remapToJs(a);
-      b = Sk.ffi.remapToJs(b);
-      if (isNumber(b)) {
-        return wxyzToPy(a.w + b, a.x, a.y, a.z);
-      }
-      else {
-        var w = a.w + b.w;
-        var x = a.x + b.x;
-        var y = a.y + b.y;
-        var z = a.z + b.z;
-        return wxyzToPy(w, x, y, z);
-      }
-    });
-    $loc.__radd__ = Sk.ffi.functionPy(function(b, a) {
-      a = Sk.ffi.remapToJs(a);
-      b = Sk.ffi.remapToJs(b);
-      if (isNumber(a)) {
-        return wxyzToPy(a + b.w, b.x, b.y, b.z);
-      }
-      else {
-        throw new Sk.builtin.AssertionError();
-      }
-    });
-    $loc.__iadd__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-      var self = Sk.ffi.remapToJs(selfPy);
-      var other = Sk.ffi.remapToJs(otherPy);
-      if (isNumber(other)) {
-        self.w += other;
-      }
-      else {
-        self.w += other.w;
-        self.x += other.x;
-        self.y += other.y;
-        self.z += other.z;
-      }
-      return selfPy;
-    });
-    $loc.__sub__ = Sk.ffi.functionPy(function(a, b) {
-      a = Sk.ffi.remapToJs(a);
-      b = Sk.ffi.remapToJs(b);
-      if (isNumber(b)) {
-        return wxyzToPy(a.w - b, a.x, a.y, a.z);
-      }
-      else {
-        var w = a.w - b.w;
-        var x = a.x - b.x;
-        var y = a.y - b.y;
-        var z = a.z - b.z;
-        return wxyzToPy(w, x, y, z);
-      }
-    });
-    $loc.__rsub__ = Sk.ffi.functionPy(function(b, a) {
-      a = Sk.ffi.remapToJs(a);
-      b = Sk.ffi.remapToJs(b);
-      if (isNumber(a)) {
-        return wxyzToPy(a - b.w, -b.x, -b.y, -b.z);
-      }
-      else {
-        throw new Sk.builtin.AssertionError();
-      }
-    });
-    $loc.__isub__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-      var self = Sk.ffi.remapToJs(selfPy);
-      var other = Sk.ffi.remapToJs(otherPy);
-      if (isNumber(other)) {
-        self.w -= other;
-      }
-      else {
-        self.w -= other.w;
-        self.x -= other.x;
-        self.y -= other.y;
-        self.z -= other.z;
-      }
-      return selfPy;
-    });
-    $loc.__mul__ = Sk.ffi.functionPy(function(a, b) {
-      a = Sk.ffi.remapToJs(a);
-      b = Sk.ffi.remapToJs(b);
-      if (isNumber(b)) {
-        return wxyzToPy(a.w * b, a.x * b, a.y * b, a.z * b);
-      }
-      else {
-        var ab = new THREE[QUATERNION]()['multiplyQuaternions'](a, b);
-        return Sk.ffi.callsim(mod[QUATERNION], Sk.ffi.referenceToPy(ab, QUATERNION));
-      }
-    });
-    $loc.__rmul__ = Sk.ffi.functionPy(function(b, a) {
-      a = Sk.ffi.remapToJs(a);
-      b = Sk.ffi.remapToJs(b);
-      if (isNumber(a)) {
-        return wxyzToPy(a * b.w, a * b.x, a * b.y, a * b.z);
-      }
-      else {
-        throw new Sk.builtin.AssertionError();
-      }
-    });
-    $loc.__imul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-      var a = Sk.ffi.remapToJs(selfPy);
-      var b = Sk.ffi.remapToJs(otherPy);
-      var a0 = a.w;
-      var a1 = a.x;
-      var a2 = a.y;
-      var a3 = a.z;
-      var b0, b1, b2, b3, b4, b5, b6, b7;
-      if (isNumber(b)) {
-        a.w *= b;
-        a.x *= b;
-        a.y *= b;
-        a.z *= b;
-      }
-      else {
-        a.multiply(b);
-      }
-      return selfPy;
-    });
-    $loc.nb$positive = function() {
-      return this;
-    };
-    $loc.nb$negative = function() {
-      var mv = Sk.ffi.remapToJs(this);
-      return wxyzToPy(-mv.w, -mv.x, -mv.y, -mv.z);
-    };
-    $loc.__eq__ = Sk.ffi.functionPy(function(a, b) {
-      a = Sk.ffi.remapToJs(a);
-      b = Sk.ffi.remapToJs(b);
-      return a.w === b.w && a.x === b.x && a.y === b.y && a.z === b.z;
-    });
-    $loc.__ne__ = Sk.ffi.functionPy(function(a, b) {
-      a = Sk.ffi.remapToJs(a);
-      b = Sk.ffi.remapToJs(b);
-      return a.w !== b.w || a.x !== b.x || a.y !== b.y || a.z !== b.z;
-    });
-    $loc.__getattr__ = Sk.ffi.functionPy(function(quaternionPy, name) {
-      var quaternion = Sk.ffi.remapToJs(quaternionPy);
-      switch(name) {
-        case PROP_X: {
-          return Sk.builtin.assk$(quaternion.x, Sk.builtin.nmber.float$);
-        }
-        case PROP_Y: {
-          return Sk.builtin.assk$(quaternion.y, Sk.builtin.nmber.float$);
-        }
-        case PROP_Z: {
-          return Sk.builtin.assk$(quaternion.z, Sk.builtin.nmber.float$);
-        }
-        case PROP_W: {
-          return Sk.builtin.assk$(quaternion.w, Sk.builtin.nmber.float$);
-        }
-        case METHOD_COPY: {
-          return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.functionPy(function(self) {
-              self.tp$name = METHOD_COPY;
-            });
-            $loc.__call__ = Sk.ffi.functionPy(function(self, qPy) {
-              var q  = Sk.ffi.remapToJs(qPy);
-              quaternion.x = q.x;
-              quaternion.y = q.y;
-              quaternion.z = q.z;
-              quaternion.w = q.w;
-              return quaternionPy;
-            });
-            $loc.__str__ = Sk.ffi.functionPy(function(self) {
-              return Sk.ffi.stringToPy(METHOD_COPY);
-            });
-            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-              return Sk.ffi.stringToPy(METHOD_COPY);
-            });
-          }, METHOD_COPY, []));
-        }
-        case METHOD_SET_FROM_AXIS_ANGLE: {
-          return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.functionPy(function(self) {
-              self.tp$name = METHOD_SET_FROM_AXIS_ANGLE;
-            });
-            $loc.__call__ = Sk.ffi.functionPy(function(self, axisPy, anglePy) {
-              var axis = Sk.ffi.remapToJs(axisPy);
-              var angle = Sk.ffi.remapToJs(anglePy);
-              quaternion[METHOD_SET_FROM_AXIS_ANGLE](axis, angle);
-              return quaternionPy;
-            });
-            $loc.__str__ = Sk.ffi.functionPy(function(self) {
-              return Sk.ffi.stringToPy(METHOD_SET_FROM_AXIS_ANGLE);
-            });
-            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-              return Sk.ffi.stringToPy(METHOD_SET_FROM_AXIS_ANGLE);
-            });
-          }, METHOD_SET_FROM_AXIS_ANGLE, []));
-        }
-        case METHOD_SET_FROM_EULER: {
-          return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.functionPy(function(self) {
-              self.tp$name = METHOD_SET_FROM_EULER;
-            });
-            $loc.__call__ = Sk.ffi.functionPy(function(self, vectorPy, orderPy) {
-              var vector = Sk.ffi.remapToJs(vectorPy);
-              var order = Sk.ffi.remapToJs(orderPy);
-              quaternion[METHOD_SET_FROM_EULER](vector, order);
-              return quaternionPy;
-            });
-            $loc.__str__ = Sk.ffi.functionPy(function(self) {
-              return Sk.ffi.stringToPy(METHOD_SET_FROM_EULER);
-            });
-            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-              return Sk.ffi.stringToPy(METHOD_SET_FROM_EULER);
-            });
-          }, METHOD_SET_FROM_EULER, []));
-        }
-        case METHOD_SET: {
-          return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.functionPy(function(self) {
-              self.tp$name = METHOD_SET;
-            });
-            $loc.__call__ = Sk.ffi.functionPy(function(self, x, y, z, w) {
-              quaternion.x = Sk.ffi.remapToJs(x);
-              quaternion.y = Sk.ffi.remapToJs(y);
-              quaternion.z = Sk.ffi.remapToJs(z);
-              quaternion.w = Sk.ffi.remapToJs(w);
-              return quaternionPy;
-            });
-            $loc.__str__ = Sk.ffi.functionPy(function(self) {
-              return Sk.ffi.stringToPy(METHOD_SET);
-            });
-            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-              return Sk.ffi.stringToPy(METHOD_SET);
-            });
-          }, METHOD_SET, []));
-        }
-        case METHOD_CLONE: {
-          return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.functionPy(function(self) {
-              self.tp$name = METHOD_CLONE;
-            });
-            $loc.__call__ = Sk.ffi.functionPy(function(self) {
-              return wxyzToPy(quaternion.w, quaternion.x, quaternion.y, quaternion.z);
-            });
-            $loc.__str__ = Sk.ffi.functionPy(function(self) {
-              return Sk.ffi.stringToPy(METHOD_CLONE);
-            });
-            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-              return Sk.ffi.stringToPy(METHOD_CLONE);
-            });
-          }, METHOD_CLONE, []));
-        }
-        case METHOD_CONJUGATE: {
-          return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.functionPy(function(self) {
-              self.tp$name = METHOD_CONJUGATE;
-            });
-            $loc.__call__ = Sk.ffi.functionPy(function(self) {
-              quaternion[METHOD_CONJUGATE]();
-              return quaternionPy;
-            });
-            $loc.__str__ = Sk.ffi.functionPy(function(self) {
-              return Sk.ffi.stringToPy(METHOD_CONJUGATE);
-            });
-            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-              return Sk.ffi.stringToPy(METHOD_CONJUGATE);
-            });
-          }, METHOD_CONJUGATE, []));
-        }
-        case METHOD_INVERSE: {
-          return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.functionPy(function(self) {
-              self.tp$name = METHOD_INVERSE;
-            });
-            $loc.__call__ = Sk.ffi.functionPy(function(self) {
-              var k = 1.0 / quaternion[METHOD_LENGTH_SQ]();
-              quaternion[METHOD_CONJUGATE]();
-              quaternion.w *= k;
-              quaternion.x *= k;
-              quaternion.y *= k;
-              quaternion.z *= k;
-              return quaternionPy;
-            });
-            $loc.__str__ = Sk.ffi.functionPy(function(self) {
-              return Sk.ffi.stringToPy(METHOD_INVERSE);
-            });
-            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-              return Sk.ffi.stringToPy(METHOD_INVERSE);
-            });
-          }, METHOD_INVERSE, []));
-        }
-        case METHOD_LENGTH: {
-          return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.functionPy(function(self) {
-              self.tp$name = METHOD_LENGTH;
-            });
-            $loc.__call__ = Sk.ffi.functionPy(function(self) {
-              return Sk.builtin.assk$(quaternion.length(), Sk.builtin.nmber.float$);
-            });
-            $loc.__str__ = Sk.ffi.functionPy(function(self) {
-              return Sk.ffi.stringToPy(METHOD_LENGTH);
-            });
-            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-              return Sk.ffi.stringToPy(METHOD_LENGTH);
-            });
-          }, METHOD_LENGTH, []));
-        }
-        case METHOD_LENGTH_SQ: {
-          return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.functionPy(function(self) {
-              self.tp$name = METHOD_LENGTH_SQ;
-            });
-            $loc.__call__ = Sk.ffi.functionPy(function(self) {
-              return Sk.builtin.assk$(quaternion[METHOD_LENGTH_SQ](), Sk.builtin.nmber.float$);
-            });
-            $loc.__str__ = Sk.ffi.functionPy(function(self) {
-              return Sk.ffi.stringToPy(METHOD_LENGTH_SQ);
-            });
-            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-              return Sk.ffi.stringToPy(METHOD_LENGTH_SQ);
-            });
-          }, METHOD_LENGTH_SQ, []));
-        }
-        case METHOD_NORMALIZE: {
-          return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.functionPy(function(self) {
-              self.tp$name = METHOD_NORMALIZE;
-            });
-            $loc.__call__ = Sk.ffi.functionPy(function(self) {
-              quaternion[METHOD_NORMALIZE]();
-              return quaternionPy;
-            });
-            $loc.__str__ = Sk.ffi.functionPy(function(self) {
-              return Sk.ffi.stringToPy(METHOD_NORMALIZE);
-            });
-            $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-              return Sk.ffi.stringToPy(METHOD_NORMALIZE);
-            });
-          }, METHOD_NORMALIZE, []));
-        }
-      }
-    });
-    $loc.__setattr__ = Sk.ffi.functionPy(function(quaternionPy, name, valuePy) {
-      var quaternion = Sk.ffi.remapToJs(quaternionPy);
-      var value = Sk.ffi.remapToJs(valuePy);
-      switch(name) {
-        case PROP_X: {
-          quaternion.x = value;
-        }
-        break;
-        case PROP_Y: {
-          quaternion.y = value;
-        }
-        break;
-        case PROP_Z: {
-          quaternion.z = value;
-        }
-        break;
-        case PROP_W: {
-          quaternion.w = value;
-        }
-        break;
-        default: {
-          throw new Sk.builtin.AttributeError(name + " is not an attribute of " + QUATERNION);
-        }
-      }
-    });
-    $loc.__repr__ = Sk.ffi.functionPy(function(quaternionPy) {
-      var quaternion = Sk.ffi.remapToJs(quaternionPy);
-      var args = [quaternion.x, quaternion.y, quaternion.z, quaternion.w];
-      return Sk.ffi.stringToPy(QUATERNION + "(" + args.join(", ") + ")");
-    });
-    $loc.__str__ = Sk.ffi.functionPy(function(quaternionPy) {
-      var quaternion = Sk.ffi.remapToJs(quaternionPy);
-      if (isDefined(quaternion)) {
-        return Sk.ffi.stringToPy(stringFromCoordinates([quaternion.w, quaternion.x, quaternion.y, quaternion.z], ["1", "i", "j", "k"]));
-      }
-      else {
-        return Sk.ffi.stringToPy("<type '" + QUATERNION + "'>");
-      }
-    });
-  }, QUATERNION, []);
+  Sk.builtin.defineQuaternion(mod, QUATERNION, function(x, y, z, w) {return new THREE[QUATERNION](x, y, z, w)});
 
   // Erik Moller's requestAnimationFrame for smart(er) animating
   // Minor formatting changes and use of braces for if conditions.
@@ -33988,9 +34065,9 @@ Sk.builtin.defineThree = function(mod, THREE) {
   var OP_EQ            = "equal";
   /**
    * @param {string} VECTOR_3
-   * @param {function(number, number, number): string} vector3
+   * @param {function(number, number, number): string} factory
    */
-  Sk.builtin.defineVector3 = function(mod, VECTOR_3, vector3) {
+  Sk.builtin.defineVector3 = function(mod, VECTOR_3, factory) {
     Sk.ffi.checkFunctionArgs("defineVector3", arguments, 3, 3);
     /**
      * @param {Object} valuePy
@@ -34011,7 +34088,7 @@ Sk.builtin.defineThree = function(mod, THREE) {
       $loc.__init__ = Sk.ffi.functionPy(function(selfPy, x, y, z) {
         Sk.ffi.checkMethodArgs(VECTOR_3, arguments, 0, 4);
         if (Sk.ffi.isUndefined(x) && Sk.ffi.isUndefined(y) && Sk.ffi.isUndefined(z)) {
-          Sk.ffi.referenceToPy(vector3(0, 0, 0), VECTOR_3, undefined, selfPy);
+          Sk.ffi.referenceToPy(factory(0, 0, 0), VECTOR_3, undefined, selfPy);
         }
         else {
           switch(Sk.ffi.getType(x)) {
@@ -34028,7 +34105,7 @@ Sk.builtin.defineThree = function(mod, THREE) {
               Sk.ffi.checkArgType(PROP_X, NUMBER, Sk.ffi.isNumber(x), x);
               Sk.ffi.checkArgType(PROP_Y, NUMBER, Sk.ffi.isNumber(y), y);
               Sk.ffi.checkArgType(PROP_Z, NUMBER, Sk.ffi.isNumber(z), z);
-              Sk.ffi.referenceToPy(vector3(Sk.ffi.remapToJs(x), Sk.ffi.remapToJs(y), Sk.ffi.remapToJs(z)), VECTOR_3, undefined, selfPy);
+              Sk.ffi.referenceToPy(factory(Sk.ffi.remapToJs(x), Sk.ffi.remapToJs(y), Sk.ffi.remapToJs(z)), VECTOR_3, undefined, selfPy);
             }
             break
             default: {
