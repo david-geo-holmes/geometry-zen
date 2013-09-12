@@ -14185,8 +14185,41 @@ goog.exportSymbol("Sk.ffi.isNone", Sk.ffi.isNone);
 
 Sk.ffi.isNumber = function(valuePy) { return Sk.builtin.checkNumber(valuePy); };
 goog.exportSymbol("Sk.ffi.isNumber", Sk.ffi.isNumber);
-
-Sk.ffi.isClass = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.CLASS; };
+/**
+ * Determines whether the Python value is an instance of a class with a specified class name.
+ *
+ * @nosideeffects
+ * @param {Object} valuePy
+ * @param {Sk.ffi.UnionType=} className An optional class name.
+ * @return {boolean} Returns true if the value has the type CLASS and if the name matches the type name.
+ */
+Sk.ffi.isClass = function(valuePy, className)
+{
+    if (Sk.ffi.getType(valuePy) === Sk.ffi.PyType.CLASS)
+    {
+        var t = typeof className;
+        if (t === Sk.ffi.JsType.STRING)
+        {
+            return Sk.ffi.typeName(valuePy) === className;
+        }
+        else if (t === Sk.ffi.JsType.UNDEFINED)
+        {
+            return true;
+        }
+        else if (Object.prototype.toString.call(className) === '[object Array]') {
+            var name = Sk.ffi.typeName(valuePy)
+            return className.some(function(x) {return name === x;});
+        }
+        else
+        {
+            throw Sk.ffi.assertionError("caa41602-62da-4850-8f76-38d013f45a6c, typeof className => " + t);
+        }
+    }
+    else
+    {
+        return false;
+    }
+};
 goog.exportSymbol("Sk.ffi.isClass", Sk.ffi.isClass);
 
 Sk.ffi.isFunctionRef = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.FUNREF; };
@@ -24342,7 +24375,7 @@ goog.exportSymbol("Sk.builtins", Sk.builtins);
      */
     var OP_DIV           = "/";
 
-    function isComplex(valuePy) {return Sk.ffi.isClass(valuePy) && Sk.ffi.typeName(valuePy) === COMPLEX;};
+    function isComplexPy(valuePy) {return Sk.ffi.isClass(valuePy, COMPLEX);};
 
     function phase(x, y) {return Math.atan2(y, x);}
 
@@ -24412,7 +24445,7 @@ goog.exportSymbol("Sk.builtins", Sk.builtins);
       $loc.__add__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
         var a = Sk.ffi.remapToJs(selfPy);
         var b = Sk.ffi.remapToJs(otherPy);
-        if (isComplex(otherPy)) {
+        if (isComplexPy(otherPy)) {
           return cartesianToComplexPy(a.x + b.x, a.y + b.y);
         }
         else if (Sk.ffi.isNumber(otherPy)) {
@@ -24434,7 +24467,7 @@ goog.exportSymbol("Sk.builtins", Sk.builtins);
         if (Sk.ffi.isNumber(otherPy)) {
           a.x += b;
         }
-        else if (isComplex(otherPy)) {
+        else if (isComplexPy(otherPy)) {
           a.x += b.x;
           a.y += b.y;
         }
@@ -24446,7 +24479,7 @@ goog.exportSymbol("Sk.builtins", Sk.builtins);
       $loc.__sub__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
         var a = Sk.ffi.remapToJs(selfPy);
         var b = Sk.ffi.remapToJs(otherPy);
-        if (isComplex(otherPy)) {
+        if (isComplexPy(otherPy)) {
           return cartesianToComplexPy(a.x - b.x, a.y - b.y);
         }
         else if (Sk.ffi.isNumber(otherPy)) {
@@ -24526,10 +24559,10 @@ goog.exportSymbol("Sk.builtins", Sk.builtins);
       // TODO: Use of nb$* will require fixes in abstract.js
       /*
       $loc.nb$divide = function(otherPy) {
-        Sk.ffi.checkArgType("self",  COMPLEX, isComplex(this));
+        Sk.ffi.checkArgType("self",  COMPLEX, isComplexPy(this));
         var a = Sk.ffi.remapToJs(this);
         var b = Sk.ffi.remapToJs(otherPy);
-        if (isComplex(otherPy)) {
+        if (isComplexPy(otherPy)) {
           var factor = b.x * b.x + b.y * b.y;
           return cartesianToComplexPy((a.x * b.x + a.y * b.y) / factor, (a.y * b.x - a.x * b.y) / factor);
         }
@@ -24551,7 +24584,7 @@ goog.exportSymbol("Sk.builtins", Sk.builtins);
       $loc.__div__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
         var a = Sk.ffi.remapToJs(selfPy);
         var b = Sk.ffi.remapToJs(otherPy);
-        if (isComplex(otherPy)) {
+        if (isComplexPy(otherPy)) {
           var factor = b.x * b.x + b.y * b.y;
           return cartesianToComplexPy((a.x * b.x + a.y * b.y) / factor, (a.y * b.x - a.x * b.y) / factor);
         }
@@ -24624,7 +24657,7 @@ goog.exportSymbol("Sk.builtins", Sk.builtins);
     // Conversions to and from polar coordinates
     mod.phase = Sk.ffi.functionPy(function(xPy) {
       Sk.ffi.checkFunctionArgs("phase", arguments, 1, 1);
-      if (isComplex(xPy)) {
+      if (isComplexPy(xPy)) {
         var z = Sk.ffi.remapToJs(xPy);
         return Sk.ffi.numberToPy(phase(z.x, z.y));
       }
@@ -24638,7 +24671,7 @@ goog.exportSymbol("Sk.builtins", Sk.builtins);
 
     mod.polar = Sk.ffi.functionPy(function(xPy) {
       Sk.ffi.checkFunctionArgs("polar", arguments, 1, 1);
-      if (isComplex(xPy)) {
+      if (isComplexPy(xPy)) {
         var z = Sk.ffi.remapToJs(xPy);
         return Sk.ffi.tuplePy([Sk.ffi.remapToPy(norm(z.x, z.y)), Sk.ffi.remapToPy(phase(z.x, z.y))]);
       }
@@ -24779,7 +24812,7 @@ var ARG_OTHER                  = "other";
  * @param {Object} valuePy
  * @return {boolean}
  */
-function isQuaternionPy(valuePy) {return Sk.ffi.isClass(valuePy) && Sk.ffi.typeName(valuePy) === QUATERNION;};
+function isQuaternionPy(valuePy) {return Sk.ffi.isClass(valuePy, QUATERNION);};
 /**
  * @param {!Array.<number>} coordinates
  * @param {!Array.<string>} labels
@@ -25925,9 +25958,7 @@ var e1 = new THREE[VECTOR_3](1, 0, 0);
 var e2 = new THREE[VECTOR_3](0, 1, 0);
 var e3 = new THREE[VECTOR_3](0, 0, 1);
 
-function isVector3(valuePy) {
-  return Sk.ffi.isClass(valuePy) && Sk.ffi.typeName(valuePy) === VECTOR_3;
-}
+function isVector3(valuePy) {return Sk.ffi.isClass(valuePy, VECTOR_3);}
 
 function methodName(targetPy) {
   var target = Sk.ffi.remapToJs(targetPy);
@@ -26338,7 +26369,7 @@ mod[CYLINDER_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       case PROP_MATERIAL: {
         return Sk.ffi.callableToPy(mod, PROP_MATERIAL, function(methodPy, materialPy) {
           Sk.ffi.checkMethodArgs(PROP_MATERIAL, arguments, 1, 1);
-          Sk.ffi.checkArgType(PROP_MATERIAL, [Sk.ffi.PyType.CLASS], Sk.ffi.isClass(materialPy), materialPy);
+          Sk.ffi.checkArgType(PROP_MATERIAL, [Sk.ffi.PyType.CLASS], Sk.ffi.isClass(materialPy), materialPy); // TODO: MATERIALS
           cylinder[PROP_MATERIAL] = materialPy;
           return selfPy;
         });
@@ -26927,7 +26958,7 @@ Sk.builtin.buildNodeClass = function(mod) {
   return Sk.ffi.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = Sk.ffi.functionPy(function(selfPy, nodePy) {
       Sk.ffi.checkMethodArgs(NODE, arguments, 1, 1);
-      Sk.ffi.checkArgType("node", NODE, Sk.ffi.isClass(nodePy), nodePy);
+      Sk.ffi.checkArgType("node", NODE, Sk.ffi.isClass(nodePy, NODE), nodePy);
       Sk.ffi.referenceToPy(Sk.ffi.remapToJs(nodePy), NODE, undefined, selfPy);
     });
     $loc.__getattr__ = Sk.ffi.functionPy(function(nodePy, name) {
@@ -28105,9 +28136,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
      * @param {Object} valuePy
      * @return {boolean} true if the value is a Euclidean2, otherwise false.
      */
-    var isEuclidean2 = function(valuePy) {
-      return Sk.ffi.isClass(valuePy) && Sk.ffi.typeName(valuePy) === EUCLIDEAN_2;
-    };
+    var isEuclidean2Py = function(valuePy) {return Sk.ffi.isClass(valuePy, EUCLIDEAN_2);};
 
   function remapE2ToPy(x00, x01, x10, x11) {
     return Sk.ffi.callsim(mod[EUCLIDEAN_2], Sk.ffi.numberToPy(x00), Sk.ffi.numberToPy(x01), Sk.ffi.numberToPy(x10), Sk.ffi.numberToPy(x11));
@@ -28229,7 +28258,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         break;
         case Sk.ffi.PyType.CLASS: {
           Sk.ffi.checkMethodArgs(EUCLIDEAN_2, arguments, 1, 1);
-          Sk.ffi.checkArgType(PROP_W, NUMBER, isEuclidean2(x00), x00);
+          Sk.ffi.checkArgType(PROP_W, NUMBER, isEuclidean2Py(x00), x00);
           Sk.ffi.referenceToPy(Sk.ffi.remapToJs(x00), EUCLIDEAN_2, undefined, selfPy);
         }
         break;
@@ -28244,7 +28273,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
       if (Sk.ffi.isNumber(otherPy)) {
         return remapE2ToPy(lhs.w + rhs, lhs.x, lhs.y, lhs.xy);
       }
-      else if (isEuclidean2(otherPy)) {
+      else if (isEuclidean2Py(otherPy)) {
         return remapE2ToPy(lhs.w + rhs.w, lhs.x + rhs.x, lhs.y + rhs.y, lhs.xy + rhs.xy);
       }
       else {
@@ -28264,7 +28293,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         self.w += other;
         return selfPy;
       }
-      else if (isEuclidean2(otherPy)) {
+      else if (isEuclidean2Py(otherPy)) {
         self.w  += other.w;
         self.x  += other.x;
         self.y  += other.y;
@@ -28281,7 +28310,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
       if (Sk.ffi.isNumber(otherPy)) {
         return remapE2ToPy(lhs.w - rhs, lhs.x, lhs.y, lhs.xy);
       }
-      else if (isEuclidean2(otherPy)) {
+      else if (isEuclidean2Py(otherPy)) {
         return remapE2ToPy(lhs.w - rhs.w, lhs.x - rhs.x, lhs.y - rhs.y, lhs.xy - rhs.xy);
       }
       else {
@@ -30072,115 +30101,118 @@ Sk.builtin.defineUnits = function(mod) {
    * @const
    * @type {string}
    */
-  var DIMENSIONS       = "Dimensions";
+  var DIMENSIONS        = "Dimensions";
   /**
    * @const
    * @type {string}
    */
-  var MEASURE          = "Measure";
+  var MEASURE           = "Measure";
   /**
    * @const
    * @type {string}
    */
-  var RATIONAL         = "Rational";
+  var RATIONAL          = "Rational";
   /**
    * @const
    * @type {string}
    */
-  var UNIT             = "Unit";
-  var INT              = "int";
-  var NUMBER           = "Number";
+  var UNIT              = "Unit";
+  /**
+   * @const
+   * @type {!Array.<Sk.ffi.PyType>}
+   */
+  var NUMBER            = [Sk.ffi.PyType.FLOAT, Sk.ffi.PyType.INT, Sk.ffi.PyType.LONG];
+  /**
+   * @const
+   * @type {string}
+   */
+  var PROP_QUANTITY     = "quantity";
+  /**
+   * @const
+   * @type {string}
+   */
+  var PROP_UOM          = "uom";
+  /**
+   * @const
+   * @type {string}
+   */
+  var PROP_SCALE        = "scale";
+  /**
+   * @const
+   * @type {string}
+   */
+  var PROP_DIMENSIONS   = "dimensions";
+  /**
+   * @const
+   * @type {string}
+   */
+  var PROP_LABELS       = "labels";
+  /**
+   * @const
+   * @type {string}
+   */
+  var PROP_M            = "M";
+  /**
+   * @const
+   * @type {string}
+   */
+  var PROP_L            = "L";
+  /**
+   * @const
+   * @type {string}
+   */
+  var PROP_T            = "T";
+  /**
+   * @const
+   * @type {string}
+   */
+  var PROP_Q            = "Q";
+  /**
+   * @const
+   * @type {string}
+   */
+  var METHOD_COMPATIBLE = "compatible";
+  /**
+   * @const
+   * @type {string}
+   */
+  var OP_ADD            = "add";
+  /**
+   * @const
+   * @type {string}
+   */
+  var OP_SUB            = "subtract";
+  /**
+   * @const
+   * @type {string}
+   */
+  var OP_MUL            = "multiply";
+  /**
+   * @const
+   * @type {string}
+   */
+  var OP_DIV            = "divide";
+  /**
+   * @const
+   * @type {string}
+   */
+  var OP_EQ             = "equal";
 
-  /**
-   * @const
-   * @type {string}
-   */
-  var PROP_QUANTITY    = "quantity";
-  /**
-   * @const
-   * @type {string}
-   */
-  var PROP_UOM         = "uom";
-  /**
-   * @const
-   * @type {string}
-   */
-  var PROP_SCALE       = "scale";
-  /**
-   * @const
-   * @type {string}
-   */
-  var PROP_DIMENSIONS  = "dimensions";
-  /**
-   * @const
-   * @type {string}
-   */
-  var PROP_LABELS      = "labels";
-  /**
-   * @const
-   * @type {string}
-   */
-  var PROP_M           = "M";
-  /**
-   * @const
-   * @type {string}
-   */
-  var PROP_L           = "L";
-  /**
-   * @const
-   * @type {string}
-   */
-  var PROP_T           = "T";
-  /**
-   * @const
-   * @type {string}
-   */
-  var PROP_Q           = "Q";
-  /**
-   * @const
-   * @type {string}
-   */
-  var OP_ADD           = "add";
-  /**
-   * @const
-   * @type {string}
-   */
-  var OP_SUB           = "subtract";
-  /**
-   * @const
-   * @type {string}
-   */
-  var OP_MUL           = "multiply";
-  /**
-   * @const
-   * @type {string}
-   */
-  var OP_DIV           = "divide";
-  /**
-   * @const
-   * @type {string}
-   */
-  var OP_EQ            = "equal";
+  var KILOGRAM          = "kilogram";
+  var METER             = "meter";
+  var SECOND            = "second";
+  var COULOMB           = "coulomb";
+  var SI_LABELS         = ["kg", "m", "s", "C"];
+  var NEWTON            = "newton";
+  var JOULE             = "joule";
+  var WATT              = "watt";
+  var AMPERE            = "ampere";
+  var VOLT              = "volt";
+  var TESLA             = "tesla";
 
-  var KILOGRAM         = "kilogram";
-  var METER            = "meter";
-  var SECOND           = "second";
-  var COULOMB          = "coulomb";
-  var SI_LABELS        = ["kg", "m", "s", "C"];
-  var NEWTON           = "newton";
-  var JOULE            = "joule";
-  var WATT             = "watt";
-  var AMPERE           = "ampere";
-  var VOLT             = "volt";
-  var TESLA            = "tesla";
-
-  var isDimensions = function(valuePy) {
-    return Sk.ffi.isClass(valuePy) && Sk.ffi.typeName(valuePy) === DIMENSIONS;
-  }
-
-  var isUnit = function(valuePy) {
-    return Sk.ffi.isClass(valuePy) && Sk.ffi.typeName(valuePy) === UNIT;
-  }
+  var isMeasurePy    = function(valuePy) {return Sk.ffi.isClass(valuePy, MEASURE);};
+  var isDimensionsPy = function(valuePy) {return Sk.ffi.isClass(valuePy, DIMENSIONS);};
+  var isUnitPy       = function(valuePy) {return Sk.ffi.isClass(valuePy, UNIT);};
 
   Sk.builtin.defineFractions(mod, RATIONAL, function(n, d) {return new BLADE.Rational(n, d)});
 
@@ -30220,7 +30252,7 @@ Sk.builtin.defineUnits = function(mod) {
       }
     });
     $loc.__mul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-      Sk.ffi.checkRhsOperandType(OP_MUL, DIMENSIONS, isDimensions(otherPy), otherPy);
+      Sk.ffi.checkRhsOperandType(OP_MUL, DIMENSIONS, isDimensionsPy(otherPy), otherPy);
       var a = Sk.ffi.remapToJs(selfPy);
       var b = Sk.ffi.remapToJs(otherPy);
       var c = a.mul(b);
@@ -30287,6 +30319,20 @@ Sk.builtin.defineUnits = function(mod) {
         case PROP_LABELS: {
           return Sk.ffi.remapToPy(unit[PROP_LABELS]);
         }
+        case METHOD_COMPATIBLE: {
+          return Sk.ffi.callableToPy(mod, METHOD_COMPATIBLE, function(methodPy, otherPy) {
+            Sk.ffi.checkMethodArgs(METHOD_COMPATIBLE, arguments, 1, 1);
+            Sk.ffi.checkArgType("other", UNIT, isUnitPy(otherPy), otherPy);
+            var other = Sk.ffi.remapToJs(otherPy);
+            try {
+              unit.compatible(other);
+            }
+            catch(e) {
+              throw Sk.ffi.assertionError(e.message)
+            }
+            return unitPy;
+          });
+        }
       }
     });
     $loc.__add__ = Sk.ffi.functionPy(function(lhsPy, rhsPy) {
@@ -30301,7 +30347,7 @@ Sk.builtin.defineUnits = function(mod) {
       }
     });
     $loc.__mul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-      Sk.ffi.checkRhsOperandType(OP_MUL, UNIT, isUnit(otherPy), otherPy);
+      Sk.ffi.checkRhsOperandType(OP_MUL, UNIT, isUnitPy(otherPy), otherPy);
       var lhs = Sk.ffi.remapToJs(selfPy);
       var rhs = Sk.ffi.remapToJs(otherPy);
       var c = lhs.mul(rhs);
@@ -30344,13 +30390,13 @@ Sk.builtin.defineUnits = function(mod) {
   mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = Sk.ffi.functionPy(function(selfPy, quantityPy, unitPy) {
       Sk.ffi.checkMethodArgs(MEASURE, arguments, 1, 2);
-      Sk.ffi.checkArgType("quantityPy", ["Reference", MEASURE].join(" or "), Sk.ffi.isReference(quantityPy), quantityPy);
-      if (Sk.ffi.typeName(quantityPy) === MEASURE)
-      {
+      Sk.ffi.checkArgType(PROP_QUANTITY, ["Reference", MEASURE].join(" or "), Sk.ffi.isReference(quantityPy), quantityPy);
+      if (Sk.ffi.typeName(quantityPy) === MEASURE) {
         Sk.ffi.referenceToPy(Sk.ffi.remapToJs(quantityPy), MEASURE, quantityPy.custom, selfPy);
       }
-      else
-      {
+      else {
+        var custom = {};
+        custom[PROP_QUANTITY] = Sk.ffi.typeName(quantityPy);
         Sk.ffi.referenceToPy(new BLADE.Measure(Sk.ffi.remapToJs(quantityPy), Sk.ffi.remapToJs(unitPy)), MEASURE, {"quantity": Sk.ffi.typeName(quantityPy)}, selfPy);
       }
     });
@@ -30377,10 +30423,11 @@ Sk.builtin.defineUnits = function(mod) {
         throw Sk.ffi.assertionError(e.message);
       }
     });
-    $loc.__sub__ = Sk.ffi.functionPy(function(aPy, bPy) {
-      var a = Sk.ffi.remapToJs(aPy);
-      var b = Sk.ffi.remapToJs(bPy);
-      var quantityPy = Sk.ffi.gattr(aPy, PROP_QUANTITY);
+    $loc.__sub__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+      Sk.ffi.checkArgType("other", MEASURE, isMeasurePy(otherPy), otherPy);
+      var a = Sk.ffi.remapToJs(selfPy);
+      var b = Sk.ffi.remapToJs(otherPy);
+      var quantityPy = Sk.ffi.gattr(selfPy, PROP_QUANTITY);
       var custom = {"quantity": Sk.ffi.typeName(quantityPy)};
       try {
         return Sk.ffi.callsim(mod[MEASURE], Sk.ffi.remapToPy(a.sub(b), MEASURE, custom));
@@ -30389,19 +30436,34 @@ Sk.builtin.defineUnits = function(mod) {
         throw Sk.ffi.assertionError(e.message);
       }
     });
-    $loc.__mul__ = Sk.ffi.functionPy(function(aPy, bPy) {
-      var a = Sk.ffi.remapToJs(aPy);
-      var b = Sk.ffi.remapToJs(bPy);
-      var quantityPy = Sk.ffi.gattr(aPy, PROP_QUANTITY);
+    $loc.__mul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+      var lhs = Sk.ffi.remapToJs(selfPy);
+      var rhs = Sk.ffi.remapToJs(otherPy);
+      var quantityPy = Sk.ffi.gattr(selfPy, PROP_QUANTITY);
       var custom = {"quantity": Sk.ffi.typeName(quantityPy)};
-      return Sk.ffi.callsim(mod[MEASURE], Sk.ffi.remapToPy(a.mul(b), MEASURE, custom));
+      return Sk.ffi.callsim(mod[MEASURE], Sk.ffi.remapToPy(lhs.mul(rhs), MEASURE, custom));
     });
-    $loc.__div__ = Sk.ffi.functionPy(function(aPy, bPy) {
-      var a = Sk.ffi.remapToJs(aPy);
-      var b = Sk.ffi.remapToJs(bPy);
-      var quantityPy = Sk.ffi.gattr(aPy, PROP_QUANTITY);
+    $loc.__rmul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+      var lhs = Sk.ffi.remapToJs(otherPy);
+      Sk.ffi.checkArgType("other", NUMBER, Sk.ffi.isNumber(otherPy), otherPy);
+      var rhs = Sk.ffi.remapToJs(selfPy);
+      var quantityPy = Sk.ffi.gattr(selfPy, PROP_QUANTITY);
+      var custom = {"quantity": Sk.ffi.typeName(quantityPy)};
+      return Sk.ffi.callsim(mod[MEASURE], Sk.ffi.remapToPy(rhs.mul(lhs), MEASURE, custom));
+    });
+    $loc.__div__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+      var a = Sk.ffi.remapToJs(selfPy);
+      var b = Sk.ffi.remapToJs(otherPy);
+      var quantityPy = Sk.ffi.gattr(selfPy, PROP_QUANTITY);
       var custom = {"quantity": Sk.ffi.typeName(quantityPy)};
       return Sk.ffi.callsim(mod[MEASURE], Sk.ffi.remapToPy(a.div(b), MEASURE, custom));
+    });
+    $loc.__xor__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+      var a = Sk.ffi.remapToJs(selfPy);
+      var b = Sk.ffi.remapToJs(otherPy);
+      var quantityPy = Sk.ffi.gattr(selfPy, PROP_QUANTITY);
+      var custom = {"quantity": Sk.ffi.typeName(quantityPy)};
+      return Sk.ffi.callsim(mod[MEASURE], Sk.ffi.remapToPy(a.wedge(b), MEASURE, custom));
     });
     $loc.__str__ = Sk.ffi.functionPy(function(measurePy) {
       var quantityPy = Sk.ffi.gattr(measurePy, PROP_QUANTITY);
@@ -30981,12 +31043,9 @@ Sk.builtin.defineThree = function(mod, THREE) {
   function isDefined(x)   { return typeof x !== 'undefined'; }
   function isNull(x)      { return typeof x === 'object' && x === null; }
 
-  function isVector3(valuePy) {
-    return Sk.ffi.isClass(valuePy) && Sk.ffi.typeName(valuePy) === VECTOR_3;
-  }
-  function isGeometry(valuePy) {
-    // TODO: Need to include sub-classes too.
-    return Sk.ffi.isClass(valuePy) && Sk.ffi.typeName(valuePy) === GEOMETRY;
+  function isVector3Py(valuePy) {return Sk.ffi.isClass(valuePy, VECTOR_3);}
+  function isGeometryPy(valuePy) {
+    return Sk.ffi.isClass(valuePy) && Sk.ffi.typeName(valuePy) === GEOMETRY; // TODO: GEOMETRIES
   }
 
   function methodAdd(target) {
@@ -31266,7 +31325,7 @@ Sk.builtin.defineThree = function(mod, THREE) {
         Sk.ffi.checkMethodArgs(SCENE, arguments, 0, 0);
         Sk.ffi.referenceToPy(new THREE[SCENE](), SCENE, undefined, selfPy);
       }
-      else if (Sk.ffi.isClass(sceneRefPy) && Sk.ffi.typeName(sceneRefPy) === SCENE) {
+      else if (Sk.ffi.isClass(sceneRefPy, SCENE)) {
         Sk.ffi.referenceToPy(Sk.ffi.remapToJs(sceneRefPy), SCENE, undefined, selfPy);
       }
       else
@@ -32247,7 +32306,7 @@ Sk.builtin.defineThree = function(mod, THREE) {
 
   mod[CYLINDER_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = Sk.ffi.functionPy(function(selfPy, radiusTopPy, radiusBottomPy, heightPy, radialSegmentsPy, heightSegmentsPy, openEndedPy) {
-      if (Sk.ffi.isClass(radiusTopPy) && Sk.ffi.typeName(radiusTopPy) === CYLINDER_GEOMETRY) {
+      if (Sk.ffi.isClass(radiusTopPy, CYLINDER_GEOMETRY)) {
         Sk.ffi.referenceToPy(Sk.ffi.remapToJs(radiusTopPy), CYLINDER_GEOMETRY, undefined, selfPy);
       }
       else {
@@ -33355,7 +33414,7 @@ Sk.builtin.defineThree = function(mod, THREE) {
   mod[MESH] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = Sk.ffi.functionPy(function(selfPy, geometryPy, materialPy) {
       Sk.ffi.checkMethodArgs(MESH, arguments, 1, 2);
-      Sk.ffi.checkArgType(PROP_GEOMETRY, GEOMETRY, Sk.ffi.isClass(geometryPy), geometryPy);
+      Sk.ffi.checkArgType(PROP_GEOMETRY, GEOMETRY, Sk.ffi.isClass(geometryPy), geometryPy); // TODO GEOMETRIES
       var custom = {};
       custom[PROP_GEOMETRY] = Sk.ffi.typeName(geometryPy);
       Sk.ffi.referenceToPy(new THREE[MESH](Sk.ffi.remapToJs(geometryPy), Sk.ffi.remapToJs(materialPy)), MESH, custom, selfPy);
@@ -33429,7 +33488,7 @@ Sk.builtin.defineThree = function(mod, THREE) {
         case METHOD_ROTATE_ON_AXIS: {
           return Sk.ffi.callableToPy(mod, METHOD_ROTATE_ON_AXIS, function(methodPy, axisPy, anglePy) {
             Sk.ffi.checkMethodArgs(METHOD_ROTATE_ON_AXIS, arguments, 2, 2);
-            Sk.ffi.checkArgType(ARG_AXIS, VECTOR_3, isVector3(axisPy), axisPy);
+            Sk.ffi.checkArgType(ARG_AXIS, VECTOR_3, isVector3Py(axisPy), axisPy);
             Sk.ffi.checkArgType("angle", NUMBER, Sk.ffi.isNumber(anglePy), anglePy);
             mesh[METHOD_ROTATE_ON_AXIS](Sk.ffi.remapToJs(axisPy), Sk.ffi.remapToJs(anglePy));
             return meshPy;
@@ -33465,7 +33524,7 @@ Sk.builtin.defineThree = function(mod, THREE) {
         case METHOD_TRANSLATE_ON_AXIS: {
           return Sk.ffi.callableToPy(mod, METHOD_TRANSLATE_ON_AXIS, function(methodPy, axisPy, distancePy) {
             Sk.ffi.checkMethodArgs(METHOD_TRANSLATE_ON_AXIS, arguments, 2, 2);
-            Sk.ffi.checkArgType(ARG_AXIS, VECTOR_3, isVector3(axisPy), axisPy);
+            Sk.ffi.checkArgType(ARG_AXIS, VECTOR_3, isVector3Py(axisPy), axisPy);
             Sk.ffi.checkArgType(PROP_DISTANCE, NUMBER, Sk.ffi.isNumber(distancePy), distancePy);
             mesh[METHOD_TRANSLATE_ON_AXIS](Sk.ffi.remapToJs(axisPy), Sk.ffi.remapToJs(distancePy));
             return meshPy;
@@ -33515,7 +33574,7 @@ Sk.builtin.defineThree = function(mod, THREE) {
         }
         break;
         case PROP_POSITION: {
-          Sk.ffi.checkArgType(PROP_POSITION, VECTOR_3, isVector3(valuePy), valuePy);
+          Sk.ffi.checkArgType(PROP_POSITION, VECTOR_3, isVector3Py(valuePy), valuePy);
           mesh[PROP_POSITION] = value;
         }
         break;
@@ -34088,16 +34147,12 @@ Sk.builtin.defineThree = function(mod, THREE) {
      * @param {Object} valuePy
      * @return {boolean} true if the thing is a quaternion, otherwise false.
      */
-    var isQuaternionPy = function(valuePy) {
-      return Sk.ffi.isClass(valuePy) && Sk.ffi.typeName(valuePy) === QUATERNION;
-    };
+    var isQuaternionPy = function(valuePy) {return Sk.ffi.isClass(valuePy, QUATERNION);};
     /**
      * @param {Object} valuePy
      * @return {boolean} true if the thing is a vector, otherwise false.
      */
-    var isVector3Py = function(valuePy) {
-      return Sk.ffi.isClass(valuePy) && Sk.ffi.typeName(valuePy) === VECTOR_3;
-    };
+    var isVector3Py = function(valuePy) {return Sk.ffi.isClass(valuePy, VECTOR_3);};
     /**
      * @param {number} x The x-coordinate of the vector.
      * @param {number} y The y-coordinate of the vector.
@@ -34416,9 +34471,7 @@ Sk.builtin.defineFractions = function(mod, RATIONAL, factory) {
    * @param {Object} valuePy
    * @return {boolean} true if the thing is a vector, otherwise false.
    */
-  var isRational = function(valuePy) {
-    return Sk.ffi.isClass(valuePy) && Sk.ffi.typeName(valuePy) === RATIONAL;
-  }
+  var isRational = function(valuePy) {return Sk.ffi.isClass(valuePy, RATIONAL);};
 
   var RATIONAL_OR_INT = [RATIONAL, Sk.ffi.PyType.INT];
   /**
@@ -34576,7 +34629,7 @@ Sk.builtin.defineFractions = function(mod, RATIONAL, factory) {
   }, RATIONAL, []);
 };
 }).call(this);
-/* bladejs - 0.9.0
+/* bladejs - 0.9.57
  * JavaScript Geometric Algebra library.
  * 
  */
@@ -35390,7 +35443,7 @@ Sk.builtin.defineFractions = function(mod, RATIONAL, factory) {
       if (rhs instanceof BLADE.Measure) {
         return new BLADE.Measure(this.quantity.add(rhs.quantity), this.uom.compatible(rhs.uom));
       } else {
-        throw new Error("...");
+        throw new Error("Measure.add(rhs): rhs must be a Measure.");
       }
     };
 
@@ -35398,7 +35451,7 @@ Sk.builtin.defineFractions = function(mod, RATIONAL, factory) {
       if (rhs instanceof BLADE.Measure) {
         return new BLADE.Measure(this.quantity.sub(rhs.quantity), this.uom.compatible(rhs.uom));
       } else {
-        throw new Error("...");
+        throw new Error("Measure.sub(rhs): rhs must be a Measure.");
       }
     };
 
@@ -35407,8 +35460,10 @@ Sk.builtin.defineFractions = function(mod, RATIONAL, factory) {
         return new BLADE.Measure(this.quantity.mul(rhs.quantity), this.uom.mul(rhs.uom));
       } else if (rhs instanceof BLADE.Unit) {
         return new BLADE.Measure(this.quantity, this.uom.mul(rhs));
+      } else if (typeof rhs === 'number') {
+        return new BLADE.Measure(this.quantity.mul(rhs), this.uom);
       } else {
-        throw new Error("...");
+        throw new Error("Measure.mul(rhs): rhs must be a [Measure, Unit, number]");
       }
     };
 
@@ -35418,7 +35473,15 @@ Sk.builtin.defineFractions = function(mod, RATIONAL, factory) {
       } else if (rhs instanceof BLADE.Unit) {
         return new BLADE.Measure(this.quantity, this.uom.div(rhs));
       } else {
-        throw new Error("...");
+        throw new Error("Measure.div(rhs): rhs must be a [Measure, Unit]");
+      }
+    };
+
+    Measure.prototype.wedge = function(rhs) {
+      if (rhs instanceof BLADE.Measure) {
+        return new BLADE.Measure(this.quantity.wedge(rhs.quantity), this.uom.mul(rhs.uom));
+      } else {
+        throw new Error("Measure.wedge(rhs): rhs must be a Measure");
       }
     };
 
@@ -35649,7 +35712,7 @@ Sk.builtin.defineFractions = function(mod, RATIONAL, factory) {
 
       if (rhs instanceof Unit) {
         dimensions = this.dimensions.compatible(rhs.dimensions);
-        return this["this"];
+        return this;
       } else {
         throw new Error("Illegal Argument for Unit.compatible: " + rhs);
       }

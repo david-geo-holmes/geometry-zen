@@ -1,6 +1,6 @@
 {
   "name": "davinci",
-  "version": "0.9.54",
+  "version": "0.9.57",
   "description": "Python to JavaScript cross compiler",
   "author": {
     "name": "David Holmes",
@@ -21,7 +21,7 @@
     }
   ],
   "dependencies": {
-    "bladejs": "0.9.0"
+    "bladejs": "0.9.57"
   },
   "devDependencies": {
   },
