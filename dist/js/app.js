@@ -7272,9 +7272,15 @@
     return new Sk.builtin.list(c);
   };
   Sk.builtin.abs = function (a) {
-    Sk.builtin.pyCheckArgs('abs', arguments, 1, 1);
-    Sk.builtin.pyCheckType('x', 'number', Sk.builtin.checkNumber(a));
-    return new Sk.builtin.nmber(Math.abs(Sk.builtin.asnum$(a)), a.skType);
+    Sk.ffi.checkFunctionArgs('abs', arguments, 1, 1);
+    if (Sk.ffi.isNumber(a))
+      return new Sk.builtin.nmber(Math.abs(Sk.ffi.remapToJs(a)), Sk.ffi.typeName(a));
+    try {
+      var b = Sk.ffi.gattr(a, 'abs');
+      return Sk.ffi.callsim(b);
+    } catch (c) {
+      throw Sk.ffi.err.argument('x').inFunction('abs').mustHaveType('number');
+    }
   };
   Sk.builtin.ord = function (a) {
     Sk.builtin.pyCheckArgs('ord', arguments, 1, 1);
@@ -25161,8 +25167,8 @@
           Sk.ffi.PyType.INT,
           Sk.ffi.PyType.LONG
         ];
-      a[b] = Sk.ffi.buildClass(a, function (a, d) {
-        d.__init__ = Sk.ffi.functionPy(function (a, c, d) {
+      a[b] = Sk.ffi.buildClass(a, function (d, k) {
+        k.__init__ = Sk.ffi.functionPy(function (a, c, d) {
           Sk.ffi.checkMethodArgs(b, arguments, 2, 2);
           Sk.ffi.checkArgType('real', g, Sk.ffi.isNumber(c), c);
           Sk.ffi.checkArgType('imag', g, Sk.ffi.isNumber(d), d);
@@ -25171,16 +25177,26 @@
             y: Sk.ffi.remapToJs(d)
           }, b, void 0, a);
         });
-        d.__getattr__ = Sk.ffi.functionPy(function (a, b) {
-          a = Sk.ffi.remapToJs(a);
-          switch (b) {
+        k.__getattr__ = Sk.ffi.functionPy(function (b, c) {
+          b = Sk.ffi.remapToJs(b);
+          switch (c) {
           case 'real':
-            return Sk.ffi.numberToPy(a.x);
+            return Sk.ffi.numberToPy(b.x);
           case 'imag':
-            return Sk.ffi.numberToPy(a.y);
+            return Sk.ffi.numberToPy(b.y);
+          case 'abs':
+            return Sk.ffi.callableToPy(a, 'abs', function (a) {
+              return Sk.ffi.numberToPy(Math.sqrt(b.x * b.x + b.y * b.y));
+            });
+          case 'exp':
+            return Sk.ffi.callableToPy(a, 'abs', function (a) {
+              a = Math.exp(b.x);
+              var c = Math.cos(b.y), d = Math.sin(b.y);
+              return f(a * c, a * d);
+            });
           }
         });
-        d.__add__ = Sk.ffi.functionPy(function (a, d) {
+        k.__add__ = Sk.ffi.functionPy(function (a, d) {
           var e = Sk.ffi.remapToJs(a), g = Sk.ffi.remapToJs(d);
           if (c(d))
             return f(e.x + g.x, e.y + g.y);
@@ -25188,12 +25204,12 @@
             return f(e.x + g, e.y);
           throw Sk.ffi.err.argument('other').mustHaveType(b);
         });
-        d.__radd__ = Sk.ffi.functionPy(function (a, b) {
+        k.__radd__ = Sk.ffi.functionPy(function (a, b) {
           Sk.ffi.checkArgType('other', g, Sk.ffi.isNumber(b), b);
           var c = Sk.ffi.remapToJs(b), d = Sk.ffi.remapToJs(a);
           return f(c + d.x, d.y);
         });
-        d.__iadd__ = Sk.ffi.functionPy(function (a, d) {
+        k.__iadd__ = Sk.ffi.functionPy(function (a, d) {
           var e = Sk.ffi.remapToJs(a), f = Sk.ffi.remapToJs(d);
           if (Sk.ffi.isNumber(d))
             e.x += f;
@@ -25206,7 +25222,7 @@
             ]);
           return a;
         });
-        d.__sub__ = Sk.ffi.functionPy(function (a, d) {
+        k.__sub__ = Sk.ffi.functionPy(function (a, d) {
           var e = Sk.ffi.remapToJs(a), h = Sk.ffi.remapToJs(d);
           if (c(d))
             return f(e.x - h.x, e.y - h.y);
@@ -25217,7 +25233,7 @@
             g
           ]);
         });
-        d.__rsub__ = Sk.ffi.functionPy(function (a, b) {
+        k.__rsub__ = Sk.ffi.functionPy(function (a, b) {
           var c, d;
           c = Sk.ffi.remapToJs(b);
           d = Sk.ffi.remapToJs(a);
@@ -25225,19 +25241,19 @@
             return c -= d.x, d = -d.y, f(c, d);
           throw Sk.ffi.err.argument('other').mustHaveType(g);
         });
-        d.__isub__ = Sk.ffi.functionPy(function (a, b) {
+        k.__isub__ = Sk.ffi.functionPy(function (a, b) {
           var c = Sk.ffi.remapToJs(a), d = Sk.ffi.remapToJs(b);
           Sk.ffi.isNumber(b) ? c.x -= d : (c.x -= d.x, c.y -= d.y);
           return a;
         });
-        d.__mul__ = Sk.ffi.functionPy(function (a, b) {
+        k.__mul__ = Sk.ffi.functionPy(function (a, b) {
           var c, d;
           d = Sk.ffi.remapToJs(a);
           var e = Sk.ffi.remapToJs(b);
           Sk.ffi.isNumber(b) ? (c = d.x * e, d = d.y * e) : (c = d.x * e.x - d.y * e.y, d = d.y * e.x + d.x * e.y);
           return f(c, d);
         });
-        d.__rmul__ = Sk.ffi.functionPy(function (a, b) {
+        k.__rmul__ = Sk.ffi.functionPy(function (a, b) {
           var c, d;
           d = Sk.ffi.remapToJs(b);
           var e = Sk.ffi.remapToJs(a);
@@ -25245,12 +25261,12 @@
             return c = d * e.x, d *= e.y, f(c, d);
           throw Sk.ffi.err.argument('a').mustHaveType(g);
         });
-        d.__imul__ = Sk.ffi.functionPy(function (a, b) {
+        k.__imul__ = Sk.ffi.functionPy(function (a, b) {
           var c = Sk.ffi.remapToJs(a), d = c.x, e = c.y, f = Sk.ffi.remapToJs(b);
           Sk.ffi.isNumber(b) ? (c.x *= f, c.y *= f) : (c.x = d * f.x - e * f.y, c.y = e * f.x + d * f.y);
           return a;
         });
-        d.__div__ = Sk.ffi.functionPy(function (a, d) {
+        k.__div__ = Sk.ffi.functionPy(function (a, d) {
           var e = Sk.ffi.remapToJs(a), h = Sk.ffi.remapToJs(d);
           if (c(d)) {
             var k = h.x * h.x + h.y * h.y;
@@ -25263,7 +25279,7 @@
             g
           ], !1, d);
         });
-        d.__rdiv__ = Sk.ffi.functionPy(function (a, b) {
+        k.__rdiv__ = Sk.ffi.functionPy(function (a, b) {
           Sk.ffi.checkArgType('other', g, Sk.ffi.isNumber(b), b);
           var c = Sk.ffi.remapToJs(b), d = Sk.ffi.remapToJs(a);
           if (Sk.ffi.isNumber(b)) {
@@ -25272,7 +25288,7 @@
           }
           throw Sk.ffi.err.argument('other').mustHaveType(g);
         });
-        d.__idiv__ = Sk.ffi.functionPy(function (a, b) {
+        k.__idiv__ = Sk.ffi.functionPy(function (a, b) {
           var c = Sk.ffi.remapToJs(a), d = c.x, e = c.y, f = Sk.ffi.remapToJs(b);
           if (Sk.ffi.isNumber(b))
             c.x /= f, c.y /= f;
@@ -25283,18 +25299,22 @@
           }
           return a;
         });
-        d.__pos__ = Sk.ffi.functionPy(function (a) {
+        k.__abs__ = Sk.ffi.functionPy(function (a) {
+          a = Sk.ffi.remapToJs(a);
+          return Sk.ffi.numberToPy(Math.sqrt(a.x * a.x + a.y * a.y));
+        });
+        k.__pos__ = Sk.ffi.functionPy(function (a) {
           return a;
         });
-        d.__neg__ = Sk.ffi.functionPy(function (a) {
+        k.__neg__ = Sk.ffi.functionPy(function (a) {
           a = Sk.ffi.remapToJs(a);
           return f(-a.x, -a.y);
         });
-        d.__invert__ = Sk.ffi.functionPy(function (a) {
+        k.__invert__ = Sk.ffi.functionPy(function (a) {
           var b = f(1, 0);
           return Sk.ffi.callsim(a.__div__, b, a);
         });
-        d.__str__ = Sk.ffi.functionPy(function (a) {
+        k.__str__ = Sk.ffi.functionPy(function (a) {
           a = Sk.ffi.remapToJs(a);
           return Sk.ffi.stringToPy('(' + e([
             a.x,
@@ -25304,16 +25324,16 @@
             'j'
           ], '') + ')');
         });
-        d.__repr__ = Sk.ffi.functionPy(function (a) {
+        k.__repr__ = Sk.ffi.functionPy(function (a) {
           a = Sk.ffi.remapToJs(a);
           return Sk.ffi.stringToPy(b + '(' + a.x + ', ' + a.y + ')');
         });
-        d.__eq__ = Sk.ffi.functionPy(function (a, b) {
+        k.__eq__ = Sk.ffi.functionPy(function (a, b) {
           a = Sk.ffi.remapToJs(a);
           b = Sk.ffi.remapToJs(b);
           return a.x === b.x && a.y === b.y;
         });
-        d.__ne__ = Sk.ffi.functionPy(function (a, b) {
+        k.__ne__ = Sk.ffi.functionPy(function (a, b) {
           a = Sk.ffi.remapToJs(a);
           b = Sk.ffi.remapToJs(b);
           return a.x !== b.x || a.y !== b.y;

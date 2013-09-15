@@ -4729,12 +4729,23 @@ Sk.builtin.zip = function zip()
     return new Sk.builtin.list(res);
 }
 
-Sk.builtin.abs = function abs(x)
+Sk.builtin.abs = function abs(xPy)
 {
-    Sk.builtin.pyCheckArgs("abs", arguments, 1, 1);
-    Sk.builtin.pyCheckType("x", "number", Sk.builtin.checkNumber(x));
-
-    return new Sk.builtin.nmber(Math.abs(Sk.builtin.asnum$(x)),x.skType);
+  Sk.ffi.checkFunctionArgs("abs", arguments, 1, 1);
+  if (Sk.ffi.isNumber(xPy)) {
+    return new Sk.builtin.nmber(Math.abs(Sk.ffi.remapToJs(xPy)), Sk.ffi.typeName(xPy));
+//  return new Sk.builtin.nmber(Math.abs(Sk.ffi.remapToJs(xPy)), xPy.skType);
+  }
+  else
+  {
+    try {
+      var methodPy = Sk.ffi.gattr(xPy, "abs");
+      return Sk.ffi.callsim(methodPy);
+    }
+    catch(e) {
+      throw Sk.ffi.err.argument("x").inFunction("abs").mustHaveType("number");
+    }
+  }
 };
 
 Sk.builtin.ord = function ord(x)
@@ -24599,17 +24610,27 @@ mod.factorial = Sk.ffi.functionPy(function(x) {
    * @const
    * @type {string}
    */
-    var PROP_REAL = "real";
+    var PROP_REAL        = "real";
   /**
    * @const
    * @type {string}
    */
-    var PROP_IMAG = "imag";
+    var PROP_IMAG        = "imag";
+  /**
+   * @const
+   * @type {string}
+   */
+    var METHOD_ABS       = "abs";
+  /**
+   * @const
+   * @type {string}
+   */
+    var METHOD_EXP       = "exp";
   /**
    * @const
    * @type {!Array.<Sk.ffi.PyType>}
    */
-    var NUMBER   = [Sk.ffi.PyType.FLOAT, Sk.ffi.PyType.INT, Sk.ffi.PyType.LONG];
+    var NUMBER           = [Sk.ffi.PyType.FLOAT, Sk.ffi.PyType.INT, Sk.ffi.PyType.LONG];
     /**
      * @const
      * @type {string}
@@ -24700,6 +24721,19 @@ mod.factorial = Sk.ffi.functionPy(function(x) {
           }
           case PROP_IMAG: {
             return Sk.ffi.numberToPy(z.y);
+          }
+          case METHOD_ABS: {
+            return Sk.ffi.callableToPy(mod, METHOD_ABS, function(methodPy) {
+              return Sk.ffi.numberToPy(Math.sqrt(z.x * z.x + z.y * z.y));
+            });
+          }
+          case METHOD_EXP: {
+            return Sk.ffi.callableToPy(mod, METHOD_ABS, function(methodPy) {
+              var e = Math.exp(z.x);
+              var c = Math.cos(z.y);
+              var s = Math.sin(z.y);
+              return cartesianToComplexPy(e * c, e * s);
+            });
           }
         }
       });
@@ -24883,6 +24917,10 @@ mod.factorial = Sk.ffi.functionPy(function(x) {
           a.y = (aY * b.x - aX * b.y) / factor;
         }
         return selfPy;
+      });
+      $loc.__abs__ = Sk.ffi.functionPy(function(selfPy) {
+        var z = Sk.ffi.remapToJs(selfPy);
+        return Sk.ffi.numberToPy(Math.sqrt(z.x * z.x + z.y * z.y));
       });
       $loc.__pos__ = Sk.ffi.functionPy(function(selfPy) {
         return selfPy;
