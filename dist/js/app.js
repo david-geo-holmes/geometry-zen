@@ -25938,19 +25938,19 @@
         return c;
       }
       function g(a, c, d, e, f) {
-        var x = new b.Object3D(), B = a * c, g = d / c, h = a * d;
-        a = f.x * h;
-        d = f.y * h;
-        f = f.z * h;
-        for (h = -B; h <= B; h += 1)
-          if (0 != h) {
-            var n = h * g, m = new b.Geometry();
-            m.vertices.push(new b.Vector3(e.x * n - a, e.y * n - d, e.z * n - f));
-            m.vertices.push(new b.Vector3(e.x * n + a, e.y * n + d, e.z * n + f));
-            n = new b.Line(m, 0 === h % c ? k : l);
-            x.add(n);
+        var g = new b.Object3D(), D = a * c, h = d / c, n = a * d;
+        a = f.x * n;
+        d = f.y * n;
+        f = f.z * n;
+        for (n = -D; n <= D; n += 1)
+          if (0 != n) {
+            var m = n * h, p = new b.Geometry();
+            p.vertices.push(new b.Vector3(e.x * m - a, e.y * m - d, e.z * m - f));
+            p.vertices.push(new b.Vector3(e.x * m + a, e.y * m + d, e.z * m + f));
+            m = new b.Line(p, 0 === n % c ? k : l);
+            g.add(m);
           }
-        return x;
+        return g;
       }
       Sk.ffi.checkFunctionArgs('defineGeometry', arguments, 3, 3);
       var h = [
@@ -25977,19 +25977,19 @@
         c.__init__ = Sk.ffi.functionPy(function (b, c) {
           Sk.ffi.checkMethodArgs('CartesianSpace', arguments, 0, 0);
           c = Sk.ffi.callsim(a.world);
-          var d = Sk.ffi.remapToJs(c), e = Sk.ffi.callsim(a.PerspectiveCamera, Sk.ffi.numberToPy(45), Sk.ffi.numberToPy(1), Sk.ffi.numberToPy(0.1), Sk.ffi.numberToPy(10000)), B = Sk.ffi.remapToJs(e);
-          B.up.set(0, 0, 1);
-          B.position.set(8, 4, 5);
-          B.lookAt(d.position);
-          B = Sk.ffi.callsim(a.WebGLRenderer, Sk.ffi.remapToPy({ antialias: !0 }));
-          Sk.ffi.remapToJs(B).setClearColor(526344, 1);
+          var d = Sk.ffi.remapToJs(c), e = Sk.ffi.callsim(a.PerspectiveCamera, Sk.ffi.numberToPy(45), Sk.ffi.numberToPy(1), Sk.ffi.numberToPy(0.1), Sk.ffi.numberToPy(10000)), D = Sk.ffi.remapToJs(e);
+          D.up.set(0, 0, 1);
+          D.position.set(8, 4, 5);
+          D.lookAt(d.position);
+          D = Sk.ffi.callsim(a.WebGLRenderer, Sk.ffi.remapToPy({ antialias: !0 }));
+          Sk.ffi.remapToJs(D).setClearColor(526344, 1);
           d.add(f(1000));
           d.add(g(5, 10, 1, m, p));
           d.add(g(5, 10, 1, p, m));
           Sk.ffi.referenceToPy({
             scenePy: c,
             cameraPy: e,
-            rendererPy: B
+            rendererPy: D
           }, 'CartesianSpace', void 0, b);
         });
         c.__getattr__ = Sk.ffi.functionPy(function (b, c) {
@@ -26606,15 +26606,15 @@
                       b.__init__ = Sk.ffi.functionPy(function (a) {
                         a.tp$name = 'arcTo';
                       });
-                      b.__call__ = Sk.ffi.functionPy(function (a, b, c, d, f, t, g, B) {
+                      b.__call__ = Sk.ffi.functionPy(function (a, b, c, d, f, t, g, D) {
                         b = Sk.ffi.remapToJs(b);
                         c = Sk.ffi.remapToJs(c);
                         d = Sk.ffi.remapToJs(d);
                         f = Sk.ffi.remapToJs(f);
                         t = Sk.ffi.remapToJs(t);
                         g = Sk.ffi.remapToJs(g);
-                        B = Sk.ffi.remapToJs(B);
-                        e.arcTo(b, c, d, f, t, g, B);
+                        D = Sk.ffi.remapToJs(D);
+                        e.arcTo(b, c, d, f, t, g, D);
                       });
                       b.__str__ = Sk.ffi.functionPy(function (a) {
                         return Sk.ffi.stringToPy('arcTo');
@@ -27352,12 +27352,12 @@
         return 0 < f.length ? f.join('') : '0';
       }
       function f(a, b, c, e, f, g, h, t, x) {
-        var B = +f, k = +g, l = +h, L = -t, N = +(f * B + g * k + h * l - t * L), J = B * N + -0 * k + -0 * l - -0 * L, M = -0 * B + k * N - -0 * l + -0 * L, F = -0 * B + -0 * k + l * N - -0 * L, B = -0 * B + -0 * k - -0 * l + L * N;
-        f = f * J + g * M + h * F - t * B;
+        var D = +f, k = +g, l = +h, L = -t, N = +(f * D + g * k + h * l - t * L), J = D * N + -0 * k + -0 * l - -0 * L, M = -0 * D + k * N - -0 * l + -0 * L, F = -0 * D + -0 * k + l * N - -0 * L, D = -0 * D + -0 * k - -0 * l + L * N;
+        f = f * J + g * M + h * F - t * D;
         J /= f;
         M /= f;
         F /= f;
-        t = B / f;
+        t = D / f;
         f = a * J + b * M + c * F - e * t;
         g = a * M + b * J - c * t + e * F;
         h = a * F + b * t + c * J - e * M;
@@ -27461,8 +27461,8 @@
           case Sk.ffi.PyType.CLASS:
             switch (Sk.ffi.typeName(c)) {
             case 'Euclidean2':
-              var e = Sk.ffi.remapToJs(a), f = Sk.ffi.remapToJs(c), g = e.w, t = e.x, x = e.y, e = e.xy, B = f.w, h = f.x, k = f.y, f = f.xy;
-              return d(g * B + t * h + x * k - e * f, g * h + t * B - x * f + e * k, g * k + t * f + x * B - e * h, g * f + t * k - x * h + e * B);
+              var e = Sk.ffi.remapToJs(a), f = Sk.ffi.remapToJs(c), g = e.w, t = e.x, x = e.y, e = e.xy, h = f.w, k = f.x, m = f.y, f = f.xy;
+              return d(g * h + t * k + x * m - e * f, g * k + t * h - x * f + e * m, g * m + t * f + x * h - e * k, g * f + t * m - x * k + e * h);
             case 'Unit':
               return Sk.ffi.callsim(b.Measure, a, c);
             default:
@@ -27732,7 +27732,7 @@
           c(a[d], b[d]);
         return 0 < e.length ? e.join('') : '0';
       }
-      function e(a, b, c, d, e, f, g, h, k, l, m, n, p, q, C, E, w) {
+      function e(a, b, c, d, e, f, g, h, k, l, m, n, p, q, B, E, w) {
         a = +a;
         b = +b;
         c = +c;
@@ -27747,37 +27747,37 @@
         n = +n;
         p = +p;
         q = +q;
-        C = +C;
+        B = +B;
         E = +E;
         var u = 0;
         switch (~~(w | 0)) {
         case 0:
-          u = +(a * k + b * l + c * m + d * n - e * p - f * q - g * C - h * E);
+          u = +(a * k + b * l + c * m + d * n - e * p - f * q - g * B - h * E);
           break;
         case 1:
-          u = +(a * l + b * k - c * p + d * C + e * m - f * E - g * n - h * q);
+          u = +(a * l + b * k - c * p + d * B + e * m - f * E - g * n - h * q);
           break;
         case 2:
-          u = +(a * m + b * p + c * k - d * q - e * l + f * n - g * E - h * C);
+          u = +(a * m + b * p + c * k - d * q - e * l + f * n - g * E - h * B);
           break;
         case 3:
-          u = +(a * n - b * C + c * q + d * k - e * E - f * m + g * l - h * p);
+          u = +(a * n - b * B + c * q + d * k - e * E - f * m + g * l - h * p);
           break;
         case 4:
-          u = +(a * p + b * m - c * l + d * E + e * k - f * C + g * q + h * n);
+          u = +(a * p + b * m - c * l + d * E + e * k - f * B + g * q + h * n);
           break;
         case 5:
-          u = +(a * q + b * E + c * n - d * m + e * C + f * k - g * p + h * l);
+          u = +(a * q + b * E + c * n - d * m + e * B + f * k - g * p + h * l);
           break;
         case 6:
-          u = +(a * C - b * n + c * E + d * l - e * q + f * p + g * k + h * m);
+          u = +(a * B - b * n + c * E + d * l - e * q + f * p + g * k + h * m);
           break;
         case 7:
-          u = +(a * E + b * q + c * C + d * p + e * n + f * l + g * m + h * k);
+          u = +(a * E + b * q + c * B + d * p + e * n + f * l + g * m + h * k);
         }
         return +u;
       }
-      function f(a, b, c, d, e, f, g, h, k, l, m, n, p, q, C, E, w) {
+      function f(a, b, c, d, e, f, g, h, k, l, m, n, p, q, B, E, w) {
         a = +a;
         b = +b;
         c = +c;
@@ -27791,7 +27791,7 @@
         n = +n;
         p = +p;
         q = +q;
-        C = +C;
+        B = +B;
         var u = 0;
         switch (~~(w | 0)) {
         case 0:
@@ -27813,14 +27813,14 @@
           u = +(a * q + c * n - d * m + f * k);
           break;
         case 6:
-          u = +(a * C - b * n + d * l + g * k);
+          u = +(a * B - b * n + d * l + g * k);
           break;
         case 7:
-          u = +(a * +E + b * q + c * C + d * p + e * n + f * l + g * m + +h * k);
+          u = +(a * +E + b * q + c * B + d * p + e * n + f * l + g * m + +h * k);
         }
         return +u;
       }
-      function g(a, b, c, d, e, f, g, h, k, l, m, n, p, q, C, E, w) {
+      function g(a, b, c, d, e, f, g, h, k, l, m, n, p, q, B, E, w) {
         a = +a;
         b = +b;
         c = +c;
@@ -27833,21 +27833,21 @@
         n = +n;
         p = +p;
         q = +q;
-        C = +C;
+        B = +B;
         E = +E;
         var u = 0;
         switch (~~(w | 0)) {
         case 0:
-          u = +(a * +k + b * l + c * m + d * n - e * p - f * q - g * C - +h * E);
+          u = +(a * +k + b * l + c * m + d * n - e * p - f * q - g * B - +h * E);
           break;
         case 1:
-          u = +(a * l - c * p + d * C - f * E);
+          u = +(a * l - c * p + d * B - f * E);
           break;
         case 2:
           u = +(a * m + b * p - d * q - g * E);
           break;
         case 3:
-          u = +(a * n - b * C + c * q - e * E);
+          u = +(a * n - b * B + c * q - e * E);
           break;
         case 4:
           u = +(a * p + d * E);
@@ -27856,14 +27856,14 @@
           u = +(a * q + b * E);
           break;
         case 6:
-          u = +(a * C + c * E);
+          u = +(a * B + c * E);
           break;
         case 7:
           u = +(a * E);
         }
         return +u;
       }
-      function h(a, b, c, d, e, f, g, h, k, l, m, n, p, q, C, E, w) {
+      function h(a, b, c, d, e, f, g, h, k, l, m, n, p, q, B, E, w) {
         b = +b;
         c = +c;
         d = +d;
@@ -27877,17 +27877,17 @@
         n = +n;
         p = +p;
         q = +q;
-        C = +C;
+        B = +B;
         var u = 0;
         switch (~~(w | 0)) {
         case 0:
-          u = +(+a * k + b * l + c * m + d * n - e * p - f * q - g * C - h * +E);
+          u = +(+a * k + b * l + c * m + d * n - e * p - f * q - g * B - h * +E);
           break;
         case 1:
           u = +(+b * k + e * m - g * n - h * q);
           break;
         case 2:
-          u = +(+c * k - e * l + f * n - h * C);
+          u = +(+c * k - e * l + f * n - h * B);
           break;
         case 3:
           u = +(+d * k - f * m + g * l - h * p);
@@ -27906,9 +27906,9 @@
         }
         return +u;
       }
-      function k(a, b, c, d, f, g, h, k, m, n, p, q, F, K, C, E, w) {
-        var u = +m, y = +n, z = +p, D = -q, H = +F, I = -K, O = -C, P = -E, T = e(m, n, p, F, q, C, -K, E, u, y, z, H, D, O, -I, P, 0), Q = e(m, n, p, F, q, C, -K, E, u, y, z, H, D, O, -I, P, 1), R = e(m, n, p, F, q, C, -K, E, u, y, z, H, D, O, -I, P, 2), S = e(m, n, p, F, q, C, -K, E, u, y, z, H, D, O, -I, P, 3), U = +T, V = -Q, W = -R, X = -S, Y = e(u, y, z, H, D, O, -I, P, U, V, W, X, -0, -0, 0, 0, 0), Z = e(u, y, z, H, D, O, -I, P, U, V, W, X, -0, -0, 0, 0, 1), $ = e(u, y, z, H, D, O, -I, P, U, V, W, X, -0, -0, 0, 0, 2), T = e(u, y, z, H, D, O, -I, P, U, V, W, X, -0, -0, 0, 0, 4), Q = e(u, y, z, H, D, O, -I, P, U, V, W, X, -0, -0, 0, 0, 3), R = -e(u, y, z, H, D, O, -I, P, U, V, W, X, -0, -0, 0, 0, 6), S = e(u, y, z, H, D, O, -I, P, U, V, W, X, -0, -0, 0, 0, 5), u = e(u, y, z, H, D, O, -I, P, U, V, W, X, -0, -0, 0, 0, 7);
-        F = e(m, n, p, F, q, C, -K, E, Y, Z, $, Q, T, S, -R, u, 0);
+      function k(a, b, c, d, f, g, h, k, m, n, p, q, F, K, B, E, w) {
+        var u = +m, y = +n, z = +p, C = -q, H = +F, I = -K, O = -B, P = -E, T = e(m, n, p, F, q, B, -K, E, u, y, z, H, C, O, -I, P, 0), Q = e(m, n, p, F, q, B, -K, E, u, y, z, H, C, O, -I, P, 1), R = e(m, n, p, F, q, B, -K, E, u, y, z, H, C, O, -I, P, 2), S = e(m, n, p, F, q, B, -K, E, u, y, z, H, C, O, -I, P, 3), U = +T, V = -Q, W = -R, X = -S, Y = e(u, y, z, H, C, O, -I, P, U, V, W, X, -0, -0, 0, 0, 0), Z = e(u, y, z, H, C, O, -I, P, U, V, W, X, -0, -0, 0, 0, 1), $ = e(u, y, z, H, C, O, -I, P, U, V, W, X, -0, -0, 0, 0, 2), T = e(u, y, z, H, C, O, -I, P, U, V, W, X, -0, -0, 0, 0, 4), Q = e(u, y, z, H, C, O, -I, P, U, V, W, X, -0, -0, 0, 0, 3), R = -e(u, y, z, H, C, O, -I, P, U, V, W, X, -0, -0, 0, 0, 6), S = e(u, y, z, H, C, O, -I, P, U, V, W, X, -0, -0, 0, 0, 5), u = e(u, y, z, H, C, O, -I, P, U, V, W, X, -0, -0, 0, 0, 7);
+        F = e(m, n, p, F, q, B, -K, E, Y, Z, $, Q, T, S, -R, u, 0);
         m = Y / F;
         n = Z / F;
         p = $ / F;
@@ -27919,7 +27919,7 @@
         z = u / F;
         F = e(a, b, c, f, d, h, -g, k, m, n, p, Q, q, S, -R, z, 0);
         K = e(a, b, c, f, d, h, -g, k, m, n, p, Q, q, S, -R, z, 1);
-        C = e(a, b, c, f, d, h, -g, k, m, n, p, Q, q, S, -R, z, 2);
+        B = e(a, b, c, f, d, h, -g, k, m, n, p, Q, q, S, -R, z, 2);
         E = e(a, b, c, f, d, h, -g, k, m, n, p, Q, q, S, -R, z, 4);
         T = e(a, b, c, f, d, h, -g, k, m, n, p, Q, q, S, -R, z, 3);
         y = -e(a, b, c, f, d, h, -g, k, m, n, p, Q, q, S, -R, z, 6);
@@ -27927,9 +27927,9 @@
         a = e(a, b, c, f, d, h, -g, k, m, n, p, Q, q, S, -R, z, 7);
         b = -y;
         if ('undefined' !== typeof w)
-          w.w = F, w.x = K, w.y = C, w.z = T, w.xy = E, w.yz = u, w.zx = b, w.xyz = a;
+          w.w = F, w.x = K, w.y = B, w.z = T, w.xy = E, w.yz = u, w.zx = b, w.xyz = a;
         else
-          return l(F, K, C, T, E, u, b, a);
+          return l(F, K, B, T, E, u, b, a);
       }
       function l(a, c, d, e, f, g, h, k) {
         a = Sk.ffi.numberToPy(a);
@@ -27965,7 +27965,7 @@
         }
       }
       function p(a, b, c, d, e) {
-        var f, g, h, k, l, m, n, p, q, C, E, w, u, y, z, D, H, I, O, P;
+        var f, g, h, k, l, m, n, p, q, B, E, w, u, y, z, C, H, I, O, P;
         d = b.w;
         f = b.x;
         g = b.y;
@@ -27977,20 +27977,20 @@
         n = c.w;
         p = c.x;
         q = c.y;
-        C = c.z;
+        B = c.z;
         E = c.xy;
         w = c.yz;
         u = c.zx;
         y = c.xyz;
-        c = a(d, f, g, h, k, l, m, b, n, p, q, C, E, w, u, y, 0);
-        z = a(d, f, g, h, k, l, m, b, n, p, q, C, E, w, u, y, 1);
-        D = a(d, f, g, h, k, l, m, b, n, p, q, C, E, w, u, y, 2);
-        H = a(d, f, g, h, k, l, m, b, n, p, q, C, E, w, u, y, 3);
-        I = a(d, f, g, h, k, l, m, b, n, p, q, C, E, w, u, y, 4);
-        O = a(d, f, g, h, k, l, m, b, n, p, q, C, E, w, u, y, 5);
-        P = a(d, f, g, h, k, l, m, b, n, p, q, C, E, w, u, y, 6);
-        a = a(d, f, g, h, k, l, m, b, n, p, q, C, E, w, u, y, 7);
-        return e(c, z, D, H, I, O, P, a);
+        c = a(d, f, g, h, k, l, m, b, n, p, q, B, E, w, u, y, 0);
+        z = a(d, f, g, h, k, l, m, b, n, p, q, B, E, w, u, y, 1);
+        C = a(d, f, g, h, k, l, m, b, n, p, q, B, E, w, u, y, 2);
+        H = a(d, f, g, h, k, l, m, b, n, p, q, B, E, w, u, y, 3);
+        I = a(d, f, g, h, k, l, m, b, n, p, q, B, E, w, u, y, 4);
+        O = a(d, f, g, h, k, l, m, b, n, p, q, B, E, w, u, y, 5);
+        P = a(d, f, g, h, k, l, m, b, n, p, q, B, E, w, u, y, 6);
+        a = a(d, f, g, h, k, l, m, b, n, p, q, B, E, w, u, y, 7);
+        return e(c, z, C, H, I, O, P, a);
       }
       var n = [
           Sk.ffi.PyType.FLOAT,
@@ -28128,16 +28128,16 @@
           throw new Sk.builtin.AssertionError();
         });
         r.__imul__ = Sk.ffi.functionPy(function (a, b) {
-          var d = Sk.ffi.remapToJs(a), f = Sk.ffi.remapToJs(b), g = d.w, h = d.x, k = d.y, l = d.z, m = d.xy, n = d.yz, p = d.zx, q = d.xyz, r, s, w, u, y, z, D;
-          c(f) ? (r = f, f = D = z = y = u = w = s = 0) : (r = f.w, s = f.x, w = f.y, u = f.z, y = f.xy, z = f.yz, D = f.zx, f = f.xyz);
-          d.w = e(g, h, k, l, m, n, p, q, r, s, w, u, y, z, D, f, 0);
-          d.x = e(g, h, k, l, m, n, p, q, r, s, w, u, y, z, D, f, 1);
-          d.y = e(g, h, k, l, m, n, p, q, r, s, w, u, y, z, D, f, 2);
-          d.z = e(g, h, k, l, m, n, p, q, r, s, w, u, y, z, D, f, 3);
-          d.xy = e(g, h, k, l, m, n, p, q, r, s, w, u, y, z, D, f, 4);
-          d.yz = e(g, h, k, l, m, n, p, q, r, s, w, u, y, z, D, f, 5);
-          d.zx = e(g, h, k, l, m, n, p, q, r, s, w, u, y, z, D, f, 6);
-          d.xyz = e(g, h, k, l, m, n, p, q, r, s, w, u, y, z, D, f, 7);
+          var d = Sk.ffi.remapToJs(a), f = Sk.ffi.remapToJs(b), g = d.w, h = d.x, k = d.y, l = d.z, m = d.xy, n = d.yz, p = d.zx, q = d.xyz, r, s, w, u, y, z, C;
+          c(f) ? (r = f, f = C = z = y = u = w = s = 0) : (r = f.w, s = f.x, w = f.y, u = f.z, y = f.xy, z = f.yz, C = f.zx, f = f.xyz);
+          d.w = e(g, h, k, l, m, n, p, q, r, s, w, u, y, z, C, f, 0);
+          d.x = e(g, h, k, l, m, n, p, q, r, s, w, u, y, z, C, f, 1);
+          d.y = e(g, h, k, l, m, n, p, q, r, s, w, u, y, z, C, f, 2);
+          d.z = e(g, h, k, l, m, n, p, q, r, s, w, u, y, z, C, f, 3);
+          d.xy = e(g, h, k, l, m, n, p, q, r, s, w, u, y, z, C, f, 4);
+          d.yz = e(g, h, k, l, m, n, p, q, r, s, w, u, y, z, C, f, 5);
+          d.zx = e(g, h, k, l, m, n, p, q, r, s, w, u, y, z, C, f, 6);
+          d.xyz = e(g, h, k, l, m, n, p, q, r, s, w, u, y, z, C, f, 7);
           return a;
         });
         r.__div__ = Sk.ffi.functionPy(function (c, d) {
@@ -28189,16 +28189,16 @@
           throw new Sk.builtin.AssertionError();
         });
         r.__ixor__ = Sk.ffi.functionPy(function (a, b) {
-          var d = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(b), g = d.w, h = d.x, k = d.y, l = d.z, m = d.xy, n = d.yz, p = d.zx, q = d.xyz, r, s, w, u, y, z, D;
-          c(e) ? (r = e, e = D = z = y = u = w = s = 0) : (r = e.w, s = e.x, w = e.y, u = e.z, y = e.xy, z = e.yz, D = e.zx, e = e.xyz);
-          d.w = f(g, h, k, l, m, n, p, q, r, s, w, u, y, z, D, e, 0);
-          d.x = f(g, h, k, l, m, n, p, q, r, s, w, u, y, z, D, e, 1);
-          d.y = f(g, h, k, l, m, n, p, q, r, s, w, u, y, z, D, e, 2);
-          d.z = f(g, h, k, l, m, n, p, q, r, s, w, u, y, z, D, e, 3);
-          d.xy = f(g, h, k, l, m, n, p, q, r, s, w, u, y, z, D, e, 4);
-          d.yz = f(g, h, k, l, m, n, p, q, r, s, w, u, y, z, D, e, 5);
-          d.zx = f(g, h, k, l, m, n, p, q, r, s, w, u, y, z, D, e, 6);
-          d.xyz = f(g, h, k, l, m, n, p, q, r, s, w, u, y, z, D, e, 7);
+          var d = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(b), g = d.w, h = d.x, k = d.y, l = d.z, m = d.xy, n = d.yz, p = d.zx, q = d.xyz, r, s, w, u, y, z, C;
+          c(e) ? (r = e, e = C = z = y = u = w = s = 0) : (r = e.w, s = e.x, w = e.y, u = e.z, y = e.xy, z = e.yz, C = e.zx, e = e.xyz);
+          d.w = f(g, h, k, l, m, n, p, q, r, s, w, u, y, z, C, e, 0);
+          d.x = f(g, h, k, l, m, n, p, q, r, s, w, u, y, z, C, e, 1);
+          d.y = f(g, h, k, l, m, n, p, q, r, s, w, u, y, z, C, e, 2);
+          d.z = f(g, h, k, l, m, n, p, q, r, s, w, u, y, z, C, e, 3);
+          d.xy = f(g, h, k, l, m, n, p, q, r, s, w, u, y, z, C, e, 4);
+          d.yz = f(g, h, k, l, m, n, p, q, r, s, w, u, y, z, C, e, 5);
+          d.zx = f(g, h, k, l, m, n, p, q, r, s, w, u, y, z, C, e, 6);
+          d.xyz = f(g, h, k, l, m, n, p, q, r, s, w, u, y, z, C, e, 7);
           return a;
         });
         r.__lshift__ = Sk.ffi.functionPy(function (a, b) {
@@ -28214,16 +28214,16 @@
           throw new Sk.builtin.AssertionError();
         });
         r.__ilshift__ = Sk.ffi.functionPy(function (a, b) {
-          var d = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(b), f = d.w, h = d.x, k = d.y, l = d.z, m = d.xy, n = d.yz, p = d.zx, q = d.xyz, r, s, w, u, y, z, D;
-          c(e) ? (r = e, e = D = z = y = u = w = s = 0) : (r = e.w, s = e.x, w = e.y, u = e.z, y = e.xy, z = e.yz, D = e.zx, e = e.xyz);
-          d.w = g(f, h, k, l, m, n, p, q, r, s, w, u, y, z, D, e, 0);
-          d.x = g(f, h, k, l, m, n, p, q, r, s, w, u, y, z, D, e, 1);
-          d.y = g(f, h, k, l, m, n, p, q, r, s, w, u, y, z, D, e, 2);
-          d.z = g(f, h, k, l, m, n, p, q, r, s, w, u, y, z, D, e, 3);
-          d.xy = g(f, h, k, l, m, n, p, q, r, s, w, u, y, z, D, e, 4);
-          d.yz = g(f, h, k, l, m, n, p, q, r, s, w, u, y, z, D, e, 5);
-          d.zx = g(f, h, k, l, m, n, p, q, r, s, w, u, y, z, D, e, 6);
-          d.xyz = g(f, h, k, l, m, n, p, q, r, s, w, u, y, z, D, e, 7);
+          var d = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(b), f = d.w, h = d.x, k = d.y, l = d.z, m = d.xy, n = d.yz, p = d.zx, q = d.xyz, r, s, w, u, y, z, C;
+          c(e) ? (r = e, e = C = z = y = u = w = s = 0) : (r = e.w, s = e.x, w = e.y, u = e.z, y = e.xy, z = e.yz, C = e.zx, e = e.xyz);
+          d.w = g(f, h, k, l, m, n, p, q, r, s, w, u, y, z, C, e, 0);
+          d.x = g(f, h, k, l, m, n, p, q, r, s, w, u, y, z, C, e, 1);
+          d.y = g(f, h, k, l, m, n, p, q, r, s, w, u, y, z, C, e, 2);
+          d.z = g(f, h, k, l, m, n, p, q, r, s, w, u, y, z, C, e, 3);
+          d.xy = g(f, h, k, l, m, n, p, q, r, s, w, u, y, z, C, e, 4);
+          d.yz = g(f, h, k, l, m, n, p, q, r, s, w, u, y, z, C, e, 5);
+          d.zx = g(f, h, k, l, m, n, p, q, r, s, w, u, y, z, C, e, 6);
+          d.xyz = g(f, h, k, l, m, n, p, q, r, s, w, u, y, z, C, e, 7);
           return a;
         });
         r.__rshift__ = Sk.ffi.functionPy(function (a, b) {
@@ -28239,29 +28239,29 @@
           throw new Sk.builtin.AssertionError();
         });
         r.__irshift__ = Sk.ffi.functionPy(function (a, b) {
-          var d = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(b), f = d.w, g = d.x, k = d.y, l = d.z, m = d.xy, n = d.yz, p = d.zx, q = d.xyz, r, s, w, u, y, z, D;
-          c(e) ? (r = e, e = D = z = y = u = w = s = 0) : (r = e.w, s = e.x, w = e.y, u = e.z, y = e.xy, z = e.yz, D = e.zx, e = e.xyz);
-          d.w = h(f, g, k, l, m, n, p, q, r, s, w, u, y, z, D, e, 0);
-          d.x = h(f, g, k, l, m, n, p, q, r, s, w, u, y, z, D, e, 1);
-          d.y = h(f, g, k, l, m, n, p, q, r, s, w, u, y, z, D, e, 2);
-          d.z = h(f, g, k, l, m, n, p, q, r, s, w, u, y, z, D, e, 3);
-          d.xy = h(f, g, k, l, m, n, p, q, r, s, w, u, y, z, D, e, 4);
-          d.yz = h(f, g, k, l, m, n, p, q, r, s, w, u, y, z, D, e, 5);
-          d.zx = h(f, g, k, l, m, n, p, q, r, s, w, u, y, z, D, e, 6);
-          d.xyz = h(f, g, k, l, m, n, p, q, r, s, w, u, y, z, D, e, 7);
+          var d = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(b), f = d.w, g = d.x, k = d.y, l = d.z, m = d.xy, n = d.yz, p = d.zx, q = d.xyz, r, s, w, u, y, z, C;
+          c(e) ? (r = e, e = C = z = y = u = w = s = 0) : (r = e.w, s = e.x, w = e.y, u = e.z, y = e.xy, z = e.yz, C = e.zx, e = e.xyz);
+          d.w = h(f, g, k, l, m, n, p, q, r, s, w, u, y, z, C, e, 0);
+          d.x = h(f, g, k, l, m, n, p, q, r, s, w, u, y, z, C, e, 1);
+          d.y = h(f, g, k, l, m, n, p, q, r, s, w, u, y, z, C, e, 2);
+          d.z = h(f, g, k, l, m, n, p, q, r, s, w, u, y, z, C, e, 3);
+          d.xy = h(f, g, k, l, m, n, p, q, r, s, w, u, y, z, C, e, 4);
+          d.yz = h(f, g, k, l, m, n, p, q, r, s, w, u, y, z, C, e, 5);
+          d.zx = h(f, g, k, l, m, n, p, q, r, s, w, u, y, z, C, e, 6);
+          d.xyz = h(f, g, k, l, m, n, p, q, r, s, w, u, y, z, C, e, 7);
           return a;
         });
-        r.nb$positive = function () {
-          return this;
-        };
-        r.nb$negative = function () {
-          var a = Sk.ffi.remapToJs(this);
+        r.__pos__ = Sk.ffi.functionPy(function (a) {
+          return a;
+        });
+        r.__neg__ = Sk.ffi.functionPy(function (a) {
+          a = Sk.ffi.remapToJs(a);
           return l(-a.w, -a.x, -a.y, -a.z, -a.xy, -a.yz, -a.zx, -a.xyz);
-        };
-        r.nb$invert = function () {
-          var a = Sk.ffi.remapToJs(this);
+        });
+        r.__invert__ = Sk.ffi.functionPy(function (a) {
+          a = Sk.ffi.remapToJs(a);
           return l(a.w, a.x, a.y, a.z, -a.xy, -a.yz, -a.zx, -a.xyz);
-        };
+        });
         r.__eq__ = Sk.ffi.functionPy(function (a, b) {
           a = Sk.ffi.remapToJs(a);
           b = Sk.ffi.remapToJs(b);
@@ -28749,9 +28749,15 @@
             throw Sk.ffi.assertionError(p.message);
           }
         });
-        f.__mul__ = Sk.ffi.functionPy(function (a, c) {
-          var d = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(c), f = Sk.ffi.gattr(a, 'quantity'), f = { quantity: Sk.ffi.typeName(f) };
-          return Sk.ffi.callsim(b.Measure, Sk.ffi.remapToPy(d.mul(e), 'Measure', f));
+        f.__mul__ = Sk.ffi.functionPy(function (a, d) {
+          if (Sk.ffi.isClass(d, 'Measure') || Sk.ffi.isNumber(d)) {
+            var e = Sk.ffi.remapToJs(a), f = Sk.ffi.remapToJs(d), m = Sk.ffi.gattr(a, 'quantity'), m = { quantity: Sk.ffi.typeName(m) };
+            return Sk.ffi.callsim(b.Measure, Sk.ffi.remapToPy(e.mul(f), 'Measure', m));
+          }
+          Sk.ffi.checkArgType('other', [
+            'Measure',
+            c
+          ], !1, d);
         });
         f.__rmul__ = Sk.ffi.functionPy(function (a, d) {
           var e = Sk.ffi.remapToJs(d);
@@ -28766,6 +28772,19 @@
         f.__xor__ = Sk.ffi.functionPy(function (a, c) {
           var d = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(c), f = Sk.ffi.gattr(a, 'quantity'), f = { quantity: Sk.ffi.typeName(f) };
           return Sk.ffi.callsim(b.Measure, Sk.ffi.remapToPy(d.wedge(e), 'Measure', f));
+        });
+        f.__pos__ = Sk.ffi.functionPy(function (a) {
+          return a;
+        });
+        f.__neg__ = Sk.ffi.functionPy(function (a) {
+          var c = Sk.ffi.gattr(a, 'quantity'), c = Sk.ffi.callsim(c.__neg__, c);
+          a = Sk.ffi.gattr(a, 'uom');
+          return Sk.ffi.callsim(b.Measure, c, a);
+        });
+        f.__invert__ = Sk.ffi.functionPy(function (a) {
+          var c = Sk.ffi.gattr(a, 'quantity'), c = Sk.ffi.callsim(c.__invert__, c);
+          a = Sk.ffi.gattr(a, 'uom');
+          return Sk.ffi.callsim(b.Measure, c, a);
         });
         f.__str__ = Sk.ffi.functionPy(function (a) {
           var b = Sk.ffi.gattr(a, 'quantity'), b = Sk.ffi.remapToJs(Sk.ffi.callsim(b.__str__, b));
@@ -31477,16 +31496,16 @@
     var a, b, c;
     a = this.BLADE = this.BLADE || {};
     c = function (b, c, f, g, h, k, l, m, p) {
-      var n, q, s, r, v, t, x, B;
+      var n, q, s, r, v, t, x, D;
       v = +h;
       t = +k;
       x = +l;
-      B = -m;
-      n = +(h * v + k * t + l * x - m * B);
-      q = v * n + -0 * t + -0 * x - -0 * B;
-      s = -0 * v + t * n - -0 * x + -0 * B;
-      r = -0 * v + -0 * t + x * n - -0 * B;
-      n = -0 * v + -0 * t - -0 * x + B * n;
+      D = -m;
+      n = +(h * v + k * t + l * x - m * D);
+      q = v * n + -0 * t + -0 * x - -0 * D;
+      s = -0 * v + t * n - -0 * x + -0 * D;
+      r = -0 * v + -0 * t + x * n - -0 * D;
+      n = -0 * v + -0 * t - -0 * x + D * n;
       h = h * q + k * s + l * r - m * n;
       q /= h;
       s /= h;
@@ -31747,7 +31766,7 @@
   (function () {
     var a, b, c, d;
     a = this.BLADE = this.BLADE || {};
-    d = function (a, b, c, d, k, l, m, p, n, q, s, r, v, t, x, B, A) {
+    d = function (a, b, c, d, k, l, m, p, n, q, s, r, v, t, x, D, A) {
       var G;
       a = +a;
       b = +b;
@@ -31764,62 +31783,62 @@
       v = +v;
       t = +t;
       x = +x;
-      B = +B;
+      D = +D;
       G = 0;
       switch (~~(A | 0)) {
       case 0:
-        G = +(a * n + b * q + c * s + d * r - k * v - l * t - m * x - p * B);
+        G = +(a * n + b * q + c * s + d * r - k * v - l * t - m * x - p * D);
         break;
       case 1:
-        G = +(a * q + b * n - c * v + d * x + k * s - l * B - m * r - p * t);
+        G = +(a * q + b * n - c * v + d * x + k * s - l * D - m * r - p * t);
         break;
       case 2:
-        G = +(a * s + b * v + c * n - d * t - k * q + l * r - m * B - p * x);
+        G = +(a * s + b * v + c * n - d * t - k * q + l * r - m * D - p * x);
         break;
       case 3:
-        G = +(a * r - b * x + c * t + d * n - k * B - l * s + m * q - p * v);
+        G = +(a * r - b * x + c * t + d * n - k * D - l * s + m * q - p * v);
         break;
       case 4:
-        G = +(a * v + b * s - c * q + d * B + k * n - l * x + m * t + p * r);
+        G = +(a * v + b * s - c * q + d * D + k * n - l * x + m * t + p * r);
         break;
       case 5:
-        G = +(a * t + b * B + c * r - d * s + k * x + l * n - m * v + p * q);
+        G = +(a * t + b * D + c * r - d * s + k * x + l * n - m * v + p * q);
         break;
       case 6:
-        G = +(a * x - b * r + c * B + d * q - k * t + l * v + m * n + p * s);
+        G = +(a * x - b * r + c * D + d * q - k * t + l * v + m * n + p * s);
         break;
       case 7:
-        G = +(a * B + b * t + c * x + d * v + k * r + l * q + m * s + p * n);
+        G = +(a * D + b * t + c * x + d * v + k * r + l * q + m * s + p * n);
       }
       return +G;
     };
-    c = function (b, c, g, h, k, l, m, p, n, q, s, r, v, t, x, B, A) {
-      var G, L, N, J, M, F, K, C, E, w, u, y, z, D, H, I, O, P, T;
+    c = function (b, c, g, h, k, l, m, p, n, q, s, r, v, t, x, D, A) {
+      var G, L, N, J, M, F, K, B, E, w, u, y, z, C, H, I, O, P, T;
       w = +n;
       u = +q;
-      C = +s;
+      B = +s;
       y = -r;
       z = +v;
-      D = -t;
+      C = -t;
       H = -x;
-      I = -B;
-      E = d(n, q, s, v, r, x, -t, B, w, u, C, z, y, H, -D, I, 0);
-      M = d(n, q, s, v, r, x, -t, B, w, u, C, z, y, H, -D, I, 1);
-      F = d(n, q, s, v, r, x, -t, B, w, u, C, z, y, H, -D, I, 2);
-      K = d(n, q, s, v, r, x, -t, B, w, u, C, z, y, H, -D, I, 3);
+      I = -D;
+      E = d(n, q, s, v, r, x, -t, D, w, u, B, z, y, H, -C, I, 0);
+      M = d(n, q, s, v, r, x, -t, D, w, u, B, z, y, H, -C, I, 1);
+      F = d(n, q, s, v, r, x, -t, D, w, u, B, z, y, H, -C, I, 2);
+      K = d(n, q, s, v, r, x, -t, D, w, u, B, z, y, H, -C, I, 3);
       G = +E;
       L = -M;
       N = -F;
       J = -K;
-      O = d(w, u, C, z, y, H, -D, I, G, L, N, J, -0, -0, 0, 0, 0);
-      P = d(w, u, C, z, y, H, -D, I, G, L, N, J, -0, -0, 0, 0, 1);
-      T = d(w, u, C, z, y, H, -D, I, G, L, N, J, -0, -0, 0, 0, 2);
-      E = d(w, u, C, z, y, H, -D, I, G, L, N, J, -0, -0, 0, 0, 4);
-      M = d(w, u, C, z, y, H, -D, I, G, L, N, J, -0, -0, 0, 0, 3);
-      F = -d(w, u, C, z, y, H, -D, I, G, L, N, J, -0, -0, 0, 0, 6);
-      K = d(w, u, C, z, y, H, -D, I, G, L, N, J, -0, -0, 0, 0, 5);
-      w = d(w, u, C, z, y, H, -D, I, G, L, N, J, -0, -0, 0, 0, 7);
-      v = d(n, q, s, v, r, x, -t, B, O, P, T, M, E, K, -F, w, 0);
+      O = d(w, u, B, z, y, H, -C, I, G, L, N, J, -0, -0, 0, 0, 0);
+      P = d(w, u, B, z, y, H, -C, I, G, L, N, J, -0, -0, 0, 0, 1);
+      T = d(w, u, B, z, y, H, -C, I, G, L, N, J, -0, -0, 0, 0, 2);
+      E = d(w, u, B, z, y, H, -C, I, G, L, N, J, -0, -0, 0, 0, 4);
+      M = d(w, u, B, z, y, H, -C, I, G, L, N, J, -0, -0, 0, 0, 3);
+      F = -d(w, u, B, z, y, H, -C, I, G, L, N, J, -0, -0, 0, 0, 6);
+      K = d(w, u, B, z, y, H, -C, I, G, L, N, J, -0, -0, 0, 0, 5);
+      w = d(w, u, B, z, y, H, -C, I, G, L, N, J, -0, -0, 0, 0, 7);
+      v = d(n, q, s, v, r, x, -t, D, O, P, T, M, E, K, -F, w, 0);
       n = O / v;
       q = P / v;
       s = T / v;
@@ -31827,17 +31846,17 @@
       M /= v;
       F /= v;
       K /= v;
-      C = w / v;
-      v = d(b, c, g, k, h, m, -l, p, n, q, s, M, r, K, -F, C, 0);
-      t = d(b, c, g, k, h, m, -l, p, n, q, s, M, r, K, -F, C, 1);
-      x = d(b, c, g, k, h, m, -l, p, n, q, s, M, r, K, -F, C, 2);
-      B = d(b, c, g, k, h, m, -l, p, n, q, s, M, r, K, -F, C, 4);
-      E = d(b, c, g, k, h, m, -l, p, n, q, s, M, r, K, -F, C, 3);
-      u = -d(b, c, g, k, h, m, -l, p, n, q, s, M, r, K, -F, C, 6);
-      w = d(b, c, g, k, h, m, -l, p, n, q, s, M, r, K, -F, C, 5);
-      b = d(b, c, g, k, h, m, -l, p, n, q, s, M, r, K, -F, C, 7);
+      B = w / v;
+      v = d(b, c, g, k, h, m, -l, p, n, q, s, M, r, K, -F, B, 0);
+      t = d(b, c, g, k, h, m, -l, p, n, q, s, M, r, K, -F, B, 1);
+      x = d(b, c, g, k, h, m, -l, p, n, q, s, M, r, K, -F, B, 2);
+      D = d(b, c, g, k, h, m, -l, p, n, q, s, M, r, K, -F, B, 4);
+      E = d(b, c, g, k, h, m, -l, p, n, q, s, M, r, K, -F, B, 3);
+      u = -d(b, c, g, k, h, m, -l, p, n, q, s, M, r, K, -F, B, 6);
+      w = d(b, c, g, k, h, m, -l, p, n, q, s, M, r, K, -F, B, 5);
+      b = d(b, c, g, k, h, m, -l, p, n, q, s, M, r, K, -F, B, 7);
       c = -u;
-      return 'undefined' !== typeof A ? (A.w = v, A.x = t, A.y = x, A.z = E, A.xy = B, A.yz = w, A.zx = c, A.xyz = b) : new a.Euclidean3(v, t, x, E, B, w, c, b);
+      return 'undefined' !== typeof A ? (A.w = v, A.x = t, A.y = x, A.z = E, A.xy = D, A.yz = w, A.zx = c, A.xyz = b) : new a.Euclidean3(v, t, x, E, D, w, c, b);
     };
     b = function () {
       function b(a, c, d, e, l, m, p, n) {
@@ -31888,7 +31907,7 @@
         }
       };
       b.compute = function (a, b, c, d, e) {
-        var m, p, n, q, s, r, v, t, x, B, A, G, L, N, J, M, F, K, C, E;
+        var m, p, n, q, s, r, v, t, x, D, A, G, L, N, J, M, F, K, B, E;
         m = d(b, 0);
         p = d(b, 1);
         n = d(b, 2);
@@ -31899,21 +31918,21 @@
         b = d(b, 7);
         t = d(c, 0);
         x = d(c, 1);
-        B = d(c, 2);
+        D = d(c, 2);
         A = d(c, 3);
         G = d(c, 4);
         L = d(c, 5);
         N = d(c, 6);
         J = d(c, 7);
-        c = a(m, p, n, q, s, r, v, b, t, x, B, A, G, L, N, J, 0);
-        d = a(m, p, n, q, s, r, v, b, t, x, B, A, G, L, N, J, 1);
-        M = a(m, p, n, q, s, r, v, b, t, x, B, A, G, L, N, J, 2);
-        F = a(m, p, n, q, s, r, v, b, t, x, B, A, G, L, N, J, 3);
-        K = a(m, p, n, q, s, r, v, b, t, x, B, A, G, L, N, J, 4);
-        C = a(m, p, n, q, s, r, v, b, t, x, B, A, G, L, N, J, 5);
-        E = a(m, p, n, q, s, r, v, b, t, x, B, A, G, L, N, J, 6);
-        a = a(m, p, n, q, s, r, v, b, t, x, B, A, G, L, N, J, 7);
-        return e(c, d, M, F, K, C, E, a);
+        c = a(m, p, n, q, s, r, v, b, t, x, D, A, G, L, N, J, 0);
+        d = a(m, p, n, q, s, r, v, b, t, x, D, A, G, L, N, J, 1);
+        M = a(m, p, n, q, s, r, v, b, t, x, D, A, G, L, N, J, 2);
+        F = a(m, p, n, q, s, r, v, b, t, x, D, A, G, L, N, J, 3);
+        K = a(m, p, n, q, s, r, v, b, t, x, D, A, G, L, N, J, 4);
+        B = a(m, p, n, q, s, r, v, b, t, x, D, A, G, L, N, J, 5);
+        E = a(m, p, n, q, s, r, v, b, t, x, D, A, G, L, N, J, 6);
+        a = a(m, p, n, q, s, r, v, b, t, x, D, A, G, L, N, J, 7);
+        return e(c, d, M, F, K, B, E, a);
       };
       b.prototype.add = function (c) {
         return b.compute(a.bladeASM.addE3, [
@@ -32530,9 +32549,9 @@
           }
           return +n;
         },
-        addE3: function (a, b, c, g, h, k, l, m, p, n, q, s, r, v, t, x, B) {
+        addE3: function (a, b, c, g, h, k, l, m, p, n, q, s, r, v, t, x, D) {
           var A = 0;
-          switch (~~(B | 0)) {
+          switch (~~(D | 0)) {
           case 0:
             A = +(+a + +p);
             break;
@@ -32559,9 +32578,9 @@
           }
           return +A;
         },
-        subE3: function (a, b, c, g, h, k, l, m, p, n, q, s, r, v, t, x, B) {
+        subE3: function (a, b, c, g, h, k, l, m, p, n, q, s, r, v, t, x, D) {
           var A = 0;
-          switch (~~(B | 0)) {
+          switch (~~(D | 0)) {
           case 0:
             A = +(+a - +p);
             break;
@@ -32588,7 +32607,7 @@
           }
           return +A;
         },
-        mulE3: function (a, b, c, g, h, k, l, m, p, n, q, s, r, v, t, x, B) {
+        mulE3: function (a, b, c, g, h, k, l, m, p, n, q, s, r, v, t, x, D) {
           a = +a;
           b = +b;
           c = +c;
@@ -32606,7 +32625,7 @@
           t = +t;
           x = +x;
           var A = 0;
-          switch (~~(B | 0)) {
+          switch (~~(D | 0)) {
           case 0:
             A = +(a * p + b * n + c * q + g * s - h * r - k * v - l * t - m * x);
             break;
@@ -32633,7 +32652,7 @@
           }
           return +A;
         },
-        extE3: function (a, b, c, g, h, k, l, m, p, n, q, s, r, v, t, x, B) {
+        extE3: function (a, b, c, g, h, k, l, m, p, n, q, s, r, v, t, x, D) {
           a = +a;
           b = +b;
           c = +c;
@@ -32649,7 +32668,7 @@
           v = +v;
           t = +t;
           var A = 0;
-          switch (~~(B | 0)) {
+          switch (~~(D | 0)) {
           case 0:
             A = +(a * p);
             break;
@@ -32676,7 +32695,7 @@
           }
           return +A;
         },
-        lcoE3: function (a, b, c, g, h, k, l, m, p, n, q, s, r, v, t, x, B) {
+        lcoE3: function (a, b, c, g, h, k, l, m, p, n, q, s, r, v, t, x, D) {
           a = +a;
           b = +b;
           c = +c;
@@ -32692,7 +32711,7 @@
           t = +t;
           x = +x;
           var A = 0;
-          switch (~~(B | 0)) {
+          switch (~~(D | 0)) {
           case 0:
             A = +(a * +p + b * n + c * q + g * s - h * r - k * v - l * t - +m * x);
             break;
@@ -32719,7 +32738,7 @@
           }
           return +A;
         },
-        rcoE3: function (a, b, c, g, h, k, l, m, p, n, q, s, r, v, t, x, B) {
+        rcoE3: function (a, b, c, g, h, k, l, m, p, n, q, s, r, v, t, x, D) {
           b = +b;
           c = +c;
           g = +g;
@@ -32735,7 +32754,7 @@
           v = +v;
           t = +t;
           var A = 0;
-          switch (~~(B | 0)) {
+          switch (~~(D | 0)) {
           case 0:
             A = +(+a * p + b * n + c * q + g * s - h * r - k * v - l * t - m * +x);
             break;
