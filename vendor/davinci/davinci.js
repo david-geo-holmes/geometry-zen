@@ -4732,18 +4732,30 @@ Sk.builtin.zip = function zip()
 Sk.builtin.abs = function abs(xPy)
 {
   Sk.ffi.checkFunctionArgs("abs", arguments, 1, 1);
-  if (Sk.ffi.isNumber(xPy)) {
-    return new Sk.builtin.nmber(Math.abs(Sk.ffi.remapToJs(xPy)), Sk.ffi.typeName(xPy));
-//  return new Sk.builtin.nmber(Math.abs(Sk.ffi.remapToJs(xPy)), xPy.skType);
+  if (Sk.ffi.isNumber(xPy))
+  {
+    return Sk.ffi.numberToPy(Math.abs(Sk.ffi.remapToJs(xPy)), Sk.ffi.getType(xPy));
   }
   else
   {
-    try {
-      var methodPy = Sk.ffi.gattr(xPy, "abs");
-      return Sk.ffi.callsim(methodPy);
+      try
+      {
+        var methodPy = xPy['__abs__'];
+        if (methodPy)
+        {
+            return Sk.ffi.callsim(methodPy, xPy);
+        }
+        else
+        {
+            throw new Sk.builtin.NotImplementedError("abs");
+        }
+//      var methodPy = Sk.ffi.gattr(xPy, "abs");
+//      return Sk.ffi.callsim(methodPy);
     }
-    catch(e) {
-      throw Sk.ffi.err.argument("x").inFunction("abs").mustHaveType("number");
+    catch(e)
+    {
+        Sk.debugout("" + e);
+        throw Sk.ffi.err.argument("x").inFunction("abs").mustHaveType("number");
     }
   }
 };
@@ -7924,16 +7936,15 @@ Sk.abstr.gattr = function(obj, nameJS)
 
     if (obj['__getattr__']) {
         ret = Sk.misceval.callsim(obj['__getattr__'], obj, nameJS);
-    } else if (obj.tp$getattr !== undefined) {
+    }
+    else if (obj.tp$getattr !== undefined) {
         ret = obj.tp$getattr(nameJS);
     }
 
     if (ret === undefined) {
-        throw new Sk.builtin.AttributeError("'" + objname + "' object has no attribute '" + nameJS + "'");       
+        throw new Sk.builtin.AttributeError("'" + objname + "' object has no attribute '" + nameJS + "'");
     }
- 
     return ret;
-    
 };
 goog.exportSymbol("Sk.abstr.gattr", Sk.abstr.gattr);
 
@@ -13779,6 +13790,20 @@ Sk.ffi.attributeError = function(message) {return new Sk.builtin.AttributeError(
 goog.exportSymbol("Sk.ffi.attributeError", Sk.ffi.attributeError);
 
 /**
+ * NotImplementedError
+ * @typedef {!Sk.builtin.NotImplementedError}
+ */
+Sk.ffi.NotImplementedError
+goog.exportSymbol("Sk.ffi.NotImplementedError", Sk.ffi.NotImplementedError);
+/**
+ * Returns a new NotImplementedError.
+ * @param {string} message The message string.
+ * @return {Sk.ffi.NotImplementedError} The NotImplementedError.
+ */
+Sk.ffi.notImplementedError = function(message) {return new Sk.builtin.NotImplementedError(message);};
+goog.exportSymbol("Sk.ffi.notImplementedError", Sk.ffi.notImplementedError);
+
+/**
  * @typedef {!Sk.builtin.TypeError}
  */
 Sk.ffi.TypeError
@@ -13874,6 +13899,26 @@ Sk.ffi.booleanToPy = function(valueJs, defaultJs)
 };
 goog.exportSymbol("Sk.ffi.booleanToPy", Sk.ffi.booleanToPy);
 
+Sk.ffi.numberToPy = function(valueJs, kind)
+{
+    switch(kind)
+    {
+        case Sk.ffi.PyType.FLOAT:
+        {
+            return new Sk.builtin.nmber(valueJs, Sk.builtin.nmber.float$);
+        }
+        case Sk.ffi.PyType.INT:
+        {
+            return new Sk.builtin.nmber(valueJs, Sk.builtin.nmber.int$);
+        }
+        default:
+        {
+            throw Sk.ffi.assertionError("ead77baa-30b2-470a-bb18-9db949965e45, kind => " + kind);
+        }
+    }
+}
+goog.exportSymbol("Sk.ffi.numberToPy", Sk.ffi.numberToPy);
+
 /**
  * Converts a JavaScript number or null to the internal Python float representation.
  *
@@ -13881,7 +13926,7 @@ goog.exportSymbol("Sk.ffi.booleanToPy", Sk.ffi.booleanToPy);
  * @param {number=} defaultJs
  * @return {Object|Sk.ffi.none|undefined}
  */
-Sk.ffi.numberToPy = function(valueJs, defaultJs)
+Sk.ffi.numberToFloatPy = function(valueJs, defaultJs)
 {
     var t = typeof valueJs;
     if (t === Sk.ffi.JsType.NUMBER)
@@ -13897,7 +13942,7 @@ Sk.ffi.numberToPy = function(valueJs, defaultJs)
         var d = typeof defaultJs;
         if (d === Sk.ffi.JsType.NUMBER)
         {
-            return Sk.ffi.numberToPy(Number(defaultJs));
+            return Sk.ffi.numberToFloatPy(Number(defaultJs));
         }
         else if (d === Sk.ffi.JsType.UNDEFINED)
         {
@@ -13911,7 +13956,7 @@ Sk.ffi.numberToPy = function(valueJs, defaultJs)
         {
             throw Sk.ffi.err.
                 argument("defaultJs").
-                inFunction("Sk.ffi.numberToPy").
+                inFunction("Sk.ffi.numberToFloatPy").
                 mustHaveType([Sk.ffi.JsType.NUMBER, 'null', Sk.ffi.JsType.UNDEFINED].join(" or "));
         }
     }
@@ -13919,11 +13964,11 @@ Sk.ffi.numberToPy = function(valueJs, defaultJs)
     {
         throw Sk.ffi.err.
             argument("valueJs").
-            inFunction("Sk.ffi.numberToPy").
+            inFunction("Sk.ffi.numberToFloatPy").
             mustHaveType([Sk.ffi.JsType.NUMBER, 'null', Sk.ffi.JsType.UNDEFINED].join(" or "));
     }
 };
-goog.exportSymbol("Sk.ffi.numberToPy", Sk.ffi.numberToPy);
+goog.exportSymbol("Sk.ffi.numberToFloatPy", Sk.ffi.numberToFloatPy);
 
 /**
  * Converts a JavaScript number or null to the internal Python int representation.
@@ -14161,7 +14206,7 @@ Sk.ffi.remapToPy = function(valueJs, className, custom)
     }
     else if (t === Sk.ffi.JsType.NUMBER)
     {
-        return Sk.ffi.numberToPy(Number(valueJs));
+        return Sk.ffi.numberToFloatPy(Number(valueJs));
     }
     else if (t === Sk.ffi.JsType.BOOLEAN)
     {
@@ -14789,6 +14834,67 @@ Sk.ffi.callsim = function(func, args)
     return Sk.misceval.apply(func, undefined, undefined, undefined, args);
 };
 goog.exportSymbol("Sk.ffi.callsim", Sk.ffi.callsim);
+
+/**
+ * Computes the exponential of a value by either invoking the special __exp__ function or the native equivalent.
+ */
+Sk.ffi.exp = function(valuePy)
+{
+    if (valuePy['__exp__'])
+    {
+        return Sk.ffi.callsim(valuePy["__exp__"], valuePy);
+    }
+    else
+    {
+        throw Sk.ffi.notImplementedError('__exp__');
+    }
+};
+goog.exportSymbol("Sk.ffi.exp", Sk.ffi.exp);
+
+/**
+ * Computes the positive of a value by either invoking the special __pos__ function or the native equivalent.
+ */
+Sk.ffi.pos = function(valuePy)
+{
+    return Sk.ffi.callsim(valuePy["__pos__"], valuePy);
+};
+goog.exportSymbol("Sk.ffi.pos", Sk.ffi.pos);
+
+/**
+ * Computes the negative of a value by either invoking the special __neg__ function or the native equivalent.
+ */
+Sk.ffi.neg = function(valuePy)
+{
+    return Sk.ffi.callsim(valuePy["__neg__"], valuePy);
+};
+goog.exportSymbol("Sk.ffi.neg", Sk.ffi.neg);
+
+/**
+ * Computes the inverse of a value by either invoking the special __invert__ function or the native equivalent.
+ */
+Sk.ffi.invert = function(valuePy)
+{
+    return Sk.ffi.callsim(valuePy["__invert__"], valuePy);
+};
+goog.exportSymbol("Sk.ffi.invert", Sk.ffi.invert);
+
+/**
+ * Computes the programmatic representation of a value by either invoking the special __repr__ function or the native equivalent.
+ */
+Sk.ffi.repr = function(valuePy)
+{
+    return Sk.ffi.callsim(valuePy["__repr__"], valuePy);
+};
+goog.exportSymbol("Sk.ffi.repr", Sk.ffi.repr);
+
+/**
+ * Computes the string representation of a value by either invoking the special __str__ function or the native equivalent.
+ */
+Sk.ffi.str = function(valuePy)
+{
+    return Sk.ffi.callsim(valuePy["__str__"], valuePy);
+};
+goog.exportSymbol("Sk.ffi.str", Sk.ffi.str);
 
 /**
  * Convenience function for implementing callable attributes.
@@ -24398,7 +24504,7 @@ mod.atan2 = Sk.ffi.functionPy(function(y, x) {
 mod.sin = Sk.ffi.functionPy(function(anglePy) {
   Sk.ffi.checkFunctionArgs("sin", arguments, 1, 1);
   if (Sk.ffi.isNumber(anglePy)) {
-    return Sk.ffi.numberToPy(Math.sin(Sk.ffi.remapToJs(anglePy)));
+    return Sk.ffi.numberToFloatPy(Math.sin(Sk.ffi.remapToJs(anglePy)));
   }
   else
   {
@@ -24416,7 +24522,7 @@ mod.sin = Sk.ffi.functionPy(function(anglePy) {
 mod.cos = Sk.ffi.functionPy(function(anglePy) {
   Sk.ffi.checkFunctionArgs("cos", arguments, 1, 1);
   if (Sk.ffi.isNumber(anglePy)) {
-    return Sk.ffi.numberToPy(Math.cos(Sk.ffi.remapToJs(anglePy)));
+    return Sk.ffi.numberToFloatPy(Math.cos(Sk.ffi.remapToJs(anglePy)));
   }
   else
   {
@@ -24541,17 +24647,18 @@ mod.log10 = Sk.ffi.functionPy(function(x) {
 mod.exp = Sk.ffi.functionPy(function(anglePy) {
   Sk.ffi.checkFunctionArgs("exp", arguments, 1, 1);
   if (Sk.ffi.isNumber(anglePy)) {
-    return Sk.ffi.numberToPy(Math.exp(Sk.ffi.remapToJs(anglePy)));
+    return Sk.ffi.numberToFloatPy(Math.exp(Sk.ffi.remapToJs(anglePy)));
   }
   else
   {
-    try {
-      var methodPy = Sk.ffi.gattr(anglePy, "exp");
-      return Sk.ffi.callsim(methodPy);
-    }
-    catch(e) {
-      throw Sk.ffi.err.argument(ARG_ANGLE).inFunction("exp").mustHaveType(DIMENSIONLESS_NUMBER);
-    }
+    return Sk.ffi.exp(anglePy);
+//    try {
+//      var methodPy = Sk.ffi.gattr(anglePy, "exp");
+//      return Sk.ffi.callsim(methodPy);
+//    }
+//    catch(e) {
+//      throw Sk.ffi.err.argument(ARG_ANGLE).inFunction("exp").mustHaveType(DIMENSIONLESS_NUMBER);
+//    }
   }
 });
 
@@ -24704,7 +24811,7 @@ mod.factorial = Sk.ffi.functionPy(function(x) {
      * @param {number} y
      * @return {!Object}
      */
-    function cartesianToComplexPy(x, y) {return Sk.ffi.callsim(mod[COMPLEX], Sk.ffi.numberToPy(x), Sk.ffi.numberToPy(y));}
+    function cartesianToComplexPy(x, y) {return Sk.ffi.callsim(mod[COMPLEX], Sk.ffi.numberToFloatPy(x), Sk.ffi.numberToFloatPy(y));}
 
     mod[COMPLEX] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       $loc.__init__ = Sk.ffi.functionPy(function(selfPy, rePy, imPy) {
@@ -24717,18 +24824,18 @@ mod.factorial = Sk.ffi.functionPy(function(x) {
         z = Sk.ffi.remapToJs(z);
         switch(name) {
           case PROP_REAL: {
-            return Sk.ffi.numberToPy(z.x);
+            return Sk.ffi.numberToFloatPy(z.x);
           }
           case PROP_IMAG: {
-            return Sk.ffi.numberToPy(z.y);
+            return Sk.ffi.numberToFloatPy(z.y);
           }
           case METHOD_ABS: {
             return Sk.ffi.callableToPy(mod, METHOD_ABS, function(methodPy) {
-              return Sk.ffi.numberToPy(Math.sqrt(z.x * z.x + z.y * z.y));
+              return Sk.ffi.numberToFloatPy(Math.sqrt(z.x * z.x + z.y * z.y));
             });
           }
           case METHOD_EXP: {
-            return Sk.ffi.callableToPy(mod, METHOD_ABS, function(methodPy) {
+            return Sk.ffi.callableToPy(mod, METHOD_EXP, function(methodPy) {
               var e = Math.exp(z.x);
               var c = Math.cos(z.y);
               var s = Math.sin(z.y);
@@ -24920,7 +25027,14 @@ mod.factorial = Sk.ffi.functionPy(function(x) {
       });
       $loc.__abs__ = Sk.ffi.functionPy(function(selfPy) {
         var z = Sk.ffi.remapToJs(selfPy);
-        return Sk.ffi.numberToPy(Math.sqrt(z.x * z.x + z.y * z.y));
+        return Sk.ffi.numberToFloatPy(Math.sqrt(z.x * z.x + z.y * z.y));
+      });
+      $loc.__exp__ = Sk.ffi.functionPy(function(selfPy) {
+        var z = Sk.ffi.remapToJs(selfPy);
+        var e = Math.exp(z.x);
+        var c = Math.cos(z.y);
+        var s = Math.sin(z.y);
+        return cartesianToComplexPy(e * c, e * s);
       });
       $loc.__pos__ = Sk.ffi.functionPy(function(selfPy) {
         return selfPy;
@@ -24958,10 +25072,10 @@ mod.factorial = Sk.ffi.functionPy(function(x) {
       Sk.ffi.checkFunctionArgs("phase", arguments, 1, 1);
       if (isComplexPy(xPy)) {
         var z = Sk.ffi.remapToJs(xPy);
-        return Sk.ffi.numberToPy(phase(z.x, z.y));
+        return Sk.ffi.numberToFloatPy(phase(z.x, z.y));
       }
       else if (Sk.ffi.isNumber(xPy)) {
-        return Sk.ffi.numberToPy(Math.atan2(0, Sk.ffi.remapToJs(xPy)));
+        return Sk.ffi.numberToFloatPy(Math.atan2(0, Sk.ffi.remapToJs(xPy)));
       }
       else {
         Sk.ffi.checkArgType("x", COMPLEX, false, xPy);
@@ -24983,8 +25097,8 @@ mod.factorial = Sk.ffi.functionPy(function(x) {
     });
 
     // Constants
-    mod.pi = Sk.ffi.numberToPy(Math.PI);
-    mod.e =  Sk.ffi.numberToPy(Math.E);
+    mod.pi = Sk.ffi.numberToFloatPy(Math.PI);
+    mod.e =  Sk.ffi.numberToFloatPy(Math.E);
   };
 }).call(this);
 /**
@@ -25161,7 +25275,7 @@ function stringFromCoordinates(coordinates, labels, multiplier) {
  */
 function wxyzToPy(w, x, y, z) {
   // The arguments to Quaternion in Python are in the order x, y, z, w!
-  return Sk.ffi.callsim(mod[QUATERNION], Sk.ffi.numberToPy(x), Sk.ffi.numberToPy(y), Sk.ffi.numberToPy(z), Sk.ffi.numberToPy(w));
+  return Sk.ffi.callsim(mod[QUATERNION], Sk.ffi.numberToFloatPy(x), Sk.ffi.numberToFloatPy(y), Sk.ffi.numberToFloatPy(z), Sk.ffi.numberToFloatPy(w));
 }
 /**
  *
@@ -25326,16 +25440,16 @@ mod[QUATERNION] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var quaternion = Sk.ffi.remapToJs(quaternionPy);
     switch(name) {
       case PROP_X: {
-        return Sk.ffi.numberToPy(quaternion.x);
+        return Sk.ffi.numberToFloatPy(quaternion.x);
       }
       case PROP_Y: {
-        return Sk.ffi.numberToPy(quaternion.y);
+        return Sk.ffi.numberToFloatPy(quaternion.y);
       }
       case PROP_Z: {
-        return Sk.ffi.numberToPy(quaternion.z);
+        return Sk.ffi.numberToFloatPy(quaternion.z);
       }
       case PROP_W: {
-        return Sk.ffi.numberToPy(quaternion.w);
+        return Sk.ffi.numberToFloatPy(quaternion.w);
       }
       case METHOD_COPY: {
         return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
@@ -25434,7 +25548,7 @@ mod[QUATERNION] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
             Sk.ffi.referenceToPy(null, METHOD_LENGTH, null, methodPy);
           });
           $loc.__call__ = Sk.ffi.functionPy(function(methodPy) {
-            return Sk.ffi.numberToPy(quaternion.length());
+            return Sk.ffi.numberToFloatPy(quaternion.length());
           });
         }, METHOD_LENGTH, []));
       }
@@ -25444,7 +25558,7 @@ mod[QUATERNION] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
             Sk.ffi.referenceToPy(null, METHOD_LENGTH_SQ, null, methodPy);
           });
           $loc.__call__ = Sk.ffi.functionPy(function(methodPy) {
-            return Sk.ffi.numberToPy(quaternion[METHOD_LENGTH_SQ]());
+            return Sk.ffi.numberToFloatPy(quaternion[METHOD_LENGTH_SQ]());
           });
         }, METHOD_LENGTH_SQ, []));
       }
@@ -26347,7 +26461,7 @@ mod[CARTESIAN_SPACE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     Sk.ffi.checkMethodArgs(CARTESIAN_SPACE, arguments, 0, 0);
     var scenePy = Sk.ffi.callsim(mod[WORLD]);
     var scene = Sk.ffi.remapToJs(scenePy);
-    var cameraPy = Sk.ffi.callsim(mod[PERSPECTIVE_CAMERA], Sk.ffi.numberToPy(45), Sk.ffi.numberToPy(1.0), Sk.ffi.numberToPy(0.1), Sk.ffi.numberToPy(10000));
+    var cameraPy = Sk.ffi.callsim(mod[PERSPECTIVE_CAMERA], Sk.ffi.numberToFloatPy(45), Sk.ffi.numberToFloatPy(1.0), Sk.ffi.numberToFloatPy(0.1), Sk.ffi.numberToFloatPy(10000));
     var camera = Sk.ffi.remapToJs(cameraPy);
     camera[PROP_UP].set(0, 0, 1);
     camera[PROP_POSITION].set(+8, +4, +5);
@@ -26497,9 +26611,9 @@ mod[CONE_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           }
           Sk.ffi.checkMethodArgs(METHOD_BUILD, arguments, 0, 0);
           var dimensions = dimensionCone();
-          var radiusTop      = Sk.ffi.numberToPy(0);
-          var radiusBottom   = Sk.ffi.numberToPy(dimensions[PROP_RADIUS]);
-          var height         = Sk.ffi.numberToPy(dimensions[PROP_HEIGHT]);
+          var radiusTop      = Sk.ffi.numberToFloatPy(0);
+          var radiusBottom   = Sk.ffi.numberToFloatPy(dimensions[PROP_RADIUS]);
+          var height         = Sk.ffi.numberToFloatPy(dimensions[PROP_HEIGHT]);
           var radialSegments = Sk.ffi.numberToIntPy(32);
           var heightSegments = Sk.ffi.numberToIntPy(1);
           var openEnded      = Sk.ffi.booleanToPy(false);
@@ -26740,9 +26854,9 @@ mod[CYLINDER_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           }
           Sk.ffi.checkMethodArgs(METHOD_BUILD, arguments, 0, 0);
           var dimensions = dimensionCylinder();
-          var radiusTop      = Sk.ffi.numberToPy(dimensions.a);
-          var radiusBottom   = Sk.ffi.numberToPy(dimensions.b);
-          var height         = Sk.ffi.numberToPy(dimensions.h);
+          var radiusTop      = Sk.ffi.numberToFloatPy(dimensions.a);
+          var radiusBottom   = Sk.ffi.numberToFloatPy(dimensions.b);
+          var height         = Sk.ffi.numberToFloatPy(dimensions.h);
           var radialSegments = Sk.ffi.numberToIntPy(32);
           var heightSegments = Sk.ffi.numberToIntPy(1);
           var openEnded      = Sk.ffi.booleanToPy(false);
@@ -28232,7 +28346,7 @@ Sk.builtin.buildWindowClass = function(mod) {
     $loc.__getattr__ = Sk.ffi.functionPy(function(self, name) {
       switch(name) {
         case PROP_ANIMATION_TIME: {
-          return Sk.ffi.numberToPy(window[PROP_ANIMATION_TIME]);
+          return Sk.ffi.numberToFloatPy(window[PROP_ANIMATION_TIME]);
         }
         case PROP_DOCUMENT: {
           return mod[PROP_DOCUMENT];
@@ -28294,9 +28408,9 @@ Sk.builtin.buildWindowClass = function(mod) {
             });
             $loc.__call__ = Sk.ffi.functionPy(function(self, callback) {
               var requestID = window[METHOD_REQUEST_ANIMATION_FRAME](function(timestamp) {
-                Sk.misceval.callsim(callback, Sk.ffi.numberToPy(timestamp));
+                Sk.misceval.callsim(callback, Sk.ffi.numberToFloatPy(timestamp));
               });
-              return Sk.ffi.numberToPy(requestID);
+              return Sk.ffi.numberToFloatPy(requestID);
             });
           }, METHOD_REQUEST_ANIMATION_FRAME, []));
         }
@@ -28311,7 +28425,7 @@ Sk.builtin.buildWindowClass = function(mod) {
               var timeoutID = window[METHOD_SET_TIMEOUT](function() {
                 Sk.misceval.callsim(funcPy);
               }, delay, params);
-              return Sk.ffi.numberToPy(timeoutID);
+              return Sk.ffi.numberToFloatPy(timeoutID);
             });
           }, METHOD_SET_TIMEOUT, []));
         }
@@ -28438,7 +28552,7 @@ Sk.builtin.defineEuclidean2 = function(mod) {
     var isEuclidean2Py = function(valuePy) {return Sk.ffi.isClass(valuePy, EUCLIDEAN_2);};
 
   function remapE2ToPy(x00, x01, x10, x11) {
-    return Sk.ffi.callsim(mod[EUCLIDEAN_2], Sk.ffi.numberToPy(x00), Sk.ffi.numberToPy(x01), Sk.ffi.numberToPy(x10), Sk.ffi.numberToPy(x11));
+    return Sk.ffi.callsim(mod[EUCLIDEAN_2], Sk.ffi.numberToFloatPy(x00), Sk.ffi.numberToFloatPy(x01), Sk.ffi.numberToFloatPy(x10), Sk.ffi.numberToFloatPy(x11));
   }
 
   function stringFromCoordinates(coordinates, labels, multiplier) {
@@ -28954,6 +29068,17 @@ Sk.builtin.defineEuclidean2 = function(mod) {
         }
       }
     });
+    $loc.__abs__ = Sk.ffi.functionPy(function(selfPy) {
+      var mv = Sk.ffi.remapToJs(selfPy);
+      return Sk.ffi.numberToFloatPy(Math.sqrt(mv.w * mv.w + mv.x * mv.x + mv.y * mv.y - mv.xy * mv.xy));
+    });
+    $loc.__exp__ = Sk.ffi.functionPy(function(selfPy) {
+      var mv = Sk.ffi.remapToJs(selfPy);
+      var e = Math.exp(mv.w);
+      var c = Math.cos(mv.xy);
+      var s = Math.sin(mv.xy);
+      return remapE2ToPy(e * c, 0, 0, e * s);
+    });
     $loc.__repr__ = Sk.ffi.functionPy(function(mv) {
       mv = Sk.ffi.remapToJs(mv);
       return Sk.ffi.stringToPy(EUCLIDEAN_2 + "(" + [mv.w, mv.x, mv.y, mv.xy].map(function(x) {return String(x);}).join(", ") + ")");
@@ -28981,16 +29106,16 @@ Sk.builtin.defineEuclidean2 = function(mod) {
       var mv = Sk.ffi.remapToJs(mvPy);
       switch(name) {
         case PROP_W: {
-          return Sk.ffi.numberToPy(mv[PROP_W]);
+          return Sk.ffi.numberToFloatPy(mv[PROP_W]);
         }
         case PROP_X: {
-          return Sk.ffi.numberToPy(mv[PROP_X]);
+          return Sk.ffi.numberToFloatPy(mv[PROP_X]);
         }
         case PROP_Y: {
-          return Sk.ffi.numberToPy(mv[PROP_Y]);
+          return Sk.ffi.numberToFloatPy(mv[PROP_Y]);
         }
         case PROP_XY: {
-          return Sk.ffi.numberToPy(mv[PROP_XY]);
+          return Sk.ffi.numberToFloatPy(mv[PROP_XY]);
         }
         case METHOD_CLONE: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
@@ -29583,14 +29708,14 @@ Sk.builtin.defineEuclidean3 = function(mod) {
   }
 
   function coordsJsToE3Py(w, x, y, z, xy, yz, zx, xyz) {
-    w   = Sk.ffi.numberToPy(w);
-    x   = Sk.ffi.numberToPy(x);
-    y   = Sk.ffi.numberToPy(y);
-    z   = Sk.ffi.numberToPy(z);
-    xy  = Sk.ffi.numberToPy(xy);
-    yz  = Sk.ffi.numberToPy(yz);
-    zx  = Sk.ffi.numberToPy(zx);
-    xyz = Sk.ffi.numberToPy(xyz);
+    w   = Sk.ffi.numberToFloatPy(w);
+    x   = Sk.ffi.numberToFloatPy(x);
+    y   = Sk.ffi.numberToFloatPy(y);
+    z   = Sk.ffi.numberToFloatPy(z);
+    xy  = Sk.ffi.numberToFloatPy(xy);
+    yz  = Sk.ffi.numberToFloatPy(yz);
+    zx  = Sk.ffi.numberToFloatPy(zx);
+    xyz = Sk.ffi.numberToFloatPy(xyz);
     return Sk.ffi.callsim(mod[EUCLIDEAN_3], w, x, y, z, xy, yz, zx, xyz);
   }
 
@@ -30184,28 +30309,28 @@ Sk.builtin.defineEuclidean3 = function(mod) {
       var mv = Sk.ffi.remapToJs(mvPy);
       switch(name) {
         case PROP_W: {
-          return Sk.ffi.numberToPy(mv.w);
+          return Sk.ffi.numberToFloatPy(mv.w);
         }
         case PROP_X: {
-          return Sk.ffi.numberToPy(mv.x);
+          return Sk.ffi.numberToFloatPy(mv.x);
         }
         case PROP_Y: {
-          return Sk.ffi.numberToPy(mv.y);
+          return Sk.ffi.numberToFloatPy(mv.y);
         }
         case PROP_Z: {
-          return Sk.ffi.numberToPy(mv.z);
+          return Sk.ffi.numberToFloatPy(mv.z);
         }
         case PROP_XY: {
-          return Sk.ffi.numberToPy(mv.xy);
+          return Sk.ffi.numberToFloatPy(mv.xy);
         }
         case PROP_YZ: {
-          return Sk.ffi.numberToPy(mv.yz);
+          return Sk.ffi.numberToFloatPy(mv.yz);
         }
         case PROP_ZX: {
-          return Sk.ffi.numberToPy(mv.zx);
+          return Sk.ffi.numberToFloatPy(mv.zx);
         }
         case PROP_XYZ: {
-          return Sk.ffi.numberToPy(mv.xyz);
+          return Sk.ffi.numberToFloatPy(mv.xyz);
         }
         case METHOD_ADD: {
           return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
@@ -30241,7 +30366,7 @@ Sk.builtin.defineEuclidean3 = function(mod) {
             });
             $loc.__call__ = Sk.ffi.functionPy(function(self, vPy) {
               var v  = Sk.ffi.remapToJs(vPy);
-              return Sk.ffi.numberToPy(mv.dot(v));
+              return Sk.ffi.numberToFloatPy(mv.dot(v));
             });
           }, METHOD_DOT, []));
         }
@@ -30294,7 +30419,7 @@ Sk.builtin.defineEuclidean3 = function(mod) {
             });
             $loc.__call__ = Sk.ffi.functionPy(function(self, index) {
               index  = Sk.ffi.remapToJs(index);
-              return Sk.ffi.numberToPy(mv[METHOD_GET_COMPONENT](index));
+              return Sk.ffi.numberToFloatPy(mv[METHOD_GET_COMPONENT](index));
             });
           }, METHOD_GET_COMPONENT, []));
         }
@@ -30337,7 +30462,7 @@ Sk.builtin.defineEuclidean3 = function(mod) {
             $loc.__init__ = Sk.ffi.functionPy(function(self) {
             });
             $loc.__call__ = Sk.ffi.functionPy(function(self) {
-              return Sk.ffi.numberToPy(mv.length());
+              return Sk.ffi.numberToFloatPy(mv.length());
             });
           }, METHOD_LENGTH, []));
         }
@@ -30397,6 +30522,15 @@ Sk.builtin.defineEuclidean3 = function(mod) {
         }
       }
     });
+    $loc.__exp__ = Sk.ffi.functionPy(function(selfPy) {
+      Sk.ffi.checkMethodArgs(METHOD_EXP, arguments, 0, 0);
+      var mv = Sk.ffi.remapToJs(selfPy);
+      var angle = Math.sqrt(mv.xy * mv.xy + mv.yz * mv.yz + mv.zx * mv.zx);
+      var c = Math.cos(angle);
+      var s = Math.sin(angle);
+      var k = s / angle;
+      return coordsJsToE3Py(c, 0, 0, 0, k * mv.xy, k * mv.yz, k * mv.zx, 0);
+    });
     $loc.__repr__ = Sk.ffi.functionPy(function(m) {
       m = Sk.ffi.remapToJs(m);
       var grade0 = m.w !== 0;
@@ -30447,26 +30581,26 @@ Sk.builtin.defineUnits = function(mod) {
 /**
  * Prefixes.
  */
-mod.yocto = Sk.ffi.numberToPy(1e-24);
-mod.zepto = Sk.ffi.numberToPy(1e-21);
-mod.atto  = Sk.ffi.numberToPy(1e-18);
-mod.femto = Sk.ffi.numberToPy(1e-15);
-mod.pico  = Sk.ffi.numberToPy(1e-12);
-mod.nano  = Sk.ffi.numberToPy(1e-9);
-mod.micro = Sk.ffi.numberToPy(1e-6);
-mod.milli = Sk.ffi.numberToPy(1e-3);
-mod.centi = Sk.ffi.numberToPy(1e-2);
-mod.deci  = Sk.ffi.numberToPy(1e-1);
-mod.deka  = Sk.ffi.numberToPy(1e+1);
-mod.hecto = Sk.ffi.numberToPy(1e+2);
-mod.kilo  = Sk.ffi.numberToPy(1e+3);
-mod.mega  = Sk.ffi.numberToPy(1e+6);
-mod.giga  = Sk.ffi.numberToPy(1e+9);
-mod.tera  = Sk.ffi.numberToPy(1e+12);
-mod.peta  = Sk.ffi.numberToPy(1e+15);
-mod.exa   = Sk.ffi.numberToPy(1e+18);
-mod.zetta = Sk.ffi.numberToPy(1e+21);
-mod.yotta = Sk.ffi.numberToPy(1e+24);
+mod.yocto = Sk.ffi.numberToFloatPy(1e-24);
+mod.zepto = Sk.ffi.numberToFloatPy(1e-21);
+mod.atto  = Sk.ffi.numberToFloatPy(1e-18);
+mod.femto = Sk.ffi.numberToFloatPy(1e-15);
+mod.pico  = Sk.ffi.numberToFloatPy(1e-12);
+mod.nano  = Sk.ffi.numberToFloatPy(1e-9);
+mod.micro = Sk.ffi.numberToFloatPy(1e-6);
+mod.milli = Sk.ffi.numberToFloatPy(1e-3);
+mod.centi = Sk.ffi.numberToFloatPy(1e-2);
+mod.deci  = Sk.ffi.numberToFloatPy(1e-1);
+mod.deka  = Sk.ffi.numberToFloatPy(1e+1);
+mod.hecto = Sk.ffi.numberToFloatPy(1e+2);
+mod.kilo  = Sk.ffi.numberToFloatPy(1e+3);
+mod.mega  = Sk.ffi.numberToFloatPy(1e+6);
+mod.giga  = Sk.ffi.numberToFloatPy(1e+9);
+mod.tera  = Sk.ffi.numberToFloatPy(1e+12);
+mod.peta  = Sk.ffi.numberToFloatPy(1e+15);
+mod.exa   = Sk.ffi.numberToFloatPy(1e+18);
+mod.zetta = Sk.ffi.numberToFloatPy(1e+21);
+mod.yotta = Sk.ffi.numberToFloatPy(1e+24);
 
 /**
  * @const
@@ -30950,26 +31084,29 @@ mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     return Sk.ffi.callsim(mod[MEASURE], Sk.ffi.remapToPy(a.wedge(b), MEASURE, custom));
   });
   $loc.__pos__ = Sk.ffi.functionPy(function(selfPy) {
-    return selfPy;
+    var quantityPy = Sk.ffi.pos(Sk.ffi.gattr(selfPy, PROP_QUANTITY));
+    var uomPy      = Sk.ffi.gattr(selfPy, PROP_UOM);
+    return Sk.ffi.callsim(mod[MEASURE], quantityPy, uomPy);
   });
   $loc.__neg__ = Sk.ffi.functionPy(function(selfPy) {
-    var quantityPy = Sk.ffi.gattr(selfPy, PROP_QUANTITY);
-    quantityPy = Sk.ffi.callsim(quantityPy["__neg__"], quantityPy);
+    var quantityPy = Sk.ffi.neg(Sk.ffi.gattr(selfPy, PROP_QUANTITY));
     var uomPy      = Sk.ffi.gattr(selfPy, PROP_UOM);
     return Sk.ffi.callsim(mod[MEASURE], quantityPy, uomPy);
   });
   $loc.__invert__ = Sk.ffi.functionPy(function(selfPy) {
-    var quantityPy = Sk.ffi.gattr(selfPy, PROP_QUANTITY);
-    quantityPy = Sk.ffi.callsim(quantityPy["__invert__"], quantityPy);
+    var quantityPy = Sk.ffi.invert(Sk.ffi.gattr(selfPy, PROP_QUANTITY));
     var uomPy      = Sk.ffi.gattr(selfPy, PROP_UOM);
     return Sk.ffi.callsim(mod[MEASURE], quantityPy, uomPy);
   });
-  $loc.__str__ = Sk.ffi.functionPy(function(measurePy) {
-    var quantityPy = Sk.ffi.gattr(measurePy, PROP_QUANTITY);
-    var quantityStr = Sk.ffi.remapToJs(Sk.ffi.callsim(quantityPy["__str__"], quantityPy));
-    var uomPy = Sk.ffi.gattr(measurePy, PROP_UOM);
-    var uomStr = Sk.ffi.remapToJs(Sk.ffi.callsim(uomPy["__str__"], uomPy));
-    return Sk.ffi.remapToPy("" + quantityStr + " " + uomStr);
+  $loc.__exp__ = Sk.ffi.functionPy(function(selfPy) {
+    var quantityPy = Sk.ffi.exp(Sk.ffi.gattr(selfPy, PROP_QUANTITY));
+    var uomPy      = Sk.ffi.gattr(selfPy, PROP_UOM);
+    return Sk.ffi.callsim(mod[MEASURE], quantityPy, uomPy);
+  });
+  $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
+    var qtyStr = Sk.ffi.remapToJs(Sk.ffi.str(Sk.ffi.gattr(selfPy, PROP_QUANTITY)));
+    var uomStr = Sk.ffi.remapToJs(Sk.ffi.str(Sk.ffi.gattr(selfPy, PROP_UOM)));
+    return Sk.ffi.remapToPy("" + qtyStr + " " + uomStr);
   });
   $loc.__repr__ = Sk.ffi.functionPy(function(measurePy) {
     var quantityPy = Sk.ffi.gattr(measurePy, PROP_QUANTITY);
@@ -32507,7 +32644,7 @@ Sk.builtin.defineThree = function(mod, THREE) {
       var UPDATE_PROJECTION_MATRIX = "updateProjectionMatrix"
       switch(name) {
         case "aspect": {
-          return Sk.ffi.numberToPy(camera.aspect);
+          return Sk.ffi.numberToFloatPy(camera.aspect);
         }
         case PROP_POSITION: {
           return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(camera[PROP_POSITION], VECTOR_3));
@@ -32829,13 +32966,13 @@ Sk.builtin.defineThree = function(mod, THREE) {
       var cylinder = Sk.ffi.remapToJs(selfPy);
       switch(name) {
         case PROP_RADIUS_TOP: {
-          return Sk.ffi.numberToPy(cylinder[PROP_RADIUS_TOP]);
+          return Sk.ffi.numberToFloatPy(cylinder[PROP_RADIUS_TOP]);
         }
         case PROP_RADIUS_BOTTOM: {
-          return Sk.ffi.numberToPy(cylinder[PROP_RADIUS_BOTTOM]);
+          return Sk.ffi.numberToFloatPy(cylinder[PROP_RADIUS_BOTTOM]);
         }
         case PROP_HEIGHT: {
-          return Sk.ffi.numberToPy(cylinder[PROP_HEIGHT]);
+          return Sk.ffi.numberToFloatPy(cylinder[PROP_HEIGHT]);
         }
         case PROP_RADIAL_SEGMENTS: {
           return Sk.ffi.numberToIntPy(cylinder[PROP_RADIAL_SEGMENTS]);
@@ -33504,10 +33641,10 @@ Sk.builtin.defineThree = function(mod, THREE) {
           return Sk.ffi.callsim(mod[COLOR], Sk.ffi.referenceToPy(light[PROP_COLOR], COLOR));
         }
         case PROP_DISTANCE: {
-          return Sk.ffi.numberToPy(light[PROP_DISTANCE]);
+          return Sk.ffi.numberToFloatPy(light[PROP_DISTANCE]);
         }
         case PROP_INTENSITY: {
-          return Sk.ffi.numberToPy(light[PROP_INTENSITY]);
+          return Sk.ffi.numberToFloatPy(light[PROP_INTENSITY]);
         }
         case PROP_POSITION: {
           return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(light[PROP_POSITION], VECTOR_3));
@@ -33649,10 +33786,10 @@ Sk.builtin.defineThree = function(mod, THREE) {
           return Sk.ffi.callsim(mod[COLOR], Sk.ffi.referenceToPy(light[PROP_COLOR], COLOR));
         }
         case PROP_DISTANCE: {
-          return Sk.ffi.numberToPy(light[PROP_DISTANCE]);
+          return Sk.ffi.numberToFloatPy(light[PROP_DISTANCE]);
         }
         case PROP_INTENSITY: {
-          return Sk.ffi.numberToPy(light[PROP_INTENSITY]);
+          return Sk.ffi.numberToFloatPy(light[PROP_INTENSITY]);
         }
         case PROP_POSITION: {
           return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(light[PROP_POSITION], VECTOR_3));
@@ -33865,7 +34002,7 @@ Sk.builtin.defineThree = function(mod, THREE) {
           return Sk.ffi.callsim(mod[COLOR], Sk.ffi.referenceToPy(material[PROP_COLOR], COLOR));
         }
         case PROP_OPACITY: {
-          return Sk.ffi.numberToPy(material[PROP_OPACITY]);
+          return Sk.ffi.numberToFloatPy(material[PROP_OPACITY]);
         }
       }
     });
@@ -34152,7 +34289,7 @@ Sk.builtin.defineThree = function(mod, THREE) {
           return material[PROP_NEEDS_UPDATE];
         }
         case PROP_OPACITY: {
-          return Sk.ffi.numberToPy(material[PROP_OPACITY]);
+          return Sk.ffi.numberToFloatPy(material[PROP_OPACITY]);
         }
         case PROP_OVERDRAW: {
           return material[PROP_OVERDRAW];
@@ -34164,7 +34301,7 @@ Sk.builtin.defineThree = function(mod, THREE) {
           return material[PROP_WIREFRAME];
         }
         case PROP_WIREFRAME_LINEWIDTH: {
-          return Sk.ffi.numberToPy(material[PROP_WIREFRAME_LINEWIDTH]);
+          return Sk.ffi.numberToFloatPy(material[PROP_WIREFRAME_LINEWIDTH]);
         }
         case PROP_VISIBLE: {
           return material[PROP_VISIBLE];
@@ -34297,7 +34434,7 @@ Sk.builtin.defineThree = function(mod, THREE) {
           return material[PROP_NEEDS_UPDATE];
         }
         case PROP_OPACITY: {
-          return Sk.ffi.numberToPy(material[PROP_OPACITY]);
+          return Sk.ffi.numberToFloatPy(material[PROP_OPACITY]);
         }
         case PROP_OVERDRAW: {
           return material[PROP_OVERDRAW];
@@ -34658,7 +34795,7 @@ Sk.builtin.defineThree = function(mod, THREE) {
      * @param {number} z The z-coordinate of the vector.
      */
     var xyzJsToVector3Py = function(x, y, z) {
-      return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.numberToPy(x), Sk.ffi.numberToPy(y), Sk.ffi.numberToPy(z));
+      return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.numberToFloatPy(x), Sk.ffi.numberToFloatPy(y), Sk.ffi.numberToFloatPy(z));
     };
     mod[VECTOR_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       $loc.__init__ = Sk.ffi.functionPy(function(selfPy, x, y, z) {
@@ -34776,7 +34913,7 @@ Sk.builtin.defineThree = function(mod, THREE) {
           case PROP_X:
           case PROP_Y:
           case PROP_Z: {
-            return Sk.ffi.numberToPy(vector[name]);
+            return Sk.ffi.numberToFloatPy(vector[name]);
           }
           case METHOD_APPLY_QUATERNION: {
             return Sk.ffi.callableToPy(mod, METHOD_APPLY_QUATERNION, function(methodPy, qPy) {
@@ -34809,7 +34946,7 @@ Sk.builtin.defineThree = function(mod, THREE) {
                 self.tp$name = METHOD_LENGTH;
               });
               $loc.__call__ = Sk.ffi.functionPy(function(self) {
-                return Sk.ffi.numberToPy(vector.length());
+                return Sk.ffi.numberToFloatPy(vector.length());
               });
             }, METHOD_LENGTH, []));
           }
@@ -34978,7 +35115,7 @@ Sk.builtin.defineFractions = function(mod, RATIONAL, factory) {
    * @param {number} denominator
    */
   var rationalToPy = function(numerator, denominator) {
-    return Sk.ffi.callsim(mod[RATIONAL], Sk.ffi.numberToPy(numerator), Sk.ffi.numberToPy(denominator));
+    return Sk.ffi.callsim(mod[RATIONAL], Sk.ffi.numberToFloatPy(numerator), Sk.ffi.numberToFloatPy(denominator));
   };
   mod[RATIONAL] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = Sk.ffi.functionPy(function(selfPy, numerPy, denomPy) {
@@ -35126,6 +35263,91 @@ Sk.builtin.defineFractions = function(mod, RATIONAL, factory) {
       return Sk.ffi.remapToPy("" + rational);
     });
   }, RATIONAL, []);
+};
+}).call(this);
+/**
+ * Convenience function for incorporating workbench into a module.
+ *
+ * Usage:
+ *
+ * Sk.builtin.defineWorkbench(mod);
+ */
+(function() {
+Sk.builtin.defineWorkbench = function(mod) {
+  Sk.ffi.checkFunctionArgs("defineWorkbench", arguments, 1, 1);
+  /**
+   * @const
+   * @type {string}
+   */
+  var WORKBENCH                       = "Workbench";
+  /**
+   * @const
+   * @type {string}
+   */
+  var METHOD_SET_UP                   = "setUp";
+  /**
+   * @const
+   * @type {string}
+   */
+  var METHOD_TEAR_DOWN                = "tearDown";
+  /**
+   * @const
+   * @type {string}
+   */
+  var METHOD_UPDATE_PROJECTION_MATRIX = "updateProjectionMatrix";
+
+  function removeElementsByTagName(tagName) {
+    var elements = document.getElementsByTagName(tagName);
+    for (var i = elements.length - 1; i >= 0; i--) {
+      var e = elements[i];
+      e.parentNode.removeChild(e);
+    }
+  }
+
+  mod[WORKBENCH] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
+    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, rendererPy, cameraPy) {
+      Sk.ffi.checkMethodArgs(WORKBENCH, arguments, 2, 2);
+      var renderer = Sk.ffi.remapToJs(rendererPy);
+      var camera   = Sk.ffi.remapToJs(cameraPy);
+      function onWindowResize(event) {
+        var width  = window.innerWidth;
+        var height = window.innerHeight;
+        renderer.setSize(width, height);
+        camera.aspect = width / height;
+        camera[METHOD_UPDATE_PROJECTION_MATRIX]();
+      }
+      Sk.ffi.referenceToPy({"renderer": renderer, "camera": camera, "onWindowResize": onWindowResize}, WORKBENCH, undefined, selfPy);
+    });
+    $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
+      var wb = Sk.ffi.remapToJs(selfPy);
+      switch(name) {
+        case METHOD_SET_UP: {
+          return Sk.ffi.callableToPy(mod, METHOD_SET_UP, function(methodPy) {
+            removeElementsByTagName('canvas');
+            document.body.insertBefore(wb.renderer['domElement'], document.body.firstChild);
+            window.addEventListener('resize', wb.onWindowResize, false);
+            wb.onWindowResize(null);
+          });
+        }
+        case METHOD_TEAR_DOWN: {
+          return Sk.ffi.callableToPy(mod, METHOD_TEAR_DOWN, function(methodPy) {
+            window.removeEventListener('resize', wb.onWindowResize, false);
+            removeElementsByTagName('canvas');
+          });
+        }
+      }
+    });
+    /*
+    $loc.setUp = Sk.ffi.functionPy(function(selfPy) {
+      Sk.ffi.checkMethodArgs('setUp', arguments, 0, 0);
+      var wb = Sk.ffi.remapToJs(selfPy);
+      removeElementsByTagName('canvas');
+      document.body.insertBefore(wb.renderer['domElement'], document.body.firstChild);
+      window.addEventListener('resize', wb.onWindowResize, false);
+      wb.onWindowResize(null);
+    });
+    */
+  }, WORKBENCH, []);
 };
 }).call(this);
 /* bladejs - 0.9.60
