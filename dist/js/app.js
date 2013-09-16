@@ -28545,6 +28545,26 @@
   (function () {
     var a = this.BLADE = this.BLADE || {};
     Sk.builtin.defineUnits = function (b) {
+      b.yocto = Sk.ffi.numberToPy(1e-24);
+      b.zepto = Sk.ffi.numberToPy(1e-21);
+      b.atto = Sk.ffi.numberToPy(1e-18);
+      b.femto = Sk.ffi.numberToPy(1e-15);
+      b.pico = Sk.ffi.numberToPy(1e-12);
+      b.nano = Sk.ffi.numberToPy(1e-9);
+      b.micro = Sk.ffi.numberToPy(0.000001);
+      b.milli = Sk.ffi.numberToPy(0.001);
+      b.centi = Sk.ffi.numberToPy(0.01);
+      b.deci = Sk.ffi.numberToPy(0.1);
+      b.deka = Sk.ffi.numberToPy(10);
+      b.hecto = Sk.ffi.numberToPy(100);
+      b.kilo = Sk.ffi.numberToPy(1000);
+      b.mega = Sk.ffi.numberToPy(1000000);
+      b.giga = Sk.ffi.numberToPy(1000000000);
+      b.tera = Sk.ffi.numberToPy(1000000000000);
+      b.peta = Sk.ffi.numberToPy(1000000000000000);
+      b.exa = Sk.ffi.numberToPy(1000000000000000000);
+      b.zetta = Sk.ffi.numberToPy(1e+21);
+      b.yotta = Sk.ffi.numberToPy(1e+24);
       var c = [
           Sk.ffi.PyType.FLOAT,
           Sk.ffi.PyType.INT,

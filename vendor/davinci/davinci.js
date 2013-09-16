@@ -30445,6 +30445,30 @@ var  BLADE = this.BLADE;
 
 Sk.builtin.defineUnits = function(mod) {
 /**
+ * Prefixes.
+ */
+mod.yocto = Sk.ffi.numberToPy(1e-24);
+mod.zepto = Sk.ffi.numberToPy(1e-21);
+mod.atto  = Sk.ffi.numberToPy(1e-18);
+mod.femto = Sk.ffi.numberToPy(1e-15);
+mod.pico  = Sk.ffi.numberToPy(1e-12);
+mod.nano  = Sk.ffi.numberToPy(1e-9);
+mod.micro = Sk.ffi.numberToPy(1e-6);
+mod.milli = Sk.ffi.numberToPy(1e-3);
+mod.centi = Sk.ffi.numberToPy(1e-2);
+mod.deci  = Sk.ffi.numberToPy(1e-1);
+mod.deka  = Sk.ffi.numberToPy(1e+1);
+mod.hecto = Sk.ffi.numberToPy(1e+2);
+mod.kilo  = Sk.ffi.numberToPy(1e+3);
+mod.mega  = Sk.ffi.numberToPy(1e+6);
+mod.giga  = Sk.ffi.numberToPy(1e+9);
+mod.tera  = Sk.ffi.numberToPy(1e+12);
+mod.peta  = Sk.ffi.numberToPy(1e+15);
+mod.exa   = Sk.ffi.numberToPy(1e+18);
+mod.zetta = Sk.ffi.numberToPy(1e+21);
+mod.yotta = Sk.ffi.numberToPy(1e+24);
+
+/**
  * @const
  * @type {string}
  */
