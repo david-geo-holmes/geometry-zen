@@ -14264,31 +14264,34 @@ Sk.ffi.isClass = function(valuePy, className)
 };
 goog.exportSymbol("Sk.ffi.isClass", Sk.ffi.isClass);
 
-Sk.ffi.isDefined = function(valuePy) { return Sk.ffi.getType(valuePy) !== Sk.ffi.PyType.UNDEFINED; };
+Sk.ffi.isDefined = function(valuePy) {return Sk.ffi.getType(valuePy) !== Sk.ffi.PyType.UNDEFINED;};
 goog.exportSymbol("Sk.ffi.isDefined", Sk.ffi.isDefined);
 
-Sk.ffi.isDict = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.DICT; };
+Sk.ffi.isDict = function(valuePy) {return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.DICT;};
 goog.exportSymbol("Sk.ffi.isDict", Sk.ffi.isDict);
 
-Sk.ffi.isFunction = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.FUNCTION; };
+Sk.ffi.isList = function(valuePy) {return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.LIST;};
+goog.exportSymbol("Sk.ffi.isList", Sk.ffi.isList);
+
+Sk.ffi.isFunction = function(valuePy) {return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.FUNCTION;};
 goog.exportSymbol("Sk.ffi.isFunction", Sk.ffi.isFunction);
 
-Sk.ffi.isFunctionRef = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.FUNREF; };
+Sk.ffi.isFunctionRef = function(valuePy) {return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.FUNREF;};
 goog.exportSymbol("Sk.ffi.isFunctionRef", Sk.ffi.isFunctionRef);
 
-Sk.ffi.isInt = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.INT; };
+Sk.ffi.isInt = function(valuePy) {return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.INT;};
 goog.exportSymbol("Sk.ffi.isInt", Sk.ffi.isInt);
 
-Sk.ffi.isNone = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.NONE; };
+Sk.ffi.isNone = function(valuePy) {return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.NONE;};
 goog.exportSymbol("Sk.ffi.isNone", Sk.ffi.isNone);
 
-Sk.ffi.isNumber = function(valuePy) { return Sk.builtin.checkNumber(valuePy); };
+Sk.ffi.isNumber = function(valuePy) {return Sk.builtin.checkNumber(valuePy);};
 goog.exportSymbol("Sk.ffi.isNumber", Sk.ffi.isNumber);
 
-Sk.ffi.isStr = function(valuePy) { return Sk.builtin.checkString(valuePy); };
+Sk.ffi.isStr = function(valuePy) {return Sk.builtin.checkString(valuePy);};
 goog.exportSymbol("Sk.ffi.isStr", Sk.ffi.isStr);
 
-Sk.ffi.isUndefined = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.UNDEFINED; };
+Sk.ffi.isUndefined = function(valuePy) {return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.UNDEFINED;};
 goog.exportSymbol("Sk.ffi.isUndefined", Sk.ffi.isUndefined);
 
 /**
@@ -24973,7 +24976,7 @@ mod.factorial = Sk.ffi.functionPy(function(x) {
           return cartesianToComplexPy(a.x / b, a.y / b);
         }
         else {
-          throw Sk.ffi.err.expectArg("other").toHaveType([COMPLEX, NUMBER].join(" or "));
+          throw Sk.ffi.err.expectArg("other").toHaveType([COMPLEX, NUMBER]);
         }
       };
       $loc.nb$rdiv = function(otherPy) {
@@ -26200,6 +26203,11 @@ var PROP_RADIUS_BOTTOM              = "radiusBottom";
  * @const
  * @type {string}
  */
+var PROP_SCALE                      = "scale";
+/**
+ * @const
+ * @type {string}
+ */
 var PROP_VOLUME                     = "volume";
 /**
  * @const
@@ -26404,12 +26412,24 @@ function methodName(targetPy) {
   });
 }
 
-function modifyMesh(meshPy, parameters) {
-  var mesh = Sk.ffi.remapToJs(meshPy);
-  if (parameters[PROP_NAME]) {
-    mesh.name = parameters[PROP_NAME];
+function completeMesh(geometryPy, parameters) {
+  function modifyMesh(meshPy) {
+    var mesh = Sk.ffi.remapToJs(meshPy);
+    if (parameters[PROP_NAME]) {
+      mesh.name = parameters[PROP_NAME];
+    }
+    return meshPy;
   }
-  return meshPy;
+  if (parameters[PROP_MATERIAL]) {
+    return modifyMesh(Sk.ffi.callsim(mod[MESH], geometryPy, parameters[PROP_MATERIAL]));
+  }
+  else {
+    var args = {};
+    args[PROP_COLOR]     = parameters[PROP_COLOR];
+    args[PROP_WIREFRAME] = parameters[PROP_WIREFRAME];
+    var materialPy = Sk.ffi.callsim(mod[MESH_LAMBERT_MATERIAL], Sk.ffi.remapToPy(args));
+    return modifyMesh(Sk.ffi.callsim(mod[MESH], geometryPy, materialPy));
+  }
 }
 
 mod[WORLD] = Sk.ffi.functionPy(function() {
@@ -26585,12 +26605,28 @@ mod[ARROW_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           return selfPy;
         });
       }
+      case PROP_MATERIAL: {
+        return Sk.ffi.callableToPy(mod, PROP_MATERIAL, function(methodPy, materialPy) {
+          Sk.ffi.checkMethodArgs(PROP_MATERIAL, arguments, 1, 1);
+          Sk.ffi.checkArgType(PROP_MATERIAL, [Sk.ffi.PyType.CLASS], Sk.ffi.isClass(materialPy), materialPy); // TODO: MATERIALS
+          arrow[PROP_MATERIAL] = materialPy;
+          return selfPy;
+        });
+      }
       case PROP_NAME: { return methodName(selfPy); }
       case PROP_RADIUS: {
         return Sk.ffi.callableToPy(mod, PROP_RADIUS, function(methodPy, radiusPy) {
           Sk.ffi.checkMethodArgs(PROP_RADIUS, arguments, 1, 1);
           Sk.ffi.checkArgType(PROP_RADIUS, [NUMBER, Sk.ffi.PyType.NONE], Sk.ffi.isNumber(radiusPy) || Sk.ffi.isNone(radiusPy), radiusPy);
           arrow[PROP_RADIUS] = Sk.ffi.remapToJs(radiusPy);
+          return selfPy;
+        });
+      }
+      case PROP_SCALE: {
+        return Sk.ffi.callableToPy(mod, PROP_SCALE, function(methodPy, lengthPy) {
+          Sk.ffi.checkMethodArgs(PROP_SCALE, arguments, 1, 1);
+          Sk.ffi.checkArgType(PROP_SCALE, [NUMBER, Sk.ffi.PyType.NONE], Sk.ffi.isNumber(lengthPy) || Sk.ffi.isNone(lengthPy), lengthPy);
+          arrow[PROP_SCALE] = Sk.ffi.remapToJs(lengthPy);
           return selfPy;
         });
       }
@@ -26613,11 +26649,12 @@ mod[ARROW_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       case METHOD_BUILD: {
         return Sk.ffi.callableToPy(mod, METHOD_BUILD, function(methodPy) {
           /**
-           * @return {{length: number, radius: number}}
+           * @return {{scale: number, axis: Object, length: number, radius: number}}
            */
           function dimensionArrow() {
             var dims = {};
             if (arrow.volume) {
+              var s = (arrow.scale)  ? arrow.scale  : 1;
               var h = (arrow.length) ? arrow.length : DEFAULT_CYLINDER_HEIGHT;
               var r = (arrow.radius) ? arrow.radius : DEFAULT_CYLINDER_RADIUS;
               var alpha = r / h;
@@ -26625,25 +26662,21 @@ mod[ARROW_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
               dims.length = dims.radius / alpha;
             }
             else {
+              dims.scale  = (arrow.scale)  ? arrow.scale  : 1;
+              dims.axis   = (arrow.axis)   ? arrow.axis   : e3;
               dims.length = (arrow.length) ? arrow.length : DEFAULT_CYLINDER_HEIGHT;
               dims.radius = (arrow.radius) ? arrow.radius : DEFAULT_CYLINDER_RADIUS;
             }
             return dims;
           }
           Sk.ffi.checkMethodArgs(METHOD_BUILD, arguments, 0, 0);
-            var dimensions = dimensionArrow();
-            var length         = Sk.ffi.numberToFloatPy(dimensions[PROP_LENGTH]);
-//          var radiusTop      = Sk.ffi.numberToFloatPy(0);
-//          var radiusBottom   = Sk.ffi.numberToFloatPy(dimensions[PROP_RADIUS]);
-//          var radialSegments = Sk.ffi.numberToIntPy(32);
-//          var heightSegments = Sk.ffi.numberToIntPy(1);
-//          var openEnded      = Sk.ffi.booleanToPy(false);
-          var geometryPy = Sk.ffi.callsim(mod[ARROW_GEOMETRY], length);
-          var parameters = {};
-          parameters[PROP_COLOR]     = arrow[PROP_COLOR];
-          parameters[PROP_WIREFRAME] = arrow[PROP_WIREFRAME];
-          var materialPy = Sk.ffi.callsim(mod[MESH_LAMBERT_MATERIAL], Sk.ffi.remapToPy(parameters));
-          return modifyMesh(Sk.ffi.callsim(mod[MESH], geometryPy, materialPy), arrow);
+          var dimensions = dimensionArrow();
+          var scalePy    = Sk.ffi.numberToFloatPy(dimensions[PROP_SCALE]);
+          var axisPy     = Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(dimensions[PROP_AXIS], VECTOR_3));
+          var segmentsPy = Sk.ffi.numberToIntPy(32);
+          var lengthPy   = Sk.ffi.numberToFloatPy(dimensions[PROP_LENGTH]);
+          var geometryPy = Sk.ffi.callsim(mod[ARROW_GEOMETRY], scalePy, axisPy, segmentsPy, lengthPy);
+          return completeMesh(geometryPy, arrow);
         });
       }
       default: {
@@ -26750,11 +26783,7 @@ mod[CONE_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           var heightSegments = Sk.ffi.numberToIntPy(1);
           var openEnded      = Sk.ffi.booleanToPy(false);
           var geometryPy = Sk.ffi.callsim(mod[CYLINDER_GEOMETRY], radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded);
-          var parameters = {};
-          parameters[PROP_COLOR]     = cone[PROP_COLOR];
-          parameters[PROP_WIREFRAME] = cone[PROP_WIREFRAME];
-          var materialPy = Sk.ffi.callsim(mod[MESH_LAMBERT_MATERIAL], Sk.ffi.remapToPy(parameters));
-          return modifyMesh(Sk.ffi.callsim(mod[MESH], geometryPy, materialPy), cone);
+          return completeMesh(geometryPy, cone);
         });
       }
       default: {
@@ -26860,11 +26889,7 @@ mod[CUBE_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           var height     = Sk.ffi.remapToPy(dimensions[PROP_HEIGHT]);
           var depth      = Sk.ffi.remapToPy(dimensions[PROP_DEPTH]);
           var geometryPy = Sk.ffi.callsim(mod[CUBE_GEOMETRY], width, height, depth);
-          var parameters = {};
-          parameters[PROP_COLOR]     = cube[PROP_COLOR];
-          parameters[PROP_WIREFRAME] = cube[PROP_WIREFRAME];
-          var materialPy = Sk.ffi.callsim(mod[MESH_LAMBERT_MATERIAL], Sk.ffi.remapToPy(parameters));
-          return modifyMesh(Sk.ffi.callsim(mod[MESH], geometryPy, materialPy), cube);
+          return completeMesh(geometryPy, cube);
         });
       }
       default: {
@@ -26993,16 +27018,7 @@ mod[CYLINDER_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           var heightSegments = Sk.ffi.numberToIntPy(1);
           var openEnded      = Sk.ffi.booleanToPy(false);
           var geometryPy = Sk.ffi.callsim(mod[CYLINDER_GEOMETRY], radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded);
-          if (cylinder[PROP_MATERIAL]) {
-            return modifyMesh(Sk.ffi.callsim(mod[MESH], geometryPy, cylinder[PROP_MATERIAL]), cylinder);
-          }
-          else {
-            var parameters = {};
-            parameters[PROP_COLOR]     = cylinder[PROP_COLOR];
-            parameters[PROP_WIREFRAME] = cylinder[PROP_WIREFRAME];
-            var materialPy = Sk.ffi.callsim(mod[MESH_LAMBERT_MATERIAL], Sk.ffi.remapToPy(parameters));
-            return modifyMesh(Sk.ffi.callsim(mod[MESH], geometryPy, materialPy), cylinder);
-          }
+          return completeMesh(geometryPy, cylinder);
         });
       }
       default: {
@@ -27094,11 +27110,7 @@ mod[SPHERE_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           var widthSegments  = Sk.ffi.remapToPy(24);
           var heightSegments = Sk.ffi.remapToPy(18);
           var geometryPy = Sk.ffi.callsim(mod[SPHERE_GEOMETRY], radius, widthSegments, heightSegments);
-          var parameters = {};
-          parameters[PROP_COLOR]     = sphere[PROP_COLOR];
-          parameters[PROP_WIREFRAME] = sphere[PROP_WIREFRAME];
-          var materialPy = Sk.ffi.callsim(mod[MESH_LAMBERT_MATERIAL], Sk.ffi.remapToPy(parameters));
-          return modifyMesh(Sk.ffi.callsim(mod[MESH], geometryPy, materialPy), sphere);
+          return completeMesh(geometryPy, sphere);
         });
       }
       default: {
@@ -31479,6 +31491,11 @@ Sk.builtin.defineThree = function(mod, THREE) {
  * @const
  * @type {string}
  */
+  var PROP_AXIS                  = "axis";
+/**
+ * @const
+ * @type {string}
+ */
   var PROP_BOTTOM                = "bottom";
 /**
  * @const
@@ -31565,6 +31582,21 @@ Sk.builtin.defineThree = function(mod, THREE) {
  * @type {string}
  */
   var PROP_OVERDRAW              = "overdraw";
+/**
+ * @const
+ * @type {string}
+ */
+  var PROP_PHI_START             = "phiStart";
+/**
+ * @const
+ * @type {string}
+ */
+  var PROP_PHI_LENGTH            = "phiLength";
+/**
+ * @const
+ * @type {string}
+ */
+  var PROP_POINTS                = "points";
 /**
  * @const
  * @type {string}
@@ -31660,6 +31692,11 @@ Sk.builtin.defineThree = function(mod, THREE) {
  * @type {string}
  */
   var PROP_UP                    = "up";
+/**
+ * @const
+ * @type {string}
+ */
+  var PROP_UUID                  = "uuid";
 /**
  * @const
  * @type {string}
@@ -32963,20 +33000,47 @@ Sk.builtin.defineThree = function(mod, THREE) {
   }, ORTHOGRAPHIC_CAMERA, []);
 
   mod[ARROW_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, length, segments, radiusShaft, radiusCone, lengthCone) {
-      length = Sk.ffi.remapToJs(length) || 1;
-      segments = Sk.ffi.remapToJs(segments);
-      radiusShaft = Sk.ffi.remapToJs(radiusShaft) || 0.01;
-      radiusCone = Sk.ffi.remapToJs(radiusCone) || 0.08;
-      lengthCone = Sk.ffi.remapToJs(lengthCone) || 0.2;
-      var lengthShaft = 1 - lengthCone;
+    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, scalePy, axisPy, segmentsPy, lengthPy, radiusShaft, radiusCone, lengthCone) {
+      Sk.ffi.checkMethodArgs(ARROW_GEOMETRY, arguments, 0, 6);
+      var scale;
+      var axis;
+      var length;
+      if (Sk.ffi.isDefined(scalePy)) {
+        Sk.ffi.checkArgType(PROP_SCALE, NUMBER, Sk.ffi.isNumber(scalePy), scalePy);
+        scale = Sk.ffi.remapToJs(scalePy);
+      }
+      else {
+        scale = 1;
+      }
+      if (Sk.ffi.isDefined(axisPy)) {
+        Sk.ffi.checkArgType(PROP_AXIS, VECTOR_3, Sk.ffi.isClass(axisPy, VECTOR_3), axisPy);
+        axis = Sk.ffi.remapToJs(axisPy);
+      }
+      else {
+        axis = new THREE[VECTOR_3](0, 0, 1);
+      }
+      if (Sk.ffi.isDefined(segmentsPy)) {
+        Sk.ffi.checkArgType(PROP_SEGMENTS, INT, Sk.ffi.isNumber(segmentsPy), segmentsPy);
+      }
+      if (Sk.ffi.isDefined(lengthPy)) {
+        Sk.ffi.checkArgType(PROP_SCALE, NUMBER, Sk.ffi.isNumber(lengthPy), lengthPy);
+        length = Sk.ffi.remapToJs(lengthPy) * scale;
+      }
+      else {
+        length = scale;
+      }
+      var segments = Sk.ffi.remapToJs(segmentsPy);
+      radiusShaft  = (Sk.ffi.remapToJs(radiusShaft) || 0.01) * scale;
+      radiusCone   = (Sk.ffi.remapToJs(radiusCone) || 0.08) * scale;
+      lengthCone   = (Sk.ffi.remapToJs(lengthCone) || 0.2) * scale;
+      var lengthShaft = length - lengthCone;
       var a = new THREE[VECTOR_3](0, 0, length);
       var b = new THREE[VECTOR_3](radiusCone, 0, lengthShaft);
       var c = new THREE[VECTOR_3](radiusShaft, 0, lengthShaft);
       var d = new THREE[VECTOR_3](radiusShaft, 0, 0);
       var e = new THREE[VECTOR_3](0, 0, 0);
       var points = [a, b, c, d, e];
-      Sk.ffi.referenceToPy(new THREE[REVOLUTION_GEOMETRY](points, segments), ARROW_GEOMETRY, undefined, selfPy);
+      Sk.ffi.referenceToPy(new THREE[REVOLUTION_GEOMETRY](points, segments, 0, 2 * Math.PI, axis), ARROW_GEOMETRY, undefined, selfPy);
     });
     $loc.__getattr__ = Sk.ffi.functionPy(function(geometryPy, name) {
       var geometry = Sk.ffi.remapToJs(geometryPy);
@@ -32984,96 +33048,126 @@ Sk.builtin.defineThree = function(mod, THREE) {
         case PROP_ID: {
           return Sk.ffi.numberToIntPy(geometry[PROP_ID]);
         }
+        case PROP_UUID: {
+          return Sk.ffi.stringToPy(geometry[PROP_UUID]);
+        }
         case PROP_NAME: {
           return Sk.ffi.stringToPy(geometry[PROP_NAME]);
         }
         case PROP_VERTICES: {
           return verticesPy(geometry[PROP_VERTICES]);
         }
+        default: {
+          throw Sk.ffi.err.attribute(name).isNotGetableOnType(ARROW_GEOMETRY);
+        }
       }
     });
     $loc.__setattr__ = Sk.ffi.functionPy(function(geometryPy, name, valuePy) {
       var geometry = Sk.ffi.remapToJs(geometryPy);
-      var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
-        case PROP_NAME: {
-          if (isString(value)) {
-            geometry[PROP_NAME] = value;
-          }
-          else {
-            throw new Error(name + " must be a string");
-          }
+        case PROP_NAME:
+        {
+          Sk.ffi.checkArgType(PROP_NAME, Sk.ffi.PyType.STR, Sk.ffi.isStr(valuePy), valuePy);
+          geometry[PROP_NAME] = Sk.ffi.remapToJs(valuePy);
         }
         break;
         default: {
-          throw new Error(name + " is not an attribute of " + ARROW_GEOMETRY);
+          throw Sk.ffi.err.attribute(name).isNotSetableOnType(ARROW_GEOMETRY);
         }
       }
     });
-    $loc.__str__ = Sk.ffi.functionPy(function(self) {
-      var geometry = Sk.ffi.remapToJs(self);
+    $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
       var args = {};
       return Sk.ffi.stringToPy(ARROW_GEOMETRY + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-      var geometry = Sk.ffi.remapToJs(self);
+    $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
       var args = [];
       return Sk.ffi.stringToPy(ARROW_GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
     });
   }, ARROW_GEOMETRY, []);
 
    mod[CIRCLE_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.functionPy(function(self, radius, segments, thetaStart, thetaLength) {
-      radius      = numberFromArg(radius,          PROP_RADIUS,       CIRCLE_GEOMETRY);
-      segments    = numberFromIntegerArg(segments, PROP_SEGMENTS,     CIRCLE_GEOMETRY);
-      thetaStart  = numberFromArg(thetaStart,      PROP_THETA_START,  CIRCLE_GEOMETRY);
-      thetaLength = numberFromArg(thetaLength,     PROP_THETA_LENGTH, CIRCLE_GEOMETRY);
-      self.v = new THREE[CIRCLE_GEOMETRY](radius, segments, thetaStart, thetaLength);
-      self.tp$name = CIRCLE_GEOMETRY;
+    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, radiusPy, segmentsPy, thetaStartPy, thetaLengthPy) {
+      Sk.ffi.checkMethodArgs(CIRCLE_GEOMETRY, arguments, 0, 4);
+      if (Sk.ffi.isDefined(radiusPy)) {
+        Sk.ffi.checkArgType(PROP_RADIUS, NUMBER, Sk.ffi.isNumber(radiusPy), radiusPy);
+      }
+      if (Sk.ffi.isDefined(segmentsPy)) {
+        Sk.ffi.checkArgType(PROP_SEGMENTS, INT, Sk.ffi.isInt(segmentsPy), segmentsPy);
+      }
+      if (Sk.ffi.isDefined(thetaStartPy)) {
+        Sk.ffi.checkArgType(PROP_THETA_START, NUMBER, Sk.ffi.isNumber(thetaStartPy), thetaStartPy);
+      }
+      if (Sk.ffi.isDefined(thetaLengthPy)) {
+        Sk.ffi.checkArgType(PROP_THETA_LENGTH, NUMBER, Sk.ffi.isNumber(thetaLengthPy), thetaLengthPy);
+      }
+      Sk.ffi.referenceToPy(new THREE[CIRCLE_GEOMETRY](Sk.ffi.remapToJs(radiusPy), Sk.ffi.remapToJs(segmentsPy), Sk.ffi.remapToJs(thetaStartPy), Sk.ffi.remapToJs(thetaLengthPy)), CIRCLE_GEOMETRY, undefined, selfPy);
     });
-    $loc.__getattr__ = Sk.ffi.functionPy(function(self, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
+      var geometry = Sk.ffi.remapToJs(selfPy);
       switch(name) {
+        case PROP_ID: {
+          return Sk.ffi.numberToIntPy(geometry[PROP_ID]);
+        }
+        case PROP_UUID: {
+          return Sk.ffi.stringToPy(geometry[PROP_UUID]);
+        }
+        case PROP_NAME: {
+          return Sk.ffi.stringToPy(geometry[PROP_NAME]);
+        }
+        case PROP_VERTICES: {
+          return verticesPy(geometry[PROP_VERTICES]);
+        }
         default: {
           throw Sk.ffi.err.attribute(name).isNotGetableOnType(CIRCLE_GEOMETRY);
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.functionPy(function(geometryPy, name, valuePy) {
-      var geometry = Sk.ffi.remapToJs(geometryPy);
-      var value = Sk.ffi.remapToJs(valuePy);
+    $loc.__setattr__ = Sk.ffi.functionPy(function(selfPy, name, valuePy) {
+      var geometry = Sk.ffi.remapToJs(selfPy);
       switch(name) {
+        case PROP_NAME:
+        {
+          Sk.ffi.checkArgType(PROP_NAME, Sk.ffi.PyType.STR, Sk.ffi.isStr(valuePy), valuePy);
+          geometry[PROP_NAME] = Sk.ffi.remapToJs(valuePy);
+        }
+        break;
         default: {
-          throw new Error(name + " is not an attribute of " + CIRCLE_GEOMETRY);
+          throw Sk.ffi.err.attribute(name).isNotSetableOnType(CIRCLE_GEOMETRY);
         }
       }
     });
-    $loc.__str__ = Sk.ffi.functionPy(function(self) {
-      var sphere = self.v;
+    $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
       var args = {};
       return Sk.ffi.stringToPy(CIRCLE_GEOMETRY + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-      var sphere = self.v;
+    $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
       var args = [];
       return Sk.ffi.stringToPy(CIRCLE_GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
     });
   }, CIRCLE_GEOMETRY, []);
 
    mod[CUBE_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, widthPy, heightPy, depthPy, widthSegments, heightSegments, depthSegmentsPy) {
+    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, widthPy, heightPy, depthPy, widthSegmentsPy, heightSegmentsPy, depthSegmentsPy) {
       Sk.ffi.checkMethodArgs(CUBE_GEOMETRY, arguments, 3, 6);
       Sk.ffi.checkArgType(PROP_WIDTH,  NUMBER, Sk.ffi.isNumber(widthPy),  widthPy);
       Sk.ffi.checkArgType(PROP_HEIGHT, NUMBER, Sk.ffi.isNumber(heightPy), heightPy);
       Sk.ffi.checkArgType(PROP_DEPTH,  NUMBER, Sk.ffi.isNumber(depthPy),  depthPy);
+      if (Sk.ffi.isDefined(widthSegmentsPy)) {
+        Sk.ffi.checkArgType(PROP_WIDTH_SEGMENTS, INT, Sk.ffi.isInt(widthSegmentsPy), widthSegmentsPy);
+      }
+      if (Sk.ffi.isDefined(heightSegmentsPy)) {
+        Sk.ffi.checkArgType(PROP_HEIGHT_SEGMENTS, INT, Sk.ffi.isInt(heightSegmentsPy), heightSegmentsPy);
+      }
       if (Sk.ffi.isDefined(depthSegmentsPy)) {
         Sk.ffi.checkArgType(PROP_DEPTH_SEGMENTS, INT, Sk.ffi.isInt(depthSegmentsPy), depthSegmentsPy);
       }
       var width  = Sk.ffi.remapToJs(widthPy);
       var height = Sk.ffi.remapToJs(heightPy);
       var depth  = Sk.ffi.remapToJs(depthPy);
-      widthSegments  = numberFromIntegerArg(widthSegments,  PROP_WIDTH_SEGMENTS,  CUBE_GEOMETRY);
-      heightSegments = numberFromIntegerArg(heightSegments, PROP_HEIGHT_SEGMENTS, CUBE_GEOMETRY);
-      var depthSegments = Sk.ffi.remapToJs(depthSegmentsPy);
+      var widthSegments  = Sk.ffi.remapToJs(widthSegmentsPy);
+      var heightSegments = Sk.ffi.remapToJs(heightSegmentsPy);
+      var depthSegments  = Sk.ffi.remapToJs(depthSegmentsPy);
       Sk.ffi.referenceToPy(new THREE[CUBE_GEOMETRY](width, height, depth, widthSegments, heightSegments, depthSegments), CUBE_GEOMETRY, undefined, selfPy);
     });
     $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
@@ -33203,13 +33297,10 @@ Sk.builtin.defineThree = function(mod, THREE) {
   }, CYLINDER_GEOMETRY, []);
 
   mod[LATHE_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.functionPy(function(self, pointsPy, segmentsPy, phiStart, phiLength) {
-      var points = Sk.ffi.remapToJs(pointsPy);
-      var segments = Sk.ffi.remapToJs(segmentsPy);
-      phiStart = Sk.ffi.remapToJs(phiStart);
-      phiLength = Sk.ffi.remapToJs(phiLength);
-      self.v = new THREE[LATHE_GEOMETRY](points, segments, phiStart, phiLength);
-      self.tp$name = LATHE_GEOMETRY;
+    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, pointsPy, segmentsPy, phiStartPy, phiLengthPy) {
+      Sk.ffi.checkMethodArgs(LATHE_GEOMETRY, arguments, 1, 4);
+      // Temporary workaround until the THREE.LatheGeometry is fixed...
+      Sk.ffi.referenceToPy(new THREE[REVOLUTION_GEOMETRY](Sk.ffi.remapToJs(pointsPy), Sk.ffi.remapToJs(segmentsPy), Sk.ffi.remapToJs(phiStartPy), Sk.ffi.remapToJs(phiLengthPy)), LATHE_GEOMETRY, undefined, selfPy);
     });
     $loc.__getattr__ = Sk.ffi.functionPy(function(geometryPy, name) {
       var geometry = Sk.ffi.remapToJs(geometryPy);
@@ -33223,33 +33314,31 @@ Sk.builtin.defineThree = function(mod, THREE) {
         case PROP_VERTICES: {
           return verticesPy(geometry[PROP_VERTICES]);
         }
+        default: {
+          throw Sk.ffi.err.attribute(name).isNotGetableOnType(LATHE_GEOMETRY);
+        }
       }
     });
     $loc.__setattr__ = Sk.ffi.functionPy(function(geometryPy, name, valuePy) {
       var geometry = Sk.ffi.remapToJs(geometryPy);
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
-        case PROP_NAME: {
-          if (isString(value)) {
-            geometry[PROP_NAME] = value;
-          }
-          else {
-            throw new Error(name + " must be a string");
-          }
+        case PROP_NAME:
+        {
+          Sk.ffi.checkArgType(PROP_NAME, Sk.ffi.PyType.STR, Sk.ffi.isStr(valuePy), valuePy);
+          geometry[PROP_NAME] = Sk.ffi.remapToJs(valuePy);
         }
         break;
         default: {
-          throw new Error(name + " is not an attribute of " + LATHE_GEOMETRY);
+          throw Sk.ffi.err.attribute(name).isNotSetableOnType(LATHE_GEOMETRY);
         }
       }
     });
-    $loc.__str__ = Sk.ffi.functionPy(function(self) {
-      var latheGeometry = self.v;
+    $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
       var args = {};
       return Sk.ffi.stringToPy(LATHE_GEOMETRY + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-      var latheGeometry = self.v;
+    $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
       var args = [];
       return Sk.ffi.stringToPy(LATHE_GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
     });
@@ -33407,17 +33496,39 @@ Sk.builtin.defineThree = function(mod, THREE) {
   /**
    * @constructor
    * @param {!Array.<number>} points
-   * @param {number} segments
+   * @param {number=} segments
    * @param {number=} phiStart
    * @param {number=} phiLength
+   * @param {Object=} axis
    */
-  THREE.RevolutionGeometry = function ( points, segments, phiStart, phiLength ) {
+  THREE.RevolutionGeometry = function (points, segments, phiStart, phiLength, axis) {
 
     THREE[GEOMETRY].call( this );
 
+    var e3 = new THREE[VECTOR_3]( 0, 0, 1 );
     segments = segments || 12;
     phiStart = phiStart || 0;
     phiLength = phiLength || 2 * Math.PI;
+    axis = axis || e3;
+    function rotor(a, b) {
+      // TODO: This doesn't work when a is anti-parallel to b.
+      var ax = a.x;
+      var ay = a.y;
+      var az = a.z;
+      var bx = b.x;
+      var by = b.y;
+      var bz = b.z;
+      var sp = ax * bx + ay * by + az * bz;
+      var w0 = 1 + sp;
+      var scale = 1 / Math.sqrt(2 * w0);
+      var w = w0 * scale;
+      var x = (ay * bz - az * by) * scale;
+      var y = (az * bx - ax * bz) * scale;
+      var z = (ax * by - ay * bx) * scale;
+      return new THREE[QUATERNION](x, y, z, w);
+    }
+
+    var rotation = rotor(e3, axis);
 
     // Determine heuristically whether the user intended to make a complete revolution.
     var isClosed = Math.abs(2 * Math.PI - Math.abs(phiLength - phiStart)) < 0.0001;
@@ -33443,6 +33554,8 @@ Sk.builtin.defineThree = function(mod, THREE) {
         vertex.x = c * pt.x - s * pt.y;
         vertex.y = s * pt.x + c * pt.y;
         vertex.z = pt.z;
+
+        vertex['applyQuaternion'](rotation);
 
         this['vertices'].push( vertex );
 
@@ -33471,34 +33584,22 @@ Sk.builtin.defineThree = function(mod, THREE) {
         var u1 = u0 + inverseSegments;
         var v1 = v0 + inversePointLength;
 
-        this['faces'].push( new THREE[FACE_3]( a, b, d ) );
+        this['faces'].push(new THREE[FACE_3](d, b, a));
+        this['faceVertexUvs'][ 0 ].push([
+          new THREE[VECTOR_2](u0, v0),
+          new THREE[VECTOR_2](u1, v0),
+          new THREE[VECTOR_2](u0, v1)
+        ]);
 
-        this['faceVertexUvs'][ 0 ].push( [
-
-          new THREE[VECTOR_2]( u0, v0 ),
-          new THREE[VECTOR_2]( u1, v0 ),
-          new THREE[VECTOR_2]( u0, v1 )
-
-        ] );
-
-        this['faces'].push( new THREE[FACE_3]( b, c, d ) );
-
-        this['faceVertexUvs'][ 0 ].push( [
-
-          new THREE[VECTOR_2]( u1, v0 ),
-          new THREE[VECTOR_2]( u1, v1 ),
-          new THREE[VECTOR_2]( u0, v1 )
-
-        ] );
-
-
+        this['faces'].push(new THREE[FACE_3](d, c, b));
+        this['faceVertexUvs'][ 0 ].push([
+          new THREE[VECTOR_2](u1, v0),
+          new THREE[VECTOR_2](u1, v1), 
+          new THREE[VECTOR_2](u0, v1)
+        ]);
       }
-
     }
 
-//  This call seems to be responsible for making the revolution incomplete.
-//  We try to make it a no-op by sensibly detecting a closed revolution.
-//    this['mergeVertices']();
     this['computeCentroids']();
     this['computeFaceNormals']();
     this['computeVertexNormals']();
@@ -33507,12 +33608,27 @@ Sk.builtin.defineThree = function(mod, THREE) {
   THREE.RevolutionGeometry.prototype = Object.create( THREE[GEOMETRY].prototype );
 
   mod[REVOLUTION_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, pointsPy, segmentsPy, phiStart, phiLength) {
-      var points = Sk.ffi.remapToJs(pointsPy);
-      var segments = Sk.ffi.remapToJs(segmentsPy);
-      phiStart = Sk.ffi.remapToJs(phiStart);
-      phiLength = Sk.ffi.remapToJs(phiLength);
-      Sk.ffi.referenceToPy(new THREE[REVOLUTION_GEOMETRY](points, segments, phiStart, phiLength), REVOLUTION_GEOMETRY, undefined, selfPy);
+    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, pointsPy, segmentsPy, phiStartPy, phiLengthPy, axisPy) {
+      Sk.ffi.checkMethodArgs(REVOLUTION_GEOMETRY, arguments, 1, 5);
+      Sk.ffi.checkArgType(PROP_POINTS, Sk.ffi.PyType.LIST, Sk.ffi.isList(pointsPy), pointsPy);
+      if (Sk.ffi.isDefined(segmentsPy)) {
+        Sk.ffi.checkArgType(PROP_SEGMENTS, Sk.ffi.PyType.INT, Sk.ffi.isInt(segmentsPy), segmentsPy);
+      }
+      if (Sk.ffi.isDefined(phiStartPy)) {
+        Sk.ffi.checkArgType(PROP_PHI_START, NUMBER, Sk.ffi.isNumber(phiStartPy), phiStartPy);
+      }
+      if (Sk.ffi.isDefined(phiLengthPy)) {
+        Sk.ffi.checkArgType(PROP_PHI_LENGTH, NUMBER, Sk.ffi.isNumber(phiLengthPy), phiLengthPy);
+      }
+      if (Sk.ffi.isDefined(axisPy)) {
+        Sk.ffi.checkArgType(PROP_AXIS, VECTOR_3, Sk.ffi.isClass(axisPy, VECTOR_3), axisPy);
+      }
+      Sk.ffi.referenceToPy(new THREE[REVOLUTION_GEOMETRY](
+        Sk.ffi.remapToJs(pointsPy),
+        Sk.ffi.remapToJs(segmentsPy),
+        Sk.ffi.remapToJs(phiStartPy),
+        Sk.ffi.remapToJs(phiLengthPy),
+        Sk.ffi.remapToJs(axisPy)), REVOLUTION_GEOMETRY, undefined, selfPy);
     });
     $loc.__getattr__ = Sk.ffi.functionPy(function(geometryPy, name) {
       var geometry = Sk.ffi.remapToJs(geometryPy);
@@ -33526,6 +33642,9 @@ Sk.builtin.defineThree = function(mod, THREE) {
         case PROP_VERTICES: {
           return verticesPy(geometry[PROP_VERTICES]);
         }
+        default: {
+          throw Sk.ffi.err.attribute(name).isNotGetableOnType(REVOLUTION_GEOMETRY);
+        }
       }
     });
     $loc.__setattr__ = Sk.ffi.functionPy(function(geometryPy, name, valuePy) {
@@ -33533,26 +33652,20 @@ Sk.builtin.defineThree = function(mod, THREE) {
       var value = Sk.ffi.remapToJs(valuePy);
       switch(name) {
         case PROP_NAME: {
-          if (isString(value)) {
-            geometry[PROP_NAME] = value;
-          }
-          else {
-            throw new Error(name + " must be a string");
-          }
+          Sk.ffi.checkArgType(PROP_NAME, Sk.ffi.PyType.STR, Sk.ffi.isStr(valuePy), valuePy);
+          geometry[PROP_NAME] = Sk.ffi.remapToJs(valuePy);
         }
         break;
         default: {
-          throw new Error(name + " is not an attribute of " + REVOLUTION_GEOMETRY);
+          throw Sk.ffi.err.attribute(name).isNotSetableOnType(REVOLUTION_GEOMETRY);
         }
       }
     });
-    $loc.__str__ = Sk.ffi.functionPy(function(self) {
-      var latheGeometry = self.v;
+    $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
       var args = {};
       return Sk.ffi.stringToPy(REVOLUTION_GEOMETRY + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-      var latheGeometry = self.v;
+    $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
       var args = [];
       return Sk.ffi.stringToPy(REVOLUTION_GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
     });
@@ -35158,7 +35271,7 @@ Sk.builtin.defineThree = function(mod, THREE) {
             }
             break
             default: {
-              Sk.ffi.checkArgType(PROP_X, [NUMBER, VECTOR_3].join(" or "), false, x);
+              Sk.ffi.checkArgType(PROP_X, [NUMBER, VECTOR_3], false, x);
             }
           }
         }

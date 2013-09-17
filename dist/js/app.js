@@ -12442,6 +12442,10 @@
     return Sk.ffi.getType(a) === Sk.ffi.PyType.DICT;
   };
   goog.exportSymbol('Sk.ffi.isDict', Sk.ffi.isDict);
+  Sk.ffi.isList = function (a) {
+    return Sk.ffi.getType(a) === Sk.ffi.PyType.LIST;
+  };
+  goog.exportSymbol('Sk.ffi.isList', Sk.ffi.isList);
   Sk.ffi.isFunction = function (a) {
     return Sk.ffi.getType(a) === Sk.ffi.PyType.FUNCTION;
   };
@@ -25924,10 +25928,19 @@
           return b;
         });
       }
-      function e(a, b) {
-        var c = Sk.ffi.remapToJs(a);
-        b.name && (c.name = b.name);
-        return a;
+      function e(b, c) {
+        function d(a) {
+          var b = Sk.ffi.remapToJs(a);
+          c.name && (b.name = c.name);
+          return a;
+        }
+        if (c.material)
+          return d(Sk.ffi.callsim(a.Mesh, b, c.material));
+        var e = {};
+        e.color = c.color;
+        e.wireframe = c.wireframe;
+        e = Sk.ffi.callsim(a.MeshLambertMaterial, Sk.ffi.remapToPy(e));
+        return d(Sk.ffi.callsim(a.Mesh, b, e));
       }
       function f(a) {
         a = [
@@ -26134,6 +26147,13 @@
               r.length = Sk.ffi.remapToJs(c);
               return b;
             });
+          case 'material':
+            return Sk.ffi.callableToPy(a, 'material', function (a, c) {
+              Sk.ffi.checkMethodArgs('material', arguments, 1, 1);
+              Sk.ffi.checkArgType('material', [Sk.ffi.PyType.CLASS], Sk.ffi.isClass(c), c);
+              r.material = c;
+              return b;
+            });
           case 'name':
             return d(b);
           case 'radius':
@@ -26144,6 +26164,16 @@
                 Sk.ffi.PyType.NONE
               ], Sk.ffi.isNumber(c) || Sk.ffi.isNone(c), c);
               r.radius = Sk.ffi.remapToJs(c);
+              return b;
+            });
+          case 'scale':
+            return Sk.ffi.callableToPy(a, 'scale', function (a, c) {
+              Sk.ffi.checkMethodArgs('scale', arguments, 1, 1);
+              Sk.ffi.checkArgType('scale', [
+                k,
+                Sk.ffi.PyType.NONE
+              ], Sk.ffi.isNumber(c) || Sk.ffi.isNone(c), c);
+              r.scale = Sk.ffi.remapToJs(c);
               return b;
             });
           case 'volume':
@@ -26163,20 +26193,18 @@
           case 'build':
             return Sk.ffi.callableToPy(a, 'build', function (b) {
               Sk.ffi.checkMethodArgs('build', arguments, 0, 0);
-              var c = {};
+              var c, d = {};
               if (r.volume) {
-                var d = (r.radius ? r.radius : 0.5) / (r.length ? r.length : 1);
-                c.radius = Math.pow(3 * d * r.volume / Math.PI, 1 / 3);
-                c.length = c.radius / d;
+                var f = (r.radius ? r.radius : 0.5) / (r.length ? r.length : 1);
+                d.radius = Math.pow(3 * f * r.volume / Math.PI, 1 / 3);
+                d.length = d.radius / f;
               } else
-                c.length = r.length ? r.length : 1, c.radius = r.radius ? r.radius : 0.5;
+                d.scale = r.scale ? r.scale : 1, d.axis = r.axis ? r.axis : q, d.length = r.length ? r.length : 1, d.radius = r.radius ? r.radius : 0.5;
+              c = d;
+              var d = Sk.ffi.numberToFloatPy(c.scale), f = Sk.ffi.callsim(a.Vector3, Sk.ffi.referenceToPy(c.axis, 'Vector3')), g = Sk.ffi.numberToIntPy(32);
               c = Sk.ffi.numberToFloatPy(c.length);
-              c = Sk.ffi.callsim(a.ArrowGeometry, c);
-              d = {};
-              d.color = r.color;
-              d.wireframe = r.wireframe;
-              d = Sk.ffi.callsim(a.MeshLambertMaterial, Sk.ffi.remapToPy(d));
-              return e(Sk.ffi.callsim(a.Mesh, c, d), r);
+              d = Sk.ffi.callsim(a.ArrowGeometry, d, f, g, c);
+              return e(d, r);
             });
           default:
             throw Sk.ffi.err.attribute(c).isNotGetableOnType('ArrowBuilder');
@@ -26267,11 +26295,8 @@
               d = Sk.ffi.numberToFloatPy(0);
               f = Sk.ffi.numberToFloatPy(c.radius);
               c = Sk.ffi.numberToFloatPy(c.height);
-              var g = Sk.ffi.numberToIntPy(32), h = Sk.ffi.numberToIntPy(1), w = Sk.ffi.booleanToPy(!1), d = Sk.ffi.callsim(a.CylinderGeometry, d, f, c, g, h, w), f = {};
-              f.color = r.color;
-              f.wireframe = r.wireframe;
-              f = Sk.ffi.callsim(a.MeshLambertMaterial, Sk.ffi.remapToPy(f));
-              return e(Sk.ffi.callsim(a.Mesh, d, f), r);
+              var g = Sk.ffi.numberToIntPy(32), h = Sk.ffi.numberToIntPy(1), w = Sk.ffi.booleanToPy(!1), d = Sk.ffi.callsim(a.CylinderGeometry, d, f, c, g, h, w);
+              return e(d, r);
             });
           default:
             throw Sk.ffi.err.attribute(c).isNotGetableOnType('ConeBuilder');
@@ -26367,11 +26392,7 @@
               f = Sk.ffi.remapToPy(c.height);
               c = Sk.ffi.remapToPy(c.depth);
               d = Sk.ffi.callsim(a.CubeGeometry, d, f, c);
-              f = {};
-              f.color = r.color;
-              f.wireframe = r.wireframe;
-              f = Sk.ffi.callsim(a.MeshLambertMaterial, Sk.ffi.remapToPy(f));
-              return e(Sk.ffi.callsim(a.Mesh, d, f), r);
+              return e(d, r);
             });
           default:
             throw Sk.ffi.err.attribute(c).isNotGetableOnType('CubeBuilder');
@@ -26488,13 +26509,7 @@
               f = Sk.ffi.numberToFloatPy(c.b);
               c = Sk.ffi.numberToFloatPy(c.h);
               var g = Sk.ffi.numberToIntPy(32), h = Sk.ffi.numberToIntPy(1), w = Sk.ffi.booleanToPy(!1), d = Sk.ffi.callsim(a.CylinderGeometry, d, f, c, g, h, w);
-              if (r.material)
-                return e(Sk.ffi.callsim(a.Mesh, d, r.material), r);
-              f = {};
-              f.color = r.color;
-              f.wireframe = r.wireframe;
-              f = Sk.ffi.callsim(a.MeshLambertMaterial, Sk.ffi.remapToPy(f));
-              return e(Sk.ffi.callsim(a.Mesh, d, f), r);
+              return e(d, r);
             });
           default:
             throw Sk.ffi.err.attribute(c).isNotGetableOnType('CylinderBuilder');
@@ -26569,11 +26584,7 @@
               c = Sk.ffi.remapToPy(c);
               var d = Sk.ffi.remapToPy(24), g = Sk.ffi.remapToPy(18);
               c = Sk.ffi.callsim(a.SphereGeometry, c, d, g);
-              d = {};
-              d.color = f.color;
-              d.wireframe = f.wireframe;
-              d = Sk.ffi.callsim(a.MeshLambertMaterial, Sk.ffi.remapToPy(d));
-              return e(Sk.ffi.callsim(a.Mesh, c, d), f);
+              return e(c, f);
             });
           default:
             throw Sk.ffi.err.attribute(c).isNotGetableOnType('SphereBuilder');
@@ -29799,57 +29810,59 @@
         });
       }, 'OrthographicCamera', []);
       a.ArrowGeometry = Sk.ffi.buildClass(a, function (a, c) {
-        c.__init__ = Sk.ffi.functionPy(function (a, c, d, e, f, g) {
-          c = Sk.ffi.remapToJs(c) || 1;
-          d = Sk.ffi.remapToJs(d);
-          e = Sk.ffi.remapToJs(e) || 0.01;
-          f = Sk.ffi.remapToJs(f) || 0.08;
-          g = Sk.ffi.remapToJs(g) || 0.2;
-          g = 1 - g;
-          c = new b.Vector3(0, 0, c);
-          f = new b.Vector3(f, 0, g);
-          g = new b.Vector3(e, 0, g);
-          e = new b.Vector3(e, 0, 0);
-          var h = new b.Vector3(0, 0, 0);
+        c.__init__ = Sk.ffi.functionPy(function (a, c, d, e, f, g, h, k) {
+          Sk.ffi.checkMethodArgs('ArrowGeometry', arguments, 0, 6);
+          var l, n, p;
+          Sk.ffi.isDefined(c) ? (Sk.ffi.checkArgType('scale', s, Sk.ffi.isNumber(c), c), l = Sk.ffi.remapToJs(c)) : l = 1;
+          Sk.ffi.isDefined(d) ? (Sk.ffi.checkArgType('axis', 'Vector3', Sk.ffi.isClass(d, 'Vector3'), d), n = Sk.ffi.remapToJs(d)) : n = new b.Vector3(0, 0, 1);
+          Sk.ffi.isDefined(e) && Sk.ffi.checkArgType('segments', t, Sk.ffi.isNumber(e), e);
+          Sk.ffi.isDefined(f) ? (Sk.ffi.checkArgType('scale', s, Sk.ffi.isNumber(f), f), p = Sk.ffi.remapToJs(f) * l) : p = l;
+          var m = Sk.ffi.remapToJs(e);
+          g = (Sk.ffi.remapToJs(g) || 0.01) * l;
+          h = (Sk.ffi.remapToJs(h) || 0.08) * l;
+          k = (Sk.ffi.remapToJs(k) || 0.2) * l;
+          var q = p - k;
+          p = new b.Vector3(0, 0, p);
+          l = new b.Vector3(h, 0, q);
+          var q = new b.Vector3(g, 0, q), D = new b.Vector3(g, 0, 0), w = new b.Vector3(0, 0, 0);
           Sk.ffi.referenceToPy(new b.RevolutionGeometry([
-            c,
-            f,
-            g,
-            e,
-            h
-          ], d), 'ArrowGeometry', void 0, a);
+            p,
+            l,
+            q,
+            D,
+            w
+          ], m, 0, 2 * Math.PI, n), 'ArrowGeometry', void 0, a);
         });
         c.__getattr__ = Sk.ffi.functionPy(function (a, b) {
           var c = Sk.ffi.remapToJs(a);
           switch (b) {
           case 'id':
             return Sk.ffi.numberToIntPy(c.id);
+          case 'uuid':
+            return Sk.ffi.stringToPy(c.uuid);
           case 'name':
             return Sk.ffi.stringToPy(c.name);
           case 'vertices':
             return m(c.vertices);
+          default:
+            throw Sk.ffi.err.attribute(b).isNotGetableOnType('ArrowGeometry');
           }
         });
         c.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
           a = Sk.ffi.remapToJs(a);
-          c = Sk.ffi.remapToJs(c);
           switch (b) {
           case 'name':
-            if (e(c))
-              a.name = c;
-            else
-              throw Error(b + ' must be a string');
+            Sk.ffi.checkArgType('name', Sk.ffi.PyType.STR, Sk.ffi.isStr(c), c);
+            a.name = Sk.ffi.remapToJs(c);
             break;
           default:
-            throw Error(b + ' is not an attribute of ArrowGeometry');
+            throw Sk.ffi.err.attribute(b).isNotSetableOnType('ArrowGeometry');
           }
         });
         c.__str__ = Sk.ffi.functionPy(function (a) {
-          Sk.ffi.remapToJs(a);
           return Sk.ffi.stringToPy('ArrowGeometry(' + JSON.stringify({}) + ')');
         });
         c.__repr__ = Sk.ffi.functionPy(function (a) {
-          Sk.ffi.remapToJs(a);
           return Sk.ffi.stringToPy('ArrowGeometry(' + [].map(function (a) {
             return JSON.stringify(a);
           }).join(', ') + ')');
@@ -29857,25 +29870,37 @@
       }, 'ArrowGeometry', []);
       a.CircleGeometry = Sk.ffi.buildClass(a, function (a, c) {
         c.__init__ = Sk.ffi.functionPy(function (a, c, d, e, f) {
-          c = n(c, 'radius', 'CircleGeometry');
-          d = q(d, 'segments', 'CircleGeometry');
-          e = n(e, 'thetaStart', 'CircleGeometry');
-          f = n(f, 'thetaLength', 'CircleGeometry');
-          a.v = new b.CircleGeometry(c, d, e, f);
-          a.tp$name = 'CircleGeometry';
+          Sk.ffi.checkMethodArgs('CircleGeometry', arguments, 0, 4);
+          Sk.ffi.isDefined(c) && Sk.ffi.checkArgType('radius', s, Sk.ffi.isNumber(c), c);
+          Sk.ffi.isDefined(d) && Sk.ffi.checkArgType('segments', t, Sk.ffi.isInt(d), d);
+          Sk.ffi.isDefined(e) && Sk.ffi.checkArgType('thetaStart', s, Sk.ffi.isNumber(e), e);
+          Sk.ffi.isDefined(f) && Sk.ffi.checkArgType('thetaLength', s, Sk.ffi.isNumber(f), f);
+          Sk.ffi.referenceToPy(new b.CircleGeometry(Sk.ffi.remapToJs(c), Sk.ffi.remapToJs(d), Sk.ffi.remapToJs(e), Sk.ffi.remapToJs(f)), 'CircleGeometry', void 0, a);
         });
         c.__getattr__ = Sk.ffi.functionPy(function (a, b) {
+          var c = Sk.ffi.remapToJs(a);
           switch (b) {
+          case 'id':
+            return Sk.ffi.numberToIntPy(c.id);
+          case 'uuid':
+            return Sk.ffi.stringToPy(c.uuid);
+          case 'name':
+            return Sk.ffi.stringToPy(c.name);
+          case 'vertices':
+            return m(c.vertices);
           default:
             throw Sk.ffi.err.attribute(b).isNotGetableOnType('CircleGeometry');
           }
         });
         c.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
-          Sk.ffi.remapToJs(a);
-          Sk.ffi.remapToJs(c);
+          a = Sk.ffi.remapToJs(a);
           switch (b) {
+          case 'name':
+            Sk.ffi.checkArgType('name', Sk.ffi.PyType.STR, Sk.ffi.isStr(c), c);
+            a.name = Sk.ffi.remapToJs(c);
+            break;
           default:
-            throw Error(b + ' is not an attribute of CircleGeometry');
+            throw Sk.ffi.err.attribute(b).isNotSetableOnType('CircleGeometry');
           }
         });
         c.__str__ = Sk.ffi.functionPy(function (a) {
@@ -29893,12 +29918,11 @@
           Sk.ffi.checkArgType('width', s, Sk.ffi.isNumber(c), c);
           Sk.ffi.checkArgType('height', s, Sk.ffi.isNumber(d), d);
           Sk.ffi.checkArgType('depth', s, Sk.ffi.isNumber(e), e);
+          Sk.ffi.isDefined(f) && Sk.ffi.checkArgType('widthSegments', t, Sk.ffi.isInt(f), f);
+          Sk.ffi.isDefined(g) && Sk.ffi.checkArgType('heightSegments', t, Sk.ffi.isInt(g), g);
           Sk.ffi.isDefined(h) && Sk.ffi.checkArgType('depthSegments', t, Sk.ffi.isInt(h), h);
-          var k = Sk.ffi.remapToJs(c), l = Sk.ffi.remapToJs(d), n = Sk.ffi.remapToJs(e);
-          f = q(f, 'widthSegments', 'CubeGeometry');
-          g = q(g, 'heightSegments', 'CubeGeometry');
-          var p = Sk.ffi.remapToJs(h);
-          Sk.ffi.referenceToPy(new b.CubeGeometry(k, l, n, f, g, p), 'CubeGeometry', void 0, a);
+          var k = Sk.ffi.remapToJs(c), l = Sk.ffi.remapToJs(d), n = Sk.ffi.remapToJs(e), p = Sk.ffi.remapToJs(f), m = Sk.ffi.remapToJs(g), q = Sk.ffi.remapToJs(h);
+          Sk.ffi.referenceToPy(new b.CubeGeometry(k, l, n, p, m, q), 'CubeGeometry', void 0, a);
         });
         c.__getattr__ = Sk.ffi.functionPy(function (a, b) {
           var c = Sk.ffi.remapToJs(a);
@@ -30011,12 +30035,8 @@
       }, 'CylinderGeometry', []);
       a.LatheGeometry = Sk.ffi.buildClass(a, function (a, c) {
         c.__init__ = Sk.ffi.functionPy(function (a, c, d, e, f) {
-          c = Sk.ffi.remapToJs(c);
-          d = Sk.ffi.remapToJs(d);
-          e = Sk.ffi.remapToJs(e);
-          f = Sk.ffi.remapToJs(f);
-          a.v = new b.LatheGeometry(c, d, e, f);
-          a.tp$name = 'LatheGeometry';
+          Sk.ffi.checkMethodArgs('LatheGeometry', arguments, 1, 4);
+          Sk.ffi.referenceToPy(new b.RevolutionGeometry(Sk.ffi.remapToJs(c), Sk.ffi.remapToJs(d), Sk.ffi.remapToJs(e), Sk.ffi.remapToJs(f)), 'LatheGeometry', void 0, a);
         });
         c.__getattr__ = Sk.ffi.functionPy(function (a, b) {
           var c = Sk.ffi.remapToJs(a);
@@ -30027,20 +30047,20 @@
             return Sk.ffi.stringToPy(c.name);
           case 'vertices':
             return m(c.vertices);
+          default:
+            throw Sk.ffi.err.attribute(b).isNotGetableOnType('LatheGeometry');
           }
         });
         c.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
           a = Sk.ffi.remapToJs(a);
-          c = Sk.ffi.remapToJs(c);
+          Sk.ffi.remapToJs(c);
           switch (b) {
           case 'name':
-            if (e(c))
-              a.name = c;
-            else
-              throw Error(b + ' must be a string');
+            Sk.ffi.checkArgType('name', Sk.ffi.PyType.STR, Sk.ffi.isStr(c), c);
+            a.name = Sk.ffi.remapToJs(c);
             break;
           default:
-            throw Error(b + ' is not an attribute of LatheGeometry');
+            throw Sk.ffi.err.attribute(b).isNotSetableOnType('LatheGeometry');
           }
         });
         c.__str__ = Sk.ffi.functionPy(function (a) {
@@ -30182,37 +30202,46 @@
           }).join(', ') + ')');
         });
       }, 'PlaneGeometry', []);
-      b.RevolutionGeometry = function (a, c, d, e) {
+      b.RevolutionGeometry = function (a, c, d, e, f) {
         b.Geometry.call(this);
+        var g = new b.Vector3(0, 0, 1);
         c = c || 12;
         d = d || 0;
         e = e || 2 * Math.PI;
-        var f = 0.0001 > Math.abs(2 * Math.PI - Math.abs(e - d)) ? c : c + 1, g = 1 / c, h = (e - d) * g;
+        f = f || g;
+        var h = g.x, k = g.y, g = g.z, l = f.x, n = f.y;
+        f = f.z;
+        var p = 1 + (h * l + k * n + g * f), m = 1 / Math.sqrt(2 * p);
+        f = new b.Quaternion((k * f - g * n) * m, (g * l - h * f) * m, (h * n - k * l) * m, p * m);
+        p = 0.0001 > Math.abs(2 * Math.PI - Math.abs(e - d)) ? c : c + 1;
+        h = 1 / c;
+        m = (e - d) * h;
         e = 0;
-        for (var k = f; e < k; e++)
-          for (var l = d + e * h, n = Math.cos(l), p = Math.sin(l), l = 0, m = a.length; l < m; l++) {
-            var q = a[l], s = new b.Vector3();
-            s.x = n * q.x - p * q.y;
-            s.y = p * q.x + n * q.y;
-            s.z = q.z;
-            this.vertices.push(s);
+        for (k = p; e < k; e++)
+          for (var l = d + e * m, g = Math.cos(l), q = Math.sin(l), l = 0, n = a.length; l < n; l++) {
+            var s = a[l], t = new b.Vector3();
+            t.x = g * s.x - q * s.y;
+            t.y = q * s.x + g * s.y;
+            t.z = s.z;
+            t.applyQuaternion(f);
+            this.vertices.push(t);
           }
         d = 1 / (a.length - 1);
-        h = a.length;
-        f *= h;
+        f = a.length;
+        p *= f;
         e = 0;
         for (k = c; e < k; e++)
-          for (l = 0, m = a.length - 1; l < m; l++) {
-            q = l + h * e;
-            c = q % f;
-            var p = (q + h) % f, n = (q + 1 + h) % f, q = (q + 1) % f, s = e * g, t = l * d, u = s + g, y = t + d;
-            this.faces.push(new b.Face3(c, p, q));
+          for (l = 0, n = a.length - 1; l < n; l++) {
+            q = l + f * e;
+            c = q % p;
+            var m = (q + f) % p, g = (q + 1 + f) % p, q = (q + 1) % p, s = e * h, t = l * d, u = s + h, y = t + d;
+            this.faces.push(new b.Face3(q, m, c));
             this.faceVertexUvs[0].push([
               new b.Vector2(s, t),
               new b.Vector2(u, t),
               new b.Vector2(s, y)
             ]);
-            this.faces.push(new b.Face3(p, n, q));
+            this.faces.push(new b.Face3(q, g, m));
             this.faceVertexUvs[0].push([
               new b.Vector2(u, t),
               new b.Vector2(u, y),
@@ -30225,12 +30254,14 @@
       };
       b.RevolutionGeometry.prototype = Object.create(b.Geometry.prototype);
       a.RevolutionGeometry = Sk.ffi.buildClass(a, function (a, c) {
-        c.__init__ = Sk.ffi.functionPy(function (a, c, d, e, f) {
-          c = Sk.ffi.remapToJs(c);
-          d = Sk.ffi.remapToJs(d);
-          e = Sk.ffi.remapToJs(e);
-          f = Sk.ffi.remapToJs(f);
-          Sk.ffi.referenceToPy(new b.RevolutionGeometry(c, d, e, f), 'RevolutionGeometry', void 0, a);
+        c.__init__ = Sk.ffi.functionPy(function (a, c, d, e, f, g) {
+          Sk.ffi.checkMethodArgs('RevolutionGeometry', arguments, 1, 5);
+          Sk.ffi.checkArgType('points', Sk.ffi.PyType.LIST, Sk.ffi.isList(c), c);
+          Sk.ffi.isDefined(d) && Sk.ffi.checkArgType('segments', Sk.ffi.PyType.INT, Sk.ffi.isInt(d), d);
+          Sk.ffi.isDefined(e) && Sk.ffi.checkArgType('phiStart', s, Sk.ffi.isNumber(e), e);
+          Sk.ffi.isDefined(f) && Sk.ffi.checkArgType('phiLength', s, Sk.ffi.isNumber(f), f);
+          Sk.ffi.isDefined(g) && Sk.ffi.checkArgType('axis', 'Vector3', Sk.ffi.isClass(g, 'Vector3'), g);
+          Sk.ffi.referenceToPy(new b.RevolutionGeometry(Sk.ffi.remapToJs(c), Sk.ffi.remapToJs(d), Sk.ffi.remapToJs(e), Sk.ffi.remapToJs(f), Sk.ffi.remapToJs(g)), 'RevolutionGeometry', void 0, a);
         });
         c.__getattr__ = Sk.ffi.functionPy(function (a, b) {
           var c = Sk.ffi.remapToJs(a);
@@ -30241,20 +30272,20 @@
             return Sk.ffi.stringToPy(c.name);
           case 'vertices':
             return m(c.vertices);
+          default:
+            throw Sk.ffi.err.attribute(b).isNotGetableOnType('RevolutionGeometry');
           }
         });
         c.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
           a = Sk.ffi.remapToJs(a);
-          c = Sk.ffi.remapToJs(c);
+          Sk.ffi.remapToJs(c);
           switch (b) {
           case 'name':
-            if (e(c))
-              a.name = c;
-            else
-              throw Error(b + ' must be a string');
+            Sk.ffi.checkArgType('name', Sk.ffi.PyType.STR, Sk.ffi.isStr(c), c);
+            a.name = Sk.ffi.remapToJs(c);
             break;
           default:
-            throw Error(b + ' is not an attribute of RevolutionGeometry');
+            throw Sk.ffi.err.attribute(b).isNotSetableOnType('RevolutionGeometry');
           }
         });
         c.__str__ = Sk.ffi.functionPy(function (a) {
@@ -31442,7 +31473,7 @@
               Sk.ffi.checkArgType('x', [
                 b,
                 f
-              ].join(' or '), !1, c);
+              ], !1, c);
             }
         });
         m.__add__ = Sk.ffi.functionPy(function (a, b) {
@@ -74506,6 +74537,7 @@ var Stats = function () {
           if (!err) {
             return $scope.contextItem.childItems = response;
           } else {
+            console.log('err: ' + err + ', reponse: ' + response + ', status ' + status);
             return alert('' + err.message + '. Cause: ' + response.message + '.');
           }
         });

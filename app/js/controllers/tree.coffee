@@ -34,6 +34,7 @@ angular.module("app").controller 'TreeCtrl', ['$rootScope','$scope', '$window', 
         # status is 2xx
         $scope.contextItem.childItems = response
       else
+        console.log "err: #{err}, reponse: #{response}, status #{status}"
         # TODO: Log this message to analytics as an exception.
         # status may be 401, 403
         alert "#{err.message}. Cause: #{response.message}."
