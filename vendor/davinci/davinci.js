@@ -14227,20 +14227,6 @@ goog.exportSymbol("Sk.ffi.remapToPy", Sk.ffi.remapToPy);
 Sk.ffi.isBool = function(valuePy) {return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.BOOL;};
 goog.exportSymbol("Sk.ffi.isBool", Sk.ffi.isBool);
 
-Sk.ffi.isDict = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.DICT; };
-goog.exportSymbol("Sk.ffi.isDict", Sk.ffi.isDict);
-
-Sk.ffi.isFunction = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.FUNCTION; };
-goog.exportSymbol("Sk.ffi.isFunction", Sk.ffi.isFunction);
-
-Sk.ffi.isInt = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.INT; };
-goog.exportSymbol("Sk.ffi.isInt", Sk.ffi.isInt);
-
-Sk.ffi.isNone = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.NONE; };
-goog.exportSymbol("Sk.ffi.isNone", Sk.ffi.isNone);
-
-Sk.ffi.isNumber = function(valuePy) { return Sk.builtin.checkNumber(valuePy); };
-goog.exportSymbol("Sk.ffi.isNumber", Sk.ffi.isNumber);
 /**
  * Determines whether the Python value is an instance of a class with a specified class name.
  *
@@ -14278,11 +14264,26 @@ Sk.ffi.isClass = function(valuePy, className)
 };
 goog.exportSymbol("Sk.ffi.isClass", Sk.ffi.isClass);
 
+Sk.ffi.isDefined = function(valuePy) { return Sk.ffi.getType(valuePy) !== Sk.ffi.PyType.UNDEFINED; };
+goog.exportSymbol("Sk.ffi.isDefined", Sk.ffi.isDefined);
+
+Sk.ffi.isDict = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.DICT; };
+goog.exportSymbol("Sk.ffi.isDict", Sk.ffi.isDict);
+
+Sk.ffi.isFunction = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.FUNCTION; };
+goog.exportSymbol("Sk.ffi.isFunction", Sk.ffi.isFunction);
+
 Sk.ffi.isFunctionRef = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.FUNREF; };
 goog.exportSymbol("Sk.ffi.isFunctionRef", Sk.ffi.isFunctionRef);
 
-Sk.ffi.isReference = function(valuePy) { return Sk.ffi.isClass(valuePy) || Sk.ffi.isFunctionRef(valuePy); };
-goog.exportSymbol("Sk.ffi.isReference", Sk.ffi.isReference);
+Sk.ffi.isInt = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.INT; };
+goog.exportSymbol("Sk.ffi.isInt", Sk.ffi.isInt);
+
+Sk.ffi.isNone = function(valuePy) { return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.NONE; };
+goog.exportSymbol("Sk.ffi.isNone", Sk.ffi.isNone);
+
+Sk.ffi.isNumber = function(valuePy) { return Sk.builtin.checkNumber(valuePy); };
+goog.exportSymbol("Sk.ffi.isNumber", Sk.ffi.isNumber);
 
 Sk.ffi.isStr = function(valuePy) { return Sk.builtin.checkString(valuePy); };
 goog.exportSymbol("Sk.ffi.isStr", Sk.ffi.isStr);
@@ -30857,12 +30858,22 @@ var ARG_OTHER         = "other";
  * @const
  * @type {string}
  */
+var GRAM              = "gram";
+/**
+ * @const
+ * @type {string}
+ */
 var KILOGRAM          = "kilogram";
 /**
  * @const
  * @type {string}
  */
 var METER             = "meter";
+/**
+ * @const
+ * @type {string}
+ */
+var CM                = "cm";
 /**
  * @const
  * @type {string}
@@ -30917,19 +30928,24 @@ Sk.builtin.defineFractions(mod, RATIONAL, function(n, d) {return new BLADE.Ratio
 
 mod[DIMENSIONS] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__init__ = Sk.ffi.functionPy(function(selfPy, M, L, T, Q) {
-    Sk.ffi.checkMethodArgs(MEASURE, arguments, 1, 4);
-    Sk.ffi.checkArgType("M", [RATIONAL, DIMENSIONS].join(" or "), Sk.ffi.isReference(M), M);
+    Sk.ffi.checkMethodArgs(DIMENSIONS, arguments, 1, 4);
+    Sk.ffi.checkArgType(PROP_M, RATIONAL, Sk.ffi.isClass(M, RATIONAL) || Sk.ffi.isClass(M, DIMENSIONS), M);
     switch(Sk.ffi.typeName(M)) {
       case RATIONAL: {
+        Sk.ffi.checkMethodArgs(DIMENSIONS, arguments, 4, 4);
+        Sk.ffi.checkArgType(PROP_L, RATIONAL, Sk.ffi.isClass(L, RATIONAL), L);
+        Sk.ffi.checkArgType(PROP_T, RATIONAL, Sk.ffi.isClass(T, RATIONAL), T);
+        Sk.ffi.checkArgType(PROP_Q, RATIONAL, Sk.ffi.isClass(Q, RATIONAL), Q);
         Sk.ffi.referenceToPy(new BLADE.Dimensions(Sk.ffi.remapToJs(M), Sk.ffi.remapToJs(L), Sk.ffi.remapToJs(T), Sk.ffi.remapToJs(Q)), DIMENSIONS, undefined, selfPy);
       }
       break;
       case DIMENSIONS: {
+        Sk.ffi.checkMethodArgs(DIMENSIONS, arguments, 1, 1);
         Sk.ffi.referenceToPy(Sk.ffi.remapToJs(M), DIMENSIONS, undefined, selfPy);
       }
       break;
       default: {
-        Sk.ffi.checkArgType("M", [RATIONAL, DIMENSIONS].join(" or "), false, M);
+        throw Sk.ffi.err.argument(PROP_M).inFunction(DIMENSIONS).mustHaveType([RATIONAL, DIMENSIONS]);
       }
     }
   });
@@ -31127,7 +31143,7 @@ mod[UNIT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
 mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__init__ = Sk.ffi.functionPy(function(selfPy, quantityPy, unitPy) {
     Sk.ffi.checkMethodArgs(MEASURE, arguments, 1, 2);
-    Sk.ffi.checkArgType(PROP_QUANTITY, ["Reference", MEASURE].join(" or "), Sk.ffi.isReference(quantityPy), quantityPy);
+    Sk.ffi.checkArgType(PROP_QUANTITY, ["Reference", MEASURE], Sk.ffi.isClass(quantityPy), quantityPy);
     if (Sk.ffi.typeName(quantityPy) === MEASURE) {
       Sk.ffi.referenceToPy(Sk.ffi.remapToJs(quantityPy), MEASURE, quantityPy.custom, selfPy);
     }
@@ -31255,6 +31271,9 @@ mod[METER]    = Sk.ffi.callsim(mod[UNIT], Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(
 mod[SECOND]   = Sk.ffi.callsim(mod[UNIT], Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new BLADE.Dimensions(0, 0, 1, 0),  DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS));
 mod[COULOMB]  = Sk.ffi.callsim(mod[UNIT], Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new BLADE.Dimensions(0, 0, 0, 1),  DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS));
 
+mod[GRAM]     = Sk.ffi.callsim(mod[UNIT], Sk.ffi.remapToPy(0.001), Sk.ffi.remapToPy(new BLADE.Dimensions(1, 0, 0, 0),  DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS));
+mod[CM]       = Sk.ffi.callsim(mod[UNIT], Sk.ffi.remapToPy(0.01),  Sk.ffi.remapToPy(new BLADE.Dimensions(0, 1, 0, 0),  DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS));
+
 mod[NEWTON]   = Sk.ffi.callsim(mod[UNIT], Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new BLADE.Dimensions(1, 1, -2,  0), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS));
 mod[JOULE]    = Sk.ffi.callsim(mod[UNIT], Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new BLADE.Dimensions(1, 2, -2,  0), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS));
 mod[WATT]     = Sk.ffi.callsim(mod[UNIT], Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(new BLADE.Dimensions(1, 2, -3,  0), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS));
@@ -31266,12 +31285,16 @@ mod[TESLA]    = Sk.ffi.callsim(mod[UNIT], Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(
 (function() {
 Sk.builtin.defineThree = function(mod, THREE) {
   Sk.ffi.checkFunctionArgs("defineFractions", arguments, 2, 2);
-
 /**
  * @const
  * @type {string}
  */
   var NODE                       = "Node";
+/**
+ * @const
+ * @type {Sk.ffi.PyType}
+ */
+  var INT                        = Sk.ffi.PyType.INT;
 /**
  * @const
  * @type {!Array.<Sk.ffi.PyType>}
@@ -31466,6 +31489,16 @@ Sk.builtin.defineThree = function(mod, THREE) {
  * @const
  * @type {string}
  */
+  var PROP_DEPTH                 = "depth";
+/**
+ * @const
+ * @type {string}
+ */
+  var PROP_DEPTH_SEGMENTS        = "depthSegments";
+/**
+ * @const
+ * @type {string}
+ */
   var PROP_DETAIL                = "detail";
 /**
  * @const
@@ -31566,17 +31599,17 @@ Sk.builtin.defineThree = function(mod, THREE) {
  * @const
  * @type {string}
  */
-  var PROP_RADIAL_SEGMENTS       = "radialSegments";
-/**
- * @const
- * @type {string}
- */
   var PROP_HEIGHT_SEGMENTS       = "heightSegments";
 /**
  * @const
  * @type {string}
  */
   var PROP_OPEN_ENDED            = "openEnded";
+/**
+ * @const
+ * @type {string}
+ */
+  var PROP_RADIAL_SEGMENTS       = "radialSegments";
 /**
  * @const
  * @type {string}
@@ -31642,6 +31675,16 @@ Sk.builtin.defineThree = function(mod, THREE) {
  * @type {string}
  */
   var PROP_VISIBLE               = "visible";
+/**
+ * @const
+ * @type {string}
+ */
+  var PROP_WIDTH                 = "width";
+/**
+ * @const
+ * @type {string}
+ */
+  var PROP_WIDTH_SEGMENTS        = "widthSegments";
 /**
  * @const
  * @type {string}
@@ -32933,7 +32976,7 @@ Sk.builtin.defineThree = function(mod, THREE) {
       var d = new THREE[VECTOR_3](radiusShaft, 0, 0);
       var e = new THREE[VECTOR_3](0, 0, 0);
       var points = [a, b, c, d, e];
-      Sk.ffi.referenceToPy(new THREE[LATHE_GEOMETRY](points, segments), ARROW_GEOMETRY, undefined, selfPy);
+      Sk.ffi.referenceToPy(new THREE[REVOLUTION_GEOMETRY](points, segments), ARROW_GEOMETRY, undefined, selfPy);
     });
     $loc.__getattr__ = Sk.ffi.functionPy(function(geometryPy, name) {
       var geometry = Sk.ffi.remapToJs(geometryPy);
@@ -33017,63 +33060,57 @@ Sk.builtin.defineThree = function(mod, THREE) {
   }, CIRCLE_GEOMETRY, []);
 
    mod[CUBE_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-    var PROP_WIDTH           = "width";
-    var PROP_HEIGHT          = "height";
-    var PROP_DEPTH           = "depth";
-    var PROP_WIDTH_SEGMENTS  = "widthSegments";
-    var PROP_HEIGHT_SEGMENTS = "heightSegments";
-    var PROP_DEPTH_SEGMENTS  = "depthSegments";
-    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, width, height, depth, widthSegments, heightSegments, depthSegments) {
+    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, widthPy, heightPy, depthPy, widthSegments, heightSegments, depthSegmentsPy) {
       Sk.ffi.checkMethodArgs(CUBE_GEOMETRY, arguments, 3, 6);
-      width          = numberFromArg(width,                 PROP_WIDTH,           CUBE_GEOMETRY);
-      height         = numberFromArg(height,                PROP_HEIGHT,          CUBE_GEOMETRY);
-      depth          = numberFromArg(depth,                 PROP_DEPTH,           CUBE_GEOMETRY);
+      Sk.ffi.checkArgType(PROP_WIDTH,  NUMBER, Sk.ffi.isNumber(widthPy),  widthPy);
+      Sk.ffi.checkArgType(PROP_HEIGHT, NUMBER, Sk.ffi.isNumber(heightPy), heightPy);
+      Sk.ffi.checkArgType(PROP_DEPTH,  NUMBER, Sk.ffi.isNumber(depthPy),  depthPy);
+      if (Sk.ffi.isDefined(depthSegmentsPy)) {
+        Sk.ffi.checkArgType(PROP_DEPTH_SEGMENTS, INT, Sk.ffi.isInt(depthSegmentsPy), depthSegmentsPy);
+      }
+      var width  = Sk.ffi.remapToJs(widthPy);
+      var height = Sk.ffi.remapToJs(heightPy);
+      var depth  = Sk.ffi.remapToJs(depthPy);
       widthSegments  = numberFromIntegerArg(widthSegments,  PROP_WIDTH_SEGMENTS,  CUBE_GEOMETRY);
       heightSegments = numberFromIntegerArg(heightSegments, PROP_HEIGHT_SEGMENTS, CUBE_GEOMETRY);
-      depthSegments  = numberFromIntegerArg(depthSegments,  PROP_DEPTH_SEGMENTS,  CUBE_GEOMETRY);
+      var depthSegments = Sk.ffi.remapToJs(depthSegmentsPy);
       Sk.ffi.referenceToPy(new THREE[CUBE_GEOMETRY](width, height, depth, widthSegments, heightSegments, depthSegments), CUBE_GEOMETRY, undefined, selfPy);
     });
-    $loc.__getattr__ = Sk.ffi.functionPy(function(self, name) {
+    $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
+      var cube = Sk.ffi.remapToJs(selfPy);
       switch(name) {
-        case PROP_WIDTH: {
-          return Sk.builtin.assk$(self.v[PROP_WIDTH], Sk.builtin.nmber.float$);
-        }
-        case PROP_HEIGHT: {
-          return Sk.builtin.assk$(self.v[PROP_HEIGHT], Sk.builtin.nmber.float$);
-        }
+        case PROP_WIDTH:
+        case PROP_HEIGHT:
         case PROP_DEPTH: {
-          return Sk.builtin.assk$(self.v[PROP_DEPTH], Sk.builtin.nmber.float$);
+          return Sk.ffi.numberToFloatPy(cube[name]);
         }
-        case PROP_WIDTH_SEGMENTS: {
-          return Sk.builtin.assk$(self.v[PROP_WIDTH_SEGMENTS], Sk.builtin.nmber.int$);
-        }
-        case PROP_HEIGHT_SEGMENTS: {
-          return Sk.builtin.assk$(self.v[PROP_HEIGHT_SEGMENTS], Sk.builtin.nmber.int$);
-        }
+        case PROP_WIDTH_SEGMENTS:
+        case PROP_HEIGHT_SEGMENTS:
         case PROP_DEPTH_SEGMENTS: {
-          return Sk.builtin.assk$(self.v[PROP_DEPTH_SEGMENTS], Sk.builtin.nmber.int$);
+          return Sk.ffi.numberToIntPy(cube[name]);
+        }
+        default: {
+          throw Sk.ffi.err.attribute(name).isNotGetableOnType(CUBE_GEOMETRY);
         }
       }
     });
-    $loc.__setattr__ = Sk.ffi.functionPy(function(geometryPy, name, valuePy) {
-      var geometry = Sk.ffi.remapToJs(geometryPy);
-      var value = Sk.ffi.remapToJs(valuePy);
+    $loc.__setattr__ = Sk.ffi.functionPy(function(selfPy, name, valuePy) {
       switch(name) {
         default: {
-          throw new Error(name + " is not an attribute of " + CUBE_GEOMETRY);
+          throw Sk.ffi.err.attribute(name).isNotSetableOnType(CUBE_GEOMETRY);
         }
       }
     });
-    $loc.__str__ = Sk.ffi.functionPy(function(self) {
-      var cube = self.v;
+    $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
+      var cube = Sk.ffi.remapToJs(selfPy);
       var args = {};
       args[PROP_WIDTH]  = cube[PROP_WIDTH];
       args[PROP_HEIGHT] = cube[PROP_HEIGHT];
       args[PROP_DEPTH]  = cube[PROP_DEPTH];
       return Sk.ffi.stringToPy(CUBE_GEOMETRY + "(" + JSON.stringify(args) + ")");
     });
-    $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-      var cube = self.v;
+    $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
+      var cube = Sk.ffi.remapToJs(selfPy);
       var width          = cube[PROP_WIDTH];
       var height         = cube[PROP_HEIGHT];
       var depth          = cube[PROP_DEPTH];
