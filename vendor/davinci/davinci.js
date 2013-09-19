@@ -13850,7 +13850,7 @@ goog.exportSymbol("Sk.ffi.none", Sk.ffi.none);
 /**
  * Converts a JavaScript boolean or null to the internal Python bool representation.
  *
- * @param {?boolean} valueJs
+ * @param {?boolean=} valueJs
  * @param {boolean=} defaultJs
  * @return {Sk.ffi.bool|Sk.ffi.none|undefined}
  */
@@ -13921,7 +13921,7 @@ goog.exportSymbol("Sk.ffi.numberToPy", Sk.ffi.numberToPy);
 /**
  * Converts a JavaScript number or null to the internal Python float representation.
  *
- * @param {?number} valueJs
+ * @param {?number=} valueJs
  * @param {number=} defaultJs
  * @return {Object|Sk.ffi.none|undefined}
  */
@@ -14718,7 +14718,7 @@ goog.exportSymbol("Sk.ffi.numberToJs", Sk.ffi.numberToJs);
  * valueJs = Sk.ffi.remapToJs(valuePy);
  *
  * @param {Object} valuePy The Python value to be mapped.
- * @param {Object=} defaultJs The optional default JavaScript value to use when the type of the value is undefined.
+ * @param {boolean|Object=} defaultJs The optional default JavaScript value to use when the type of the value is undefined.
  */
 Sk.ffi.remapToJs = function(valuePy, defaultJs)
 {
@@ -26198,6 +26198,11 @@ var CARTESIAN_SPACE                 = "CartesianSpace";
  * @const
  * @type {string}
  */
+var EUCLIDEAN_3                     = "Euclidean3";
+/**
+ * @const
+ * @type {string}
+ */
 var SCENE                           = "Scene";
 /**
  * @const
@@ -26209,6 +26214,11 @@ var PERSPECTIVE_CAMERA              = "PerspectiveCamera";
  * @type {string}
  */
 var WEBGL_RENDERER                  = "WebGLRenderer";
+/**
+ * @const
+ * @type {string}
+ */
+var PROP_ATTITUDE                   = "attitude";
 /**
  * @const
  * @type {string}
@@ -26448,6 +26458,11 @@ var OBJECT_3D                       = "Object3D";
  * @const
  * @type {string}
  */
+var QUATERNION                      = "Quaternion";
+/**
+ * @const
+ * @type {string}
+ */
 var VECTOR_3                        = "Vector3";
 /**
  * @const
@@ -26489,8 +26504,10 @@ var MATERIAL_GRID_MINOR = new THREE[LINE_BASIC_MATERIAL]({"color": COLOR_GRID,"o
 var e1 = new THREE[VECTOR_3](1, 0, 0);
 var e2 = new THREE[VECTOR_3](0, 1, 0);
 var e3 = new THREE[VECTOR_3](0, 0, 1);
+var one = {"vector": new THREE[VECTOR_3](0, 0, 0), "quaternion": new THREE[QUATERNION](0, 0, 0, 1), "xyz": 0};
 
-function isVector3(valuePy) {return Sk.ffi.isClass(valuePy, VECTOR_3);}
+function isEuclidean3Py(valuePy) {return Sk.ffi.isClass(valuePy, EUCLIDEAN_3);}
+function isVector3Py(valuePy) {return Sk.ffi.isClass(valuePy, VECTOR_3);}
 
 function methodName(targetPy) {
   var target = Sk.ffi.remapToJs(targetPy);
@@ -26665,17 +26682,17 @@ mod[ARROW_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var self = {};
     self[PROP_COLOR]     = DEFAULT_COLOR;
     self[PROP_WIREFRAME] = false;
-    self[PROP_AXIS]      = e3;
+    self[PROP_ATTITUDE]  = one;
     Sk.ffi.referenceToPy(self, ARROW_BUILDER, undefined, selfPy);
   });
   $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
     var arrow = Sk.ffi.remapToJs(selfPy);
     switch(name) {
-      case PROP_AXIS: {
-        return Sk.ffi.callableToPy(mod, PROP_AXIS, function(methodPy, axisPy) {
-          Sk.ffi.checkMethodArgs(PROP_AXIS, arguments, 1, 1);
-          Sk.ffi.checkArgType(PROP_AXIS, VECTOR_3, isVector3(axisPy), axisPy);
-          arrow[PROP_AXIS] = Sk.ffi.remapToJs(axisPy);
+      case PROP_ATTITUDE: {
+        return Sk.ffi.callableToPy(mod, PROP_ATTITUDE, function(methodPy, attitudePy) {
+          Sk.ffi.checkMethodArgs(PROP_ATTITUDE, arguments, 1, 1);
+          Sk.ffi.checkArgType(PROP_ATTITUDE, EUCLIDEAN_3, isEuclidean3Py(attitudePy), attitudePy);
+          arrow[PROP_ATTITUDE] = Sk.ffi.remapToJs(attitudePy);
           return selfPy;
         });
       }
@@ -26739,7 +26756,7 @@ mod[ARROW_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       case METHOD_BUILD: {
         return Sk.ffi.callableToPy(mod, METHOD_BUILD, function(methodPy) {
           /**
-           * @return {{scale: number, axis: Object, length: number, radius: number}}
+           * @return {{scale: number, attitude: Object, length: number, radius: number}}
            */
           function dimensionArrow() {
             var dims = {};
@@ -26752,20 +26769,20 @@ mod[ARROW_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
               dims.length = dims.radius / alpha;
             }
             else {
-              dims.scale  = (arrow.scale)  ? arrow.scale  : 1;
-              dims.axis   = (arrow.axis)   ? arrow.axis   : e3;
-              dims.length = (arrow.length) ? arrow.length : DEFAULT_CYLINDER_HEIGHT;
-              dims.radius = (arrow.radius) ? arrow.radius : DEFAULT_CYLINDER_RADIUS;
+              dims.scale    = (arrow.scale)    ? arrow.scale    : 1;
+              dims.attitude = (arrow.attitude) ? arrow.attitude : one;
+              dims.length   = (arrow.length)   ? arrow.length   : DEFAULT_CYLINDER_HEIGHT;
+              dims.radius   = (arrow.radius)   ? arrow.radius   : DEFAULT_CYLINDER_RADIUS;
             }
             return dims;
           }
           Sk.ffi.checkMethodArgs(METHOD_BUILD, arguments, 0, 0);
           var dimensions = dimensionArrow();
           var scalePy    = Sk.ffi.numberToFloatPy(dimensions[PROP_SCALE]);
-          var axisPy     = Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(dimensions[PROP_AXIS], VECTOR_3));
+          var attitudePy = Sk.ffi.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(dimensions[PROP_ATTITUDE], EUCLIDEAN_3));
           var segmentsPy = Sk.ffi.numberToIntPy(32);
           var lengthPy   = Sk.ffi.numberToFloatPy(dimensions[PROP_LENGTH]);
-          var geometryPy = Sk.ffi.callsim(mod[ARROW_GEOMETRY], scalePy, axisPy, segmentsPy, lengthPy);
+          var geometryPy = Sk.ffi.callsim(mod[ARROW_GEOMETRY], scalePy, attitudePy, segmentsPy, lengthPy);
           return completeMesh(geometryPy, arrow);
         });
       }
@@ -26798,7 +26815,7 @@ mod[CONE_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       case PROP_AXIS: {
         return Sk.ffi.callableToPy(mod, PROP_AXIS, function(methodPy, axisPy) {
           Sk.ffi.checkMethodArgs(PROP_AXIS, arguments, 1, 1);
-          Sk.ffi.checkArgType(PROP_AXIS, VECTOR_3, isVector3(axisPy), axisPy);
+          Sk.ffi.checkArgType(PROP_AXIS, VECTOR_3, isVector3Py(axisPy), axisPy);
           cone[PROP_AXIS] = Sk.ffi.remapToJs(axisPy);
           return selfPy;
         });
@@ -27140,7 +27157,7 @@ mod[SPHERE_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       case PROP_AXIS: {
         return Sk.ffi.callableToPy(mod, PROP_AXIS, function(methodPy, axisPy) {
           Sk.ffi.checkMethodArgs(PROP_AXIS, arguments, 1, 1);
-          Sk.ffi.checkArgType(PROP_AXIS, VECTOR_3, isVector3(axisPy), axisPy);
+          Sk.ffi.checkArgType(PROP_AXIS, VECTOR_3, isVector3Py(axisPy), axisPy);
           sphere[PROP_AXIS] = Sk.ffi.remapToJs(axisPy);
           return selfPy;
         });
@@ -30025,8 +30042,8 @@ mod[TESLA]    = Sk.ffi.callsim(mod[UNIT], Sk.ffi.remapToPy(1), Sk.ffi.remapToPy(
 };
 }).call(this);
 (function() {
-Sk.builtin.defineThree = function(mod, THREE) {
-Sk.ffi.checkFunctionArgs("defineThree", arguments, 2, 2);
+Sk.builtin.defineThree = function(mod, THREE, BLADE) {
+Sk.ffi.checkFunctionArgs("defineThree", arguments, 3, 3);
 /**
 * @const
 * @type {string}
@@ -30222,6 +30239,11 @@ var TETRAHEDRON_GEOMETRY       = "TetrahedronGeometry";
 * @type {string}
 */
 var TORUS_GEOMETRY             = "TorusGeometry";
+/**
+* @const
+* @type {string}
+*/
+var PROP_ATTITUDE              = "attitude";
 /**
 * @const
 * @type {string}
@@ -30471,6 +30493,11 @@ var PROP_WIREFRAME_LINEWIDTH   = "wireframeLinewidth";
 * @const
 * @type {string}
 */
+var PROP_VECTOR                = "vector";
+/**
+* @const
+* @type {string}
+*/
 var PROP_W                     = "w";
 /**
 * @const
@@ -30640,9 +30667,22 @@ function isUndefined(x) { return typeof x === 'undefined'; }
 function isDefined(x)   { return typeof x !== 'undefined'; }
 function isNull(x)      { return typeof x === 'object' && x === null; }
 
+function isEuclidean3Py(valuePy) {return Sk.ffi.isClass(valuePy, EUCLIDEAN_3);}
 function isVector3Py(valuePy) {return Sk.ffi.isClass(valuePy, VECTOR_3);}
 function isGeometryPy(valuePy) {
   return Sk.ffi.isClass(valuePy) && Sk.ffi.typeName(valuePy) === GEOMETRY; // TODO: GEOMETRIES
+}
+
+function vectorToEuclidean3Py(vector) {
+  var euclidean = {"vector": vector, "quaternion": new THREE[QUATERNION](0,0,0,0), "xyz": 0};
+  return Sk.ffi.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(euclidean, EUCLIDEAN_3));
+}
+
+function setVectorProperty(obj, name, valuePy) {
+  Sk.ffi.checkArgType(name, EUCLIDEAN_3, isEuclidean3Py(valuePy), valuePy);
+  var vectorPy = Sk.ffi.gattr(valuePy, PROP_VECTOR);
+  Sk.ffi.checkArgType(name, VECTOR_3, isVector3Py(vectorPy), vectorPy);
+  obj[name] = Sk.ffi.remapToJs(vectorPy);
 }
 
 function methodAdd(target) {
@@ -30699,7 +30739,7 @@ function verticesPy(vertices) {
     });
     $loc.__getitem__ = Sk.ffi.functionPy(function(verticesPy, indexPy) {
       var index = Sk.ffi.remapToJs(indexPy);
-      return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(vertices[index], VECTOR_3));
+      return vectorToEuclidean3Py(vertices[index]);
     });
     $loc.mp$length = function() {return vertices.length;};
     $loc.__str__ = Sk.ffi.functionPy(function(self) {
@@ -30882,7 +30922,7 @@ function wxyzToPy(w, x, y, z) {
 function vectorJs(x, y, z) {return new THREE[VECTOR_3](x, y, z);}
 function quaternionJs(x, y, z, w) {return new THREE[QUATERNION](x, y, z, w);}
 
-Sk.builtin.defineEuclidean3(mod, {"vector": vectorJs, "quaternion": quaternionJs}, EUCLIDEAN_3);
+Sk.builtin.defineEuclidean3(mod, {"vector": vectorJs, "quaternion": quaternionJs}, EUCLIDEAN_3, THREE, BLADE);
 Sk.builtin.defineVector3(mod, VECTOR_3, vectorJs);
 Sk.builtin.defineQuaternion(mod, QUATERNION, quaternionJs);
 
@@ -30904,22 +30944,22 @@ mod[SCENE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var scene = Sk.ffi.remapToJs(scenePy);
     switch(name) {
       case PROP_POSITION: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(scene[PROP_POSITION], VECTOR_3));
+        return vectorToEuclidean3Py(scene[PROP_POSITION]);
       }
       case PROP_QUATERNION: {
         return Sk.ffi.callsim(mod[QUATERNION], Sk.ffi.referenceToPy(scene[PROP_QUATERNION], QUATERNION));
       }
       case PROP_ROTATION: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(scene[PROP_ROTATION], VECTOR_3));
+        return vectorToEuclidean3Py(scene[PROP_ROTATION]);
       }
       case PROP_EULER_ORDER: {
         return Sk.ffi.stringToPy(scene[PROP_EULER_ORDER]);
       }
       case PROP_SCALE: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(scene[PROP_SCALE], VECTOR_3));
+        return vectorToEuclidean3Py(scene[PROP_SCALE]);
       }
       case PROP_UP: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(scene[PROP_UP], VECTOR_3));
+        return vectorToEuclidean3Py(scene[PROP_UP]);
       }
       case PROP_USE_QUATERNION: {
         return scene[PROP_USE_QUATERNION];
@@ -30953,16 +30993,15 @@ mod[SCENE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var scene = Sk.ffi.remapToJs(scenePy);
     var value = Sk.ffi.remapToJs(valuePy);
     switch(name) {
-      case PROP_POSITION: {
-        scene[PROP_POSITION] = value;
+      case PROP_POSITION:
+      case PROP_ROTATION:
+      case PROP_SCALE:
+      case PROP_UP: {
+        setVectorProperty(scene, name, valuePy);
       }
       break;
       case PROP_QUATERNION: {
         scene[PROP_QUATERNION] = value;
-      }
-      break;
-      case PROP_ROTATION: {
-        scene[PROP_ROTATION] = value;
       }
       break;
       case PROP_EULER_ORDER: {
@@ -30972,14 +31011,6 @@ mod[SCENE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         else {
           throw new Error(name + " must be a string");
         }
-      }
-      break;
-      case PROP_SCALE: {
-        scene[PROP_SCALE] = value;
-      }
-      break;
-      case PROP_UP: {
-        scene[PROP_UP] = value;
       }
       break;
       case PROP_USE_QUATERNION: {
@@ -31449,22 +31480,22 @@ mod[PERSPECTIVE_CAMERA] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         return Sk.builtin.assk$(camera.aspect, Sk.builtin.nmber.float$);
       }
       case PROP_POSITION: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(camera.position, VECTOR_3));
+        return vectorToEuclidean3Py(camera[PROP_POSITION]);
       }
       case PROP_QUATERNION: {
         return Sk.ffi.callsim(mod[QUATERNION], Sk.ffi.referenceToPy(camera[PROP_QUATERNION], QUATERNION));
       }
       case PROP_ROTATION: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(camera[PROP_ROTATION], VECTOR_3));
+        return vectorToEuclidean3Py(camera[PROP_ROTATION]);
       }
       case PROP_EULER_ORDER: {
         return Sk.ffi.stringToPy(camera[PROP_EULER_ORDER]);
       }
       case PROP_SCALE: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(camera[PROP_SCALE], VECTOR_3));
+        return vectorToEuclidean3Py(camera[PROP_SCALE]);
       }
       case PROP_UP: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(camera[PROP_UP], VECTOR_3));
+        return vectorToEuclidean3Py(camera[PROP_UP]);
       }
       case PROP_USE_QUATERNION: {
         return camera[PROP_USE_QUATERNION];
@@ -31515,16 +31546,15 @@ mod[PERSPECTIVE_CAMERA] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         camera.aspect = value;
       }
       break;
-      case PROP_POSITION: {
-        camera[PROP_POSITION] = value;
+      case PROP_POSITION:
+      case PROP_ROTATION:
+      case PROP_SCALE:
+      case PROP_UP: {
+        setVectorProperty(camera, name, valuePy);
       }
       break;
       case PROP_QUATERNION: {
         camera[PROP_QUATERNION] = value;
-      }
-      break;
-      case PROP_ROTATION: {
-        camera[PROP_ROTATION] = value;
       }
       break;
       case PROP_EULER_ORDER: {
@@ -31534,14 +31564,6 @@ mod[PERSPECTIVE_CAMERA] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         else {
           throw new Error(name + " must be a string");
         }
-      }
-      break;
-      case PROP_SCALE: {
-        camera[PROP_SCALE] = value;
-      }
-      break;
-      case PROP_UP: {
-        camera[PROP_UP] = value;
       }
       break;
       case PROP_USE_QUATERNION: {
@@ -31578,22 +31600,22 @@ mod[ORTHOGRAPHIC_CAMERA] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         return Sk.ffi.numberToFloatPy(camera.aspect);
       }
       case PROP_POSITION: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(camera[PROP_POSITION], VECTOR_3));
+        return vectorToEuclidean3Py(camera[PROP_POSITION]);
       }
       case PROP_QUATERNION: {
         return Sk.ffi.callsim(mod[QUATERNION], Sk.ffi.referenceToPy(camera[PROP_QUATERNION], QUATERNION));
       }
       case PROP_ROTATION: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(camera[PROP_ROTATION], VECTOR_3));
+        return vectorToEuclidean3Py(camera[PROP_ROTATION]);
       }
       case PROP_EULER_ORDER: {
         return Sk.ffi.stringToPy(camera[PROP_EULER_ORDER]);
       }
       case PROP_SCALE: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(camera[PROP_SCALE], VECTOR_3));
+        return vectorToEuclidean3Py(camera[PROP_SCALE]);
       }
       case PROP_UP: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(camera[PROP_UP], VECTOR_3));
+        return vectorToEuclidean3Py(camera[PROP_UP]);
       }
       case PROP_USE_QUATERNION: {
         return camera[PROP_USE_QUATERNION];
@@ -31656,16 +31678,15 @@ mod[ORTHOGRAPHIC_CAMERA] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         camera[PROP_BOTTOM] = value;
       }
       break;
-      case PROP_POSITION: {
-        camera[PROP_POSITION] = value;
+      case PROP_POSITION:
+      case PROP_ROTATION:
+      case PROP_SCALE:
+      case PROP_UP: {
+        setVectorProperty(camera, name, valuePy);
       }
       break;
       case PROP_QUATERNION: {
         camera[PROP_QUATERNION] = value;
-      }
-      break;
-      case PROP_ROTATION: {
-        camera[PROP_ROTATION] = value;
       }
       break;
       case PROP_EULER_ORDER: {
@@ -31675,14 +31696,6 @@ mod[ORTHOGRAPHIC_CAMERA] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         else {
           throw new Error(name + " must be a string");
         }
-      }
-      break;
-      case PROP_SCALE: {
-        camera[PROP_SCALE] = value;
-      }
-      break;
-      case PROP_UP: {
-        camera[PROP_UP] = value;
       }
       break;
       case PROP_USE_QUATERNION: {
@@ -31705,10 +31718,10 @@ mod[ORTHOGRAPHIC_CAMERA] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
 }, ORTHOGRAPHIC_CAMERA, []);
 
 mod[ARROW_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, scalePy, axisPy, segmentsPy, lengthPy, radiusShaft, radiusCone, lengthCone) {
+  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, scalePy, attitudePy, segmentsPy, lengthPy, radiusShaft, radiusCone, lengthCone) {
     Sk.ffi.checkMethodArgs(ARROW_GEOMETRY, arguments, 0, 6);
     var scale;
-    var axis;
+    var quaternion;
     var length;
     if (Sk.ffi.isDefined(scalePy)) {
       Sk.ffi.checkArgType(PROP_SCALE, NUMBER, Sk.ffi.isNumber(scalePy), scalePy);
@@ -31717,12 +31730,12 @@ mod[ARROW_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     else {
       scale = 1;
     }
-    if (Sk.ffi.isDefined(axisPy)) {
-      Sk.ffi.checkArgType(PROP_AXIS, VECTOR_3, Sk.ffi.isClass(axisPy, VECTOR_3), axisPy);
-      axis = Sk.ffi.remapToJs(axisPy);
+    if (Sk.ffi.isDefined(attitudePy)) {
+      Sk.ffi.checkArgType(PROP_ATTITUDE, EUCLIDEAN_3, Sk.ffi.isClass(attitudePy, EUCLIDEAN_3), attitudePy);
+      quaternion = Sk.ffi.remapToJs(attitudePy).quaternion;
     }
     else {
-      axis = new THREE[VECTOR_3](0, 0, 1);
+      quaternion = new THREE[QUATERNION](0, 0, 0, 1);
     }
     if (Sk.ffi.isDefined(segmentsPy)) {
       Sk.ffi.checkArgType(PROP_SEGMENTS, INT, Sk.ffi.isNumber(segmentsPy), segmentsPy);
@@ -31745,7 +31758,7 @@ mod[ARROW_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var d = new THREE[VECTOR_3](radiusShaft, 0, 0);
     var e = new THREE[VECTOR_3](0, 0, 0);
     var points = [a, b, c, d, e];
-    Sk.ffi.referenceToPy(new THREE[REVOLUTION_GEOMETRY](points, segments, 0, 2 * Math.PI, axis), ARROW_GEOMETRY, undefined, selfPy);
+    Sk.ffi.referenceToPy(new THREE[REVOLUTION_GEOMETRY](points, segments, 0, 2 * Math.PI, quaternion), ARROW_GEOMETRY, undefined, selfPy);
   });
   $loc.__getattr__ = Sk.ffi.functionPy(function(geometryPy, name) {
     var geometry = Sk.ffi.remapToJs(geometryPy);
@@ -32204,36 +32217,16 @@ mod[OCTAHEDRON_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
  * @param {number=} segments
  * @param {number=} phiStart
  * @param {number=} phiLength
- * @param {Object=} axis
+ * @param {Object=} attitude
  */
-THREE.RevolutionGeometry = function (points, segments, phiStart, phiLength, axis) {
+THREE.RevolutionGeometry = function (points, segments, phiStart, phiLength, attitude) {
 
   THREE[GEOMETRY].call( this );
 
-  var e3 = new THREE[VECTOR_3]( 0, 0, 1 );
   segments = segments || 12;
   phiStart = phiStart || 0;
   phiLength = phiLength || 2 * Math.PI;
-  axis = axis || e3;
-  function rotor(a, b) {
-    // TODO: This doesn't work when a is anti-parallel to b.
-    var ax = a.x;
-    var ay = a.y;
-    var az = a.z;
-    var bx = b.x;
-    var by = b.y;
-    var bz = b.z;
-    var sp = ax * bx + ay * by + az * bz;
-    var w0 = 1 + sp;
-    var scale = 1 / Math.sqrt(2 * w0);
-    var w = w0 * scale;
-    var x = (ay * bz - az * by) * scale;
-    var y = (az * bx - ax * bz) * scale;
-    var z = (ax * by - ay * bx) * scale;
-    return new THREE[QUATERNION](x, y, z, w);
-  }
-
-  var rotation = rotor(e3, axis);
+  attitude = attitude || new THREE[QUATERNION](0, 0, 0, 1);
 
   // Determine heuristically whether the user intended to make a complete revolution.
   var isClosed = Math.abs(2 * Math.PI - Math.abs(phiLength - phiStart)) < 0.0001;
@@ -32260,7 +32253,7 @@ THREE.RevolutionGeometry = function (points, segments, phiStart, phiLength, axis
       vertex.y = s * pt.x + c * pt.y;
       vertex.z = pt.z;
 
-      vertex['applyQuaternion'](rotation);
+      vertex['applyQuaternion'](attitude);
 
       this['vertices'].push( vertex );
 
@@ -32313,7 +32306,7 @@ THREE.RevolutionGeometry = function (points, segments, phiStart, phiLength, axis
 THREE.RevolutionGeometry.prototype = Object.create( THREE[GEOMETRY].prototype );
 
 mod[REVOLUTION_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, pointsPy, segmentsPy, phiStartPy, phiLengthPy, axisPy) {
+  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, pointsPy, segmentsPy, phiStartPy, phiLengthPy, attitudePy) {
     Sk.ffi.checkMethodArgs(REVOLUTION_GEOMETRY, arguments, 1, 5);
     Sk.ffi.checkArgType(PROP_POINTS, Sk.ffi.PyType.LIST, Sk.ffi.isList(pointsPy), pointsPy);
     if (Sk.ffi.isDefined(segmentsPy)) {
@@ -32325,15 +32318,17 @@ mod[REVOLUTION_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     if (Sk.ffi.isDefined(phiLengthPy)) {
       Sk.ffi.checkArgType(PROP_PHI_LENGTH, NUMBER, Sk.ffi.isNumber(phiLengthPy), phiLengthPy);
     }
-    if (Sk.ffi.isDefined(axisPy)) {
-      Sk.ffi.checkArgType(PROP_AXIS, VECTOR_3, Sk.ffi.isClass(axisPy, VECTOR_3), axisPy);
+    if (Sk.ffi.isDefined(attitudePy)) {
+      Sk.ffi.checkArgType(PROP_ATTITUDE, EUCLIDEAN_3, Sk.ffi.isClass(attitudePy, EUCLIDEAN_3), attitudePy);
     }
+    var attitude   = Sk.ffi.remapToJs(attitudePy);
+    var quaternion = attitude ? attitude.quaternion : undefined;
     Sk.ffi.referenceToPy(new THREE[REVOLUTION_GEOMETRY](
       Sk.ffi.remapToJs(pointsPy),
       Sk.ffi.remapToJs(segmentsPy),
       Sk.ffi.remapToJs(phiStartPy),
       Sk.ffi.remapToJs(phiLengthPy),
-      Sk.ffi.remapToJs(axisPy)), REVOLUTION_GEOMETRY, undefined, selfPy);
+      quaternion), REVOLUTION_GEOMETRY, undefined, selfPy);
   });
   $loc.__getattr__ = Sk.ffi.functionPy(function(geometryPy, name) {
     var geometry = Sk.ffi.remapToJs(geometryPy);
@@ -32647,22 +32642,22 @@ mod[OBJECT_3D] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var obj = Sk.ffi.remapToJs(objPy);
     switch(name) {
       case PROP_POSITION: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(obj[PROP_POSITION], VECTOR_3));
+        return vectorToEuclidean3Py(obj[PROP_POSITION]);
       }
       case PROP_QUATERNION: {
         return Sk.ffi.callsim(mod[QUATERNION], Sk.ffi.referenceToPy(obj[PROP_QUATERNION], QUATERNION));
       }
       case PROP_ROTATION: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(obj[PROP_ROTATION], VECTOR_3));
+        return vectorToEuclidean3Py(obj[PROP_ROTATION]);
       }
       case PROP_EULER_ORDER: {
         return Sk.ffi.stringToPy(obj[PROP_EULER_ORDER]);
       }
       case PROP_SCALE: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(obj[PROP_SCALE], VECTOR_3));
+        return vectorToEuclidean3Py(obj[PROP_SCALE]);
       }
       case PROP_UP: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(obj[PROP_UP], VECTOR_3));
+        return vectorToEuclidean3Py(obj[PROP_UP]);
       }
       case PROP_USE_QUATERNION: {
         return obj[PROP_USE_QUATERNION];
@@ -32675,20 +32670,19 @@ mod[OBJECT_3D] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       }
     }
   });
-  $loc.__setattr__ = Sk.ffi.functionPy(function(obj, name, value) {
+  $loc.__setattr__ = Sk.ffi.functionPy(function(obj, name, valuePy) {
     obj = Sk.ffi.remapToJs(obj);
-    value = Sk.ffi.remapToJs(value);
+    var value = Sk.ffi.remapToJs(valuePy);
     switch(name) {
-      case PROP_POSITION: {
-        obj[PROP_POSITION] = value;
+      case PROP_POSITION:
+      case PROP_ROTATION:
+      case PROP_SCALE:
+      case PROP_UP: {
+        setVectorProperty(obj, name, valuePy);
       }
       break;
       case PROP_QUATERNION: {
         obj[PROP_QUATERNION] = value;
-      }
-      break;
-      case PROP_ROTATION: {
-        obj[PROP_ROTATION] = value;
       }
       break;
       case PROP_EULER_ORDER: {
@@ -32698,14 +32692,6 @@ mod[OBJECT_3D] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         else {
           throw new Error(name + " must be a string");
         }
-      }
-      break;
-      case PROP_SCALE: {
-        obj[PROP_SCALE] = value;
-      }
-      break;
-      case PROP_UP: {
-        obj[PROP_UP] = value;
       }
       break;
       case PROP_USE_QUATERNION: {
@@ -32801,22 +32787,22 @@ mod[DIRECTIONAL_LIGHT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         return Sk.ffi.numberToFloatPy(light[PROP_INTENSITY]);
       }
       case PROP_POSITION: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(light[PROP_POSITION], VECTOR_3));
+        return vectorToEuclidean3Py(light[PROP_POSITION]);
       }
       case PROP_QUATERNION: {
         return Sk.ffi.callsim(mod[QUATERNION], Sk.ffi.referenceToPy(light[PROP_QUATERNION], QUATERNION));
       }
       case PROP_ROTATION: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(light[PROP_ROTATION], VECTOR_3));
+        return vectorToEuclidean3Py(light[PROP_ROTATION]);
       }
       case PROP_EULER_ORDER: {
         return Sk.ffi.stringToPy(light[PROP_EULER_ORDER]);
       }
       case PROP_SCALE: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(light[PROP_SCALE], VECTOR_3));
+        return vectorToEuclidean3Py(light[PROP_SCALE]);
       }
       case PROP_UP: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(light[PROP_UP], VECTOR_3));
+        return vectorToEuclidean3Py(light[PROP_UP]);
       }
       case PROP_USE_QUATERNION: {
         return light[PROP_USE_QUATERNION];
@@ -32840,9 +32826,9 @@ mod[DIRECTIONAL_LIGHT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       }
     }
   });
-  $loc.__setattr__ = Sk.ffi.functionPy(function(light, name, value) {
+  $loc.__setattr__ = Sk.ffi.functionPy(function(light, name, valuePy) {
     light = Sk.ffi.remapToJs(light);
-    value = Sk.ffi.remapToJs(value);
+    var value = Sk.ffi.remapToJs(valuePy);
     switch(name) {
       case PROP_COLOR: {
         light[PROP_COLOR] = new THREE[COLOR](value);
@@ -32866,16 +32852,15 @@ mod[DIRECTIONAL_LIGHT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         }
       }
       break;
-      case PROP_POSITION: {
-        light[PROP_POSITION] = value;
+      case PROP_POSITION:
+      case PROP_ROTATION:
+      case PROP_SCALE:
+      case PROP_UP: {
+        setVectorProperty(light, name, valuePy);
       }
       break;
       case PROP_QUATERNION: {
         light[PROP_QUATERNION] = value;
-      }
-      break;
-      case PROP_ROTATION: {
-        light[PROP_ROTATION] = value;
       }
       break;
       case PROP_EULER_ORDER: {
@@ -32885,14 +32870,6 @@ mod[DIRECTIONAL_LIGHT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         else {
           throw new Error(name + " must be a string");
         }
-      }
-      break;
-      case PROP_SCALE: {
-        light[PROP_SCALE] = value;
-      }
-      break;
-      case PROP_UP: {
-        light[PROP_UP] = value;
       }
       break;
       case PROP_USE_QUATERNION: {
@@ -32946,22 +32923,22 @@ mod[POINT_LIGHT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         return Sk.ffi.numberToFloatPy(light[PROP_INTENSITY]);
       }
       case PROP_POSITION: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(light[PROP_POSITION], VECTOR_3));
+        return vectorToEuclidean3Py(light[PROP_POSITION]);
       }
       case PROP_QUATERNION: {
         return Sk.ffi.callsim(mod[QUATERNION], Sk.ffi.referenceToPy(light[PROP_QUATERNION], QUATERNION));
       }
       case PROP_ROTATION: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(light[PROP_ROTATION], VECTOR_3));
+        return vectorToEuclidean3Py(light[PROP_ROTATION]);
       }
       case PROP_EULER_ORDER: {
         return Sk.ffi.stringToPy(light[PROP_EULER_ORDER]);
       }
       case PROP_SCALE: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(light[PROP_SCALE], VECTOR_3));
+        return vectorToEuclidean3Py(light[PROP_SCALE]);
       }
       case PROP_UP: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(light[PROP_UP], VECTOR_3));
+        return vectorToEuclidean3Py(light[PROP_UP]);
       }
       case PROP_USE_QUATERNION: {
         return light[PROP_USE_QUATERNION];
@@ -32985,9 +32962,9 @@ mod[POINT_LIGHT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       }
     }
   });
-  $loc.__setattr__ = Sk.ffi.functionPy(function(light, name, value) {
+  $loc.__setattr__ = Sk.ffi.functionPy(function(light, name, valuePy) {
     light = Sk.ffi.remapToJs(light);
-    value = Sk.ffi.remapToJs(value);
+    var value = Sk.ffi.remapToJs(valuePy);
     switch(name) {
       case PROP_COLOR: {
         light[PROP_COLOR] = new THREE[COLOR](value);
@@ -33011,16 +32988,15 @@ mod[POINT_LIGHT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         }
       }
       break;
-      case PROP_POSITION: {
-        light[PROP_POSITION] = value;
+      case PROP_POSITION:
+      case PROP_ROTATION:
+      case PROP_SCALE:
+      case PROP_UP: {
+        setVectorProperty(light, name, valuePy);
       }
       break;
       case PROP_QUATERNION: {
         light[PROP_QUATERNION] = value;
-      }
-      break;
-      case PROP_ROTATION: {
-        light[PROP_ROTATION] = value;
       }
       break;
       case PROP_EULER_ORDER: {
@@ -33030,14 +33006,6 @@ mod[POINT_LIGHT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         else {
           throw new Error(name + " must be a string");
         }
-      }
-      break;
-      case PROP_SCALE: {
-        light[PROP_SCALE] = value;
-      }
-      break;
-      case PROP_UP: {
-        light[PROP_UP] = value;
       }
       break;
       case PROP_USE_QUATERNION: {
@@ -33075,22 +33043,22 @@ mod[LINE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var line = Sk.ffi.remapToJs(linePy);
     switch(name) {
       case PROP_POSITION: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(line[PROP_POSITION], VECTOR_3));
+        return vectorToEuclidean3Py(line[PROP_POSITION]);
       }
       case PROP_QUATERNION: {
         return Sk.ffi.callsim(mod[QUATERNION], Sk.ffi.referenceToPy(line[PROP_QUATERNION], QUATERNION));
       }
       case PROP_ROTATION: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(line[PROP_ROTATION], VECTOR_3));
+        return vectorToEuclidean3Py(line[PROP_ROTATION]);
       }
       case PROP_EULER_ORDER: {
         return Sk.ffi.stringToPy(line[PROP_EULER_ORDER]);
       }
       case PROP_SCALE: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(line[PROP_SCALE], VECTOR_3));
+        return vectorToEuclidean3Py(line[PROP_SCALE]);
       }
       case PROP_UP: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(line[PROP_UP], VECTOR_3));
+        return vectorToEuclidean3Py(line[PROP_UP]);
       }
       case PROP_USE_QUATERNION: {
         return line[PROP_USE_QUATERNION];
@@ -33235,22 +33203,22 @@ mod[MESH] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         }
       }
       case PROP_POSITION: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(mesh[PROP_POSITION], VECTOR_3));
+        return vectorToEuclidean3Py(mesh[PROP_POSITION]);
       }
       case PROP_QUATERNION: {
         return Sk.ffi.callsim(mod[QUATERNION], Sk.ffi.referenceToPy(mesh[PROP_QUATERNION], QUATERNION));
       }
       case PROP_ROTATION: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(mesh[PROP_ROTATION], VECTOR_3));
+        return vectorToEuclidean3Py(mesh[PROP_ROTATION]);
       }
       case PROP_EULER_ORDER: {
         return Sk.ffi.stringToPy(mesh[PROP_EULER_ORDER]);
       }
       case PROP_SCALE: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(mesh[PROP_SCALE], VECTOR_3));
+        return vectorToEuclidean3Py(mesh[PROP_SCALE]);
       }
       case PROP_UP: {
-        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(mesh[PROP_UP], VECTOR_3));
+        return vectorToEuclidean3Py(mesh[PROP_UP]);
       }
       case PROP_USE_QUATERNION: {
         return mesh[PROP_USE_QUATERNION];
@@ -33363,17 +33331,15 @@ mod[MESH] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         }
       }
       break;
-      case PROP_POSITION: {
-        Sk.ffi.checkArgType(PROP_POSITION, VECTOR_3, isVector3Py(valuePy), valuePy);
-        mesh[PROP_POSITION] = value;
+      case PROP_POSITION:
+      case PROP_ROTATION:
+      case PROP_SCALE:
+      case PROP_UP: {
+        setVectorProperty(mesh, name, valuePy);
       }
       break;
       case PROP_QUATERNION: {
         mesh[PROP_QUATERNION] = value;
-      }
-      break;
-      case PROP_ROTATION: {
-        mesh[PROP_ROTATION] = value;
       }
       break;
       case PROP_EULER_ORDER: {
@@ -33383,14 +33349,6 @@ mod[MESH] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         else {
           throw new Error(name + " must be a string");
         }
-      }
-      break;
-      case PROP_SCALE: {
-        mesh[PROP_SCALE] = value;
-      }
-      break;
-      case PROP_UP: {
-        mesh[PROP_UP] = value;
       }
       break;
       case PROP_USE_QUATERNION: {
@@ -33771,16 +33729,20 @@ if (typeof THREE !== 'undefined') {
 }).call(this);
 /**
  * Convenience function for incorporating a Euclidean3 class into a module.
- *
- * Usage:
- *
- * Sk.builtin.defineEuclidean3(mod);
  */
 (function() {
-this.BLADE = this.BLADE || {};
-var BLADE = this.BLADE;
-Sk.builtin.defineEuclidean3 = function(mod, factory, EUCLIDEAN_3) {
-Sk.ffi.checkFunctionArgs("defineEuclidean3", arguments, 3, 3);
+Sk.builtin.defineEuclidean3 = function(mod, factory, EUCLIDEAN_3, THREE, BLADE) {
+Sk.ffi.checkFunctionArgs("defineEuclidean3", arguments, 5, 5);
+/**
+ * @const
+ * @type {string}
+ */
+var VECTOR_3                   = "Vector3";
+/**
+ * @const
+ * @type {string}
+ */
+var QUATERNION                 = "Quaternion";
 /**
  * @const
  * @type {string}
@@ -33831,6 +33793,21 @@ var INT                        = Sk.ffi.PyType.INT;
  * @type {!Array.<Sk.ffi.PyType>}
  */
 var NUMBER                     = [Sk.ffi.PyType.FLOAT, Sk.ffi.PyType.INT, Sk.ffi.PyType.LONG];
+/**
+ * @const
+ * @type {string}
+ */
+var PROP_VECTOR                = "vector";
+/**
+ * @const
+ * @type {string}
+ */
+var PROP_QUATERNION            = "quaternion";
+/**
+ * @const
+ * @type {string}
+ */
+var PROP_MUTABLE               = "mutable";
 /**
  * @const
  * @type {string}
@@ -33896,6 +33873,11 @@ var METHOD_DOT                 = "dot";
  * @type {string}
  */
 var METHOD_EXP                 = "exp";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_CONSTANTIFY         = "constantify";
 /**
  * @const
  * @type {string}
@@ -33975,7 +33957,47 @@ var ARG_OTHER                  = "other";
  * @const
  * @type {string}
  */
+var ARG_SELF                   = "self";
+/**
+ * @const
+ * @type {string}
+ */
 var ARG_VALUE                  = "value";
+/**
+ * @constructor
+ */
+THREE.Euclidean3 = function(vector, quaternion, xyz, mutable) {
+  this.vector     = vector;
+  this.quaternion = quaternion;
+  this._pseudo    = xyz;
+  this._mutable   = (typeof mutable === 'boolean') ? mutable : true;
+}
+THREE.Euclidean3.prototype = {
+  constructor: THREE.Euclidean3,
+  get w () {return this.quaternion.w;},
+  set w (value) {this.checkMutable(); this.quaternion.w = value;},
+  get x () {return this.vector.x;},
+  set x (value) {this.checkMutable(); this.vector.x = value;},
+  get y () {return this.vector.y;},
+  set y (value) {this.checkMutable(); this.vector.y = value;},
+  get z () {return this.vector.z;},
+  set z (value) {this.checkMutable(); this.vector.z = value;},
+  get xy () {return -this.quaternion.z;},
+  set xy (value) {this.checkMutable(); this.quaternion.z = -value;},
+  get yz () {return -this.quaternion.x;},
+  set yz (value) {this.checkMutable(); this.quaternion.x = -value;},
+  get zx () {return -this.quaternion.y;},
+  set zx (value) {this.checkMutable(); this.quaternion.y = -value;},
+  get xyz () {return this._pseudo;},
+  set xyz (value) {this.checkMutable(); this._pseudo = value;},
+  get mutable () {return this._mutable;},
+  set mutable (value) {this._mutable = value;},
+  checkMutable: function() {
+    if (!this._mutable) {
+      throw new Error("Quantity is not mutable");
+    }
+  }
+}
 
 function isNumber(x)    {return typeof x === 'number';}
 function isEuclidean3(valuePy) {return Sk.ffi.isClass(valuePy, EUCLIDEAN_3);}
@@ -34333,17 +34355,28 @@ function divide(a000, a001, a010, a011, a100, a101, a110, a111, b000, b001, b010
     return coordsJsToE3Py(w, x, y, z, xy, yz, zx, xyz);
   }
 }
-
-function coordsJsToE3Py(w, x, y, z, xy, yz, zx, xyz) {
-  w   = Sk.ffi.numberToFloatPy(w);
-  x   = Sk.ffi.numberToFloatPy(x);
-  y   = Sk.ffi.numberToFloatPy(y);
-  z   = Sk.ffi.numberToFloatPy(z);
-  xy  = Sk.ffi.numberToFloatPy(xy);
-  yz  = Sk.ffi.numberToFloatPy(yz);
-  zx  = Sk.ffi.numberToFloatPy(zx);
-  xyz = Sk.ffi.numberToFloatPy(xyz);
-  return Sk.ffi.callsim(mod[EUCLIDEAN_3], w, x, y, z, xy, yz, zx, xyz);
+/**
+ * @param {number} w
+ * @param {number} x
+ * @param {number} y
+ * @param {number} z
+ * @param {number} xy
+ * @param {number} yz
+ * @param {number} zx
+ * @param {number} xyz
+ * @param {boolean=} mutable
+ */
+function coordsJsToE3Py(w, x, y, z, xy, yz, zx, xyz, mutable) {
+  var wPy   = Sk.ffi.numberToFloatPy(w);
+  var xPy   = Sk.ffi.numberToFloatPy(x);
+  var yPy   = Sk.ffi.numberToFloatPy(y);
+  var zPy   = Sk.ffi.numberToFloatPy(z);
+  var xyPy  = Sk.ffi.numberToFloatPy(xy);
+  var yzPy  = Sk.ffi.numberToFloatPy(yz);
+  var zxPy  = Sk.ffi.numberToFloatPy(zx);
+  var xyzPy = Sk.ffi.numberToFloatPy(xyz);
+  var mutablePy = Sk.ffi.booleanToPy(mutable);
+  return Sk.ffi.callsim(mod[EUCLIDEAN_3], wPy, xPy, yPy, zPy, xyPy, yzPy, zxPy, xyzPy, mutablePy);
 }
 
 function coord(mv, index) {
@@ -34407,50 +34440,61 @@ function compute(f, a, b, coord, pack) {
   return pack(x0, x1, x2, x3, x4, x5, x6, x7);
 }
 
-mod[SCALAR_E3] = Sk.ffi.functionPy(function(w) {
-  Sk.ffi.checkFunctionArgs(SCALAR_E3, arguments, 1, 1);
-  Sk.ffi.checkArgType(PROP_W, NUMBER, Sk.ffi.isNumber(w), w);
-  w = Sk.ffi.numberToJs(w);
-  return coordsJsToE3Py(w, 0, 0, 0, 0, 0, 0, 0);
+mod[SCALAR_E3] = Sk.ffi.functionPy(function(wPy, mutablePy) {
+  Sk.ffi.checkFunctionArgs(SCALAR_E3, arguments, 1, 2);
+  Sk.ffi.checkArgType(PROP_W, NUMBER, Sk.ffi.isNumber(wPy), wPy);
+  if (Sk.ffi.isDefined(mutablePy)) {
+    Sk.ffi.checkArgType(PROP_MUTABLE, Sk.ffi.PyType.BOOL, Sk.ffi.isBool(mutablePy), mutablePy);
+  }
+  return coordsJsToE3Py(Sk.ffi.numberToJs(wPy), 0, 0, 0, 0, 0, 0, 0, Sk.ffi.remapToJs(mutablePy));
 });
 
-mod[VECTOR_E3] = Sk.ffi.functionPy(function(x, y, z) {
-  Sk.ffi.checkFunctionArgs(VECTOR_E3, arguments, 3, 3);
+mod[VECTOR_E3] = Sk.ffi.functionPy(function(x, y, z, mutablePy) {
+  Sk.ffi.checkFunctionArgs(VECTOR_E3, arguments, 3, 4);
   Sk.ffi.checkArgType(PROP_X, NUMBER, Sk.ffi.isNumber(x), x);
   Sk.ffi.checkArgType(PROP_Y, NUMBER, Sk.ffi.isNumber(y), y);
   Sk.ffi.checkArgType(PROP_Z, NUMBER, Sk.ffi.isNumber(z), z);
+  if (Sk.ffi.isDefined(mutablePy)) {
+    Sk.ffi.checkArgType(PROP_MUTABLE, Sk.ffi.PyType.BOOL, Sk.ffi.isBool(mutablePy), mutablePy);
+  }
   x = Sk.ffi.numberToJs(x);
   y = Sk.ffi.numberToJs(y);
   z = Sk.ffi.numberToJs(z);
-  return coordsJsToE3Py(0, x, y, z, 0, 0, 0, 0);
+  return coordsJsToE3Py(0, x, y, z, 0, 0, 0, 0, Sk.ffi.remapToJs(mutablePy));
 });
 
-mod[BIVECTOR_E3] = Sk.ffi.functionPy(function(xy, yz, zx) {
-  Sk.ffi.checkFunctionArgs(BIVECTOR_E3, arguments, 3, 3);
+mod[BIVECTOR_E3] = Sk.ffi.functionPy(function(xy, yz, zx, mutablePy) {
+  Sk.ffi.checkFunctionArgs(BIVECTOR_E3, arguments, 3, 4);
   Sk.ffi.checkArgType(PROP_XY, NUMBER, Sk.ffi.isNumber(xy), xy);
   Sk.ffi.checkArgType(PROP_YZ, NUMBER, Sk.ffi.isNumber(yz), yz);
   Sk.ffi.checkArgType(PROP_ZX, NUMBER, Sk.ffi.isNumber(zx), zx);
+  if (Sk.ffi.isDefined(mutablePy)) {
+    Sk.ffi.checkArgType(PROP_MUTABLE, Sk.ffi.PyType.BOOL, Sk.ffi.isBool(mutablePy), mutablePy);
+  }
   xy = Sk.ffi.numberToJs(xy);
   yz = Sk.ffi.numberToJs(yz);
   zx = Sk.ffi.numberToJs(zx);
-  return coordsJsToE3Py(0, 0, 0, 0, xy, yz, zx, 0);
+  return coordsJsToE3Py(0, 0, 0, 0, xy, yz, zx, 0, Sk.ffi.remapToJs(mutablePy));
 });
 
-mod[PSEUDOSCALAR_E3] = Sk.ffi.functionPy(function(xyz) {
-  Sk.ffi.checkFunctionArgs(PSEUDOSCALAR_E3, arguments, 1, 1);
+mod[PSEUDOSCALAR_E3] = Sk.ffi.functionPy(function(xyz, mutablePy) {
+  Sk.ffi.checkFunctionArgs(PSEUDOSCALAR_E3, arguments, 1, 2);
   Sk.ffi.checkArgType(PROP_XYZ, NUMBER, Sk.ffi.isNumber(xyz), xyz);
+  if (Sk.ffi.isDefined(mutablePy)) {
+    Sk.ffi.checkArgType(PROP_MUTABLE, Sk.ffi.PyType.BOOL, Sk.ffi.isBool(mutablePy), mutablePy);
+  }
   xyz = Sk.ffi.numberToJs(xyz);
-  return coordsJsToE3Py(0, 0, 0, 0, 0, 0, 0, xyz);
+  return coordsJsToE3Py(0, 0, 0, 0, 0, 0, 0, xyz, Sk.ffi.remapToJs(mutablePy));
 });
 
 mod[EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-  $loc.__init__ = Sk.ffi.functionPy(function(self, w, x, y, z, xy, yz, zx, xyz) {
-    Sk.ffi.checkMethodArgs(EUCLIDEAN_3, arguments, 1, 8);
+  $loc.__init__ = Sk.ffi.functionPy(function(self, w, x, y, z, xy, yz, zx, xyz, mutablePy) {
+    Sk.ffi.checkMethodArgs(EUCLIDEAN_3, arguments, 1, 9);
     switch(Sk.ffi.getType(w)) {
       case Sk.ffi.PyType.FLOAT:
       case Sk.ffi.PyType.INT:
       case Sk.ffi.PyType.LONG: {
-        Sk.ffi.checkMethodArgs(EUCLIDEAN_3, arguments, 8, 8);
+        Sk.ffi.checkMethodArgs(EUCLIDEAN_3, arguments, 8, 9);
         Sk.ffi.checkArgType(PROP_W,    NUMBER, Sk.ffi.isNumber(w), w);
         Sk.ffi.checkArgType(PROP_X,    NUMBER, Sk.ffi.isNumber(x), x);
         Sk.ffi.checkArgType(PROP_Y,    NUMBER, Sk.ffi.isNumber(y), y);
@@ -34459,6 +34503,9 @@ mod[EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         Sk.ffi.checkArgType(PROP_YZ,   NUMBER, Sk.ffi.isNumber(yz), yz);
         Sk.ffi.checkArgType(PROP_ZX,   NUMBER, Sk.ffi.isNumber(zx), zx);
         Sk.ffi.checkArgType(PROP_XYZ,  NUMBER, Sk.ffi.isNumber(xyz), xyz);
+        if (Sk.ffi.isDefined(mutablePy)) {
+          Sk.ffi.checkArgType(PROP_MUTABLE, Sk.ffi.PyType.BOOL, Sk.ffi.isBool(mutablePy), mutablePy);
+        }
         w   = Sk.ffi.remapToJs(w);
         x   = Sk.ffi.remapToJs(x);
         y   = Sk.ffi.remapToJs(y);
@@ -34467,9 +34514,10 @@ mod[EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         yz  = Sk.ffi.remapToJs(yz);
         zx  = Sk.ffi.remapToJs(zx);
         xyz = Sk.ffi.remapToJs(xyz);
+        var mutable = Sk.ffi.remapToJs(mutablePy, true);
         var vector = factory.vector(x,y,z);
         var quaternion = factory.quaternion(-yz, -zx, -xy, w);
-        Sk.ffi.referenceToPy({"vector": vector, "quaternion": quaternion, "xyz": xyz}, EUCLIDEAN_3, undefined, self);
+        Sk.ffi.referenceToPy(new THREE.Euclidean3(vector, quaternion, xyz, mutable), EUCLIDEAN_3, undefined, self);
       }
       break;
       case Sk.ffi.PyType.CLASS: {
@@ -34750,6 +34798,11 @@ mod[EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       return selfPy;
     }
   });
+  $loc.__mod__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+    var s  = Sk.ffi.remapToJs(selfPy);
+    var o = Sk.ffi.remapToJs(otherPy);
+    return Sk.ffi.numberToFloatPy(s.x * o.x + s.y * o.y + s.z * o.z);
+  });
   $loc.__xor__ = Sk.ffi.functionPy(function(a, b) {
     a = Sk.ffi.remapToJs(a);
     b = Sk.ffi.remapToJs(b);
@@ -34936,6 +34989,13 @@ mod[EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     a.xyz = rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 7);
     return selfPy;
   });
+  $loc.__len__ = Sk.ffi.functionPy(function(selfPy) {
+    var self = Sk.ffi.remapToJs(selfPy);
+    var x = self.x;
+    var y = self.y;
+    var z = self.z;
+    return Sk.ffi.numberToFloatPy(Math.sqrt(x*x+y*y+z*z));
+  });
   $loc.__pos__ = Sk.ffi.functionPy(function(selfPy) {
     return selfPy;
   });
@@ -35007,28 +35067,37 @@ mod[EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var quaternion = self.quaternion;
     switch(name) {
       case PROP_W: {
-        return Sk.ffi.numberToFloatPy(quaternion.w);
+        return Sk.ffi.numberToFloatPy(self.w);
       }
       case PROP_X: {
-        return Sk.ffi.numberToFloatPy(vector.x);
+        return Sk.ffi.numberToFloatPy(self.x);
       }
       case PROP_Y: {
-        return Sk.ffi.numberToFloatPy(vector.y);
+        return Sk.ffi.numberToFloatPy(self.y);
       }
       case PROP_Z: {
-        return Sk.ffi.numberToFloatPy(vector.z);
+        return Sk.ffi.numberToFloatPy(self.z);
       }
       case PROP_XY: {
-        return Sk.ffi.numberToFloatPy(-quaternion.z);
+        return Sk.ffi.numberToFloatPy(self.xy);
       }
       case PROP_YZ: {
-        return Sk.ffi.numberToFloatPy(-quaternion.x);
+        return Sk.ffi.numberToFloatPy(self.yz);
       }
       case PROP_ZX: {
-        return Sk.ffi.numberToFloatPy(-quaternion.y);
+        return Sk.ffi.numberToFloatPy(self.zx);
       }
       case PROP_XYZ: {
         return Sk.ffi.numberToFloatPy(self.xyz);
+      }
+      case PROP_MUTABLE: {
+        return Sk.ffi.booleanToPy(self.mutable);
+      }
+      case PROP_VECTOR: {
+        return Sk.ffi.callsim(mod[VECTOR_3], Sk.ffi.referenceToPy(self.vector, VECTOR_3));
+      }
+      case PROP_QUATERNION: {
+        return Sk.ffi.callsim(mod[QUATERNION], Sk.ffi.referenceToPy(self.quaternion, QUATERNION));
       }
       case METHOD_ADD: {
         return Sk.ffi.callableToPy(mod, METHOD_ADD, function(methodPy, otherPy) {
@@ -35043,6 +35112,13 @@ mod[EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           quaternion.y += arg.quaternion.y;
           quaternion.z += arg.quaternion.z;
           self.xyz += arg.xyz;
+          return selfPy;
+        });
+      }
+      case METHOD_CONSTANTIFY: {
+        return Sk.ffi.callableToPy(mod, METHOD_CONSTANTIFY, function(methodPy) {
+          Sk.ffi.checkMethodArgs(METHOD_CONSTANTIFY, arguments, 0, 0);
+          self.mutable = false;
           return selfPy;
         });
       }
@@ -35127,7 +35203,7 @@ mod[EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       }
       case METHOD_SET: {
         return Sk.ffi.callableToPy(mod, METHOD_SET, function(methodPy, xPy, yPy, zPy) {
-          Sk.ffi.checkMethodArgs(METHOD_SET, arguments, 1, 1);
+          Sk.ffi.checkMethodArgs(METHOD_SET, arguments, 3, 3);
           Sk.ffi.checkArgType(PROP_X, NUMBER, Sk.ffi.isNumber(xPy), xPy);
           Sk.ffi.checkArgType(PROP_Y, NUMBER, Sk.ffi.isNumber(yPy), yPy);
           Sk.ffi.checkArgType(PROP_Z, NUMBER, Sk.ffi.isNumber(zPy), zPy);
@@ -35162,40 +35238,27 @@ mod[EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       }
     }
   });
-  $loc.__setattr__ = Sk.ffi.functionPy(function(mv, name, value) {
-    mv = Sk.ffi.remapToJs(mv);
-    value = Sk.ffi.remapToJs(value);
+  $loc.__setattr__ = Sk.ffi.functionPy(function(selfPy, name, valuePy) {
+    // We don't normally check the self argument for performance reasons.
+    // I'm doing it here to prove the implementation and because we expect coordinate-mutation to be rare.
+    Sk.ffi.checkArgType(ARG_SELF, EUCLIDEAN_3, isEuclidean3(selfPy), selfPy);
+    var self = Sk.ffi.remapToJs(selfPy);
     switch(name) {
-      case PROP_W: {
-        mv.w = value;
-      }
-      break;
-      case PROP_X: {
-        mv.x = value;
-      }
-      break;
-      case PROP_Y: {
-        mv.y = value;
-      }
-      break;
-      case PROP_Z: {
-        mv.z = value;
-      }
-      break;
-      case PROP_XY: {
-        mv.xy = value;
-      }
-      break;
-      case PROP_YZ: {
-        mv.yz = value;
-      }
-      break;
-      case PROP_ZX: {
-        mv.zx = value;
-      }
-      break;
+      case PROP_W:
+      case PROP_X:
+      case PROP_Y:
+      case PROP_Z:
+      case PROP_XY:
+      case PROP_YZ:
+      case PROP_ZX:
       case PROP_XYZ: {
-        mv.xyz = value;
+        Sk.ffi.checkArgType(name, NUMBER, Sk.ffi.isNumber(valuePy), valuePy);
+        try {
+          self[name] = Sk.ffi.remapToJs(valuePy);
+        }
+        catch(e) {
+          throw Sk.ffi.assertionError(e.message);
+        }
       }
       break;
       default: {
@@ -35255,15 +35318,14 @@ mod[EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   });
   $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
     var self = Sk.ffi.remapToJs(selfPy);
-    var vector = self.vector;
     var quaternion = self.quaternion;
-    var w = quaternion.w;
-    var x = vector.x;
-    var y = vector.y;
-    var z = vector.z;
-    var xy = -quaternion.z;
-    var yz = -quaternion.x;
-    var zx = -quaternion.y;
+    var w   = self.w;
+    var x   = self.x;
+    var y   = self.y;
+    var z   = self.z;
+    var xy  = self.xy;
+    var yz  = self.yz;
+    var zx  = self.zx;
     var xyz = self.xyz;
     return Sk.ffi.stringToPy(stringFromCoordinates([w, x, y, z, xy, yz, zx, xyz], ["1", "i", "j", "k", "ij", "jk", "ki", "I"]));
   });
