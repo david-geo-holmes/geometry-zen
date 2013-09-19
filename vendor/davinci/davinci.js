@@ -30625,9 +30625,9 @@ var METHOD_CROSS               = "cross";
 */
 var METHOD_DOT                 = "dot";
 /**
-* @const
-* @type {string}
-*/
+ * @const
+ * @type {string}
+ */
 var METHOD_LOOK_AT             = "lookAt";
 /**
 * @const
@@ -30644,6 +30644,11 @@ var METHOD_SET_RGB             = "setRGB";
  * @type {string}
  */
 var ARG_AXIS                   = "axis";
+/**
+ * @const
+ * @type {string}
+ */
+var ARG_VECTOR                 = "vector";
 
 mod[NODE]  = Sk.builtin.buildNodeClass(mod);
 
@@ -30674,7 +30679,7 @@ function isGeometryPy(valuePy) {
 }
 
 function vectorToEuclidean3Py(vector) {
-  var euclidean = {"vector": vector, "quaternion": new THREE[QUATERNION](0,0,0,0), "xyz": 0};
+  var euclidean = new THREE[EUCLIDEAN_3](vector, new THREE[QUATERNION](0,0,0,0), 0);
   return Sk.ffi.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(euclidean, EUCLIDEAN_3));
 }
 
@@ -30695,6 +30700,17 @@ function methodAdd(target) {
   return Sk.ffi.callableToPy(mod, METHOD_ADD, function(methodPy, childPy) {
     var child = Sk.ffi.remapToJs(childPy);
     target.add(child);
+  });
+}
+
+function methodLookAt(targetPy) {
+  return Sk.ffi.callableToPy(mod, METHOD_LOOK_AT, function(methodPy, euclideanPy) {
+    Sk.ffi.checkMethodArgs(METHOD_LOOK_AT, arguments, 1, 1);
+    Sk.ffi.checkArgType(ARG_VECTOR, EUCLIDEAN_3, isEuclidean3Py(euclideanPy), euclideanPy);
+    var vectorPy = Sk.ffi.gattr(euclideanPy, PROP_VECTOR);
+    Sk.ffi.checkArgType(ARG_VECTOR, VECTOR_3, isVector3Py(vectorPy), vectorPy);
+    Sk.ffi.remapToJs(targetPy)[METHOD_LOOK_AT](Sk.ffi.remapToJs(vectorPy));
+    return targetPy;
   });
 }
 
@@ -30964,29 +30980,9 @@ mod[SCENE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       case PROP_USE_QUATERNION: {
         return scene[PROP_USE_QUATERNION];
       }
-      case METHOD_LOOK_AT: {
-        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-          $loc.__init__ = Sk.ffi.functionPy(function(self) {
-            self.tp$name = METHOD_LOOK_AT;
-          });
-          $loc.__call__ = Sk.ffi.functionPy(function(self, vectorPy) {
-            scene[METHOD_LOOK_AT](Sk.ffi.remapToJs(vectorPy));
-            return scenePy;
-          });
-          $loc.__str__ = Sk.ffi.functionPy(function(self) {
-            return Sk.ffi.stringToPy(METHOD_LOOK_AT);
-          })
-          $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-            return Sk.ffi.stringToPy(METHOD_LOOK_AT);
-          })
-        }, METHOD_LOOK_AT, []));
-      }
-      case METHOD_ADD: {
-        return methodAdd(scene);
-      }
-      case METHOD_REMOVE: {
-        return methodRemove(scene);
-      }
+      case METHOD_LOOK_AT: {return methodLookAt(scenePy);}
+      case METHOD_ADD:     {return methodAdd(scene);}
+      case METHOD_REMOVE:  {return methodRemove(scene);}
     }
   });
   $loc.__setattr__ = Sk.ffi.functionPy(function(scenePy, name, valuePy) {
@@ -31500,23 +31496,7 @@ mod[PERSPECTIVE_CAMERA] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       case PROP_USE_QUATERNION: {
         return camera[PROP_USE_QUATERNION];
       }
-      case METHOD_LOOK_AT: {
-        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-          $loc.__init__ = Sk.ffi.functionPy(function(methodPy) {
-            Sk.ffi.referenceToPy(camera, METHOD_LOOK_AT, undefined, methodPy);
-          });
-          $loc.__call__ = Sk.ffi.functionPy(function(methodPy, vectorPy) {
-            camera[METHOD_LOOK_AT](Sk.ffi.remapToJs(vectorPy));
-            return cameraPy;
-          });
-          $loc.__str__ = Sk.ffi.functionPy(function(self) {
-            return Sk.ffi.stringToPy(METHOD_LOOK_AT);
-          })
-          $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-            return Sk.ffi.stringToPy(METHOD_LOOK_AT);
-          })
-        }, METHOD_LOOK_AT, []));
-      }
+      case METHOD_LOOK_AT: {return methodLookAt(cameraPy);}
       case UPDATE_PROJECTION_MATRIX: {
         return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
           $loc.__init__ = Sk.ffi.functionPy(function(self) {
@@ -31620,23 +31600,7 @@ mod[ORTHOGRAPHIC_CAMERA] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       case PROP_USE_QUATERNION: {
         return camera[PROP_USE_QUATERNION];
       }
-      case METHOD_LOOK_AT: {
-        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-          $loc.__init__ = Sk.ffi.functionPy(function(self) {
-            self.tp$name = METHOD_LOOK_AT;
-          });
-          $loc.__call__ = Sk.ffi.functionPy(function(self, vectorPy) {
-            camera[METHOD_LOOK_AT](Sk.ffi.remapToJs(vectorPy));
-            return cameraPy;
-          });
-          $loc.__str__ = Sk.ffi.functionPy(function(self) {
-            return Sk.ffi.stringToPy(METHOD_LOOK_AT);
-          })
-          $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-            return Sk.ffi.stringToPy(METHOD_LOOK_AT);
-          })
-        }, METHOD_LOOK_AT, []));
-      }
+      case METHOD_LOOK_AT: {return methodLookAt(cameraPy);}
       case UPDATE_PROJECTION_MATRIX: {
         return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
           $loc.__init__ = Sk.ffi.functionPy(function(self) {
@@ -32807,23 +32771,7 @@ mod[DIRECTIONAL_LIGHT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       case PROP_USE_QUATERNION: {
         return light[PROP_USE_QUATERNION];
       }
-      case METHOD_LOOK_AT: {
-        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-          $loc.__init__ = Sk.ffi.functionPy(function(self) {
-            self.tp$name = METHOD_LOOK_AT;
-          });
-          $loc.__call__ = Sk.ffi.functionPy(function(self, vectorPy) {
-            light[METHOD_LOOK_AT](Sk.ffi.remapToJs(vectorPy));
-            return lightPy;
-          });
-          $loc.__str__ = Sk.ffi.functionPy(function(self) {
-            return Sk.ffi.stringToPy(METHOD_LOOK_AT);
-          })
-          $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-            return Sk.ffi.stringToPy(METHOD_LOOK_AT);
-          })
-        }, METHOD_LOOK_AT, []));
-      }
+      case METHOD_LOOK_AT: {return methodLookAt(lightPy);}
     }
   });
   $loc.__setattr__ = Sk.ffi.functionPy(function(light, name, valuePy) {
@@ -32943,23 +32891,7 @@ mod[POINT_LIGHT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       case PROP_USE_QUATERNION: {
         return light[PROP_USE_QUATERNION];
       }
-      case METHOD_LOOK_AT: {
-        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-          $loc.__init__ = Sk.ffi.functionPy(function(self) {
-            self.tp$name = METHOD_LOOK_AT;
-          });
-          $loc.__call__ = Sk.ffi.functionPy(function(self, vectorPy) {
-            light[METHOD_LOOK_AT](Sk.ffi.remapToJs(vectorPy));
-            return lightPy;
-          });
-          $loc.__str__ = Sk.ffi.functionPy(function(self) {
-            return Sk.ffi.stringToPy(METHOD_LOOK_AT);
-          })
-          $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-            return Sk.ffi.stringToPy(METHOD_LOOK_AT);
-          })
-        }, METHOD_LOOK_AT, []));
-      }
+      case METHOD_LOOK_AT: {return methodLookAt(lightPy);}
     }
   });
   $loc.__setattr__ = Sk.ffi.functionPy(function(light, name, valuePy) {
@@ -33063,23 +32995,7 @@ mod[LINE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       case PROP_USE_QUATERNION: {
         return line[PROP_USE_QUATERNION];
       }
-      case METHOD_LOOK_AT: {
-        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-          $loc.__init__ = Sk.ffi.functionPy(function(self) {
-            self.tp$name = METHOD_LOOK_AT;
-          });
-          $loc.__call__ = Sk.ffi.functionPy(function(self, vectorPy) {
-            line[METHOD_LOOK_AT](Sk.ffi.remapToJs(vectorPy));
-            return linePy;
-          });
-          $loc.__str__ = Sk.ffi.functionPy(function(self) {
-            return Sk.ffi.stringToPy(METHOD_LOOK_AT);
-          })
-          $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-            return Sk.ffi.stringToPy(METHOD_LOOK_AT);
-          })
-        }, METHOD_LOOK_AT, []));
-      }
+      case METHOD_LOOK_AT: {return methodLookAt(linePy);}
       case PROP_TYPE: {
         return Sk.ffi.numberToIntPy(line[PROP_TYPE]);
       }
@@ -33226,23 +33142,7 @@ mod[MESH] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       case PROP_VISIBLE: {
         return mesh[PROP_VISIBLE];
       }
-      case METHOD_LOOK_AT: {
-        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-          $loc.__init__ = Sk.ffi.functionPy(function(self) {
-            self.tp$name = METHOD_LOOK_AT;
-          });
-          $loc.__call__ = Sk.ffi.functionPy(function(self, vectorPy) {
-            mesh[METHOD_LOOK_AT](Sk.ffi.remapToJs(vectorPy));
-            return meshPy;
-          });
-          $loc.__str__ = Sk.ffi.functionPy(function(self) {
-            return Sk.ffi.stringToPy(METHOD_LOOK_AT);
-          })
-          $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-            return Sk.ffi.stringToPy(METHOD_LOOK_AT);
-          })
-        }, METHOD_LOOK_AT, []));
-      }
+      case METHOD_LOOK_AT: {return methodLookAt(meshPy);}
       case METHOD_ROTATE_ON_AXIS: {
         return Sk.ffi.callableToPy(mod, METHOD_ROTATE_ON_AXIS, function(methodPy, axisPy, anglePy) {
           Sk.ffi.checkMethodArgs(METHOD_ROTATE_ON_AXIS, arguments, 2, 2);
