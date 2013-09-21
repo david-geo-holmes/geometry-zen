@@ -26590,12 +26590,10 @@ mod[CARTESIAN_SPACE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     }
   });
   $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
-    var space = Sk.ffi.remapToJs(selfPy);
-    return Sk.ffi.stringToPy("" + space);
+    return Sk.ffi.stringToPy(CARTESIAN_SPACE);
   })
   $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
-    var space = Sk.ffi.remapToJs(selfPy);
-    return Sk.ffi.stringToPy("" + space);
+    return Sk.ffi.stringToPy(CARTESIAN_SPACE);
   })
 }, CARTESIAN_SPACE, []);
 
@@ -27034,7 +27032,9 @@ mod[SPHERE_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
 
 };
 }).call(this);
-Sk.builtin.buildNodeClass = function(mod) {
+(function() {
+Sk.builtin.defineNode = function(mod) {
+Sk.ffi.checkFunctionArgs("defineNode", arguments, 1, 1);
 /**
  * @const
  * @type {string}
@@ -27355,6 +27355,11 @@ var METHOD_TRANSFORM                      = "transform";
  * @type {string}
  */
 var METHOD_TRANSLATE                      = "translate";
+/**
+ * @const
+ * @type {string}
+ */
+var ARG_NAME                              = "name";
 
 var nodeToPy = function(node) {
   if (node) {
@@ -27400,17 +27405,10 @@ var numberFromArg = function(arg) {
     return null;
   }
 }
-
-var stringFromArg = function(arg) {
-  if (arg) {
-    return arg.v;
-  }
-  else {
-    return null;
-  }
-}
-
-return Sk.ffi.buildClass(mod, function($gbl, $loc) {
+/**
+ * Node
+ */
+mod[NODE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__init__ = Sk.ffi.functionPy(function(selfPy, nodePy) {
     Sk.ffi.checkMethodArgs(NODE, arguments, 1, 1);
     Sk.ffi.checkArgType("node", NODE, Sk.ffi.isClass(nodePy, NODE), nodePy);
@@ -28231,8 +28229,10 @@ return Sk.ffi.buildClass(mod, function($gbl, $loc) {
           $loc.__init__ = Sk.ffi.functionPy(function(self) {
             self.tp$name = METHOD_SET_ATTRIBUTE;
           });
-          $loc.__call__ = Sk.ffi.functionPy(function(self, name, value) {
-            node.setAttribute(stringFromArg(name), stringFromArg(value));
+          $loc.__call__ = Sk.ffi.functionPy(function(methodPy, namePy, valuePy) {
+            Sk.ffi.checkMethodArgs(METHOD_SET_ATTRIBUTE, arguments, 2, 2);
+            Sk.ffi.checkArgType(ARG_NAME, Sk.ffi.PyType.STR, Sk.ffi.isStr(namePy), namePy);
+            node.setAttribute(Sk.ffi.remapToJs(namePy), Sk.ffi.remapToJs(valuePy));
           });
           $loc.__str__ = Sk.ffi.functionPy(function(self) {
             return Sk.ffi.stringToPy(METHOD_SET_ATTRIBUTE)
@@ -28302,7 +28302,9 @@ return Sk.ffi.buildClass(mod, function($gbl, $loc) {
     return Sk.ffi.stringToPy(NODE)
   })
 }, NODE, []);
+
 };
+}).call(this);
 Sk.builtin.buildWindowClass = function(mod) {
 /**
  * @const
@@ -30416,7 +30418,7 @@ var ARG_AXIS                   = "axis";
  */
 var ARG_VECTOR                 = "vector";
 
-mod[NODE]  = Sk.builtin.buildNodeClass(mod);
+Sk.builtin.defineNode(mod);
 
 /**
  * @param {string} name
@@ -31032,9 +31034,7 @@ mod[WEBGL_RENDERER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         return renderer[PROP_SORT_OBJECTS];
       }
       case PROP_DOM_ELEMENT: {
-        // TODO: I think duck-typing means that this will work as long as we don't
-        // try to do anything more ambitious.
-        return {v: renderer[PROP_DOM_ELEMENT]};
+        return Sk.ffi.callsim(mod[NODE], Sk.ffi.referenceToPy(renderer[PROP_DOM_ELEMENT], NODE));
       }
       case METHOD_RENDER: {
         return Sk.ffi.callableToPy(mod, METHOD_RENDER, function(methodPy, scenePy, cameraPy) {
@@ -35689,6 +35689,11 @@ var WORKBENCH_2D                    = "Workbench2D";
  * @const
  * @type {string}
  */
+var WORKBENCH_3D                    = "Workbench3D";
+/**
+ * @const
+ * @type {string}
+ */
 var WORKBENCH                       = "Workbench";
 /**
  * @const
@@ -35710,6 +35715,11 @@ var METHOD_TEAR_DOWN                = "tearDown";
  * @type {string}
  */
 var METHOD_UPDATE_PROJECTION_MATRIX = "updateProjectionMatrix";
+/**
+ * @const
+ * @type {string}
+ */
+var TAG_NAME_CANVAS                 = "canvas";
 
 function removeElementsByTagName(tagName) {
   var elements = document.getElementsByTagName(tagName);
@@ -35718,7 +35728,9 @@ function removeElementsByTagName(tagName) {
     e.parentNode.removeChild(e);
   }
 }
-
+/**
+ * Workbench2D
+ */
 mod[WORKBENCH_2D] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__init__ = Sk.ffi.functionPy(function(selfPy, canvasPy) {
     Sk.ffi.checkMethodArgs(WORKBENCH_2D, arguments, 1, 1);
@@ -35746,13 +35758,53 @@ mod[WORKBENCH_2D] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       case METHOD_TEAR_DOWN: {
         return Sk.ffi.callableToPy(mod, METHOD_TEAR_DOWN, function(methodPy) {
           window.removeEventListener('resize', workbench.onWindowResize, false);
-          removeElementsByTagName('canvas');
+          removeElementsByTagName(TAG_NAME_CANVAS);
         });
       }
     }
   });
 }, WORKBENCH_2D, []);
-
+/**
+ * Workbench3D
+ */
+mod[WORKBENCH_3D] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
+  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, canvasPy, rendererPy, cameraPy) {
+    Sk.ffi.checkMethodArgs(WORKBENCH_3D, arguments, 3, 3);
+    Sk.ffi.checkArgType(PROP_CANVAS, "Element", Sk.ffi.isClass(canvasPy), canvasPy);
+    var canvas   = Sk.ffi.remapToJs(canvasPy);
+    var renderer = Sk.ffi.remapToJs(rendererPy);
+    var camera   = Sk.ffi.remapToJs(cameraPy);
+    function onWindowResize(event) {
+      var width  = window.innerWidth;
+      var height = window.innerHeight;
+      renderer.setSize(width, height);
+      camera.aspect = width / height;
+      camera[METHOD_UPDATE_PROJECTION_MATRIX]();
+    }
+    Sk.ffi.referenceToPy({"canvas": canvas, "renderer": renderer, "camera": camera, "onWindowResize": onWindowResize}, WORKBENCH_3D, undefined, selfPy);
+  });
+  $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
+    var workbench = Sk.ffi.remapToJs(selfPy);
+    switch(name) {
+      case METHOD_SET_UP: {
+        return Sk.ffi.callableToPy(mod, METHOD_SET_UP, function(methodPy) {
+          document.body.insertBefore(workbench.canvas, document.body.firstChild);
+          window.addEventListener('resize', workbench.onWindowResize, false);
+          workbench.onWindowResize(null);
+        });
+      }
+      case METHOD_TEAR_DOWN: {
+        return Sk.ffi.callableToPy(mod, METHOD_TEAR_DOWN, function(methodPy) {
+          window.removeEventListener('resize', workbench.onWindowResize, false);
+          removeElementsByTagName(TAG_NAME_CANVAS);
+        });
+      }
+    }
+  });
+}, WORKBENCH_3D, []);
+/**
+ * Workbench will be deprecated.
+ */
 mod[WORKBENCH] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__init__ = Sk.ffi.functionPy(function(selfPy, rendererPy, cameraPy) {
     Sk.ffi.checkMethodArgs(WORKBENCH, arguments, 2, 2);
@@ -35780,7 +35832,7 @@ mod[WORKBENCH] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       case METHOD_TEAR_DOWN: {
         return Sk.ffi.callableToPy(mod, METHOD_TEAR_DOWN, function(methodPy) {
           window.removeEventListener('resize', workbench.onWindowResize, false);
-          removeElementsByTagName('canvas');
+          removeElementsByTagName(TAG_NAME_CANVAS);
         });
       }
     }
