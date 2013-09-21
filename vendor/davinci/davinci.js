@@ -35684,7 +35684,17 @@ Sk.ffi.checkFunctionArgs("defineWorkbench", arguments, 1, 1);
  * @const
  * @type {string}
  */
+var WORKBENCH_2D                    = "Workbench2D";
+/**
+ * @const
+ * @type {string}
+ */
 var WORKBENCH                       = "Workbench";
+/**
+ * @const
+ * @type {string}
+ */
+var PROP_CANVAS                     = "canvas";
 /**
  * @const
  * @type {string}
@@ -35709,6 +35719,40 @@ function removeElementsByTagName(tagName) {
   }
 }
 
+mod[WORKBENCH_2D] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
+  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, canvasPy) {
+    Sk.ffi.checkMethodArgs(WORKBENCH_2D, arguments, 1, 1);
+    Sk.ffi.checkArgType(PROP_CANVAS, "Element", Sk.ffi.isClass(canvasPy), canvasPy);
+    var canvas = Sk.ffi.remapToJs(canvasPy);
+    function onWindowResize(event) {
+      var width  = window.innerWidth;
+      var height = window.innerHeight;
+      canvas.width  = width;
+      canvas.height = height;
+    }
+    Sk.ffi.referenceToPy({"canvas": canvas, "onWindowResize": onWindowResize}, WORKBENCH_2D, undefined, selfPy);
+  });
+  $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
+    var workbench = Sk.ffi.remapToJs(selfPy);
+    switch(name) {
+      case METHOD_SET_UP: {
+        return Sk.ffi.callableToPy(mod, METHOD_SET_UP, function(methodPy) {
+          Sk.ffi.checkMethodArgs(METHOD_SET_UP, arguments, 0, 0);
+          document.body.insertBefore(workbench.canvas, document.body.firstChild);
+          window.addEventListener('resize', workbench.onWindowResize, false);
+          workbench.onWindowResize(null);
+        });
+      }
+      case METHOD_TEAR_DOWN: {
+        return Sk.ffi.callableToPy(mod, METHOD_TEAR_DOWN, function(methodPy) {
+          window.removeEventListener('resize', workbench.onWindowResize, false);
+          removeElementsByTagName('canvas');
+        });
+      }
+    }
+  });
+}, WORKBENCH_2D, []);
+
 mod[WORKBENCH] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__init__ = Sk.ffi.functionPy(function(selfPy, rendererPy, cameraPy) {
     Sk.ffi.checkMethodArgs(WORKBENCH, arguments, 2, 2);
@@ -35728,7 +35772,6 @@ mod[WORKBENCH] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     switch(name) {
       case METHOD_SET_UP: {
         return Sk.ffi.callableToPy(mod, METHOD_SET_UP, function(methodPy) {
-          removeElementsByTagName('canvas');
           document.body.insertBefore(workbench.renderer['domElement'], document.body.firstChild);
           window.addEventListener('resize', workbench.onWindowResize, false);
           workbench.onWindowResize(null);
