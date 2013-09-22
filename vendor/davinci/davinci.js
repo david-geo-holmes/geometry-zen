@@ -26171,10 +26171,9 @@ mod[GRAPHICS] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var graphics = Sk.ffi.remapToJs(graphicsPy);
     switch(name) {
       case METHOD_BEGIN_FILL: {
-        return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-          $loc.__init__ = Sk.ffi.functionPy(function(self) {
-            self.tp$name = METHOD_BEGIN_FILL;
-            self.v = graphics[METHOD_BEGIN_FILL];
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+          $loc.__init__ = Sk.ffi.functionPy(function(selfPy) {
+            Sk.ffi.referenceToPy(graphics[METHOD_BEGIN_FILL], METHOD_BEGIN_FILL, undefined, selfPy);
           });
           $loc.__call__ = Sk.ffi.functionPy(function(self, color) {
             color = Sk.ffi.remapToJs(color);
@@ -26184,10 +26183,9 @@ mod[GRAPHICS] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         }, METHOD_BEGIN_FILL, []));
       }
       case METHOD_BEGIN_STROKE: {
-        return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-          $loc.__init__ = Sk.ffi.functionPy(function(self) {
-            self.tp$name = METHOD_BEGIN_STROKE;
-            self.v = graphics[METHOD_BEGIN_STROKE];
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+          $loc.__init__ = Sk.ffi.functionPy(function(selfPy) {
+            Sk.ffi.referenceToPy(graphics[METHOD_BEGIN_STROKE], METHOD_BEGIN_STROKE, undefined, selfPy);
           });
           $loc.__call__ = Sk.ffi.functionPy(function(self, color) {
             color = Sk.ffi.remapToJs(color);
@@ -26197,7 +26195,7 @@ mod[GRAPHICS] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         }, METHOD_BEGIN_STROKE, []));
       }
       case METHOD_DRAW_CIRCLE: {
-        return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
           $loc.__init__ = Sk.ffi.functionPy(function(self) {
             self.tp$name = METHOD_DRAW_CIRCLE;
             self.v = graphics[METHOD_DRAW_CIRCLE];
@@ -26212,7 +26210,7 @@ mod[GRAPHICS] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         }, METHOD_DRAW_CIRCLE, []));
       }
       case METHOD_DRAW_RECT: {
-        return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
           $loc.__init__ = Sk.ffi.functionPy(function(self) {
             self.tp$name = METHOD_DRAW_RECT;
             self.v = graphics[METHOD_DRAW_RECT];
@@ -26228,7 +26226,7 @@ mod[GRAPHICS] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         }, METHOD_DRAW_RECT, []));
       }
       case METHOD_END_FILL: {
-        return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
           $loc.__init__ = Sk.ffi.functionPy(function(self) {
             self.tp$name = METHOD_END_FILL;
             self.v = graphics[METHOD_END_FILL];
@@ -26240,7 +26238,7 @@ mod[GRAPHICS] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         }, METHOD_END_FILL, []));
       }
       case METHOD_END_STROKE: {
-        return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
           $loc.__init__ = Sk.ffi.functionPy(function(self) {
             self.tp$name = METHOD_END_STROKE;
             self.v = graphics[METHOD_END_STROKE];
@@ -26252,7 +26250,7 @@ mod[GRAPHICS] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         }, METHOD_END_STROKE, []));
       }
       case METHOD_LINE_TO: {
-        return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
           $loc.__init__ = Sk.ffi.functionPy(function(self) {
             self.tp$name = METHOD_LINE_TO;
             self.v = graphics[METHOD_LINE_TO];
@@ -26266,7 +26264,7 @@ mod[GRAPHICS] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         }, METHOD_LINE_TO, []));
       }
       case METHOD_MOVE_TO: {
-        return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
           $loc.__init__ = Sk.ffi.functionPy(function(self) {
             self.tp$name = METHOD_MOVE_TO;
             self.v = graphics[METHOD_MOVE_TO];
@@ -26280,7 +26278,7 @@ mod[GRAPHICS] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         }, METHOD_MOVE_TO, []));
       }
       case METHOD_SET_STROKE_STYLE: {
-        return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
           $loc.__init__ = Sk.ffi.functionPy(function(self) {
             self.tp$name = METHOD_SET_STROKE_STYLE;
             self.v = graphics[METHOD_SET_STROKE_STYLE];
@@ -26303,22 +26301,18 @@ mod[GRAPHICS] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
  * MovieClip
  */
 mod[MOVIE_CLIP] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-  $loc.__init__ = Sk.ffi.functionPy(function(self, modePy, startPositionPy, loopPy, labelsPy) {
+  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, modePy, startPositionPy, loopPy, labelsPy) {
     var mode = (modePy !== null) ? Sk.ffi.remapToJs(modePy) : null;
     var startPosition = Sk.ffi.remapToJs(startPositionPy);
     var loop = Sk.ffi.remapToJs(loopPy);
     var labels = Sk.ffi.remapToJs(labelsPy);
-    self.tp$name = MOVIE_CLIP;
-    if (typeof createjs[MOVIE_CLIP] === 'undefined') {
-      throw new Error("Missing " + MOVIE_CLIP + " JavaScript implementation.");
-    }
-    self.v = new createjs[MOVIE_CLIP](mode, startPosition, loop, labels);
+    Sk.ffi.referenceToPy(new createjs[MOVIE_CLIP](mode, startPosition, loop, labels), MOVIE_CLIP, undefined, selfPy);
   });
   $loc.__getattr__ = Sk.ffi.functionPy(function(movieClipPy, name) {
     var movieClip = Sk.ffi.remapToJs(movieClipPy);
     switch(name) {
       case PROP_TIMELINE: {
-        return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
           $loc.__init__ = Sk.ffi.functionPy(function(self) {
             self.tp$name = PROP_TIMELINE;
             self.v = movieClip[PROP_TIMELINE];
@@ -26327,7 +26321,7 @@ mod[MOVIE_CLIP] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
             var timeline = Sk.ffi.remapToJs(timelinePy);
             switch(name) {
               case METHOD_ADD_TWEEN: {
-                return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+                return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
                   $loc.__init__ = Sk.ffi.functionPy(function(self) {
                     self.tp$name = METHOD_ADD_TWEEN;
                     self.v = timeline[METHOD_ADD_TWEEN];
@@ -26345,7 +26339,7 @@ mod[MOVIE_CLIP] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       }
       break;
       case METHOD_GOTO_AND_PLAY: {
-        return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
           $loc.__init__ = Sk.ffi.functionPy(function(self) {
             self.tp$name = METHOD_GOTO_AND_PLAY;
             self.v = movieClip[METHOD_GOTO_AND_PLAY];
@@ -26398,7 +26392,7 @@ mod[SHAPE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         return Sk.builtin.assk$(shape[PROP_ALPHA], Sk.builtin.nmber.float$);
       }
       case PROP_GRAPHICS: {
-        return Sk.misceval.callsim(mod[GRAPHICS], Sk.ffi.referenceToPy(shape[PROP_GRAPHICS], GRAPHICS));
+        return Sk.ffi.callsim(mod[GRAPHICS], Sk.ffi.referenceToPy(shape[PROP_GRAPHICS], GRAPHICS));
       }
       case PROP_NAME: {
         return new Sk.builtin.str(shape[PROP_NAME]);
@@ -26419,19 +26413,19 @@ mod[SHAPE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         return Sk.builtin.removeEventListener(mod, shape);
       }
       case METHOD_GLOBAL_TO_LOCAL: {
-        return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
           $loc.__init__ = Sk.ffi.functionPy(function(self) {
             self.tp$name = METHOD_GLOBAL_TO_LOCAL;
             self.v = shape[METHOD_GLOBAL_TO_LOCAL];
           });
           $loc.__call__ = Sk.ffi.functionPy(function(methodPy, x, y) {
             var point = shape[METHOD_GLOBAL_TO_LOCAL](Sk.ffi.remapToJs(x), Sk.ffi.remapToJs(y));
-            return Sk.misceval.callsim(mod[POINT], Sk.ffi.referenceToPy(point, POINT));
+            return Sk.ffi.callsim(mod[POINT], Sk.ffi.referenceToPy(point, POINT));
           });
         }, METHOD_GLOBAL_TO_LOCAL, []));
       }
       case METHOD_HIT_TEST: {
-        return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
           $loc.__init__ = Sk.ffi.functionPy(function(self) {
             self.tp$name = METHOD_HIT_TEST;
             self.v = shape[METHOD_HIT_TEST];
@@ -26442,14 +26436,14 @@ mod[SHAPE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         }, METHOD_HIT_TEST, []));
       }
       case METHOD_LOCAL_TO_LOCAL: {
-        return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
           $loc.__init__ = Sk.ffi.functionPy(function(self) {
             self.tp$name = METHOD_LOCAL_TO_LOCAL;
             self.v = shape[METHOD_LOCAL_TO_LOCAL];
           });
           $loc.__call__ = Sk.ffi.functionPy(function(methodPy, x, y, target) {
             var point = shape[METHOD_LOCAL_TO_LOCAL](Sk.ffi.remapToJs(x), Sk.ffi.remapToJs(y), Sk.ffi.remapToJs(target));
-            return Sk.misceval.callsim(mod[POINT], Sk.ffi.referenceToPy(point, POINT));
+            return Sk.ffi.callsim(mod[POINT], Sk.ffi.referenceToPy(point, POINT));
           });
         }, METHOD_LOCAL_TO_LOCAL, []));
       }
@@ -26511,19 +26505,19 @@ mod[STAGE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         return Sk.builtin.assk$(stage[PROP_MOUSE_Y], Sk.builtin.nmber.int$);
       }
       case METHOD_ADD_CHILD: {
-        return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
           $loc.__init__ = Sk.ffi.functionPy(function(self) {
             self.tp$name = METHOD_ADD_CHILD;
             self.v = stage[METHOD_ADD_CHILD];
           });
           $loc.__call__ = Sk.ffi.functionPy(function(self, childPy) {
             var child = stage[METHOD_ADD_CHILD](Sk.ffi.remapToJs(childPy));
-            return Sk.misceval.callsim(mod[childPy.tp$name], Sk.ffi.referenceToPy(child, childPy.tp$name));
+            return Sk.ffi.callsim(mod[childPy.tp$name], Sk.ffi.referenceToPy(child, childPy.tp$name));
           });
         }, METHOD_ADD_CHILD, []));
       }
       case METHOD_ENABLE_MOUSE_OVER: {
-        return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
           $loc.__init__ = Sk.ffi.functionPy(function(self) {
             self.tp$name = METHOD_ENABLE_MOUSE_OVER;
             self.v = stage[METHOD_ENABLE_MOUSE_OVER];
@@ -26534,7 +26528,7 @@ mod[STAGE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         }, METHOD_ENABLE_MOUSE_OVER, []));
       }
       case METHOD_UPDATE: {
-        return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
           $loc.__init__ = Sk.ffi.functionPy(function(self) {
             self.tp$name = METHOD_UPDATE;
             self.v = stage[METHOD_UPDATE];
@@ -26599,8 +26593,11 @@ mod[TEXT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       case METHOD_ADD_EVENT_LISTENER: {
         return Sk.builtin.addEventListener(mod, text);
       }
+      case METHOD_REMOVE_EVENT_LISTENER: {
+        return Sk.builtin.removeEventListener(mod, text);
+      }
       case METHOD_GET_MEASURED_WIDTH: {
-        return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
           $loc.__init__ = Sk.ffi.functionPy(function(methodPy) {
             methodPy.tp$name = METHOD_GET_MEASURED_WIDTH;
             methodPy.v = text[METHOD_GET_MEASURED_WIDTH];
@@ -26611,7 +26608,7 @@ mod[TEXT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         }, METHOD_GET_MEASURED_WIDTH, []));
       }
       case METHOD_GET_MEASURED_HEIGHT: {
-        return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
           $loc.__init__ = Sk.ffi.functionPy(function(methodPy) {
             methodPy.tp$name = METHOD_GET_MEASURED_HEIGHT;
             methodPy.v = text[METHOD_GET_MEASURED_HEIGHT];
@@ -26673,7 +26670,7 @@ mod[TEXT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
 /**
  * Ticker
  */
-mod[TICKER] = Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+mod[TICKER] = Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__init__ = Sk.ffi.functionPy(function(self) {
     self.tp$name = TICKER;
     self.v = createjs[TICKER];
@@ -26682,7 +26679,7 @@ mod[TICKER] = Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var ticker = Sk.ffi.remapToJs(tickerPy);
     switch(name) {
       case METHOD_ADD_EVENT_LISTENER: {
-        return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
           $loc.__init__ = Sk.ffi.functionPy(function(self) {
             self.tp$name = METHOD_ADD_EVENT_LISTENER;
           });
@@ -26694,7 +26691,7 @@ mod[TICKER] = Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
             }
             else {
               var listener = function(event) {
-                Sk.misceval.callsim(listenerPy);
+                Sk.ffi.callsim(listenerPy);
               };
               ticker[METHOD_ADD_EVENT_LISTENER](type, listener, useCapture);
             }
@@ -26708,7 +26705,7 @@ mod[TICKER] = Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
 /**
  * Tween
  */
-mod[TWEEN] = Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+mod[TWEEN] = Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__init__ = Sk.ffi.functionPy(function(self) {
     self.tp$name = TWEEN;
     self.v = createjs[TWEEN];
@@ -26717,7 +26714,7 @@ mod[TWEEN] = Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var entryPoint = Sk.ffi.remapToJs(entryPointPy);
     switch(name) {
       case METHOD_GET: {
-        return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
           $loc.__init__ = Sk.ffi.functionPy(function(self) {
             self.tp$name = METHOD_GET;
           });
@@ -26727,7 +26724,7 @@ mod[TWEEN] = Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
             pluginData = Sk.ffi.remapToJs(pluginData);
             override = Sk.ffi.remapToJs(override);
             var tween = entryPoint[METHOD_GET](target, props, pluginData, override);
-            return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
               $loc.__init__ = Sk.ffi.functionPy(function(self) {
                 self.tp$name = TWEEN;
                 self.v = tween;
@@ -26736,7 +26733,7 @@ mod[TWEEN] = Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
                 var tween = Sk.ffi.remapToJs(tweenPy);
                 switch(name) {
                   case METHOD_TO: {
-                    return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+                    return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
                       $loc.__init__ = Sk.ffi.functionPy(function(self) {
                         self.tp$name = METHOD_TO;
                       });
@@ -26751,13 +26748,13 @@ mod[TWEEN] = Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
                   }
                   break;
                   case METHOD_CALL: {
-                    return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+                    return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
                       $loc.__init__ = Sk.ffi.functionPy(function(self) {
                         self.tp$name = METHOD_CALL;
                       });
                       $loc.__call__ = Sk.ffi.functionPy(function(self, callbackPy, argsPy) {
                         var callbackJS = function(argsJs) {
-                          Sk.misceval.callsim(callbackPy, Sk.ffi.remapToPy(argsJs));
+                          Sk.ffi.callsim(callbackPy, Sk.ffi.remapToPy(argsJs));
                         };
                         var argsJs = Sk.ffi.remapToJs(argsPy);
                         tween.call(callbackJS, argsJs);
@@ -26767,7 +26764,7 @@ mod[TWEEN] = Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
                   }
                   break;
                   case METHOD_WAIT: {
-                    return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+                    return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
                       $loc.__init__ = Sk.ffi.functionPy(function(self) {
                         self.tp$name = METHOD_WAIT;
                       });
@@ -26832,14 +26829,14 @@ mod[CONTAINER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         return Sk.builtin.assk$(container[PROP_ROTATION], Sk.builtin.nmber.float$);
       }
       case METHOD_ADD_CHILD: {
-        return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
           $loc.__init__ = Sk.ffi.functionPy(function(methodPy) {
             methodPy.tp$name = METHOD_ADD_CHILD;
             methodPy.v = container[METHOD_ADD_CHILD];
           });
           $loc.__call__ = Sk.ffi.functionPy(function(methodPy, childPy) {
             var child = container[METHOD_ADD_CHILD](Sk.ffi.remapToJs(childPy));
-            return Sk.misceval.callsim(mod[childPy.tp$name], Sk.ffi.referenceToPy(child, childPy.tp$name));
+            return Sk.ffi.callsim(mod[childPy.tp$name], Sk.ffi.referenceToPy(child, childPy.tp$name));
           });
         }, METHOD_ADD_CHILD, []));
       }
@@ -26847,19 +26844,19 @@ mod[CONTAINER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         return Sk.builtin.addEventListener(mod, container);
       }
       case METHOD_GET_CHILD_AT: {
-        return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
           $loc.__init__ = Sk.ffi.functionPy(function(methodPy) {
             methodPy.tp$name = METHOD_GET_CHILD_AT;
             methodPy.v = container[METHOD_GET_CHILD_AT];
           });
           $loc.__call__ = Sk.ffi.functionPy(function(methodPy, indexPy) {
             var child = container[METHOD_GET_CHILD_AT](Sk.ffi.remapToJs(indexPy));
-            return Sk.misceval.callsim(mod[SHAPE], Sk.ffi.referenceToPy(child, SHAPE));
+            return Sk.ffi.callsim(mod[SHAPE], Sk.ffi.referenceToPy(child, SHAPE));
           });
         }, METHOD_GET_CHILD_AT, []));
       }
       case METHOD_GET_NUM_CHILDREN: {
-        return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
           $loc.__init__ = Sk.ffi.functionPy(function(methodPy) {
             methodPy.tp$name = METHOD_GET_NUM_CHILDREN;
             methodPy.v = container[METHOD_GET_NUM_CHILDREN];
@@ -26868,6 +26865,9 @@ mod[CONTAINER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
             return Sk.builtin.assk$(container[METHOD_GET_NUM_CHILDREN](), Sk.builtin.nmber.int$);
           });
         }, METHOD_GET_NUM_CHILDREN, []));
+      }
+      case METHOD_REMOVE_EVENT_LISTENER: {
+        return Sk.builtin.removeEventListener(mod, container);
       }
     }
   });
@@ -26908,7 +26908,7 @@ mod[CONTAINER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
 /**
  * Ease
  */
-mod[EASE] = Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+mod[EASE] = Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__init__ = Sk.ffi.functionPy(function(self) {
     self.tp$name = EASE;
     self.v = createjs[EASE];
@@ -26961,12 +26961,12 @@ mod[POINT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         return Sk.builtin.assk$(point.y, Sk.builtin.nmber.float$);
       }
       case METHOD_CLONE: {
-        return Sk.misceval.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
           $loc.__init__ = Sk.ffi.functionPy(function(methodPy) {
             methodPy.tp$name = METHOD_CLONE;
           });
           $loc.__call__ = Sk.ffi.functionPy(function(methodPy) {
-            return Sk.misceval.callsim(mod[POINT], Sk.ffi.remapToPy(point.x), Sk.ffi.remapToPy(point.y));
+            return Sk.ffi.callsim(mod[POINT], Sk.ffi.remapToPy(point.x), Sk.ffi.remapToPy(point.y));
           });
         }, METHOD_CLONE, []));
       }

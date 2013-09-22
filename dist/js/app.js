@@ -25841,10 +25841,9 @@
           var d = Sk.ffi.remapToJs(b);
           switch (c) {
           case 'beginFill':
-            return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (a, c) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, c) {
               c.__init__ = Sk.ffi.functionPy(function (a) {
-                a.tp$name = 'beginFill';
-                a.v = d.beginFill;
+                Sk.ffi.referenceToPy(d.beginFill, 'beginFill', void 0, a);
               });
               c.__call__ = Sk.ffi.functionPy(function (a, c) {
                 c = Sk.ffi.remapToJs(c);
@@ -25853,10 +25852,9 @@
               });
             }, 'beginFill', []));
           case 'beginStroke':
-            return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (a, c) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, c) {
               c.__init__ = Sk.ffi.functionPy(function (a) {
-                a.tp$name = 'beginStroke';
-                a.v = d.beginStroke;
+                Sk.ffi.referenceToPy(d.beginStroke, 'beginStroke', void 0, a);
               });
               c.__call__ = Sk.ffi.functionPy(function (a, c) {
                 c = Sk.ffi.remapToJs(c);
@@ -25865,7 +25863,7 @@
               });
             }, 'beginStroke', []));
           case 'drawCircle':
-            return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (a, c) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, c) {
               c.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'drawCircle';
                 a.v = d.drawCircle;
@@ -25879,7 +25877,7 @@
               });
             }, 'drawCircle', []));
           case 'drawRect':
-            return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (a, c) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, c) {
               c.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'drawRect';
                 a.v = d.drawRect;
@@ -25894,7 +25892,7 @@
               });
             }, 'drawRect', []));
           case 'endFill':
-            return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (a, c) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, c) {
               c.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'endFill';
                 a.v = d.endFill;
@@ -25905,7 +25903,7 @@
               });
             }, 'endFill', []));
           case 'endStroke':
-            return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (a, c) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, c) {
               c.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'endStroke';
                 a.v = d.endStroke;
@@ -25916,7 +25914,7 @@
               });
             }, 'endStroke', []));
           case 'lineTo':
-            return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (a, c) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, c) {
               c.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'lineTo';
                 a.v = d.lineTo;
@@ -25929,7 +25927,7 @@
               });
             }, 'lineTo', []));
           case 'moveTo':
-            return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (a, c) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, c) {
               c.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'moveTo';
                 a.v = d.moveTo;
@@ -25942,7 +25940,7 @@
               });
             }, 'moveTo', []));
           case 'setStrokeStyle':
-            return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (a, c) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, c) {
               c.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'setStrokeStyle';
                 a.v = d.setStrokeStyle;
@@ -25966,16 +25964,13 @@
           d = Sk.ffi.remapToJs(d);
           e = Sk.ffi.remapToJs(e);
           l = Sk.ffi.remapToJs(l);
-          a.tp$name = 'MovieClip';
-          if ('undefined' === typeof b.MovieClip)
-            throw Error('Missing MovieClip JavaScript implementation.');
-          a.v = new b.MovieClip(c, d, e, l);
+          Sk.ffi.referenceToPy(new b.MovieClip(c, d, e, l), 'MovieClip', void 0, a);
         });
         e.__getattr__ = Sk.ffi.functionPy(function (b, c) {
           var d = Sk.ffi.remapToJs(b);
           switch (c) {
           case 'timeline':
-            return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (b, c) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (b, c) {
               c.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'timeline';
                 a.v = d.timeline;
@@ -25984,7 +25979,7 @@
                 var d = Sk.ffi.remapToJs(b);
                 switch (c) {
                 case 'addTween':
-                  return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (a, b) {
+                  return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, b) {
                     b.__init__ = Sk.ffi.functionPy(function (a) {
                       a.tp$name = 'addTween';
                       a.v = d.addTween;
@@ -25998,7 +25993,7 @@
               });
             }, 'timeline', []));
           case 'gotoAndPlay':
-            return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (a, b) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, b) {
               b.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'gotoAndPlay';
                 a.v = d.gotoAndPlay;
@@ -26039,7 +26034,7 @@
           case 'alpha':
             return Sk.builtin.assk$(d.alpha, Sk.builtin.nmber.float$);
           case 'graphics':
-            return Sk.misceval.callsim(a.Graphics, Sk.ffi.referenceToPy(d.graphics, 'Graphics'));
+            return Sk.ffi.callsim(a.Graphics, Sk.ffi.referenceToPy(d.graphics, 'Graphics'));
           case 'name':
             return new Sk.builtin.str(d.name);
           case 'x':
@@ -26053,18 +26048,18 @@
           case 'removeEventListener':
             return Sk.builtin.removeEventListener(a, d);
           case 'globalToLocal':
-            return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (b, c) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (b, c) {
               c.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'globalToLocal';
                 a.v = d.globalToLocal;
               });
               c.__call__ = Sk.ffi.functionPy(function (b, c, e) {
                 b = d.globalToLocal(Sk.ffi.remapToJs(c), Sk.ffi.remapToJs(e));
-                return Sk.misceval.callsim(a.Point, Sk.ffi.referenceToPy(b, 'Point'));
+                return Sk.ffi.callsim(a.Point, Sk.ffi.referenceToPy(b, 'Point'));
               });
             }, 'globalToLocal', []));
           case 'hitTest':
-            return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (a, b) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, b) {
               b.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'hitTest';
                 a.v = d.hitTest;
@@ -26074,14 +26069,14 @@
               });
             }, 'hitTest', []));
           case 'localToLocal':
-            return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (b, c) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (b, c) {
               c.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'localToLocal';
                 a.v = d.localToLocal;
               });
               c.__call__ = Sk.ffi.functionPy(function (b, c, e, f) {
                 b = d.localToLocal(Sk.ffi.remapToJs(c), Sk.ffi.remapToJs(e), Sk.ffi.remapToJs(f));
-                return Sk.misceval.callsim(a.Point, Sk.ffi.referenceToPy(b, 'Point'));
+                return Sk.ffi.callsim(a.Point, Sk.ffi.referenceToPy(b, 'Point'));
               });
             }, 'localToLocal', []));
           }
@@ -26129,18 +26124,18 @@
           case 'mouseY':
             return Sk.builtin.assk$(d.mouseY, Sk.builtin.nmber.int$);
           case 'addChild':
-            return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (b, c) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (b, c) {
               c.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'addChild';
                 a.v = d.addChild;
               });
               c.__call__ = Sk.ffi.functionPy(function (b, c) {
                 var e = d.addChild(Sk.ffi.remapToJs(c));
-                return Sk.misceval.callsim(a[c.tp$name], Sk.ffi.referenceToPy(e, c.tp$name));
+                return Sk.ffi.callsim(a[c.tp$name], Sk.ffi.referenceToPy(e, c.tp$name));
               });
             }, 'addChild', []));
           case 'enableMouseOver':
-            return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (a, b) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, b) {
               b.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'enableMouseOver';
                 a.v = d.enableMouseOver;
@@ -26150,7 +26145,7 @@
               });
             }, 'enableMouseOver', []));
           case 'update':
-            return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (a, b) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, b) {
               b.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'update';
                 a.v = d.update;
@@ -26201,8 +26196,10 @@
             return new Sk.builtin.str(d.textAlign);
           case 'addEventListener':
             return Sk.builtin.addEventListener(a, d);
+          case 'removeEventListener':
+            return Sk.builtin.removeEventListener(a, d);
           case 'getMeasuredWidth':
-            return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (a, b) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, b) {
               b.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'getMeasuredWidth';
                 a.v = d.getMeasuredWidth;
@@ -26212,7 +26209,7 @@
               });
             }, 'getMeasuredWidth', []));
           case 'getMeasuredHeight':
-            return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (a, b) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, b) {
               b.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'getMeasuredHeight';
                 a.v = d.getMeasuredHeight;
@@ -26262,7 +26259,7 @@
           return new Sk.builtin.str('[' + a.x + ', ' + a.y + ']');
         });
       }, 'Text', []);
-      a.Ticker = Sk.misceval.callsim(Sk.ffi.buildClass(a, function (c, e) {
+      a.Ticker = Sk.ffi.callsim(Sk.ffi.buildClass(a, function (c, e) {
         e.__init__ = Sk.ffi.functionPy(function (a) {
           a.tp$name = 'Ticker';
           a.v = b.Ticker;
@@ -26271,7 +26268,7 @@
           var d = Sk.ffi.remapToJs(b);
           switch (c) {
           case 'addEventListener':
-            return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (a, b) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, b) {
               b.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'addEventListener';
               });
@@ -26279,7 +26276,7 @@
                 a = Sk.ffi.remapToJs(b);
                 b = Sk.ffi.remapToJs(c);
                 'object' !== typeof b && (b = function (a) {
-                  Sk.misceval.callsim(c);
+                  Sk.ffi.callsim(c);
                 });
                 d.addEventListener(a, b, e);
               });
@@ -26287,7 +26284,7 @@
           }
         });
       }, 'Ticker', []));
-      a.Tween = Sk.misceval.callsim(Sk.ffi.buildClass(a, function (c, e) {
+      a.Tween = Sk.ffi.callsim(Sk.ffi.buildClass(a, function (c, e) {
         e.__init__ = Sk.ffi.functionPy(function (a) {
           a.tp$name = 'Tween';
           a.v = b.Tween;
@@ -26296,7 +26293,7 @@
           var d = Sk.ffi.remapToJs(b);
           switch (c) {
           case 'get':
-            return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (b, c) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (b, c) {
               c.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'get';
               });
@@ -26306,7 +26303,7 @@
                 f = Sk.ffi.remapToJs(f);
                 g = Sk.ffi.remapToJs(g);
                 var k = d.get(c, e, f, g);
-                return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (b, c) {
+                return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (b, c) {
                   c.__init__ = Sk.ffi.functionPy(function (a) {
                     a.tp$name = 'Tween';
                     a.v = k;
@@ -26315,7 +26312,7 @@
                     var d = Sk.ffi.remapToJs(b);
                     switch (c) {
                     case 'to':
-                      return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (a, c) {
+                      return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, c) {
                         c.__init__ = Sk.ffi.functionPy(function (a) {
                           a.tp$name = 'to';
                         });
@@ -26328,20 +26325,20 @@
                         });
                       }, 'to', []));
                     case 'onComplete':
-                      return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (a, c) {
+                      return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, c) {
                         c.__init__ = Sk.ffi.functionPy(function (a) {
                           a.tp$name = 'onComplete';
                         });
                         c.__call__ = Sk.ffi.functionPy(function (a, c, e) {
                           a = Sk.ffi.remapToJs(e);
                           d.call(function (a) {
-                            Sk.misceval.callsim(c, Sk.ffi.remapToPy(a));
+                            Sk.ffi.callsim(c, Sk.ffi.remapToPy(a));
                           }, a);
                           return b;
                         });
                       }, 'onComplete', []));
                     case 'wait':
-                      return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (a, c) {
+                      return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, c) {
                         c.__init__ = Sk.ffi.functionPy(function (a) {
                           a.tp$name = 'wait';
                         });
@@ -26390,31 +26387,31 @@
           case 'rotation':
             return Sk.builtin.assk$(d.rotation, Sk.builtin.nmber.float$);
           case 'addChild':
-            return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (b, c) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (b, c) {
               c.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'addChild';
                 a.v = d.addChild;
               });
               c.__call__ = Sk.ffi.functionPy(function (b, c) {
                 var e = d.addChild(Sk.ffi.remapToJs(c));
-                return Sk.misceval.callsim(a[c.tp$name], Sk.ffi.referenceToPy(e, c.tp$name));
+                return Sk.ffi.callsim(a[c.tp$name], Sk.ffi.referenceToPy(e, c.tp$name));
               });
             }, 'addChild', []));
           case 'addEventListener':
             return Sk.builtin.addEventListener(a, d);
           case 'getChildAt':
-            return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (b, c) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (b, c) {
               c.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'getChildAt';
                 a.v = d.getChildAt;
               });
               c.__call__ = Sk.ffi.functionPy(function (b, c) {
                 var e = d.getChildAt(Sk.ffi.remapToJs(c));
-                return Sk.misceval.callsim(a.Shape, Sk.ffi.referenceToPy(e, 'Shape'));
+                return Sk.ffi.callsim(a.Shape, Sk.ffi.referenceToPy(e, 'Shape'));
               });
             }, 'getChildAt', []));
           case 'getNumChildren':
-            return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (a, b) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, b) {
               b.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'getNumChildren';
                 a.v = d.getNumChildren;
@@ -26423,6 +26420,8 @@
                 return Sk.builtin.assk$(d.getNumChildren(), Sk.builtin.nmber.int$);
               });
             }, 'getNumChildren', []));
+          case 'removeEventListener':
+            return Sk.builtin.removeEventListener(a, d);
           }
         });
         e.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
@@ -26454,7 +26453,7 @@
           return new Sk.builtin.str('[' + a.x + ', ' + a.y + ']');
         });
       }, 'Container', []);
-      a.Ease = Sk.misceval.callsim(Sk.ffi.buildClass(a, function (a, c) {
+      a.Ease = Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, c) {
         c.__init__ = Sk.ffi.functionPy(function (a) {
           a.tp$name = 'Ease';
           a.v = b.Ease;
@@ -26491,12 +26490,12 @@
           case 'y':
             return Sk.builtin.assk$(d.y, Sk.builtin.nmber.float$);
           case 'clone':
-            return Sk.misceval.callsim(Sk.ffi.buildClass(a, function (b, c) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (b, c) {
               c.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'clone';
               });
               c.__call__ = Sk.ffi.functionPy(function (b) {
-                return Sk.misceval.callsim(a.Point, Sk.ffi.remapToPy(d.x), Sk.ffi.remapToPy(d.y));
+                return Sk.ffi.callsim(a.Point, Sk.ffi.remapToPy(d.x), Sk.ffi.remapToPy(d.y));
               });
             }, 'clone', []));
           }
@@ -33999,7 +33998,7 @@ Sk.builtinFiles = {
     'src/lib/pythonds/trees/bst.py': '#!/bin/env python3.1\n# Bradley N. Miller, David L. Ranum\n# Introduction to Data Structures and Algorithms in Python\n# Copyright 2005, 2010\n# \n\nclass BinarySearchTree:\n    \'\'\'\n    Author:  Brad Miller\n    Date:  1/15/2005\n    Description:  Imlement a binary search tree with the following interface\n                  functions:  \n                  __contains__(y) <==> y in x\n                  __getitem__(y) <==> x[y]\n                  __init__()\n                  __len__() <==> len(x)\n                  __setitem__(k,v) <==> x[k] = v\n                  clear()\n                  get(k)\n                  items() \n                  keys() \n                  values()\n                  put(k,v)\n                  in\n                  del <==> \n    \'\'\'\n\n    def __init__(self):\n        self.root = None\n        self.size = 0\n    \n    def put(self,key,val):\n        if self.root:\n            self._put(key,val,self.root)\n        else:\n            self.root = TreeNode(key,val)\n        self.size = self.size + 1\n\n    def _put(self,key,val,currentNode):\n        if key < currentNode.key:\n            if currentNode.hasLeftChild():\n                self._put(key,val,currentNode.leftChild)\n            else:\n                currentNode.leftChild = TreeNode(key,val,parent=currentNode)\n        else:\n            if currentNode.hasRightChild():\n                self._put(key,val,currentNode.rightChild)\n            else:\n                currentNode.rightChild = TreeNode(key,val,parent=currentNode)\n            \n    def __setitem__(self,k,v):\n        self.put(k,v)\n\n    def get(self,key):\n        if self.root:\n            res = self._get(key,self.root)\n            if res:\n                return res.payload\n            else:\n                return None\n        else:\n            return None\n        \n    def _get(self,key,currentNode):\n        if not currentNode:\n            return None\n        elif currentNode.key == key:\n            return currentNode\n        elif key < currentNode.key:\n            return self._get(key,currentNode.leftChild)\n        else:\n            return self._get(key,currentNode.rightChild)\n            \n        \n    def __getitem__(self,key):\n        res = self.get(key)\n        if res:\n            return res\n        else:\n            raise KeyError(\'Error, key not in tree\')\n            \n\n    def __contains__(self,key):\n        if self._get(key,self.root):\n            return True\n        else:\n            return False\n        \n    def length(self):\n        return self.size\n\n    def __len__(self):\n        return self.size\n\n    def __iter__(self):\n        return self.root.__iter__()\n    \n    def delete(self,key):\n        if self.size > 1:\n            nodeToRemove = self._get(key,self.root)\n            if nodeToRemove:\n                self.remove(nodeToRemove)\n                self.size = self.size-1\n            else:\n                raise KeyError(\'Error, key not in tree\')\n        elif self.size == 1 and self.root.key == key:\n            self.root = None\n            self.size = self.size - 1\n        else:\n            raise KeyError(\'Error, key not in tree\')\n\n    def __delitem__(self,key):\n        self.delete(key)\n    \n    def remove(self,currentNode):\n        if currentNode.isLeaf(): #leaf\n            if currentNode == currentNode.parent.leftChild:\n                currentNode.parent.leftChild = None\n            else:\n                currentNode.parent.rightChild = None\n        elif currentNode.hasBothChildren(): #interior\n            succ = currentNode.findSuccessor()\n            succ.spliceOut()\n            currentNode.key = succ.key\n            currentNode.payload = succ.payload\n        else: # this node has one child\n            if currentNode.hasLeftChild():\n                if currentNode.isLeftChild():\n                    currentNode.leftChild.parent = currentNode.parent\n                    currentNode.parent.leftChild = currentNode.leftChild\n                elif currentNode.isRightChild():\n                    currentNode.leftChild.parent = currentNode.parent\n                    currentNode.parent.rightChild = currentNode.leftChild\n                else:\n                    currentNode.replaceNodeData(currentNode.leftChild.key,\n                                       currentNode.leftChild.payload,\n                                       currentNode.leftChild.leftChild,\n                                       currentNode.leftChild.rightChild)\n            else:\n                if currentNode.isLeftChild():\n                    currentNode.rightChild.parent = currentNode.parent\n                    currentNode.parent.leftChild = currentNode.rightChild\n                elif currentNode.isRightChild():\n                    currentNode.rightChild.parent = currentNode.parent\n                    currentNode.parent.rightChild = currentNode.rightChild\n                else:\n                    currentNode.replaceNodeData(currentNode.rightChild.key,\n                                       currentNode.rightChild.payload,\n                                       currentNode.rightChild.leftChild,\n                                       currentNode.rightChild.rightChild)\n\n    def inorder(self):\n        self._inorder(self.root)\n\n    def _inorder(self,tree):\n        if tree != None:\n            self._inorder(tree.leftChild)\n            print(tree.key)\n            self._inorder(tree.rightChild)\n\n    def postorder(self):\n        self._postorder(self.root)\n\n    def _postorder(self, tree):\n        if tree:\n            self._postorder(tree.rightChild)\n            self._postorder(tree.leftChild)\n            print(tree.key)            \n\n    def preorder(self):\n        self._preorder(self,self.root)\n\n    def _preorder(self,tree):\n        if tree:\n            print(tree.key)            \n            self._preorder(tree.leftChild)\n            self._preorder(tree.rightChild)\n\n                \nclass TreeNode:\n    def __init__(self,key,val,left=None,right=None,parent=None):\n        self.key = key\n        self.payload = val\n        self.leftChild = left\n        self.rightChild = right\n        self.parent = parent\n        self.balanceFactor = 0\n        \n    def hasLeftChild(self):\n        return self.leftChild\n\n    def hasRightChild(self):\n        return self.rightChild\n    \n    def isLeftChild(self):\n        return self.parent and self.parent.leftChild == self\n\n    def isRightChild(self):\n        return self.parent and self.parent.rightChild == self\n\n    def isRoot(self):\n        return not self.parent\n\n    def isLeaf(self):\n        return not (self.rightChild or self.leftChild)\n\n    def hasAnyChildren(self):\n        return self.rightChild or self.leftChild\n\n    def hasBothChildren(self):\n        return self.rightChild and self.leftChild\n    \n    def replaceNodeData(self,key,value,lc,rc):\n        self.key = key\n        self.payload = value\n        self.leftChild = lc\n        self.rightChild = rc\n        if self.hasLeftChild():\n            self.leftChild.parent = self\n        if self.hasRightChild():\n            self.rightChild.parent = self\n        \n    def findSuccessor(self):\n        succ = None\n        if self.hasRightChild():\n            succ = self.rightChild.findMin()\n        else:\n            if self.parent:\n                if self.isLeftChild():\n                    succ = self.parent\n                else:\n                    self.parent.rightChild = None\n                    succ = self.parent.findSuccessor()\n                    self.parent.rightChild = self\n        return succ\n\n\n    def spliceOut(self):\n        if self.isLeaf():\n            if self.isLeftChild():\n                self.parent.leftChild = None\n            else:\n                self.parent.rightChild = None\n        elif self.hasAnyChildren():\n            if self.hasLeftChild():\n                if self.isLeftChild():\n                    self.parent.leftChild = self.leftChild\n                else:\n                    self.parent.rightChild = self.leftChild\n                self.leftChild.parent = self.parent\n            else:\n                if self.isLeftChild():\n                    self.parent.leftChild = self.rightChild\n                else:\n                    self.parent.rightChild = self.rightChild\n                self.rightChild.parent = self.parent\n\n    def findMin(self):\n        current = self\n        while current.hasLeftChild():\n            current = current.leftChild\n        return current\n\n    def __iter__(self):\n        """The standard inorder traversal of a binary tree."""\n        if self:\n            if self.hasLeftChild():\n                for elem in self.leftChild:\n                    yield elem\n            yield self.key\n            if self.hasRightChild():\n                for elem in self.rightChild:\n                    yield elem\n\n            \n',
     'src/lib/time/__init__.js': '\n/*\n\tBarebones implementation of the Python time package.\n\n\tFor now, only the time() function is implemented.\n*/\n \nvar $builtinmodule = function(name)\n{\n    var mod = {};\n\n    mod.time = new Sk.builtin.func(function() {\n\t  return Sk.builtin.assk$(new Date().getTime() / 1000, undefined);\n    });\n\n    return mod;\n}\n',
     'src/lib/image/__init__.js': 'var ImageMod; // the single identifier needed in the global scope\n\nif (! ImageMod) {\n    ImageMod = { };\n    ImageMod.canvasLib = [];\n}\n\n//  todo create an empty image by reading image data from a blank canvas of the appropriate size\n\nvar $builtinmodule = function(name) {\n    var mod = {};\n\n    var image = function($gbl, $loc) {\n        $loc.__init__ = new Sk.builtin.func(function(self,imageId) {\n            self.image = document.getElementById(imageId.v);\n            if (self.image == null) {\n                throw "There is no image on this page named: " + imageId.v;\n            }\n            self.width = self.image.width;\n            self.height = self.image.height;\n            self.canvas = document.createElement("canvas");\n            self.canvas.height = self.height;\n            self.canvas.width = self.width;\n            self.ctx = self.canvas.getContext("2d");\n            self.ctx.drawImage(self.image,0,0)\n            self.imagedata = self.ctx.getImageData(0,0,self.width,self.height);\n        });\n\n        $loc.getPixel = new Sk.builtin.func(function(self,x,y) {\n\t\t\tx = Sk.builtin.asnum$(x);\n\t\t\ty = Sk.builtin.asnum$(y);\n            var index = (y*4)*self.width+(x*4);\n            var red = self.imagedata.data[index]\n            var green = self.imagedata.data[index+1]\n            var blue = self.imagedata.data[index+2]\n            return Sk.misceval.callsim(mod.Pixel,red,green,blue);\n        });\n\n        $loc.setPixel = new Sk.builtin.func(function(self, x, y, pix) {\n\t\t\tx = Sk.builtin.asnum$(x);\n\t\t\ty = Sk.builtin.asnum$(y);\n            var index = (y*4)*self.width+(x*4);\n            self.imagedata.data[index] = Sk.misceval.callsim(pix.getRed,pix);\n            self.imagedata.data[index+1] = Sk.misceval.callsim(pix.getGreen,pix);\n            self.imagedata.data[index+2] = Sk.misceval.callsim(pix.getBlue,pix);\n            self.imagedata.data[index+3] = 255;\n        });\n\n        $loc.getHeight = new Sk.builtin.func(function(self) {\n            return self.image.height;\n        });\n\n        $loc.getWidth = new Sk.builtin.func(function(self,titlestring) {\n            return self.image.width;\n        });\n\n        $loc.draw = new Sk.builtin.func(function(self,win,ulx,uly) {\n\t\t\twin = Sk.builtin.asnum$(win);\n\t\t\tulx = Sk.builtin.asnum$(ulx);\n\t\t\tuly = Sk.builtin.asnum$(uly);\n            var can = Sk.misceval.callsim(win.getWin,win);\n            var ctx = can.getContext("2d");\n            //ctx.putImageData(self.imagedata,0,0,0,0,self.imagedata.width,self.imagedata.height);\n            if (! ulx) {\n                ulx = 0;\n                uly = 0;\n            }\n            ctx.putImageData(self.imagedata,ulx,uly);\n        });\n\n        // toList\n\n    }\n\n    mod.Image = Sk.misceval.buildClass(mod, image, \'Image\', []);\n\n    var eImage = function($gbl, $loc) {\n        $loc.__init__ = new Sk.builtin.func(function(self,width,height) {\n            self.width = Sk.builtin.asnum$(width);\n            self.height = Sk.builtin.asnum$(height);\n            self.canvas = document.createElement("canvas");\n            self.ctx = self.canvas.getContext(\'2d\');\n            self.canvas.height = self.height;\n            self.canvas.width = self.width;\n            self.imagedata = self.ctx.getImageData(0,0,self.width,self.height);\n        });\n\n    }\n\n    mod.EmptyImage = Sk.misceval.buildClass(mod, eImage, \'EmptyImage\', [mod.Image]);\n\n    // create a ListImage object\n\n    \n    var pixel = function($gbl, $loc) {\n        $loc.__init__ = new Sk.builtin.func(function(self,r,g,b) {\n            self.red = Sk.builtin.asnum$(r);\n            self.green = Sk.builtin.asnum$(g);\n            self.blue = Sk.builtin.asnum$(b);\n        });\n\n        $loc.getRed = new Sk.builtin.func(function(self) {\n           return self.red;\n        });\n\n        $loc.getGreen = new Sk.builtin.func(function(self) {\n           return self.green;\n        });\n\n        $loc.getBlue = new Sk.builtin.func(function(self) {\n           return self.blue;\n        });\n\n        $loc.setRed = new Sk.builtin.func(function(self,r) {\n           self.red = Sk.builtin.asnum$(r);\n        });\n\n        $loc.setGreen = new Sk.builtin.func(function(self,g) {\n           self.green = Sk.builtin.asnum$(g);\n        });\n\n        $loc.setBlue = new Sk.builtin.func(function(self,b) {\n           self.blue = Sk.builtin.asnum$(b);\n        });\n\n        $loc.__getitem__ = new Sk.builtin.func(function(self,k) {\n\t\t   k = Sk.builtin.asnum$(k);\n           if(k == 0) {\n               return self.red;\n           } else if (k == 1) {\n               return self.green;\n           } else if (k == 2) {\n               return self.blue;\n           }\n        });\n\n        $loc.__str__ = new Sk.builtin.func(function(self) {\n            return "[" + self.red + "," + self.green + "," + self.blue + "]"\n        });\n        \n        //getColorTuple\n        $loc.getColorTuple = new Sk.builtin.func(function(self,x,y) {\n\n        });\n\n        //setRange -- change from 0..255 to 0.0 .. 1.0\n        $loc.setRange = new Sk.builtin.func(function(self,mx) {\n            self.max = Sk.builtin.asnum$(mx);\n        });\n\n    }\n    mod.Pixel = Sk.misceval.buildClass(mod, pixel, \'Pixel\', []);\n\n\n\n    var screen = function($gbl, $loc) {\n        $loc.__init__ = new Sk.builtin.func(function(self,width,height) {\n            var currentCanvas = ImageMod.canvasLib[Sk.canvas];\n            if (currentCanvas === undefined) {\n                self.theScreen = document.getElementById(Sk.canvas);\n                if (width !== undefined) {\n                    self.theScreen.height = height;\n                    self.theScreen.width = width;\n                }\n\n                ImageMod.canvasLib[Sk.canvas] = self.theScreen;\n            } else {\n                self.theScreen = currentCanvas;\n                self.theScreen.height = self.theScreen.height;\n            }\n            self.theScreen.style.display = "block";\n        });\n\n        $loc.getWin = new Sk.builtin.func(function(self) {\n           return self.theScreen;\n        });\n\n        // exitonclick\n        $loc.exitonclick = new Sk.builtin.func(function(self) {\n            var canvas_id = self.theScreen.id;\n            self.theScreen.onclick = function() {\n                document.getElementById(canvas_id).style.display = \'none\';\n                document.getElementById(canvas_id).onclick = null;\n                delete ImageMod.canvasLib[canvas_id];\n            }\n\n        });\n        //getMouse\n    }\n\n    mod.ImageWin = Sk.misceval.buildClass(mod, screen, \'ImageWin\', []);\n\n    return mod\n}\n',
-    'src/lib/browser/__init__.js': '/*\n * \'browser\' Python module\n *\n * Exposes the window and document variables.\n */\nvar $builtinmodule = function(name) {\n\n  var mod = {};\n\n  var EVENT                    = \'Event\';\n  var FUNCTION                 = Sk.ffi.PyType.FUNCTION;\n  var NODE                     = \'Node\';\n  var WINDOW                   = \'Window\';\n  var WINDOW_ANIMATION_RUNNER  = \'WindowAnimationRunner\';\n  var WORKBENCH                = \'Workbench\';\n  var METHOD_START             = \'start\';\n\n  Sk.builtin.defineEvent(mod);\n\n  Sk.builtin.defineNode(mod);\n\n  mod[\'window\'] = Sk.ffi.callsim(Sk.builtin.buildWindowClass(mod));\n\n  mod[\'document\'] = Sk.ffi.callsim(Sk.builtin.buildDocumentClass(mod));\n\n  Sk.builtin.defineWorkbench(mod);\n\n  mod[WINDOW_ANIMATION_RUNNER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {\n    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, tickPy, terminatePy, setUpPy, tearDownPy) {\n      Sk.ffi.checkMethodArgs(WINDOW_ANIMATION_RUNNER, arguments, 4, 4);\n      Sk.ffi.checkArgType("tick",      FUNCTION, Sk.ffi.isFunction(tickPy));\n      Sk.ffi.checkArgType("terminate", FUNCTION, Sk.ffi.isFunction(terminatePy));\n      Sk.ffi.checkArgType("setUp",     FUNCTION, Sk.ffi.isFunction(setUpPy));\n      Sk.ffi.checkArgType("tearDown",  FUNCTION, Sk.ffi.isFunction(tearDownPy));\n      var WindowAnimationRunner = function() {\n        this.tick      = Sk.ffi.remapToJs(tickPy);\n        this.terminate = Sk.ffi.remapToJs(terminatePy);\n        this.setUp     = Sk.ffi.remapToJs(setUpPy);\n        this.tearDown  = Sk.ffi.remapToJs(tearDownPy);\n        this.startTime = null;\n        this.elapsed   = null;\n        this.requestID = null;\n      };\n      WindowAnimationRunner.prototype = {\n        constructor: WindowAnimationRunner,\n        start: function() {\n          var war = this;\n          war.setUp();\n          var animate = function(timestamp) {\n            if (war.startTime) {\n              war.elapsed = timestamp - war.startTime;\n            }\n            else {\n              if (timestamp) {\n                war.startTime = timestamp;\n              }\n              else {\n                war.elapsed = 0;\n              }\n            }\n            if (war.terminate(war.elapsed / 1000)) {\n              window.cancelAnimationFrame(war.requestID);\n              war.tearDown();\n            }\n            else {\n              war.requestID = window.requestAnimationFrame(animate);\n              war.tick(war.elapsed / 1000);\n            }\n          };\n          animate(null);\n        },\n        toString: function() {\n          return WINDOW_ANIMATION_RUNNER;\n        }\n      };\n      Sk.ffi.referenceToPy(new WindowAnimationRunner(), WINDOW_ANIMATION_RUNNER, undefined, selfPy);\n    });\n    $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {\n      var war = Sk.ffi.remapToJs(selfPy);\n      switch(name) {\n        case METHOD_START: {\n          return Sk.ffi.callableToPy(mod, METHOD_START, function(methodPy) {\n            Sk.ffi.checkMethodArgs(METHOD_START, arguments, 0, 0);\n            war.start();\n          });\n        }\n      }\n    });\n    $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {\n      return Sk.ffi.stringToPy(WINDOW_ANIMATION_RUNNER);\n    });\n    $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {\n      return Sk.ffi.stringToPy(WINDOW_ANIMATION_RUNNER + "(" + ")");\n    });\n  }, WINDOW_ANIMATION_RUNNER, []);\n\n  return mod;\n}\n',
+    'src/lib/browser/__init__.js': 'var $builtinmodule = function(name) {\n  var mod = {};\n\n  var EVENT                    = \'Event\';\n  var FUNCTION                 = Sk.ffi.PyType.FUNCTION;\n  var NODE                     = \'Node\';\n  var WINDOW                   = \'Window\';\n  var WINDOW_ANIMATION_RUNNER  = \'WindowAnimationRunner\';\n  var WORKBENCH                = \'Workbench\';\n  var METHOD_START             = \'start\';\n\n  Sk.builtin.defineEvent(mod);\n\n  Sk.builtin.defineNode(mod);\n\n  mod[\'window\'] = Sk.ffi.callsim(Sk.builtin.buildWindowClass(mod));\n\n  mod[\'document\'] = Sk.ffi.callsim(Sk.builtin.buildDocumentClass(mod));\n\n  mod[WINDOW_ANIMATION_RUNNER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {\n    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, tickPy, terminatePy, setUpPy, tearDownPy) {\n      Sk.ffi.checkMethodArgs(WINDOW_ANIMATION_RUNNER, arguments, 4, 4);\n      Sk.ffi.checkArgType("tick",      FUNCTION, Sk.ffi.isFunction(tickPy));\n      Sk.ffi.checkArgType("terminate", FUNCTION, Sk.ffi.isFunction(terminatePy));\n      Sk.ffi.checkArgType("setUp",     FUNCTION, Sk.ffi.isFunction(setUpPy));\n      Sk.ffi.checkArgType("tearDown",  FUNCTION, Sk.ffi.isFunction(tearDownPy));\n      var WindowAnimationRunner = function() {\n        this.tick      = Sk.ffi.remapToJs(tickPy);\n        this.terminate = Sk.ffi.remapToJs(terminatePy);\n        this.setUp     = Sk.ffi.remapToJs(setUpPy);\n        this.tearDown  = Sk.ffi.remapToJs(tearDownPy);\n        this.startTime = null;\n        this.elapsed   = null;\n        this.requestID = null;\n      };\n      WindowAnimationRunner.prototype = {\n        constructor: WindowAnimationRunner,\n        start: function() {\n          var war = this;\n          war.setUp();\n          var animate = function(timestamp) {\n            if (war.startTime) {\n              war.elapsed = timestamp - war.startTime;\n            }\n            else {\n              if (timestamp) {\n                war.startTime = timestamp;\n              }\n              else {\n                war.elapsed = 0;\n              }\n            }\n            if (war.terminate(war.elapsed / 1000)) {\n              window.cancelAnimationFrame(war.requestID);\n              war.tearDown();\n            }\n            else {\n              war.requestID = window.requestAnimationFrame(animate);\n              war.tick(war.elapsed / 1000);\n            }\n          };\n          animate(null);\n        },\n        toString: function() {\n          return WINDOW_ANIMATION_RUNNER;\n        }\n      };\n      Sk.ffi.referenceToPy(new WindowAnimationRunner(), WINDOW_ANIMATION_RUNNER, undefined, selfPy);\n    });\n    $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {\n      var war = Sk.ffi.remapToJs(selfPy);\n      switch(name) {\n        case METHOD_START: {\n          return Sk.ffi.callableToPy(mod, METHOD_START, function(methodPy) {\n            Sk.ffi.checkMethodArgs(METHOD_START, arguments, 0, 0);\n            war.start();\n          });\n        }\n      }\n    });\n    $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {\n      return Sk.ffi.stringToPy(WINDOW_ANIMATION_RUNNER);\n    });\n    $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {\n      return Sk.ffi.stringToPy(WINDOW_ANIMATION_RUNNER + "(" + ")");\n    });\n  }, WINDOW_ANIMATION_RUNNER, []);\n\n  return mod;\n}\n',
     'src/lib/fractions/__init__.js': '/**\n * fractions - Rational numbers\n *\n * David Holmes (david.geo.holmes@gmail.com)\n */\nvar $builtinmodule = function(name) {\n\n  var mod = {};\n\n  var FRACTION = "Fraction";\n\n  Sk.builtin.defineFractions(mod, FRACTION, function(n, d) {return new BLADE.Rational(n, d)});\n\n  return mod;\n};',
     'src/lib/pythonds/basic/__init__.py': '\n#__all__ = ["stack"]\n\n\n#from .stack import Stack\n#from .queue import Queue\n\n\n\n',
     'src/lib/geometry/__init__.js': 'var $builtinmodule = function(moduleNamePy) {\n  var mod = {};\n  Sk.builtin.defineThree(mod, THREE, BLADE);\n  Sk.builtin.defineGeometry(mod, THREE, Sk.ffi.remapToJs(moduleNamePy));\n  return mod;\n}\n',
