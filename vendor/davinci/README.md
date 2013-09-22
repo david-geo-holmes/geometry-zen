@@ -1,4 +1,4 @@
-davinci-dist
-============
+davinci
+=======
 
 DaVinci repository to facilitate bower integration.
