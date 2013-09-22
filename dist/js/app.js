@@ -25278,11 +25278,11 @@
           }
         });
         k.__add__ = Sk.ffi.functionPy(function (a, d) {
-          var e = Sk.ffi.remapToJs(a), h = Sk.ffi.remapToJs(d);
+          var e = Sk.ffi.remapToJs(a), g = Sk.ffi.remapToJs(d);
           if (c(d))
-            return f(e.x + h.x, e.y + h.y);
+            return f(e.x + g.x, e.y + g.y);
           if (Sk.ffi.isNumber(d))
-            return f(e.x + h, e.y);
+            return f(e.x + g, e.y);
           throw Sk.ffi.err.argument('other').mustHaveType(b);
         });
         k.__radd__ = Sk.ffi.functionPy(function (a, b) {
@@ -25374,9 +25374,9 @@
           if (Sk.ffi.isNumber(b))
             c.x /= f, c.y /= f;
           else {
-            var h = f.x * f.x + f.y * f.y;
-            c.x = (d * f.x + e * f.y) / h;
-            c.y = (e * f.x - d * f.y) / h;
+            var g = f.x * f.x + f.y * f.y;
+            c.x = (d * f.x + e * f.y) / g;
+            c.y = (e * f.x - d * f.y) / g;
           }
           return a;
         });
@@ -25829,15 +25829,100 @@
   };
   (function () {
     Sk.builtin.defineEasel = function (a, b, c) {
+      function d(b, c, d) {
+        var e = Sk.ffi.remapToJs(b);
+        switch (c) {
+        case 'alpha':
+          return Sk.ffi.numberToFloatPy(e.alpha);
+        case 'graphics':
+          return Sk.ffi.callsim(a.Graphics, Sk.ffi.referenceToPy(e.graphics, 'Graphics'));
+        case 'name':
+          return Sk.ffi.stringToPy(e.name);
+        case 'x':
+          return Sk.ffi.numberToFloatPy(e.x);
+        case 'y':
+          return Sk.ffi.numberToFloatPy(e.y);
+        case 'rotation':
+          return Sk.ffi.numberToFloatPy(e.rotation);
+        case 'addEventListener':
+          return Sk.builtin.addEventListener(a, e);
+        case 'removeEventListener':
+          return Sk.builtin.removeEventListener(a, e);
+        case 'globalToLocal':
+          return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (b, c) {
+            c.__init__ = Sk.ffi.functionPy(function (a) {
+              a.tp$name = 'globalToLocal';
+              a.v = e.globalToLocal;
+            });
+            c.__call__ = Sk.ffi.functionPy(function (b, c, d) {
+              b = e.globalToLocal(Sk.ffi.remapToJs(c), Sk.ffi.remapToJs(d));
+              return Sk.ffi.callsim(a.Point, Sk.ffi.referenceToPy(b, 'Point'));
+            });
+          }, 'globalToLocal', []));
+        case 'hitTest':
+          return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, b) {
+            b.__init__ = Sk.ffi.functionPy(function (a) {
+              a.tp$name = 'hitTest';
+              a.v = e.hitTest;
+            });
+            b.__call__ = Sk.ffi.functionPy(function (a, b, c) {
+              return Sk.ffi.remapToPy(e.hitTest(Sk.ffi.remapToJs(b), Sk.ffi.remapToJs(c)));
+            });
+          }, 'hitTest', []));
+        case 'localToLocal':
+          return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (b, c) {
+            c.__init__ = Sk.ffi.functionPy(function (a) {
+              a.tp$name = 'localToLocal';
+              a.v = e.localToLocal;
+            });
+            c.__call__ = Sk.ffi.functionPy(function (b, c, d, f) {
+              b = e.localToLocal(Sk.ffi.remapToJs(c), Sk.ffi.remapToJs(d), Sk.ffi.remapToJs(f));
+              return Sk.ffi.callsim(a.Point, Sk.ffi.referenceToPy(b, 'Point'));
+            });
+          }, 'localToLocal', []));
+        default:
+          throw Sk.ffi.err.attribute(c).isNotGetableOnType(d);
+        }
+      }
+      function e(a, b, c, d) {
+        a = Sk.ffi.remapToJs(a);
+        var e = Sk.ffi.remapToJs(c);
+        switch (b) {
+        case 'alpha':
+          Sk.ffi.checkArgType('alpha', f, Sk.ffi.isNumber(c), c);
+          a.alpha = e;
+          break;
+        case 'name':
+          Sk.ffi.checkArgType('name', Sk.ffi.PyType.STR, Sk.ffi.isStr(c), c);
+          a.name = e;
+          break;
+        case 'x':
+        case 'y':
+          Sk.ffi.checkArgType(b, f, Sk.ffi.isNumber(c), c);
+          a[b] = e;
+          break;
+        case 'rotation':
+          Sk.ffi.checkArgType('rotation', f, Sk.ffi.isNumber(c), c);
+          a.rotation = e;
+          break;
+        default:
+          throw Sk.ffi.err.attribute(b).isNotSetableOnType(d);
+        }
+      }
       Sk.ffi.checkFunctionArgs('defineEasel', arguments, 3, 3);
       Sk.builtin.defineEuclidean2(a, c);
       Sk.builtin.defineEvent(a);
-      a.Graphics = Sk.ffi.buildClass(a, function (c, e) {
-        e.__init__ = Sk.ffi.functionPy(function (a, c) {
+      var f = [
+          Sk.ffi.PyType.FLOAT,
+          Sk.ffi.PyType.INT,
+          Sk.ffi.PyType.LONG
+        ];
+      a.Graphics = Sk.ffi.buildClass(a, function (c, d) {
+        d.__init__ = Sk.ffi.functionPy(function (a, c) {
           Sk.ffi.checkMethodArgs('Graphics', arguments, 0, 1);
           Sk.ffi.isDefined(c) ? Sk.ffi.referenceToPy(Sk.ffi.remapToJs(c), 'Graphics', void 0, a) : Sk.ffi.referenceToPy(new b.Graphics(), 'Graphics', void 0, a);
         });
-        e.__getattr__ = Sk.ffi.functionPy(function (b, c) {
+        d.__getattr__ = Sk.ffi.functionPy(function (b, c) {
           var d = Sk.ffi.remapToJs(b);
           switch (c) {
           case 'beginFill':
@@ -25868,11 +25953,11 @@
                 a.tp$name = 'drawCircle';
                 a.v = d.drawCircle;
               });
-              c.__call__ = Sk.ffi.functionPy(function (a, c, e, g) {
+              c.__call__ = Sk.ffi.functionPy(function (a, c, e, f) {
                 c = Sk.ffi.remapToJs(c);
                 e = Sk.ffi.remapToJs(e);
-                g = Sk.ffi.remapToJs(g);
-                d.drawCircle(c, e, g);
+                f = Sk.ffi.remapToJs(f);
+                d.drawCircle(c, e, f);
                 return b;
               });
             }, 'drawCircle', []));
@@ -25882,12 +25967,12 @@
                 a.tp$name = 'drawRect';
                 a.v = d.drawRect;
               });
-              c.__call__ = Sk.ffi.functionPy(function (a, c, e, g, k) {
+              c.__call__ = Sk.ffi.functionPy(function (a, c, e, f, g) {
                 c = Sk.ffi.remapToJs(c);
                 e = Sk.ffi.remapToJs(e);
+                f = Sk.ffi.remapToJs(f);
                 g = Sk.ffi.remapToJs(g);
-                k = Sk.ffi.remapToJs(k);
-                d.drawRect(c, e, g, k);
+                d.drawRect(c, e, f, g);
                 return b;
               });
             }, 'drawRect', []));
@@ -25945,28 +26030,28 @@
                 a.tp$name = 'setStrokeStyle';
                 a.v = d.setStrokeStyle;
               });
-              c.__call__ = Sk.ffi.functionPy(function (a, c, e, g, k, l) {
+              c.__call__ = Sk.ffi.functionPy(function (a, c, e, f, g, h) {
                 c = Sk.ffi.remapToJs(c);
                 e = Sk.ffi.remapToJs(e);
+                f = Sk.ffi.remapToJs(f);
                 g = Sk.ffi.remapToJs(g);
-                k = Sk.ffi.remapToJs(k);
-                l = Sk.ffi.remapToJs(l);
-                d.setStrokeStyle(c, e, g, k, l);
+                h = Sk.ffi.remapToJs(h);
+                d.setStrokeStyle(c, e, f, g, h);
                 return b;
               });
             }, 'setStrokeStyle', []));
           }
         });
       }, 'Graphics', []);
-      a.MovieClip = Sk.ffi.buildClass(a, function (c, e) {
-        e.__init__ = Sk.ffi.functionPy(function (a, c, d, e, l) {
+      a.MovieClip = Sk.ffi.buildClass(a, function (c, d) {
+        d.__init__ = Sk.ffi.functionPy(function (a, c, d, e, f) {
           c = null !== c ? Sk.ffi.remapToJs(c) : null;
           d = Sk.ffi.remapToJs(d);
           e = Sk.ffi.remapToJs(e);
-          l = Sk.ffi.remapToJs(l);
-          Sk.ffi.referenceToPy(new b.MovieClip(c, d, e, l), 'MovieClip', void 0, a);
+          f = Sk.ffi.remapToJs(f);
+          Sk.ffi.referenceToPy(new b.MovieClip(c, d, e, f), 'MovieClip', void 0, a);
         });
-        e.__getattr__ = Sk.ffi.functionPy(function (b, c) {
+        d.__getattr__ = Sk.ffi.functionPy(function (b, c) {
           var d = Sk.ffi.remapToJs(b);
           switch (c) {
           case 'timeline':
@@ -26006,113 +26091,38 @@
           }
         });
       }, 'MovieClip', []);
-      a.Shape = Sk.ffi.buildClass(a, function (c, e) {
-        e.__init__ = Sk.ffi.functionPy(function (a, c) {
-          a.tp$name = 'Shape';
-          if ('undefined' === typeof c)
-            a.v = new b.Shape();
-          else {
-            var d = c.tp$name;
-            if ('string' === typeof d)
-              switch (d) {
-              case 'Shape':
-                a.v = Sk.ffi.remapToJs(c);
-                break;
-              case 'Graphics':
-                a.v = new b.Shape(Sk.ffi.remapToJs(c));
-                break;
-              default:
-                throw Error(d);
-              }
-            else
-              throw Error(typeof d);
-          }
+      a.Shape = Sk.ffi.buildClass(a, function (a, c) {
+        c.__init__ = Sk.ffi.functionPy(function (a, c) {
+          Sk.ffi.checkMethodArgs('Shape', arguments, 0, 1);
+          if (Sk.ffi.isUndefined(c))
+            Sk.ffi.referenceToPy(new b.Shape(), 'Shape', void 0, a);
+          else
+            switch (Sk.ffi.checkArgType('graphics', 'Graphics', Sk.ffi.isClass(c), c), Sk.ffi.typeName(c)) {
+            case 'Shape':
+              Sk.ffi.referenceToPy(Sk.ffi.remapToJs(c), 'Shape', void 0, a);
+              break;
+            case 'Graphics':
+              Sk.ffi.referenceToPy(new b.Shape(Sk.ffi.remapToJs(c)), 'Shape', void 0, a);
+              break;
+            default:
+              Sk.ffi.checkArgType('graphics', 'Graphics', !1, c);
+            }
         });
-        e.__getattr__ = Sk.ffi.functionPy(function (b, c) {
-          var d = Sk.ffi.remapToJs(b);
-          switch (c) {
-          case 'alpha':
-            return Sk.builtin.assk$(d.alpha, Sk.builtin.nmber.float$);
-          case 'graphics':
-            return Sk.ffi.callsim(a.Graphics, Sk.ffi.referenceToPy(d.graphics, 'Graphics'));
-          case 'name':
-            return new Sk.builtin.str(d.name);
-          case 'x':
-            return Sk.builtin.assk$(d.x, Sk.builtin.nmber.int$);
-          case 'y':
-            return Sk.builtin.assk$(d.y, Sk.builtin.nmber.int$);
-          case 'rotation':
-            return Sk.builtin.assk$(d.rotation, Sk.builtin.nmber.float$);
-          case 'addEventListener':
-            return Sk.builtin.addEventListener(a, d);
-          case 'removeEventListener':
-            return Sk.builtin.removeEventListener(a, d);
-          case 'globalToLocal':
-            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (b, c) {
-              c.__init__ = Sk.ffi.functionPy(function (a) {
-                a.tp$name = 'globalToLocal';
-                a.v = d.globalToLocal;
-              });
-              c.__call__ = Sk.ffi.functionPy(function (b, c, e) {
-                b = d.globalToLocal(Sk.ffi.remapToJs(c), Sk.ffi.remapToJs(e));
-                return Sk.ffi.callsim(a.Point, Sk.ffi.referenceToPy(b, 'Point'));
-              });
-            }, 'globalToLocal', []));
-          case 'hitTest':
-            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, b) {
-              b.__init__ = Sk.ffi.functionPy(function (a) {
-                a.tp$name = 'hitTest';
-                a.v = d.hitTest;
-              });
-              b.__call__ = Sk.ffi.functionPy(function (a, b, c) {
-                return Sk.ffi.remapToPy(d.hitTest(Sk.ffi.remapToJs(b), Sk.ffi.remapToJs(c)));
-              });
-            }, 'hitTest', []));
-          case 'localToLocal':
-            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (b, c) {
-              c.__init__ = Sk.ffi.functionPy(function (a) {
-                a.tp$name = 'localToLocal';
-                a.v = d.localToLocal;
-              });
-              c.__call__ = Sk.ffi.functionPy(function (b, c, e, f) {
-                b = d.localToLocal(Sk.ffi.remapToJs(c), Sk.ffi.remapToJs(e), Sk.ffi.remapToJs(f));
-                return Sk.ffi.callsim(a.Point, Sk.ffi.referenceToPy(b, 'Point'));
-              });
-            }, 'localToLocal', []));
-          }
+        c.__getattr__ = Sk.ffi.functionPy(function (a, b) {
+          return d(a, b, 'Shape');
         });
-        e.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
-          a = Sk.ffi.remapToJs(a);
-          c = Sk.ffi.remapToJs(c);
-          switch (b) {
-          case 'alpha':
-            a.alpha = c;
-            break;
-          case 'name':
-            a.name = c;
-            break;
-          case 'x':
-            a.x = c;
-            break;
-          case 'y':
-            a.y = c;
-            break;
-          case 'rotation':
-            a.rotation = c;
-            break;
-          default:
-            throw new Sk.builtin.AttributeError(b + ' is not a writeable attribute of Shape');
-          }
+        c.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
+          return e(a, b, c, 'Shape');
         });
       }, 'Shape', []);
-      a.Stage = Sk.ffi.buildClass(a, function (c, e) {
-        e.__init__ = Sk.ffi.functionPy(function (a, c) {
+      a.Stage = Sk.ffi.buildClass(a, function (c, d) {
+        d.__init__ = Sk.ffi.functionPy(function (a, c) {
           Sk.ffi.checkMethodArgs('Stage', arguments, 1, 1);
           Sk.ffi.checkArgType('canvas', 'Node', Sk.ffi.isClass(c, 'Node'), c);
           var d = Sk.ffi.remapToJs(c);
           Sk.ffi.referenceToPy(new b.Stage(d), 'Stage', void 0, a);
         });
-        e.__getattr__ = Sk.ffi.functionPy(function (b, c) {
+        d.__getattr__ = Sk.ffi.functionPy(function (b, c) {
           var d = Sk.ffi.remapToJs(b);
           switch (c) {
           case 'mouseInBounds':
@@ -26124,14 +26134,14 @@
           case 'mouseY':
             return Sk.builtin.assk$(d.mouseY, Sk.builtin.nmber.int$);
           case 'addChild':
-            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (b, c) {
-              c.__init__ = Sk.ffi.functionPy(function (a) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, b) {
+              b.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'addChild';
                 a.v = d.addChild;
               });
-              c.__call__ = Sk.ffi.functionPy(function (b, c) {
-                var e = d.addChild(Sk.ffi.remapToJs(c));
-                return Sk.ffi.callsim(a[c.tp$name], Sk.ffi.referenceToPy(e, c.tp$name));
+              b.__call__ = Sk.ffi.functionPy(function (a, b) {
+                d.addChild(Sk.ffi.remapToJs(b));
+                return b;
               });
             }, 'addChild', []));
           case 'enableMouseOver':
@@ -26156,7 +26166,7 @@
             }, 'update', []));
           }
         });
-        e.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
+        d.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
           a = Sk.ffi.remapToJs(a);
           c = Sk.ffi.remapToJs(c);
           switch (b) {
@@ -26171,100 +26181,77 @@
           }
         });
       }, 'Stage', []);
-      a.Text = Sk.ffi.buildClass(a, function (c, e) {
-        e.__init__ = Sk.ffi.functionPy(function (a, c, d, e) {
-          a.tp$name = 'Text';
+      a.Text = Sk.ffi.buildClass(a, function (c, f) {
+        f.__init__ = Sk.ffi.functionPy(function (a, c, d, e) {
+          Sk.ffi.checkArgType('text', Sk.ffi.PyType.STR, Sk.ffi.isStr(c), c);
+          Sk.ffi.checkArgType('font', Sk.ffi.PyType.STR, Sk.ffi.isStr(d), d);
           c = Sk.ffi.remapToJs(c);
           d = Sk.ffi.remapToJs(d);
           e = Sk.ffi.remapToJs(e);
-          a.v = new b.Text(c, d, e);
+          Sk.ffi.referenceToPy(new b.Text(c, d, e), 'Text', void 0, a);
         });
-        e.__getattr__ = Sk.ffi.functionPy(function (b, c) {
-          var d = Sk.ffi.remapToJs(b);
+        f.__getattr__ = Sk.ffi.functionPy(function (b, c) {
+          var e = Sk.ffi.remapToJs(b);
           switch (c) {
-          case 'alpha':
-            return Sk.builtin.assk$(d.alpha, Sk.builtin.nmber.float$);
-          case 'x':
-            return Sk.builtin.assk$(d.x, Sk.builtin.nmber.float$);
-          case 'y':
-            return Sk.builtin.assk$(d.y, Sk.builtin.nmber.float$);
-          case 'rotation':
-            return Sk.builtin.assk$(d.rotation, Sk.builtin.nmber.float$);
           case 'text':
-            return new Sk.builtin.str(d.text);
+            return Sk.ffi.stringToPy(e.text);
           case 'textAlign':
-            return new Sk.builtin.str(d.textAlign);
-          case 'addEventListener':
-            return Sk.builtin.addEventListener(a, d);
-          case 'removeEventListener':
-            return Sk.builtin.removeEventListener(a, d);
+            return Sk.ffi.stringToPy(e.textAlign);
           case 'getMeasuredWidth':
             return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, b) {
               b.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'getMeasuredWidth';
-                a.v = d.getMeasuredWidth;
+                a.v = e.getMeasuredWidth;
               });
               b.__call__ = Sk.ffi.functionPy(function (a, b) {
-                return Sk.builtin.assk$(d.getMeasuredWidth(), Sk.builtin.nmber.float$);
+                return Sk.builtin.assk$(e.getMeasuredWidth(), Sk.builtin.nmber.float$);
               });
             }, 'getMeasuredWidth', []));
           case 'getMeasuredHeight':
             return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, b) {
               b.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'getMeasuredHeight';
-                a.v = d.getMeasuredHeight;
+                a.v = e.getMeasuredHeight;
               });
               b.__call__ = Sk.ffi.functionPy(function (a, b) {
-                return Sk.builtin.assk$(d.getMeasuredHeight(), Sk.builtin.nmber.float$);
+                return Sk.builtin.assk$(e.getMeasuredHeight(), Sk.builtin.nmber.float$);
               });
             }, 'getMeasuredHeight', []));
+          default:
+            return d(b, c, 'Text');
           }
         });
-        e.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
-          a = Sk.ffi.remapToJs(a);
-          var d = Sk.ffi.remapToJs(c);
+        f.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
+          var d = Sk.ffi.remapToJs(a), f = Sk.ffi.remapToJs(c);
           switch (b) {
-          case 'alpha':
-            Sk.builtin.pyCheckType('alpha', 'Number', Sk.builtin.checkNumber(c));
-            a.alpha = d;
-            break;
           case 'hitArea':
-            a.hitArea = d;
-            break;
-          case 'x':
-            a.x = d;
-            break;
-          case 'y':
-            a.y = d;
-            break;
-          case 'rotation':
-            a.rotation = d;
+            d.hitArea = f;
             break;
           case 'text':
-            a.text = d;
+            d.text = f;
             break;
           case 'textAlign':
-            a.textAlign = d;
+            d.textAlign = f;
             break;
           default:
-            throw new Sk.builtin.AttributeError(b + ' is not a writeable attribute of Text');
+            return e(a, b, c, 'Text');
           }
         });
-        e.__repr__ = Sk.ffi.functionPy(function (a) {
+        f.__repr__ = Sk.ffi.functionPy(function (a) {
           a = Sk.ffi.remapToJs(a);
-          return new Sk.builtin.str('Text(' + a.x + ', ' + a.y + ')');
+          return Sk.ffi.stringToPy('Text(' + a.x + ', ' + a.y + ')');
         });
-        e.__str__ = Sk.ffi.functionPy(function (a) {
+        f.__str__ = Sk.ffi.functionPy(function (a) {
           a = Sk.ffi.remapToJs(a);
-          return new Sk.builtin.str('[' + a.x + ', ' + a.y + ']');
+          return Sk.ffi.stringToPy('[' + a.x + ', ' + a.y + ']');
         });
       }, 'Text', []);
-      a.Ticker = Sk.ffi.callsim(Sk.ffi.buildClass(a, function (c, e) {
-        e.__init__ = Sk.ffi.functionPy(function (a) {
+      a.Ticker = Sk.ffi.callsim(Sk.ffi.buildClass(a, function (c, d) {
+        d.__init__ = Sk.ffi.functionPy(function (a) {
           a.tp$name = 'Ticker';
           a.v = b.Ticker;
         });
-        e.__getattr__ = Sk.ffi.functionPy(function (b, c) {
+        d.__getattr__ = Sk.ffi.functionPy(function (b, c) {
           var d = Sk.ffi.remapToJs(b);
           switch (c) {
           case 'addEventListener':
@@ -26284,12 +26271,12 @@
           }
         });
       }, 'Ticker', []));
-      a.Tween = Sk.ffi.callsim(Sk.ffi.buildClass(a, function (c, e) {
-        e.__init__ = Sk.ffi.functionPy(function (a) {
+      a.Tween = Sk.ffi.callsim(Sk.ffi.buildClass(a, function (c, d) {
+        d.__init__ = Sk.ffi.functionPy(function (a) {
           a.tp$name = 'Tween';
           a.v = b.Tween;
         });
-        e.__getattr__ = Sk.ffi.functionPy(function (b, c) {
+        d.__getattr__ = Sk.ffi.functionPy(function (b, c) {
           var d = Sk.ffi.remapToJs(b);
           switch (c) {
           case 'get':
@@ -26302,11 +26289,11 @@
                 e = Sk.ffi.remapToJs(e);
                 f = Sk.ffi.remapToJs(f);
                 g = Sk.ffi.remapToJs(g);
-                var k = d.get(c, e, f, g);
+                var h = d.get(c, e, f, g);
                 return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (b, c) {
                   c.__init__ = Sk.ffi.functionPy(function (a) {
                     a.tp$name = 'Tween';
-                    a.v = k;
+                    a.v = h;
                   });
                   c.__getattr__ = Sk.ffi.functionPy(function (b, c) {
                     var d = Sk.ffi.remapToJs(b);
@@ -26356,30 +26343,15 @@
           }
         });
       }, 'Tween', []));
-      a.Container = Sk.ffi.buildClass(a, function (c, e) {
-        e.__init__ = Sk.ffi.functionPy(function (a, c) {
-          a.tp$name = 'Container';
-          if ('undefined' === typeof c)
-            a.v = new b.Container();
-          else {
-            var d = c.tp$name;
-            if ('string' === typeof d)
-              switch (d) {
-              case 'Container':
-                a.v = Sk.ffi.remapToJs(c);
-                break;
-              default:
-                throw Error(d);
-              }
-            else
-              throw Error(typeof d);
-          }
+      a.Container = Sk.ffi.buildClass(a, function (c, d) {
+        d.__init__ = Sk.ffi.functionPy(function (a, c) {
+          Sk.ffi.isUndefined(c) ? Sk.ffi.referenceToPy(new b.Container(), 'Container', void 0, a) : Sk.ffi.referenceToPy(Sk.ffi.remapToJs(c), 'Container', void 0, a);
         });
-        e.__getattr__ = Sk.ffi.functionPy(function (b, c) {
+        d.__getattr__ = Sk.ffi.functionPy(function (b, c) {
           var d = Sk.ffi.remapToJs(b);
           switch (c) {
           case 'name':
-            return new Sk.builtin.str(d.name);
+            return Sk.ffi.stringToPy(d.name);
           case 'x':
             return Sk.builtin.assk$(d.x, Sk.builtin.nmber.float$);
           case 'y':
@@ -26387,14 +26359,14 @@
           case 'rotation':
             return Sk.builtin.assk$(d.rotation, Sk.builtin.nmber.float$);
           case 'addChild':
-            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (b, c) {
-              c.__init__ = Sk.ffi.functionPy(function (a) {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, b) {
+              b.__init__ = Sk.ffi.functionPy(function (a) {
                 a.tp$name = 'addChild';
                 a.v = d.addChild;
               });
-              c.__call__ = Sk.ffi.functionPy(function (b, c) {
-                var e = d.addChild(Sk.ffi.remapToJs(c));
-                return Sk.ffi.callsim(a[c.tp$name], Sk.ffi.referenceToPy(e, c.tp$name));
+              b.__call__ = Sk.ffi.functionPy(function (a, b) {
+                d.addChild(Sk.ffi.remapToJs(b));
+                return b;
               });
             }, 'addChild', []));
           case 'addEventListener':
@@ -26424,7 +26396,7 @@
             return Sk.builtin.removeEventListener(a, d);
           }
         });
-        e.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
+        d.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
           a = Sk.ffi.remapToJs(a);
           c = Sk.ffi.remapToJs(c);
           switch (b) {
@@ -26444,13 +26416,13 @@
             throw new Sk.builtin.AttributeError(b + ' is not a writeable attribute of Container');
           }
         });
-        e.__repr__ = Sk.ffi.functionPy(function (a) {
+        d.__repr__ = Sk.ffi.functionPy(function (a) {
           a = Sk.ffi.remapToJs(a);
-          return new Sk.builtin.str('Container(' + a.x + ', ' + a.y + ')');
+          return Sk.ffi.stringToPy('Container(' + a.x + ', ' + a.y + ')');
         });
-        e.__str__ = Sk.ffi.functionPy(function (a) {
+        d.__str__ = Sk.ffi.functionPy(function (a) {
           a = Sk.ffi.remapToJs(a);
-          return new Sk.builtin.str('[' + a.x + ', ' + a.y + ']');
+          return Sk.ffi.stringToPy('[' + a.x + ', ' + a.y + ']');
         });
       }, 'Container', []);
       a.Ease = Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, c) {
@@ -26465,8 +26437,8 @@
           }
         });
       }, 'Ease', []));
-      a.Point = Sk.ffi.buildClass(a, function (c, e) {
-        e.__init__ = Sk.ffi.functionPy(function (a, c, d) {
+      a.Point = Sk.ffi.buildClass(a, function (c, d) {
+        d.__init__ = Sk.ffi.functionPy(function (a, c, d) {
           Sk.builtin.pyCheckArgs('Point', arguments, 1, 3);
           a.tp$name = 'Point';
           switch (arguments.length) {
@@ -26482,7 +26454,7 @@
             Sk.builtin.pyCheckType('x', 'number', Sk.builtin.checkNumber(c)), Sk.builtin.pyCheckType('y', 'number', Sk.builtin.checkNumber(d)), c = Sk.ffi.remapToJs(c), d = Sk.ffi.remapToJs(d), a.tp$name = 'Point', a.v = new b.Point(c, d);
           }
         });
-        e.__getattr__ = Sk.ffi.functionPy(function (b, c) {
+        d.__getattr__ = Sk.ffi.functionPy(function (b, c) {
           var d = Sk.ffi.remapToJs(b);
           switch (c) {
           case 'x':
@@ -26500,7 +26472,7 @@
             }, 'clone', []));
           }
         });
-        e.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
+        d.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
           a = Sk.ffi.remapToJs(a);
           c = Sk.ffi.remapToJs(c);
           switch (b) {
@@ -26511,21 +26483,21 @@
             a.y = c;
           }
         });
-        e.__repr__ = Sk.ffi.functionPy(function (a) {
+        d.__repr__ = Sk.ffi.functionPy(function (a) {
           a = Sk.ffi.remapToJs(a);
-          return new Sk.builtin.str('Point(' + a.x + ', ' + a.y + ')');
+          return Sk.ffi.stringToPy('Point(' + a.x + ', ' + a.y + ')');
         });
-        e.__str__ = Sk.ffi.functionPy(function (a) {
+        d.__str__ = Sk.ffi.functionPy(function (a) {
           a = Sk.ffi.remapToJs(a);
-          return new Sk.builtin.str('[' + a.x + ', ' + a.y + ']');
+          return Sk.ffi.stringToPy('[' + a.x + ', ' + a.y + ']');
         });
       }, 'Point', []);
-      a.getHSL = Sk.ffi.functionPy(function (a, c, f, g) {
+      a.getHSL = Sk.ffi.functionPy(function (a, c, d, e) {
         a = Sk.ffi.remapToJs(a);
         c = Sk.ffi.remapToJs(c);
-        f = Sk.ffi.remapToJs(f);
-        g = Sk.ffi.remapToJs(g);
-        return new Sk.builtin.str(b.Graphics.getHSL(a, c, f, g));
+        d = Sk.ffi.remapToJs(d);
+        e = Sk.ffi.remapToJs(e);
+        return Sk.ffi.stringToPy(b.Graphics.getHSL(a, c, d, e));
       });
     };
   }.call(this));
@@ -29285,7 +29257,7 @@
           case 'sortObjects':
             return d.sortObjects;
           case 'domElement':
-            return { v: d.domElement };
+            return Sk.ffi.callsim(a.Node, Sk.ffi.referenceToPy(d.domElement, 'Node'));
           case 'render':
             return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (a, b) {
               b.__init__ = Sk.ffi.functionPy(function (a) {
