@@ -26073,6 +26073,11 @@ var METHOD_DRAW_RECT              = "drawRect";
  * @const
  * @type {string}
  */
+var METHOD_DRAW_ROUND_RECT        = "drawRoundRect";
+/**
+ * @const
+ * @type {string}
+ */
 var METHOD_ENABLE_MOUSE_OVER      = "enableMouseOver";
 /**
  * @const
@@ -26170,6 +26175,31 @@ var METHOD_UPDATE                 = "update";
  */
 var METHOD_WAIT                   = "wait";
 /**
+ * @const
+ * @type {string}
+ */
+var ARG_X                         = "x";
+/**
+ * @const
+ * @type {string}
+ */
+var ARG_Y                         = "y";
+/**
+ * @const
+ * @type {string}
+ */
+var ARG_WIDTH                     = "width";
+/**
+ * @const
+ * @type {string}
+ */
+var ARG_HEIGHT                    = "height";
+/**
+ * @const
+ * @type {string}
+ */
+var ARG_RADIUS                    = "radius";
+/**
  * Graphics
  */
 mod[GRAPHICS] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
@@ -26239,6 +26269,23 @@ mod[GRAPHICS] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
             return graphicsPy;
           });
         }, METHOD_DRAW_RECT, []));
+      }
+      case METHOD_DRAW_ROUND_RECT: {
+        return Sk.ffi.callableToPy(mod, METHOD_DRAW_ROUND_RECT, function(methodPy, xPy, yPy, widthPy, heightPy, radiusPy) {
+          Sk.ffi.checkMethodArgs(METHOD_DRAW_ROUND_RECT, arguments, 5, 5);
+          Sk.ffi.checkArgType(ARG_X, NUMBER, Sk.ffi.isNumber(xPy), xPy);
+          Sk.ffi.checkArgType(ARG_Y, NUMBER, Sk.ffi.isNumber(yPy), yPy);
+          Sk.ffi.checkArgType(ARG_WIDTH, NUMBER, Sk.ffi.isNumber(widthPy), widthPy);
+          Sk.ffi.checkArgType(ARG_HEIGHT, NUMBER, Sk.ffi.isNumber(heightPy), heightPy);
+          Sk.ffi.checkArgType(ARG_RADIUS, NUMBER, Sk.ffi.isNumber(radiusPy), radiusPy);
+          var x = Sk.ffi.remapToJs(xPy);
+          var y = Sk.ffi.remapToJs(yPy);
+          var w = Sk.ffi.remapToJs(widthPy);
+          var h = Sk.ffi.remapToJs(heightPy);
+          var radius = Sk.ffi.remapToJs(radiusPy);
+          graphics[METHOD_DRAW_ROUND_RECT](x, y, w, h, radius);
+          return graphicsPy;
+        });
       }
       case METHOD_END_FILL: {
         return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
