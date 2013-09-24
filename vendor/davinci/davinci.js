@@ -27429,6 +27429,11 @@ var PROP_SCALE                      = "scale";
  * @const
  * @type {string}
  */
+var PROP_SEGMENTS                   = "segments";
+/**
+ * @const
+ * @type {string}
+ */
 var PROP_VOLUME                     = "volume";
 /**
  * @const
@@ -27897,6 +27902,14 @@ mod[ARROW_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           return selfPy;
         });
       }
+      case PROP_SEGMENTS: {
+        return Sk.ffi.callableToPy(mod, PROP_SEGMENTS, function(methodPy, segmentsPy) {
+          Sk.ffi.checkMethodArgs(PROP_SEGMENTS, arguments, 1, 1);
+          Sk.ffi.checkArgType(PROP_SEGMENTS, [Sk.ffi.PyType.INT, Sk.ffi.PyType.NONE], Sk.ffi.isInt(segmentsPy) || Sk.ffi.isNone(segmentsPy), segmentsPy);
+          arrow[PROP_SEGMENTS] = Sk.ffi.remapToJs(segmentsPy);
+          return selfPy;
+        });
+      }
       case METHOD_BUILD: {
         return Sk.ffi.callableToPy(mod, METHOD_BUILD, function(methodPy) {
           /**
@@ -27924,7 +27937,7 @@ mod[ARROW_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           var dimensions = dimensionArrow();
           var scalePy    = Sk.ffi.numberToFloatPy(dimensions[PROP_SCALE]);
           var attitudePy = Sk.ffi.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(dimensions[PROP_ATTITUDE], EUCLIDEAN_3));
-          var segmentsPy = Sk.ffi.numberToIntPy(32);
+          var segmentsPy = Sk.ffi.numberToIntPy(arrow[PROP_SEGMENTS] ? arrow[PROP_SEGMENTS] : 32);
           var lengthPy   = Sk.ffi.numberToFloatPy(dimensions[PROP_LENGTH]);
           var geometryPy = Sk.ffi.callsim(mod[ARROW_GEOMETRY], scalePy, attitudePy, segmentsPy, lengthPy);
           return completeMesh(geometryPy, arrow);
@@ -27968,6 +27981,14 @@ mod[CONE_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           return selfPy;
         });
       }
+      case PROP_SEGMENTS: {
+        return Sk.ffi.callableToPy(mod, PROP_SEGMENTS, function(methodPy, segmentsPy) {
+          Sk.ffi.checkMethodArgs(PROP_SEGMENTS, arguments, 1, 1);
+          Sk.ffi.checkArgType(PROP_SEGMENTS, [Sk.ffi.PyType.INT, Sk.ffi.PyType.NONE], Sk.ffi.isInt(segmentsPy) || Sk.ffi.isNone(segmentsPy), segmentsPy);
+          cone[PROP_SEGMENTS] = Sk.ffi.remapToJs(segmentsPy);
+          return selfPy;
+        });
+      }
       case METHOD_BUILD: {
         return Sk.ffi.callableToPy(mod, METHOD_BUILD, function(methodPy) {
           /**
@@ -27989,11 +28010,11 @@ mod[CONE_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
             return dims;
           }
           Sk.ffi.checkMethodArgs(METHOD_BUILD, arguments, 0, 0);
-          var dimensions = dimensionCone();
+          var dimensions     = dimensionCone();
           var radiusTop      = Sk.ffi.numberToFloatPy(0);
           var radiusBottom   = Sk.ffi.numberToFloatPy(dimensions[PROP_RADIUS]);
           var height         = Sk.ffi.numberToFloatPy(dimensions[PROP_HEIGHT]);
-          var radialSegments = Sk.ffi.numberToIntPy(32);
+          var radialSegments = Sk.ffi.numberToIntPy(cone[PROP_SEGMENTS] ? cone[PROP_SEGMENTS] : 32);
           var heightSegments = Sk.ffi.numberToIntPy(1);
           var openEnded      = Sk.ffi.booleanToPy(false);
           var geometryPy = Sk.ffi.callsim(mod[CYLINDER_GEOMETRY], radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded);
@@ -28137,6 +28158,14 @@ mod[CYLINDER_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           return selfPy;
         });
       }
+      case PROP_SEGMENTS: {
+        return Sk.ffi.callableToPy(mod, PROP_SEGMENTS, function(methodPy, segmentsPy) {
+          Sk.ffi.checkMethodArgs(PROP_SEGMENTS, arguments, 1, 1);
+          Sk.ffi.checkArgType(PROP_SEGMENTS, [Sk.ffi.PyType.INT, Sk.ffi.PyType.NONE], Sk.ffi.isInt(segmentsPy) || Sk.ffi.isNone(segmentsPy), segmentsPy);
+          cylinder[PROP_SEGMENTS] = Sk.ffi.remapToJs(segmentsPy);
+          return selfPy;
+        });
+      }
       case METHOD_BUILD: {
         return Sk.ffi.callableToPy(mod, METHOD_BUILD, function(methodPy) {
           /**
@@ -28165,7 +28194,7 @@ mod[CYLINDER_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           var radiusTop      = Sk.ffi.numberToFloatPy(dimensions.a);
           var radiusBottom   = Sk.ffi.numberToFloatPy(dimensions.b);
           var height         = Sk.ffi.numberToFloatPy(dimensions.h);
-          var radialSegments = Sk.ffi.numberToIntPy(32);
+          var radialSegments = Sk.ffi.numberToIntPy(cylinder[PROP_SEGMENTS] ? cylinder[PROP_SEGMENTS] : 32);
           var heightSegments = Sk.ffi.numberToIntPy(1);
           var openEnded      = Sk.ffi.booleanToPy(false);
           var geometryPy = Sk.ffi.callsim(mod[CYLINDER_GEOMETRY], radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded);
@@ -32962,11 +32991,12 @@ mod[ARROW_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     radiusCone   = (Sk.ffi.remapToJs(radiusCone) || 0.08) * scale;
     lengthCone   = (Sk.ffi.remapToJs(lengthCone) || 0.2) * scale;
     var lengthShaft = length - lengthCone;
-    var a = new THREE[VECTOR_3](0,           length,      0);
-    var b = new THREE[VECTOR_3](radiusCone,  lengthShaft, 0);
-    var c = new THREE[VECTOR_3](radiusShaft, lengthShaft, 0);
-    var d = new THREE[VECTOR_3](radiusShaft, 0,           0);
-    var e = new THREE[VECTOR_3](0,           0,           0);
+    var halfLength = length / 2;
+    var a = new THREE[VECTOR_3](0,           halfLength,               0);
+    var b = new THREE[VECTOR_3](radiusCone,  lengthShaft - halfLength, 0);
+    var c = new THREE[VECTOR_3](radiusShaft, lengthShaft - halfLength, 0);
+    var d = new THREE[VECTOR_3](radiusShaft, -halfLength,              0);
+    var e = new THREE[VECTOR_3](0,           -halfLength,              0);
     var points = [a, b, c, d, e];
     var generator = new THREE[QUATERNION](0, 1, 0, 0);
     Sk.ffi.referenceToPy(new THREE[REVOLUTION_GEOMETRY](points, generator, segments, 0, 2 * Math.PI, attitude), ARROW_GEOMETRY, undefined, selfPy);
@@ -33227,9 +33257,12 @@ mod[CYLINDER_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
 mod[LATHE_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__init__ = Sk.ffi.functionPy(function(selfPy, pointsPy, segmentsPy, phiStartPy, phiLengthPy) {
     Sk.ffi.checkMethodArgs(LATHE_GEOMETRY, arguments, 1, 4);
+    var points = Sk.ffi.remapToJs(pointsPy).map(function(euclidean3) {
+      return new THREE[VECTOR_3](euclidean3.x, euclidean3.y, euclidean3.z);
+    });
     // LatheGeometry assumes that the points are to be rotated about the z-axis.
     var generator = new THREE[QUATERNION](0, 0, 1, 0);
-    Sk.ffi.referenceToPy(new THREE[REVOLUTION_GEOMETRY](Sk.ffi.remapToJs(pointsPy), generator, Sk.ffi.remapToJs(segmentsPy), Sk.ffi.remapToJs(phiStartPy), Sk.ffi.remapToJs(phiLengthPy)), LATHE_GEOMETRY, undefined, selfPy);
+    Sk.ffi.referenceToPy(new THREE[REVOLUTION_GEOMETRY](points, generator, Sk.ffi.remapToJs(segmentsPy), Sk.ffi.remapToJs(phiStartPy), Sk.ffi.remapToJs(phiLengthPy)), LATHE_GEOMETRY, undefined, selfPy);
   });
   $loc.__getattr__ = Sk.ffi.functionPy(function(geometryPy, name) {
     var geometry = Sk.ffi.remapToJs(geometryPy);
@@ -33452,7 +33485,6 @@ THREE.RevolutionGeometry = function (points, generator, segments, phiStart, phiL
   segments = segments || 12;
   phiStart = phiStart || 0;
   phiLength = phiLength || 2 * Math.PI;
-  attitude = attitude || new THREE[QUATERNION](0, 0, 0, 1);
 
   // Determine heuristically whether the user intended to make a complete revolution.
   var isClosed = Math.abs(2 * Math.PI - Math.abs(phiLength - phiStart)) < 0.0001;
@@ -33462,36 +33494,32 @@ THREE.RevolutionGeometry = function (points, generator, segments, phiStart, phiL
   var inverseSegments = 1.0 / segments;
   var phiStep = (phiLength - phiStart) * inverseSegments;
 
-  for ( var i = 0, il = halfPlanes; i < il; i ++ ) {
+  for (var i = 0, il = halfPlanes; i < il; i++) {
 
     var phi = phiStart + i * phiStep;
 
     var halfAngle = phi / 2;
 
-    var c = Math.cos( halfAngle );
-    var s = Math.sin( halfAngle );
+    var cosHA = Math.cos( halfAngle );
+    var sinHA = Math.sin( halfAngle );
+    var rotor = new THREE[QUATERNION](generator.x * sinHA, generator.y * sinHA, generator.z * sinHA, cosHA);
 
-    for ( var j = 0, jl = points.length; j < jl; j ++ ) {
+    for (var j = 0, jl = points.length; j < jl; j++) {
 
       var pt = points[ j ];
 
       var vertex = new THREE[VECTOR_3](pt.x, pt.y, pt.z);
 
-      var rotor = new THREE[QUATERNION](generator.x * s, generator.y * s, generator.z * s, c);
-
       // The generator tells us how to rotate the points.
       vertex['applyQuaternion'](rotor);
-//      vertex.z = c * pt.z - s * pt.x;
-//      vertex.x = s * pt.z + c * pt.x;
-//      vertex.y = pt.y;
 
       // The attitude tells us where we want the symmetry axis to be.
-      vertex['applyQuaternion'](attitude);
+      if (attitude) {
+        vertex['applyQuaternion'](attitude);
+      }
 
       this['vertices'].push( vertex );
-
     }
-
   }
 
   var inversePointLength = 1.0 / ( points.length - 1 );
@@ -33555,10 +33583,13 @@ mod[REVOLUTION_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     if (Sk.ffi.isDefined(attitudePy)) {
       Sk.ffi.checkArgType(PROP_ATTITUDE, EUCLIDEAN_3, Sk.ffi.isClass(attitudePy, EUCLIDEAN_3), attitudePy);
     }
+    var points = Sk.ffi.remapToJs(pointsPy).map(function(euclidean3) {
+      return new THREE[VECTOR_3](euclidean3.x, euclidean3.y, euclidean3.z);
+    });
     var attitude   = Sk.ffi.remapToJs(attitudePy);
     var attitude = Sk.ffi.remapToJs(attitudePy) ? Sk.ffi.remapToJs(attitudePy).quaternion : undefined;
     Sk.ffi.referenceToPy(new THREE[REVOLUTION_GEOMETRY](
-      Sk.ffi.remapToJs(pointsPy),
+      points,
       Sk.ffi.remapToJs(generatorPy).quaternion,
       Sk.ffi.remapToJs(segmentsPy),
       Sk.ffi.remapToJs(phiStartPy),
