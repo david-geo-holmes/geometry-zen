@@ -33888,8 +33888,18 @@ mod[REVOLUTION_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   var PROP_HEIGHT_SEGMENTS = "heightSegments";
   var PROP_PHI_START       = "phiStart";
   var PROP_PHI_LENGTH      = "phiLength";
-  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, radius, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
-    radius         = numberFromArg(radius,                PROP_RADIUS,          SPHERE_GEOMETRY);
+  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, radiusPy, widthSegments, heightSegments, phiStart, phiLength, thetaStart, thetaLength) {
+    if (Sk.ffi.isDefined(radiusPy)) {
+      if (Sk.ffi.isClass(radiusPy, SPHERE_GEOMETRY)) {
+        Sk.ffi.checkMethodArgs(SPHERE_GEOMETRY, arguments, 1, 1);
+        Sk.ffi.referenceToPy(Sk.ffi.remapToJs(radiusPy), SPHERE_GEOMETRY, undefined, selfPy);
+        return;
+      }
+      else {
+        Sk.ffi.checkArgType(PROP_RADIUS, NUMBER, Sk.ffi.isNumber(radiusPy), radiusPy);
+      }
+    }
+    var radius = Sk.ffi.remapToJs(radiusPy);
     widthSegments  = numberFromIntegerArg(widthSegments,  PROP_WIDTH_SEGMENTS,  SPHERE_GEOMETRY);
     heightSegments = numberFromIntegerArg(heightSegments, PROP_HEIGHT_SEGMENTS, SPHERE_GEOMETRY);
     phiStart       = numberFromArg(phiStart,              PROP_PHI_START,       SPHERE_GEOMETRY);
@@ -34591,6 +34601,11 @@ mod[MESH] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         var geometry = mesh[PROP_GEOMETRY];
         var className = meshPy.custom[PROP_GEOMETRY];
         return Sk.ffi.callsim(mod[className], Sk.ffi.referenceToPy(geometry, className));
+      }
+      case PROP_MATERIAL: {
+        var material = mesh[PROP_MATERIAL];
+        var className = meshPy.custom[PROP_MATERIAL];
+        return Sk.ffi.callsim(mod[className], Sk.ffi.referenceToPy(material, className));
       }
       case PROP_MATRIX_AUTO_UPDATE: {
         return mesh[PROP_MATRIX_AUTO_UPDATE];

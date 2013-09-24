@@ -30543,14 +30543,22 @@
       }, 'RevolutionGeometry', []);
       a.SphereGeometry = Sk.ffi.buildClass(a, function (a, c) {
         c.__init__ = Sk.ffi.functionPy(function (a, c, d, e, f, g, h, k) {
-          c = x(c, 'radius', 'SphereGeometry');
+          if (Sk.ffi.isDefined(c)) {
+            if (Sk.ffi.isClass(c, 'SphereGeometry')) {
+              Sk.ffi.checkMethodArgs('SphereGeometry', arguments, 1, 1);
+              Sk.ffi.referenceToPy(Sk.ffi.remapToJs(c), 'SphereGeometry', void 0, a);
+              return;
+            }
+            Sk.ffi.checkArgType('radius', C, Sk.ffi.isNumber(c), c);
+          }
+          var l = Sk.ffi.remapToJs(c);
           d = z(d, 'widthSegments', 'SphereGeometry');
           e = z(e, 'heightSegments', 'SphereGeometry');
           f = x(f, 'phiStart', 'SphereGeometry');
           g = x(g, 'phiLength', 'SphereGeometry');
           h = x(h, 'thetaStart', 'SphereGeometry');
           k = x(k, 'thetaLength', 'SphereGeometry');
-          Sk.ffi.referenceToPy(new b.SphereGeometry(c, d, e, f, g, h, k), 'SphereGeometry', void 0, a);
+          Sk.ffi.referenceToPy(new b.SphereGeometry(l, d, e, f, g, h, k), 'SphereGeometry', void 0, a);
         });
         c.__getattr__ = Sk.ffi.functionPy(function (a, b) {
           var c = Sk.ffi.remapToJs(a);
@@ -31008,6 +31016,9 @@
           case 'geometry':
             var f = b.custom.geometry;
             return Sk.ffi.callsim(a[f], Sk.ffi.referenceToPy(e.geometry, f));
+          case 'material':
+            var g = e.material, f = b.custom.material;
+            return Sk.ffi.callsim(a[f], Sk.ffi.referenceToPy(g, f));
           case 'matrixAutoUpdate':
             return e.matrixAutoUpdate;
           case 'name':
