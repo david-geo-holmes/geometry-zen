@@ -27391,7 +27391,7 @@
               f = Sk.ffi.remapToPy(c.width);
               c = Sk.ffi.remapToPy(c.height);
               g = Sk.ffi.numberToIntPy(d.segments ? d.segments : 1);
-              f = Sk.ffi.callsim(a.VortexGeometry, f, c, g, g);
+              f = Sk.ffi.callsim(a.TorusGeometry, f, c, g, g);
               return e(f, d);
             });
           default:
@@ -28417,16 +28417,16 @@
         return 0 < f.length ? f.join('') : '0';
       }
       function f(a, b, c, e, f, g, h, k, l) {
-        var y = +f, v = +g, C = +h, F = -k, G = +(f * y + g * v + h * C - k * F), H = y * G + -0 * v + -0 * C - -0 * F, I = -0 * y + v * G - -0 * C + -0 * F, K = -0 * y + -0 * v + C * G - -0 * F, y = -0 * y + -0 * v - -0 * C + F * G;
-        f = f * H + g * I + h * K - k * y;
+        var y = +f, v = +g, C = +h, F = -k, G = +(f * y + g * v + h * C - k * F), H = y * G + -0 * v + -0 * C - -0 * F, J = -0 * y + v * G - -0 * C + -0 * F, K = -0 * y + -0 * v + C * G - -0 * F, y = -0 * y + -0 * v - -0 * C + F * G;
+        f = f * H + g * J + h * K - k * y;
         H /= f;
-        I /= f;
+        J /= f;
         K /= f;
         k = y / f;
-        f = a * H + b * I + c * K - e * k;
-        g = a * I + b * H - c * k + e * K;
-        h = a * K + b * k + c * H - e * I;
-        a = a * k + b * K - c * I + e * H;
+        f = a * H + b * J + c * K - e * k;
+        g = a * J + b * H - c * k + e * K;
+        h = a * K + b * k + c * H - e * J;
+        a = a * k + b * K - c * J + e * H;
         if ('undefined' !== typeof l)
           l.w = f, l.x = g, l.y = h, l.xy = a;
         else
@@ -29467,7 +29467,7 @@
           throw Sk.ffi.err.attribute(c).isNotSetableOnType(a);
         }
       }
-      function I(b, c, d) {
+      function J(b, c, d) {
         var e = Sk.ffi.remapToJs(c);
         switch (d) {
         case 'color':
@@ -29511,7 +29511,7 @@
       }
       Sk.ffi.checkFunctionArgs('defineThree', arguments, 3, 3);
       Sk.builtin.defineNode(a);
-      var J = Sk.ffi.PyType.INT, D = [
+      var I = Sk.ffi.PyType.INT, D = [
           Sk.ffi.PyType.FLOAT,
           Sk.ffi.PyType.INT,
           Sk.ffi.PyType.LONG
@@ -29542,10 +29542,10 @@
         d = (c - a) / d;
         for (k = 0; k < e; k++)
           for (0 !== a ? (v = this.vertices[m[0][k]].clone(), p = this.vertices[m[0][k + 1]].clone()) : (v = this.vertices[m[1][k]].clone(), p = this.vertices[m[1][k + 1]].clone()), v.setY(Math.sqrt(v.x * v.x + v.z * v.z) * d).normalize(), p.setY(Math.sqrt(p.x * p.x + p.z * p.z) * d).normalize(), l = 0; l < f; l++) {
-            var w = m[l][k], y = m[l + 1][k], C = m[l + 1][k + 1], q = m[l][k + 1], u = v.clone(), F = v.clone(), G = p.clone(), t = p.clone(), H = n[l][k].clone(), r = n[l + 1][k].clone(), I = n[l + 1][k + 1].clone(), D = n[l][k + 1].clone();
+            var w = m[l][k], y = m[l + 1][k], C = m[l + 1][k + 1], q = m[l][k + 1], F = v.clone(), u = v.clone(), G = p.clone(), t = p.clone(), H = n[l][k].clone(), r = n[l + 1][k].clone(), J = n[l + 1][k + 1].clone(), D = n[l][k + 1].clone();
             this.faces.push(new b.Face3(w, y, q, [
-              u,
               F,
+              u,
               t
             ]));
             this.faceVertexUvs[0].push([
@@ -29554,37 +29554,37 @@
               D
             ]);
             this.faces.push(new b.Face3(y, C, q, [
-              F,
+              u,
               G,
               t
             ]));
             this.faceVertexUvs[0].push([
               r,
-              I,
+              J,
               D
             ]);
           }
         if (!1 === g && 0 < a)
           for (this.vertices.push(new b.Vector3(0, h, 0)), k = 0; k < e; k++)
-            w = m[0][k], y = m[0][k + 1], C = this.vertices.length - 1, u = new b.Vector3(0, 1, 0), F = new b.Vector3(0, 1, 0), G = new b.Vector3(0, 1, 0), H = n[0][k].clone(), r = n[0][k + 1].clone(), I = new b.Vector2(r.u, 0), this.faces.push(new b.Face3(w, y, C, [
-              u,
+            w = m[0][k], y = m[0][k + 1], C = this.vertices.length - 1, F = new b.Vector3(0, 1, 0), u = new b.Vector3(0, 1, 0), G = new b.Vector3(0, 1, 0), H = n[0][k].clone(), r = n[0][k + 1].clone(), J = new b.Vector2(r.u, 0), this.faces.push(new b.Face3(w, y, C, [
               F,
+              u,
               G
             ])), this.faceVertexUvs[0].push([
               H,
               r,
-              I
+              J
             ]);
         if (!1 === g && 0 < c)
           for (this.vertices.push(new b.Vector3(0, -h, 0)), k = 0; k < e; k++)
-            w = m[l][k + 1], y = m[l][k], C = this.vertices.length - 1, u = new b.Vector3(0, -1, 0), F = new b.Vector3(0, -1, 0), G = new b.Vector3(0, -1, 0), H = n[l][k + 1].clone(), r = n[l][k].clone(), I = new b.Vector2(r.u, 1), this.faces.push(new b.Face3(w, y, C, [
-              u,
+            w = m[l][k + 1], y = m[l][k], C = this.vertices.length - 1, F = new b.Vector3(0, -1, 0), u = new b.Vector3(0, -1, 0), G = new b.Vector3(0, -1, 0), H = n[l][k + 1].clone(), r = n[l][k].clone(), J = new b.Vector2(r.u, 1), this.faces.push(new b.Face3(w, y, C, [
               F,
+              u,
               G
             ])), this.faceVertexUvs[0].push([
               H,
               r,
-              I
+              J
             ]);
         this.computeCentroids();
         this.computeFaceNormals();
@@ -29668,6 +29668,66 @@
         this.computeVertexNormals();
       };
       Sk.stdlib.RevolutionGeometry.prototype = Object.create(b.Geometry.prototype);
+      Sk.stdlib.TorusGeometry = function (a, c, d, e, f) {
+        b.Geometry.call(this);
+        this.radius = a || 100;
+        this.tube = c || 40;
+        this.radialSegments = d || 8;
+        this.tubularSegments = e || 6;
+        this.arc = f || 2 * Math.PI;
+        f = new b.Vector3();
+        a = [];
+        c = [];
+        for (d = 0; d <= this.radialSegments; d++)
+          for (e = 0; e <= this.tubularSegments; e++) {
+            var g = e / this.tubularSegments * this.arc, h = 2 * d / this.radialSegments * Math.PI;
+            f.x = this.radius * Math.cos(g);
+            f.y = this.radius * Math.sin(g);
+            var k = new b.Vector3();
+            k.x = (this.radius + this.tube * Math.cos(h)) * Math.cos(g);
+            k.y = (this.radius + this.tube * Math.cos(h)) * Math.sin(g);
+            k.z = this.tube * Math.sin(h);
+            this.vertices.push(k);
+            a.push(new b.Vector2(e / this.tubularSegments, d / this.radialSegments));
+            c.push(k.clone().sub(f).normalize());
+          }
+        for (d = 1; d <= this.radialSegments; d++)
+          for (e = 1; e <= this.tubularSegments; e++) {
+            f = (this.tubularSegments + 1) * d + e - 1;
+            var g = (this.tubularSegments + 1) * (d - 1) + e - 1, h = (this.tubularSegments + 1) * (d - 1) + e, k = (this.tubularSegments + 1) * d + e, l = new b.Face3(f, g, k, [
+                c[f],
+                c[g],
+                c[k]
+              ]);
+            l.normal.add(c[f]);
+            l.normal.add(c[g]);
+            l.normal.add(c[k]);
+            l.normal.normalize();
+            this.faces.push(l);
+            this.faceVertexUvs[0].push([
+              a[f].clone(),
+              a[g].clone(),
+              a[k].clone()
+            ]);
+            l = new b.Face3(g, h, k, [
+              c[g],
+              c[h],
+              c[k]
+            ]);
+            l.normal.add(c[g]);
+            l.normal.add(c[h]);
+            l.normal.add(c[k]);
+            l.normal.normalize();
+            this.faces.push(l);
+            this.faceVertexUvs[0].push([
+              a[g].clone(),
+              a[h].clone(),
+              a[k].clone()
+            ]);
+          }
+        this.computeCentroids();
+      };
+      Sk.stdlib.TorusGeometry.prototype = Object.create(b.Geometry.prototype);
       Sk.builtin.defineEuclidean3(a, b, c);
       a.Scene = Sk.ffi.buildClass(a, function (c, d) {
         d.__init__ = Sk.ffi.functionPy(function (a, c) {
@@ -30310,7 +30370,7 @@
           } else
             l = 1;
           Sk.ffi.isDefined(d) ? (Sk.ffi.checkArgType('attitude', 'Euclidean3', Sk.ffi.isClass(d, 'Euclidean3'), d), m = Sk.ffi.remapToJs(d).quaternion) : m = new b.Quaternion(0, 0, 0, 1);
-          Sk.ffi.isDefined(e) && Sk.ffi.checkArgType('segments', J, Sk.ffi.isNum(e), e);
+          Sk.ffi.isDefined(e) && Sk.ffi.checkArgType('segments', I, Sk.ffi.isNum(e), e);
           Sk.ffi.isDefined(f) ? (Sk.ffi.checkArgType('scale', D, Sk.ffi.isNum(f), f), n = Sk.ffi.remapToJs(f) * l) : n = l;
           var v = Sk.ffi.remapToJs(e);
           g = (Sk.ffi.remapToJs(g) || 0.01) * l;
@@ -30369,7 +30429,7 @@
         c.__init__ = Sk.ffi.functionPy(function (a, c, d, e, f) {
           Sk.ffi.checkMethodArgs('CircleGeometry', arguments, 0, 4);
           Sk.ffi.isDefined(c) && Sk.ffi.checkArgType('radius', D, Sk.ffi.isNum(c), c);
-          Sk.ffi.isDefined(d) && Sk.ffi.checkArgType('segments', J, Sk.ffi.isInt(d), d);
+          Sk.ffi.isDefined(d) && Sk.ffi.checkArgType('segments', I, Sk.ffi.isInt(d), d);
           Sk.ffi.isDefined(e) && Sk.ffi.checkArgType('thetaStart', D, Sk.ffi.isNum(e), e);
           Sk.ffi.isDefined(f) && Sk.ffi.checkArgType('thetaLength', D, Sk.ffi.isNum(f), f);
           Sk.ffi.referenceToPy(new b.CircleGeometry(Sk.ffi.remapToJs(c), Sk.ffi.remapToJs(d), Sk.ffi.remapToJs(e), Sk.ffi.remapToJs(f)), 'CircleGeometry', void 0, a);
@@ -30415,11 +30475,11 @@
           Sk.ffi.checkArgType('width', D, Sk.ffi.isNum(c), c);
           Sk.ffi.checkArgType('height', D, Sk.ffi.isNum(d), d);
           Sk.ffi.checkArgType('depth', D, Sk.ffi.isNum(e), e);
-          Sk.ffi.isDefined(f) && Sk.ffi.checkArgType('widthSegments', J, Sk.ffi.isInt(f), f);
-          Sk.ffi.isDefined(g) && Sk.ffi.checkArgType('heightSegments', J, Sk.ffi.isInt(g), g);
-          Sk.ffi.isDefined(h) && Sk.ffi.checkArgType('depthSegments', J, Sk.ffi.isInt(h), h);
-          var k = Sk.ffi.remapToJs(c), l = Sk.ffi.remapToJs(d), m = Sk.ffi.remapToJs(e), n = Sk.ffi.remapToJs(f), v = Sk.ffi.remapToJs(g), w = Sk.ffi.remapToJs(h);
-          Sk.ffi.referenceToPy(new b.CubeGeometry(k, l, m, n, v, w), 'CubeGeometry', void 0, a);
+          Sk.ffi.isDefined(f) && Sk.ffi.checkArgType('widthSegments', I, Sk.ffi.isInt(f), f);
+          Sk.ffi.isDefined(g) && Sk.ffi.checkArgType('heightSegments', I, Sk.ffi.isInt(g), g);
+          Sk.ffi.isDefined(h) && Sk.ffi.checkArgType('depthSegments', I, Sk.ffi.isInt(h), h);
+          var k = Sk.ffi.remapToJs(c), l = Sk.ffi.remapToJs(d), m = Sk.ffi.remapToJs(e), n = Sk.ffi.remapToJs(f), v = Sk.ffi.remapToJs(g), p = Sk.ffi.remapToJs(h);
+          Sk.ffi.referenceToPy(new b.CubeGeometry(k, l, m, n, v, p), 'CubeGeometry', void 0, a);
         });
         c.__getattr__ = Sk.ffi.functionPy(function (a, b) {
           var c = Sk.ffi.remapToJs(a);
@@ -30574,7 +30634,7 @@
         c.__init__ = Sk.ffi.functionPy(function (a, c, d) {
           Sk.ffi.checkMethodArgs('IcosahedronGeometry', arguments, 0, 2);
           Sk.ffi.isDefined(c) && Sk.ffi.checkArgType('radius', D, Sk.ffi.isNum(c), c);
-          Sk.ffi.isDefined(d) && Sk.ffi.checkArgType('detail', J, Sk.ffi.isInt(d), d);
+          Sk.ffi.isDefined(d) && Sk.ffi.checkArgType('detail', I, Sk.ffi.isInt(d), d);
           var e = Sk.ffi.remapToJs(c), f = Sk.ffi.remapToJs(d);
           Sk.ffi.referenceToPy(new b.IcosahedronGeometry(e, f), 'IcosahedronGeometry', void 0, a);
         });
@@ -30616,7 +30676,7 @@
         c.__init__ = Sk.ffi.functionPy(function (a, c, d) {
           Sk.ffi.checkMethodArgs('OctahedronGeometry', arguments, 0, 2);
           Sk.ffi.isDefined(c) && Sk.ffi.checkArgType('radius', D, Sk.ffi.isNum(c), c);
-          Sk.ffi.isDefined(d) && Sk.ffi.checkArgType('detail', J, Sk.ffi.isInt(d), d);
+          Sk.ffi.isDefined(d) && Sk.ffi.checkArgType('detail', I, Sk.ffi.isInt(d), d);
           var e = Sk.ffi.remapToJs(c), f = Sk.ffi.remapToJs(d), g = new b.OctahedronGeometry(e, f);
           g.radius = e;
           g.detail = f;
@@ -30819,7 +30879,7 @@
         c.__init__ = Sk.ffi.functionPy(function (a, c, d) {
           Sk.ffi.checkMethodArgs('TetrahedronGeometry', arguments, 2, 2);
           Sk.ffi.checkArgType('radius', D, Sk.ffi.isNum(c), c);
-          Sk.ffi.checkArgType('detail', J, Sk.ffi.isInt(d), d);
+          Sk.ffi.checkArgType('detail', I, Sk.ffi.isInt(d), d);
           var e = Sk.ffi.remapToJs(c), f = Sk.ffi.remapToJs(d), g = new b.TetrahedronGeometry(e, f);
           g.radius = e;
           g.detail = f;
@@ -30890,47 +30950,50 @@
           }).join(', ') + ')');
         });
       }, 'TextGeometry', []);
-      a.TorusGeometry = Sk.ffi.buildClass(a, function (a, c) {
-        c.__init__ = Sk.ffi.functionPy(function (a, c, d, e, f, g) {
-          c = w(c, 'radius', 'TorusGeometry');
-          d = w(d, 'tube', 'TorusGeometry');
-          e = y(e, 'radialSegments', 'TorusGeometry');
-          f = y(f, 'tubularSegments', 'TorusGeometry');
-          g = w(g, 'arc', 'TorusGeometry');
-          a.v = new b.TorusGeometry(c, d, e, f, g);
+      a.TorusGeometry = Sk.ffi.buildClass(a, function (a, b) {
+        b.__init__ = Sk.ffi.functionPy(function (a, b, c, d, e, f) {
+          Sk.ffi.checkMethodArgs('TorusGeometry', arguments, 0, 5);
+          Sk.ffi.isDefined(b) && Sk.ffi.checkArgType('radius', D, Sk.ffi.isNum(b), b);
+          Sk.ffi.isDefined(c) && Sk.ffi.checkArgType('tube', D, Sk.ffi.isNum(c), c);
+          Sk.ffi.isDefined(d) && Sk.ffi.checkArgType('radialSegments', I, Sk.ffi.isInt(d), d);
+          Sk.ffi.isDefined(e) && Sk.ffi.checkArgType('tubularSegments', I, Sk.ffi.isInt(e), e);
+          Sk.ffi.isDefined(f) && Sk.ffi.checkArgType('arc', D, Sk.ffi.isNum(f), f);
+          var g = Sk.ffi.remapToJs(b), h = Sk.ffi.remapToJs(c), k = Sk.ffi.remapToJs(d), l = Sk.ffi.remapToJs(e), m = Sk.ffi.remapToJs(f), g = new Sk.stdlib.TorusGeometry(g, h, k, l, m);
+          Sk.ffi.referenceToPy(g, 'TorusGeometry', void 0, a);
         });
-        c.__getattr__ = Sk.ffi.functionPy(function (a, b) {
+        b.__getattr__ = Sk.ffi.functionPy(function (a, b) {
+          var c = Sk.ffi.remapToJs(a);
           switch (b) {
           case 'radius':
-            return Sk.builtin.assk$(a.v.radius, Sk.builtin.nmber.float$);
+            return Sk.ffi.numberToFloatPy(c.radius);
           case 'tube':
-            return Sk.builtin.assk$(a.v.tube, Sk.builtin.nmber.float$);
+            return Sk.ffi.numberToFloatPy(c.tube);
           case 'radialSegments':
-            return Sk.builtin.assk$(a.v.radialSegments, Sk.builtin.nmber.int$);
+            return Sk.ffi.numberToIntPy(c.radialSegments);
           case 'tubularSegments':
-            return Sk.builtin.assk$(a.v.tubularSegments, Sk.builtin.nmber.int$);
+            return Sk.ffi.numberToIntPy(c.tubularSegments);
           case 'arc':
-            return Sk.builtin.assk$(a.v.arc, Sk.builtin.nmber.float$);
+            return Sk.ffi.numberToFloatPy(c.arc);
+          default:
+            return C('TorusGeometry', a, b);
           }
         });
-        c.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
-          Sk.ffi.remapToJs(a);
-          Sk.ffi.remapToJs(c);
+        b.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
           switch (b) {
           default:
-            throw Error(b + ' is not an attribute of TorusGeometry');
+            return F('TorusGeometry', a, b, c);
           }
         });
-        c.__str__ = Sk.ffi.functionPy(function (a) {
-          a = a.v;
+        b.__str__ = Sk.ffi.functionPy(function (a) {
+          a = Sk.ffi.remapToJs(a);
           var b = {};
           b.radius = a.radius;
           b.tube = a.tube;
           b.arc = a.arc;
           return Sk.ffi.stringToPy('TorusGeometry(' + JSON.stringify(b) + ')');
         });
-        c.__repr__ = Sk.ffi.functionPy(function (a) {
-          a = a.v;
+        b.__repr__ = Sk.ffi.functionPy(function (a) {
+          a = Sk.ffi.remapToJs(a);
           return Sk.ffi.stringToPy('TorusGeometry(' + [
             a.radius,
             a.tube,
@@ -31040,7 +31103,7 @@
           Sk.ffi.referenceToPy(new b.AmbientLight(d), 'AmbientLight', void 0, a);
         });
         c.__getattr__ = Sk.ffi.functionPy(function (a, b) {
-          return I('AmbientLight', a, b);
+          return J('AmbientLight', a, b);
         });
         c.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
           return K('AmbientLight', a, b, c);
@@ -31071,7 +31134,7 @@
           case 'intensity':
             return Sk.ffi.numberToFloatPy(c.intensity);
           default:
-            return I('DirectionalLight', a, b);
+            return J('DirectionalLight', a, b);
           }
         });
         c.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
@@ -31123,7 +31186,7 @@
           case 'intensity':
             return Sk.ffi.numberToFloatPy(Sk.ffi.remapToJs(a).intensity);
           default:
-            return I('PointLight', a, b);
+            return J('PointLight', a, b);
           }
         });
         c.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
@@ -33481,48 +33544,48 @@
       return +C;
     };
     c = function (b, c, g, h, k, l, m, n, p, q, r, s, u, t, w, y, v) {
-      var C, F, G, H, I, K, N, J, D, L, M, E, x, B, z, A, O, P, Q;
+      var C, F, G, H, J, K, N, I, D, L, M, E, x, B, z, A, O, P, Q;
       L = +p;
       M = +q;
-      J = +r;
+      I = +r;
       E = -s;
       x = +u;
       B = -t;
       z = -w;
       A = -y;
-      D = d(p, q, r, u, s, w, -t, y, L, M, J, x, E, z, -B, A, 0);
-      I = d(p, q, r, u, s, w, -t, y, L, M, J, x, E, z, -B, A, 1);
-      K = d(p, q, r, u, s, w, -t, y, L, M, J, x, E, z, -B, A, 2);
-      N = d(p, q, r, u, s, w, -t, y, L, M, J, x, E, z, -B, A, 3);
+      D = d(p, q, r, u, s, w, -t, y, L, M, I, x, E, z, -B, A, 0);
+      J = d(p, q, r, u, s, w, -t, y, L, M, I, x, E, z, -B, A, 1);
+      K = d(p, q, r, u, s, w, -t, y, L, M, I, x, E, z, -B, A, 2);
+      N = d(p, q, r, u, s, w, -t, y, L, M, I, x, E, z, -B, A, 3);
       C = +D;
-      F = -I;
+      F = -J;
       G = -K;
       H = -N;
-      O = d(L, M, J, x, E, z, -B, A, C, F, G, H, -0, -0, 0, 0, 0);
-      P = d(L, M, J, x, E, z, -B, A, C, F, G, H, -0, -0, 0, 0, 1);
-      Q = d(L, M, J, x, E, z, -B, A, C, F, G, H, -0, -0, 0, 0, 2);
-      D = d(L, M, J, x, E, z, -B, A, C, F, G, H, -0, -0, 0, 0, 4);
-      I = d(L, M, J, x, E, z, -B, A, C, F, G, H, -0, -0, 0, 0, 3);
-      K = -d(L, M, J, x, E, z, -B, A, C, F, G, H, -0, -0, 0, 0, 6);
-      N = d(L, M, J, x, E, z, -B, A, C, F, G, H, -0, -0, 0, 0, 5);
-      L = d(L, M, J, x, E, z, -B, A, C, F, G, H, -0, -0, 0, 0, 7);
-      u = d(p, q, r, u, s, w, -t, y, O, P, Q, I, D, N, -K, L, 0);
+      O = d(L, M, I, x, E, z, -B, A, C, F, G, H, -0, -0, 0, 0, 0);
+      P = d(L, M, I, x, E, z, -B, A, C, F, G, H, -0, -0, 0, 0, 1);
+      Q = d(L, M, I, x, E, z, -B, A, C, F, G, H, -0, -0, 0, 0, 2);
+      D = d(L, M, I, x, E, z, -B, A, C, F, G, H, -0, -0, 0, 0, 4);
+      J = d(L, M, I, x, E, z, -B, A, C, F, G, H, -0, -0, 0, 0, 3);
+      K = -d(L, M, I, x, E, z, -B, A, C, F, G, H, -0, -0, 0, 0, 6);
+      N = d(L, M, I, x, E, z, -B, A, C, F, G, H, -0, -0, 0, 0, 5);
+      L = d(L, M, I, x, E, z, -B, A, C, F, G, H, -0, -0, 0, 0, 7);
+      u = d(p, q, r, u, s, w, -t, y, O, P, Q, J, D, N, -K, L, 0);
       p = O / u;
       q = P / u;
       r = Q / u;
       s = D / u;
-      I /= u;
+      J /= u;
       K /= u;
       N /= u;
-      J = L / u;
-      u = d(b, c, g, k, h, m, -l, n, p, q, r, I, s, N, -K, J, 0);
-      t = d(b, c, g, k, h, m, -l, n, p, q, r, I, s, N, -K, J, 1);
-      w = d(b, c, g, k, h, m, -l, n, p, q, r, I, s, N, -K, J, 2);
-      y = d(b, c, g, k, h, m, -l, n, p, q, r, I, s, N, -K, J, 4);
-      D = d(b, c, g, k, h, m, -l, n, p, q, r, I, s, N, -K, J, 3);
-      M = -d(b, c, g, k, h, m, -l, n, p, q, r, I, s, N, -K, J, 6);
-      L = d(b, c, g, k, h, m, -l, n, p, q, r, I, s, N, -K, J, 5);
-      b = d(b, c, g, k, h, m, -l, n, p, q, r, I, s, N, -K, J, 7);
+      I = L / u;
+      u = d(b, c, g, k, h, m, -l, n, p, q, r, J, s, N, -K, I, 0);
+      t = d(b, c, g, k, h, m, -l, n, p, q, r, J, s, N, -K, I, 1);
+      w = d(b, c, g, k, h, m, -l, n, p, q, r, J, s, N, -K, I, 2);
+      y = d(b, c, g, k, h, m, -l, n, p, q, r, J, s, N, -K, I, 4);
+      D = d(b, c, g, k, h, m, -l, n, p, q, r, J, s, N, -K, I, 3);
+      M = -d(b, c, g, k, h, m, -l, n, p, q, r, J, s, N, -K, I, 6);
+      L = d(b, c, g, k, h, m, -l, n, p, q, r, J, s, N, -K, I, 5);
+      b = d(b, c, g, k, h, m, -l, n, p, q, r, J, s, N, -K, I, 7);
       c = -M;
       return 'undefined' !== typeof v ? (v.w = u, v.x = t, v.y = w, v.z = D, v.xy = y, v.yz = L, v.zx = c, v.xyz = b) : new a.Euclidean3(u, t, w, D, y, L, c, b);
     };
@@ -33575,7 +33638,7 @@
         }
       };
       b.compute = function (a, b, c, d, e) {
-        var m, n, p, q, r, s, u, t, w, y, v, C, F, G, H, I, K, N, J, D;
+        var m, n, p, q, r, s, u, t, w, y, v, C, F, G, H, J, K, N, I, D;
         m = d(b, 0);
         n = d(b, 1);
         p = d(b, 2);
@@ -33594,13 +33657,13 @@
         H = d(c, 7);
         c = a(m, n, p, q, r, s, u, b, t, w, y, v, C, F, G, H, 0);
         d = a(m, n, p, q, r, s, u, b, t, w, y, v, C, F, G, H, 1);
-        I = a(m, n, p, q, r, s, u, b, t, w, y, v, C, F, G, H, 2);
+        J = a(m, n, p, q, r, s, u, b, t, w, y, v, C, F, G, H, 2);
         K = a(m, n, p, q, r, s, u, b, t, w, y, v, C, F, G, H, 3);
         N = a(m, n, p, q, r, s, u, b, t, w, y, v, C, F, G, H, 4);
-        J = a(m, n, p, q, r, s, u, b, t, w, y, v, C, F, G, H, 5);
+        I = a(m, n, p, q, r, s, u, b, t, w, y, v, C, F, G, H, 5);
         D = a(m, n, p, q, r, s, u, b, t, w, y, v, C, F, G, H, 6);
         a = a(m, n, p, q, r, s, u, b, t, w, y, v, C, F, G, H, 7);
-        return e(c, d, I, K, N, J, D, a);
+        return e(c, d, J, K, N, I, D, a);
       };
       b.prototype.add = function (c) {
         return b.compute(a.bladeASM.addE3, [

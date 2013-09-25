@@ -27598,6 +27598,11 @@ var SPHERE_GEOMETRY                 = "SphereGeometry";
  * @const
  * @type {string}
  */
+var TORUS_GEOMETRY                  = "TorusGeometry";
+/**
+ * @const
+ * @type {string}
+ */
 var VORTEX_GEOMETRY                 = "VortexGeometry";
 /**
  * @const
@@ -28476,10 +28481,10 @@ mod[VORTEX_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           }
           Sk.ffi.checkMethodArgs(METHOD_BUILD, arguments, 0, 0);
           var dimensions = dimensionPlane();
-          var width      = Sk.ffi.remapToPy(dimensions[PROP_WIDTH]);
-          var height     = Sk.ffi.remapToPy(dimensions[PROP_HEIGHT]);
+          var radius     = Sk.ffi.remapToPy(dimensions[PROP_WIDTH]);
+          var tube       = Sk.ffi.remapToPy(dimensions[PROP_HEIGHT]);
           var segments   = Sk.ffi.numberToIntPy(plane[PROP_SEGMENTS] ? plane[PROP_SEGMENTS] : 1);
-          var geometryPy = Sk.ffi.callsim(mod[VORTEX_GEOMETRY], width, height, segments, segments);
+          var geometryPy = Sk.ffi.callsim(mod[TORUS_GEOMETRY], radius, tube, segments, segments);
           return completeMesh(geometryPy, plane);
         });
       }
@@ -32500,7 +32505,85 @@ Sk.stdlib.RevolutionGeometry = function (points, generator, segments, phiStart, 
   this['computeVertexNormals']();
 };
 Sk.stdlib.RevolutionGeometry.prototype = Object.create(THREE['Geometry'].prototype);
+/**
+ * TorusGeometry
+ *
+ * @constructor
+ * @param {number=} radius
+ * @param {number=} tube
+ * @param {number=} radialSegments
+ * @param {number=} tubularSegments
+ * @param {number=} arc
+ */
+Sk.stdlib.TorusGeometry = function(radius, tube, radialSegments, tubularSegments, arc) {
 
+  THREE['Geometry'].call(this);
+
+  var scope = this;
+
+  this.radius = radius || 100;
+  this.tube = tube || 40;
+  this.radialSegments = radialSegments || 8;
+  this.tubularSegments = tubularSegments || 6;
+  this.arc = arc || Math.PI * 2;
+
+  var center = new THREE['Vector3'](), uvs = [], normals = [];
+
+  for ( var j = 0; j <= this.radialSegments; j ++ ) {
+
+    for ( var i = 0; i <= this.tubularSegments; i ++ ) {
+
+      var u = i / this.tubularSegments * this.arc;
+      var v = j / this.radialSegments * Math.PI * 2;
+
+      center.x = this.radius * Math.cos( u );
+      center.y = this.radius * Math.sin( u );
+
+      var vertex = new THREE['Vector3']();
+      vertex.x = ( this.radius + this.tube * Math.cos( v ) ) * Math.cos( u );
+      vertex.y = ( this.radius + this.tube * Math.cos( v ) ) * Math.sin( u );
+      vertex.z = this.tube * Math.sin( v );
+
+      this['vertices'].push( vertex );
+
+      uvs.push( new THREE['Vector2']( i / this.tubularSegments, j / this.radialSegments ) );
+      normals.push( vertex.clone().sub( center ).normalize() );
+    }
+  }
+
+  for ( var j = 1; j <= this.radialSegments; j ++ ) {
+
+    for ( var i = 1; i <= this.tubularSegments; i ++ ) {
+
+      var a = ( this.tubularSegments + 1 ) * j + i - 1;
+      var b = ( this.tubularSegments + 1 ) * ( j - 1 ) + i - 1;
+      var c = ( this.tubularSegments + 1 ) * ( j - 1 ) + i;
+      var d = ( this.tubularSegments + 1 ) * j + i;
+
+      var face = new THREE['Face3'](a, b, d, [normals[a], normals[b], normals[d]]);
+      face['normal'].add( normals[ a ] );
+      face['normal'].add( normals[ b ] );
+      face['normal'].add( normals[ d ] );
+      face['normal'].normalize();
+
+      this['faces'].push(face);
+
+      this['faceVertexUvs'][0].push([uvs[a].clone(), uvs[b].clone(), uvs[d].clone()]);
+
+      face = new THREE['Face3'](b, c, d, [normals[b], normals[c], normals[d]]);
+      face['normal'].add( normals[ b ] );
+      face['normal'].add( normals[ c ] );
+      face['normal'].add( normals[ d ] );
+      face['normal'].normalize();
+
+      this['faces'].push(face);
+
+      this['faceVertexUvs'][0].push([uvs[b].clone(), uvs[c].clone(), uvs[d].clone()]);
+    }
+  }
+  this['computeCentroids']();
+};
+Sk.stdlib.TorusGeometry.prototype = Object.create(THREE['Geometry'].prototype );
 /**
  * @param {string} name
  * @param {Object} valuePy
@@ -34324,7 +34407,7 @@ mod[TETRAHEDRON_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__init__ = Sk.ffi.functionPy(function(selfPy, radiusPy, detailPy) {
     Sk.ffi.checkMethodArgs(TETRAHEDRON_GEOMETRY, arguments, 2, 2);
     Sk.ffi.checkArgType(ARG_RADIUS, NUM, Sk.ffi.isNum(radiusPy), radiusPy);
-    Sk.ffi.checkArgType(ARG_DETAIL, INT,    Sk.ffi.isInt(detailPy), detailPy);
+    Sk.ffi.checkArgType(ARG_DETAIL, INT, Sk.ffi.isInt(detailPy), detailPy);
     var radius = Sk.ffi.remapToJs(radiusPy);
     var detail = Sk.ffi.remapToJs(detailPy);
     var tetra = new THREE[TETRAHEDRON_GEOMETRY](radius, detail);
@@ -34408,52 +34491,71 @@ mod[TETRAHEDRON_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   var PROP_RADIAL_SEGMENTS  = "radialSegments";
   var PROP_TUBULAR_SEGMENTS = "tubularSegments";
   var PROP_ARC              = "arc";
-  $loc.__init__ = Sk.ffi.functionPy(function(self, radius, tube, radialSegments, tubularSegments, arc) {
-    radius = numberFromArg(radius,                          PROP_RADIUS,           TORUS_GEOMETRY);
-    tube = numberFromArg(tube,                              PROP_TUBE,             TORUS_GEOMETRY);
-    radialSegments = numberFromIntegerArg(radialSegments,   PROP_RADIAL_SEGMENTS,  TORUS_GEOMETRY);
-    tubularSegments = numberFromIntegerArg(tubularSegments, PROP_TUBULAR_SEGMENTS, TORUS_GEOMETRY);
-    arc = numberFromArg(arc,                                PROP_ARC,              TORUS_GEOMETRY);
-    self.v = new THREE[TORUS_GEOMETRY](radius, tube, radialSegments, tubularSegments, arc);
+  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, radiusPy, tubePy, radialSegmentsPy, tubularSegmentsPy, arcPy) {
+    Sk.ffi.checkMethodArgs(TORUS_GEOMETRY, arguments, 0, 5);
+    if (Sk.ffi.isDefined(radiusPy)) {
+      Sk.ffi.checkArgType(ARG_RADIUS, NUM, Sk.ffi.isNum(radiusPy), radiusPy);
+    }
+    if (Sk.ffi.isDefined(tubePy)) {
+      Sk.ffi.checkArgType(PROP_TUBE, NUM, Sk.ffi.isNum(tubePy), tubePy);
+    }
+    if (Sk.ffi.isDefined(radialSegmentsPy)) {
+      Sk.ffi.checkArgType(PROP_RADIAL_SEGMENTS, INT, Sk.ffi.isInt(radialSegmentsPy), radialSegmentsPy);
+    }
+    if (Sk.ffi.isDefined(tubularSegmentsPy)) {
+      Sk.ffi.checkArgType(PROP_TUBULAR_SEGMENTS, INT, Sk.ffi.isInt(tubularSegmentsPy), tubularSegmentsPy);
+    }
+    if (Sk.ffi.isDefined(arcPy)) {
+      Sk.ffi.checkArgType(PROP_ARC, NUM, Sk.ffi.isNum(arcPy), arcPy);
+    }
+    var radius = Sk.ffi.remapToJs(radiusPy);
+    var tube = Sk.ffi.remapToJs(tubePy);
+    var radialSegments = Sk.ffi.remapToJs(radialSegmentsPy);
+    var tubularSegments = Sk.ffi.remapToJs(tubularSegmentsPy);
+    var arc = Sk.ffi.remapToJs(arcPy);
+    var torus = new Sk.stdlib.TorusGeometry(radius, tube, radialSegments, tubularSegments, arc);
+    Sk.ffi.referenceToPy(torus, TORUS_GEOMETRY, undefined, selfPy);
   });
-  $loc.__getattr__ = Sk.ffi.functionPy(function(self, name) {
+  $loc.__getattr__ = Sk.ffi.functionPy(function(torusPy, name) {
+    var torus = Sk.ffi.remapToJs(torusPy);
     switch(name) {
       case PROP_RADIUS: {
-        return Sk.builtin.assk$(self.v[PROP_RADIUS], Sk.builtin.nmber.float$);
+        return Sk.ffi.numberToFloatPy(torus[PROP_RADIUS]);
       }
       case PROP_TUBE: {
-        return Sk.builtin.assk$(self.v[PROP_TUBE], Sk.builtin.nmber.float$);
+        return Sk.ffi.numberToFloatPy(torus[PROP_TUBE]);
       }
       case PROP_RADIAL_SEGMENTS: {
-        return Sk.builtin.assk$(self.v[PROP_RADIAL_SEGMENTS], Sk.builtin.nmber.int$);
+        return Sk.ffi.numberToIntPy(torus[PROP_RADIAL_SEGMENTS]);
       }
       case PROP_TUBULAR_SEGMENTS: {
-        return Sk.builtin.assk$(self.v[PROP_TUBULAR_SEGMENTS], Sk.builtin.nmber.int$);
+        return Sk.ffi.numberToIntPy(torus[PROP_TUBULAR_SEGMENTS]);
       }
       case PROP_ARC: {
-        return Sk.builtin.assk$(self.v[PROP_ARC], Sk.builtin.nmber.float$);
+        return Sk.ffi.numberToFloatPy(torus[PROP_ARC]);
+      }
+      default: {
+        return geometryGetAttr(TORUS_GEOMETRY, torusPy, name);
       }
     }
   });
-  $loc.__setattr__ = Sk.ffi.functionPy(function(geometryPy, name, valuePy) {
-    var geometry = Sk.ffi.remapToJs(geometryPy);
-    var value = Sk.ffi.remapToJs(valuePy);
+  $loc.__setattr__ = Sk.ffi.functionPy(function(torusPy, name, valuePy) {
     switch(name) {
       default: {
-        throw new Error(name + " is not an attribute of " + TORUS_GEOMETRY);
+        return geometrySetAttr(TORUS_GEOMETRY, torusPy, name, valuePy);
       }
     }
   });
-  $loc.__str__ = Sk.ffi.functionPy(function(self) {
-    var torus = self.v;
+  $loc.__str__ = Sk.ffi.functionPy(function(torusPy) {
+    var torus = Sk.ffi.remapToJs(torusPy);
     var args = {};
     args[PROP_RADIUS] = torus[PROP_RADIUS];
     args[PROP_TUBE]   = torus[PROP_TUBE];
     args[PROP_ARC]    = torus[PROP_ARC];
     return Sk.ffi.stringToPy(TORUS_GEOMETRY + "(" + JSON.stringify(args) + ")");
   });
-  $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-    var torus = self.v;
+  $loc.__repr__ = Sk.ffi.functionPy(function(torusPy) {
+    var torus = Sk.ffi.remapToJs(torusPy);
     var radius          = torus[PROP_RADIUS];
     var tube            = torus[PROP_TUBE];
     var radialSegments  = torus[PROP_RADIAL_SEGMENTS];
