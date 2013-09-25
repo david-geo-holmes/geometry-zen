@@ -33578,8 +33578,15 @@ mod[ARROW_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var attitude;
     var length;
     if (Sk.ffi.isDefined(scalePy)) {
-      Sk.ffi.checkArgType(PROP_SCALE, NUM, Sk.ffi.isNum(scalePy), scalePy);
-      scale = Sk.ffi.remapToJs(scalePy);
+      if (Sk.ffi.isClass(scalePy, ARROW_GEOMETRY)) {
+        Sk.ffi.checkMethodArgs(ARROW_GEOMETRY, arguments, 1, 1);
+        Sk.ffi.referenceToPy(Sk.ffi.remapToJs(scalePy), ARROW_GEOMETRY, undefined, selfPy);
+        return;
+      }
+      else {
+        Sk.ffi.checkArgType(PROP_SCALE, NUM, Sk.ffi.isNum(scalePy), scalePy);
+        scale = Sk.ffi.remapToJs(scalePy);
+      }
     }
     else {
       scale = 1;
@@ -33607,13 +33614,13 @@ mod[ARROW_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     lengthCone   = (Sk.ffi.remapToJs(lengthCone) || 0.2) * scale;
     var lengthShaft = length - lengthCone;
     var halfLength = length / 2;
-    var a = new THREE[VECTOR_3](0,           halfLength,               0);
-    var b = new THREE[VECTOR_3](radiusCone,  lengthShaft - halfLength, 0);
-    var c = new THREE[VECTOR_3](radiusShaft, lengthShaft - halfLength, 0);
-    var d = new THREE[VECTOR_3](radiusShaft, -halfLength,              0);
-    var e = new THREE[VECTOR_3](0,           -halfLength,              0);
+    var a = new THREE[VECTOR_3](0,           0, halfLength);
+    var b = new THREE[VECTOR_3](radiusCone,  0, lengthShaft - halfLength);
+    var c = new THREE[VECTOR_3](radiusShaft, 0, lengthShaft - halfLength);
+    var d = new THREE[VECTOR_3](radiusShaft, 0, -halfLength);
+    var e = new THREE[VECTOR_3](0,           0, -halfLength);
     var points = [a, b, c, d, e];
-    var generator = new THREE[QUATERNION](0, 1, 0, 0);
+    var generator = new THREE[QUATERNION](0, 0, 1, 0);
     Sk.ffi.referenceToPy(new Sk.stdlib.RevolutionGeometry(points, generator, segments, 0, 2 * Math.PI, attitude), ARROW_GEOMETRY, undefined, selfPy);
   });
   $loc.__getattr__ = Sk.ffi.functionPy(function(geometryPy, name) {

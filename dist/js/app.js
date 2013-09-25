@@ -28181,9 +28181,9 @@
           case 'quantity':
             Sk.ffi.checkArgType('quantity', 'Euclidean3', Sk.ffi.isClass(d, 'Euclidean3'), d);
             c = function (a, c, d) {
-              if (-1 !== c) {
-                var e = 1 / Math.sqrt(2 * (1 + c));
-                return new b.Quaternion(-(-e * d), 0, -(e * a), e * (1 + c));
+              if (-1 !== d) {
+                var e = 1 / Math.sqrt(2 * (1 + d));
+                return new b.Quaternion(-(-e * c), -(-e * a), -0, e * (1 + d));
               }
               return new b.Quaternion(1, 0, 0, 0);
             };
@@ -30231,7 +30231,16 @@
         c.__init__ = Sk.ffi.functionPy(function (a, c, d, e, f, g, h, k) {
           Sk.ffi.checkMethodArgs('ArrowGeometry', arguments, 0, 6);
           var l, m, n;
-          Sk.ffi.isDefined(c) ? (Sk.ffi.checkArgType('scale', D, Sk.ffi.isNum(c), c), l = Sk.ffi.remapToJs(c)) : l = 1;
+          if (Sk.ffi.isDefined(c)) {
+            if (Sk.ffi.isClass(c, 'ArrowGeometry')) {
+              Sk.ffi.checkMethodArgs('ArrowGeometry', arguments, 1, 1);
+              Sk.ffi.referenceToPy(Sk.ffi.remapToJs(c), 'ArrowGeometry', void 0, a);
+              return;
+            }
+            Sk.ffi.checkArgType('scale', D, Sk.ffi.isNum(c), c);
+            l = Sk.ffi.remapToJs(c);
+          } else
+            l = 1;
           Sk.ffi.isDefined(d) ? (Sk.ffi.checkArgType('attitude', 'Euclidean3', Sk.ffi.isClass(d, 'Euclidean3'), d), m = Sk.ffi.remapToJs(d).quaternion) : m = new b.Quaternion(0, 0, 0, 1);
           Sk.ffi.isDefined(e) && Sk.ffi.checkArgType('segments', J, Sk.ffi.isNum(e), e);
           Sk.ffi.isDefined(f) ? (Sk.ffi.checkArgType('scale', D, Sk.ffi.isNum(f), f), n = Sk.ffi.remapToJs(f) * l) : n = l;
@@ -30240,9 +30249,9 @@
           h = (Sk.ffi.remapToJs(h) || 0.08) * l;
           k = (Sk.ffi.remapToJs(k) || 0.2) * l;
           var p = n - k, w = n / 2;
-          n = new b.Vector3(0, w, 0);
-          l = new b.Vector3(h, p - w, 0);
-          var p = new b.Vector3(g, p - w, 0), y = new b.Vector3(g, -w, 0), w = new b.Vector3(0, -w, 0);
+          n = new b.Vector3(0, 0, w);
+          l = new b.Vector3(h, 0, p - w);
+          var p = new b.Vector3(g, 0, p - w), y = new b.Vector3(g, 0, -w), w = new b.Vector3(0, 0, -w);
           n = [
             n,
             l,
@@ -30250,7 +30259,7 @@
             y,
             w
           ];
-          l = new b.Quaternion(0, 1, 0, 0);
+          l = new b.Quaternion(0, 0, 1, 0);
           Sk.ffi.referenceToPy(new Sk.stdlib.RevolutionGeometry(n, l, v, 0, 2 * Math.PI, m), 'ArrowGeometry', void 0, a);
         });
         c.__getattr__ = Sk.ffi.functionPy(function (a, b) {
