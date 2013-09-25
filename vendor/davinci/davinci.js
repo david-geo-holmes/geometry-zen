@@ -13861,6 +13861,7 @@ Sk.ffi.booleanToPy = function(valueJs, defaultJs)
         }
         else
         {
+            Sk.debugout({"defaultJs": defaultJs});
             throw Sk.ffi.err.
                 argument("defaultJs").
                 inFunction("Sk.ffi.booleanToPy").
@@ -13869,6 +13870,7 @@ Sk.ffi.booleanToPy = function(valueJs, defaultJs)
     }
     else
     {
+        Sk.debugout({"valueJs": valueJs});
         throw Sk.ffi.err.
             argument("valueJs").
             inFunction("Sk.ffi.booleanToPy").
@@ -27549,6 +27551,11 @@ var LINE_BASIC_MATERIAL             = "LineBasicMaterial";
  * @const
  * @type {string}
  */
+var MESH_BASIC_MATERIAL             = "MeshBasicMaterial";
+/**
+ * @const
+ * @type {string}
+ */
 var MESH_LAMBERT_MATERIAL           = "MeshLambertMaterial";
 /**
  * @const
@@ -27666,6 +27673,7 @@ function methodName(targetPy) {
 }
 
 function completeMesh(geometryPy, parameters) {
+
   function modifyMesh(meshPy) {
     var mesh = Sk.ffi.remapToJs(meshPy);
     if (parameters[PROP_NAME]) {
@@ -27673,6 +27681,7 @@ function completeMesh(geometryPy, parameters) {
     }
     return meshPy;
   }
+
   if (parameters[PROP_MATERIAL]) {
     return modifyMesh(Sk.ffi.callsim(mod[MESH], geometryPy, parameters[PROP_MATERIAL]));
   }
@@ -27693,7 +27702,7 @@ function completeMesh(geometryPy, parameters) {
     if (typeof parameters[PROP_WIREFRAME] !== 'undefined') {
       args[PROP_WIREFRAME] = parameters[PROP_WIREFRAME];
       if (parameters[PROP_WIREFRAME]) {
-        var materialPy = Sk.ffi.callsim(mod[MESH_NORMAL_MATERIAL], Sk.ffi.remapToPy(args));
+        var materialPy = Sk.ffi.callsim(mod[MESH_BASIC_MATERIAL], Sk.ffi.remapToPy(args));
         return modifyMesh(Sk.ffi.callsim(mod[MESH], geometryPy, materialPy));
       }
       else {
@@ -34183,6 +34192,15 @@ mod[GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
 function object3DGetAttr(className, selfPy, name) {
   var self = Sk.ffi.remapToJs(selfPy);
   switch(name) {
+    case PROP_ID: {
+      return Sk.ffi.numberToIntPy(self[PROP_ID]);
+    }
+    case PROP_NAME: {
+      return Sk.ffi.stringToPy(self[PROP_NAME]);
+    }
+    case PROP_UUID: {
+      return Sk.ffi.stringToPy(self[PROP_UUID]);
+    }
     case PROP_ATTITUDE: {
       return quaternionToEuclidean3Py(self[PROP_QUATERNION]);
     }
@@ -34779,36 +34797,76 @@ mod[MESH] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     return Sk.ffi.stringToPy(MESH + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
   });
 }, MESH, []);
-
+/**
+ * @param {string} className 
+ * @param {!Object} materialPy
+ * @param {string} name
+ */
+function materialGetAttr(className, materialPy, name) {
+  var material = Sk.ffi.remapToJs(materialPy);
+  switch(name) {
+    case PROP_ID: {
+      return Sk.ffi.numberToIntPy(material[PROP_ID]);
+    }
+    case PROP_NAME: {
+      return Sk.ffi.stringToPy(material[PROP_NAME]);
+    }
+    case PROP_NEEDS_UPDATE: {
+      return Sk.ffi.booleanToPy(material[PROP_NEEDS_UPDATE]);
+    }
+    case PROP_OPACITY: {
+      return Sk.ffi.numberToFloatPy(material[PROP_OPACITY]);
+    }
+    case PROP_OVERDRAW: {
+      return Sk.ffi.numberToFloatPy(material[PROP_OVERDRAW]);
+    }
+    case PROP_TRANSPARENT: {
+      return Sk.ffi.booleanToPy(material[PROP_TRANSPARENT]);
+    }
+    case PROP_UUID: {
+      return Sk.ffi.stringToPy(material[PROP_UUID]);
+    }
+    case PROP_VISIBLE: {
+      return Sk.ffi.booleanToPy(material[PROP_VISIBLE]);
+    }
+    default: {
+      throw Sk.ffi.err.attribute(name).isNotGetableOnType(className);
+    }
+  }
+}
+/**
+ * @param {string} className 
+ * @param {!Object} materialPy
+ * @param {string} name
+ * @param {!Object} valuePy
+ */
+function materialSetAttr(className, materialPy, name, valuePy) {
+  var material = Sk.ffi.remapToJs(materialPy);
+  var value = Sk.ffi.remapToJs(valuePy);
+  switch(name) {
+    case PROP_NAME: {
+      Sk.ffi.checkArgType(PROP_NAME, Sk.ffi.PyType.STR, Sk.ffi.isStr(valuePy), valuePy);
+      material[PROP_NAME] = value;
+    }
+    break;
+    default: {
+      throw Sk.ffi.err.attribute(name).isNotSetableOnType(className);
+    }
+  }
+}
+/**
+ * MeshBasicMaterial
+ */
 mod[MESH_BASIC_MATERIAL] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-  $loc.__init__ = Sk.ffi.functionPy(function(self, parameters) {
-    self.tp$name = MESH_BASIC_MATERIAL;
-    parameters = Sk.ffi.remapToJs(parameters);
-    self.v = new THREE[MESH_BASIC_MATERIAL](parameters);
+  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, parametersPy) {
+    var parameters = Sk.ffi.remapToJs(parametersPy);
+    Sk.ffi.referenceToPy(new THREE[MESH_BASIC_MATERIAL](parameters), MESH_BASIC_MATERIAL, undefined, selfPy);
   });
   $loc.__getattr__ = Sk.ffi.functionPy(function(materialPy, name) {
     var material = Sk.ffi.remapToJs(materialPy);
     switch(name) {
-      case PROP_ID: {
-        return Sk.ffi.numberToIntPy(material[PROP_ID]);
-      }
-      case PROP_NAME: {
-        return Sk.ffi.stringToPy(material[PROP_NAME]);
-      }
       case PROP_COLOR: {
         return Sk.ffi.callsim(mod[COLOR], Sk.ffi.referenceToPy(material[PROP_COLOR], COLOR));
-      }
-      case PROP_NEEDS_UPDATE: {
-        return material[PROP_NEEDS_UPDATE];
-      }
-      case PROP_OPACITY: {
-        return Sk.ffi.numberToFloatPy(material[PROP_OPACITY]);
-      }
-      case PROP_OVERDRAW: {
-        return material[PROP_OVERDRAW];
-      }
-      case PROP_TRANSPARENT: {
-        return material[PROP_TRANSPARENT];
       }
       case PROP_WIREFRAME: {
         return material[PROP_WIREFRAME];
@@ -34816,8 +34874,8 @@ mod[MESH_BASIC_MATERIAL] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       case PROP_WIREFRAME_LINEWIDTH: {
         return Sk.ffi.numberToFloatPy(material[PROP_WIREFRAME_LINEWIDTH]);
       }
-      case PROP_VISIBLE: {
-        return material[PROP_VISIBLE];
+      default: {
+        return materialGetAttr(MESH_BASIC_MATERIAL, materialPy, name);
       }
     }
   });
@@ -34902,7 +34960,7 @@ mod[MESH_BASIC_MATERIAL] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       }
       break;
       default: {
-        throw new Error(name + " is not an attribute of " + MESH_BASIC_MATERIAL);
+        return materialSetAttr(MESH_BASIC_MATERIAL, materialPy, name, valuePy);
       }
     }
   });
