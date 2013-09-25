@@ -27543,6 +27543,11 @@ var SPHERE_BUILDER                  = "SphereBuilder";
  * @const
  * @type {string}
  */
+var VORTEX_BUILDER                  = "VortexBuilder";
+/**
+ * @const
+ * @type {string}
+ */
 var POINT_LIGHT                     = "PointLight";
 /**
  * @const
@@ -27589,6 +27594,11 @@ var PLANE_GEOMETRY                  = "PlaneGeometry";
  * @type {string}
  */
 var SPHERE_GEOMETRY                 = "SphereGeometry";
+/**
+ * @const
+ * @type {string}
+ */
+var VORTEX_GEOMETRY                 = "VortexGeometry";
 /**
  * @const
  * @type {string}
@@ -28411,6 +28421,81 @@ mod[SPHERE_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     return Sk.ffi.stringToPy(SPHERE_BUILDER + "(" + ")");
   })
 }, SPHERE_BUILDER, []);
+
+mod[VORTEX_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
+  $loc.__init__ = Sk.ffi.functionPy(function(selfPy) {
+    Sk.ffi.checkMethodArgs(VORTEX_BUILDER, arguments, 0, 0);
+    Sk.ffi.referenceToPy({}, VORTEX_BUILDER, undefined, selfPy);
+  });
+  $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
+    var plane = Sk.ffi.remapToJs(selfPy);
+    switch(name) {
+      case PROP_HEIGHT: {
+        return Sk.ffi.callableToPy(mod, PROP_HEIGHT, function(methodPy, heightPy) {
+          Sk.ffi.checkMethodArgs(PROP_HEIGHT, arguments, 1, 1);
+          Sk.ffi.checkArgType(PROP_HEIGHT, [NUMBER, Sk.ffi.PyType.NONE], Sk.ffi.isNum(heightPy) || Sk.ffi.isNone(heightPy), heightPy);
+          plane[PROP_HEIGHT] = Sk.ffi.remapToJs(heightPy);
+          return selfPy;
+        });
+      }
+      case PROP_WIDTH: {
+        return Sk.ffi.callableToPy(mod, PROP_WIDTH, function(methodPy, widthPy) {
+          Sk.ffi.checkMethodArgs(PROP_WIDTH, arguments, 1, 1);
+          Sk.ffi.checkArgType(PROP_WIDTH, [NUMBER, Sk.ffi.PyType.NONE], Sk.ffi.isNum(widthPy) || Sk.ffi.isNone(widthPy), widthPy);
+          plane[PROP_WIDTH] = Sk.ffi.remapToJs(widthPy);
+          return selfPy;
+        });
+      }
+      case PROP_SEGMENTS: {
+        return Sk.ffi.callableToPy(mod, PROP_SEGMENTS, function(methodPy, segmentsPy) {
+          Sk.ffi.checkMethodArgs(PROP_SEGMENTS, arguments, 1, 1);
+          Sk.ffi.checkArgType(PROP_SEGMENTS, [Sk.ffi.PyType.INT, Sk.ffi.PyType.NONE], Sk.ffi.isInt(segmentsPy) || Sk.ffi.isNone(segmentsPy), segmentsPy);
+          plane[PROP_SEGMENTS] = Sk.ffi.remapToJs(segmentsPy);
+          return selfPy;
+        });
+      }
+      case METHOD_BUILD: {
+        return Sk.ffi.callableToPy(mod, METHOD_BUILD, function(methodPy) {
+          /**
+           * @return {{width: number, height: number}}
+           */
+          function dimensionPlane() {
+            var dims = {};
+            if (plane[PROP_VOLUME]) {
+              var w = (plane.width)  ? plane.width  : DEFAULT_CUBE_LENGTH;
+              var h = (plane.height) ? plane.height : DEFAULT_CUBE_LENGTH;
+              var alpha = Math.pow(plane[PROP_VOLUME] / (w * h), 1 / 2);
+              dims.width  = alpha * w;
+              dims.height = alpha * h;
+            }
+            else {
+              dims.width  = (plane.width)  ? plane.width  : DEFAULT_CUBE_LENGTH;
+              dims.height = (plane.height) ? plane.height : DEFAULT_CUBE_LENGTH;
+            }
+            return dims;
+          }
+          Sk.ffi.checkMethodArgs(METHOD_BUILD, arguments, 0, 0);
+          var dimensions = dimensionPlane();
+          var width      = Sk.ffi.remapToPy(dimensions[PROP_WIDTH]);
+          var height     = Sk.ffi.remapToPy(dimensions[PROP_HEIGHT]);
+          var segments   = Sk.ffi.numberToIntPy(plane[PROP_SEGMENTS] ? plane[PROP_SEGMENTS] : 1);
+          var geometryPy = Sk.ffi.callsim(mod[VORTEX_GEOMETRY], width, height, segments, segments);
+          return completeMesh(geometryPy, plane);
+        });
+      }
+      default: {
+        return builderGetAttr(selfPy, name, VORTEX_BUILDER);
+      }
+    }
+  });
+  $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
+    var self = Sk.ffi.remapToJs(selfPy);
+    return Sk.ffi.stringToPy("" + self);
+  })
+  $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
+    return Sk.ffi.stringToPy(VORTEX_BUILDER + "(" + ")");
+  })
+}, VORTEX_BUILDER, []);
 
 };
 }).call(this);
@@ -29778,19 +29863,19 @@ mod[PROBE_E3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       case PROP_QUANTITY: {
         Sk.ffi.checkArgType(PROP_QUANTITY, EUCLIDEAN_3, Sk.ffi.isClass(valuePy, EUCLIDEAN_3), valuePy);
         /**
-         * Compute the Quaternion required to rotate (0,1,0) to (x,y,z).
+         * Compute the Quaternion required to rotate (0,0,1) to (x,y,z).
          *
          * @param {number} x
          * @param {number} y
          * @param {number} z
          */
         function quaternion(x, y, z) {
-          if (y !== -1) {
-            var scale = 1 / Math.sqrt(2 * (1 + y));
-            var xy = scale * x;
-            var yz = -scale * z;
-            var zx = 0;
-            return new THREE[QUATERNION](-yz, 0, -xy, scale * (1 + y));
+          if (z !== -1) {
+            var scale = 1 / Math.sqrt(2 * (1 + z));
+            var xy =  0;
+            var yz = +scale * y;
+            var zx = -scale * x;
+            return new THREE[QUATERNION](-yz, -zx, -xy, scale * (1 + z));
           }
           else {
             return new THREE[QUATERNION](1, 0, 0, 0);
@@ -31575,6 +31660,11 @@ var TETRAHEDRON_GEOMETRY       = "TetrahedronGeometry";
  * @type {string}
  */
 var TORUS_GEOMETRY             = "TorusGeometry";
+/**
+ * @const
+ * @type {string}
+ */
+var VORTEX_GEOMETRY            = "VortexGeometry";
 /**
  * @const
  * @type {string}
@@ -34030,7 +34120,7 @@ mod[OCTAHEDRON_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   });
 }, OCTAHEDRON_GEOMETRY, []);
 
- mod[PLANE_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
+mod[PLANE_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__init__ = Sk.ffi.functionPy(function(selfPy, widthPy, depthPy, widthSegments, heightSegments) {
     Sk.ffi.checkMethodArgs(PLANE_GEOMETRY, arguments, 2, 5);
     Sk.ffi.checkArgType(ARG_WIDTH, NUM, Sk.ffi.isNum(widthPy),  widthPy);
@@ -34373,6 +34463,64 @@ mod[TETRAHEDRON_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     return Sk.ffi.stringToPy(TORUS_GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
   });
 }, TORUS_GEOMETRY, []);
+
+mod[VORTEX_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
+  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, widthPy, depthPy, widthSegments, heightSegments) {
+    Sk.ffi.checkMethodArgs(VORTEX_GEOMETRY, arguments, 2, 5);
+    Sk.ffi.checkArgType(ARG_WIDTH, NUM, Sk.ffi.isNum(widthPy),  widthPy);
+    Sk.ffi.checkArgType(ARG_DEPTH, NUM, Sk.ffi.isNum(depthPy), depthPy);
+    var width = Sk.ffi.remapToJs(widthPy);
+    var depth = Sk.ffi.remapToJs(depthPy);
+    widthSegments  = numberFromIntegerArg(widthSegments,  PROP_WIDTH_SEGMENTS,  VORTEX_GEOMETRY);
+    heightSegments = numberFromIntegerArg(heightSegments, PROP_HEIGHT_SEGMENTS, VORTEX_GEOMETRY);
+    Sk.ffi.referenceToPy(new Sk.stdlib.PlaneGeometry(width, depth, widthSegments, heightSegments), VORTEX_GEOMETRY, undefined, selfPy);
+  });
+  $loc.__getattr__ = Sk.ffi.functionPy(function(planePy, name) {
+    var plane = Sk.ffi.remapToJs(planePy);
+    switch(name) {
+      case PROP_WIDTH: {
+        return Sk.ffi.numberToFloatPy(plane[PROP_WIDTH]);
+      }
+      case PROP_DEPTH:
+      case PROP_HEIGHT: {
+        return Sk.ffi.numberToFloatPy(plane[PROP_HEIGHT]);
+      }
+      case PROP_WIDTH_SEGMENTS: {
+        return Sk.ffi.numberToIntPy(plane[PROP_WIDTH_SEGMENTS]);
+      }
+      case PROP_DEPTH_SEGMENTS:
+      case PROP_HEIGHT_SEGMENTS: {
+        return Sk.ffi.numberToIntPy(plane[PROP_HEIGHT_SEGMENTS]);
+      }
+      default: {
+        return geometryGetAttr(VORTEX_GEOMETRY, planePy, name);
+      }
+    }
+  });
+  $loc.__setattr__ = Sk.ffi.functionPy(function(planePy, name, valuePy) {
+    switch(name) {
+      default: {
+        return geometryGetAttr(VORTEX_GEOMETRY, planePy, name);
+      }
+    }
+  });
+  $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
+    var plane = Sk.ffi.remapToJs(selfPy);
+    var args = {};
+    args[PROP_WIDTH] = plane[PROP_WIDTH];
+    args[PROP_DEPTH] = plane[PROP_HEIGHT];
+    return Sk.ffi.stringToPy(VORTEX_GEOMETRY + "(" + JSON.stringify(args) + ")");
+  });
+  $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
+    var plane = Sk.ffi.remapToJs(selfPy);
+    var width          = plane[PROP_WIDTH];
+    var depth          = plane[PROP_HEIGHT];
+    var widthSegments  = plane[PROP_WIDTH_SEGMENTS];
+    var heightSegments = plane[PROP_HEIGHT_SEGMENTS];
+    var args = [width, depth, widthSegments, heightSegments];
+    return Sk.ffi.stringToPy(VORTEX_GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
+  });
+}, VORTEX_GEOMETRY, []);
 /**
  * @param {string} className 
  * @param {!Object} geometryPy

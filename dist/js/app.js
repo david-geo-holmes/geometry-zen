@@ -27338,6 +27338,74 @@
           return Sk.ffi.stringToPy('SphereBuilder()');
         });
       }, 'SphereBuilder', []);
+      a.VortexBuilder = Sk.ffi.buildClass(a, function (b, c) {
+        c.__init__ = Sk.ffi.functionPy(function (a) {
+          Sk.ffi.checkMethodArgs('VortexBuilder', arguments, 0, 0);
+          Sk.ffi.referenceToPy({}, 'VortexBuilder', void 0, a);
+        });
+        c.__getattr__ = Sk.ffi.functionPy(function (b, c) {
+          var d = Sk.ffi.remapToJs(b);
+          switch (c) {
+          case 'height':
+            return Sk.ffi.callableToPy(a, 'height', function (a, c) {
+              Sk.ffi.checkMethodArgs('height', arguments, 1, 1);
+              Sk.ffi.checkArgType('height', [
+                l,
+                Sk.ffi.PyType.NONE
+              ], Sk.ffi.isNum(c) || Sk.ffi.isNone(c), c);
+              d.height = Sk.ffi.remapToJs(c);
+              return b;
+            });
+          case 'width':
+            return Sk.ffi.callableToPy(a, 'width', function (a, c) {
+              Sk.ffi.checkMethodArgs('width', arguments, 1, 1);
+              Sk.ffi.checkArgType('width', [
+                l,
+                Sk.ffi.PyType.NONE
+              ], Sk.ffi.isNum(c) || Sk.ffi.isNone(c), c);
+              d.width = Sk.ffi.remapToJs(c);
+              return b;
+            });
+          case 'segments':
+            return Sk.ffi.callableToPy(a, 'segments', function (a, c) {
+              Sk.ffi.checkMethodArgs('segments', arguments, 1, 1);
+              Sk.ffi.checkArgType('segments', [
+                Sk.ffi.PyType.INT,
+                Sk.ffi.PyType.NONE
+              ], Sk.ffi.isInt(c) || Sk.ffi.isNone(c), c);
+              d.segments = Sk.ffi.remapToJs(c);
+              return b;
+            });
+          case 'build':
+            return Sk.ffi.callableToPy(a, 'build', function (b) {
+              Sk.ffi.checkMethodArgs('build', arguments, 0, 0);
+              var c, f = {};
+              if (d.volume) {
+                c = d.width ? d.width : 1;
+                var g = d.height ? d.height : 1, h = Math.pow(d.volume / (c * g), 0.5);
+                f.width = h * c;
+                f.height = h * g;
+              } else
+                f.width = d.width ? d.width : 1, f.height = d.height ? d.height : 1;
+              c = f;
+              f = Sk.ffi.remapToPy(c.width);
+              c = Sk.ffi.remapToPy(c.height);
+              g = Sk.ffi.numberToIntPy(d.segments ? d.segments : 1);
+              f = Sk.ffi.callsim(a.VortexGeometry, f, c, g, g);
+              return e(f, d);
+            });
+          default:
+            return h(b, c, 'VortexBuilder');
+          }
+        });
+        c.__str__ = Sk.ffi.functionPy(function (a) {
+          a = Sk.ffi.remapToJs(a);
+          return Sk.ffi.stringToPy('' + a);
+        });
+        c.__repr__ = Sk.ffi.functionPy(function (a) {
+          return Sk.ffi.stringToPy('VortexBuilder()');
+        });
+      }, 'VortexBuilder', []);
     };
   }.call(this));
   (function () {
@@ -28183,7 +28251,7 @@
             c = function (a, c, d) {
               if (-1 !== d) {
                 var e = 1 / Math.sqrt(2 * (1 + d));
-                return new b.Quaternion(-(-e * c), -(-e * a), -0, e * (1 + d));
+                return new b.Quaternion(-(+e * c), -(-e * a), -0, e * (1 + d));
               }
               return new b.Quaternion(1, 0, 0, 0);
             };
@@ -30874,6 +30942,58 @@
           }).join(', ') + ')');
         });
       }, 'TorusGeometry', []);
+      a.VortexGeometry = Sk.ffi.buildClass(a, function (a, b) {
+        b.__init__ = Sk.ffi.functionPy(function (a, b, c, d, e) {
+          Sk.ffi.checkMethodArgs('VortexGeometry', arguments, 2, 5);
+          Sk.ffi.checkArgType('width', D, Sk.ffi.isNum(b), b);
+          Sk.ffi.checkArgType('depth', D, Sk.ffi.isNum(c), c);
+          var f = Sk.ffi.remapToJs(b), g = Sk.ffi.remapToJs(c);
+          d = y(d, 'widthSegments', 'VortexGeometry');
+          e = y(e, 'heightSegments', 'VortexGeometry');
+          Sk.ffi.referenceToPy(new Sk.stdlib.PlaneGeometry(f, g, d, e), 'VortexGeometry', void 0, a);
+        });
+        b.__getattr__ = Sk.ffi.functionPy(function (a, b) {
+          var c = Sk.ffi.remapToJs(a);
+          switch (b) {
+          case 'width':
+            return Sk.ffi.numberToFloatPy(c.width);
+          case 'depth':
+          case 'height':
+            return Sk.ffi.numberToFloatPy(c.height);
+          case 'widthSegments':
+            return Sk.ffi.numberToIntPy(c.widthSegments);
+          case 'depthSegments':
+          case 'heightSegments':
+            return Sk.ffi.numberToIntPy(c.heightSegments);
+          default:
+            return C('VortexGeometry', a, b);
+          }
+        });
+        b.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
+          switch (b) {
+          default:
+            return C('VortexGeometry', a, b);
+          }
+        });
+        b.__str__ = Sk.ffi.functionPy(function (a) {
+          a = Sk.ffi.remapToJs(a);
+          var b = {};
+          b.width = a.width;
+          b.depth = a.height;
+          return Sk.ffi.stringToPy('VortexGeometry(' + JSON.stringify(b) + ')');
+        });
+        b.__repr__ = Sk.ffi.functionPy(function (a) {
+          a = Sk.ffi.remapToJs(a);
+          return Sk.ffi.stringToPy('VortexGeometry(' + [
+            a.width,
+            a.height,
+            a.widthSegments,
+            a.heightSegments
+          ].map(function (a) {
+            return JSON.stringify(a);
+          }).join(', ') + ')');
+        });
+      }, 'VortexGeometry', []);
       a.Geometry = Sk.ffi.buildClass(a, function (a, c) {
         c.__init__ = Sk.ffi.functionPy(function (a, c) {
           'undefined' !== typeof c ? Sk.ffi.referenceToPy(Sk.ffi.remapToJs(c), 'Geometry', void 0, a) : Sk.ffi.referenceToPy(new b.Geometry(), 'Geometry', void 0, a);
