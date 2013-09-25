@@ -29775,6 +29775,13 @@ mod[PROBE_E3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     switch(name) {
       case PROP_QUANTITY: {
         Sk.ffi.checkArgType(PROP_QUANTITY, EUCLIDEAN_3, Sk.ffi.isClass(valuePy, EUCLIDEAN_3), valuePy);
+        /**
+         * Compute the Quaternion required to rotate (0,1,0) to (x,y,z).
+         *
+         * @param {number} x
+         * @param {number} y
+         * @param {number} z
+         */
         function quaternion(x, y, z) {
           if (y !== -1) {
             var scale = 1 / Math.sqrt(2 * (1 + y));
@@ -29800,7 +29807,6 @@ mod[PROBE_E3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         var grade0 = Sk.ffi.remapToJs(probe[PROP_GRADE_0]);
         var s0 = Math.abs(w);
         grade0.scale.set(s0, s0, s0);
-//      grade0.quaternion.set(0, 0, 0, 1);
 
         var grade1 = Sk.ffi.remapToJs(probe[PROP_GRADE_1]);
         var s1 = Math.sqrt(x * x + y * y + z * z);
@@ -29815,7 +29821,6 @@ mod[PROBE_E3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         var grade3 = Sk.ffi.remapToJs(probe[PROP_GRADE_3]);
         var s3 = Math.pow(Math.abs(xyz), 1/3);
         grade3.scale.set(s3, s3, s3);
-//      grade2.quaternion = quaternion(yz/s2, zx/s2, xy/s2);
 
         probe[PROP_QUANTITY] = valuePy;
       }
@@ -31652,6 +31657,16 @@ var PROP_GEOMETRY              = "geometry";
 * @const
 * @type {string}
 */
+var PROP_HEIGHT                = "height";
+/**
+* @const
+* @type {string}
+*/
+var PROP_HEIGHT_SEGMENTS       = "heightSegments";
+/**
+* @const
+* @type {string}
+*/
 var PROP_ID                    = "id";
 /**
 * @const
@@ -31743,16 +31758,6 @@ var PROP_RADIUS_TOP            = "radiusTop";
 * @type {string}
 */
 var PROP_RADIUS_BOTTOM         = "radiusBottom";
-/**
-* @const
-* @type {string}
-*/
-var PROP_HEIGHT                = "height";
-/**
-* @const
-* @type {string}
-*/
-var PROP_HEIGHT_SEGMENTS       = "heightSegments";
 /**
 * @const
 * @type {string}
@@ -32032,6 +32037,11 @@ var ARG_COLOR                  = PROP_COLOR;
  * @const
  * @type {string}
  */
+var ARG_DEPTH                  = PROP_DEPTH;
+/**
+ * @const
+ * @type {string}
+ */
 var ARG_FAR                    = PROP_FAR;
 /**
  * @const
@@ -32048,6 +32058,11 @@ var ARG_NEAR                   = PROP_NEAR;
  * @type {string}
  */
 var ARG_VECTOR                 = "vector";
+/**
+ * @const
+ * @type {string}
+ */
+var ARG_WIDTH                  = PROP_WIDTH;
 
 Sk.builtin.defineNode(mod);
 
@@ -33254,7 +33269,7 @@ mod[ARROW_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var e = new THREE[VECTOR_3](0,           -halfLength,              0);
     var points = [a, b, c, d, e];
     var generator = new THREE[QUATERNION](0, 1, 0, 0);
-    Sk.ffi.referenceToPy(new THREE[REVOLUTION_GEOMETRY](points, generator, segments, 0, 2 * Math.PI, attitude), ARROW_GEOMETRY, undefined, selfPy);
+    Sk.ffi.referenceToPy(new BLADE.RevolutionGeometry(points, generator, segments, 0, 2 * Math.PI, attitude), ARROW_GEOMETRY, undefined, selfPy);
   });
   $loc.__getattr__ = Sk.ffi.functionPy(function(geometryPy, name) {
     var geometry = Sk.ffi.remapToJs(geometryPy);
@@ -33517,7 +33532,7 @@ mod[LATHE_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     });
     // LatheGeometry assumes that the points are to be rotated about the z-axis.
     var generator = new THREE[QUATERNION](0, 0, 1, 0);
-    Sk.ffi.referenceToPy(new THREE[REVOLUTION_GEOMETRY](points, generator, Sk.ffi.remapToJs(segmentsPy), Sk.ffi.remapToJs(phiStartPy), Sk.ffi.remapToJs(phiLengthPy)), LATHE_GEOMETRY, undefined, selfPy);
+    Sk.ffi.referenceToPy(new BLADE.RevolutionGeometry(points, generator, Sk.ffi.remapToJs(segmentsPy), Sk.ffi.remapToJs(phiStartPy), Sk.ffi.remapToJs(phiLengthPy)), LATHE_GEOMETRY, undefined, selfPy);
   });
   $loc.__getattr__ = Sk.ffi.functionPy(function(geometryPy, name) {
     var geometry = Sk.ffi.remapToJs(geometryPy);
@@ -33666,65 +33681,138 @@ mod[OCTAHEDRON_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
 }, OCTAHEDRON_GEOMETRY, []);
 
  mod[PLANE_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-  var PROP_WIDTH           = "width";
-  var PROP_HEIGHT          = "height";
-  var PROP_WIDTH_SEGMENTS  = "widthSegments";
-  var PROP_HEIGHT_SEGMENTS = "heightSegments";
-  $loc.__init__ = Sk.ffi.functionPy(function(self, width, height, widthSegments, heightSegments) {
-    width          = numberFromArg(width,                 PROP_WIDTH,           PLANE_GEOMETRY);
-    height         = numberFromArg(height,                PROP_HEIGHT,          PLANE_GEOMETRY);
+  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, widthPy, depthPy, widthSegments, heightSegments) {
+    Sk.ffi.checkMethodArgs(PLANE_GEOMETRY, arguments, 2, 5);
+    Sk.ffi.checkArgType(ARG_WIDTH, NUMBER, Sk.ffi.isNumber(widthPy),  widthPy);
+    Sk.ffi.checkArgType(ARG_DEPTH, NUMBER, Sk.ffi.isNumber(depthPy), depthPy);
+    var width = Sk.ffi.remapToJs(widthPy);
+    var depth = Sk.ffi.remapToJs(depthPy);
     widthSegments  = numberFromIntegerArg(widthSegments,  PROP_WIDTH_SEGMENTS,  PLANE_GEOMETRY);
     heightSegments = numberFromIntegerArg(heightSegments, PROP_HEIGHT_SEGMENTS, PLANE_GEOMETRY);
-    self.v = new THREE[PLANE_GEOMETRY](width, height, widthSegments, heightSegments);
-    self.tp$name = PLANE_GEOMETRY;
+    Sk.ffi.referenceToPy(new BLADE.RectangleGeometry(width, depth, widthSegments, heightSegments), PLANE_GEOMETRY, undefined, selfPy);
   });
-  $loc.__getattr__ = Sk.ffi.functionPy(function(self, name) {
+  $loc.__getattr__ = Sk.ffi.functionPy(function(planePy, name) {
+    var plane = Sk.ffi.remapToJs(planePy);
     switch(name) {
       case PROP_WIDTH: {
-        return Sk.builtin.assk$(self.v[PROP_WIDTH], Sk.builtin.nmber.float$);
+        return Sk.ffi.numberToFloatPy(plane[PROP_WIDTH]);
       }
+      case PROP_DEPTH:
       case PROP_HEIGHT: {
-        return Sk.builtin.assk$(self.v[PROP_HEIGHT], Sk.builtin.nmber.float$);
+        return Sk.ffi.numberToFloatPy(plane[PROP_HEIGHT]);
       }
       case PROP_WIDTH_SEGMENTS: {
-        return Sk.builtin.assk$(self.v[PROP_WIDTH_SEGMENTS], Sk.builtin.nmber.int$);
+        return Sk.ffi.numberToIntPy(plane[PROP_WIDTH_SEGMENTS]);
       }
+      case PROP_DEPTH_SEGMENTS:
       case PROP_HEIGHT_SEGMENTS: {
-        return Sk.builtin.assk$(self.v[PROP_HEIGHT_SEGMENTS], Sk.builtin.nmber.int$);
+        return Sk.ffi.numberToIntPy(plane[PROP_HEIGHT_SEGMENTS]);
       }
       default: {
-        throw Sk.ffi.err.attribute(name).isNotGetableOnType(PLANE_GEOMETRY);
+        return geometryGetAttr(PLANE_GEOMETRY, planePy, name);
       }
     }
   });
-  $loc.__setattr__ = Sk.ffi.functionPy(function(geometryPy, name, valuePy) {
-    var geometry = Sk.ffi.remapToJs(geometryPy);
-    var value = Sk.ffi.remapToJs(valuePy);
+  $loc.__setattr__ = Sk.ffi.functionPy(function(planePy, name, valuePy) {
     switch(name) {
       default: {
-        throw Sk.ffi.err.attribute(name).isNotSetableOnType(PLANE_GEOMETRY);
+        return geometryGetAttr(PLANE_GEOMETRY, planePy, name);
       }
     }
   });
-  $loc.__str__ = Sk.ffi.functionPy(function(self) {
-    var plane = self.v;
+  $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
+    var plane = Sk.ffi.remapToJs(selfPy);
     var args = {};
-    args[PROP_WIDTH]  = plane[PROP_WIDTH];
-    args[PROP_HEIGHT] = plane[PROP_HEIGHT];
+    args[PROP_WIDTH] = plane[PROP_WIDTH];
+    args[PROP_DEPTH] = plane[PROP_HEIGHT];
     return Sk.ffi.stringToPy(PLANE_GEOMETRY + "(" + JSON.stringify(args) + ")");
   });
-  $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-    var plane = self.v;
+  $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
+    var plane = Sk.ffi.remapToJs(selfPy);
     var width          = plane[PROP_WIDTH];
-    var height         = plane[PROP_HEIGHT];
+    var depth          = plane[PROP_HEIGHT];
     var widthSegments  = plane[PROP_WIDTH_SEGMENTS];
     var heightSegments = plane[PROP_HEIGHT_SEGMENTS];
-    var args = [width, height, widthSegments, heightSegments];
+    var args = [width, depth, widthSegments, heightSegments];
     return Sk.ffi.stringToPy(PLANE_GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
   });
 }, PLANE_GEOMETRY, []);
+/**
+ * RectangleGeometry
+ *
+ * @constructor
+ * @param {number} width
+ * @param {number} height
+ * @param {number} widthSegments
+ * @param {number} heightSegments
+ */
+BLADE.RectangleGeometry = function (width, height, widthSegments, heightSegments) {
+
+  THREE['Geometry'].call( this );
+
+  this.width = width;
+  this.height = height;
+
+  this.widthSegments = widthSegments || 1;
+  this.heightSegments = heightSegments || 1;
+
+  var ix, iz;
+  var width_half = width / 2;
+  var height_half = height / 2;
+
+  var gridX = this.widthSegments;
+  var gridZ = this.heightSegments;
+
+  var gridX1 = gridX + 1;
+  var gridZ1 = gridZ + 1;
+
+  var segment_width = this.width / gridX;
+  var segment_height = this.height / gridZ;
+
+  var normal = new THREE['Vector3'](0, 0, 1);
+
+  for ( iz = 0; iz < gridZ1; iz ++ ) {
+    for ( ix = 0; ix < gridX1; ix ++ ) {
+      var x = ix * segment_width - width_half;
+      var y = iz * segment_height - height_half;
+      this['vertices'].push(new THREE['Vector3'](x, - y, 0));
+    }
+  }
+
+  for ( iz = 0; iz < gridZ; iz ++ ) {
+    for ( ix = 0; ix < gridX; ix ++ ) {
+      var a = ix + gridX1 * iz;
+      var b = ix + gridX1 * ( iz + 1 );
+      var c = ( ix + 1 ) + gridX1 * ( iz + 1 );
+      var d = ( ix + 1 ) + gridX1 * iz;
+
+      var uva = new THREE['Vector2']( ix / gridX, 1 - iz / gridZ );
+      var uvb = new THREE['Vector2']( ix / gridX, 1 - ( iz + 1 ) / gridZ );
+      var uvc = new THREE['Vector2']( ( ix + 1 ) / gridX, 1 - ( iz + 1 ) / gridZ );
+      var uvd = new THREE['Vector2']( ( ix + 1 ) / gridX, 1 - iz / gridZ );
+
+      var face = new THREE['Face3'](a, b, d);
+      face['normal'].copy( normal );
+      face['vertexNormals'].push(normal.clone(), normal.clone(), normal.clone());
+
+      this['faces'].push(face);
+      this['faceVertexUvs'][0].push([uva, uvb, uvd]);
+
+      face = new THREE['Face3'](b, c, d);
+      face['normal'].copy(normal);
+      face['vertexNormals'].push(normal.clone(), normal.clone(), normal.clone());
+
+      this['faces'].push(face);
+      this['faceVertexUvs'][0].push([uvb.clone(), uvc, uvd.clone()]);
+    }
+  }
+  this['computeCentroids']();
+};
+BLADE.RectangleGeometry.prototype = Object.create(THREE['Geometry'].prototype);
 
 /**
+ * RevolutionGeometry
+ *
  * @constructor
  * @param {!Array.<number>} points
  * @param {!Object} generator
@@ -33733,7 +33821,7 @@ mod[OCTAHEDRON_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
  * @param {number=} phiLength
  * @param {Object=} attitude
  */
-THREE.RevolutionGeometry = function (points, generator, segments, phiStart, phiLength, attitude) {
+BLADE.RevolutionGeometry = function (points, generator, segments, phiStart, phiLength, attitude) {
 
   THREE[GEOMETRY].call( this );
 
@@ -33818,8 +33906,7 @@ THREE.RevolutionGeometry = function (points, generator, segments, phiStart, phiL
   this['computeFaceNormals']();
   this['computeVertexNormals']();
 };
-
-THREE.RevolutionGeometry.prototype = Object.create( THREE[GEOMETRY].prototype );
+BLADE.RevolutionGeometry.prototype = Object.create(THREE[GEOMETRY].prototype);
 
 mod[REVOLUTION_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__init__ = Sk.ffi.functionPy(function(selfPy, pointsPy, generatorPy, segmentsPy, phiStartPy, phiLengthPy, attitudePy) {
@@ -33843,7 +33930,7 @@ mod[REVOLUTION_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     });
     var attitude   = Sk.ffi.remapToJs(attitudePy);
     var attitude = Sk.ffi.remapToJs(attitudePy) ? Sk.ffi.remapToJs(attitudePy).quaternion : undefined;
-    Sk.ffi.referenceToPy(new THREE[REVOLUTION_GEOMETRY](
+    Sk.ffi.referenceToPy(new BLADE.RevolutionGeometry(
       points,
       Sk.ffi.remapToJs(generatorPy).quaternion,
       Sk.ffi.remapToJs(segmentsPy),
@@ -33854,17 +33941,11 @@ mod[REVOLUTION_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__getattr__ = Sk.ffi.functionPy(function(geometryPy, name) {
     var geometry = Sk.ffi.remapToJs(geometryPy);
     switch(name) {
-      case PROP_ID: {
-        return Sk.ffi.numberToIntPy(geometry[PROP_ID]);
-      }
-      case PROP_NAME: {
-        return Sk.ffi.stringToPy(geometry[PROP_NAME]);
-      }
       case PROP_VERTICES: {
         return verticesPy(geometry[PROP_VERTICES]);
       }
       default: {
-        throw Sk.ffi.err.attribute(name).isNotGetableOnType(REVOLUTION_GEOMETRY);
+        return geometryGetAttr(REVOLUTION_GEOMETRY, geometryPy, name);
       }
     }
   });
@@ -33872,13 +33953,8 @@ mod[REVOLUTION_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var geometry = Sk.ffi.remapToJs(geometryPy);
     var value = Sk.ffi.remapToJs(valuePy);
     switch(name) {
-      case PROP_NAME: {
-        Sk.ffi.checkArgType(PROP_NAME, Sk.ffi.PyType.STR, Sk.ffi.isStr(valuePy), valuePy);
-        geometry[PROP_NAME] = Sk.ffi.remapToJs(valuePy);
-      }
-      break;
       default: {
-        throw Sk.ffi.err.attribute(name).isNotSetableOnType(REVOLUTION_GEOMETRY);
+        return geometrySetAttr(REVOLUTION_GEOMETRY, geometryPy, name, valuePy);
       }
     }
   });
