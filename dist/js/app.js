@@ -28262,6 +28262,45 @@
           return Sk.ffi.stringToPy('ProbeE3');
         });
       }, 'ProbeE3', []);
+      a.ProbeBuilderE3 = Sk.ffi.buildClass(a, function (b, d) {
+        d.__init__ = Sk.ffi.functionPy(function (a) {
+          Sk.ffi.checkMethodArgs('ProbeBuilderE3', arguments, 0, 0);
+          Sk.ffi.referenceToPy({}, 'ProbeBuilderE3', void 0, a);
+        });
+        d.__getattr__ = Sk.ffi.functionPy(function (b, c) {
+          Sk.ffi.remapToJs(b);
+          switch (c) {
+          case 'build':
+            return Sk.ffi.callableToPy(a, c, function (b) {
+              b = [
+                'SphereBuilder',
+                'ArrowBuilder',
+                'VortexBuilder',
+                'CubeBuilder'
+              ].map(function (b) {
+                b = Sk.ffi.callsim(a[b]);
+                return Sk.ffi.callsim(Sk.ffi.gattr(b, 'build'));
+              });
+              return Sk.ffi.callsim(a.ProbeE3, b[0], b[1], b[2], b[3]);
+            });
+          default:
+            throw Sk.ffi.err.attribute(c).isNotGetableOnType('ProbeBuilderE3');
+          }
+        });
+        d.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
+          Sk.ffi.remapToJs(a);
+          switch (b) {
+          default:
+            throw Sk.ffi.err.attribute(b).isNotSetableOnType('ProbeBuilderE3');
+          }
+        });
+        d.__str__ = Sk.ffi.functionPy(function (a) {
+          return Sk.ffi.stringToPy('ProbeBuilderE3');
+        });
+        d.__repr__ = Sk.ffi.functionPy(function (a) {
+          return Sk.ffi.stringToPy('ProbeBuilderE3');
+        });
+      }, 'ProbeBuilderE3', []);
     };
   }.call(this));
   Sk.builtin.buildWindowClass = function (a) {

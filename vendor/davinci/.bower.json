@@ -1,6 +1,6 @@
 {
   "name": "davinci",
-  "version": "0.9.101",
+  "version": "0.9.103",
   "description": "Python to JavaScript cross compiler",
   "author": {
     "name": "David Holmes",
@@ -31,11 +31,11 @@
   "keywords": [],
   "ignore": [],
   "homepage": "https://github.com/geometryzen/davinci",
-  "_release": "0.9.101",
+  "_release": "0.9.103",
   "_resolution": {
     "type": "version",
-    "tag": "0.9.101",
-    "commit": "36db8a5b66e11d8c36875ae6ae042dffbf8c1543"
+    "tag": "0.9.103",
+    "commit": "65a66117734437cd6ede841372354cbd09239312"
   },
   "_source": "git://github.com/geometryzen/davinci.git",
   "_target": "*",
