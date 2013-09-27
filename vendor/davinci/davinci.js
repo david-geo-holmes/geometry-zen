@@ -14071,29 +14071,29 @@ goog.exportSymbol("Sk.ffi.stringToPy", Sk.ffi.stringToPy);
  * - This form is useful in initialization functions.
  *
  * @param {Object|string|number|boolean} valueJs
- * @param {string} tp$name
+ * @param {string} className
  * @param {Object=} custom Custom metadata that the caller wishes to retain.
  * @param {Object=} targetPy An optional destination for mapping reference types.
  */
-Sk.ffi.referenceToPy = function(valueJs, tp$name, custom, targetPy)
+Sk.ffi.referenceToPy = function(valueJs, className, custom, targetPy)
 {
     var t = typeof valueJs;
     if (t === Sk.ffi.JsType.OBJECT || t === Sk.ffi.JsType.FUNCTION)
     {
-        if (typeof tp$name === Sk.ffi.JsType.STRING)
+        if (typeof className === Sk.ffi.JsType.STRING)
         {
             if (targetPy) {
                 targetPy.v = valueJs;
-                targetPy.tp$name = tp$name;
+                targetPy.tp$name = className;
                 targetPy.custom = custom;
             }
             else {
-                return {"v": valueJs, "tp$name": tp$name, "custom": custom};
+                return {"v": valueJs, "tp$name": className, "custom": custom};
             }
         }
         else
         {
-            throw Sk.ffi.assertionError("9fad4b9e-4845-4a06-9bce-0aa7c68e1f03");
+            throw Sk.ffi.assertionError("9fad4b9e-4845-4a06-9bce-0aa7c68e1f03 [className is " + className + "]");
         }
     }
     else
@@ -27537,6 +27537,11 @@ var VORTEX_BUILDER                  = "VortexBuilder";
  * @const
  * @type {string}
  */
+var AMBIENT_LIGHT                   = "AmbientLight";
+/**
+ * @const
+ * @type {string}
+ */
 var POINT_LIGHT                     = "PointLight";
 /**
  * @const
@@ -27729,9 +27734,15 @@ mod[WORLD] = Sk.ffi.functionPy(function() {
   var scenePy = Sk.ffi.callsim(mod[SCENE]);
   var scene = Sk.ffi.remapToJs(scenePy);
 
-  var pointLight = new THREE[POINT_LIGHT](0xFFFFFF);
-  pointLight.position.set(0, 5, 5);
-  scene.add(pointLight);
+  function addPointLight(x, y, z) {
+    var pointLight = new THREE[POINT_LIGHT](0xFFFFFF);
+    pointLight.position.set(x, y, z);
+    scene.add(pointLight);
+  }
+
+  addPointLight(+5, +5, +5);
+
+  scene.add(new THREE[AMBIENT_LIGHT](0x222222));
 
   return scenePy;
 });
@@ -29824,6 +29835,11 @@ var PROP_COLOR                      = "color";
  * @const
  * @type {string}
  */
+var PROP_POSITION                   = "position";
+/**
+ * @const
+ * @type {string}
+ */
 var PROP_QUANTITY                   = "quantity";
 /**
  * @const
@@ -29890,6 +29906,19 @@ mod[PROBE_E3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__setattr__ = Sk.ffi.functionPy(function(selfPy, name, valuePy) {
     var probe = Sk.ffi.remapToJs(selfPy);
     switch(name) {
+      case PROP_POSITION: {
+        Sk.ffi.checkArgType(PROP_POSITION, EUCLIDEAN_3, Sk.ffi.isClass(valuePy, EUCLIDEAN_3), valuePy);
+        var position = Sk.ffi.remapToJs(valuePy).vector;
+        var grade0 = Sk.ffi.remapToJs(probe[PROP_GRADE_0]);
+        grade0[PROP_POSITION] = position;
+        var grade1 = Sk.ffi.remapToJs(probe[PROP_GRADE_1]);
+        grade1[PROP_POSITION] = position;
+        var grade2 = Sk.ffi.remapToJs(probe[PROP_GRADE_2]);
+        grade2[PROP_POSITION] = position;
+        var grade3 = Sk.ffi.remapToJs(probe[PROP_GRADE_3]);
+        grade3[PROP_POSITION] = position;
+      }
+      break;
       case PROP_QUANTITY: {
         Sk.ffi.checkArgType(PROP_QUANTITY, EUCLIDEAN_3, Sk.ffi.isClass(valuePy, EUCLIDEAN_3), valuePy);
         /**
@@ -31657,6 +31686,11 @@ var LINE_BASIC_MATERIAL        = "LineBasicMaterial";
 * @const
 * @type {string}
 */
+var MATERIAL                   = "Material";
+/**
+* @const
+* @type {string}
+*/
 var MESH                       = "Mesh";
 /**
 * @const
@@ -31774,6 +31808,11 @@ var PROP_BOTTOM                = "bottom";
  * @type {string}
  */
 var PROP_CANVAS                = "canvas";
+/**
+* @const
+* @type {string}
+*/
+var PROP_CHARGE                = "charge";
 /**
  * @const
  * @type {string}
@@ -32103,6 +32142,16 @@ var PROP_XYZ                   = "xyz";
 * @const
 * @type {string}
 */
+var METHOD_GET_HEX             = "getHex";
+/**
+* @const
+* @type {string}
+*/
+var METHOD_GET_HEX_STRING      = "getHexString";
+/**
+* @const
+* @type {string}
+*/
 var METHOD_ROTATE_ON_AXIS      = "rotateOnAxis";
 /**
 * @const
@@ -32317,9 +32366,9 @@ Sk.stdlib.CylinderGeometry = function (radiusTop, radiusBottom, height, radialSe
       var u = x / radialSegments;
 
       var vertex = new THREE['Vector3']();
-      vertex.x = radius * Math.sin( u * Math.PI * 2 );
-      vertex.y = - v * height + heightHalf;
-      vertex.z = radius * Math.cos( u * Math.PI * 2 );
+      vertex.y = radius * Math.sin( u * Math.PI * 2 );
+      vertex.z = - v * height + heightHalf;
+      vertex.x = radius * Math.cos( u * Math.PI * 2 );
 
       this['vertices'].push( vertex );
 
@@ -32375,16 +32424,12 @@ Sk.stdlib.CylinderGeometry = function (radiusTop, radiusBottom, height, radialSe
 
       this['faces'].push( new THREE['Face3']( v2, v3, v4, [ n2, n3, n4 ] ) );
       this['faceVertexUvs'][ 0 ].push( [ uv2, uv3, uv4 ] );
-
     }
-
   }
-
   // top cap
-
   if ( openEnded === false && radiusTop > 0 ) {
 
-    this['vertices'].push( new THREE['Vector3']( 0, heightHalf, 0 ) );
+    this['vertices'].push(new THREE['Vector3'](0, 0, heightHalf));
 
     for ( x = 0; x < radialSegments; x ++ ) {
 
@@ -32402,16 +32447,12 @@ Sk.stdlib.CylinderGeometry = function (radiusTop, radiusBottom, height, radialSe
 
       this['faces'].push( new THREE['Face3']( v1, v2, v3, [ n1, n2, n3 ] ) );
       this['faceVertexUvs'][ 0 ].push( [ uv1, uv2, uv3 ] );
-
     }
-
   }
-
   // bottom cap
-
   if ( openEnded === false && radiusBottom > 0 ) {
 
-    this['vertices'].push( new THREE['Vector3']( 0, - heightHalf, 0 ) );
+    this['vertices'].push(new THREE['Vector3'](0, 0, -heightHalf));
 
     for ( x = 0; x < radialSegments; x ++ ) {
 
@@ -33507,21 +33548,21 @@ mod[COLOR] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   var PROP_R = "r";
   var PROP_G = "g";
   var PROP_B = "b";
-  $loc.__init__ = Sk.ffi.functionPy(function(self, value) {
-    value = Sk.ffi.remapToJs(value);
-    self.tp$name = COLOR;
-    if (isUndefined(value)) {
-      self.v = new THREE[COLOR]();
+  var PROP_VALUE = "value";
+  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, valuePy) {
+    var value = Sk.ffi.remapToJs(valuePy);
+    if (Sk.ffi.isUndefined(valuePy)) {
+      Sk.ffi.referenceToPy(new THREE[COLOR](), COLOR, undefined, selfPy);
     }
     else {
-      if (isNumber(value) || isString(value)) {
-        self.v = new THREE[COLOR](value);
+      if (Sk.ffi.isInt(valuePy) || Sk.ffi.isStr(valuePy)) {
+        Sk.ffi.referenceToPy(new THREE[COLOR](value), COLOR, undefined, selfPy);
       }
-      else if (isColor(value)) {
-        self.v = new THREE[COLOR](value);
+      else if (Sk.ffi.isClass(valuePy, COLOR)) {
+        Sk.ffi.referenceToPy(value, COLOR, undefined, selfPy);
       }
       else {
-        throw new Sk.builtin.AssertionError("value must be either a number, string or Color.");
+        Sk.ffi.checkArgType(PROP_VALUE, [Sk.ffi.PyType.INT, Sk.ffi.PyType.STR, COLOR], false, value);
       }
     }
   });
@@ -33529,13 +33570,23 @@ mod[COLOR] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var color = Sk.ffi.remapToJs(colorPy);
     switch(name) {
       case PROP_R: {
-        return Sk.builtin.assk$(color[PROP_R], Sk.builtin.nmber.float$);
+        return Sk.ffi.numberToIntPy(color[PROP_R]);
       }
       case PROP_G: {
-        return Sk.builtin.assk$(color[PROP_G], Sk.builtin.nmber.float$);
+        return Sk.ffi.numberToIntPy(color[PROP_G]);
       }
       case PROP_B: {
-        return Sk.builtin.assk$(color[PROP_B], Sk.builtin.nmber.float$);
+        return Sk.ffi.numberToIntPy(color[PROP_B]);
+      }
+      case METHOD_GET_HEX: {
+        return Sk.ffi.callableToPy(mod, METHOD_GET_HEX, function(methodPy) {
+          return Sk.ffi.numberToIntPy(color[METHOD_GET_HEX]());
+        });
+      }
+      case METHOD_GET_HEX_STRING: {
+        return Sk.ffi.callableToPy(mod, METHOD_GET_HEX_STRING, function(methodPy) {
+          return Sk.ffi.stringToPy(color[METHOD_GET_HEX_STRING]());
+        });
       }
       case METHOD_SET_RGB: {
         return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
@@ -33557,39 +33608,36 @@ mod[COLOR] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           });
         }, METHOD_SET_RGB, []));
       }
+      default: {
+        throw Sk.ffi.err.attribute(name).isNotGetableOnType(COLOR);
+      }
     }
   });
   $loc.__setattr__ = Sk.ffi.functionPy(function(colorPy, name, valuePy) {
     var color = Sk.ffi.remapToJs(colorPy);
-    var value = Sk.ffi.remapToJs(valuePy);
     switch(name) {
-      case PROP_R: {
-        color[PROP_R] = value;
-      }
-      break;
-      case PROP_G: {
-        color[PROP_G] = value;
-      }
-      break;
+      case PROP_R:
+      case PROP_G:
       case PROP_B: {
-        color[PROP_B] = value;
+        Sk.ffi.checkArgType(name, Sk.ffi.PyType.INT, Sk.ffi.isInt(valuePy), valuePy);
+        color[PROP_R] = Sk.ffi.remapToJs(valuePy);
       }
       break;
       default: {
-        throw new Sk.builtin.AttributeError(name + " is not an attribute of " + COLOR);
+        throw Sk.ffi.err.attribute(name).isNotSetableOnType(COLOR);
       }
     }
   });
-  $loc.__str__ = Sk.ffi.functionPy(function(self) {
-    var color = self.v;
+  $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
+    var color = Sk.ffi.remapToJs(selfPy);
     var args = {};
     args[PROP_R] = color[PROP_R];
     args[PROP_G] = color[PROP_G];
     args[PROP_B] = color[PROP_B];
     return Sk.ffi.stringToPy(COLOR + "(" + JSON.stringify(args) + ")");
   });
-  $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-    var color = self.v;
+  $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
+    var color = Sk.ffi.remapToJs(selfPy);
     var r = color[PROP_R];
     var g = color[PROP_G];
     var b = color[PROP_B];
@@ -34920,6 +34968,7 @@ function object3DGetAttr(className, selfPy, name) {
     case PROP_USE_QUATERNION: {
       return self[PROP_USE_QUATERNION];
     }
+    case PROP_CHARGE:
     case PROP_MASS:
     case PROP_MOMENTUM:
     case PROP_VELOCITY: {
@@ -34980,6 +35029,7 @@ function object3DSetAttr(className, selfPy, name, valuePy) {
       self[PROP_USE_QUATERNION] = value;
     }
     break;
+    case PROP_CHARGE:
     case PROP_MASS:
     case PROP_MOMENTUM:
     case PROP_VELOCITY: {
@@ -35308,9 +35358,12 @@ mod[LINE_BASIC_MATERIAL] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
 mod[MESH] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__init__ = Sk.ffi.functionPy(function(selfPy, geometryPy, materialPy) {
     Sk.ffi.checkMethodArgs(MESH, arguments, 1, 2);
-    Sk.ffi.checkArgType(PROP_GEOMETRY, GEOMETRY, Sk.ffi.isClass(geometryPy), geometryPy); // TODO GEOMETRIES
+    Sk.ffi.checkArgType(PROP_GEOMETRY, GEOMETRY, Sk.ffi.isClass(geometryPy), geometryPy); // TODO: GEOMETRIES
+    Sk.ffi.checkArgType(PROP_MATERIAL, MATERIAL, Sk.ffi.isClass(materialPy), materialPy); // TODO: MATERIALS
     var custom = {};
+    // Remember the concrete class names so that we can return the appropriate Python wrapper later.
     custom[PROP_GEOMETRY] = Sk.ffi.typeName(geometryPy);
+    custom[PROP_MATERIAL] = Sk.ffi.typeName(materialPy);
     Sk.ffi.referenceToPy(new THREE[MESH](Sk.ffi.remapToJs(geometryPy), Sk.ffi.remapToJs(materialPy)), MESH, custom, selfPy);
   });
   $loc.__getattr__ = Sk.ffi.functionPy(function(meshPy, name) {
