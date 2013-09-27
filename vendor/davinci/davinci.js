@@ -27322,6 +27322,11 @@ var EUCLIDEAN_3                     = "Euclidean3";
  * @const
  * @type {string}
  */
+var COLOR                           = "Color";
+/**
+ * @const
+ * @type {string}
+ */
 var SCENE                           = "Scene";
 /**
  * @const
@@ -27873,7 +27878,7 @@ function builderGetAttr(selfPy, name, className) {
     case PROP_COLOR: {
       return Sk.ffi.callableToPy(mod, name, function(methodPy, colorPy) {
         Sk.ffi.checkMethodArgs(name, arguments, 1, 1);
-        Sk.ffi.checkArgType(name, NUMBER, Sk.ffi.isNum(colorPy) || Sk.ffi.isStr(colorPy), colorPy);
+        Sk.ffi.checkArgType(name, NUMBER, Sk.ffi.isNum(colorPy)||Sk.ffi.isStr(colorPy)||Sk.ffi.isClass(colorPy, COLOR), colorPy);
         self[name] = Sk.ffi.remapToJs(colorPy);
         return selfPy;
       });
@@ -29802,9 +29807,19 @@ var EUCLIDEAN_3                     = "Euclidean3";
 var QUATERNION                      = "Quaternion";
 /**
  * @const
+ * @type {string}
+ */
+var COLOR                           = "Color";
+/**
+ * @const
  * @type {!Array.<Sk.ffi.PyType>}
  */
 var NUMBER                          = [Sk.ffi.PyType.FLOAT, Sk.ffi.PyType.INT, Sk.ffi.PyType.LONG];
+/**
+ * @const
+ * @type {string}
+ */
+var PROP_COLOR                      = "color";
 /**
  * @const
  * @type {string}
@@ -29949,13 +29964,24 @@ mod[PROBE_BUILDER_E3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     Sk.ffi.referenceToPy({}, PROBE_BUILDER_E3, undefined, selfPy);
   });
   $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
-    var probe = Sk.ffi.remapToJs(selfPy);
+    var self = Sk.ffi.remapToJs(selfPy);
     switch(name) {
+      case PROP_COLOR: {
+        return Sk.ffi.callableToPy(mod, name, function(methodPy, colorPy) {
+          Sk.ffi.checkMethodArgs(name, arguments, 1, 1);
+          Sk.ffi.checkArgType(name, NUMBER, Sk.ffi.isNum(colorPy)||Sk.ffi.isStr(colorPy)||Sk.ffi.isClass(colorPy, COLOR), colorPy);
+          self[PROP_COLOR] = colorPy;
+          return selfPy;
+        });
+      }
       case METHOD_BUILD: {
         return Sk.ffi.callableToPy(mod, name, function(methodPy) {
           var builderNames = [SPHERE_BUILDER, ARROW_BUILDER, VORTEX_BUILDER, CUBE_BUILDER];
           var meshes = builderNames.map(function(builderName) {
             var builderPy = Sk.ffi.callsim(mod[builderName]);
+            if (self[PROP_COLOR]) {
+              Sk.ffi.callsim(Sk.ffi.gattr(builderPy, PROP_COLOR), self[PROP_COLOR]);
+            }
             return Sk.ffi.callsim(Sk.ffi.gattr(builderPy, METHOD_BUILD));
           });
           return Sk.ffi.callsim(mod[PROBE_E3], meshes[0], meshes[1], meshes[2], meshes[3]);
