@@ -49,5 +49,6 @@ angular.module("app").factory('cookie', [() ->
     return this.setItem(name, "", new Date(0), path)
 
   hasItem: (name) ->
+    # console.log "hasItem(#{name})"
     return (new RegExp("(?:^|;\\s*)" + escape(name).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie);
 ])

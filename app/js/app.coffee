@@ -22,12 +22,12 @@ app.run(['$rootScope', '$window' , '$location', 'cookie', 'i18n', ($rootScope, $
   $rootScope.loginEnabled = () -> not cookie.hasItem(GITHUB_TOKEN_COOKIE_NAME)
 
   $rootScope.logout = () ->
-    console.log "logout"
+    # console.log "logout"
     cookie.removeItem(GITHUB_TOKEN_COOKIE_NAME)
     cookie.removeItem(GITHUB_LOGIN_COOKIE_NAME)
 
   $rootScope.login = () ->
-    console.log "login"
+    # console.log "login"
     clientId = cookie.getItem(GITHUB_APPLICATION_CLIENT_ID_COOKIE_NAME)
     $window.location.href = "https://github.com/login/oauth/authorize?client_id=#{clientId}&amp;scope=repo,user,gist"
 
