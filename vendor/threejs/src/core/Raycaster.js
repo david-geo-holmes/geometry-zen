@@ -36,7 +36,7 @@
 
 	var intersectObject = function ( object, raycaster, intersects ) {
 
-		if ( object instanceof THREE.Particle ) {
+		if ( object instanceof THREE.Sprite ) {
 
 			matrixPosition.getPositionFromMatrix( object.matrixWorld );
 			var distance = raycaster.ray.distanceToPoint( matrixPosition );
@@ -95,8 +95,6 @@
 
 			} 
 
-			var vertices = geometry.vertices;
-
 			if ( geometry instanceof THREE.BufferGeometry ) {
 
 				var material = object.material;
@@ -144,7 +142,16 @@
 								positions[ c * 3 + 2 ]
 							);
 
-							var intersectionPoint = localRay.intersectTriangle( vA, vB, vC, material.side !== THREE.DoubleSide );
+							
+							if ( material.side === THREE.BackSide ) {
+							
+								var intersectionPoint = localRay.intersectTriangle( vC, vB, vA, true ); 
+
+							} else {
+
+								var intersectionPoint = localRay.intersectTriangle( vA, vB, vC, material.side !== THREE.DoubleSide );
+
+							}
 
 							if ( intersectionPoint === null ) continue;
 
@@ -198,7 +205,16 @@
 							positions[ c * 3 + 2 ]
 						);
 
-						var intersectionPoint = localRay.intersectTriangle( vA, vB, vC, material.side !== THREE.DoubleSide );
+						
+						if ( material.side === THREE.BackSide ) {
+							
+							var intersectionPoint = localRay.intersectTriangle( vC, vB, vA, true ); 
+
+						} else {
+
+							var intersectionPoint = localRay.intersectTriangle( vA, vB, vC, material.side !== THREE.DoubleSide );
+
+						}
 
 						if ( intersectionPoint === null ) continue;
 
@@ -230,6 +246,8 @@
 				var a, b, c, d;
 				var precision = raycaster.precision;
 
+				var vertices = geometry.vertices;
+
 				for ( var f = 0, fl = geometry.faces.length; f < fl; f ++ ) {
 
 					var face = geometry.faces[ f ];
@@ -242,7 +260,15 @@
 					b = vertices[ face.b ];
 					c = vertices[ face.c ];
 					
-					var intersectionPoint = localRay.intersectTriangle( a, b, c, material.side !== THREE.DoubleSide );
+					if ( material.side === THREE.BackSide ) {
+							
+						var intersectionPoint = localRay.intersectTriangle( c, b, a, true ); 
+
+					} else {
+								
+						var intersectionPoint = localRay.intersectTriangle( a, b, c, material.side !== THREE.DoubleSide );
+
+					}
 
 					if ( intersectionPoint === null ) continue;
 
@@ -289,33 +315,39 @@
 			inverseMatrix.getInverse( object.matrixWorld );
 			localRay.copy( raycaster.ray ).applyMatrix4( inverseMatrix );
 
-			var vertices = geometry.vertices;
-			var nbVertices = vertices.length;
-			var interSegment = new THREE.Vector3();
-			var interRay = new THREE.Vector3();
-			var step = object.type === THREE.LineStrip ? 1 : 2;
+			/* if ( geometry instanceof THREE.BufferGeometry ) {
 
-			for ( var i = 0; i < nbVertices - 1; i = i + step ) {
+			} else */ if ( geometry instanceof THREE.Geometry ) {
 
-				var distSq = localRay.distanceSqToSegment( vertices[ i ], vertices[ i + 1 ], interRay, interSegment );
+				var vertices = geometry.vertices;
+				var nbVertices = vertices.length;
+				var interSegment = new THREE.Vector3();
+				var interRay = new THREE.Vector3();
+				var step = object.type === THREE.LineStrip ? 1 : 2;
 
-				if ( distSq > precisionSq ) continue;
+				for ( var i = 0; i < nbVertices - 1; i = i + step ) {
 
-				var distance = localRay.origin.distanceTo( interRay );
+					var distSq = localRay.distanceSqToSegment( vertices[ i ], vertices[ i + 1 ], interRay, interSegment );
 
-				if ( distance < raycaster.near || distance > raycaster.far ) continue;
+					if ( distSq > precisionSq ) continue;
 
-				intersects.push( {
+					var distance = localRay.origin.distanceTo( interRay );
 
-					distance: distance,
-					// What do we want? intersection point on the ray or on the segment??
-					// point: raycaster.ray.at( distance ),
-					point: interSegment.clone().applyMatrix4( object.matrixWorld ),
-					face: null,
-					faceIndex: null,
-					object: object
+					if ( distance < raycaster.near || distance > raycaster.far ) continue;
 
-				} );
+					intersects.push( {
+
+						distance: distance,
+						// What do we want? intersection point on the ray or on the segment??
+						// point: raycaster.ray.at( distance ),
+						point: interSegment.clone().applyMatrix4( object.matrixWorld ),
+						face: null,
+						faceIndex: null,
+						object: object
+
+					} );
+
+				}
 
 			}
 

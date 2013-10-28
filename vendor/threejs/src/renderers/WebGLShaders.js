@@ -1207,7 +1207,7 @@ THREE.ShaderChunk = {
 
 		"#ifdef USE_COLOR",
 
-			"gl_FragColor = gl_FragColor * vec4( vColor, opacity );",
+			"gl_FragColor = gl_FragColor * vec4( vColor, 1.0 );",
 
 		"#endif"
 
@@ -1251,15 +1251,17 @@ THREE.ShaderChunk = {
 			"#ifdef BONE_TEXTURE",
 
 				"uniform sampler2D boneTexture;",
+				"uniform int boneTextureWidth;",
+				"uniform int boneTextureHeight;",
 
 				"mat4 getBoneMatrix( const in float i ) {",
 
 					"float j = i * 4.0;",
-					"float x = mod( j, N_BONE_PIXEL_X );",
-					"float y = floor( j / N_BONE_PIXEL_X );",
+					"float x = mod( j, float( boneTextureWidth ) );",
+					"float y = floor( j / float( boneTextureWidth ) );",
 
-					"const float dx = 1.0 / N_BONE_PIXEL_X;",
-					"const float dy = 1.0 / N_BONE_PIXEL_Y;",
+					"float dx = 1.0 / float( boneTextureWidth );",
+					"float dy = 1.0 / float( boneTextureHeight );",
 
 					"y = dy * ( y + 0.5 );",
 

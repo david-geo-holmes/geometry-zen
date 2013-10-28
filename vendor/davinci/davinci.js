@@ -14259,12 +14259,25 @@ goog.exportSymbol("Sk.ffi.isDict", Sk.ffi.isDict);
 Sk.ffi.isList = function(valuePy) {return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.LIST;};
 goog.exportSymbol("Sk.ffi.isList", Sk.ffi.isList);
 
+/**
+ * @nosideeffects
+ * @param {Object} valuePy
+ * @return {boolean}
+ */
+Sk.ffi.isFloat = function(valuePy) {return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.FLOAT;};
+goog.exportSymbol("Sk.ffi.isFloat", Sk.ffi.isFloat);
+
 Sk.ffi.isFunction = function(valuePy) {return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.FUNCTION;};
 goog.exportSymbol("Sk.ffi.isFunction", Sk.ffi.isFunction);
 
 Sk.ffi.isFunctionRef = function(valuePy) {return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.FUNREF;};
 goog.exportSymbol("Sk.ffi.isFunctionRef", Sk.ffi.isFunctionRef);
 
+/**
+ * @nosideeffects
+ * @param {Object} valuePy
+ * @return {boolean}
+ */
 Sk.ffi.isInt = function(valuePy) {return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.INT;};
 goog.exportSymbol("Sk.ffi.isInt", Sk.ffi.isInt);
 
@@ -28976,7 +28989,7 @@ mod[NODE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           Sk.ffi.checkMethodArgs(METHOD_APPEND_CHILD, arguments, 1, 1);
           Sk.ffi.checkArgType(ARG_CHILD, NODE, Sk.ffi.isInstance(childNodePy, NODE), childNodePy);
           var childNode = Sk.ffi.remapToJs(childNodePy);
-          return nodeToPy(node.appendChild(Sk.ffi.remapToJs(childNode)));
+          return nodeToPy(node.appendChild(childNode));
         });
       }
       case METHOD_GET_CONTEXT: {
@@ -34139,10 +34152,10 @@ mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var self = Sk.ffi.remapToJs(selfPy);
     if (isMeasurePy(otherPy)) {
       var other = Sk.ffi.remapToJs(otherPy);
-      return Sk.ffi.callsim(mod[MEASURE], Sk.ffi.xor(self[QTY_PY], other[QTY_PY]), Sk.ffh.multiply(self[UOM_PY], other[UOM_PY]));
+      return Sk.ffi.callsim(mod[MEASURE], Sk.ffh.xor(self[QTY_PY], other[QTY_PY]), Sk.ffh.multiply(self[UOM_PY], other[UOM_PY]));
     }
     else if (Sk.ffi.isNum(otherPy)) {
-      return Sk.ffi.callsim(mod[MEASURE], Sk.ffi.xor(self[QTY_PY], otherPy), self[UOM_PY]);
+      return Sk.ffi.callsim(mod[MEASURE], Sk.ffh.xor(self[QTY_PY], otherPy), self[UOM_PY]);
     }
     else {
       Sk.ffi.checkArgType(ARG_OTHER, [MEASURE, NUMBER], false, otherPy);
@@ -36270,7 +36283,7 @@ mod[COLOR] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       case PROP_R:
       case PROP_G:
       case PROP_B: {
-        Sk.ffi.checkArgType(name, Sk.ffi.PyType.INT, Sk.ffi.isInt(valuePy), valuePy);
+        Sk.ffi.checkArgType(name, [Sk.ffi.PyType.FLOAT, Sk.ffi.PyType.INT], Sk.ffi.isFloat(valuePy) || Sk.ffi.isInt(valuePy), valuePy);
         color[PROP_R] = Sk.ffi.remapToJs(valuePy);
       }
       break;
