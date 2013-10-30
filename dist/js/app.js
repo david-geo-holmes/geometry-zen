@@ -12464,6 +12464,10 @@
     return Sk.ffi.getType(a) === Sk.ffi.PyType.INT;
   };
   goog.exportSymbol('Sk.ffi.isInt', Sk.ffi.isInt);
+  Sk.ffi.isLong = function (a) {
+    return Sk.ffi.getType(a) === Sk.ffi.PyType.LONG;
+  };
+  goog.exportSymbol('Sk.ffi.isLong', Sk.ffi.isLong);
   Sk.ffi.isNone = function (a) {
     return Sk.ffi.getType(a) === Sk.ffi.PyType.NONE;
   };
@@ -12896,6 +12900,10 @@
     return Sk.ffh.unaryExec(SPECIAL_METHOD_REPR, a, 'tp$str');
   };
   goog.exportSymbol('Sk.ffh.repr', Sk.ffh.repr);
+  Sk.ffh.evaluate = function (a, b) {
+    return Sk.ffi.isFloat(a) || Sk.ffi.isInt(a) || Sk.ffi.isLong(a) ? a : Sk.ffi.callsim(Sk.ffi.gattr(a, 'evaluate'), b);
+  };
+  goog.exportSymbol('Sk.ffh.evaluate', Sk.ffh.evaluate);
   Sk.builtin.enumerate = function (a, b) {
     if (!(this instanceof Sk.builtin.enumerate))
       return new Sk.builtin.enumerate(a, b);
@@ -25402,9 +25410,9 @@
           if (Sk.ffi.isNum(b))
             c.x /= f, c.y /= f;
           else {
-            var k = f.x * f.x + f.y * f.y;
-            c.x = (d * f.x + e * f.y) / k;
-            c.y = (e * f.x - d * f.y) / k;
+            var g = f.x * f.x + f.y * f.y;
+            c.x = (d * f.x + e * f.y) / g;
+            c.y = (e * f.x - d * f.y) / g;
           }
           return a;
         });
@@ -27409,7 +27417,7 @@
                 c.height = h * g;
               } else
                 c.radius = d.radius ? d.radius : 1, c.height = d.height ? d.height : 1;
-              var c = Sk.ffi.remapToPy(c.radius), f = Sk.ffi.remapToPy(0.08), g = Sk.ffi.remapToPy(0.01), h = Sk.ffi.remapToPy(0.2), n = Sk.ffi.remapToPy(0.8), k = Sk.ffi.numberToIntPy(8), p = Sk.ffi.numberToIntPy(32), c = Sk.ffi.callsim(a.VortexGeometry, c, f, g, h, n, k, p);
+              var c = Sk.ffi.remapToPy(c.radius), f = Sk.ffi.remapToPy(0.08), g = Sk.ffi.remapToPy(0.01), h = Sk.ffi.remapToPy(0.2), n = Sk.ffi.remapToPy(0.8), k = Sk.ffi.numberToIntPy(8), l = Sk.ffi.numberToIntPy(32), c = Sk.ffi.callsim(a.VortexGeometry, c, f, g, h, n, k, l);
               return e(c, d);
             });
           default:
@@ -30571,6 +30579,329 @@
           }
         });
       }, 'Lorentzian', []);
+    };
+  }.call(this));
+  (function () {
+    Sk.builtin.defineSymbolic = function (a, b) {
+      Sk.ffi.checkFunctionArgs('defineSymbolic', arguments, 2, 2);
+      a.Environment = Sk.ffi.buildClass(a, function (b, d) {
+        d.__init__ = Sk.ffi.functionPy(function (a, b, c) {
+          Sk.ffi.checkMethodArgs('Environment', arguments, 0, 2);
+          var d = { bindings: {} };
+          'undefined' === typeof b || Sk.ffi.isNone(b) || (Sk.ffi.checkArgType('parent', 'Environment', Sk.ffi.isInstance(b, 'Environment'), b), d.parent = b);
+          if ('undefined' !== typeof c && !Sk.ffi.isNone(c)) {
+            Sk.ffi.checkArgType('binding', 'Binding', Sk.ffi.isInstance(c, 'Binding'), c);
+            var k = Sk.ffi.gattr(c, 'name');
+            Sk.ffi.checkArgType('name', Sk.ffi.PyType.STR, Sk.ffi.isStr(k), k);
+            var l = Sk.ffi.gattr(c, 'expr');
+            d.bindings[Sk.ffi.remapToJs(k)] = l;
+          }
+          Sk.ffi.referenceToPy(d, 'Environment', void 0, a);
+        });
+        d.__add__ = Sk.ffi.functionPy(function (b, c) {
+          Sk.ffi.checkMethodArgs('+', arguments, 1, 1);
+          return Sk.ffi.callsim(a.Environment, b, c);
+        });
+        d.__getattr__ = Sk.ffi.functionPy(function (b, c) {
+          var d = Sk.ffi.remapToJs(b);
+          switch (c) {
+          case 'lookup':
+            return Sk.ffi.callableToPy(a, 'lookup', function (a, b) {
+              Sk.ffi.checkMethodArgs('lookup', arguments, 1, 1);
+              Sk.ffi.checkArgType('name', Sk.ffi.PyType.STR, Sk.ffi.isStr(b), b);
+              var c = Sk.ffi.remapToJs(b);
+              return 'undefined' !== typeof d.bindings[c] ? d.bindings[c] : 'undefined' !== typeof d.parent ? Sk.ffi.callsim(Sk.ffi.gattr(d.parent, 'lookup'), b) : Sk.ffi.none.None;
+            });
+          default:
+            throw Sk.ffi.err.attribute(c).isNotGetableOnType('Environment');
+          }
+        });
+        d.__repr__ = Sk.ffi.functionPy(function (a) {
+          Sk.ffi.remapToJs(a);
+          return Sk.ffi.stringToPy('Environment()');
+        });
+        d.__str__ = Sk.ffi.functionPy(function (a) {
+          Sk.ffi.remapToJs(a);
+          return Sk.ffi.stringToPy('Environment');
+        });
+      }, 'Environment', []);
+      a.Variable = Sk.ffi.buildClass(a, function (b, d) {
+        d.__init__ = Sk.ffi.functionPy(function (a, b) {
+          Sk.ffi.checkMethodArgs('Variable', arguments, 1, 1);
+          Sk.ffi.checkArgType('name', Sk.ffi.PyType.STR, Sk.ffi.isStr(b), b);
+          Sk.ffi.referenceToPy({ name: b }, 'Variable', void 0, a);
+        });
+        d.__add__ = Sk.ffi.functionPy(function (b, c) {
+          Sk.ffi.checkMethodArgs('+', arguments, 1, 1);
+          return Sk.ffi.callsim(a.Add, b, c);
+        });
+        d.__radd__ = Sk.ffi.functionPy(function (b, c) {
+          Sk.ffi.checkMethodArgs('+', arguments, 1, 1);
+          return Sk.ffi.callsim(a.Add, c, b);
+        });
+        d.__sub__ = Sk.ffi.functionPy(function (b, c) {
+          Sk.ffi.checkMethodArgs('-', arguments, 1, 1);
+          return Sk.ffi.callsim(a.Subtract, b, c);
+        });
+        d.__mul__ = Sk.ffi.functionPy(function (b, c) {
+          Sk.ffi.checkMethodArgs('*', arguments, 1, 1);
+          return Sk.ffi.callsim(a.Multiply, b, c);
+        });
+        d.__getattr__ = Sk.ffi.functionPy(function (b, c) {
+          var d = Sk.ffi.remapToJs(b);
+          switch (c) {
+          case 'evaluate':
+            return Sk.ffi.callableToPy(a, 'evaluate', function (a, c) {
+              Sk.ffi.checkMethodArgs('evaluate', arguments, 1, 1);
+              Sk.ffi.checkArgType('env', 'Environment', Sk.ffi.isInstance(c, 'Environment'), c);
+              var f = Sk.ffi.gattr(c, 'lookup'), f = Sk.ffi.callsim(f, d.name);
+              return Sk.ffi.isNone(f) ? b : f;
+            });
+          default:
+            throw Sk.ffi.err.attribute(c).isNotGetableOnType('Variable');
+          }
+        });
+        d.__repr__ = Sk.ffi.functionPy(function (a) {
+          a = Sk.ffi.remapToJs(a);
+          return Sk.ffi.stringToPy('Variable("' + Sk.ffi.remapToJs(a.name) + '")');
+        });
+        d.__str__ = Sk.ffi.functionPy(function (a) {
+          return Sk.ffi.remapToJs(a).name;
+        });
+      }, 'Variable', []);
+      a.Binding = Sk.ffi.buildClass(a, function (a, b) {
+        b.__init__ = Sk.ffi.functionPy(function (a, b, c) {
+          Sk.ffi.checkMethodArgs('Binding', arguments, 2, 2);
+          Sk.ffi.checkArgType('name', Sk.ffi.PyType.STR, Sk.ffi.isStr(b), b);
+          var d = {};
+          d.name = b;
+          d.expr = c;
+          Sk.ffi.referenceToPy(d, 'Binding', void 0, a);
+        });
+        b.__getattr__ = Sk.ffi.functionPy(function (a, b) {
+          var c = Sk.ffi.remapToJs(a);
+          switch (b) {
+          case 'name':
+            return c.name;
+          case 'expr':
+            return c.expr;
+          default:
+            throw Sk.ffi.err.attribute(b).isNotGetableOnType('Binding');
+          }
+        });
+        b.__repr__ = Sk.ffi.functionPy(function (a) {
+          a = Sk.ffi.remapToJs(a);
+          a = [
+            '"' + Sk.ffi.remapToJs(a.name) + '"',
+            Sk.ffi.remapToJs(Sk.ffh.repr(a.expr))
+          ].join(', ');
+          return Sk.ffi.stringToPy('Binding(' + a + ')');
+        });
+        b.__str__ = Sk.ffi.functionPy(function (a) {
+          a = Sk.ffi.remapToJs(a);
+          a = [
+            Sk.ffi.remapToJs(a.name),
+            Sk.ffi.remapToJs(Sk.ffh.str(a.expr))
+          ].join(' => ');
+          return Sk.ffi.stringToPy(a);
+        });
+      }, 'Binding', []);
+      a.Add = Sk.ffi.buildClass(a, function (b, d) {
+        d.__init__ = Sk.ffi.functionPy(function (a, b, c) {
+          Sk.ffi.checkMethodArgs('Add', arguments, 2, 2);
+          Sk.ffi.referenceToPy({
+            lhs: b,
+            rhs: c
+          }, 'Add', void 0, a);
+        });
+        d.__add__ = Sk.ffi.functionPy(function (b, c) {
+          Sk.ffi.checkMethodArgs('+', arguments, 1, 1);
+          return Sk.ffi.callsim(a.Add, b, c);
+        });
+        d.__mul__ = Sk.ffi.functionPy(function (b, c) {
+          Sk.ffi.checkMethodArgs('*', arguments, 1, 1);
+          return Sk.ffi.callsim(a.Multiply, b, c);
+        });
+        d.__getattr__ = Sk.ffi.functionPy(function (b, c) {
+          var d = Sk.ffi.remapToJs(b);
+          switch (c) {
+          case 'evaluate':
+            return Sk.ffi.callableToPy(a, 'evaluate', function (a, b) {
+              Sk.ffi.checkMethodArgs('evaluate', arguments, 1, 1);
+              Sk.ffi.checkArgType('env', 'Environment', Sk.ffi.isInstance(b, 'Environment'), b);
+              var c = Sk.ffh.evaluate(d.lhs, b), e = Sk.ffh.evaluate(d.rhs, b);
+              return Sk.ffh.add(c, e);
+            });
+          default:
+            throw Sk.ffi.err.attribute(c).isNotGetableOnType('Variable');
+          }
+        });
+        d.__repr__ = Sk.ffi.functionPy(function (a) {
+          a = Sk.ffi.remapToJs(a);
+          a = [
+            a.lhs,
+            a.rhs
+          ].map(function (a) {
+            return Sk.ffi.remapToJs(Sk.ffh.repr(a));
+          }).join(', ');
+          return Sk.ffi.stringToPy('Add(' + a + ')');
+        });
+        d.__str__ = Sk.ffi.functionPy(function (a) {
+          a = Sk.ffi.remapToJs(a);
+          a = [
+            a.lhs,
+            a.rhs
+          ].map(function (a) {
+            return Sk.ffi.remapToJs(Sk.ffh.str(a));
+          }).join(' + ');
+          return Sk.ffi.stringToPy(a);
+        });
+      }, 'Add', []);
+      a.Subtract = Sk.ffi.buildClass(a, function (b, d) {
+        d.__init__ = Sk.ffi.functionPy(function (a, b, c) {
+          Sk.ffi.checkMethodArgs('Subtract', arguments, 2, 2);
+          Sk.ffi.referenceToPy({
+            lhs: b,
+            rhs: c
+          }, 'Subtract', void 0, a);
+        });
+        d.__add__ = Sk.ffi.functionPy(function (b, c) {
+          Sk.ffi.checkMethodArgs('+', arguments, 1, 1);
+          return Sk.ffi.callsim(a.Add, b, c);
+        });
+        d.__mul__ = Sk.ffi.functionPy(function (b, c) {
+          Sk.ffi.checkMethodArgs('*', arguments, 1, 1);
+          return Sk.ffi.callsim(a.Multiply, b, c);
+        });
+        d.__getattr__ = Sk.ffi.functionPy(function (b, c) {
+          var d = Sk.ffi.remapToJs(b);
+          switch (c) {
+          case 'evaluate':
+            return Sk.ffi.callableToPy(a, 'evaluate', function (a, b) {
+              Sk.ffi.checkMethodArgs('evaluate', arguments, 1, 1);
+              Sk.ffi.checkArgType('env', 'Environment', Sk.ffi.isInstance(b, 'Environment'), b);
+              var c = Sk.ffh.evaluate(d.lhs, b), e = Sk.ffh.evaluate(d.rhs, b);
+              return Sk.ffh.subtract(c, e);
+            });
+          default:
+            throw Sk.ffi.err.attribute(c).isNotGetableOnType('Variable');
+          }
+        });
+        d.__repr__ = Sk.ffi.functionPy(function (a) {
+          a = Sk.ffi.remapToJs(a);
+          a = [
+            a.lhs,
+            a.rhs
+          ].map(function (a) {
+            return Sk.ffi.remapToJs(Sk.ffh.repr(a));
+          }).join(', ');
+          return Sk.ffi.stringToPy('Subtract(' + a + ')');
+        });
+        d.__str__ = Sk.ffi.functionPy(function (a) {
+          a = Sk.ffi.remapToJs(a);
+          a = [
+            a.lhs,
+            a.rhs
+          ].map(function (a) {
+            return Sk.ffi.remapToJs(Sk.ffh.str(a));
+          }).join(' - ');
+          return Sk.ffi.stringToPy(a);
+        });
+      }, 'Subtract', []);
+      a.Multiply = Sk.ffi.buildClass(a, function (b, d) {
+        d.__init__ = Sk.ffi.functionPy(function (a, b, c) {
+          Sk.ffi.checkMethodArgs('Multiply', arguments, 2, 2);
+          Sk.ffi.referenceToPy({
+            lhs: b,
+            rhs: c
+          }, 'Multiply', void 0, a);
+        });
+        d.__add__ = Sk.ffi.functionPy(function (b, c) {
+          Sk.ffi.checkMethodArgs('+', arguments, 1, 1);
+          return Sk.ffi.callsim(a.Add, b, c);
+        });
+        d.__mul__ = Sk.ffi.functionPy(function (b, c) {
+          Sk.ffi.checkMethodArgs('*', arguments, 1, 1);
+          return Sk.ffi.callsim(a.Multiply, b, c);
+        });
+        d.__getattr__ = Sk.ffi.functionPy(function (b, c) {
+          var d = Sk.ffi.remapToJs(b);
+          switch (c) {
+          case 'evaluate':
+            return Sk.ffi.callableToPy(a, 'evaluate', function (a, b) {
+              Sk.ffi.checkMethodArgs('evaluate', arguments, 1, 1);
+              Sk.ffi.checkArgType('env', 'Environment', Sk.ffi.isInstance(b, 'Environment'), b);
+              var c = Sk.ffh.evaluate(d.lhs, b), e = Sk.ffh.evaluate(d.rhs, b);
+              return Sk.ffh.multiply(c, e);
+            });
+          default:
+            throw Sk.ffi.err.attribute(c).isNotGetableOnType('Variable');
+          }
+        });
+        d.__repr__ = Sk.ffi.functionPy(function (a) {
+          a = Sk.ffi.remapToJs(a);
+          a = [
+            a.lhs,
+            a.rhs
+          ].map(function (a) {
+            return Sk.ffi.remapToJs(Sk.ffh.repr(a));
+          }).join(', ');
+          return Sk.ffi.stringToPy('Multiply(' + a + ')');
+        });
+        d.__str__ = Sk.ffi.functionPy(function (a) {
+          a = Sk.ffi.remapToJs(a);
+          a = [
+            a.lhs,
+            a.rhs
+          ].map(function (a) {
+            return Sk.ffi.remapToJs(Sk.ffh.str(a));
+          }).join(' * ');
+          return Sk.ffi.stringToPy(a);
+        });
+      }, 'Multiply', []);
+      a.PointE2 = Sk.ffi.buildClass(a, function (b, d) {
+        d.__init__ = Sk.ffi.functionPy(function (a, b, c) {
+          Sk.ffi.checkMethodArgs('PointE2', arguments, 2, 2);
+          var d = {};
+          d.x = b;
+          d.y = c;
+          Sk.ffi.referenceToPy(d, 'PointE2', void 0, a);
+        });
+        d.__getattr__ = Sk.ffi.functionPy(function (b, c) {
+          var d = Sk.ffi.remapToJs(b);
+          switch (c) {
+          case 'evaluate':
+            return Sk.ffi.callableToPy(a, 'evaluate', function (b, c) {
+              Sk.ffi.checkMethodArgs('evaluate', arguments, 1, 1);
+              Sk.ffi.checkArgType('env', 'Environment', Sk.ffi.isInstance(c, 'Environment'), c);
+              var e = Sk.ffh.evaluate(d.x, c), f = Sk.ffh.evaluate(d.y, c);
+              return Sk.ffi.callsim(a.PointE2, e, f);
+            });
+          default:
+            throw Sk.ffi.err.attribute(c).isNotGetableOnType('PointE2');
+          }
+        });
+        d.__repr__ = Sk.ffi.functionPy(function (a) {
+          a = Sk.ffi.remapToJs(a);
+          a = [
+            a.x,
+            a.y
+          ].map(function (a) {
+            return Sk.ffi.remapToJs(Sk.ffh.repr(a));
+          }).join(', ');
+          return Sk.ffi.stringToPy('PointE2(' + a + ')');
+        });
+        d.__str__ = Sk.ffi.functionPy(function (a) {
+          a = Sk.ffi.remapToJs(a);
+          a = [
+            a.x,
+            a.y
+          ].map(function (a) {
+            return Sk.ffi.remapToJs(Sk.ffh.str(a));
+          }).join(', ');
+          return Sk.ffi.stringToPy('[' + a + ']');
+        });
+      }, 'PointE2', []);
     };
   }.call(this));
   (function () {
@@ -35501,6 +35832,7 @@ Sk.builtinFiles = {
     'src/lib/urllib/__init__.js': 'var $builtinmodule = function(name)\n{\n  var urllib = {};\n\n  return urllib;\n};\n',
     'src/lib/random/__init__.js': '\n/*\n  I\'ve wrapped Makoto Matsumoto and Takuji Nishimura\'s code in a namespace\n  so it\'s better encapsulated. Now you can have multiple random number generators\n  and they won\'t stomp all over eachother\'s state.\n  \n  If you want to use this as a substitute for Math.random(), use the random()\n  method like so:\n  \n  var m = new MersenneTwister();\n  var randomNumber = m.random();\n  \n  You can also call the other genrand_{foo}() methods on the instance.\n\n  If you want to use a specific seed in order to get a repeatable random\n  sequence, pass an integer into the constructor:\n\n  var m = new MersenneTwister(123);\n\n  and that will always produce the same random sequence.\n\n  Sean McCullough (banksean@gmail.com)\n*/\n\n/* \n   A C-program for MT19937, with initialization improved 2002/1/26.\n   Coded by Takuji Nishimura and Makoto Matsumoto.\n \n   Before using, initialize the state by using init_genrand(seed)  \n   or init_by_array(init_key, key_length).\n \n   Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura,\n   All rights reserved.                          \n \n   Redistribution and use in source and binary forms, with or without\n   modification, are permitted provided that the following conditions\n   are met:\n \n     1. Redistributions of source code must retain the above copyright\n        notice, this list of conditions and the following disclaimer.\n \n     2. Redistributions in binary form must reproduce the above copyright\n        notice, this list of conditions and the following disclaimer in the\n        documentation and/or other materials provided with the distribution.\n \n     3. The names of its contributors may not be used to endorse or promote \n        products derived from this software without specific prior written \n        permission.\n \n   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT\n   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR\n   A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR\n   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,\n   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,\n   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR\n   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF\n   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING\n   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS\n   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n \n \n   Any feedback is very welcome.\n   http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html\n   email: m-mat @ math.sci.hiroshima-u.ac.jp (remove space)\n*/\n\nvar MersenneTwister = function(seed) {\n  if (seed == undefined) {\n    seed = new Date().getTime();\n  } \n  /* Period parameters */  \n  this.N = 624;\n  this.M = 397;\n  this.MATRIX_A = 0x9908b0df;   /* constant vector a */\n  this.UPPER_MASK = 0x80000000; /* most significant w-r bits */\n  this.LOWER_MASK = 0x7fffffff; /* least significant r bits */\n \n  this.mt = new Array(this.N); /* the array for the state vector */\n  this.mti=this.N+1; /* mti==N+1 means mt[N] is not initialized */\n\n  this.init_genrand(seed);\n}  \n \n/* initializes mt[N] with a seed */\nMersenneTwister.prototype.init_genrand = function(s) {\n  this.mt[0] = s >>> 0;\n  for (this.mti=1; this.mti<this.N; this.mti++) {\n      var s = this.mt[this.mti-1] ^ (this.mt[this.mti-1] >>> 30);\n   this.mt[this.mti] = (((((s & 0xffff0000) >>> 16) * 1812433253) << 16) + (s & 0x0000ffff) * 1812433253)\n  + this.mti;\n      /* See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier. */\n      /* In the previous versions, MSBs of the seed affect   */\n      /* only MSBs of the array mt[].                        */\n      /* 2002/01/09 modified by Makoto Matsumoto             */\n      this.mt[this.mti] >>>= 0;\n      /* for >32 bit machines */\n  }\n}\n \n/* initialize by an array with array-length */\n/* init_key is the array for initializing keys */\n/* key_length is its length */\n/* slight change for C++, 2004/2/26 */\nMersenneTwister.prototype.init_by_array = function(init_key, key_length) {\n  var i, j, k;\n  this.init_genrand(19650218);\n  i=1; j=0;\n  k = (this.N>key_length ? this.N : key_length);\n  for (; k; k--) {\n    var s = this.mt[i-1] ^ (this.mt[i-1] >>> 30)\n    this.mt[i] = (this.mt[i] ^ (((((s & 0xffff0000) >>> 16) * 1664525) << 16) + ((s & 0x0000ffff) * 1664525)))\n      + init_key[j] + j; /* non linear */\n    this.mt[i] >>>= 0; /* for WORDSIZE > 32 machines */\n    i++; j++;\n    if (i>=this.N) { this.mt[0] = this.mt[this.N-1]; i=1; }\n    if (j>=key_length) j=0;\n  }\n  for (k=this.N-1; k; k--) {\n    var s = this.mt[i-1] ^ (this.mt[i-1] >>> 30);\n    this.mt[i] = (this.mt[i] ^ (((((s & 0xffff0000) >>> 16) * 1566083941) << 16) + (s & 0x0000ffff) * 1566083941))\n      - i; /* non linear */\n    this.mt[i] >>>= 0; /* for WORDSIZE > 32 machines */\n    i++;\n    if (i>=this.N) { this.mt[0] = this.mt[this.N-1]; i=1; }\n  }\n\n  this.mt[0] = 0x80000000; /* MSB is 1; assuring non-zero initial array */ \n}\n \n/* generates a random number on [0,0xffffffff]-interval */\nMersenneTwister.prototype.genrand_int32 = function() {\n  var y;\n  var mag01 = new Array(0x0, this.MATRIX_A);\n  /* mag01[x] = x * MATRIX_A  for x=0,1 */\n\n  if (this.mti >= this.N) { /* generate N words at one time */\n    var kk;\n\n    if (this.mti == this.N+1)   /* if init_genrand() has not been called, */\n      this.init_genrand(5489); /* a default initial seed is used */\n\n    for (kk=0;kk<this.N-this.M;kk++) {\n      y = (this.mt[kk]&this.UPPER_MASK)|(this.mt[kk+1]&this.LOWER_MASK);\n      this.mt[kk] = this.mt[kk+this.M] ^ (y >>> 1) ^ mag01[y & 0x1];\n    }\n    for (;kk<this.N-1;kk++) {\n      y = (this.mt[kk]&this.UPPER_MASK)|(this.mt[kk+1]&this.LOWER_MASK);\n      this.mt[kk] = this.mt[kk+(this.M-this.N)] ^ (y >>> 1) ^ mag01[y & 0x1];\n    }\n    y = (this.mt[this.N-1]&this.UPPER_MASK)|(this.mt[0]&this.LOWER_MASK);\n    this.mt[this.N-1] = this.mt[this.M-1] ^ (y >>> 1) ^ mag01[y & 0x1];\n\n    this.mti = 0;\n  }\n\n  y = this.mt[this.mti++];\n\n  /* Tempering */\n  y ^= (y >>> 11);\n  y ^= (y << 7) & 0x9d2c5680;\n  y ^= (y << 15) & 0xefc60000;\n  y ^= (y >>> 18);\n\n  return y >>> 0;\n}\n \n/* generates a random number on [0,0x7fffffff]-interval */\nMersenneTwister.prototype.genrand_int31 = function() {\n  return (this.genrand_int32()>>>1);\n}\n \n/* generates a random number on [0,1]-real-interval */\nMersenneTwister.prototype.genrand_real1 = function() {\n  return this.genrand_int32()*(1.0/4294967295.0); \n  /* divided by 2^32-1 */ \n}\n\n/* generates a random number on [0,1)-real-interval */\nMersenneTwister.prototype.random = function() {\n  return this.genrand_int32()*(1.0/4294967296.0); \n  /* divided by 2^32 */\n}\n \n/* generates a random number on (0,1)-real-interval */\nMersenneTwister.prototype.genrand_real3 = function() {\n  return (this.genrand_int32() + 0.5)*(1.0/4294967296.0); \n  /* divided by 2^32 */\n}\n \n/* generates a random number on [0,1) with 53-bit resolution*/\nMersenneTwister.prototype.genrand_res53 = function() { \n  var a=this.genrand_int32()>>>5, b=this.genrand_int32()>>>6; \n  return(a*67108864.0+b)*(1.0/9007199254740992.0); \n} \n\n/* These real versions are due to Isaku Wada, 2002/01/09 added */\n\n\n\nvar $builtinmodule = function(name)\n{\n\n    var mod = {};\n\n    var myGenerator = new MersenneTwister();\n\n    mod.seed = new Sk.builtin.func(function(x) {\n        Sk.builtin.pyCheckArgs("seed", arguments, 0, 1);\n\tx = Sk.builtin.asnum$(x);\n\n        if (arguments.length > 0)\n            myGenerator = new MersenneTwister(x);\n        else\n            myGenerator = new MersenneTwister();\n\n\treturn Sk.builtin.none.none$;\n    });\n\n    mod.random = new Sk.builtin.func(function() {\n        Sk.builtin.pyCheckArgs("random", arguments, 0, 0);\n\n\treturn new Sk.builtin.nmber(myGenerator.genrand_res53(), Sk.builtin.nmber.float$);\n    });\n\n    var toInt = function(num) {\n        return num | 0;\n    };\n\n    var randrange = function(start, stop, step) {\n        // Ported from CPython 2.7\n        var width, n, ret;\n\n        if (!Sk.builtin.checkInt(start)) {\n            throw new Sk.builtin.ValueError("non-integer first argument for randrange()");\n        };\n\n        if (stop === undefined) {\n            // Random in [0, start)\n            return toInt(myGenerator.genrand_res53() * start);\n        };\n\n        if (!Sk.builtin.checkInt(stop)) {\n            throw new Sk.builtin.ValueError("non-integer stop for randrange()");\n        };\n\n        if (step === undefined) {\n            step = 1;\n        };\n\n        width = stop - start;\n\n        if ((step == 1) && (width > 0)) {\n            // Random in [start, stop), must use toInt on product for correct results with negative ranges\n            ret = start + toInt(myGenerator.genrand_res53() * width);\n\t    return new Sk.builtin.nmber(ret, Sk.builtin.nmber.int$);\n        };\n\n        if (step == 1) {\n            throw new Sk.builtin.ValueError("empty range for randrange() (" + start + ", " + stop + ", " + width + ")");\n        };\n\n        if (!Sk.builtin.checkInt(step)) {\n            throw new Sk.builtin.ValueError("non-integer step for randrange()");\n        };\n\n        if (step > 0) {\n            n = toInt((width + step - 1) / step);\n        } else if (step < 0) {\n            n = toInt((width + step + 1) / step);\n        } else {\n            throw new Sk.builtin.ValueError("zero step for randrange()");\n        };\n\n        if (n <= 0) {\n            throw new Sk.builtin.ValueError("empty range for randrange()");\n        };\n\n        // Random in range(start, stop, step)\n        ret = start + (step * toInt(myGenerator.genrand_res53() * n));\n\treturn new Sk.builtin.nmber(ret, Sk.builtin.nmber.int$);\n    };\n\n    mod.randint = new Sk.builtin.func(function(a, b) {\n        Sk.builtin.pyCheckArgs("randint", arguments, 2, 2);\n\n\ta = Sk.builtin.asnum$(a);\n\tb = Sk.builtin.asnum$(b);\n        return randrange(a, b+1);\n    });\n\n    mod.randrange = new Sk.builtin.func(function(start, stop, step) {\n        Sk.builtin.pyCheckArgs("randrange", arguments, 1, 3);\n\n\tstart = Sk.builtin.asnum$(start);\n\tstop = Sk.builtin.asnum$(stop);\n\tstep = Sk.builtin.asnum$(step);\n        return randrange(start, stop, step);\n    });\n\n    mod.choice = new Sk.builtin.func(function(seq) {\n        Sk.builtin.pyCheckArgs("choice", arguments, 1, 1);\n        Sk.builtin.pyCheckType("seq", "sequence", Sk.builtin.checkSequence(seq));\n\n        if (seq.sq$length !== undefined) {\n            var r = toInt(myGenerator.genrand_res53() * seq.sq$length());\n            return seq.mp$subscript(r);\n        } else {\n            throw new Sk.builtin.TypeError("object has no length");\n        }\n    });\n\n    mod.shuffle = new Sk.builtin.func(function(x) {\n        Sk.builtin.pyCheckArgs("shuffle", arguments, 1, 1);\n        Sk.builtin.pyCheckType("x", "sequence", Sk.builtin.checkSequence(x));\n\n        if (x.sq$length !== undefined) {\n            if (x.mp$ass_subscript !== undefined) {\n                for (var i = x.sq$length() - 1; i > 0; i -= 1) {\n                    var r = toInt(myGenerator.genrand_res53() * (i + 1));\n                    var tmp = x.mp$subscript(r);\n                    x.mp$ass_subscript(r, x.mp$subscript(i));\n                    x.mp$ass_subscript(i, tmp);\n                };\n            } else {\n                throw new Sk.builtin.TypeError("object is immutable");\n            };\n        } else {\n            throw new Sk.builtin.TypeError("object has no length");\n        };        \n\n\treturn Sk.builtin.none.none$;\n    });\n\n    return mod;\n}',
     'src/lib/test/__init__.py': '__author__ = \'bmiller\'\n\ndef testEqual(actual, expected):\n    if type(expected) == type(1):\n        if actual == expected:\n            print(\'Pass\')\n            return True\n    elif type(expected) == type(1.11):\n        if abs(actual-expected) < 0.00001:\n            print(\'Pass\')\n            return True\n    else:\n        if actual == expected:\n            print(\'Pass\')\n            return True\n    print(\'Test Failed: expected \' + str(expected) + \' but got \' + str(actual))\n    return False\n\ndef testNotEqual(actual, expected):\n    pass\n\n',
+    'src/lib/symbolic/__init__.js': 'var $builtinmodule = function(name) {\n  var mod = {};\n  Sk.builtin.defineSymbolic(mod, "symbolic");\n  return mod;\n};\n',
     'src/builtin/this.py': 's = """Gur Mra bs Clguba, ol Gvz Crgref\n\nOrnhgvshy vf orggre guna htyl.\nRkcyvpvg vf orggre guna vzcyvpvg.\nFvzcyr vf orggre guna pbzcyrk.\nPbzcyrk vf orggre guna pbzcyvpngrq.\nSyng vf orggre guna arfgrq.\nFcnefr vf orggre guna qrafr.\nErnqnovyvgl pbhagf.\nFcrpvny pnfrf nera\'g fcrpvny rabhtu gb oernx gur ehyrf.\nNygubhtu cenpgvpnyvgl orngf chevgl.\nReebef fubhyq arire cnff fvyragyl.\nHayrff rkcyvpvgyl fvyraprq.\nVa gur snpr bs nzovthvgl, ershfr gur grzcgngvba gb thrff.\nGurer fubhyq or bar-- naq cersrenoyl bayl bar --boivbhf jnl gb qb vg.\nNygubhtu gung jnl znl abg or boivbhf ng svefg hayrff lbh\'er Qhgpu.\nAbj vf orggre guna arire.\nNygubhtu arire vf bsgra orggre guna *evtug* abj.\nVs gur vzcyrzragngvba vf uneq gb rkcynva, vg\'f n onq vqrn.\nVs gur vzcyrzragngvba vf rnfl gb rkcynva, vg znl or n tbbq vqrn.\nAnzrfcnprf ner bar ubaxvat terng vqrn -- yrg\'f qb zber bs gubfr!"""\n\nd = {}\nfor c in (65, 97):\n    for i in range(26):\n        d[chr(i+c)] = chr((i+13) % 26 + c)\n\nprint "".join([d.get(c, c) for c in s])\n',
     'src/lib/e2ga/__init__.js': 'var $builtinmodule = function(name) {\n  var mod = {};\n  Sk.builtin.defineEuclidean2(mod, BLADE);\n  return mod;\n}\n'
   }
