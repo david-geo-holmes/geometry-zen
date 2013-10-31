@@ -28871,6 +28871,9 @@
           }
         });
       }, 'Euclidean2', []);
+      a.e1 = d(0, 1, 0, 0);
+      a.e2 = d(0, 0, 1, 0);
+      a.I = d(0, 0, 0, 1);
     };
   }.call(this));
   (function () {
@@ -29246,7 +29249,7 @@
         },
         checkMutable: function () {
           if (!this._mutable)
-            throw Error('Quantity is not mutable');
+            throw Sk.ffi.assertionError('Quantity is not mutable');
         }
       };
       a.ScalarE3 = Sk.ffi.functionPy(function (a, b) {
@@ -29680,32 +29683,25 @@
               var c = Sk.ffi.remapToJs(b);
               return Sk.ffi.numberToFloatPy(f.dot(c.vector));
             });
-          case 'exp':
-            return Sk.ffi.callableToPy(a, 'exp', function (a) {
-              throw Sk.ffi.assertionError('exp ($getattr)');
-            });
           case 'setX':
             return Sk.ffi.callableToPy(a, 'setX', function (a, c) {
               Sk.ffi.checkMethodArgs('setX', arguments, 1, 1);
               Sk.ffi.checkArgType('x', r, Sk.ffi.isNum(c), c);
-              var d = Sk.ffi.remapToJs(c);
-              f.setX(d);
+              d.x = Sk.ffi.remapToJs(c);
               return b;
             });
           case 'setY':
             return Sk.ffi.callableToPy(a, 'setY', function (a, c) {
               Sk.ffi.checkMethodArgs('setY', arguments, 1, 1);
               Sk.ffi.checkArgType('y', r, Sk.ffi.isNum(c), c);
-              var d = Sk.ffi.remapToJs(c);
-              f.setY(d);
+              d.y = Sk.ffi.remapToJs(c);
               return b;
             });
           case 'setZ':
             return Sk.ffi.callableToPy(a, 'setZ', function (a, c) {
               Sk.ffi.checkMethodArgs('setZ', arguments, 1, 1);
               Sk.ffi.checkArgType('z', r, Sk.ffi.isNum(c), c);
-              var d = Sk.ffi.remapToJs(c);
-              f.setZ(d);
+              d.z = Sk.ffi.remapToJs(c);
               return b;
             });
           case 'getComponent':
@@ -29846,6 +29842,10 @@
           ], '1 i j k ij jk ki I'.split(' ')));
         });
       }, 'Euclidean3', []);
+      a.e1 = e(0, 1, 0, 0, 0, 0, 0, 0, !1);
+      a.e2 = e(0, 0, 1, 0, 0, 0, 0, 0, !1);
+      a.e3 = e(0, 0, 0, 1, 0, 0, 0, 0, !1);
+      a.I = e(0, 0, 0, 0, 0, 0, 0, 1, !1);
     };
   }.call(this));
   (function () {
