@@ -27508,6 +27508,11 @@ var METHOD_LOOK_AT                  = "lookAt";
  * @const
  * @type {string}
  */
+var METHOD_NORMALIZE                = "normalize";
+/**
+ * @const
+ * @type {string}
+ */
 var METHOD_SET_CLEAR_COLOR          = "setClearColor";
 /**
  * @const
@@ -28057,6 +28062,13 @@ mod[ARROW_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           return completeMesh(geometryPy, arrow);
         });
       }
+      case METHOD_NORMALIZE: {
+        return Sk.ffi.callableToPy(mod, METHOD_NORMALIZE, function(methodPy) {
+          Sk.ffi.checkMethodArgs(METHOD_NORMALIZE, arguments, 0, 0);
+//        args[PROP_RADIUS] = Math.sqrt(1 / Math.PI);
+          return selfPy;
+        });
+      }
       default: {
         return builderGetAttr(selfPy, name, ARROW_BUILDER);
       }
@@ -28133,6 +28145,13 @@ mod[CONE_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           var openEnded      = Sk.ffi.booleanToPy(false);
           var geometryPy = Sk.ffi.callsim(mod[CYLINDER_GEOMETRY], radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded);
           return completeMesh(geometryPy, cone);
+        });
+      }
+      case METHOD_NORMALIZE: {
+        return Sk.ffi.callableToPy(mod, METHOD_NORMALIZE, function(methodPy) {
+          Sk.ffi.checkMethodArgs(METHOD_NORMALIZE, arguments, 0, 0);
+//        args[PROP_RADIUS] = Math.sqrt(1 / Math.PI);
+          return selfPy;
         });
       }
       default: {
@@ -28220,6 +28239,15 @@ mod[CUBE_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           var segments   = Sk.ffi.numberToIntPy(cube[PROP_SEGMENTS] ? cube[PROP_SEGMENTS] : 1);
           var geometryPy = Sk.ffi.callsim(mod[CUBE_GEOMETRY], width, height, depth, segments, segments, segments);
           return completeMesh(geometryPy, cube);
+        });
+      }
+      case METHOD_NORMALIZE: {
+        return Sk.ffi.callableToPy(mod, METHOD_NORMALIZE, function(methodPy) {
+          Sk.ffi.checkMethodArgs(METHOD_NORMALIZE, arguments, 0, 0);
+          cube[PROP_DEPTH]  = 1;
+          cube[PROP_WIDTH]  = 1;
+          cube[PROP_HEIGHT] = 1;
+          return selfPy;
         });
       }
       default: {
@@ -28324,6 +28352,13 @@ mod[CYLINDER_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           return completeMesh(geometryPy, cylinder);
         });
       }
+      case METHOD_NORMALIZE: {
+        return Sk.ffi.callableToPy(mod, METHOD_NORMALIZE, function(methodPy) {
+          Sk.ffi.checkMethodArgs(METHOD_NORMALIZE, arguments, 0, 0);
+//        args[PROP_RADIUS] = Math.sqrt(1 / Math.PI);
+          return selfPy;
+        });
+      }
       default: {
         return builderGetAttr(selfPy, name, CYLINDER_BUILDER);
       }
@@ -28399,6 +28434,13 @@ mod[PLANE_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           return completeMesh(geometryPy, plane);
         });
       }
+      case METHOD_NORMALIZE: {
+        return Sk.ffi.callableToPy(mod, METHOD_NORMALIZE, function(methodPy) {
+          Sk.ffi.checkMethodArgs(METHOD_NORMALIZE, arguments, 0, 0);
+//        args[PROP_RADIUS] = Math.sqrt(1 / Math.PI);
+          return selfPy;
+        });
+      }
       default: {
         return builderGetAttr(selfPy, name, PLANE_BUILDER);
       }
@@ -28419,13 +28461,13 @@ mod[SPHERE_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     Sk.ffi.referenceToPy({}, SPHERE_BUILDER, undefined, selfPy);
   });
   $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
-    var sphere = Sk.ffi.remapToJs(selfPy);
+    var args = Sk.ffi.remapToJs(selfPy);
     switch(name) {
       case PROP_RADIUS: {
         return Sk.ffi.callableToPy(mod, PROP_RADIUS, function(methodPy, radiusPy) {
           Sk.ffi.checkMethodArgs(PROP_RADIUS, arguments, 1, 1);
           Sk.ffi.checkArgType(PROP_RADIUS, [NUMBER, Sk.ffi.PyType.NONE], Sk.ffi.isNum(radiusPy) || Sk.ffi.isNone(radiusPy), radiusPy);
-          sphere[PROP_RADIUS] = Sk.ffi.remapToJs(radiusPy);
+          args[PROP_RADIUS] = Sk.ffi.remapToJs(radiusPy);
           return selfPy;
         });
       }
@@ -28433,7 +28475,7 @@ mod[SPHERE_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         return Sk.ffi.callableToPy(mod, PROP_SEGMENTS, function(methodPy, segmentsPy) {
           Sk.ffi.checkMethodArgs(PROP_SEGMENTS, arguments, 1, 1);
           Sk.ffi.checkArgType(PROP_SEGMENTS, [Sk.ffi.PyType.INT, Sk.ffi.PyType.NONE], Sk.ffi.isInt(segmentsPy) || Sk.ffi.isNone(segmentsPy), segmentsPy);
-          sphere[PROP_SEGMENTS] = Sk.ffi.remapToJs(segmentsPy);
+          args[PROP_SEGMENTS] = Sk.ffi.remapToJs(segmentsPy);
           return selfPy;
         });
       }
@@ -28444,22 +28486,29 @@ mod[SPHERE_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
            */
           function dimensionSphere() {
             var dims = {};
-            if (sphere[PROP_VOLUME]) {
-              var r = (sphere.radius) ? sphere.radius : DEFAULT_SPHERE_RADIUS;
-              dims.radius = Math.pow(3 * sphere[PROP_VOLUME] / (4 * Math.PI), 1 / 3);
+            if (args[PROP_VOLUME]) {
+              var r = (args.radius) ? args.radius : DEFAULT_SPHERE_RADIUS;
+              dims.radius = Math.pow(3 * args[PROP_VOLUME] / (4 * Math.PI), 1 / 3);
             }
             else {
-              dims.radius = (sphere.radius) ? sphere.radius : DEFAULT_SPHERE_RADIUS;
+              dims.radius = (args.radius) ? args.radius : DEFAULT_SPHERE_RADIUS;
             }
             return dims;
           }
           Sk.ffi.checkMethodArgs(METHOD_BUILD, arguments, 0, 0);
           var dimensions = dimensionSphere();
           var radius         = Sk.ffi.remapToPy(dimensions.radius);
-          var widthSegments  = Sk.ffi.numberToIntPy(sphere[PROP_SEGMENTS] ? sphere[PROP_SEGMENTS] : 24);
-          var heightSegments = Sk.ffi.numberToIntPy(sphere[PROP_SEGMENTS] ? sphere[PROP_SEGMENTS] : 18);
+          var widthSegments  = Sk.ffi.numberToIntPy(args[PROP_SEGMENTS] ? args[PROP_SEGMENTS] : 24);
+          var heightSegments = Sk.ffi.numberToIntPy(args[PROP_SEGMENTS] ? args[PROP_SEGMENTS] : 18);
           var geometryPy = Sk.ffi.callsim(mod[SPHERE_GEOMETRY], radius, widthSegments, heightSegments);
-          return completeMesh(geometryPy, sphere);
+          return completeMesh(geometryPy, args);
+        });
+      }
+      case METHOD_NORMALIZE: {
+        return Sk.ffi.callableToPy(mod, METHOD_NORMALIZE, function(methodPy) {
+          Sk.ffi.checkMethodArgs(METHOD_NORMALIZE, arguments, 0, 0);
+          args[PROP_RADIUS] = Math.pow(3 / (4 * Math.PI), 1 / 3);
+          return selfPy;
         });
       }
       default: {
@@ -28482,13 +28531,13 @@ mod[VORTEX_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     Sk.ffi.referenceToPy({}, VORTEX_BUILDER, undefined, selfPy);
   });
   $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
-    var vortex = Sk.ffi.remapToJs(selfPy);
+    var args = Sk.ffi.remapToJs(selfPy);
     switch(name) {
       case PROP_RADIUS: {
-        return Sk.ffi.callableToPy(mod, PROP_RADIUS, function(methodPy, widthPy) {
+        return Sk.ffi.callableToPy(mod, PROP_RADIUS, function(methodPy, radiusPy) {
           Sk.ffi.checkMethodArgs(PROP_RADIUS, arguments, 1, 1);
-          Sk.ffi.checkArgType(PROP_RADIUS, [NUMBER, Sk.ffi.PyType.NONE], Sk.ffi.isNum(widthPy) || Sk.ffi.isNone(widthPy), widthPy);
-          vortex[PROP_RADIUS] = Sk.ffi.remapToJs(widthPy);
+          Sk.ffi.checkArgType(PROP_RADIUS, [NUMBER, Sk.ffi.PyType.NONE], Sk.ffi.isNum(radiusPy) || Sk.ffi.isNone(radiusPy), radiusPy);
+          args[PROP_RADIUS] = Sk.ffi.remapToJs(radiusPy);
           return selfPy;
         });
       }
@@ -28496,7 +28545,7 @@ mod[VORTEX_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         return Sk.ffi.callableToPy(mod, PROP_SEGMENTS, function(methodPy, segmentsPy) {
           Sk.ffi.checkMethodArgs(PROP_SEGMENTS, arguments, 1, 1);
           Sk.ffi.checkArgType(PROP_SEGMENTS, [Sk.ffi.PyType.INT, Sk.ffi.PyType.NONE], Sk.ffi.isInt(segmentsPy) || Sk.ffi.isNone(segmentsPy), segmentsPy);
-          vortex[PROP_SEGMENTS] = Sk.ffi.remapToJs(segmentsPy);
+          args[PROP_SEGMENTS] = Sk.ffi.remapToJs(segmentsPy);
           return selfPy;
         });
       }
@@ -28507,16 +28556,16 @@ mod[VORTEX_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
            */
           function dimensionPlane() {
             var dims = {};
-            if (vortex[PROP_VOLUME]) {
-              var w = (vortex.radius) ? vortex.radius : DEFAULT_CUBE_LENGTH;
-              var h = (vortex.height) ? vortex.height : DEFAULT_CUBE_LENGTH;
-              var alpha = Math.pow(vortex[PROP_VOLUME] / (w * h), 1 / 2);
+            if (args[PROP_VOLUME]) {
+              var w = (args.radius) ? args.radius : DEFAULT_CUBE_LENGTH;
+              var h = (args.height) ? args.height : DEFAULT_CUBE_LENGTH;
+              var alpha = Math.pow(args[PROP_VOLUME] / (w * h), 1 / 2);
               dims.width  = alpha * w;
               dims.height = alpha * h;
             }
             else {
-              dims.radius = (vortex.radius) ? vortex.radius : DEFAULT_CUBE_LENGTH;
-              dims.height = (vortex.height) ? vortex.height : DEFAULT_CUBE_LENGTH;
+              dims.radius = (args.radius) ? args.radius : DEFAULT_CUBE_LENGTH;
+              dims.height = (args.height) ? args.height : DEFAULT_CUBE_LENGTH;
             }
             return dims;
           }
@@ -28527,10 +28576,17 @@ mod[VORTEX_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           var radiusShaft = Sk.ffi.remapToPy(0.01);
           var lengthCone  = Sk.ffi.remapToPy(0.2);
           var lengthShaft = Sk.ffi.remapToPy(0.8);
-          var arrows      = Sk.ffi.numberToIntPy(8);
-          var segments    = Sk.ffi.numberToIntPy(32);
+          var arrows      = Sk.ffi.numberToIntPy(6);
+          var segments    = Sk.ffi.numberToIntPy(args[PROP_SEGMENTS] ? args[PROP_SEGMENTS] : 32);
           var geometryPy  = Sk.ffi.callsim(mod[VORTEX_GEOMETRY], radius, radiusCone, radiusShaft, lengthCone, lengthShaft, arrows, segments);
-          return completeMesh(geometryPy, vortex);
+          return completeMesh(geometryPy, args);
+        });
+      }
+      case METHOD_NORMALIZE: {
+        return Sk.ffi.callableToPy(mod, METHOD_NORMALIZE, function(methodPy) {
+          Sk.ffi.checkMethodArgs(METHOD_NORMALIZE, arguments, 0, 0);
+          args[PROP_RADIUS] = Math.sqrt(1 / Math.PI);
+          return selfPy;
         });
       }
       default: {
@@ -29857,6 +29913,16 @@ var PROP_QUANTITY                   = "quantity";
  * @const
  * @type {string}
  */
+var PROP_SEGMENTS                   = "segments";
+/**
+ * @const
+ * @type {string}
+ */
+var PROP_WIREFRAME                  = "wireframe";
+/**
+ * @const
+ * @type {string}
+ */
 var PROP_GRADE_0                    = "grade0";
 /**
  * @const
@@ -29878,6 +29944,11 @@ var PROP_GRADE_3                    = "grade3";
  * @type {string}
  */
 var METHOD_BUILD                    = "build";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_NORMALIZE                = "normalize";
 /**
  * ProbeE3
  */
@@ -29964,22 +30035,50 @@ mod[PROBE_E3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
 
         var grade0 = Sk.ffi.remapToJs(probe[PROP_GRADE_0]);
         var s0 = Math.abs(w);
-        grade0.scale.set(s0, s0, s0);
+        if (s0 !== 0) {
+          grade0.scale.set(s0, s0, s0);
+          grade0.visible = true;
+        }
+        else {
+          grade0.visible = false;
+          grade0.scale.set(1, 1, 1);
+        }
 
         var grade1 = Sk.ffi.remapToJs(probe[PROP_GRADE_1]);
-        var s1 = Math.sqrt(x * x + y * y + z * z);
-        grade1.scale.set(s1, s1, s1);
-        grade1.quaternion = quaternion(x/s1, y/s1, z/s1);
+        if (x !== 0 || y !== 0 || z !== 0) {
+          var s1 = Math.sqrt(x * x + y * y + z * z);
+          grade1.scale.set(s1, s1, s1);
+          grade1.quaternion = quaternion(x/s1, y/s1, z/s1);
+          grade1.visible = true;
+        }
+        else {
+          grade1.visible = false;
+          grade1.scale.set(1, 1, 1);
+        }
 
         var grade2 = Sk.ffi.remapToJs(probe[PROP_GRADE_2]);
-        var norm2 = Math.sqrt(xy * xy + yz * yz + zx * zx);
-        var s2 = Math.pow(norm2, 1/2);
-        grade2.scale.set(s2, s2, s2);
-        grade2.quaternion = quaternion(yz/norm2, zx/norm2, xy/norm2);
+        if (xy !== 0 || yz !== 0 || zx !== 0) {
+          var norm2 = Math.sqrt(xy * xy + yz * yz + zx * zx);
+          var s2 = Math.pow(norm2, 1/2);
+          grade2.scale.set(s2, s2, s2);
+          grade2.quaternion = quaternion(yz/norm2, zx/norm2, xy/norm2);
+          grade2.visible = true;
+        }
+        else {
+          grade2.visible = false;
+          grade2.scale.set(1, 1, 1);
+        }
 
         var grade3 = Sk.ffi.remapToJs(probe[PROP_GRADE_3]);
-        var s3 = Math.pow(Math.abs(xyz), 1/3);
-        grade3.scale.set(s3, s3, s3);
+        if (xyz !== 0) {
+          var s3 = Math.pow(Math.abs(xyz), 1/3);
+          grade3.scale.set(s3, s3, s3);
+          grade3.visible = true;
+        }
+        else {
+          grade3.visible = false;
+          grade3.scale.set(1, 1, 1);
+        }
 
         probe[PROP_QUANTITY] = valuePy;
       }
@@ -30002,16 +30101,35 @@ mod[PROBE_E3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
 mod[PROBE_BUILDER_E3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__init__ = Sk.ffi.functionPy(function(selfPy) {
     Sk.ffi.checkMethodArgs(PROBE_BUILDER_E3, arguments, 0, 0);
-    Sk.ffi.referenceToPy({}, PROBE_BUILDER_E3, undefined, selfPy);
+    var args = {};
+    args[PROP_SEGMENTS] = 12;
+    args[PROP_WIREFRAME] = false;
+    Sk.ffi.referenceToPy(args, PROBE_BUILDER_E3, undefined, selfPy);
   });
   $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
-    var self = Sk.ffi.remapToJs(selfPy);
+    var args = Sk.ffi.remapToJs(selfPy);
     switch(name) {
       case PROP_COLOR: {
         return Sk.ffi.callableToPy(mod, name, function(methodPy, colorPy) {
           Sk.ffi.checkMethodArgs(name, arguments, 1, 1);
-          Sk.ffi.checkArgType(name, NUMBER, Sk.ffi.isNum(colorPy)||Sk.ffi.isStr(colorPy)||Sk.ffi.isInstance(colorPy, COLOR), colorPy);
-          self[PROP_COLOR] = colorPy;
+          Sk.ffi.checkArgType(name, [NUMBER, Sk.ffi.PyType.STR, COLOR], Sk.ffi.isNum(colorPy)||Sk.ffi.isStr(colorPy)||Sk.ffi.isInstance(colorPy, COLOR), colorPy);
+          args[PROP_COLOR] = colorPy;
+          return selfPy;
+        });
+      }
+      case PROP_SEGMENTS: {
+        return Sk.ffi.callableToPy(mod, name, function(methodPy, segmentsPy) {
+          Sk.ffi.checkMethodArgs(name, arguments, 1, 1);
+          Sk.ffi.checkArgType(name, Sk.ffi.PyType.INT, Sk.ffi.isInt(segmentsPy), segmentsPy);
+          args[PROP_SEGMENTS] = Sk.ffi.remapToJs(segmentsPy);
+          return selfPy;
+        });
+      }
+      case PROP_WIREFRAME: {
+        return Sk.ffi.callableToPy(mod, name, function(methodPy, wireframePy) {
+          Sk.ffi.checkMethodArgs(name, arguments, 1, 1);
+          Sk.ffi.checkArgType(name, Sk.ffi.PyType.BOOL, Sk.ffi.isBool(wireframePy), wireframePy);
+          args[PROP_WIREFRAME] = Sk.ffi.remapToJs(wireframePy);
           return selfPy;
         });
       }
@@ -30020,9 +30138,12 @@ mod[PROBE_BUILDER_E3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           var builderNames = [SPHERE_BUILDER, ARROW_BUILDER, VORTEX_BUILDER, CUBE_BUILDER];
           var meshes = builderNames.map(function(builderName) {
             var builderPy = Sk.ffi.callsim(mod[builderName]);
-            if (self[PROP_COLOR]) {
-              Sk.ffi.callsim(Sk.ffi.gattr(builderPy, PROP_COLOR), self[PROP_COLOR]);
+            if (args[PROP_COLOR]) {
+              Sk.ffi.callsim(Sk.ffi.gattr(builderPy, PROP_COLOR), args[PROP_COLOR]);
             }
+            Sk.ffi.callsim(Sk.ffi.gattr(builderPy, METHOD_NORMALIZE));
+            Sk.ffi.callsim(Sk.ffi.gattr(builderPy, PROP_SEGMENTS), Sk.ffi.numberToIntPy(args[PROP_SEGMENTS]));
+            Sk.ffi.callsim(Sk.ffi.gattr(builderPy, PROP_WIREFRAME), Sk.ffi.booleanToPy(args[PROP_WIREFRAME]));
             return Sk.ffi.callsim(Sk.ffi.gattr(builderPy, METHOD_BUILD));
           });
           return Sk.ffi.callsim(mod[PROBE_E3], meshes[0], meshes[1], meshes[2], meshes[3]);

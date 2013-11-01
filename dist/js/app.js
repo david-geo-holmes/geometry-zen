@@ -27006,6 +27006,11 @@
               f = Sk.ffi.callsim(a.ArrowGeometry, f, g, h, c);
               return e(f, d);
             });
+          case 'normalize':
+            return Sk.ffi.callableToPy(a, 'normalize', function (a) {
+              Sk.ffi.checkMethodArgs('normalize', arguments, 0, 0);
+              return b;
+            });
           default:
             return h(b, c, 'ArrowBuilder');
           }
@@ -27072,6 +27077,11 @@
               c = Sk.ffi.numberToFloatPy(c.height);
               var h = Sk.ffi.numberToIntPy(d.segments ? d.segments : 32), n = Sk.ffi.numberToIntPy(1), k = Sk.ffi.booleanToPy(!1), f = Sk.ffi.callsim(a.CylinderGeometry, f, g, c, h, n, k);
               return e(f, d);
+            });
+          case 'normalize':
+            return Sk.ffi.callableToPy(a, 'normalize', function (a) {
+              Sk.ffi.checkMethodArgs('normalize', arguments, 0, 0);
+              return b;
             });
           default:
             return h(b, c, 'ConeBuilder');
@@ -27153,6 +27163,14 @@
               h = Sk.ffi.numberToIntPy(d.segments ? d.segments : 1);
               f = Sk.ffi.callsim(a.CubeGeometry, f, g, c, h, h, h);
               return e(f, d);
+            });
+          case 'normalize':
+            return Sk.ffi.callableToPy(a, 'normalize', function (a) {
+              Sk.ffi.checkMethodArgs('normalize', arguments, 0, 0);
+              d.depth = 1;
+              d.width = 1;
+              d.height = 1;
+              return b;
             });
           default:
             return h(b, c, 'CubeBuilder');
@@ -27249,6 +27267,11 @@
               var h = Sk.ffi.numberToIntPy(d.segments ? d.segments : 32), n = Sk.ffi.numberToIntPy(1), k = Sk.ffi.booleanToPy(!1), f = Sk.ffi.callsim(a.CylinderGeometry, f, g, c, h, n, k);
               return e(f, d);
             });
+          case 'normalize':
+            return Sk.ffi.callableToPy(a, 'normalize', function (a) {
+              Sk.ffi.checkMethodArgs('normalize', arguments, 0, 0);
+              return b;
+            });
           default:
             return h(b, c, 'CylinderBuilder');
           }
@@ -27317,6 +27340,11 @@
               f = Sk.ffi.callsim(a.PlaneGeometry, f, c, g, g);
               return e(f, d);
             });
+          case 'normalize':
+            return Sk.ffi.callableToPy(a, 'normalize', function (a) {
+              Sk.ffi.checkMethodArgs('normalize', arguments, 0, 0);
+              return b;
+            });
           default:
             return h(b, c, 'PlaneBuilder');
           }
@@ -27366,6 +27394,12 @@
               var f = Sk.ffi.numberToIntPy(d.segments ? d.segments : 24), g = Sk.ffi.numberToIntPy(d.segments ? d.segments : 18);
               c = Sk.ffi.callsim(a.SphereGeometry, c, f, g);
               return e(c, d);
+            });
+          case 'normalize':
+            return Sk.ffi.callableToPy(a, 'normalize', function (a) {
+              Sk.ffi.checkMethodArgs('normalize', arguments, 0, 0);
+              d.radius = Math.pow(3 / (4 * Math.PI), 1 / 3);
+              return b;
             });
           default:
             return h(b, c, 'SphereBuilder');
@@ -27417,8 +27451,14 @@
                 c.height = h * g;
               } else
                 c.radius = d.radius ? d.radius : 1, c.height = d.height ? d.height : 1;
-              var c = Sk.ffi.remapToPy(c.radius), f = Sk.ffi.remapToPy(0.08), g = Sk.ffi.remapToPy(0.01), h = Sk.ffi.remapToPy(0.2), n = Sk.ffi.remapToPy(0.8), k = Sk.ffi.numberToIntPy(8), l = Sk.ffi.numberToIntPy(32), c = Sk.ffi.callsim(a.VortexGeometry, c, f, g, h, n, k, l);
+              var c = Sk.ffi.remapToPy(c.radius), f = Sk.ffi.remapToPy(0.08), g = Sk.ffi.remapToPy(0.01), h = Sk.ffi.remapToPy(0.2), n = Sk.ffi.remapToPy(0.8), k = Sk.ffi.numberToIntPy(6), l = Sk.ffi.numberToIntPy(d.segments ? d.segments : 32), c = Sk.ffi.callsim(a.VortexGeometry, c, f, g, h, n, k, l);
               return e(c, d);
+            });
+          case 'normalize':
+            return Sk.ffi.callableToPy(a, 'normalize', function (a) {
+              Sk.ffi.checkMethodArgs('normalize', arguments, 0, 0);
+              d.radius = Math.sqrt(1 / Math.PI);
+              return b;
             });
           default:
             return h(b, c, 'VortexBuilder');
@@ -28289,19 +28329,13 @@
               return new b.Quaternion(1, 0, 0, 0);
             };
             var m = Sk.ffi.remapToJs(d), n = m.w, l = m.x, p = m.y, q = m.z, r = m.xy, v = m.yz, s = m.zx, m = m.xyz, e = Sk.ffi.remapToJs(a.grade0), n = Math.abs(n);
-            e.scale.set(n, n, n);
+            0 !== n ? (e.scale.set(n, n, n), e.visible = !0) : (e.visible = !1, e.scale.set(1, 1, 1));
             e = Sk.ffi.remapToJs(a.grade1);
-            n = Math.sqrt(l * l + p * p + q * q);
-            e.scale.set(n, n, n);
-            e.quaternion = c(l / n, p / n, q / n);
+            0 !== l || 0 !== p || 0 !== q ? (n = Math.sqrt(l * l + p * p + q * q), e.scale.set(n, n, n), e.quaternion = c(l / n, p / n, q / n), e.visible = !0) : (e.visible = !1, e.scale.set(1, 1, 1));
             l = Sk.ffi.remapToJs(a.grade2);
-            p = Math.sqrt(r * r + v * v + s * s);
-            q = Math.pow(p, 0.5);
-            l.scale.set(q, q, q);
-            l.quaternion = c(v / p, s / p, r / p);
+            0 !== r || 0 !== v || 0 !== s ? (p = Math.sqrt(r * r + v * v + s * s), q = Math.pow(p, 0.5), l.scale.set(q, q, q), l.quaternion = c(v / p, s / p, r / p), l.visible = !0) : (l.visible = !1, l.scale.set(1, 1, 1));
             c = Sk.ffi.remapToJs(a.grade3);
-            r = Math.pow(Math.abs(m), 1 / 3);
-            c.scale.set(r, r, r);
+            0 !== m ? (r = Math.pow(Math.abs(m), 1 / 3), c.scale.set(r, r, r), c.visible = !0) : (c.visible = !1, c.scale.set(1, 1, 1));
             a.quantity = d;
             break;
           default:
@@ -28318,7 +28352,10 @@
       a.ProbeBuilderE3 = Sk.ffi.buildClass(a, function (b, e) {
         e.__init__ = Sk.ffi.functionPy(function (a) {
           Sk.ffi.checkMethodArgs('ProbeBuilderE3', arguments, 0, 0);
-          Sk.ffi.referenceToPy({}, 'ProbeBuilderE3', void 0, a);
+          Sk.ffi.referenceToPy({
+            segments: 12,
+            wireframe: !1
+          }, 'ProbeBuilderE3', void 0, a);
         });
         e.__getattr__ = Sk.ffi.functionPy(function (b, d) {
           var e = Sk.ffi.remapToJs(b);
@@ -28326,8 +28363,26 @@
           case 'color':
             return Sk.ffi.callableToPy(a, d, function (a, l) {
               Sk.ffi.checkMethodArgs(d, arguments, 1, 1);
-              Sk.ffi.checkArgType(d, c, Sk.ffi.isNum(l) || Sk.ffi.isStr(l) || Sk.ffi.isInstance(l, 'Color'), l);
+              Sk.ffi.checkArgType(d, [
+                c,
+                Sk.ffi.PyType.STR,
+                'Color'
+              ], Sk.ffi.isNum(l) || Sk.ffi.isStr(l) || Sk.ffi.isInstance(l, 'Color'), l);
               e.color = l;
+              return b;
+            });
+          case 'segments':
+            return Sk.ffi.callableToPy(a, d, function (a, c) {
+              Sk.ffi.checkMethodArgs(d, arguments, 1, 1);
+              Sk.ffi.checkArgType(d, Sk.ffi.PyType.INT, Sk.ffi.isInt(c), c);
+              e.segments = Sk.ffi.remapToJs(c);
+              return b;
+            });
+          case 'wireframe':
+            return Sk.ffi.callableToPy(a, d, function (a, c) {
+              Sk.ffi.checkMethodArgs(d, arguments, 1, 1);
+              Sk.ffi.checkArgType(d, Sk.ffi.PyType.BOOL, Sk.ffi.isBool(c), c);
+              e.wireframe = Sk.ffi.remapToJs(c);
               return b;
             });
           case 'build':
@@ -28340,6 +28395,9 @@
               ].map(function (b) {
                 b = Sk.ffi.callsim(a[b]);
                 e.color && Sk.ffi.callsim(Sk.ffi.gattr(b, 'color'), e.color);
+                Sk.ffi.callsim(Sk.ffi.gattr(b, 'normalize'));
+                Sk.ffi.callsim(Sk.ffi.gattr(b, 'segments'), Sk.ffi.numberToIntPy(e.segments));
+                Sk.ffi.callsim(Sk.ffi.gattr(b, 'wireframe'), Sk.ffi.booleanToPy(e.wireframe));
                 return Sk.ffi.callsim(Sk.ffi.gattr(b, 'build'));
               });
               return Sk.ffi.callsim(a.ProbeE3, b[0], b[1], b[2], b[3]);
