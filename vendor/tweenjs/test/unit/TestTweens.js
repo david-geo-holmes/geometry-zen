@@ -262,7 +262,7 @@ test( "Test TWEEN.Tween.chain --with one tween", function() {
 
 test( "Test TWEEN.Tween.chain --with several tweens in an array", function() {
 
-	var	t = new TWEEN.Tween( {} ),
+	var t = new TWEEN.Tween( {} ),
 		chainedTweens = [],
 		numChained = 3,
 		numChainedStarted = 0;
@@ -271,15 +271,17 @@ test( "Test TWEEN.Tween.chain --with several tweens in an array", function() {
 
 	t.to( {}, 1000 );
 
+	function onChainedStart() {
+		numChainedStarted++;
+	}
+
 	for(var i = 0; i < numChained; i++ ){
 		var chained = new TWEEN.Tween( {} );
 			chained.to( {}, 1000 );
 
 		chainedTweens.push( chained );
 
-		chained.onStart(function() {
-			numChainedStarted++;
-		});
+		chained.onStart(onChainedStart);
 	}
 
 	// NOTE: This is not the normal way to chain several tweens simultaneously
@@ -301,7 +303,7 @@ test( "Test TWEEN.Tween.chain --with several tweens in an array", function() {
 
 test( "Test TWEEN.Tween.chain allows endless loops", function() {
 
-	var	obj = { x: 0 },
+	var obj = { x: 0 },
 		t1 = new TWEEN.Tween( obj ).to( { x: 100 }, 1000 ),
 		t2 = new TWEEN.Tween( obj ).to( { x: 0 }, 1000 );
 
@@ -594,4 +596,47 @@ test( "Test yoyo with repeat 1 happens once", function() {
 
 	TWEEN.update( 225 );
 	equal( obj.x, 0 );
+});
+
+test( "Test TWEEN.Tween.stopChainedTweens()", function() {
+	var	t = new TWEEN.Tween( {} ),
+		tStarted = false,
+		tCompleted = false,
+		t2 = new TWEEN.Tween( {} ),
+		t2Started = false;
+
+	TWEEN.removeAll();
+
+	t.to( {}, 1000 );
+	t2
+          .delay(500)
+          .to( {}, 1000 );
+
+	t.chain( t2 );
+        t2.chain( t );
+
+	t.onStart(function() {
+		tStarted = true;
+	});
+
+	t.onComplete(function() {
+		tCompleted = true;
+	});
+
+	t2.onStart(function() {
+		equal( tStarted, true );
+		equal( tCompleted, true );
+		equal( t2Started, false );
+		t2Started = true;
+	});
+
+	equal( tStarted, false );
+	equal( t2Started, false );
+
+	t.start( 0 );
+	TWEEN.update( 1001 );
+        t.stop();
+	equal( tStarted, true );
+	equal( t2Started, false );
+	equal( TWEEN.getAll().length, 0 );
 });

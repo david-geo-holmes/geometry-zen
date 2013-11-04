@@ -11,28 +11,30 @@ Super simple, fast and easy to use tweening engine which incorporates optimised 
 
 ### Examples ###
 
-[![Relative values](http://sole.github.com/tween.js/assets/examples/09_relative.png)](http://sole.github.com/tween.js/examples/09_relative_values.html)
-[![Repeat](http://sole.github.com/tween.js/assets/examples/08_repeat.png)](http://sole.github.com/tween.js/examples/08_repeat.html)
-[![Dynamic to](http://sole.github.com/tween.js/assets/examples/07_dynamic_to.png)](http://sole.github.com/tween.js/examples/07_dynamic_to.html)
-[![Array interpolation](http://sole.github.com/tween.js/assets/examples/03_graphs.png)](http://sole.github.com/tween.js/examples/06_array_interpolation.html)
-[![Video and time](http://sole.github.com/tween.js/assets/examples/06_video_and_time.png)](http://sole.github.com/tween.js/examples/05_video_and_time.html)
-[![Simplest possible example](http://sole.github.com/tween.js/assets/examples/04_simplest.png)](http://sole.github.com/tween.js/examples/04_simplest.html)
-[![Graphs](http://sole.github.com/tween.js/assets/examples/03_graphs.png)](http://sole.github.com/tween.js/examples/03_graphs.html)
-[![Black and red](http://sole.github.com/tween.js/assets/examples/02_black_and_red.png)](http://sole.github.com/tween.js/examples/02_black_and_red.html)
-[![Bars](http://sole.github.com/tween.js/assets/examples/01_bars.png)](http://sole.github.com/tween.js/examples/01_bars.html)
-[![hello world](http://sole.github.com/tween.js/assets/examples/00_hello_world.png)](http://sole.github.com/tween.js/examples/00_hello_world.html)
+[![Stop all chained tweens](./assets/examples/11_stop_all_chained_tweens.png)](./examples/11_stop_all_chained_tweens.html)
+[![Yoyo](./assets/examples/10_yoyo.png)](./examples/10_yoyo.html)
+[![Relative values](./assets/examples/09_relative.png)](./examples/09_relative_values.html)
+[![Repeat](./assets/examples/08_repeat.png)](./examples/08_repeat.html)
+[![Dynamic to](./assets/examples/07_dynamic_to.png)](./examples/07_dynamic_to.html)
+[![Array interpolation](./assets/examples/03_graphs.png)](./examples/06_array_interpolation.html)
+[![Video and time](./assets/examples/06_video_and_time.png)](./examples/05_video_and_time.html)
+[![Simplest possible example](./assets/examples/04_simplest.png)](./examples/04_simplest.html)
+[![Graphs](./assets/examples/03_graphs.png)](./examples/03_graphs.html)
+[![Black and red](./assets/examples/02_black_and_red.png)](./examples/02_black_and_red.html)
+[![Bars](./assets/examples/01_bars.png)](./examples/01_bars.html)
+[![hello world](./assets/examples/00_hello_world.png)](./examples/00_hello_world.html)
 
 ### Projects using tween.js ###
 
-[![MOMA Inventing Abstraction 1910-1925](http://sole.github.com/tween.js/assets/projects/09_moma.png)](http://www.moma.org/interactives/exhibitions/2012/inventingabstraction/)
-[![Web Lab](http://sole.github.com/tween.js/assets/projects/08_web_lab.png)](http://www.chromeweblab.com/)
-[![MACCHINA I](http://sole.github.com/tween.js/assets/projects/07_macchina.png)](http://5013.es/toys/macchina)
-[![Minesweeper 3D](http://sole.github.com/tween.js/assets/projects/06_minesweeper3d.png)](http://egraether.com/mine3d/)
-[![ROME](http://sole.github.com/tween.js/assets/projects/05_rome.png)](http://ro.me)
-[![WebGL Globe](http://sole.github.com/tween.js/assets/projects/04_webgl_globe.png)](http://data-arts.appspot.com/globe)
-[![Androidify](http://sole.github.com/tween.js/assets/projects/03_androidify.png)](http://www.androidify.com/)
-[![The Wilderness Downtown](http://sole.github.com/tween.js/assets/projects/01_wilderness.png)](http://thewildernessdowntown.com/)
-[![Linechart](http://sole.github.com/tween.js/assets/projects/00_linechart.png)](http://dejavis.org/linechart)
+[![MOMA Inventing Abstraction 1910-1925](./assets/projects/09_moma.png)](http://www.moma.org/interactives/exhibitions/2012/inventingabstraction/)
+[![Web Lab](./assets/projects/08_web_lab.png)](http://www.chromeweblab.com/)
+[![MACCHINA I](./assets/projects/07_macchina.png)](http://5013.es/toys/macchina)
+[![Minesweeper 3D](./assets/projects/06_minesweeper3d.png)](http://egraether.com/mine3d/)
+[![ROME](./assets/projects/05_rome.png)](http://ro.me)
+[![WebGL Globe](./assets/projects/04_webgl_globe.png)](http://data-arts.appspot.com/globe)
+[![Androidify](./assets/projects/03_androidify.png)](http://www.androidify.com/)
+[![The Wilderness Downtown](./assets/projects/01_wilderness.png)](http://thewildernessdowntown.com/)
+[![Linechart](./assets/projects/00_linechart.png)](http://dejavis.org/linechart)
 
 ### Usage ###
 
@@ -42,10 +44,9 @@ Download the [minified library](https://github.com/sole/tween.js/raw/master/buil
 <script src="js/tween.min.js"></script>
 ```
 
-The following code creates a Tween which will change the `x` attribute in a position variable, so that it goes from 50 to 400 in 2 seconds. The anonymous function set up with an interval will update the screen so that we can see something happening:
+The following code creates a Tween which will change the `x` attribute in a position variable, so that it goes from 50 to 400 in 2 seconds. We'll use `requestAnimationFrame` to call `TWEEN.update` so that "time ticks", the `tween` gets updated and the `onUpdate` method makes things happen on the screen:
 
-```html
-<script>
+```javascript
 
 	init();
 	animate();
@@ -76,14 +77,15 @@ The following code creates a Tween which will change the `x` attribute in a posi
 
 	}
 
-</script>
 ```
 
-Note: this corresponds to the example [04_simplest.html](http://sole.github.com/tween.js/examples/04_simplest.html) that you can find in the ```examples``` folder.
+Note: this corresponds to the example [04_simplest.html](./examples/04_simplest.html) that you can find in the ```examples``` folder.
 
 Have a look at that folder to discover more functionalities of the library!
 
 Also, Jerome Etienne has written a [tutorial](http://learningthreejs.com/blog/2011/08/17/tweenjs-for-smooth-animation/) demonstrating how to use tween.js with three.js, and it's also great for understanding how tweens work!
+
+Finally, if you need to use tweens in C/C++ code, you now have an option! Check out [libtween](https://github.com/jsm174/libtween) which is a port of tween.js to C by [jsm174](https://github.com/jsm174)!
 
 ### FAQ ###
 
@@ -96,6 +98,13 @@ Use the `delay()` method: `var t = new TWEEN.Tween({...}).delay(1000);`
 No, we like to keep it simple and free of dependencies. Feel free to make one yourself, though! :-)
 
 ### Change log ###
+
+2013 11 03 - **r12** (5,697 KB, gzip: 2,131 KB)
+
+* Fix bug with cached ```tweens.length``` value inside ```update()``` loop ([freestlr](https://github.com/freestlr))
+* Move assets and all examples and stuff to use the ```gh-pages``` branch, so things are always properly updated ([sole](https://github.com/sole)).
+* Fix bug where chained tweens were not stopped if the previous tween had been stopped, under certain circumstances, by [cfddream](https://github.com/cfddream)
+* Use tweens in C/C++ with [libtween](https://github.com/jsm174/libtween) by [jsm174](https://github.com/jsm174)!
 
 2013 08 10 - **r11**
 
