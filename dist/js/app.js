@@ -31576,13 +31576,14 @@
         b = Sk.ffi.remapToJs(b);
         switch (c) {
         case 'id':
-          return Sk.ffi.numberToIntPy(b.id);
+          return Sk.ffi.numberToIntPy(b[c]);
         case 'name':
-          return Sk.ffi.stringToPy(b.name);
         case 'uuid':
-          return Sk.ffi.stringToPy(b.uuid);
+          return Sk.ffi.stringToPy(b[c]);
         case 'vertices':
           return w(b.vertices);
+        case 'radius':
+          return Sk.ffi.numberToFloatPy(b[c]);
         default:
           throw Sk.ffi.err.attribute(c).isNotGetableOnType(a);
         }
@@ -31699,9 +31700,8 @@
         c = Sk.ffi.remapToJs(c);
         switch (d) {
         case 'emissive':
-          if (h(c[d]))
-            return Sk.ffi.callsim(a.Color, Sk.ffi.referenceToPy(c.emissive, 'Color'));
-          throw Sk.ffi.err.attribute(d).isNotGetableOnType(b);
+        case 'color':
+          return Sk.ffi.callsim(a.Color, Sk.ffi.referenceToPy(c[d], 'Color'));
         case 'id':
           return Sk.ffi.numberToIntPy(c.id);
         case 'name':

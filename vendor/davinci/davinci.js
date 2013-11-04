@@ -38427,17 +38427,18 @@ function geometryGetAttr(className, geometryPy, name) {
   var geometry = Sk.ffi.remapToJs(geometryPy);
   switch(name) {
     case PROP_ID: {
-      return Sk.ffi.numberToIntPy(geometry[PROP_ID]);
+      return Sk.ffi.numberToIntPy(geometry[name]);
     }
-    case PROP_NAME: {
-      return Sk.ffi.stringToPy(geometry[PROP_NAME]);
-    }
+    case PROP_NAME:
     case PROP_UUID: {
-      return Sk.ffi.stringToPy(geometry[PROP_UUID]);
+      return Sk.ffi.stringToPy(geometry[name]);
     }
     case PROP_VERTICES: {
       // TODO: This isn't really possible with the current implementation.
       return verticesPy(geometry[PROP_VERTICES]);
+    }
+    case PROP_RADIUS: {
+      return Sk.ffi.numberToFloatPy(geometry[name]);
     }
     default: {
       throw Sk.ffi.err.attribute(name).isNotGetableOnType(className);
@@ -39120,13 +39121,9 @@ mod[MESH] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
 function materialGetAttr(className, materialPy, name) {
   var material = Sk.ffi.remapToJs(materialPy);
   switch(name) {
-    case PROP_EMISSIVE: {
-      if (isDefined(material[name])) {
-        return Sk.ffi.callsim(mod[COLOR], Sk.ffi.referenceToPy(material[PROP_EMISSIVE], COLOR));
-      }
-      else {
-        throw Sk.ffi.err.attribute(name).isNotGetableOnType(className);
-      }
+    case PROP_EMISSIVE:
+    case PROP_COLOR: {
+      return Sk.ffi.callsim(mod[COLOR], Sk.ffi.referenceToPy(material[name], COLOR));
     }
     case PROP_ID: {
       return Sk.ffi.numberToIntPy(material[PROP_ID]);
