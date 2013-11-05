@@ -1,8 +1,8 @@
 {
   "name": "geometryzen",
-  "version": "0.9.117",
+  "version": "0.9.118",
   "main": "./app/js/main.js",
-  "description": "Geometry Zen is the way of looking at nature through a Geometric Algebra perspective.",
+  "description": "Geometry Zen is an online application for learning Physics and Engineering using Geometric Algebra, Python programming, and WebGL visualization.",
   "author": {
     "name": "David Holmes",
     "email": "david.geo.holmes@gmail.com"
