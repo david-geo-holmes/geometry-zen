@@ -1,6 +1,6 @@
 !!! 5
 html(lang="en", data-ng-app="app")
-  head(profile="http://www.w3.org/2005/10/profile")
+  head
     meta(charset="utf-8")
     title #{marketing.name} - #{marketing.tagLine}
     meta(http-equiv="X-UA-Compatible", content="IE=edge,chrome=1")
@@ -37,9 +37,9 @@ html(lang="en", data-ng-app="app")
         .container-fluid
           .row-fluid
             #footer-copyright.span4
-              | &copy; 2013 <a href="http://github.com/david-geo-holmes", target="_blank">David Geo Holmes</a>
+              | &copy; 2013 <a href="http://github.com/david-geo-holmes" target="_blank">David Geo Holmes</a>
             #footer-validator.span4
-              | <a href="http://validator.w3.org/check?uri=referer", target="_blank"><img src="/img/html5.png" id="html5icon" alt="validator"></a>
+              | <a href="http://validator.w3.org/check?uri=referer" target="_blank"><img src="/img/html5.png" id="html5icon" alt="validator"></a>
             #footer-terms.span4
               | Dedicated to Geo
     script(src=js)
