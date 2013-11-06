@@ -9730,8 +9730,8 @@
         var m;
         if (void 0 === e || '' === e)
           m = b++;
-        var n = !1, p = !1, q = !1, r = !1, t = !1;
-        f && (-1 !== f.indexOf('-') ? p = !0 : -1 !== f.indexOf('0') && (n = !0), -1 !== f.indexOf('+') ? r = !0 : -1 !== f.indexOf(' ') && (q = !0), t = -1 !== f.indexOf('#'));
+        var n = !1, p = !1, q = !1, r = !1, s = !1;
+        f && (-1 !== f.indexOf('-') ? p = !0 : -1 !== f.indexOf('0') && (n = !0), -1 !== f.indexOf('+') ? r = !0 : -1 !== f.indexOf(' ') && (q = !0), s = -1 !== f.indexOf('#'));
         h && (h = parseInt(h.substr(1), 10));
         f = function (a, b) {
           b = Sk.builtin.asnum$(b);
@@ -9744,7 +9744,7 @@
               d = '0' + d, f = !0;
           c = '';
           e ? c = '-' : r ? c = '+' + c : q && (c = ' ' + c);
-          t && (16 === b ? c += '0x' : 8 !== b || (f || '0' === d) || (c += '0'));
+          s && (16 === b ? c += '0x' : 8 !== b || (f || '0' === d) || (c += '0'));
           return [
             c,
             d
@@ -26027,8 +26027,8 @@
               Sk.ffi.checkArgType('width', f, Sk.ffi.isNum(g), g);
               Sk.ffi.checkArgType('height', f, Sk.ffi.isNum(h), h);
               Sk.ffi.checkArgType('radius', f, Sk.ffi.isNum(l), l);
-              var A = Sk.ffi.remapToJs(c), x = Sk.ffi.remapToJs(e), B = Sk.ffi.remapToJs(g), w = Sk.ffi.remapToJs(h), C = Sk.ffi.remapToJs(l);
-              d.drawRoundRect(A, x, B, w, C);
+              var y = Sk.ffi.remapToJs(c), x = Sk.ffi.remapToJs(e), z = Sk.ffi.remapToJs(g), u = Sk.ffi.remapToJs(h), C = Sk.ffi.remapToJs(l);
+              d.drawRoundRect(y, x, z, u, C);
               return b;
             });
           case 'endFill':
@@ -26902,7 +26902,7 @@
           transparent: !0
         }), p = new b.Vector3(1, 0, 0), q = new b.Vector3(0, 1, 0);
       new b.Vector3(0, 0, 1);
-      var r = new b.Euclidean3(new b.Vector3(0, 0, 1), new b.Quaternion(0, 0, 0, 0), 0, !1), t = new b.Euclidean3(new b.Vector3(0, 0, 0), new b.Quaternion(0, 0, 0, 1), 0, !1);
+      var r = new b.Euclidean3(new b.Vector3(0, 0, 1), new b.Quaternion(0, 0, 0, 0), 0, !1), s = new b.Euclidean3(new b.Vector3(0, 0, 0), new b.Quaternion(0, 0, 0, 1), 0, !1);
       a.world = Sk.ffi.functionPy(function () {
         Sk.ffi.checkFunctionArgs('world', arguments, 0, 0);
         var c = Sk.ffi.callsim(a.Scene), d = Sk.ffi.remapToJs(c), e = new b.PointLight(16777215);
@@ -27055,7 +27055,7 @@
             return Sk.ffi.callableToPy(a, 'build', function (b) {
               Sk.ffi.checkMethodArgs('build', arguments, 0, 0);
               var c, e = {};
-              e.attitude = d.attitude ? d.attitude : t;
+              e.attitude = d.attitude ? d.attitude : s;
               e.axis = d.axis ? d.axis : r;
               if (d.volume) {
                 var g = (d.radius ? d.radius : 0.5) / (d.length ? d.length : 1);
@@ -27360,9 +27360,9 @@
               } else
                 e.a = 'number' === typeof d.radiusTop ? d.radiusTop : 0.5, e.b = 'number' === typeof d.radiusBottom ? d.radiusBottom : 0.5, e.h = 'number' === typeof d.height ? d.height : 1;
               c = e;
-              var e = Sk.ffi.numberToFloatPy(c.a), g = Sk.ffi.numberToFloatPy(c.b), h = Sk.ffi.numberToFloatPy(c.h), n = Sk.ffi.numberToIntPy(d.segments ? d.segments : 32), k = Sk.ffi.numberToIntPy(1), u = Sk.ffi.booleanToPy(!1);
+              var e = Sk.ffi.numberToFloatPy(c.a), g = Sk.ffi.numberToFloatPy(c.b), h = Sk.ffi.numberToFloatPy(c.h), n = Sk.ffi.numberToIntPy(d.segments ? d.segments : 32), k = Sk.ffi.numberToIntPy(1), l = Sk.ffi.booleanToPy(!1);
               c = Sk.ffi.callsim(a.Euclidean3, Sk.ffi.referenceToPy(c.axis, 'Euclidean3'));
-              e = Sk.ffi.callsim(a.CylinderGeometry, e, g, h, n, k, u, c);
+              e = Sk.ffi.callsim(a.CylinderGeometry, e, g, h, n, k, l, c);
               return f(e, d);
             });
           case 'normalize':
@@ -27691,7 +27691,7 @@
                 c.height = h * g;
               } else
                 c.radius = d.radius ? d.radius : 1, c.height = d.height ? d.height : 1;
-              var c = Sk.ffi.remapToPy(c.radius), e = Sk.ffi.remapToPy(0.08), g = Sk.ffi.remapToPy(0.01), h = Sk.ffi.remapToPy(0.2), n = Sk.ffi.remapToPy(0.8), k = Sk.ffi.numberToIntPy(6), u = Sk.ffi.numberToIntPy(d.segments ? d.segments : 32), c = Sk.ffi.callsim(a[Sk.three.VORTEX_GEOMETRY], c, e, g, h, n, k, u);
+              var c = Sk.ffi.remapToPy(c.radius), e = Sk.ffi.remapToPy(0.08), g = Sk.ffi.remapToPy(0.01), h = Sk.ffi.remapToPy(0.2), n = Sk.ffi.remapToPy(0.8), k = Sk.ffi.numberToIntPy(6), l = Sk.ffi.numberToIntPy(d.segments ? d.segments : 32), c = Sk.ffi.callsim(a[Sk.three.VORTEX_GEOMETRY], c, e, g, h, n, k, l);
               return f(c, d);
             });
           case 'normalize':
@@ -28582,12 +28582,12 @@
                   a.visible = !1;
                 });
                 a.scale.set(1, 1, 1);
-              }, p = Sk.ffi.remapToJs(d), q = p.w, l = p.x, r = p.y, t = p.z, s = p.xy, A = p.yz, x = p.zx, p = p.xyz, e = Sk.ffi.remapToJs(a.grade0), q = Math.abs(q);
+              }, p = Sk.ffi.remapToJs(d), q = p.w, l = p.x, r = p.y, s = p.z, t = p.xy, y = p.yz, x = p.zx, p = p.xyz, e = Sk.ffi.remapToJs(a.grade0), q = Math.abs(q);
             0 !== q ? c(e, q) : n(e);
             e = Sk.ffi.remapToJs(a.grade1);
-            0 !== l || 0 !== r || 0 !== t ? (q = Math.sqrt(l * l + r * r + t * t), e.quaternion = m(l / q, r / q, t / q), c(e, q)) : n(e);
+            0 !== l || 0 !== r || 0 !== s ? (q = Math.sqrt(l * l + r * r + s * s), e.quaternion = m(l / q, r / q, s / q), c(e, q)) : n(e);
             l = Sk.ffi.remapToJs(a.grade2);
-            0 !== s || 0 !== A || 0 !== x ? (r = Math.sqrt(s * s + A * A + x * x), t = Math.pow(r, 0.5), l.quaternion = m(A / r, x / r, s / r), c(l, t)) : n(l);
+            0 !== t || 0 !== y || 0 !== x ? (r = Math.sqrt(t * t + y * y + x * x), s = Math.pow(r, 0.5), l.quaternion = m(y / r, x / r, t / r), c(l, s)) : n(l);
             m = Sk.ffi.remapToJs(a.grade3);
             0 !== p ? (n = Math.pow(Math.abs(p), 1 / 3), c(m, n)) : n(m);
             a.quantity = d;
@@ -28821,19 +28821,19 @@
           d(a[e], b[e]);
         return 0 < f.length ? f.join('') : '0';
       }
-      function f(a, b, c, e, f, g, h, k, A) {
-        var x = +f, B = +g, w = +h, C = -k, G = +(f * x + g * B + h * w - k * C), E = x * G + -0 * B + -0 * w - -0 * C, F = -0 * x + B * G - -0 * w + -0 * C, D = -0 * x + -0 * B + w * G - -0 * C, x = -0 * x + -0 * B - -0 * w + C * G;
-        f = f * E + g * F + h * D - k * x;
-        E /= f;
-        F /= f;
-        D /= f;
+      function f(a, b, c, e, f, g, h, k, y) {
+        var x = +f, z = +g, u = +h, C = -k, G = +(f * x + g * z + h * u - k * C), I = x * G + -0 * z + -0 * u - -0 * C, J = -0 * x + z * G - -0 * u + -0 * C, H = -0 * x + -0 * z + u * G - -0 * C, x = -0 * x + -0 * z - -0 * u + C * G;
+        f = f * I + g * J + h * H - k * x;
+        I /= f;
+        J /= f;
+        H /= f;
         k = x / f;
-        f = a * E + b * F + c * D - e * k;
-        g = a * F + b * E - c * k + e * D;
-        h = a * D + b * k + c * E - e * F;
-        a = a * k + b * D - c * F + e * E;
-        if ('undefined' !== typeof A)
-          A.w = f, A.x = g, A.y = h, A.xy = a;
+        f = a * I + b * J + c * H - e * k;
+        g = a * J + b * I - c * k + e * H;
+        h = a * H + b * k + c * I - e * J;
+        a = a * k + b * H - c * J + e * I;
+        if ('undefined' !== typeof y)
+          y.w = f, y.x = g, y.y = h, y.xy = a;
         else
           return d(f, g, h, a);
       }
@@ -28933,8 +28933,8 @@
           case Sk.ffi.PyType.INSTANCE:
             switch (Sk.ffi.typeName(c)) {
             case 'Euclidean2':
-              var e = Sk.ffi.remapToJs(b), f = Sk.ffi.remapToJs(c), g = e.w, h = e.x, l = e.y, e = e.xy, m = f.w, B = f.x, w = f.y, f = f.xy;
-              return d(g * m + h * B + l * w - e * f, g * B + h * m - l * f + e * w, g * w + h * f + l * m - e * B, g * f + h * w - l * B + e * m);
+              var e = Sk.ffi.remapToJs(b), f = Sk.ffi.remapToJs(c), g = e.w, h = e.x, l = e.y, e = e.xy, m = f.w, z = f.x, u = f.y, f = f.xy;
+              return d(g * m + h * z + l * u - e * f, g * z + h * m - l * f + e * u, g * u + h * f + l * m - e * z, g * f + h * u - l * z + e * m);
             case 'Unit':
               return Sk.ffi.callsim(a.Measure, b, c);
             default:
@@ -29239,7 +29239,7 @@
           c(a[d], b[d]);
         return 0 < e.length ? e.join('') : '0';
       }
-      function g(a, b, c, d, e, f, g, h, k, l, m, n, p, u, z, y, q) {
+      function g(a, b, c, d, e, f, g, h, k, l, m, n, p, B, w, v, A) {
         a = +a;
         b = +b;
         c = +c;
@@ -29253,38 +29253,38 @@
         m = +m;
         n = +n;
         p = +p;
-        u = +u;
-        z = +z;
-        y = +y;
-        var v = 0;
-        switch (~~(q | 0)) {
+        B = +B;
+        w = +w;
+        v = +v;
+        var q = 0;
+        switch (~~(A | 0)) {
         case 0:
-          v = +(a * k + b * l + c * m + d * n - e * p - f * u - g * z - h * y);
+          q = +(a * k + b * l + c * m + d * n - e * p - f * B - g * w - h * v);
           break;
         case 1:
-          v = +(a * l + b * k - c * p + d * z + e * m - f * y - g * n - h * u);
+          q = +(a * l + b * k - c * p + d * w + e * m - f * v - g * n - h * B);
           break;
         case 2:
-          v = +(a * m + b * p + c * k - d * u - e * l + f * n - g * y - h * z);
+          q = +(a * m + b * p + c * k - d * B - e * l + f * n - g * v - h * w);
           break;
         case 3:
-          v = +(a * n - b * z + c * u + d * k - e * y - f * m + g * l - h * p);
+          q = +(a * n - b * w + c * B + d * k - e * v - f * m + g * l - h * p);
           break;
         case 4:
-          v = +(a * p + b * m - c * l + d * y + e * k - f * z + g * u + h * n);
+          q = +(a * p + b * m - c * l + d * v + e * k - f * w + g * B + h * n);
           break;
         case 5:
-          v = +(a * u + b * y + c * n - d * m + e * z + f * k - g * p + h * l);
+          q = +(a * B + b * v + c * n - d * m + e * w + f * k - g * p + h * l);
           break;
         case 6:
-          v = +(a * z - b * n + c * y + d * l - e * u + f * p + g * k + h * m);
+          q = +(a * w - b * n + c * v + d * l - e * B + f * p + g * k + h * m);
           break;
         case 7:
-          v = +(a * y + b * u + c * z + d * p + e * n + f * l + g * m + h * k);
+          q = +(a * v + b * B + c * w + d * p + e * n + f * l + g * m + h * k);
         }
-        return +v;
+        return +q;
       }
-      function h(a, b, c, d, e, f, g, h, k, l, m, n, p, u, z, y, q) {
+      function h(a, b, c, d, e, f, g, h, k, l, m, n, p, B, w, v, A) {
         a = +a;
         b = +b;
         c = +c;
@@ -29297,37 +29297,37 @@
         m = +m;
         n = +n;
         p = +p;
-        u = +u;
-        z = +z;
-        var v = 0;
-        switch (~~(q | 0)) {
+        B = +B;
+        w = +w;
+        var q = 0;
+        switch (~~(A | 0)) {
         case 0:
-          v = +(a * k);
+          q = +(a * k);
           break;
         case 1:
-          v = +(a * l + b * k);
+          q = +(a * l + b * k);
           break;
         case 2:
-          v = +(a * m + c * k);
+          q = +(a * m + c * k);
           break;
         case 3:
-          v = +(a * n + d * k);
+          q = +(a * n + d * k);
           break;
         case 4:
-          v = +(a * p + b * m - c * l + e * k);
+          q = +(a * p + b * m - c * l + e * k);
           break;
         case 5:
-          v = +(a * u + c * n - d * m + f * k);
+          q = +(a * B + c * n - d * m + f * k);
           break;
         case 6:
-          v = +(a * z - b * n + d * l + g * k);
+          q = +(a * w - b * n + d * l + g * k);
           break;
         case 7:
-          v = +(a * +y + b * u + c * z + d * p + e * n + f * l + g * m + +h * k);
+          q = +(a * +v + b * B + c * w + d * p + e * n + f * l + g * m + +h * k);
         }
-        return +v;
+        return +q;
       }
-      function k(a, b, c, d, e, f, g, h, k, l, m, n, p, u, z, y, q) {
+      function k(a, b, c, d, e, f, g, h, k, l, m, n, p, B, w, v, A) {
         a = +a;
         b = +b;
         c = +c;
@@ -29339,38 +29339,38 @@
         m = +m;
         n = +n;
         p = +p;
-        u = +u;
-        z = +z;
-        y = +y;
-        var v = 0;
-        switch (~~(q | 0)) {
+        B = +B;
+        w = +w;
+        v = +v;
+        var q = 0;
+        switch (~~(A | 0)) {
         case 0:
-          v = +(a * +k + b * l + c * m + d * n - e * p - f * u - g * z - +h * y);
+          q = +(a * +k + b * l + c * m + d * n - e * p - f * B - g * w - +h * v);
           break;
         case 1:
-          v = +(a * l - c * p + d * z - f * y);
+          q = +(a * l - c * p + d * w - f * v);
           break;
         case 2:
-          v = +(a * m + b * p - d * u - g * y);
+          q = +(a * m + b * p - d * B - g * v);
           break;
         case 3:
-          v = +(a * n - b * z + c * u - e * y);
+          q = +(a * n - b * w + c * B - e * v);
           break;
         case 4:
-          v = +(a * p + d * y);
+          q = +(a * p + d * v);
           break;
         case 5:
-          v = +(a * u + b * y);
+          q = +(a * B + b * v);
           break;
         case 6:
-          v = +(a * z + c * y);
+          q = +(a * w + c * v);
           break;
         case 7:
-          v = +(a * y);
+          q = +(a * v);
         }
-        return +v;
+        return +q;
       }
-      function l(a, b, c, d, e, f, g, h, k, l, m, n, p, u, z, y, q) {
+      function l(a, b, c, d, e, f, g, h, k, l, m, n, p, B, w, v, A) {
         b = +b;
         c = +c;
         d = +d;
@@ -29383,60 +29383,60 @@
         m = +m;
         n = +n;
         p = +p;
-        u = +u;
-        z = +z;
-        var v = 0;
-        switch (~~(q | 0)) {
+        B = +B;
+        w = +w;
+        var q = 0;
+        switch (~~(A | 0)) {
         case 0:
-          v = +(+a * k + b * l + c * m + d * n - e * p - f * u - g * z - h * +y);
+          q = +(+a * k + b * l + c * m + d * n - e * p - f * B - g * w - h * +v);
           break;
         case 1:
-          v = +(+b * k + e * m - g * n - h * u);
+          q = +(+b * k + e * m - g * n - h * B);
           break;
         case 2:
-          v = +(+c * k - e * l + f * n - h * z);
+          q = +(+c * k - e * l + f * n - h * w);
           break;
         case 3:
-          v = +(+d * k - f * m + g * l - h * p);
+          q = +(+d * k - f * m + g * l - h * p);
           break;
         case 4:
-          v = +(+e * k + h * n);
+          q = +(+e * k + h * n);
           break;
         case 5:
-          v = +(+f * k + h * l);
+          q = +(+f * k + h * l);
           break;
         case 6:
-          v = +(+g * k + h * m);
+          q = +(+g * k + h * m);
           break;
         case 7:
-          v = +(+h * k);
+          q = +(+h * k);
         }
-        return +v;
+        return +q;
       }
-      function m(a, b, c, d, f, h, k, l, m, n, p, q, H, u, z, y, r) {
-        var v = +m, L = +n, I = +p, J = -q, K = +H, O = -u, P = -z, Q = -y, Y = g(m, n, p, H, q, z, -u, y, v, L, I, K, J, P, -O, Q, 0), R = g(m, n, p, H, q, z, -u, y, v, L, I, K, J, P, -O, Q, 1), S = g(m, n, p, H, q, z, -u, y, v, L, I, K, J, P, -O, Q, 2), T = g(m, n, p, H, q, z, -u, y, v, L, I, K, J, P, -O, Q, 3), U = +Y, V = -R, W = -S, X = -T, $ = g(v, L, I, K, J, P, -O, Q, U, V, W, X, -0, -0, 0, 0, 0), aa = g(v, L, I, K, J, P, -O, Q, U, V, W, X, -0, -0, 0, 0, 1), ba = g(v, L, I, K, J, P, -O, Q, U, V, W, X, -0, -0, 0, 0, 2), Y = g(v, L, I, K, J, P, -O, Q, U, V, W, X, -0, -0, 0, 0, 4), R = g(v, L, I, K, J, P, -O, Q, U, V, W, X, -0, -0, 0, 0, 3), S = -g(v, L, I, K, J, P, -O, Q, U, V, W, X, -0, -0, 0, 0, 6), T = g(v, L, I, K, J, P, -O, Q, U, V, W, X, -0, -0, 0, 0, 5), v = g(v, L, I, K, J, P, -O, Q, U, V, W, X, -0, -0, 0, 0, 7);
-        H = g(m, n, p, H, q, z, -u, y, $, aa, ba, R, Y, T, -S, v, 0);
-        m = $ / H;
-        n = aa / H;
-        p = ba / H;
-        q = Y / H;
-        R /= H;
-        S /= H;
-        T /= H;
-        I = v / H;
-        H = g(a, b, c, f, d, k, -h, l, m, n, p, R, q, T, -S, I, 0);
-        u = g(a, b, c, f, d, k, -h, l, m, n, p, R, q, T, -S, I, 1);
-        z = g(a, b, c, f, d, k, -h, l, m, n, p, R, q, T, -S, I, 2);
-        y = g(a, b, c, f, d, k, -h, l, m, n, p, R, q, T, -S, I, 4);
-        Y = g(a, b, c, f, d, k, -h, l, m, n, p, R, q, T, -S, I, 3);
-        L = -g(a, b, c, f, d, k, -h, l, m, n, p, R, q, T, -S, I, 6);
-        v = g(a, b, c, f, d, k, -h, l, m, n, p, R, q, T, -S, I, 5);
-        a = g(a, b, c, f, d, k, -h, l, m, n, p, R, q, T, -S, I, 7);
-        b = -L;
-        if ('undefined' !== typeof r)
-          r.w = H, r.x = u, r.y = z, r.z = Y, r.xy = y, r.yz = v, r.zx = b, r.xyz = a;
+      function m(a, b, c, d, f, h, k, l, m, n, p, q, r, B, w, v, A) {
+        var K = +m, D = +n, E = +p, L = -q, M = +r, O = -B, P = -w, Q = -v, Y = g(m, n, p, r, q, w, -B, v, K, D, E, M, L, P, -O, Q, 0), R = g(m, n, p, r, q, w, -B, v, K, D, E, M, L, P, -O, Q, 1), S = g(m, n, p, r, q, w, -B, v, K, D, E, M, L, P, -O, Q, 2), T = g(m, n, p, r, q, w, -B, v, K, D, E, M, L, P, -O, Q, 3), U = +Y, V = -R, W = -S, X = -T, Z = g(K, D, E, M, L, P, -O, Q, U, V, W, X, -0, -0, 0, 0, 0), $ = g(K, D, E, M, L, P, -O, Q, U, V, W, X, -0, -0, 0, 0, 1), aa = g(K, D, E, M, L, P, -O, Q, U, V, W, X, -0, -0, 0, 0, 2), Y = g(K, D, E, M, L, P, -O, Q, U, V, W, X, -0, -0, 0, 0, 4), R = g(K, D, E, M, L, P, -O, Q, U, V, W, X, -0, -0, 0, 0, 3), S = -g(K, D, E, M, L, P, -O, Q, U, V, W, X, -0, -0, 0, 0, 6), T = g(K, D, E, M, L, P, -O, Q, U, V, W, X, -0, -0, 0, 0, 5), K = g(K, D, E, M, L, P, -O, Q, U, V, W, X, -0, -0, 0, 0, 7);
+        r = g(m, n, p, r, q, w, -B, v, Z, $, aa, R, Y, T, -S, K, 0);
+        m = Z / r;
+        n = $ / r;
+        p = aa / r;
+        q = Y / r;
+        R /= r;
+        S /= r;
+        T /= r;
+        E = K / r;
+        r = g(a, b, c, f, d, k, -h, l, m, n, p, R, q, T, -S, E, 0);
+        B = g(a, b, c, f, d, k, -h, l, m, n, p, R, q, T, -S, E, 1);
+        w = g(a, b, c, f, d, k, -h, l, m, n, p, R, q, T, -S, E, 2);
+        v = g(a, b, c, f, d, k, -h, l, m, n, p, R, q, T, -S, E, 4);
+        Y = g(a, b, c, f, d, k, -h, l, m, n, p, R, q, T, -S, E, 3);
+        D = -g(a, b, c, f, d, k, -h, l, m, n, p, R, q, T, -S, E, 6);
+        K = g(a, b, c, f, d, k, -h, l, m, n, p, R, q, T, -S, E, 5);
+        a = g(a, b, c, f, d, k, -h, l, m, n, p, R, q, T, -S, E, 7);
+        b = -D;
+        if ('undefined' !== typeof A)
+          A.w = r, A.x = B, A.y = w, A.z = Y, A.xy = v, A.yz = K, A.zx = b, A.xyz = a;
         else
-          return e(H, u, z, Y, y, v, b, a);
+          return e(r, B, w, Y, v, K, b, a);
       }
       function n(a, b) {
         switch (b) {
@@ -29461,7 +29461,7 @@
         }
       }
       function p(a, b, c, d, e) {
-        var f, g, h, k, l, m, n, p, u, z, y, q, v, r, I, J, K, O, P, Q;
+        var f, g, h, k, l, m, n, p, q, w, v, A, r, D, E, L, M, O, P, Q;
         d = b.quaternion.w;
         f = b.vector.x;
         g = b.vector.y;
@@ -29472,21 +29472,21 @@
         b = b.xyz;
         n = c.quaternion.w;
         p = c.vector.x;
-        u = c.vector.y;
-        z = c.vector.z;
-        y = -c.quaternion.z;
-        q = -c.quaternion.x;
-        v = -c.quaternion.y;
-        r = c.xyz;
-        c = a(d, f, g, h, k, l, m, b, n, p, u, z, y, q, v, r, 0);
-        I = a(d, f, g, h, k, l, m, b, n, p, u, z, y, q, v, r, 1);
-        J = a(d, f, g, h, k, l, m, b, n, p, u, z, y, q, v, r, 2);
-        K = a(d, f, g, h, k, l, m, b, n, p, u, z, y, q, v, r, 3);
-        O = a(d, f, g, h, k, l, m, b, n, p, u, z, y, q, v, r, 4);
-        P = a(d, f, g, h, k, l, m, b, n, p, u, z, y, q, v, r, 5);
-        Q = a(d, f, g, h, k, l, m, b, n, p, u, z, y, q, v, r, 6);
-        a = a(d, f, g, h, k, l, m, b, n, p, u, z, y, q, v, r, 7);
-        return e(c, I, J, K, O, P, Q, a);
+        q = c.vector.y;
+        w = c.vector.z;
+        v = -c.quaternion.z;
+        A = -c.quaternion.x;
+        r = -c.quaternion.y;
+        D = c.xyz;
+        c = a(d, f, g, h, k, l, m, b, n, p, q, w, v, A, r, D, 0);
+        E = a(d, f, g, h, k, l, m, b, n, p, q, w, v, A, r, D, 1);
+        L = a(d, f, g, h, k, l, m, b, n, p, q, w, v, A, r, D, 2);
+        M = a(d, f, g, h, k, l, m, b, n, p, q, w, v, A, r, D, 3);
+        O = a(d, f, g, h, k, l, m, b, n, p, q, w, v, A, r, D, 4);
+        P = a(d, f, g, h, k, l, m, b, n, p, q, w, v, A, r, D, 5);
+        Q = a(d, f, g, h, k, l, m, b, n, p, q, w, v, A, r, D, 6);
+        a = a(d, f, g, h, k, l, m, b, n, p, q, w, v, A, r, D, 7);
+        return e(c, E, L, M, O, P, Q, a);
       }
       Sk.ffi.checkFunctionArgs('defineEuclidean3', arguments, 3, 3);
       Sk.builtin.defineVector3(a, b);
@@ -29586,14 +29586,12 @@
       });
       a[Sk.e3ga.VECTOR_E3] = Sk.ffi.functionPy(function (a, b, c, d) {
         Sk.ffi.checkFunctionArgs(Sk.e3ga.VECTOR_E3, arguments, 3, 4);
-        Sk.ffi.checkArgType('x', r, Sk.ffi.isNum(a), a);
-        Sk.ffi.checkArgType('y', r, Sk.ffi.isNum(b), b);
-        Sk.ffi.checkArgType('z', r, Sk.ffi.isNum(c), c);
+        Sk.ffi.checkArgType('x', Sk.ffi.PyType.FLOAT, Sk.ffi.isNum(a), a);
+        Sk.ffi.checkArgType('y', Sk.ffi.PyType.FLOAT, Sk.ffi.isNum(b), b);
+        Sk.ffi.checkArgType('z', Sk.ffi.PyType.FLOAT, Sk.ffi.isNum(c), c);
         Sk.ffi.isDefined(d) && Sk.ffi.checkArgType('mutable', Sk.ffi.PyType.BOOL, Sk.ffi.isBool(d), d);
-        a = Sk.ffi.numberToJs(a);
-        b = Sk.ffi.numberToJs(b);
-        c = Sk.ffi.numberToJs(c);
-        return e(0, a, b, c, 0, 0, 0, 0, Sk.ffi.remapToJs(d));
+        var f = Sk.ffi.numberToJs(a), g = Sk.ffi.numberToJs(b), h = Sk.ffi.numberToJs(c);
+        return e(0, f, g, h, 0, 0, 0, 0, Sk.ffi.remapToJs(d));
       });
       a.BivectorE3 = Sk.ffi.functionPy(function (a, b, c, d) {
         Sk.ffi.checkFunctionArgs('BivectorE3', arguments, 3, 4);
@@ -29613,8 +29611,8 @@
         a = Sk.ffi.numberToJs(a);
         return e(0, 0, 0, 0, 0, 0, 0, a, Sk.ffi.remapToJs(b));
       });
-      a.Euclidean3 = Sk.ffi.buildClass(a, function (t, s) {
-        s.__init__ = Sk.ffi.functionPy(function (a, c, d, e, f, g, h, k, l, m) {
+      a.Euclidean3 = Sk.ffi.buildClass(a, function (s, t) {
+        t.__init__ = Sk.ffi.functionPy(function (a, c, d, e, f, g, h, k, l, m) {
           Sk.ffi.checkMethodArgs('Euclidean3', arguments, 1, 9);
           switch (Sk.ffi.getType(c)) {
           case Sk.ffi.PyType.FLOAT:
@@ -29638,8 +29636,8 @@
             h = Sk.ffi.remapToJs(h);
             k = Sk.ffi.remapToJs(k);
             l = Sk.ffi.remapToJs(l);
-            var n = Sk.ffi.remapToJs(m, !0), u = new b.Vector3(d, e, f), z = new b.Quaternion(-h, -k, -g, c);
-            Sk.ffi.referenceToPy(new b.Euclidean3(u, z, l, n), 'Euclidean3', void 0, a);
+            var n = Sk.ffi.remapToJs(m, !0), p = new b.Vector3(d, e, f), w = new b.Quaternion(-h, -k, -g, c);
+            Sk.ffi.referenceToPy(new b.Euclidean3(p, w, l, n), 'Euclidean3', void 0, a);
             break;
           case Sk.ffi.PyType.INSTANCE:
             Sk.ffi.checkMethodArgs('Euclidean3', arguments, 1, 1);
@@ -29649,7 +29647,7 @@
             throw new Sk.builtin.AssertionError('09eaed05-6d9d-4ded-a499-e4c480a9ed68, getType(w) => ' + Sk.ffi.getType(c));
           }
         });
-        s.__add__ = Sk.ffi.functionPy(function (a, b) {
+        t.__add__ = Sk.ffi.functionPy(function (a, b) {
           var c = Sk.ffi.remapToJs(a), d = c.vector, f = c.quaternion, g = Sk.ffi.remapToJs(b);
           if (Sk.ffi.isNum(b))
             return e(f.w + g, d.x, d.y, d.z, -f.z, -f.x, -f.y, c.xyz);
@@ -29660,7 +29658,7 @@
             'Euclidean3'
           ]);
         });
-        s.__radd__ = Sk.ffi.functionPy(function (a, b) {
+        t.__radd__ = Sk.ffi.functionPy(function (a, b) {
           var c = Sk.ffi.remapToJs(b), d = Sk.ffi.remapToJs(a), f = d.vector, g = d.quaternion;
           if (Sk.ffi.isNum(b))
             return e(c + g.w, f.x, f.y, f.z, -g.z, -g.x, -g.y, d.xyz);
@@ -29669,7 +29667,7 @@
             'Euclidean3'
           ]);
         });
-        s.__iadd__ = Sk.ffi.functionPy(function (a, b) {
+        t.__iadd__ = Sk.ffi.functionPy(function (a, b) {
           var c = Sk.ffi.remapToJs(a), d = c.vector, e = c.quaternion, f = Sk.ffi.remapToJs(b);
           if (Sk.ffi.isNum(b))
             e.w += f;
@@ -29690,7 +29688,7 @@
             ]);
           return a;
         });
-        s.__sub__ = Sk.ffi.functionPy(function (a, b) {
+        t.__sub__ = Sk.ffi.functionPy(function (a, b) {
           var c = Sk.ffi.remapToJs(a), d = c.vector, f = c.quaternion, g = Sk.ffi.remapToJs(b);
           if (Sk.ffi.isNum(b))
             return e(f.w - g, d.x, d.y, d.z, -f.z, -f.x, -f.y, c.xyz);
@@ -29703,7 +29701,7 @@
             'Euclidean3'
           ]);
         });
-        s.__rsub__ = Sk.ffi.functionPy(function (a, b) {
+        t.__rsub__ = Sk.ffi.functionPy(function (a, b) {
           var c = Sk.ffi.remapToJs(b), d = Sk.ffi.remapToJs(a), f = d.vector, g = d.quaternion;
           if (Sk.ffi.isNum(b))
             return e(c - g.w, -f.x, -f.y, -f.z, g.z, g.x, g.y, -d.xyz);
@@ -29712,7 +29710,7 @@
             'Euclidean3'
           ]);
         });
-        s.__isub__ = Sk.ffi.functionPy(function (a, b) {
+        t.__isub__ = Sk.ffi.functionPy(function (a, b) {
           var c = Sk.ffi.remapToJs(a), d = c.vector, e = c.quaternion, f = Sk.ffi.remapToJs(b);
           if (Sk.ffi.isNum(b))
             e.w -= f;
@@ -29733,7 +29731,7 @@
             ]);
           return a;
         });
-        s.__mul__ = Sk.ffi.functionPy(function (b, c) {
+        t.__mul__ = Sk.ffi.functionPy(function (b, c) {
           switch (Sk.ffi.getType(c)) {
           case Sk.ffi.PyType.INSTANCE:
             switch (Sk.ffi.typeName(c)) {
@@ -29762,7 +29760,7 @@
             ]);
           }
         });
-        s.__rmul__ = Sk.ffi.functionPy(function (a, b) {
+        t.__rmul__ = Sk.ffi.functionPy(function (a, b) {
           var c = Sk.ffi.remapToJs(b), d = Sk.ffi.remapToJs(a), f = d.vector, g = d.quaternion;
           if (Sk.ffi.isNum(b))
             return e(c * g.w, c * f.x, c * f.y, c * f.z, -c * g.z, -c * g.x, -c * g.y, c * d.xyz);
@@ -29772,20 +29770,20 @@
             'Unit'
           ]);
         });
-        s.__imul__ = Sk.ffi.functionPy(function (a, b) {
-          var c = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(b), f = c.w, h = c.x, k = c.y, l = c.z, m = c.xy, n = c.yz, p = c.zx, u = c.xyz, z, y, q, v, r, t, s;
-          d(e) ? (z = e, e = s = t = r = v = q = y = 0) : (z = e.w, y = e.x, q = e.y, v = e.z, r = e.xy, t = e.yz, s = e.zx, e = e.xyz);
-          c.w = g(f, h, k, l, m, n, p, u, z, y, q, v, r, t, s, e, 0);
-          c.x = g(f, h, k, l, m, n, p, u, z, y, q, v, r, t, s, e, 1);
-          c.y = g(f, h, k, l, m, n, p, u, z, y, q, v, r, t, s, e, 2);
-          c.z = g(f, h, k, l, m, n, p, u, z, y, q, v, r, t, s, e, 3);
-          c.xy = g(f, h, k, l, m, n, p, u, z, y, q, v, r, t, s, e, 4);
-          c.yz = g(f, h, k, l, m, n, p, u, z, y, q, v, r, t, s, e, 5);
-          c.zx = g(f, h, k, l, m, n, p, u, z, y, q, v, r, t, s, e, 6);
-          c.xyz = g(f, h, k, l, m, n, p, u, z, y, q, v, r, t, s, e, 7);
+        t.__imul__ = Sk.ffi.functionPy(function (a, b) {
+          var c = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(b), f = c.w, h = c.x, k = c.y, l = c.z, m = c.xy, n = c.yz, p = c.zx, q = c.xyz, w, v, A, r, D, E, s;
+          d(e) ? (w = e, e = s = E = D = r = A = v = 0) : (w = e.w, v = e.x, A = e.y, r = e.z, D = e.xy, E = e.yz, s = e.zx, e = e.xyz);
+          c.w = g(f, h, k, l, m, n, p, q, w, v, A, r, D, E, s, e, 0);
+          c.x = g(f, h, k, l, m, n, p, q, w, v, A, r, D, E, s, e, 1);
+          c.y = g(f, h, k, l, m, n, p, q, w, v, A, r, D, E, s, e, 2);
+          c.z = g(f, h, k, l, m, n, p, q, w, v, A, r, D, E, s, e, 3);
+          c.xy = g(f, h, k, l, m, n, p, q, w, v, A, r, D, E, s, e, 4);
+          c.yz = g(f, h, k, l, m, n, p, q, w, v, A, r, D, E, s, e, 5);
+          c.zx = g(f, h, k, l, m, n, p, q, w, v, A, r, D, E, s, e, 6);
+          c.xyz = g(f, h, k, l, m, n, p, q, w, v, A, r, D, E, s, e, 7);
           return a;
         });
-        s.__div__ = Sk.ffi.functionPy(function (b, d) {
+        t.__div__ = Sk.ffi.functionPy(function (b, d) {
           switch (Sk.ffi.getType(d)) {
           case Sk.ffi.PyType.INSTANCE:
             switch (Sk.ffi.typeName(d)) {
@@ -29813,128 +29811,128 @@
             ]);
           }
         });
-        s.__rdiv__ = Sk.ffi.functionPy(function (a, b) {
+        t.__rdiv__ = Sk.ffi.functionPy(function (a, b) {
           b = Sk.ffi.remapToJs(b);
           a = Sk.ffi.remapToJs(a);
           if (d(b))
             return m(b, 0, 0, 0, 0, 0, 0, 0, a.w, a.x, a.y, a.xy, a.z, -a.zx, a.yz, a.xyz, void 0);
           throw new Sk.builtin.AssertionError('' + JSON.stringify(b, null, 2) + ' / ' + JSON.stringify(a, null, 2));
         });
-        s.__idiv__ = Sk.ffi.functionPy(function (a, b) {
+        t.__idiv__ = Sk.ffi.functionPy(function (a, b) {
           var c = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(b);
           d(e) ? m(c.w, c.x, c.y, c.xy, c.z, -c.zx, c.yz, c.xyz, e, 0, 0, 0, 0, 0, 0, 0, c) : m(c.w, c.x, c.y, c.xy, c.z, -c.zx, c.yz, c.xyz, e.w, e.x, e.y, e.xy, e.z, -e.zx, e.yz, e.xyz, c);
           return a;
         });
-        s.__mod__ = Sk.ffi.functionPy(function (a, b) {
+        t.__mod__ = Sk.ffi.functionPy(function (a, b) {
           var c = Sk.ffi.remapToJs(a), d = Sk.ffi.remapToJs(b);
           return Sk.ffi.numberToFloatPy(c.x * d.x + c.y * d.y + c.z * d.z);
         });
-        s.__xor__ = Sk.ffi.functionPy(function (a, b) {
+        t.__xor__ = Sk.ffi.functionPy(function (a, b) {
           a = Sk.ffi.remapToJs(a);
           b = Sk.ffi.remapToJs(b);
           return d(b) ? e(a.w * b, a.x * b, a.y * b, a.z * b, a.xy * b, a.yz * b, a.zx * b, a.xyz * b) : p(h, a, b, n, e);
         });
-        s.__rxor__ = Sk.ffi.functionPy(function (a, b) {
+        t.__rxor__ = Sk.ffi.functionPy(function (a, b) {
           b = Sk.ffi.remapToJs(b);
           a = Sk.ffi.remapToJs(a);
           if (d(b))
             return e(b * a.w, b * a.x, b * a.y, b * a.z, b * a.xy, b * a.yz, b * a.zx, b * a.xyz);
           throw new Sk.builtin.AssertionError();
         });
-        s.__ixor__ = Sk.ffi.functionPy(function (a, b) {
-          var c = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(b), f = c.w, g = c.x, k = c.y, l = c.z, m = c.xy, n = c.yz, p = c.zx, u = c.xyz, z, y, q, v, r, t, s;
-          d(e) ? (z = e, e = s = t = r = v = q = y = 0) : (z = e.w, y = e.x, q = e.y, v = e.z, r = e.xy, t = e.yz, s = e.zx, e = e.xyz);
-          c.w = h(f, g, k, l, m, n, p, u, z, y, q, v, r, t, s, e, 0);
-          c.x = h(f, g, k, l, m, n, p, u, z, y, q, v, r, t, s, e, 1);
-          c.y = h(f, g, k, l, m, n, p, u, z, y, q, v, r, t, s, e, 2);
-          c.z = h(f, g, k, l, m, n, p, u, z, y, q, v, r, t, s, e, 3);
-          c.xy = h(f, g, k, l, m, n, p, u, z, y, q, v, r, t, s, e, 4);
-          c.yz = h(f, g, k, l, m, n, p, u, z, y, q, v, r, t, s, e, 5);
-          c.zx = h(f, g, k, l, m, n, p, u, z, y, q, v, r, t, s, e, 6);
-          c.xyz = h(f, g, k, l, m, n, p, u, z, y, q, v, r, t, s, e, 7);
+        t.__ixor__ = Sk.ffi.functionPy(function (a, b) {
+          var c = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(b), f = c.w, g = c.x, k = c.y, l = c.z, m = c.xy, n = c.yz, p = c.zx, q = c.xyz, w, v, A, r, D, E, s;
+          d(e) ? (w = e, e = s = E = D = r = A = v = 0) : (w = e.w, v = e.x, A = e.y, r = e.z, D = e.xy, E = e.yz, s = e.zx, e = e.xyz);
+          c.w = h(f, g, k, l, m, n, p, q, w, v, A, r, D, E, s, e, 0);
+          c.x = h(f, g, k, l, m, n, p, q, w, v, A, r, D, E, s, e, 1);
+          c.y = h(f, g, k, l, m, n, p, q, w, v, A, r, D, E, s, e, 2);
+          c.z = h(f, g, k, l, m, n, p, q, w, v, A, r, D, E, s, e, 3);
+          c.xy = h(f, g, k, l, m, n, p, q, w, v, A, r, D, E, s, e, 4);
+          c.yz = h(f, g, k, l, m, n, p, q, w, v, A, r, D, E, s, e, 5);
+          c.zx = h(f, g, k, l, m, n, p, q, w, v, A, r, D, E, s, e, 6);
+          c.xyz = h(f, g, k, l, m, n, p, q, w, v, A, r, D, E, s, e, 7);
           return a;
         });
-        s.__lshift__ = Sk.ffi.functionPy(function (a, b) {
+        t.__lshift__ = Sk.ffi.functionPy(function (a, b) {
           a = Sk.ffi.remapToJs(a);
           b = Sk.ffi.remapToJs(b);
           return d(b) ? e(a.w * b, 0, 0, 0, 0, 0, 0, 0) : p(k, a, b, n, e);
         });
-        s.__rlshift__ = Sk.ffi.functionPy(function (a, b) {
+        t.__rlshift__ = Sk.ffi.functionPy(function (a, b) {
           b = Sk.ffi.remapToJs(b);
           a = Sk.ffi.remapToJs(a);
           if (d(b))
             return e(b * a.w, b * a.x, b * a.y, b * a.z, b * a.xy, b * a.yz, b * a.zx, b * a.xyz);
           throw new Sk.builtin.AssertionError();
         });
-        s.__ilshift__ = Sk.ffi.functionPy(function (a, b) {
-          var c = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(b), f = c.w, g = c.x, h = c.y, l = c.z, m = c.xy, n = c.yz, p = c.zx, u = c.xyz, z, y, q, v, r, t, s;
-          d(e) ? (z = e, e = s = t = r = v = q = y = 0) : (z = e.w, y = e.x, q = e.y, v = e.z, r = e.xy, t = e.yz, s = e.zx, e = e.xyz);
-          c.w = k(f, g, h, l, m, n, p, u, z, y, q, v, r, t, s, e, 0);
-          c.x = k(f, g, h, l, m, n, p, u, z, y, q, v, r, t, s, e, 1);
-          c.y = k(f, g, h, l, m, n, p, u, z, y, q, v, r, t, s, e, 2);
-          c.z = k(f, g, h, l, m, n, p, u, z, y, q, v, r, t, s, e, 3);
-          c.xy = k(f, g, h, l, m, n, p, u, z, y, q, v, r, t, s, e, 4);
-          c.yz = k(f, g, h, l, m, n, p, u, z, y, q, v, r, t, s, e, 5);
-          c.zx = k(f, g, h, l, m, n, p, u, z, y, q, v, r, t, s, e, 6);
-          c.xyz = k(f, g, h, l, m, n, p, u, z, y, q, v, r, t, s, e, 7);
+        t.__ilshift__ = Sk.ffi.functionPy(function (a, b) {
+          var c = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(b), f = c.w, g = c.x, h = c.y, l = c.z, m = c.xy, n = c.yz, p = c.zx, q = c.xyz, w, v, A, r, D, E, s;
+          d(e) ? (w = e, e = s = E = D = r = A = v = 0) : (w = e.w, v = e.x, A = e.y, r = e.z, D = e.xy, E = e.yz, s = e.zx, e = e.xyz);
+          c.w = k(f, g, h, l, m, n, p, q, w, v, A, r, D, E, s, e, 0);
+          c.x = k(f, g, h, l, m, n, p, q, w, v, A, r, D, E, s, e, 1);
+          c.y = k(f, g, h, l, m, n, p, q, w, v, A, r, D, E, s, e, 2);
+          c.z = k(f, g, h, l, m, n, p, q, w, v, A, r, D, E, s, e, 3);
+          c.xy = k(f, g, h, l, m, n, p, q, w, v, A, r, D, E, s, e, 4);
+          c.yz = k(f, g, h, l, m, n, p, q, w, v, A, r, D, E, s, e, 5);
+          c.zx = k(f, g, h, l, m, n, p, q, w, v, A, r, D, E, s, e, 6);
+          c.xyz = k(f, g, h, l, m, n, p, q, w, v, A, r, D, E, s, e, 7);
           return a;
         });
-        s.__rshift__ = Sk.ffi.functionPy(function (a, b) {
+        t.__rshift__ = Sk.ffi.functionPy(function (a, b) {
           a = Sk.ffi.remapToJs(a);
           b = Sk.ffi.remapToJs(b);
           return d(b) ? e(a.w * b, a.x * b, a.y * b, a.z * b, a.xy * b, a.yz * b, a.zx * b, a.xyz * b) : p(l, a, b, n, e);
         });
-        s.__rrshift__ = Sk.ffi.functionPy(function (a, b) {
+        t.__rrshift__ = Sk.ffi.functionPy(function (a, b) {
           b = Sk.ffi.remapToJs(b);
           a = Sk.ffi.remapToJs(a);
           if (d(b))
             return e(b * a.w, 0, 0, 0, 0, 0, 0, 0);
           throw new Sk.builtin.AssertionError();
         });
-        s.__irshift__ = Sk.ffi.functionPy(function (a, b) {
-          var c = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(b), f = c.w, g = c.x, h = c.y, k = c.z, m = c.xy, n = c.yz, p = c.zx, u = c.xyz, z, y, q, v, r, t, s;
-          d(e) ? (z = e, e = s = t = r = v = q = y = 0) : (z = e.w, y = e.x, q = e.y, v = e.z, r = e.xy, t = e.yz, s = e.zx, e = e.xyz);
-          c.w = l(f, g, h, k, m, n, p, u, z, y, q, v, r, t, s, e, 0);
-          c.x = l(f, g, h, k, m, n, p, u, z, y, q, v, r, t, s, e, 1);
-          c.y = l(f, g, h, k, m, n, p, u, z, y, q, v, r, t, s, e, 2);
-          c.z = l(f, g, h, k, m, n, p, u, z, y, q, v, r, t, s, e, 3);
-          c.xy = l(f, g, h, k, m, n, p, u, z, y, q, v, r, t, s, e, 4);
-          c.yz = l(f, g, h, k, m, n, p, u, z, y, q, v, r, t, s, e, 5);
-          c.zx = l(f, g, h, k, m, n, p, u, z, y, q, v, r, t, s, e, 6);
-          c.xyz = l(f, g, h, k, m, n, p, u, z, y, q, v, r, t, s, e, 7);
+        t.__irshift__ = Sk.ffi.functionPy(function (a, b) {
+          var c = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(b), f = c.w, g = c.x, h = c.y, k = c.z, m = c.xy, n = c.yz, p = c.zx, q = c.xyz, w, v, A, r, D, s, t;
+          d(e) ? (w = e, e = t = s = D = r = A = v = 0) : (w = e.w, v = e.x, A = e.y, r = e.z, D = e.xy, s = e.yz, t = e.zx, e = e.xyz);
+          c.w = l(f, g, h, k, m, n, p, q, w, v, A, r, D, s, t, e, 0);
+          c.x = l(f, g, h, k, m, n, p, q, w, v, A, r, D, s, t, e, 1);
+          c.y = l(f, g, h, k, m, n, p, q, w, v, A, r, D, s, t, e, 2);
+          c.z = l(f, g, h, k, m, n, p, q, w, v, A, r, D, s, t, e, 3);
+          c.xy = l(f, g, h, k, m, n, p, q, w, v, A, r, D, s, t, e, 4);
+          c.yz = l(f, g, h, k, m, n, p, q, w, v, A, r, D, s, t, e, 5);
+          c.zx = l(f, g, h, k, m, n, p, q, w, v, A, r, D, s, t, e, 6);
+          c.xyz = l(f, g, h, k, m, n, p, q, w, v, A, r, D, s, t, e, 7);
           return a;
         });
-        s.__len__ = Sk.ffi.functionPy(function (a) {
+        t.__len__ = Sk.ffi.functionPy(function (a) {
           return Sk.ffi.numberToFloatPy(8);
         });
-        s.__pos__ = Sk.ffi.functionPy(function (a) {
+        t.__pos__ = Sk.ffi.functionPy(function (a) {
           return a;
         });
-        s.__neg__ = Sk.ffi.functionPy(function (a) {
+        t.__neg__ = Sk.ffi.functionPy(function (a) {
           a = Sk.ffi.remapToJs(a);
           var b = a.vector, c = a.quaternion;
           return e(-c.w, -b.x, -b.y, -b.z, c.z, c.x, c.y, -a.xyz);
         });
-        s.__invert__ = Sk.ffi.functionPy(function (a) {
+        t.__invert__ = Sk.ffi.functionPy(function (a) {
           a = Sk.ffi.remapToJs(a);
           var b = a.vector, c = a.quaternion;
           return e(c.w, b.x, b.y, b.z, c.z, c.x, c.y, -a.xyz);
         });
-        s.__eq__ = Sk.ffi.functionPy(function (a, b) {
+        t.__eq__ = Sk.ffi.functionPy(function (a, b) {
           if (Sk.ffi.isInstance(b, 'Euclidean3')) {
             var c = Sk.ffi.remapToJs(a), d = c.vector, e = c.quaternion, f = Sk.ffi.remapToJs(b), g = f.quaternion;
             return d.equals(f.vector) && e.equals(g) && c.xyz === f.xyz;
           }
           return Sk.ffi.bool.False;
         });
-        s.__ne__ = Sk.ffi.functionPy(function (a, b) {
+        t.__ne__ = Sk.ffi.functionPy(function (a, b) {
           if (Sk.ffi.isInstance(b, 'Euclidean3')) {
             var c = Sk.ffi.remapToJs(a), d = c.vector, e = c.quaternion, f = Sk.ffi.remapToJs(b), g = f.quaternion;
             return !d.equals(f.vector) || !e.equals(g) || c.xyz !== f.xyz;
           }
           return Sk.ffi.bool.True;
         });
-        s.__getitem__ = Sk.ffi.functionPy(function (a, b) {
+        t.__getitem__ = Sk.ffi.functionPy(function (a, b) {
           Sk.ffi.checkMethodArgs('[]', arguments, 1, 1);
           Sk.ffi.checkArgType('index', q, Sk.ffi.isInt(b), b);
           var c = Sk.ffi.remapToJs(b), d = Sk.ffi.remapToJs(a), f = d.vector, g = d.quaternion;
@@ -29949,7 +29947,7 @@
             return e(0, 0, 0, 0, 0, 0, 0, d.xyz);
           }
         });
-        s.__getattr__ = Sk.ffi.functionPy(function (b, c) {
+        t.__getattr__ = Sk.ffi.functionPy(function (b, c) {
           var d = Sk.ffi.remapToJs(b), f = d.vector, g = d.quaternion;
           switch (c) {
           case 'w':
@@ -29989,6 +29987,20 @@
               d.xyz += h.xyz;
               return b;
             });
+          case 'applyMatrix3':
+            return Sk.ffi.callableToPy(a, c, function (a, d) {
+              Sk.ffi.checkMethodArgs(c, arguments, 1, 1);
+              Sk.ffi.checkArgType('m', Sk.three.MATRIX_3, Sk.ffi.isInstance(d, Sk.three.MATRIX_3), d);
+              f[c](Sk.ffi.remapToJs(d));
+              return b;
+            });
+          case 'applyMatrix4':
+            return Sk.ffi.callableToPy(a, c, function (a, d) {
+              Sk.ffi.checkMethodArgs(c, arguments, 1, 1);
+              Sk.ffi.checkArgType('m', Sk.three.MATRIX_4, Sk.ffi.isInstance(d, Sk.three.MATRIX_4), d);
+              f[c](Sk.ffi.remapToJs(d));
+              return b;
+            });
           case 'sub':
             return Sk.ffi.callableToPy(a, c, function (a, e) {
               Sk.ffi.checkMethodArgs(c, arguments, 1, 1);
@@ -30014,8 +30026,8 @@
             return Sk.ffi.callableToPy(a, 'cross', function (a, b) {
               Sk.ffi.checkMethodArgs('cross', arguments, 1, 1);
               Sk.ffi.checkArgType('other', 'Euclidean3', Sk.ffi.isInstance(b, 'Euclidean3'), b);
-              var c = Sk.ffi.remapToJs(b), f = d.x, g = d.y, h = d.z, u = c.x, z = c.y, c = c.z;
-              return e(0, g * c - h * z, h * u - f * c, f * z - g * u, 0, 0, 0, 0);
+              var c = Sk.ffi.remapToJs(b), f = d.x, g = d.y, h = d.z, k = c.x, w = c.y, c = c.z;
+              return e(0, g * c - h * w, h * k - f * c, f * w - g * k, 0, 0, 0, 0);
             });
           case 'dot':
             return Sk.ffi.callableToPy(a, 'dot', function (a, b) {
@@ -30067,8 +30079,8 @@
               Sk.ffi.checkArgType('x', r, Sk.ffi.isNum(c), c);
               Sk.ffi.checkArgType('y', r, Sk.ffi.isNum(d), d);
               Sk.ffi.checkArgType('z', r, Sk.ffi.isNum(e), e);
-              var g = Sk.ffi.remapToJs(c), h = Sk.ffi.remapToJs(d), u = Sk.ffi.remapToJs(e);
-              f.set(g, h, u);
+              var g = Sk.ffi.remapToJs(c), h = Sk.ffi.remapToJs(d), k = Sk.ffi.remapToJs(e);
+              f.set(g, h, k);
               return b;
             });
           case 'clone':
@@ -30091,7 +30103,7 @@
             throw Sk.ffi.err.attribute(c).isNotGetableOnType('Euclidean3');
           }
         });
-        s.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
+        t.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
           Sk.ffi.checkArgType('self', 'Euclidean3', Sk.ffi.isInstance(a, 'Euclidean3'), a);
           a = Sk.ffi.remapToJs(a);
           switch (b) {
@@ -30114,29 +30126,29 @@
             throw Sk.ffi.err.attribute(b).isNotSetableOnType('Euclidean3');
           }
         });
-        s.__cliffordConjugate__ = Sk.ffi.functionPy(function (a) {
+        t.__cliffordConjugate__ = Sk.ffi.functionPy(function (a) {
           Sk.ffi.checkMethodArgs('cliffordConjugate', arguments, 0, 0);
           var b = Sk.ffi.remapToJs(a);
           return e(b.w, -b.x, -b.y, -b.z, -b.xy, -b.yz, -b.zx, b.xyz);
         });
-        s.__exp__ = Sk.ffi.functionPy(function (a) {
+        t.__exp__ = Sk.ffi.functionPy(function (a) {
           Sk.ffi.checkMethodArgs('exp', arguments, 0, 0);
           var b = Sk.ffi.remapToJs(a).quaternion, c = -b.z, d = -b.x, b = -b.y, f = Math.sqrt(c * c + d * d + b * b), g = Math.cos(f), f = Math.sin(f) / f;
           return e(g, 0, 0, 0, f * c, f * d, f * b, 0);
         });
-        s.__sqrt__ = Sk.ffi.functionPy(function (a) {
+        t.__sqrt__ = Sk.ffi.functionPy(function (a) {
           Sk.ffi.checkMethodArgs('sqrt', arguments, 0, 0);
           var b = Sk.ffi.remapToJs(a);
           return e(Math.sqrt(b.w), 0, 0, 0, 0, 0, 0, 0);
         });
-        s.__repr__ = Sk.ffi.functionPy(function (a) {
+        t.__repr__ = Sk.ffi.functionPy(function (a) {
           var b = Sk.ffi.remapToJs(a), c = b.vector, d = b.quaternion;
           a = d.w;
-          var e = c.x, f = c.y, c = c.z, g = -d.z, h = -d.x, d = -d.y, b = b.xyz, k = 0 !== a, l = 0 !== e || 0 != f || 0 !== c, m = 0 !== g || 0 !== h || 0 !== d, u = 0 !== b;
-          if (!k || l || m || u) {
-            if (k || !l || m || u) {
-              if (k || l || !m || u) {
-                if (k || l || m || !u)
+          var e = c.x, f = c.y, c = c.z, g = -d.z, h = -d.x, d = -d.y, b = b.xyz, k = 0 !== a, l = 0 !== e || 0 != f || 0 !== c, m = 0 !== g || 0 !== h || 0 !== d, n = 0 !== b;
+          if (!k || l || m || n) {
+            if (k || !l || m || n) {
+              if (k || l || !m || n) {
+                if (k || l || m || !n)
                   return a = [
                     a,
                     e,
@@ -30167,7 +30179,7 @@
           a = [a];
           return Sk.ffi.stringToPy('ScalarE3(' + a.join(', ') + ')');
         });
-        s.__str__ = Sk.ffi.functionPy(function (a) {
+        t.__str__ = Sk.ffi.functionPy(function (a) {
           Sk.ffi.checkFunctionArgs('str', arguments, 1, 1);
           Sk.ffi.checkArgType('self', 'Euclidean3', Sk.ffi.isInstance(a, 'Euclidean3'), a);
           var b = Sk.ffi.remapToJs(a);
@@ -30217,19 +30229,19 @@
           d(a[e], b[e]);
         return 0 < f.length ? f.join('') : '0';
       }
-      function f(a, b, c, e, f, g, h, k, A) {
-        var x = +f, B = +g, w = +h, C = -k, G = +(f * x + g * B + h * w - k * C), E = x * G + -0 * B + -0 * w - -0 * C, F = -0 * x + B * G - -0 * w + -0 * C, D = -0 * x + -0 * B + w * G - -0 * C, x = -0 * x + -0 * B - -0 * w + C * G;
-        f = f * E + g * F + h * D - k * x;
-        E /= f;
-        F /= f;
-        D /= f;
+      function f(a, b, c, e, f, g, h, k, y) {
+        var x = +f, z = +g, u = +h, C = -k, G = +(f * x + g * z + h * u - k * C), I = x * G + -0 * z + -0 * u - -0 * C, J = -0 * x + z * G - -0 * u + -0 * C, H = -0 * x + -0 * z + u * G - -0 * C, x = -0 * x + -0 * z - -0 * u + C * G;
+        f = f * I + g * J + h * H - k * x;
+        I /= f;
+        J /= f;
+        H /= f;
         k = x / f;
-        f = a * E + b * F + c * D - e * k;
-        g = a * F + b * E - c * k + e * D;
-        h = a * D + b * k + c * E - e * F;
-        a = a * k + b * D - c * F + e * E;
-        if ('undefined' !== typeof A)
-          A.w = f, A.x = g, A.y = h, A.xy = a;
+        f = a * I + b * J + c * H - e * k;
+        g = a * J + b * I - c * k + e * H;
+        h = a * H + b * k + c * I - e * J;
+        a = a * k + b * H - c * J + e * I;
+        if ('undefined' !== typeof y)
+          y.w = f, y.x = g, y.y = h, y.xy = a;
         else
           return d(f, g, h, a);
       }
@@ -30261,40 +30273,40 @@
         return d(0, 0, 0, Sk.ffi.remapToJs(a));
       });
       a.Lorentzian = Sk.ffi.buildClass(a, function (b, g) {
-        g.__init__ = Sk.ffi.functionPy(function (a, b, c, d, e, f, g, h, l, m, C, G, E, F, D, M, H) {
+        g.__init__ = Sk.ffi.functionPy(function (a, b, c, d, e, f, g, h, l, m, C, G, I, J, H, F, N) {
           Sk.ffi.checkMethodArgs('Lorentzian', arguments, 1, 16);
           if (k(b))
             Sk.ffi.checkMethodArgs('Lorentzian', arguments, 1, 1), Sk.ffi.referenceToPy(Sk.ffi.remapToJs(b), 'Lorentzian', void 0, a);
           else {
             Sk.ffi.checkMethodArgs('Lorentzian', arguments, 16, 16);
-            var u = {};
-            u[0] = b;
-            u[1] = c;
-            u[2] = d;
-            u[3] = e;
-            u[4] = f;
-            u[5] = g;
-            u[6] = h;
-            u[7] = l;
-            u[8] = m;
-            u[9] = C;
-            u[10] = G;
-            u[11] = E;
-            u[12] = F;
-            u[13] = D;
-            u[14] = M;
-            u[15] = H;
-            Sk.ffi.referenceToPy(u, 'Lorentzian', void 0, a);
+            var B = {};
+            B[0] = b;
+            B[1] = c;
+            B[2] = d;
+            B[3] = e;
+            B[4] = f;
+            B[5] = g;
+            B[6] = h;
+            B[7] = l;
+            B[8] = m;
+            B[9] = C;
+            B[10] = G;
+            B[11] = I;
+            B[12] = J;
+            B[13] = H;
+            B[14] = F;
+            B[15] = N;
+            Sk.ffi.referenceToPy(B, 'Lorentzian', void 0, a);
           }
         });
         g.__add__ = Sk.ffi.functionPy(function (b, c) {
           var d = Sk.ffi.remapToJs(b), e = Sk.ffi.remapToJs(c);
           if (k(c)) {
-            var f = Sk.ffi.numberToFloatPy(0), g = Sk.ffh.add(d[0], e[0]), l = Sk.ffh.add(d[1], e[1]), m = Sk.ffh.add(d[2], e[2]), B = f, w = Sk.ffh.add(d[4], e[4]), C = f, G = f, E = f, d = Sk.ffh.add(d[8], e[8]);
-            return Sk.ffi.callsim(a.Lorentzian, g, l, m, B, w, C, G, E, d, f, f, f, f, f, f, f);
+            var f = Sk.ffi.numberToFloatPy(0), g = Sk.ffh.add(d[0], e[0]), l = Sk.ffh.add(d[1], e[1]), m = Sk.ffh.add(d[2], e[2]), z = f, u = Sk.ffh.add(d[4], e[4]), C = f, G = f, I = f, d = Sk.ffh.add(d[8], e[8]);
+            return Sk.ffi.callsim(a.Lorentzian, g, l, m, z, u, C, G, I, d, f, f, f, f, f, f, f);
           }
           if (Sk.ffi.isNum(c))
-            return f = Sk.ffi.numberToFloatPy(0), g = Sk.ffh.add(d[0], e), l = d[1], m = d[2], w = d[4], d = d[8], Sk.ffi.callsim(a.Lorentzian, g, l, m, f, w, f, f, f, d, f, f, f, f, f, f, f);
+            return f = Sk.ffi.numberToFloatPy(0), g = Sk.ffh.add(d[0], e), l = d[1], m = d[2], u = d[4], d = d[8], Sk.ffi.callsim(a.Lorentzian, g, l, m, f, u, f, f, f, d, f, f, f, f, f, f, f);
           Sk.ffi.checkRhsOperandType('add', h, !1, c);
         });
         g.__radd__ = Sk.ffi.functionPy(function (b, c) {
@@ -30486,7 +30498,7 @@
                   11,
                   10
                 ]
-              ])), B = d(e([
+              ])), z = d(e([
                 [
                   1,
                   2,
@@ -30502,7 +30514,7 @@
                   0,
                   2
                 ]
-              ])), w = d(e([
+              ])), u = d(e([
                 [
                   1,
                   3,
@@ -30591,51 +30603,51 @@
                   1,
                   5,
                   0
-                ]])), E = d(e([[
+                ]])), I = d(e([[
                   1,
                   6,
                   0
-                ]])), F = d(e([[
+                ]])), J = d(e([[
                   1,
                   7,
                   0
-                ]])), D = d(e([[
+                ]])), H = d(e([[
                   1,
                   8,
                   0
-                ]])), M = d(e([[
+                ]])), F = d(e([[
                   1,
                   9,
                   0
-                ]])), H = d(e([[
+                ]])), N = d(e([[
                   1,
                   10,
                   0
-                ]])), u = d(e([[
+                ]])), B = d(e([[
                   1,
                   11,
                   0
-                ]])), z = d(e([[
+                ]])), w = d(e([[
                   1,
                   12,
                   0
-                ]])), y = d(e([[
+                ]])), v = d(e([[
                   1,
                   13,
                   0
-                ]])), N = d(e([[
+                ]])), A = d(e([[
                   1,
                   14,
                   0
-                ]])), v = d(e([[
+                ]])), K = d(e([[
                   1,
                   15,
                   0
                 ]]));
-            return Sk.ffi.callsim(a.Lorentzian, l, m, B, w, C, G, E, F, D, M, H, u, z, y, N, v);
+            return Sk.ffi.callsim(a.Lorentzian, l, m, z, u, C, G, I, J, H, F, N, B, w, v, A, K);
           }
           if (Sk.ffi.isNum(c))
-            return l = Sk.ffh.add(f[0], g), m = Sk.ffh.add(f[1], g), B = Sk.ffh.add(f[2], g), w = Sk.ffh.add(f[3], g), C = Sk.ffh.add(f[4], g), G = Sk.ffh.add(f[5], g), E = Sk.ffh.add(f[6], g), F = Sk.ffh.add(f[7], g), D = Sk.ffh.add(f[8], g), M = Sk.ffh.add(f[9], g), H = Sk.ffh.add(f[10], g), u = Sk.ffh.add(f[11], g), z = Sk.ffh.add(f[12], g), y = Sk.ffh.add(f[13], g), N = Sk.ffh.add(f[14], g), v = Sk.ffh.add(f[15], g), Sk.ffi.callsim(a.Lorentzian, l, m, B, w, C, G, E, F, D, M, H, u, z, y, N, v);
+            return l = Sk.ffh.add(f[0], g), m = Sk.ffh.add(f[1], g), z = Sk.ffh.add(f[2], g), u = Sk.ffh.add(f[3], g), C = Sk.ffh.add(f[4], g), G = Sk.ffh.add(f[5], g), I = Sk.ffh.add(f[6], g), J = Sk.ffh.add(f[7], g), H = Sk.ffh.add(f[8], g), F = Sk.ffh.add(f[9], g), N = Sk.ffh.add(f[10], g), B = Sk.ffh.add(f[11], g), w = Sk.ffh.add(f[12], g), v = Sk.ffh.add(f[13], g), A = Sk.ffh.add(f[14], g), K = Sk.ffh.add(f[15], g), Sk.ffi.callsim(a.Lorentzian, l, m, z, u, C, G, I, J, H, F, N, B, w, v, A, K);
           Sk.ffi.checkRhsOperandType('multiply', h, !1, c);
         });
         g.__rmul__ = Sk.ffi.functionPy(function (a, b) {
@@ -31638,6 +31650,8 @@
   Sk.three = Sk.three || {};
   Sk.three.FACE_3 = 'Face3';
   Sk.three.MATERIAL = 'Material';
+  Sk.three.MATRIX_3 = 'Matrix3';
+  Sk.three.MATRIX_4 = 'Matrix4';
   Sk.three.OBJECT_3D = 'Object3D';
   Sk.three.ARROW_GEOMETRY = 'ArrowGeometry';
   Sk.three.VORTEX_GEOMETRY = 'VortexGeometry';
@@ -31727,7 +31741,7 @@
           return b;
         });
       }
-      function t(b) {
+      function s(b) {
         if ('object' !== typeof b)
           throw Sk.ffi.assertionError('target must be an object.');
         if ('function' !== typeof b.remove)
@@ -31737,7 +31751,37 @@
           b.remove(d);
         });
       }
-      function s(a, b, d, g) {
+      function t(b) {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (c, d) {
+          d.__init__ = Sk.ffi.functionPy(function (a) {
+            Sk.ffi.referenceToPy(b, 'vertices', void 0, a);
+          });
+          d.__getattr__ = Sk.ffi.functionPy(function (c, d) {
+            switch (d) {
+            case 'append':
+              return Sk.ffi.callableToPy(a, 'append', function (a, c) {
+                b.push(n('vector', c));
+              });
+            }
+          });
+          d.__getitem__ = Sk.ffi.functionPy(function (a, c) {
+            var d = Sk.ffi.remapToJs(c);
+            return m(b[d]);
+          });
+          d.mp$length = function () {
+            return b.length;
+          };
+          d.__str__ = Sk.ffi.functionPy(function (a) {
+            return Sk.ffh.str(Sk.ffi.listPy(b.map(function (a) {
+              return m(a);
+            })));
+          });
+          d.__repr__ = Sk.ffi.functionPy(function (a) {
+            return Sk.ffi.stringToPy('vertices');
+          });
+        }, 'vertices', []));
+      }
+      function y(a, b, d, g) {
         if (f(b))
           throw Error('argName must be specified');
         if (f(d))
@@ -31770,7 +31814,7 @@
           throw new Sk.builtin.AssertionError(d + '.' + b + ' is unknown.');
         }
       }
-      function A(b, c, d) {
+      function x(b, c, d) {
         var e = Sk.ffi.remapToJs(b);
         switch (c) {
         case 'aspect':
@@ -31810,7 +31854,7 @@
           throw Sk.ffi.err.attribute(c).isNotSetableOnType(d);
         }
       }
-      function x(b, c, d) {
+      function z(b, c, d) {
         c = Sk.ffi.remapToJs(c);
         switch (d) {
         case 'id':
@@ -31823,9 +31867,7 @@
             return Sk.ffi.callsim(a[Sk.three.FACE_3], Sk.ffi.referenceToPy(b, Sk.three.FACE_3));
           }), Sk.ffi.listPy(b);
         case 'vertices':
-          return Sk.ffi.listPy(c.vertices.map(function (a) {
-            return m(a);
-          }));
+          return t(c.vertices);
         case 'radius':
           return Sk.ffi.numberToFloatPy(c[d]);
         case 'width':
@@ -31842,7 +31884,7 @@
           throw Sk.ffi.err.attribute(d).isNotGetableOnType(b);
         }
       }
-      function B(a, b, c, d) {
+      function u(a, b, c, d) {
         b = Sk.ffi.remapToJs(b);
         var e = Sk.ffi.remapToJs(d);
         switch (c) {
@@ -31854,7 +31896,7 @@
           throw Sk.ffi.err.attribute(c).isNotSetableOnType(a);
         }
       }
-      function w(b, c, d) {
+      function C(b, c, d) {
         var e = Sk.ffi.remapToJs(c);
         switch (d) {
         case 'color':
@@ -31863,7 +31905,7 @@
           return Sk.three.object3DGetAttr(b, c, d);
         }
       }
-      function C(a, b, c, d) {
+      function G(a, b, c, d) {
         var e = Sk.ffi.remapToJs(b), f = Sk.ffi.remapToJs(d);
         switch (c) {
         case 'color':
@@ -31873,7 +31915,7 @@
           return Sk.three.object3DSetAttr(a, b, c, d);
         }
       }
-      function G(b, c, d) {
+      function I(b, c, d) {
         c = Sk.ffi.remapToJs(c);
         switch (d) {
         case 'emissive':
@@ -31895,7 +31937,7 @@
           throw Sk.ffi.err.attribute(d).isNotGetableOnType(b);
         }
       }
-      function E(a, b, c, d) {
+      function J(a, b, c, d) {
         b = Sk.ffi.remapToJs(b);
         switch (c) {
         case 'name':
@@ -31915,7 +31957,7 @@
       }
       Sk.ffi.checkFunctionArgs('defineThree', arguments, 2, 2);
       Sk.builtin.defineNode(a);
-      var F = Sk.ffi.PyType.INT, D = [
+      var H = Sk.ffi.PyType.INT, F = [
           Sk.ffi.PyType.FLOAT,
           Sk.ffi.PyType.INT,
           Sk.ffi.PyType.LONG
@@ -31934,10 +31976,10 @@
         for (l = 0; l <= e; l++) {
           var p = [], q = [], r = l / e, s = -r * c + h, t = r * (b - a) + a;
           for (g = 0; g < d; g++) {
-            var w = g / d, x = 2 * w * Math.PI, x = Sk.three.vector3Cycle(s, t * Math.cos(x), t * Math.sin(x), k);
+            var u = g / d, x = 2 * u * Math.PI, x = Sk.three.vector3Cycle(s, t * Math.cos(x), t * Math.sin(x), k);
             this.vertices.push(x);
             p.push(this.vertices.length - 1);
-            q.push(new THREE.Vector2(w, 1 - r));
+            q.push(new THREE.Vector2(u, 1 - r));
           }
           m.push(p);
           n.push(q);
@@ -31945,49 +31987,49 @@
         c = (b - a) / c;
         for (g = 0; g < d; g++)
           for (r = (g + 0) % d, s = (g + 1) % d, 0 !== a ? (p = this.vertices[m[0][r]].clone(), q = this.vertices[m[0][s]].clone()) : (p = this.vertices[m[1][r]].clone(), q = this.vertices[m[1][s]].clone()), l = p.getComponent((k + 2) % 3), t = p.getComponent((k + 1) % 3), p.setComponent((k + 0) % 3, Math.sqrt(l * l + t * t) * c), p.normalize(), l = q.getComponent((k + 2) % 3), t = q.getComponent((k + 1) % 3), q.setComponent((k + 0) % 3, Math.sqrt(l * l + t * t) * c), q.normalize(), l = 0; l < e; l++) {
-            var t = m[l][r], w = m[l + 1][r], x = m[l + 1][s], A = m[l][s], B = p.clone(), C = p.clone(), D = q.clone(), F = q.clone(), G = n[l][r].clone(), E = n[l + 1][r].clone(), Z = n[l + 1][s].clone(), ca = n[l][s].clone();
-            this.faces.push(new THREE.Face3(t, w, A, [
-              B,
+            var t = m[l][r], u = m[l + 1][r], x = m[l + 1][s], y = m[l][s], z = p.clone(), C = p.clone(), F = q.clone(), H = q.clone(), I = n[l][r].clone(), G = n[l + 1][r].clone(), J = n[l + 1][s].clone(), ba = n[l][s].clone();
+            this.faces.push(new THREE.Face3(t, u, y, [
+              z,
               C,
-              F
+              H
+            ]));
+            this.faceVertexUvs[0].push([
+              I,
+              G,
+              ba
+            ]);
+            this.faces.push(new THREE.Face3(u, x, y, [
+              C,
+              F,
+              H
             ]));
             this.faceVertexUvs[0].push([
               G,
-              E,
-              ca
-            ]);
-            this.faces.push(new THREE.Face3(w, x, A, [
-              C,
-              D,
-              F
-            ]));
-            this.faceVertexUvs[0].push([
-              E,
-              Z,
-              ca
+              J,
+              ba
             ]);
           }
         if (!1 === f && 0 < a)
           for (this.vertices.push(Sk.three.vector3Cycle(+h, 0, 0, k)), g = 0; g < d; g++)
-            r = (g + 0) % d, s = (g + 1) % d, t = m[0][r], w = m[0][s], x = this.vertices.length - 1, B = Sk.three.vector3Cycle(1, 0, 0, k), C = Sk.three.vector3Cycle(1, 0, 0, k), D = Sk.three.vector3Cycle(1, 0, 0, k), G = n[0][r].clone(), E = n[0][s].clone(), Z = new THREE.Vector2(E.u, 0), this.faces.push(new THREE.Face3(t, w, x, [
-              B,
+            r = (g + 0) % d, s = (g + 1) % d, t = m[0][r], u = m[0][s], x = this.vertices.length - 1, z = Sk.three.vector3Cycle(1, 0, 0, k), C = Sk.three.vector3Cycle(1, 0, 0, k), F = Sk.three.vector3Cycle(1, 0, 0, k), I = n[0][r].clone(), G = n[0][s].clone(), J = new THREE.Vector2(G.u, 0), this.faces.push(new THREE.Face3(t, u, x, [
+              z,
               C,
-              D
+              F
             ])), this.faceVertexUvs[0].push([
+              I,
               G,
-              E,
-              Z
+              J
             ]);
         if (!1 === f && 0 < b)
           for (this.vertices.push(Sk.three.vector3Cycle(-h, 0, 0, k)), g = 0; g < d; g++)
-            r = (g + 0) % d, s = (g + 1) % d, t = m[e][s], w = m[e][r], x = this.vertices.length - 1, B = Sk.three.vector3Cycle(-1, 0, 0, k), C = Sk.three.vector3Cycle(-1, 0, 0, k), D = Sk.three.vector3Cycle(-1, 0, 0, k), G = n[e][s].clone(), E = n[e][r].clone(), Z = new THREE.Vector2(E.u, 1), this.faces.push(new THREE.Face3(t, w, x, [
-              B,
+            r = (g + 0) % d, s = (g + 1) % d, t = m[e][s], u = m[e][r], x = this.vertices.length - 1, z = Sk.three.vector3Cycle(-1, 0, 0, k), C = Sk.three.vector3Cycle(-1, 0, 0, k), F = Sk.three.vector3Cycle(-1, 0, 0, k), I = n[e][s].clone(), G = n[e][r].clone(), J = new THREE.Vector2(G.u, 1), this.faces.push(new THREE.Face3(t, u, x, [
+              z,
               C,
-              D
+              F
             ])), this.faceVertexUvs[0].push([
+              I,
               G,
-              E,
-              Z
+              J
             ]);
         this.computeCentroids();
         this.computeFaceNormals();
@@ -32158,13 +32200,13 @@
             var s = h(this.circleSegments, e), t = Math.cos(s), s = Math.sin(s);
             m.x = l * t;
             m.y = l * s;
-            var w = new THREE.Vector3(), x = e % k === k - 1 ? b : c;
-            w.x = (l + x * q) * t;
-            w.y = (l + x * q) * s;
-            w.z = x * r;
-            this.vertices.push(w);
+            var u = new THREE.Vector3(), x = e % k === k - 1 ? b : c;
+            u.x = (l + x * q) * t;
+            u.y = (l + x * q) * s;
+            u.z = x * r;
+            this.vertices.push(u);
             a.push(new THREE.Vector2(e / this.circleSegments, f / this.radialSegments));
-            d.push(w.clone().sub(m).normalize());
+            d.push(u.clone().sub(m).normalize());
           }
         }
         for (f = 1; f <= this.radialSegments; f++)
@@ -32220,7 +32262,7 @@
           case 'add':
             return q(d);
           case 'remove':
-            return t(d);
+            return s(d);
           }
         });
         c.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
@@ -32438,7 +32480,7 @@
                 'Color',
                 Sk.ffi.PyType.INT
               ], Sk.ffi.isInstance(b, 'Color') || Sk.ffi.isInt(b), b);
-              Sk.ffi.checkArgType('alpha', D, Sk.ffi.isNum(c), c);
+              Sk.ffi.checkArgType('alpha', F, Sk.ffi.isNum(c), c);
               var e = Sk.ffi.remapToJs(b), f = Sk.ffi.remapToJs(c);
               return Sk.ffi.remapToPy(d.setClearColor(e, f));
             });
@@ -32609,10 +32651,10 @@
       a.PerspectiveCamera = Sk.ffi.buildClass(a, function (b, c) {
         c.__init__ = Sk.ffi.functionPy(function (a, b, c, d, e) {
           Sk.ffi.checkMethodArgs('PerspectiveCamera', arguments, 0, 4);
-          Sk.ffi.isDefined(b) && Sk.ffi.checkArgType('fov', D, Sk.ffi.isNum(b), b);
-          Sk.ffi.isDefined(c) && Sk.ffi.checkArgType('aspect', D, Sk.ffi.isNum(c), c);
-          Sk.ffi.isDefined(d) && Sk.ffi.checkArgType('near', D, Sk.ffi.isNum(d), d);
-          Sk.ffi.isDefined(e) && Sk.ffi.checkArgType('far', D, Sk.ffi.isNum(e), e);
+          Sk.ffi.isDefined(b) && Sk.ffi.checkArgType('fov', F, Sk.ffi.isNum(b), b);
+          Sk.ffi.isDefined(c) && Sk.ffi.checkArgType('aspect', F, Sk.ffi.isNum(c), c);
+          Sk.ffi.isDefined(d) && Sk.ffi.checkArgType('near', F, Sk.ffi.isNum(d), d);
+          Sk.ffi.isDefined(e) && Sk.ffi.checkArgType('far', F, Sk.ffi.isNum(e), e);
           var f = Sk.ffi.remapToJs(b), g = Sk.ffi.remapToJs(c), h = Sk.ffi.remapToJs(d), k = Sk.ffi.remapToJs(e);
           Sk.ffi.referenceToPy(new THREE.PerspectiveCamera(f, g, h, k), 'PerspectiveCamera', void 0, a);
         });
@@ -32653,7 +32695,7 @@
               });
             }, 'updateProjectionMatrix', []));
           default:
-            return A(b, c, 'PerspectiveCamera');
+            return x(b, c, 'PerspectiveCamera');
           }
         });
         c.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
@@ -32847,14 +32889,14 @@
           } else
             l = 1;
           Sk.ffi.isDefined(c) ? (Sk.ffi.checkArgType('attitude', 'Euclidean3', Sk.ffi.isInstance(c, 'Euclidean3'), c), m = Sk.ffi.remapToJs(c).quaternion) : m = new THREE.Quaternion(0, 0, 0, 1);
-          Sk.ffi.isDefined(d) && Sk.ffi.checkArgType('segments', F, Sk.ffi.isInt(d), d);
+          Sk.ffi.isDefined(d) && Sk.ffi.checkArgType('segments', H, Sk.ffi.isInt(d), d);
           Sk.ffi.isDefined(e) ? (Sk.ffi.checkArgType('length', Sk.ffi.PyType.FLOAT, Sk.ffi.isFloat(e), e), n = Sk.ffi.remapToJs(e) * l) : n = l;
           Sk.ffi.isDefined(k) ? (Sk.ffi.checkArgType('axis', 'Euclidean3', Sk.ffi.isInstance(k, 'Euclidean3'), k), p = Sk.ffi.remapToJs(k).vector) : p = new THREE.Vector3(0, 0, 1);
           var q = Sk.ffi.remapToJs(d);
           f = (Sk.ffi.remapToJs(f) || 0.01) * l;
           g = (Sk.ffi.remapToJs(g) || 0.08) * l;
           h = (Sk.ffi.remapToJs(h) || 0.2) * l;
-          var r = n - h, H = n / 2;
+          var B = n - h, r = n / 2;
           l = function (a) {
             var b;
             b = a.x ? 2 : a.y ? 1 : 0;
@@ -32863,27 +32905,27 @@
               [
                 0,
                 0,
-                H * c
+                r * c
               ],
               [
                 g,
                 0,
-                (r - H) * c
+                (B - r) * c
               ],
               [
                 f,
                 0,
-                (r - H) * c
+                (B - r) * c
               ],
               [
                 f,
                 0,
-                -H * c
+                -r * c
               ],
               [
                 0,
                 0,
-                -H * c
+                -r * c
               ]
             ].map(function (a) {
               return new THREE.Vector3(a[d], a[e], a[h]);
@@ -32897,10 +32939,10 @@
           Sk.ffi.referenceToPy(new Sk.stdlib.RevolutionGeometry(l.points, l.generator, q, 0, 2 * Math.PI, m), Sk.three.ARROW_GEOMETRY, void 0, a);
         });
         b.__getattr__ = Sk.ffi.functionPy(function (a, b) {
-          return x(Sk.three.ARROW_GEOMETRY, a, b);
+          return z(Sk.three.ARROW_GEOMETRY, a, b);
         });
         b.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
-          return B(Sk.three.ARROW_GEOMETRY, a, b, c);
+          return u(Sk.three.ARROW_GEOMETRY, a, b, c);
         });
         b.__str__ = Sk.ffi.functionPy(function (a) {
           Sk.ffi.remapToJs(a);
@@ -32921,17 +32963,17 @@
       a.CircleGeometry = Sk.ffi.buildClass(a, function (a, b) {
         b.__init__ = Sk.ffi.functionPy(function (a, b, c, d, e) {
           Sk.ffi.checkMethodArgs('CircleGeometry', arguments, 0, 4);
-          Sk.ffi.isDefined(b) && Sk.ffi.checkArgType('radius', D, Sk.ffi.isNum(b), b);
-          Sk.ffi.isDefined(c) && Sk.ffi.checkArgType('segments', F, Sk.ffi.isInt(c), c);
-          Sk.ffi.isDefined(d) && Sk.ffi.checkArgType('thetaStart', D, Sk.ffi.isNum(d), d);
-          Sk.ffi.isDefined(e) && Sk.ffi.checkArgType('thetaLength', D, Sk.ffi.isNum(e), e);
+          Sk.ffi.isDefined(b) && Sk.ffi.checkArgType('radius', F, Sk.ffi.isNum(b), b);
+          Sk.ffi.isDefined(c) && Sk.ffi.checkArgType('segments', H, Sk.ffi.isInt(c), c);
+          Sk.ffi.isDefined(d) && Sk.ffi.checkArgType('thetaStart', F, Sk.ffi.isNum(d), d);
+          Sk.ffi.isDefined(e) && Sk.ffi.checkArgType('thetaLength', F, Sk.ffi.isNum(e), e);
           Sk.ffi.referenceToPy(new THREE.CircleGeometry(Sk.ffi.remapToJs(b), Sk.ffi.remapToJs(c), Sk.ffi.remapToJs(d), Sk.ffi.remapToJs(e)), 'CircleGeometry', void 0, a);
         });
         b.__getattr__ = Sk.ffi.functionPy(function (a, b) {
-          return x('CircleGeometry', a, b);
+          return z('CircleGeometry', a, b);
         });
         b.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
-          return B('CircleGeometry', a, b, c);
+          return u('CircleGeometry', a, b, c);
         });
         b.__str__ = Sk.ffi.functionPy(function (a) {
           return Sk.ffi.stringToPy('CircleGeometry(' + JSON.stringify({}) + ')');
@@ -32945,12 +32987,12 @@
       a.CubeGeometry = Sk.ffi.buildClass(a, function (a, b) {
         b.__init__ = Sk.ffi.functionPy(function (a, b, c, d, e, f, g) {
           Sk.ffi.checkMethodArgs('CubeGeometry', arguments, 3, 6);
-          Sk.ffi.checkArgType('width', D, Sk.ffi.isNum(b), b);
-          Sk.ffi.checkArgType('height', D, Sk.ffi.isNum(c), c);
-          Sk.ffi.checkArgType('depth', D, Sk.ffi.isNum(d), d);
-          Sk.ffi.isDefined(e) && Sk.ffi.checkArgType('widthSegments', F, Sk.ffi.isInt(e), e);
-          Sk.ffi.isDefined(f) && Sk.ffi.checkArgType('heightSegments', F, Sk.ffi.isInt(f), f);
-          Sk.ffi.isDefined(g) && Sk.ffi.checkArgType('depthSegments', F, Sk.ffi.isInt(g), g);
+          Sk.ffi.checkArgType('width', F, Sk.ffi.isNum(b), b);
+          Sk.ffi.checkArgType('height', F, Sk.ffi.isNum(c), c);
+          Sk.ffi.checkArgType('depth', F, Sk.ffi.isNum(d), d);
+          Sk.ffi.isDefined(e) && Sk.ffi.checkArgType('widthSegments', H, Sk.ffi.isInt(e), e);
+          Sk.ffi.isDefined(f) && Sk.ffi.checkArgType('heightSegments', H, Sk.ffi.isInt(f), f);
+          Sk.ffi.isDefined(g) && Sk.ffi.checkArgType('depthSegments', H, Sk.ffi.isInt(g), g);
           var h = Sk.ffi.remapToJs(b), k = Sk.ffi.remapToJs(c), l = Sk.ffi.remapToJs(d), m = Sk.ffi.remapToJs(e), n = Sk.ffi.remapToJs(f), p = Sk.ffi.remapToJs(g);
           Sk.ffi.referenceToPy(new THREE.CubeGeometry(h, k, l, m, n, p), 'CubeGeometry', void 0, a);
         });
@@ -32966,14 +33008,11 @@
           case 'depthSegments':
             return Sk.ffi.numberToIntPy(c[b]);
           default:
-            throw Sk.ffi.err.attribute(b).isNotGetableOnType('CubeGeometry');
+            return z('CubeGeometry', a, b);
           }
         });
         b.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
-          switch (b) {
-          default:
-            throw Sk.ffi.err.attribute(b).isNotSetableOnType('CubeGeometry');
-          }
+          return u('CubeGeometry', a, b, c);
         });
         b.__str__ = Sk.ffi.functionPy(function (a) {
           a = Sk.ffi.remapToJs(a);
@@ -33003,9 +33042,9 @@
             Sk.ffi.referenceToPy(Sk.ffi.remapToJs(b), 'CylinderGeometry', void 0, a);
           else {
             Sk.ffi.checkMethodArgs('CylinderGeometry', arguments, 0, 7);
-            Sk.ffi.checkArgType('radiusTop', D, Sk.ffi.isNum(b) || Sk.ffi.isUndefined(b), b);
-            Sk.ffi.checkArgType('radiusBottom', D, Sk.ffi.isNum(c) || Sk.ffi.isUndefined(c), c);
-            Sk.ffi.checkArgType('height', D, Sk.ffi.isNum(d) || Sk.ffi.isUndefined(d), d);
+            Sk.ffi.checkArgType('radiusTop', F, Sk.ffi.isNum(b) || Sk.ffi.isUndefined(b), b);
+            Sk.ffi.checkArgType('radiusBottom', F, Sk.ffi.isNum(c) || Sk.ffi.isUndefined(c), c);
+            Sk.ffi.checkArgType('height', F, Sk.ffi.isNum(d) || Sk.ffi.isUndefined(d), d);
             Sk.ffi.checkArgType('radialSegments', Sk.ffi.PyType.INT, Sk.ffi.isInt(e) || Sk.ffi.isUndefined(e), e);
             Sk.ffi.checkArgType('heightSegments', Sk.ffi.PyType.INT, Sk.ffi.isInt(f) || Sk.ffi.isUndefined(f), f);
             Sk.ffi.checkArgType('openEnded', Sk.ffi.PyType.BOOL, Sk.ffi.isBool(g) || Sk.ffi.isUndefined(g), g);
@@ -33030,11 +33069,11 @@
           case 'openEnded':
             return Sk.ffi.booleanToPy(c.openEnded);
           default:
-            return x('CylinderGeometry', a, b);
+            return z('CylinderGeometry', a, b);
           }
         });
         b.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
-          return B('CylinderGeometry', a, b, c);
+          return u('CylinderGeometry', a, b, c);
         });
         b.__str__ = Sk.ffi.functionPy(function (a) {
           a = Sk.ffi.remapToJs(a);
@@ -33068,10 +33107,10 @@
           Sk.ffi.referenceToPy(new Sk.stdlib.RevolutionGeometry(f, g, Sk.ffi.remapToJs(c), Sk.ffi.remapToJs(d), Sk.ffi.remapToJs(e)), 'LatheGeometry', void 0, a);
         });
         b.__getattr__ = Sk.ffi.functionPy(function (a, b) {
-          return x('LatheGeometry', a, b);
+          return z('LatheGeometry', a, b);
         });
         b.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
-          return B('LatheGeometry', a, b, c);
+          return u('LatheGeometry', a, b, c);
         });
         b.__str__ = Sk.ffi.functionPy(function (a) {
           return Sk.ffi.stringToPy('LatheGeometry(' + JSON.stringify({}) + ')');
@@ -33085,8 +33124,8 @@
       a.IcosahedronGeometry = Sk.ffi.buildClass(a, function (a, b) {
         b.__init__ = Sk.ffi.functionPy(function (a, b, c) {
           Sk.ffi.checkMethodArgs('IcosahedronGeometry', arguments, 0, 2);
-          Sk.ffi.isDefined(b) && Sk.ffi.checkArgType('radius', D, Sk.ffi.isNum(b), b);
-          Sk.ffi.isDefined(c) && Sk.ffi.checkArgType('detail', F, Sk.ffi.isInt(c), c);
+          Sk.ffi.isDefined(b) && Sk.ffi.checkArgType('radius', F, Sk.ffi.isNum(b), b);
+          Sk.ffi.isDefined(c) && Sk.ffi.checkArgType('detail', H, Sk.ffi.isInt(c), c);
           var d = Sk.ffi.remapToJs(b), e = Sk.ffi.remapToJs(c);
           Sk.ffi.referenceToPy(new THREE.IcosahedronGeometry(d, e), 'IcosahedronGeometry', void 0, a);
         });
@@ -33127,8 +33166,8 @@
       a.OctahedronGeometry = Sk.ffi.buildClass(a, function (a, b) {
         b.__init__ = Sk.ffi.functionPy(function (a, b, c) {
           Sk.ffi.checkMethodArgs('OctahedronGeometry', arguments, 0, 2);
-          Sk.ffi.isDefined(b) && Sk.ffi.checkArgType('radius', D, Sk.ffi.isNum(b), b);
-          Sk.ffi.isDefined(c) && Sk.ffi.checkArgType('detail', F, Sk.ffi.isInt(c), c);
+          Sk.ffi.isDefined(b) && Sk.ffi.checkArgType('radius', F, Sk.ffi.isNum(b), b);
+          Sk.ffi.isDefined(c) && Sk.ffi.checkArgType('detail', H, Sk.ffi.isInt(c), c);
           var d = Sk.ffi.remapToJs(b), e = Sk.ffi.remapToJs(c), f = new THREE.OctahedronGeometry(d, e);
           f.radius = d;
           f.detail = e;
@@ -33179,10 +33218,10 @@
           Sk.ffi.referenceToPy(new Sk.stdlib.PlaneGeometry(f, h, k, l), 'PlaneGeometry', void 0, a);
         });
         b.__getattr__ = Sk.ffi.functionPy(function (a, b) {
-          return x('PlaneGeometry', a, b);
+          return z('PlaneGeometry', a, b);
         });
         b.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
-          return B('PlaneGeometry', a, b, c);
+          return u('PlaneGeometry', a, b, c);
         });
         b.__str__ = Sk.ffi.functionPy(function (a) {
           Sk.ffi.remapToJs(a);
@@ -33220,8 +33259,8 @@
           Sk.ffi.checkArgType('points', Sk.ffi.PyType.LIST, Sk.ffi.isList(b), b);
           Sk.ffi.checkArgType('generator', 'Euclidean3', Sk.ffi.isInstance(c, 'Euclidean3'), c);
           Sk.ffi.isDefined(d) && Sk.ffi.checkArgType('segments', Sk.ffi.PyType.INT, Sk.ffi.isInt(d), d);
-          Sk.ffi.isDefined(e) && Sk.ffi.checkArgType('phiStart', D, Sk.ffi.isNum(e), e);
-          Sk.ffi.isDefined(f) && Sk.ffi.checkArgType('phiLength', D, Sk.ffi.isNum(f), f);
+          Sk.ffi.isDefined(e) && Sk.ffi.checkArgType('phiStart', F, Sk.ffi.isNum(e), e);
+          Sk.ffi.isDefined(f) && Sk.ffi.checkArgType('phiLength', F, Sk.ffi.isNum(f), f);
           Sk.ffi.isDefined(g) && Sk.ffi.checkArgType('attitude', 'Euclidean3', Sk.ffi.isInstance(g, 'Euclidean3'), g);
           var h = Sk.ffi.remapToJs(b).map(function (a) {
               return new THREE.Vector3(a.x, a.y, a.z);
@@ -33232,7 +33271,7 @@
           Sk.ffi.remapToJs(a);
           switch (b) {
           default:
-            return x('RevolutionGeometry', a, b);
+            return z('RevolutionGeometry', a, b);
           }
         });
         b.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
@@ -33240,7 +33279,7 @@
           Sk.ffi.remapToJs(c);
           switch (b) {
           default:
-            return B('RevolutionGeometry', a, b, c);
+            return u('RevolutionGeometry', a, b, c);
           }
         });
         b.__str__ = Sk.ffi.functionPy(function (a) {
@@ -33260,15 +33299,15 @@
               Sk.ffi.referenceToPy(Sk.ffi.remapToJs(b), 'SphereGeometry', void 0, a);
               return;
             }
-            Sk.ffi.checkArgType('radius', D, Sk.ffi.isNum(b), b);
+            Sk.ffi.checkArgType('radius', F, Sk.ffi.isNum(b), b);
           }
           g(c) && Sk.ffi.checkArgType('widthSegments', Sk.ffi.PyType.INT, Sk.ffi.isInt(c), c);
           g(d) && Sk.ffi.checkArgType('heightSegments', Sk.ffi.PyType.INT, Sk.ffi.isInt(d), d);
           var l = Sk.ffi.remapToJs(b), m = Sk.ffi.remapToJs(c), n = Sk.ffi.remapToJs(d);
-          e = s(e, 'phiStart', 'SphereGeometry');
-          f = s(f, 'phiLength', 'SphereGeometry');
-          h = s(h, 'thetaStart', 'SphereGeometry');
-          k = s(k, 'thetaLength', 'SphereGeometry');
+          e = y(e, 'phiStart', 'SphereGeometry');
+          f = y(f, 'phiLength', 'SphereGeometry');
+          h = y(h, 'thetaStart', 'SphereGeometry');
+          k = y(k, 'thetaLength', 'SphereGeometry');
           Sk.ffi.referenceToPy(new THREE.SphereGeometry(l, m, n, e, f, h, k), 'SphereGeometry', void 0, a);
         });
         b.__getattr__ = Sk.ffi.functionPy(function (a, b) {
@@ -33289,13 +33328,13 @@
           case 'thetaLength':
             return Sk.ffi.numberToFloatPy(c.thetaLength);
           default:
-            return x('SphereGeometry', a, b);
+            return z('SphereGeometry', a, b);
           }
         });
         b.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
           switch (b) {
           default:
-            return B('SphereGeometry', a, b, c);
+            return u('SphereGeometry', a, b, c);
           }
         });
         b.__str__ = Sk.ffi.functionPy(function (a) {
@@ -33326,8 +33365,8 @@
       a.TetrahedronGeometry = Sk.ffi.buildClass(a, function (a, b) {
         b.__init__ = Sk.ffi.functionPy(function (a, b, c) {
           Sk.ffi.checkMethodArgs('TetrahedronGeometry', arguments, 2, 2);
-          Sk.ffi.checkArgType('radius', D, Sk.ffi.isNum(b), b);
-          Sk.ffi.checkArgType('detail', F, Sk.ffi.isInt(c), c);
+          Sk.ffi.checkArgType('radius', F, Sk.ffi.isNum(b), b);
+          Sk.ffi.checkArgType('detail', H, Sk.ffi.isInt(c), c);
           var d = Sk.ffi.remapToJs(b), e = Sk.ffi.remapToJs(c), f = new THREE.TetrahedronGeometry(d, e);
           f.radius = d;
           f.detail = e;
@@ -33341,11 +33380,11 @@
           case 'detail':
             return Sk.ffi.numberToIntPy(c.detail);
           default:
-            return x('TetrahedronGeometry', a, b);
+            return z('TetrahedronGeometry', a, b);
           }
         });
         b.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
-          return B('TetrahedronGeometry', a, b, c);
+          return u('TetrahedronGeometry', a, b, c);
         });
         b.__str__ = Sk.ffi.functionPy(function (a) {
           a = Sk.ffi.remapToJs(a);
@@ -33371,10 +33410,10 @@
           a.v = new THREE.TextGeometry(b, c);
         });
         b.__getattr__ = Sk.ffi.functionPy(function (a, b) {
-          return x('TextGeometry', a, b);
+          return z('TextGeometry', a, b);
         });
         b.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
-          return B('TextGeometry', a, b, c);
+          return u('TextGeometry', a, b, c);
         });
         b.__str__ = Sk.ffi.functionPy(function (a) {
           Sk.ffi.remapToJs(a);
@@ -33390,11 +33429,11 @@
       a.TorusGeometry = Sk.ffi.buildClass(a, function (a, b) {
         b.__init__ = Sk.ffi.functionPy(function (a, b, c, d, e, f) {
           Sk.ffi.checkMethodArgs('TorusGeometry', arguments, 0, 5);
-          Sk.ffi.isDefined(b) && Sk.ffi.checkArgType('radius', D, Sk.ffi.isNum(b), b);
-          Sk.ffi.isDefined(c) && Sk.ffi.checkArgType('tube', D, Sk.ffi.isNum(c), c);
-          Sk.ffi.isDefined(d) && Sk.ffi.checkArgType('radialSegments', F, Sk.ffi.isInt(d), d);
-          Sk.ffi.isDefined(e) && Sk.ffi.checkArgType('tubularSegments', F, Sk.ffi.isInt(e), e);
-          Sk.ffi.isDefined(f) && Sk.ffi.checkArgType('arc', D, Sk.ffi.isNum(f), f);
+          Sk.ffi.isDefined(b) && Sk.ffi.checkArgType('radius', F, Sk.ffi.isNum(b), b);
+          Sk.ffi.isDefined(c) && Sk.ffi.checkArgType('tube', F, Sk.ffi.isNum(c), c);
+          Sk.ffi.isDefined(d) && Sk.ffi.checkArgType('radialSegments', H, Sk.ffi.isInt(d), d);
+          Sk.ffi.isDefined(e) && Sk.ffi.checkArgType('tubularSegments', H, Sk.ffi.isInt(e), e);
+          Sk.ffi.isDefined(f) && Sk.ffi.checkArgType('arc', F, Sk.ffi.isNum(f), f);
           var g = Sk.ffi.remapToJs(b), h = Sk.ffi.remapToJs(c), k = Sk.ffi.remapToJs(d), l = Sk.ffi.remapToJs(e), m = Sk.ffi.remapToJs(f), g = new Sk.stdlib.TorusGeometry(g, h, k, l, m);
           Sk.ffi.referenceToPy(g, 'TorusGeometry', void 0, a);
         });
@@ -33412,11 +33451,11 @@
           case 'arc':
             return Sk.ffi.numberToFloatPy(c.arc);
           default:
-            return x('TorusGeometry', a, b);
+            return z('TorusGeometry', a, b);
           }
         });
         b.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
-          return B('TorusGeometry', a, b, c);
+          return u('TorusGeometry', a, b, c);
         });
         b.__str__ = Sk.ffi.functionPy(function (a) {
           Sk.ffi.remapToJs(a);
@@ -33454,12 +33493,12 @@
         b.__init__ = Sk.ffi.functionPy(function (a, b, c, d, e, f, h, k) {
           Sk.ffi.checkMethodArgs(Sk.three.VORTEX_GEOMETRY, arguments, 7, 7);
           Sk.ffi.checkArgType('radius', Sk.ffi.PyType.FLOAT, Sk.ffi.isFloat(b), b);
-          Sk.ffi.checkArgType('radiusCone', D, Sk.ffi.isNum(c), c);
-          Sk.ffi.checkArgType('radiusShaft', D, Sk.ffi.isNum(d), d);
+          Sk.ffi.checkArgType('radiusCone', F, Sk.ffi.isNum(c), c);
+          Sk.ffi.checkArgType('radiusShaft', F, Sk.ffi.isNum(d), d);
           var l = Sk.ffi.remapToJs(b), m = Sk.ffi.remapToJs(c), n = Sk.ffi.remapToJs(d), p = Sk.ffi.remapToJs(e), q = Sk.ffi.remapToJs(f);
           g(h) && Sk.ffi.checkArgType('widthSegments', Sk.ffi.PyType.INT, Sk.ffi.isInt(h), h);
           g(k) && Sk.ffi.checkArgType('heightSegments', Sk.ffi.PyType.INT, Sk.ffi.isInt(k), k);
-          var r = Sk.ffi.remapToJs(h), s = Sk.ffi.remapToJs(k), l = new Sk.stdlib.VortexGeometry(l, m, n, p, q, r, s);
+          var r = Sk.ffi.remapToJs(h), B = Sk.ffi.remapToJs(k), l = new Sk.stdlib.VortexGeometry(l, m, n, p, q, r, B);
           Sk.ffi.referenceToPy(l, Sk.three.VORTEX_GEOMETRY, void 0, a);
         });
         b.__getattr__ = Sk.ffi.functionPy(function (a, b) {
@@ -33477,11 +33516,11 @@
           case 'heightSegments':
             return Sk.ffi.numberToIntPy(c.heightSegments);
           default:
-            return x(Sk.three.VORTEX_GEOMETRY, a, b);
+            return z(Sk.three.VORTEX_GEOMETRY, a, b);
           }
         });
         b.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
-          return B(Sk.three.VORTEX_GEOMETRY, a, b, c);
+          return u(Sk.three.VORTEX_GEOMETRY, a, b, c);
         });
         b.__str__ = Sk.ffi.functionPy(function (a) {
           Sk.ffi.remapToJs(a);
@@ -33516,10 +33555,10 @@
           g(b) ? Sk.ffi.referenceToPy(Sk.ffi.remapToJs(b), 'Geometry', void 0, a) : Sk.ffi.referenceToPy(new THREE.Geometry(), 'Geometry', void 0, a);
         });
         b.__getattr__ = Sk.ffi.functionPy(function (a, b) {
-          return x('Geometry', a, b);
+          return z('Geometry', a, b);
         });
         b.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
-          return B('Geometry', a, b, c);
+          return u('Geometry', a, b, c);
         });
         b.__str__ = Sk.ffi.functionPy(function (a) {
           Sk.ffi.remapToJs(a);
@@ -33548,6 +33587,8 @@
         case 'scale':
         case 'up':
           return m(e[d]);
+        case 'matrixWorld':
+          return Sk.ffi.callsim(a[Sk.three.MATRIX_4], Sk.ffi.referenceToPy(e[d], Sk.three.MATRIX_4));
         case 'quaternion':
           return Sk.ffi.callsim(a.Quaternion, Sk.ffi.referenceToPy(e.quaternion, 'Quaternion'));
         case 'useQuaternion':
@@ -33568,7 +33609,7 @@
         case 'add':
           return q(e);
         case 'remove':
-          return t(e);
+          return s(e);
         case 'traverse':
           return Sk.ffi.callableToPy(a, d, function (b, f) {
             Sk.ffi.checkMethodArgs(d, arguments, 1, 1);
@@ -33645,10 +33686,10 @@
           Sk.ffi.referenceToPy(new THREE.AmbientLight(c), 'AmbientLight', void 0, a);
         });
         b.__getattr__ = Sk.ffi.functionPy(function (a, b) {
-          return w('AmbientLight', a, b);
+          return C('AmbientLight', a, b);
         });
         b.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
-          return C('AmbientLight', a, b, c);
+          return G('AmbientLight', a, b, c);
         });
         b.__str__ = Sk.ffi.functionPy(function (a) {
           a = Sk.ffi.remapToJs(a);
@@ -33666,7 +33707,7 @@
       a.DirectionalLight = Sk.ffi.buildClass(a, function (a, b) {
         b.__init__ = Sk.ffi.functionPy(function (a, b, c) {
           Sk.ffi.checkMethodArgs('DirectionalLight', arguments, 1, 2);
-          Sk.ffi.checkArgType('intensity', D, Sk.ffi.isNum(c) || Sk.ffi.isUndefined(c), c);
+          Sk.ffi.checkArgType('intensity', F, Sk.ffi.isNum(c) || Sk.ffi.isUndefined(c), c);
           var d = Sk.ffi.remapToJs(b), e = Sk.ffi.remapToJs(c);
           Sk.ffi.referenceToPy(new THREE.DirectionalLight(d, e), 'DirectionalLight', void 0, a);
         });
@@ -33676,18 +33717,18 @@
           case 'intensity':
             return Sk.ffi.numberToFloatPy(c.intensity);
           default:
-            return w('DirectionalLight', a, b);
+            return C('DirectionalLight', a, b);
           }
         });
         b.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
           var d = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(c);
           switch (b) {
           case 'intensity':
-            Sk.ffi.checkArgType('intensity', D, Sk.ffi.isNum(c), c);
+            Sk.ffi.checkArgType('intensity', F, Sk.ffi.isNum(c), c);
             d.intensity = e;
             break;
           default:
-            return C('DirectionalLight', a, b, c);
+            return G('DirectionalLight', a, b, c);
           }
         });
         b.__str__ = Sk.ffi.functionPy(function (a) {
@@ -33716,8 +33757,8 @@
             'Color',
             Sk.ffi.PyType.INT
           ], Sk.ffi.isInstance(b, 'Color') || Sk.ffi.isInt(b), b);
-          Sk.ffi.checkArgType('intensity', D, Sk.ffi.isNum(c) || Sk.ffi.isUndefined(c), c);
-          Sk.ffi.checkArgType('distance', D, Sk.ffi.isNum(d) || Sk.ffi.isUndefined(d), d);
+          Sk.ffi.checkArgType('intensity', F, Sk.ffi.isNum(c) || Sk.ffi.isUndefined(c), c);
+          Sk.ffi.checkArgType('distance', F, Sk.ffi.isNum(d) || Sk.ffi.isUndefined(d), d);
           var e = Sk.ffi.remapToJs(b), f = Sk.ffi.remapToJs(c), g = Sk.ffi.remapToJs(d);
           Sk.ffi.referenceToPy(new THREE.PointLight(e, f, g), 'PointLight', void 0, a);
         });
@@ -33728,21 +33769,21 @@
           case 'intensity':
             return Sk.ffi.numberToFloatPy(Sk.ffi.remapToJs(a).intensity);
           default:
-            return w('PointLight', a, b);
+            return C('PointLight', a, b);
           }
         });
         b.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
           switch (b) {
           case 'distance':
-            Sk.ffi.checkArgType('distance', D, Sk.ffi.isNum(c), c);
+            Sk.ffi.checkArgType('distance', F, Sk.ffi.isNum(c), c);
             Sk.ffi.remapToJs(a).distance = Sk.ffi.remapToJs(c);
             break;
           case 'intensity':
-            Sk.ffi.checkArgType('intensity', D, Sk.ffi.isNum(c), c);
+            Sk.ffi.checkArgType('intensity', F, Sk.ffi.isNum(c), c);
             Sk.ffi.remapToJs(a).intensity = Sk.ffi.remapToJs(c);
             break;
           default:
-            return C('PointLight', a, b, c);
+            return G('PointLight', a, b, c);
           }
         });
         b.__str__ = Sk.ffi.functionPy(function (a) {
@@ -33904,7 +33945,7 @@
             return Sk.ffi.callableToPy(a, 'rotateOnAxis', function (a, c, e) {
               Sk.ffi.checkMethodArgs('rotateOnAxis', arguments, 2, 2);
               Sk.ffi.checkArgType('axis', 'Vector3', Sk.ffi.isInstance(c, 'Vector3'), c);
-              Sk.ffi.checkArgType('angle', D, Sk.ffi.isNum(e), e);
+              Sk.ffi.checkArgType('angle', F, Sk.ffi.isNum(e), e);
               d.rotateOnAxis(Sk.ffi.remapToJs(c), Sk.ffi.remapToJs(e));
               return b;
             });
@@ -33913,7 +33954,7 @@
           case 'rotateZ':
             return Sk.ffi.callableToPy(a, c, function (a, e) {
               Sk.ffi.checkMethodArgs(c, arguments, 1, 1);
-              Sk.ffi.checkArgType('axis', D, Sk.ffi.isNum(e), e);
+              Sk.ffi.checkArgType('axis', F, Sk.ffi.isNum(e), e);
               d[c](Sk.ffi.remapToJs(e));
               return b;
             });
@@ -33937,7 +33978,7 @@
             return Sk.ffi.callableToPy(a, 'translateOnAxis', function (a, c, e) {
               Sk.ffi.checkMethodArgs('translateOnAxis', arguments, 2, 2);
               Sk.ffi.checkArgType('axis', 'Vector3', Sk.ffi.isInstance(c, 'Vector3'), c);
-              Sk.ffi.checkArgType('distance', D, Sk.ffi.isNum(e), e);
+              Sk.ffi.checkArgType('distance', F, Sk.ffi.isNum(e), e);
               d.translateOnAxis(Sk.ffi.remapToJs(c), Sk.ffi.remapToJs(e));
               return b;
             });
@@ -33946,7 +33987,7 @@
           case 'translateZ':
             return Sk.ffi.callableToPy(a, c, function (a, e) {
               Sk.ffi.checkMethodArgs(c, arguments, 1, 1);
-              Sk.ffi.checkArgType('distance', D, Sk.ffi.isNum(e), e);
+              Sk.ffi.checkArgType('distance', F, Sk.ffi.isNum(e), e);
               d[c](Sk.ffi.remapToJs(e));
               return b;
             });
@@ -34018,13 +34059,13 @@
         b.__getattr__ = Sk.ffi.functionPy(function (a, b) {
           switch (b) {
           default:
-            return G(Sk.three.MATERIAL, a, b);
+            return I(Sk.three.MATERIAL, a, b);
           }
         });
         b.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
           switch (b) {
           default:
-            return E(Sk.three.MATERIAL, a, b, c);
+            return J(Sk.three.MATERIAL, a, b, c);
           }
         });
         b.__str__ = Sk.ffi.functionPy(function (a) {
@@ -34049,7 +34090,7 @@
           case 'wireframeLinewidth':
             return Sk.ffi.numberToFloatPy(d.wireframeLinewidth);
           default:
-            return G('MeshBasicMaterial', b, c);
+            return I('MeshBasicMaterial', b, c);
           }
         });
         f.__setattr__ = Sk.ffi.functionPy(function (a, b, f) {
@@ -34083,7 +34124,7 @@
               throw Error(b + ' must be a number');
             break;
           default:
-            return E('MeshBasicMaterial', a, b, f);
+            return J('MeshBasicMaterial', a, b, f);
           }
         });
         f.__str__ = Sk.ffi.functionPy(function (a) {
@@ -34123,7 +34164,7 @@
           case 'opacity':
             return Sk.ffi.numberToFloatPy(d.opacity);
           default:
-            return G('MeshLambertMaterial', b, c);
+            return I('MeshLambertMaterial', b, c);
           }
         });
         f.__setattr__ = Sk.ffi.functionPy(function (a, b, f) {
@@ -34157,7 +34198,7 @@
               throw Error(b + ' must be a number');
             break;
           default:
-            return E('MeshLambertMaterial', a, b, f);
+            return J('MeshLambertMaterial', a, b, f);
           }
         });
         f.__str__ = Sk.ffi.functionPy(function (a) {
@@ -34179,10 +34220,10 @@
           Sk.ffi.referenceToPy(new THREE.MeshNormalMaterial(c), 'MeshNormalMaterial', void 0, a);
         });
         b.__getattr__ = Sk.ffi.functionPy(function (a, b) {
-          return G('MeshNormalMaterial', a, b);
+          return I('MeshNormalMaterial', a, b);
         });
         b.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
-          return E('MeshNormalMaterial', a, b, c);
+          return J('MeshNormalMaterial', a, b, c);
         });
         b.__str__ = Sk.ffi.functionPy(function (a) {
           return Sk.ffi.stringToPy('MeshNormalMaterial(' + JSON.stringify({}) + ')');
@@ -34199,10 +34240,10 @@
           Sk.ffi.referenceToPy(new THREE.MeshPhongMaterial(c), 'MeshPhongMaterial', void 0, a);
         });
         b.__getattr__ = Sk.ffi.functionPy(function (a, b) {
-          return G('MeshPhongMaterial', a, b);
+          return I('MeshPhongMaterial', a, b);
         });
         b.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
-          return E('MeshPhongMaterial', a, b, c);
+          return J('MeshPhongMaterial', a, b, c);
         });
         b.__str__ = Sk.ffi.functionPy(function (a) {
           return Sk.ffi.stringToPy('MeshPhongMaterial(' + JSON.stringify({}) + ')');
@@ -34213,54 +34254,108 @@
           }).join(', ') + ')');
         });
       }, 'MeshPhongMaterial', []);
-      a[Sk.three.FACE_3] = Sk.ffi.buildClass(a, function (a, b) {
-        b.__init__ = Sk.ffi.functionPy(function (a, b, c, d, e, f, g) {
-          switch (Sk.ffi.checkMethodArgs(Sk.three.FACE_3, arguments, 1, 4)) {
-          case 1:
-            Sk.ffi.checkMethodArgs(Sk.three.FACE_3, arguments, 1, 1);
-            Sk.ffi.checkArgType('a', Sk.three.FACE_3, Sk.ffi.isInstance(b, Sk.three.FACE_3), b);
-            Sk.ffi.referenceToPy(Sk.ffi.remapToJs(b), Sk.three.FACE_3, void 0, a);
-            break;
+      a[Sk.three.MATRIX_3] = Sk.ffi.buildClass(a, function (b, c) {
+        c.__init__ = Sk.ffi.functionPy(function (a, b) {
+          Sk.ffi.checkMethodArgs(Sk.three.MATRIX_3, arguments, 0, 1);
+          g(b) && Sk.ffi.isInstance(b, Sk.three.MATRIX_3) ? Sk.ffi.referenceToPy(Sk.ffi.remapToJs(b), Sk.three.MATRIX_3, void 0, a) : Sk.ffi.referenceToPy(new THREE.Matrix3(), Sk.three.MATRIX_3, void 0, a);
+        });
+        c.__getattr__ = Sk.ffi.functionPy(function (b, c) {
+          var d = Sk.ffi.remapToJs(b);
+          switch (c) {
+          case 'getNormalMatrix':
+            return Sk.ffi.callableToPy(a, c, function (a, e) {
+              Sk.ffi.checkMethodArgs(c, arguments, 1, 1);
+              Sk.ffi.checkArgType('m', Sk.three.MATRIX_4, Sk.ffi.isInstance(e, Sk.three.MATRIX_4), e);
+              d[c](Sk.ffi.remapToJs(e));
+              return b;
+            });
           default:
-            Sk.ffi.checkMethodArgs(Sk.three.FACE_3, arguments, 4, 4);
-            Sk.ffi.checkArgType('a', F, Sk.ffi.isInt(b), b);
-            Sk.ffi.checkArgType('b', F, Sk.ffi.isInt(c), c);
-            Sk.ffi.checkArgType('c', F, Sk.ffi.isInt(d), d);
-            Sk.ffi.checkArgType('normal', 'Euclidean3', Sk.ffi.isInstance(e, 'Euclidean3'), e);
-            var h = {};
-            h.a = Sk.ffi.remapToJs(b);
-            h.b = Sk.ffi.remapToJs(c);
-            h.c = Sk.ffi.remapToJs(d);
-            h.normal = n('normal', e);
-            Sk.ffi.referenceToPy(h, Sk.three.FACE_3, void 0, a);
+            throw Sk.ffi.err.attribute(c).isNotGetableOnType(Sk.three.MATRIX_3);
           }
         });
-        b.__getattr__ = Sk.ffi.functionPy(function (a, b) {
-          var c = Sk.ffi.remapToJs(a);
+        c.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
           switch (b) {
-          case 'a':
-          case 'b':
-          case 'c':
-            return Sk.ffi.numberToIntPy(c[b]);
-          case 'centroid':
-          case 'normal':
-            return m(c[b]);
-          case 'vertexNormals':
-            return Sk.ffi.listPy(c.vertexNormals.map(function (a) {
-              return m(a);
-            }));
           default:
-            throw Sk.ffi.err.attribute(b).isNotGetableOnType(Sk.three.FACE_3);
+            throw Sk.ffi.err.attribute(b).isNotSetableOnType(Sk.three.MATRIX_3);
+          }
+        });
+        c.__str__ = Sk.ffi.functionPy(function (a) {
+          return Sk.ffi.stringToPy(Sk.three.MATRIX_3 + '()');
+        });
+        c.__repr__ = Sk.ffi.functionPy(function (a) {
+          return Sk.ffi.stringToPy(Sk.three.MATRIX_3 + '()');
+        });
+      }, Sk.three.MATRIX_3, []);
+      a[Sk.three.MATRIX_4] = Sk.ffi.buildClass(a, function (a, b) {
+        b.__init__ = Sk.ffi.functionPy(function (a, b) {
+          Sk.ffi.checkMethodArgs(Sk.three.MATRIX_4, arguments, 0, 1);
+          g(b) && Sk.ffi.isInstance(b, Sk.three.MATRIX_4) ? Sk.ffi.referenceToPy(Sk.ffi.remapToJs(b), Sk.three.MATRIX_4, void 0, a) : Sk.ffi.referenceToPy(new THREE.Matrix4(), Sk.three.MATRIX_4, void 0, a);
+        });
+        b.__getattr__ = Sk.ffi.functionPy(function (a, b) {
+          Sk.ffi.remapToJs(a);
+          switch (b) {
+          default:
+            throw Sk.ffi.err.attribute(b).isNotGetableOnType(Sk.three.MATRIX_4);
           }
         });
         b.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
+          switch (b) {
+          default:
+            throw Sk.ffi.err.attribute(b).isNotSetableOnType(Sk.three.MATRIX_4);
+          }
+        });
+        b.__str__ = Sk.ffi.functionPy(function (a) {
+          return Sk.ffi.stringToPy(Sk.three.MATRIX_4 + '()');
+        });
+        b.__repr__ = Sk.ffi.functionPy(function (a) {
+          return Sk.ffi.stringToPy(Sk.three.MATRIX_4 + '()');
+        });
+      }, Sk.three.MATRIX_4, []);
+      a[Sk.three.FACE_3] = Sk.ffi.buildClass(a, function (b, c) {
+        c.__init__ = Sk.ffi.functionPy(function (a, b, c, d, e, f, h) {
+          if (g(b) && Sk.ffi.isInstance(b, Sk.three.FACE_3)) {
+            Sk.ffi.checkMethodArgs(Sk.three.FACE_3, arguments, 1, 1);
+            var k = Sk.ffi.remapToJs(b);
+            Sk.ffi.checkArgType('a', '!?', g(k), b);
+            Sk.ffi.checkArgType('a', '?!', k instanceof THREE.Face3, b);
+          } else {
+            Sk.ffi.checkMethodArgs(Sk.three.FACE_3, arguments, 4, 4);
+            Sk.ffi.checkArgType('a', H, Sk.ffi.isInt(b), b);
+            Sk.ffi.checkArgType('b', H, Sk.ffi.isInt(c), c);
+            Sk.ffi.checkArgType('c', H, Sk.ffi.isInt(d), d);
+            Sk.ffi.checkArgType('normal', 'Euclidean3', Sk.ffi.isInstance(e, 'Euclidean3'), e);
+            var k = Sk.ffi.remapToJs(b), l = Sk.ffi.remapToJs(c), m = Sk.ffi.remapToJs(d), p = n('normal', e), q = Sk.ffi.remapToJs(f), r = Sk.ffi.remapToJs(h), k = new THREE.Face3(k, l, m, p, q, r);
+          }
+          Sk.ffi.referenceToPy(k, Sk.three.FACE_3, void 0, a);
+        });
+        c.__getattr__ = Sk.ffi.functionPy(function (b, c) {
+          var d = Sk.ffi.remapToJs(b);
+          switch (c) {
+          case 'a':
+          case 'b':
+          case 'c':
+            return Sk.ffi.numberToIntPy(d[c]);
+          case 'color':
+            return Sk.ffi.callsim(a.Color, Sk.ffi.referenceToPy(d[c], 'Color'));
+          case 'centroid':
+          case 'normal':
+            return m(d[c]);
+          case 'vertexNormals':
+            return Sk.ffi.listPy(d.vertexNormals.map(function (a) {
+              return m(a);
+            }));
+          default:
+            throw Sk.ffi.err.attribute(c).isNotGetableOnType(Sk.three.FACE_3);
+          }
+        });
+        c.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
           Sk.ffi.remapToJs(a);
           switch (b) {
           default:
             throw Sk.ffi.err.attribute(b).isNotSetableOnType(Sk.three.FACE_3);
           }
         });
-        b.__str__ = Sk.ffi.functionPy(function (a) {
+        c.__str__ = Sk.ffi.functionPy(function (a) {
           Sk.ffi.remapToJs(a);
           var b = [
               'a',
@@ -34274,7 +34369,7 @@
             });
           return Sk.ffi.stringToPy(Sk.three.FACE_3 + '(' + b.join(', ') + ')');
         });
-        b.__repr__ = Sk.ffi.functionPy(function (a) {
+        c.__repr__ = Sk.ffi.functionPy(function (a) {
           Sk.ffi.remapToJs(a);
           var b = [
               'a',
@@ -34316,7 +34411,8 @@
           case 'point':
             return m(d.point);
           case 'face':
-            return Sk.ffi.callsim(a[Sk.three.FACE_3], Sk.ffi.referenceToPy(d.face, Sk.three.FACE_3));
+            var e = d.face;
+            return !g(e) || 'object' === typeof e && null === e ? Sk.ffi.none.None : Sk.ffi.callsim(a[Sk.three.FACE_3], Sk.ffi.referenceToPy(d.face, Sk.three.FACE_3));
           case 'object':
             return Sk.ffi.callsim(a[Sk.three.OBJECT_3D], Sk.ffi.referenceToPy(d.object, Sk.three.OBJECT_3D));
           default:
@@ -34525,12 +34621,16 @@
       a.Raycaster = Sk.ffi.buildClass(a, function (b, c) {
         c.__init__ = Sk.ffi.functionPy(function (a, b, c, d, e) {
           Sk.ffi.checkMethodArgs('Raycaster', arguments, 0, 4);
-          var f = n('origin', b), h = n('direction', c);
-          g(d) && Sk.ffi.checkArgType('near', Sk.ffi.PyType.FLOAT, Sk.ffi.isFloat(d), d);
-          g(e) && Sk.ffi.checkArgType('far', Sk.ffi.PyType.FLOAT, Sk.ffi.isFloat(e), e);
-          var k = Sk.ffi.remapToJs(d);
-          Sk.ffi.remapToJs(e);
-          Sk.ffi.referenceToPy(new THREE.Raycaster(f, h, k), 'Raycaster', void 0, a);
+          if (g(b) && Sk.ffi.isInstance(b, 'Raycaster'))
+            Sk.ffi.referenceToPy(Sk.ffi.remapToJs(b), 'Raycaster', void 0, a);
+          else {
+            var f = n('origin', b), h = n('direction', c);
+            g(d) && Sk.ffi.checkArgType('near', Sk.ffi.PyType.FLOAT, Sk.ffi.isFloat(d), d);
+            g(e) && Sk.ffi.checkArgType('far', Sk.ffi.PyType.FLOAT, Sk.ffi.isFloat(e), e);
+            var k = Sk.ffi.remapToJs(d);
+            Sk.ffi.remapToJs(e);
+            Sk.ffi.referenceToPy(new THREE.Raycaster(f, h, k), 'Raycaster', void 0, a);
+          }
         });
         c.__getattr__ = Sk.ffi.functionPy(function (b, c) {
           var d = Sk.ffi.remapToJs(b);
@@ -34665,7 +34765,7 @@
           return Sk.ffi.stringToPy('Sphere(' + a.join(', ') + ')');
         });
       }, 'Sphere', []);
-      g(THREE) && (a.LineStrip = Sk.ffi.numberToIntPy(THREE.LineStrip), a.LinePieces = Sk.ffi.numberToIntPy(THREE.LinePieces), a.FlatShading = Sk.ffi.numberToIntPy(THREE.FlatShading), a.NoShading = Sk.ffi.numberToIntPy(THREE.NoShading), a.SmoothShading = Sk.ffi.numberToIntPy(THREE.SmoothShading));
+      g(THREE) && (a.LineStrip = Sk.ffi.numberToIntPy(THREE.LineStrip), a.LinePieces = Sk.ffi.numberToIntPy(THREE.LinePieces), a.FlatShading = Sk.ffi.numberToIntPy(THREE.FlatShading), a.NoShading = Sk.ffi.numberToIntPy(THREE.NoShading), a.SmoothShading = Sk.ffi.numberToIntPy(THREE.SmoothShading), a.NoColors = Sk.ffi.numberToIntPy(THREE.NoColors), a.FaceColors = Sk.ffi.numberToIntPy(THREE.FaceColors), a.VertexColors = Sk.ffi.numberToIntPy(THREE.VertexColors));
     };
   }.call(this));
   (function () {
@@ -35183,25 +35283,25 @@
     var a, b, c;
     a = this.BLADE = this.BLADE || {};
     c = function (b, c, f, g, h, k, l, m, n) {
-      var p, q, r, t, s, A, x, B;
-      s = +h;
-      A = +k;
+      var p, q, r, s, t, y, x, z;
+      t = +h;
+      y = +k;
       x = +l;
-      B = -m;
-      p = +(h * s + k * A + l * x - m * B);
-      q = s * p + -0 * A + -0 * x - -0 * B;
-      r = -0 * s + A * p - -0 * x + -0 * B;
-      t = -0 * s + -0 * A + x * p - -0 * B;
-      p = -0 * s + -0 * A - -0 * x + B * p;
-      h = h * q + k * r + l * t - m * p;
+      z = -m;
+      p = +(h * t + k * y + l * x - m * z);
+      q = t * p + -0 * y + -0 * x - -0 * z;
+      r = -0 * t + y * p - -0 * x + -0 * z;
+      s = -0 * t + -0 * y + x * p - -0 * z;
+      p = -0 * t + -0 * y - -0 * x + z * p;
+      h = h * q + k * r + l * s - m * p;
       q /= h;
       r /= h;
-      t /= h;
+      s /= h;
       m = p / h;
-      h = b * q + c * r + f * t - g * m;
-      k = b * r + c * q - f * m + g * t;
-      l = b * t + c * m + f * q - g * r;
-      b = b * m + c * t - f * r + g * q;
+      h = b * q + c * r + f * s - g * m;
+      k = b * r + c * q - f * m + g * s;
+      l = b * s + c * m + f * q - g * r;
+      b = b * m + c * s - f * r + g * q;
       return 'undefined' !== typeof n ? (n.w = h, n.x = k, n.y = l, n.xy = b) : new a.Euclidean2(h, k, l, b);
     };
     b = function () {
@@ -35240,7 +35340,7 @@
         }
       };
       b.add = function (b, c) {
-        var d, h, k, l, m, n, p, q, r, t, s;
+        var d, h, k, l, m, n, p, q, r, s, t;
         d = b[0];
         h = b[1];
         k = b[2];
@@ -35250,13 +35350,13 @@
         p = c[2];
         q = c[3];
         r = a.e2gaASM.add00(d, h, k, l, m, n, p, q);
-        t = a.e2gaASM.add01(d, h, k, l, m, n, p, q);
-        s = a.e2gaASM.add10(d, h, k, l, m, n, p, q);
+        s = a.e2gaASM.add01(d, h, k, l, m, n, p, q);
+        t = a.e2gaASM.add10(d, h, k, l, m, n, p, q);
         d = a.e2gaASM.add11(d, h, k, l, m, n, p, q);
         return [
           r,
-          t,
           s,
+          t,
           d
         ];
       };
@@ -35265,7 +35365,7 @@
         return new a.Euclidean2(c[0], c[1], c[2], c[3]);
       };
       b.sub = function (b, c) {
-        var d, h, k, l, m, n, p, q, r, t, s;
+        var d, h, k, l, m, n, p, q, r, s, t;
         d = b[0];
         h = b[1];
         k = b[2];
@@ -35275,13 +35375,13 @@
         p = c[2];
         q = c[3];
         r = a.bladeASM.subE2(d, h, k, l, m, n, p, q, 0);
-        t = a.bladeASM.subE2(d, h, k, l, m, n, p, q, 1);
-        s = a.bladeASM.subE2(d, h, k, l, m, n, p, q, 2);
+        s = a.bladeASM.subE2(d, h, k, l, m, n, p, q, 1);
+        t = a.bladeASM.subE2(d, h, k, l, m, n, p, q, 2);
         d = a.bladeASM.subE2(d, h, k, l, m, n, p, q, 3);
         return [
           r,
-          t,
           s,
+          t,
           d
         ];
       };
@@ -35290,7 +35390,7 @@
         return new a.Euclidean2(c[0], c[1], c[2], c[3]);
       };
       b.mul = function (b, c) {
-        var d, h, k, l, m, n, p, q, r, t, s;
+        var d, h, k, l, m, n, p, q, r, s, t;
         d = b[0];
         h = b[1];
         k = b[2];
@@ -35300,13 +35400,13 @@
         p = c[2];
         q = c[3];
         r = a.bladeASM.mulE2(d, h, k, l, m, n, p, q, 0);
-        t = a.bladeASM.mulE2(d, h, k, l, m, n, p, q, 1);
-        s = a.bladeASM.mulE2(d, h, k, l, m, n, p, q, 2);
+        s = a.bladeASM.mulE2(d, h, k, l, m, n, p, q, 1);
+        t = a.bladeASM.mulE2(d, h, k, l, m, n, p, q, 2);
         d = a.bladeASM.mulE2(d, h, k, l, m, n, p, q, 3);
         return [
           r,
-          t,
           s,
+          t,
           d
         ];
       };
@@ -35320,7 +35420,7 @@
         return 'number' === typeof b ? new a.Euclidean2(this.w / b, this.x / b, this.y / b, this.xy / b) : c(this.w, this.x, this.y, this.xy, b.w, b.x, b.y, b.xy, void 0);
       };
       b.wedge = function (b, c) {
-        var d, h, k, l, m, n, p, q, r, t, s;
+        var d, h, k, l, m, n, p, q, r, s, t;
         d = b[0];
         h = b[1];
         k = b[2];
@@ -35330,13 +35430,13 @@
         p = c[2];
         q = c[3];
         r = a.bladeASM.extE2(d, h, k, l, m, n, p, q, 0);
-        t = a.bladeASM.extE2(d, h, k, l, m, n, p, q, 1);
-        s = a.bladeASM.extE2(d, h, k, l, m, n, p, q, 2);
+        s = a.bladeASM.extE2(d, h, k, l, m, n, p, q, 1);
+        t = a.bladeASM.extE2(d, h, k, l, m, n, p, q, 2);
         d = a.bladeASM.extE2(d, h, k, l, m, n, p, q, 3);
         return [
           r,
-          t,
           s,
+          t,
           d
         ];
       };
@@ -35345,7 +35445,7 @@
         return new a.Euclidean2(c[0], c[1], c[2], c[3]);
       };
       b.lshift = function (b, c) {
-        var d, h, k, l, m, n, p, q, r, t, s;
+        var d, h, k, l, m, n, p, q, r, s, t;
         d = b[0];
         h = b[1];
         k = b[2];
@@ -35355,13 +35455,13 @@
         p = c[2];
         q = c[3];
         r = a.bladeASM.lcoE2(d, h, k, l, m, n, p, q, 0);
-        t = a.bladeASM.lcoE2(d, h, k, l, m, n, p, q, 1);
-        s = a.bladeASM.lcoE2(d, h, k, l, m, n, p, q, 2);
+        s = a.bladeASM.lcoE2(d, h, k, l, m, n, p, q, 1);
+        t = a.bladeASM.lcoE2(d, h, k, l, m, n, p, q, 2);
         d = a.bladeASM.lcoE2(d, h, k, l, m, n, p, q, 3);
         return [
           r,
-          t,
           s,
+          t,
           d
         ];
       };
@@ -35370,7 +35470,7 @@
         return new a.Euclidean2(c[0], c[1], c[2], c[3]);
       };
       b.rshift = function (b, c) {
-        var d, h, k, l, m, n, p, q, r, t, s;
+        var d, h, k, l, m, n, p, q, r, s, t;
         d = b[0];
         h = b[1];
         k = b[2];
@@ -35380,13 +35480,13 @@
         p = c[2];
         q = c[3];
         r = a.bladeASM.rcoE2(d, h, k, l, m, n, p, q, 0);
-        t = a.bladeASM.rcoE2(d, h, k, l, m, n, p, q, 1);
-        s = a.bladeASM.rcoE2(d, h, k, l, m, n, p, q, 2);
+        s = a.bladeASM.rcoE2(d, h, k, l, m, n, p, q, 1);
+        t = a.bladeASM.rcoE2(d, h, k, l, m, n, p, q, 2);
         d = a.bladeASM.rcoE2(d, h, k, l, m, n, p, q, 3);
         return [
           r,
-          t,
           s,
+          t,
           d
         ];
       };
@@ -35453,7 +35553,7 @@
   (function () {
     var a, b, c, d;
     a = this.BLADE = this.BLADE || {};
-    d = function (a, b, c, d, k, l, m, n, p, q, r, t, s, A, x, B, w) {
+    d = function (a, b, c, d, k, l, m, n, p, q, r, s, t, y, x, z, u) {
       var C;
       a = +a;
       b = +b;
@@ -35466,84 +35566,84 @@
       p = +p;
       q = +q;
       r = +r;
-      t = +t;
       s = +s;
-      A = +A;
+      t = +t;
+      y = +y;
       x = +x;
-      B = +B;
+      z = +z;
       C = 0;
-      switch (~~(w | 0)) {
+      switch (~~(u | 0)) {
       case 0:
-        C = +(a * p + b * q + c * r + d * t - k * s - l * A - m * x - n * B);
+        C = +(a * p + b * q + c * r + d * s - k * t - l * y - m * x - n * z);
         break;
       case 1:
-        C = +(a * q + b * p - c * s + d * x + k * r - l * B - m * t - n * A);
+        C = +(a * q + b * p - c * t + d * x + k * r - l * z - m * s - n * y);
         break;
       case 2:
-        C = +(a * r + b * s + c * p - d * A - k * q + l * t - m * B - n * x);
+        C = +(a * r + b * t + c * p - d * y - k * q + l * s - m * z - n * x);
         break;
       case 3:
-        C = +(a * t - b * x + c * A + d * p - k * B - l * r + m * q - n * s);
+        C = +(a * s - b * x + c * y + d * p - k * z - l * r + m * q - n * t);
         break;
       case 4:
-        C = +(a * s + b * r - c * q + d * B + k * p - l * x + m * A + n * t);
+        C = +(a * t + b * r - c * q + d * z + k * p - l * x + m * y + n * s);
         break;
       case 5:
-        C = +(a * A + b * B + c * t - d * r + k * x + l * p - m * s + n * q);
+        C = +(a * y + b * z + c * s - d * r + k * x + l * p - m * t + n * q);
         break;
       case 6:
-        C = +(a * x - b * t + c * B + d * q - k * A + l * s + m * p + n * r);
+        C = +(a * x - b * s + c * z + d * q - k * y + l * t + m * p + n * r);
         break;
       case 7:
-        C = +(a * B + b * A + c * x + d * s + k * t + l * q + m * r + n * p);
+        C = +(a * z + b * y + c * x + d * t + k * s + l * q + m * r + n * p);
       }
       return +C;
     };
-    c = function (b, c, g, h, k, l, m, n, p, q, r, t, s, A, x, B, w) {
-      var C, G, E, F, D, M, H, u, z, y, N, v, L, I, J, K, O, P, Q;
-      y = +p;
-      N = +q;
-      u = +r;
-      v = -t;
-      L = +s;
-      I = -A;
-      J = -x;
-      K = -B;
-      z = d(p, q, r, s, t, x, -A, B, y, N, u, L, v, J, -I, K, 0);
-      D = d(p, q, r, s, t, x, -A, B, y, N, u, L, v, J, -I, K, 1);
-      M = d(p, q, r, s, t, x, -A, B, y, N, u, L, v, J, -I, K, 2);
-      H = d(p, q, r, s, t, x, -A, B, y, N, u, L, v, J, -I, K, 3);
-      C = +z;
-      G = -D;
-      E = -M;
-      F = -H;
-      O = d(y, N, u, L, v, J, -I, K, C, G, E, F, -0, -0, 0, 0, 0);
-      P = d(y, N, u, L, v, J, -I, K, C, G, E, F, -0, -0, 0, 0, 1);
-      Q = d(y, N, u, L, v, J, -I, K, C, G, E, F, -0, -0, 0, 0, 2);
-      z = d(y, N, u, L, v, J, -I, K, C, G, E, F, -0, -0, 0, 0, 4);
-      D = d(y, N, u, L, v, J, -I, K, C, G, E, F, -0, -0, 0, 0, 3);
-      M = -d(y, N, u, L, v, J, -I, K, C, G, E, F, -0, -0, 0, 0, 6);
-      H = d(y, N, u, L, v, J, -I, K, C, G, E, F, -0, -0, 0, 0, 5);
-      y = d(y, N, u, L, v, J, -I, K, C, G, E, F, -0, -0, 0, 0, 7);
-      s = d(p, q, r, s, t, x, -A, B, O, P, Q, D, z, H, -M, y, 0);
-      p = O / s;
-      q = P / s;
-      r = Q / s;
-      t = z / s;
-      D /= s;
-      M /= s;
-      H /= s;
-      u = y / s;
-      s = d(b, c, g, k, h, m, -l, n, p, q, r, D, t, H, -M, u, 0);
-      A = d(b, c, g, k, h, m, -l, n, p, q, r, D, t, H, -M, u, 1);
-      x = d(b, c, g, k, h, m, -l, n, p, q, r, D, t, H, -M, u, 2);
-      B = d(b, c, g, k, h, m, -l, n, p, q, r, D, t, H, -M, u, 4);
-      z = d(b, c, g, k, h, m, -l, n, p, q, r, D, t, H, -M, u, 3);
-      N = -d(b, c, g, k, h, m, -l, n, p, q, r, D, t, H, -M, u, 6);
-      y = d(b, c, g, k, h, m, -l, n, p, q, r, D, t, H, -M, u, 5);
-      b = d(b, c, g, k, h, m, -l, n, p, q, r, D, t, H, -M, u, 7);
-      c = -N;
-      return 'undefined' !== typeof w ? (w.w = s, w.x = A, w.y = x, w.z = z, w.xy = B, w.yz = y, w.zx = c, w.xyz = b) : new a.Euclidean3(s, A, x, z, B, y, c, b);
+    c = function (b, c, g, h, k, l, m, n, p, q, r, s, t, y, x, z, u) {
+      var C, G, I, J, H, F, N, B, w, v, A, K, D, E, L, M, O, P, Q;
+      v = +p;
+      A = +q;
+      B = +r;
+      K = -s;
+      D = +t;
+      E = -y;
+      L = -x;
+      M = -z;
+      w = d(p, q, r, t, s, x, -y, z, v, A, B, D, K, L, -E, M, 0);
+      H = d(p, q, r, t, s, x, -y, z, v, A, B, D, K, L, -E, M, 1);
+      F = d(p, q, r, t, s, x, -y, z, v, A, B, D, K, L, -E, M, 2);
+      N = d(p, q, r, t, s, x, -y, z, v, A, B, D, K, L, -E, M, 3);
+      C = +w;
+      G = -H;
+      I = -F;
+      J = -N;
+      O = d(v, A, B, D, K, L, -E, M, C, G, I, J, -0, -0, 0, 0, 0);
+      P = d(v, A, B, D, K, L, -E, M, C, G, I, J, -0, -0, 0, 0, 1);
+      Q = d(v, A, B, D, K, L, -E, M, C, G, I, J, -0, -0, 0, 0, 2);
+      w = d(v, A, B, D, K, L, -E, M, C, G, I, J, -0, -0, 0, 0, 4);
+      H = d(v, A, B, D, K, L, -E, M, C, G, I, J, -0, -0, 0, 0, 3);
+      F = -d(v, A, B, D, K, L, -E, M, C, G, I, J, -0, -0, 0, 0, 6);
+      N = d(v, A, B, D, K, L, -E, M, C, G, I, J, -0, -0, 0, 0, 5);
+      v = d(v, A, B, D, K, L, -E, M, C, G, I, J, -0, -0, 0, 0, 7);
+      t = d(p, q, r, t, s, x, -y, z, O, P, Q, H, w, N, -F, v, 0);
+      p = O / t;
+      q = P / t;
+      r = Q / t;
+      s = w / t;
+      H /= t;
+      F /= t;
+      N /= t;
+      B = v / t;
+      t = d(b, c, g, k, h, m, -l, n, p, q, r, H, s, N, -F, B, 0);
+      y = d(b, c, g, k, h, m, -l, n, p, q, r, H, s, N, -F, B, 1);
+      x = d(b, c, g, k, h, m, -l, n, p, q, r, H, s, N, -F, B, 2);
+      z = d(b, c, g, k, h, m, -l, n, p, q, r, H, s, N, -F, B, 4);
+      w = d(b, c, g, k, h, m, -l, n, p, q, r, H, s, N, -F, B, 3);
+      A = -d(b, c, g, k, h, m, -l, n, p, q, r, H, s, N, -F, B, 6);
+      v = d(b, c, g, k, h, m, -l, n, p, q, r, H, s, N, -F, B, 5);
+      b = d(b, c, g, k, h, m, -l, n, p, q, r, H, s, N, -F, B, 7);
+      c = -A;
+      return 'undefined' !== typeof u ? (u.w = t, u.x = y, u.y = x, u.z = w, u.xy = z, u.yz = v, u.zx = c, u.xyz = b) : new a.Euclidean3(t, y, x, w, z, v, c, b);
     };
     b = function () {
       function b(a, c, d, e, l, m, n, p) {
@@ -35594,32 +35694,32 @@
         }
       };
       b.compute = function (a, b, c, d, e) {
-        var m, n, p, q, r, t, s, A, x, B, w, C, G, E, F, D, M, H, u, z;
+        var m, n, p, q, r, s, t, y, x, z, u, C, G, I, J, H, F, N, B, w;
         m = d(b, 0);
         n = d(b, 1);
         p = d(b, 2);
         q = d(b, 3);
         r = d(b, 4);
-        t = d(b, 5);
-        s = d(b, 6);
+        s = d(b, 5);
+        t = d(b, 6);
         b = d(b, 7);
-        A = d(c, 0);
+        y = d(c, 0);
         x = d(c, 1);
-        B = d(c, 2);
-        w = d(c, 3);
+        z = d(c, 2);
+        u = d(c, 3);
         C = d(c, 4);
         G = d(c, 5);
-        E = d(c, 6);
-        F = d(c, 7);
-        c = a(m, n, p, q, r, t, s, b, A, x, B, w, C, G, E, F, 0);
-        d = a(m, n, p, q, r, t, s, b, A, x, B, w, C, G, E, F, 1);
-        D = a(m, n, p, q, r, t, s, b, A, x, B, w, C, G, E, F, 2);
-        M = a(m, n, p, q, r, t, s, b, A, x, B, w, C, G, E, F, 3);
-        H = a(m, n, p, q, r, t, s, b, A, x, B, w, C, G, E, F, 4);
-        u = a(m, n, p, q, r, t, s, b, A, x, B, w, C, G, E, F, 5);
-        z = a(m, n, p, q, r, t, s, b, A, x, B, w, C, G, E, F, 6);
-        a = a(m, n, p, q, r, t, s, b, A, x, B, w, C, G, E, F, 7);
-        return e(c, d, D, M, H, u, z, a);
+        I = d(c, 6);
+        J = d(c, 7);
+        c = a(m, n, p, q, r, s, t, b, y, x, z, u, C, G, I, J, 0);
+        d = a(m, n, p, q, r, s, t, b, y, x, z, u, C, G, I, J, 1);
+        H = a(m, n, p, q, r, s, t, b, y, x, z, u, C, G, I, J, 2);
+        F = a(m, n, p, q, r, s, t, b, y, x, z, u, C, G, I, J, 3);
+        N = a(m, n, p, q, r, s, t, b, y, x, z, u, C, G, I, J, 4);
+        B = a(m, n, p, q, r, s, t, b, y, x, z, u, C, G, I, J, 5);
+        w = a(m, n, p, q, r, s, t, b, y, x, z, u, C, G, I, J, 6);
+        a = a(m, n, p, q, r, s, t, b, y, x, z, u, C, G, I, J, 7);
+        return e(c, d, H, F, N, B, w, a);
       };
       b.prototype.add = function (c) {
         return b.compute(a.bladeASM.addE3, [
@@ -36236,65 +36336,65 @@
           }
           return +p;
         },
-        addE3: function (a, b, c, g, h, k, l, m, n, p, q, r, t, s, A, x, B) {
-          var w = 0;
-          switch (~~(B | 0)) {
+        addE3: function (a, b, c, g, h, k, l, m, n, p, q, r, s, t, y, x, z) {
+          var u = 0;
+          switch (~~(z | 0)) {
           case 0:
-            w = +(+a + +n);
+            u = +(+a + +n);
             break;
           case 1:
-            w = +(+b + +p);
+            u = +(+b + +p);
             break;
           case 2:
-            w = +(+c + +q);
+            u = +(+c + +q);
             break;
           case 3:
-            w = +(+g + +r);
+            u = +(+g + +r);
             break;
           case 4:
-            w = +(+h + +t);
+            u = +(+h + +s);
             break;
           case 5:
-            w = +(+k + +s);
+            u = +(+k + +t);
             break;
           case 6:
-            w = +(+l + +A);
+            u = +(+l + +y);
             break;
           case 7:
-            w = +(+m + +x);
+            u = +(+m + +x);
           }
-          return +w;
+          return +u;
         },
-        subE3: function (a, b, c, g, h, k, l, m, n, p, q, r, t, s, A, x, B) {
-          var w = 0;
-          switch (~~(B | 0)) {
+        subE3: function (a, b, c, g, h, k, l, m, n, p, q, r, s, t, y, x, z) {
+          var u = 0;
+          switch (~~(z | 0)) {
           case 0:
-            w = +(+a - +n);
+            u = +(+a - +n);
             break;
           case 1:
-            w = +(+b - +p);
+            u = +(+b - +p);
             break;
           case 2:
-            w = +(+c - +q);
+            u = +(+c - +q);
             break;
           case 3:
-            w = +(+g - +r);
+            u = +(+g - +r);
             break;
           case 4:
-            w = +(+h - +t);
+            u = +(+h - +s);
             break;
           case 5:
-            w = +(+k - +s);
+            u = +(+k - +t);
             break;
           case 6:
-            w = +(+l - +A);
+            u = +(+l - +y);
             break;
           case 7:
-            w = +(+m - +x);
+            u = +(+m - +x);
           }
-          return +w;
+          return +u;
         },
-        mulE3: function (a, b, c, g, h, k, l, m, n, p, q, r, t, s, A, x, B) {
+        mulE3: function (a, b, c, g, h, k, l, m, n, p, q, r, s, t, y, x, z) {
           a = +a;
           b = +b;
           c = +c;
@@ -36307,39 +36407,39 @@
           p = +p;
           q = +q;
           r = +r;
-          t = +t;
           s = +s;
-          A = +A;
+          t = +t;
+          y = +y;
           x = +x;
-          var w = 0;
-          switch (~~(B | 0)) {
+          var u = 0;
+          switch (~~(z | 0)) {
           case 0:
-            w = +(a * n + b * p + c * q + g * r - h * t - k * s - l * A - m * x);
+            u = +(a * n + b * p + c * q + g * r - h * s - k * t - l * y - m * x);
             break;
           case 1:
-            w = +(a * p + b * n - c * t + g * A + h * q - k * x - l * r - m * s);
+            u = +(a * p + b * n - c * s + g * y + h * q - k * x - l * r - m * t);
             break;
           case 2:
-            w = +(a * q + b * t + c * n - g * s - h * p + k * r - l * x - m * A);
+            u = +(a * q + b * s + c * n - g * t - h * p + k * r - l * x - m * y);
             break;
           case 3:
-            w = +(a * r - b * A + c * s + g * n - h * x - k * q + l * p - m * t);
+            u = +(a * r - b * y + c * t + g * n - h * x - k * q + l * p - m * s);
             break;
           case 4:
-            w = +(a * t + b * q - c * p + g * x + h * n - k * A + l * s + m * r);
+            u = +(a * s + b * q - c * p + g * x + h * n - k * y + l * t + m * r);
             break;
           case 5:
-            w = +(a * s + b * x + c * r - g * q + h * A + k * n - l * t + m * p);
+            u = +(a * t + b * x + c * r - g * q + h * y + k * n - l * s + m * p);
             break;
           case 6:
-            w = +(a * A - b * r + c * x + g * p - h * s + k * t + l * n + m * q);
+            u = +(a * y - b * r + c * x + g * p - h * t + k * s + l * n + m * q);
             break;
           case 7:
-            w = +(a * x + b * s + c * A + g * t + h * r + k * p + l * q + m * n);
+            u = +(a * x + b * t + c * y + g * s + h * r + k * p + l * q + m * n);
           }
-          return +w;
+          return +u;
         },
-        extE3: function (a, b, c, g, h, k, l, m, n, p, q, r, t, s, A, x, B) {
+        extE3: function (a, b, c, g, h, k, l, m, n, p, q, r, s, t, y, x, z) {
           a = +a;
           b = +b;
           c = +c;
@@ -36351,38 +36451,38 @@
           p = +p;
           q = +q;
           r = +r;
-          t = +t;
           s = +s;
-          A = +A;
-          var w = 0;
-          switch (~~(B | 0)) {
+          t = +t;
+          y = +y;
+          var u = 0;
+          switch (~~(z | 0)) {
           case 0:
-            w = +(a * n);
+            u = +(a * n);
             break;
           case 1:
-            w = +(a * p + b * n);
+            u = +(a * p + b * n);
             break;
           case 2:
-            w = +(a * q + c * n);
+            u = +(a * q + c * n);
             break;
           case 3:
-            w = +(a * r + g * n);
+            u = +(a * r + g * n);
             break;
           case 4:
-            w = +(a * t + b * q - c * p + h * n);
+            u = +(a * s + b * q - c * p + h * n);
             break;
           case 5:
-            w = +(a * s + c * r - g * q + k * n);
+            u = +(a * t + c * r - g * q + k * n);
             break;
           case 6:
-            w = +(a * A - b * r + g * p + l * n);
+            u = +(a * y - b * r + g * p + l * n);
             break;
           case 7:
-            w = +(a * +x + b * s + c * A + g * t + h * r + k * p + l * q + +m * n);
+            u = +(a * +x + b * t + c * y + g * s + h * r + k * p + l * q + +m * n);
           }
-          return +w;
+          return +u;
         },
-        lcoE3: function (a, b, c, g, h, k, l, m, n, p, q, r, t, s, A, x, B) {
+        lcoE3: function (a, b, c, g, h, k, l, m, n, p, q, r, s, t, y, x, z) {
           a = +a;
           b = +b;
           c = +c;
@@ -36393,39 +36493,39 @@
           p = +p;
           q = +q;
           r = +r;
-          t = +t;
           s = +s;
-          A = +A;
+          t = +t;
+          y = +y;
           x = +x;
-          var w = 0;
-          switch (~~(B | 0)) {
+          var u = 0;
+          switch (~~(z | 0)) {
           case 0:
-            w = +(a * +n + b * p + c * q + g * r - h * t - k * s - l * A - +m * x);
+            u = +(a * +n + b * p + c * q + g * r - h * s - k * t - l * y - +m * x);
             break;
           case 1:
-            w = +(a * p - c * t + g * A - k * x);
+            u = +(a * p - c * s + g * y - k * x);
             break;
           case 2:
-            w = +(a * q + b * t - g * s - l * x);
+            u = +(a * q + b * s - g * t - l * x);
             break;
           case 3:
-            w = +(a * r - b * A + c * s - h * x);
+            u = +(a * r - b * y + c * t - h * x);
             break;
           case 4:
-            w = +(a * t + g * x);
+            u = +(a * s + g * x);
             break;
           case 5:
-            w = +(a * s + b * x);
+            u = +(a * t + b * x);
             break;
           case 6:
-            w = +(a * A + c * x);
+            u = +(a * y + c * x);
             break;
           case 7:
-            w = +(a * x);
+            u = +(a * x);
           }
-          return +w;
+          return +u;
         },
-        rcoE3: function (a, b, c, g, h, k, l, m, n, p, q, r, t, s, A, x, B) {
+        rcoE3: function (a, b, c, g, h, k, l, m, n, p, q, r, s, t, y, x, z) {
           b = +b;
           c = +c;
           g = +g;
@@ -36437,36 +36537,36 @@
           p = +p;
           q = +q;
           r = +r;
-          t = +t;
           s = +s;
-          A = +A;
-          var w = 0;
-          switch (~~(B | 0)) {
+          t = +t;
+          y = +y;
+          var u = 0;
+          switch (~~(z | 0)) {
           case 0:
-            w = +(+a * n + b * p + c * q + g * r - h * t - k * s - l * A - m * +x);
+            u = +(+a * n + b * p + c * q + g * r - h * s - k * t - l * y - m * +x);
             break;
           case 1:
-            w = +(+b * n + h * q - l * r - m * s);
+            u = +(+b * n + h * q - l * r - m * t);
             break;
           case 2:
-            w = +(+c * n - h * p + k * r - m * A);
+            u = +(+c * n - h * p + k * r - m * y);
             break;
           case 3:
-            w = +(+g * n - k * q + l * p - m * t);
+            u = +(+g * n - k * q + l * p - m * s);
             break;
           case 4:
-            w = +(+h * n + m * r);
+            u = +(+h * n + m * r);
             break;
           case 5:
-            w = +(+k * n + m * p);
+            u = +(+k * n + m * p);
             break;
           case 6:
-            w = +(+l * n + m * q);
+            u = +(+l * n + m * q);
             break;
           case 7:
-            w = +(+m * n);
+            u = +(+m * n);
           }
-          return +w;
+          return +u;
         }
       };
     }('object' === typeof window ? window : void 0, {}, new ArrayBuffer(4096));
