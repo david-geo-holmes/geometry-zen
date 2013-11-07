@@ -14891,6 +14891,15 @@ Sk.ffi.gattr = function(objectPy, name)
 goog.exportSymbol("Sk.ffi.gattr", Sk.ffi.gattr);
 
 /**
+ *
+ */
+Sk.ffi.sattr = function(objectPy, name, valuePy)
+{
+    return Sk.abstr.sattr(objectPy, name, valuePy);
+}
+goog.exportSymbol("Sk.ffi.sattr", Sk.ffi.sattr);
+
+/**
  * @param {...*} args
  * @return {!Sk.builtin.IndexError}
  */
@@ -27481,6 +27490,11 @@ var PROP_ORIGIN                     = "origin";
  * @const
  * @type {string}
  */
+var PROP_ORIENTATION                = "orientation";
+/**
+ * @const
+ * @type {string}
+ */
 var PROP_CAMERA                     = "camera";
 /**
  * @const
@@ -28829,9 +28843,12 @@ mod[Sk.geometry.VOLUME] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     cylinder = cb.build();
     cylinder.position.set(+0.0, +0.5, +0.5);
     composite.add(cylinder);
+
     cylinder = cb.build();
     cylinder.position.set(+0.0, +0.5, -0.5);
+    cylinder.name = "c1";
     composite.add(cylinder);
+
     cylinder = cb.build();
     cylinder.position.set(+0.0, -0.5, +0.5);
     composite.add(cylinder);
@@ -28840,20 +28857,25 @@ mod[Sk.geometry.VOLUME] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     cylinder = cb.build();
     cylinder.position.set(+0.5, +0.0, +0.5);
     composite.add(cylinder);
+
     cylinder = cb.build();
     cylinder.position.set(-0.5, +0.0, +0.5);
     composite.add(cylinder);
+
     cylinder = cb.build();
     cylinder.position.set(-0.5, +0.0, -0.5);
+    cylinder.name = "c2";
     composite.add(cylinder);
 
     cb.axis(0, 0, 1);
     cylinder = cb.build();
     cylinder.position.set(+0.5, -0.5, +0.0);
     composite.add(cylinder);
+
     cylinder = cb.build();
     cylinder.position.set(-0.5, +0.5, +0.0);
     composite.add(cylinder);
+
     cylinder = cb.build();
     cylinder.position.set(-0.5, -0.5, +0.0);
     composite.add(cylinder);
@@ -28863,11 +28885,13 @@ mod[Sk.geometry.VOLUME] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
 
     ab.axis(1, 0, 0);
     arrow = ab.build();
+    arrow.name = "e1";
     arrow.position.set(+0.0, -0.5, -0.5);
     composite.add(arrow);
 
     ab.axis(0, 1, 0);
     arrow = ab.build();
+    arrow.name = "e2";
     arrow.position.set(+0.5, +0.0, -0.5);
     composite.add(arrow);
 
@@ -28879,10 +28903,41 @@ mod[Sk.geometry.VOLUME] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     Sk.ffi.referenceToPy(composite, Sk.geometry.VOLUME, undefined, selfPy);
   });
   $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
-    return Sk.three.object3DGetAttr(Sk.geometry.VOLUME, selfPy, name);
+    var composite = Sk.ffi.remapToJs(selfPy);
+    switch(name) {
+      default: {
+        return Sk.three.object3DGetAttr(Sk.geometry.VOLUME, selfPy, name);
+      }
+    }
   });
   $loc.__setattr__ = Sk.ffi.functionPy(function(selfPy, name, valuePy) {
-    return Sk.three.object3DSetAttr(Sk.geometry.VOLUME, selfPy, name, valuePy);
+    var composite = Sk.ffi.remapToJs(selfPy);
+    switch(name) {
+      case PROP_ORIENTATION: {
+        Sk.ffi.checkArgType(name, Sk.ffi.PyType.BOOL, Sk.ffi.isBool(valuePy), valuePy);
+        var orientation = Sk.ffi.remapToJs(valuePy);
+        var e1 = composite.getObjectByName("e1");
+        var c1 = composite.getObjectByName("c1");
+        var e2 = composite.getObjectByName("e2");
+        var c2 = composite.getObjectByName("c2");
+        if (orientation) {
+          e1.position.set(+0.0, -0.5, -0.5);
+          c1.position.set(+0.0, +0.5, -0.5);
+          e2.position.set(+0.5, +0.0, -0.5);
+          c2.position.set(-0.5, +0.0, -0.5);
+        }
+        else {
+          e1.position.set(+0.0, +0.5, -0.5);
+          c1.position.set(+0.0, -0.5, -0.5);
+          e2.position.set(-0.5, +0.0, -0.5);
+          c2.position.set(+0.5, +0.0, -0.5);
+        }
+      }
+      break;
+      default: {
+        return Sk.three.object3DSetAttr(Sk.geometry.VOLUME, selfPy, name, valuePy);
+      }
+    }
   });
   $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
     var self = Sk.ffi.remapToJs(selfPy);
@@ -30309,6 +30364,11 @@ var PROP_GRADE_3                    = "grade3";
  * @const
  * @type {string}
  */
+var PROP_ORIENTATION                = "orientation";
+/**
+ * @const
+ * @type {string}
+ */
 var METHOD_BUILD                    = "build";
 /**
  * @const
@@ -30393,19 +30453,31 @@ mod[PROBE_E3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
             var xy =  0;
             var yz = +scale * y;
             var zx = -scale * x;
-            return new THREE[QUATERNION](-yz, -zx, -xy, scale * (1 + z));
+            return new THREE.Quaternion(-yz, -zx, -xy, scale * (1 + z));
           }
           else {
-            return new THREE[QUATERNION](1, 0, 0, 0);
+            return new THREE.Quaternion(1, 0, 0, 0);
           }
         }
+        /**
+         * Shows the specified object and all its descendants.
+         * @param {!THREE.Object3D} composite
+         * @param {!number} scale
+         */
         function show(composite, scale) {
           composite.scale.set(scale, scale, scale);
-          composite[METHOD_TRAVERSE](function(x) {x.visible = true;});
+          composite.traverse(function(x) {x.visible = true;});
         }
+        /**
+         * Hides the specified object and all its descendants.
+         * @param {!THREE.Object3D} composite
+         */
         function hide(composite) {
-          composite[METHOD_TRAVERSE](function(x) {x.visible = false;});
+          composite.traverse(function(x) {x.visible = false;});
           composite.scale.set(1, 1, 1);
+        }
+        function signum(x) {
+          return typeof x === 'number' ? x ? x < 0 ? -1 : 1 : isNaN(x) ? NaN : 0 : NaN;
         }
         var value = Sk.ffi.remapToJs(valuePy);
         var w   = value.w;
@@ -30450,6 +30522,7 @@ mod[PROBE_E3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         var grade3 = Sk.ffi.remapToJs(probe[PROP_GRADE_3]);
         if (xyz !== 0) {
           var s3 = Math.pow(Math.abs(xyz), 1 / 3);
+          Sk.ffi.sattr(probe[PROP_GRADE_3], PROP_ORIENTATION, Sk.ffi.booleanToPy(signum(xyz) >= 0));
           show(grade3, s3);
         }
         else {
@@ -36151,6 +36224,11 @@ var METHOD_APPEND              = "append";
  * @const
  * @type {string}
  */
+var METHOD_APPLY_MATRIX        = "applyMatrix";
+/**
+ * @const
+ * @type {string}
+ */
 var METHOD_CONTAINS_POINT      = "containsPoint";
 /**
  * @const
@@ -36202,6 +36280,21 @@ var METHOD_INTERSECTS_SPHERE   = "intersectsSphere";
  * @type {string}
  */
 var METHOD_INTERSECT_OBJECTS   = "intersectObjects";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_MAKE_ROTATION_X     = "makeRotationX";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_MAKE_ROTATION_Y     = "makeRotationY";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_MAKE_ROTATION_Z     = "makeRotationZ";
 /**
  * @const
  * @type {string}
@@ -36402,6 +36495,11 @@ var ARG_RADIUS_CONE            = PROP_RADIUS_CONE;
  * @type {string}
  */
 var ARG_RADIUS_SHAFT           = PROP_RADIUS_SHAFT;
+/**
+ * @const
+ * @type {string}
+ */
+var ARG_THETA                  = "theta";
 /**
  * @const
  * @type {string}
@@ -39000,6 +39098,13 @@ function geometryGetAttr(className, geometryPy, name) {
     case PROP_HEIGHT: {
       return Sk.ffi.numberToFloatPy(geometry.height);
     }
+    case METHOD_APPLY_MATRIX: {
+      return Sk.ffi.callableToPy(mod, name, function(methodPy, matrixPy) {
+        Sk.ffi.checkMethodArgs(name, arguments, 1, 1);
+        Sk.ffi.checkArgType("matrix", Sk.three.MATRIX_4, Sk.ffi.isInstance(matrixPy, Sk.three.MATRIX_4), matrixPy);
+        geometry.applyMatrix(Sk.ffi.remapToJs(matrixPy));
+      });
+    }
     default: {
       throw Sk.ffi.err.attribute(name).isNotGetableOnType(className);
     }
@@ -39600,7 +39705,7 @@ Sk.three.meshGetAttr = function(className, meshPy, name) {
       });
     }
     default: {
-      throw Sk.ffi.err.attribute(name).isNotGetableOnType(className);
+      return Sk.three.object3DGetAttr(className, meshPy, name);
     }
   }
 }
@@ -39649,7 +39754,7 @@ Sk.three.meshSetAttr = function(className, meshPy, name, valuePy) {
     }
     break;
     default: {
-      throw Sk.ffi.err.attribute(name).isNotSetableOnType(className);
+      return Sk.three.object3DSetAttr(className, meshPy, name, valuePy);
     }
   }
 };
@@ -40189,6 +40294,14 @@ mod[Sk.three.MATRIX_4] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
     var matrix = Sk.ffi.remapToJs(selfPy);
     switch(name) {
+      case METHOD_MAKE_ROTATION_X: {
+        return Sk.ffi.callableToPy(mod, name, function(methodPy, thetaPy) {
+          Sk.ffi.checkMethodArgs(name, arguments, 1, 1);
+          Sk.ffi.checkArgType(ARG_THETA, Sk.ffi.PyType.FLOAT, Sk.ffi.isFloat(thetaPy), thetaPy);
+          var theta = Sk.ffi.remapToJs(thetaPy);
+          return Sk.ffi.callsim(mod[Sk.three.MATRIX_4], Sk.ffi.referenceToPy(matrix.makeRotationX(theta), Sk.three.MATRIX_4));
+        });
+      }
       default: {
         throw Sk.ffi.err.attribute(name).isNotGetableOnType(Sk.three.MATRIX_4);
       }

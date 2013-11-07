@@ -12750,6 +12750,10 @@
     return Sk.abstr.gattr(a, b);
   };
   goog.exportSymbol('Sk.ffi.gattr', Sk.ffi.gattr);
+  Sk.ffi.sattr = function (a, b, c) {
+    return Sk.abstr.sattr(a, b, c);
+  };
+  goog.exportSymbol('Sk.ffi.sattr', Sk.ffi.sattr);
   Sk.ffi.indexError = function (a) {
     return new Sk.builtin.IndexError(a);
   };
@@ -27593,6 +27597,7 @@
           d.add(e);
           e = f.build();
           e.position.set(0, 0.5, -0.5);
+          e.name = 'c1';
           d.add(e);
           e = f.build();
           e.position.set(0, -0.5, 0.5);
@@ -27606,6 +27611,7 @@
           d.add(e);
           e = f.build();
           e.position.set(-0.5, 0, -0.5);
+          e.name = 'c2';
           d.add(e);
           f.axis(0, 0, 1);
           e = f.build();
@@ -27621,10 +27627,12 @@
           f.radius(0.01).material(Sk.ffi.remapToJs(c));
           f.axis(1, 0, 0);
           e = f.build();
+          e.name = 'e1';
           e.position.set(0, -0.5, -0.5);
           d.add(e);
           f.axis(0, 1, 0);
           e = f.build();
+          e.name = 'e2';
           e.position.set(0.5, 0, -0.5);
           d.add(e);
           f.axis(0, 0, 1);
@@ -27634,10 +27642,26 @@
           Sk.ffi.referenceToPy(d, Sk.geometry.VOLUME, void 0, a);
         });
         c.__getattr__ = Sk.ffi.functionPy(function (a, b) {
-          return Sk.three.object3DGetAttr(Sk.geometry.VOLUME, a, b);
+          Sk.ffi.remapToJs(a);
+          switch (b) {
+          default:
+            return Sk.three.object3DGetAttr(Sk.geometry.VOLUME, a, b);
+          }
         });
         c.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
-          return Sk.three.object3DSetAttr(Sk.geometry.VOLUME, a, b, c);
+          var d = Sk.ffi.remapToJs(a);
+          switch (b) {
+          case 'orientation':
+            Sk.ffi.checkArgType(b, Sk.ffi.PyType.BOOL, Sk.ffi.isBool(c), c);
+            a = Sk.ffi.remapToJs(c);
+            b = d.getObjectByName('e1');
+            c = d.getObjectByName('c1');
+            var e = d.getObjectByName('e2'), d = d.getObjectByName('c2');
+            a ? (b.position.set(0, -0.5, -0.5), c.position.set(0, 0.5, -0.5), e.position.set(0.5, 0, -0.5), d.position.set(-0.5, 0, -0.5)) : (b.position.set(0, 0.5, -0.5), c.position.set(0, -0.5, -0.5), e.position.set(-0.5, 0, -0.5), d.position.set(0.5, 0, -0.5));
+            break;
+          default:
+            return Sk.three.object3DSetAttr(Sk.geometry.VOLUME, a, b, c);
+          }
         });
         c.__str__ = Sk.ffi.functionPy(function (a) {
           Sk.ffi.remapToJs(a);
@@ -28595,7 +28619,7 @@
             l = Sk.ffi.remapToJs(a.grade2);
             0 !== s || 0 !== z || 0 !== x ? (r = Math.sqrt(s * s + z * z + x * x), t = Math.pow(r, 0.5), l.quaternion = m(z / r, x / r, s / r), c(l, t)) : n(l);
             m = Sk.ffi.remapToJs(a.grade3);
-            0 !== p ? (n = Math.pow(Math.abs(p), 1 / 3), c(m, n)) : n(m);
+            0 !== p ? (n = Math.pow(Math.abs(p), 1 / 3), Sk.ffi.sattr(a.grade3, 'orientation', Sk.ffi.booleanToPy(0 <= ('number' === typeof p ? p ? 0 > p ? -1 : 1 : isNaN(p) ? NaN : 0 : NaN))), c(m, n)) : n(m);
             a.quantity = d;
             break;
           case 'grade0':
@@ -31900,29 +31924,35 @@
         }
       }
       function I(b, c, d) {
-        c = Sk.ffi.remapToJs(c);
+        var e = Sk.ffi.remapToJs(c);
         switch (d) {
         case 'id':
-          return Sk.ffi.numberToIntPy(c.id);
+          return Sk.ffi.numberToIntPy(e.id);
         case 'name':
-          return Sk.ffi.stringToPy(c.name);
+          return Sk.ffi.stringToPy(e.name);
         case 'uuid':
-          return Sk.ffi.stringToPy(c.uuid);
+          return Sk.ffi.stringToPy(e.uuid);
         case 'faces':
-          return b = c.faces.map(function (b) {
+          return b = e.faces.map(function (b) {
             return Sk.ffi.callsim(a[Sk.three.FACE_3], Sk.ffi.referenceToPy(b, Sk.three.FACE_3));
           }), Sk.ffi.listPy(b);
         case 'colors':
-          return B(c.colors);
+          return B(e.colors);
         case 'vertices':
-          return z(c.vertices);
+          return z(e.vertices);
         case 'radius':
-          return Sk.ffi.numberToFloatPy(c.radius);
+          return Sk.ffi.numberToFloatPy(e.radius);
         case 'width':
-          return Sk.ffi.numberToFloatPy(c.width);
+          return Sk.ffi.numberToFloatPy(e.width);
         case 'depth':
         case 'height':
-          return Sk.ffi.numberToFloatPy(c.height);
+          return Sk.ffi.numberToFloatPy(e.height);
+        case 'applyMatrix':
+          return Sk.ffi.callableToPy(a, d, function (a, b) {
+            Sk.ffi.checkMethodArgs(d, arguments, 1, 1);
+            Sk.ffi.checkArgType('matrix', Sk.three.MATRIX_4, Sk.ffi.isInstance(b, Sk.three.MATRIX_4), b);
+            e.applyMatrix(Sk.ffi.remapToJs(b));
+          });
         default:
           throw Sk.ffi.err.attribute(d).isNotGetableOnType(b);
         }
@@ -34464,28 +34494,35 @@
           return Sk.ffi.stringToPy(Sk.three.MATRIX_3 + '()');
         });
       }, Sk.three.MATRIX_3, []);
-      a[Sk.three.MATRIX_4] = Sk.ffi.buildClass(a, function (a, b) {
-        b.__init__ = Sk.ffi.functionPy(function (a, b) {
+      a[Sk.three.MATRIX_4] = Sk.ffi.buildClass(a, function (b, c) {
+        c.__init__ = Sk.ffi.functionPy(function (a, b) {
           Sk.ffi.checkMethodArgs(Sk.three.MATRIX_4, arguments, 0, 1);
           g(b) && Sk.ffi.isInstance(b, Sk.three.MATRIX_4) ? Sk.ffi.referenceToPy(Sk.ffi.remapToJs(b), Sk.three.MATRIX_4, void 0, a) : Sk.ffi.referenceToPy(new THREE.Matrix4(), Sk.three.MATRIX_4, void 0, a);
         });
-        b.__getattr__ = Sk.ffi.functionPy(function (a, b) {
-          Sk.ffi.remapToJs(a);
-          switch (b) {
+        c.__getattr__ = Sk.ffi.functionPy(function (b, c) {
+          var d = Sk.ffi.remapToJs(b);
+          switch (c) {
+          case 'makeRotationX':
+            return Sk.ffi.callableToPy(a, c, function (b, e) {
+              Sk.ffi.checkMethodArgs(c, arguments, 1, 1);
+              Sk.ffi.checkArgType('theta', Sk.ffi.PyType.FLOAT, Sk.ffi.isFloat(e), e);
+              var f = Sk.ffi.remapToJs(e);
+              return Sk.ffi.callsim(a[Sk.three.MATRIX_4], Sk.ffi.referenceToPy(d.makeRotationX(f), Sk.three.MATRIX_4));
+            });
           default:
-            throw Sk.ffi.err.attribute(b).isNotGetableOnType(Sk.three.MATRIX_4);
+            throw Sk.ffi.err.attribute(c).isNotGetableOnType(Sk.three.MATRIX_4);
           }
         });
-        b.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
+        c.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
           switch (b) {
           default:
             throw Sk.ffi.err.attribute(b).isNotSetableOnType(Sk.three.MATRIX_4);
           }
         });
-        b.__str__ = Sk.ffi.functionPy(function (a) {
+        c.__str__ = Sk.ffi.functionPy(function (a) {
           return Sk.ffi.stringToPy(Sk.three.MATRIX_4 + '()');
         });
-        b.__repr__ = Sk.ffi.functionPy(function (a) {
+        c.__repr__ = Sk.ffi.functionPy(function (a) {
           return Sk.ffi.stringToPy(Sk.three.MATRIX_4 + '()');
         });
       }, Sk.three.MATRIX_4, []);
