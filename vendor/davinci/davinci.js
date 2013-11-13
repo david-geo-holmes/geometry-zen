@@ -26560,7 +26560,7 @@ function shapeGetAttr(shapePy, name, className) {
           self.v = shape[METHOD_HIT_TEST];
         });
         $loc.__call__ = Sk.ffi.functionPy(function(methodPy, x, y) {
-          return Sk.ffi.remapToPy(shape[METHOD_HIT_TEST](Sk.ffi.remapToJs(x), Sk.ffi.remapToJs(y)));
+          return Sk.ffi.booleanToPy(shape[METHOD_HIT_TEST](Sk.ffi.remapToJs(x), Sk.ffi.remapToJs(y)));
         });
       }, METHOD_HIT_TEST, []));
     }
@@ -31762,6 +31762,16 @@ var METHOD_CROSS               = "cross";
  * @const
  * @type {string}
  */
+var METHOD_DISTANCE_TO         = "distanceTo";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_DISTANCE_TO_SQUARED = "distanceToSquared";
+/**
+ * @const
+ * @type {string}
+ */
 var METHOD_DOT                 = "dot";
 /**
  * @const
@@ -31772,12 +31782,27 @@ var METHOD_EXP                 = "exp";
  * @const
  * @type {string}
  */
+var METHOD_COPY                = "copy";
+/**
+ * @const
+ * @type {string}
+ */
 var METHOD_CONSTANTIFY         = "constantify";
 /**
  * @const
  * @type {string}
  */
+var METHOD_DIVIDE_SCALAR       = "divideScalar";
+/**
+ * @const
+ * @type {string}
+ */
 var METHOD_MAGNITUDE           = "magnitude";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_MULTIPLY_SCALAR     = "multiplyScalar";
 /**
  * @const
  * @type {string}
@@ -31858,6 +31883,11 @@ var ARG_INDEX                  = "index";
  * @type {string}
  */
 var ARG_OTHER                  = "other";
+/**
+ * @const
+ * @type {string}
+ */
+var ARG_S                      = "s";
 /**
  * @const
  * @type {string}
@@ -33095,6 +33125,22 @@ mod[EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           return selfPy;
         });
       }
+      case METHOD_COPY: {
+        return Sk.ffi.callableToPy(mod, name, function(methodPy, otherPy) {
+          Sk.ffi.checkMethodArgs(name, arguments, 1, 1);
+          Sk.ffi.checkArgType(ARG_OTHER, EUCLIDEAN_3, Sk.ffi.isInstance(otherPy, EUCLIDEAN_3), otherPy);
+          var other  = Sk.ffi.remapToJs(otherPy);
+          quaternion.w = other.quaternion.w;
+          vector.x     = other.vector.x;
+          vector.y     = other.vector.y;
+          vector.z     = other.vector.z;
+          quaternion.x = other.quaternion.x;
+          quaternion.y = other.quaternion.y;
+          quaternion.z = other.quaternion.z;
+          self.xyz     = other.xyz;
+          return selfPy;
+        });
+      }
       case METHOD_CROSS: {
         return Sk.ffi.callableToPy(mod, METHOD_CROSS, function(methodPy, otherPy) {
           Sk.ffi.checkMethodArgs(METHOD_CROSS, arguments, 1, 1);
@@ -33112,12 +33158,60 @@ mod[EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           return coordsJsToE3Py(0, Cx, Cy, Cz, 0, 0, 0, 0);
         });
       }
+      case METHOD_DISTANCE_TO: {
+        return Sk.ffi.callableToPy(mod, name, function(methodPy, pointPy) {
+          Sk.ffi.checkMethodArgs(name, arguments, 1, 1);
+          Sk.ffi.checkArgType(ARG_OTHER, EUCLIDEAN_3, Sk.ffi.isInstance(pointPy, EUCLIDEAN_3), pointPy);
+          var point  = Sk.ffi.remapToJs(pointPy);
+          return Sk.ffi.numberToFloatPy(vector[METHOD_DISTANCE_TO](point.vector));
+        });
+      }
+      case METHOD_DISTANCE_TO_SQUARED: {
+        return Sk.ffi.callableToPy(mod, name, function(methodPy, pointPy) {
+          Sk.ffi.checkMethodArgs(name, arguments, 1, 1);
+          Sk.ffi.checkArgType(ARG_OTHER, EUCLIDEAN_3, Sk.ffi.isInstance(pointPy, EUCLIDEAN_3), pointPy);
+          var point  = Sk.ffi.remapToJs(pointPy);
+          return Sk.ffi.numberToFloatPy(vector[METHOD_DISTANCE_TO_SQUARED](point.vector));
+        });
+      }
+      case METHOD_DIVIDE_SCALAR: {
+        return Sk.ffi.callableToPy(mod, name, function(methodPy, sPy) {
+          Sk.ffi.checkMethodArgs(name, arguments, 1, 1);
+          Sk.ffi.checkArgType(ARG_S, Sk.ffi.PyType.FLOAT, Sk.ffi.isFloat(sPy), sPy);
+          var s  = Sk.ffi.remapToJs(sPy);
+          quaternion.w /= s;
+          vector.x     /= s;
+          vector.y     /= s;
+          vector.z     /= s;
+          quaternion.x /= s;
+          quaternion.y /= s;
+          quaternion.z /= s;
+          self.xyz     /= s;
+          return selfPy;
+        });
+      }
       case METHOD_DOT: {
-        return Sk.ffi.callableToPy(mod, METHOD_DOT, function(methodPy, otherPy) {
-          Sk.ffi.checkMethodArgs(METHOD_DOT, arguments, 1, 1);
+        return Sk.ffi.callableToPy(mod, name, function(methodPy, otherPy) {
+          Sk.ffi.checkMethodArgs(name, arguments, 1, 1);
           Sk.ffi.checkArgType(ARG_OTHER, EUCLIDEAN_3, Sk.ffi.isInstance(otherPy, EUCLIDEAN_3), otherPy);
           var other  = Sk.ffi.remapToJs(otherPy);
           return Sk.ffi.numberToFloatPy(vector[METHOD_DOT](other.vector));
+        });
+      }
+      case METHOD_MULTIPLY_SCALAR: {
+        return Sk.ffi.callableToPy(mod, name, function(methodPy, sPy) {
+          Sk.ffi.checkMethodArgs(name, arguments, 1, 1);
+          Sk.ffi.checkArgType(ARG_S, Sk.ffi.PyType.FLOAT, Sk.ffi.isFloat(sPy), sPy);
+          var s  = Sk.ffi.remapToJs(sPy);
+          quaternion.w *= s;
+          vector.x     *= s;
+          vector.y     *= s;
+          vector.z     *= s;
+          quaternion.x *= s;
+          quaternion.y *= s;
+          quaternion.z *= s;
+          self.xyz     *= s;
+          return selfPy;
         });
       }
       case METHOD_SET_X: {
@@ -36909,6 +37003,11 @@ var METHOD_UNPROJECT_VECTOR    = "unprojectVector";
  * @const
  * @type {string}
  */
+var UPDATE_PROJECTION_MATRIX   = "updateProjectionMatrix"
+/**
+ * @const
+ * @type {string}
+ */
 var METHOD_UPDATE_MATRIX       = "updateMatrix";
 /**
  * @const
@@ -36920,6 +37019,16 @@ var METHOD_ADD                 = "add";
  * @type {string}
  */
 var METHOD_CROSS               = "cross";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_COMPUTE_CENTROIDS   = "computeCentroids";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_COMPUTE_FACE_NORMALS = "computeFaceNormals";
 /**
  * @const
  * @type {string}
@@ -37076,6 +37185,7 @@ var OP_MUL                     = "*";
  * This is a customized version of THREE.CylinderGeometry.
  *
  * @constructor
+ * @extends THREE.Geometry
  * @param {number} radiusTop
  * @param {number} radiusBottom
  * @param {number} height
@@ -37131,9 +37241,9 @@ Sk.stdlib.CylinderGeometry = function (radiusTop, radiusBottom, height, radialSe
       var theta = u * Math.PI * 2;
       var vertex = Sk.three.vector3Cycle(z, radius * Math.cos(theta), radius * Math.sin(theta), direction);
 
-      this['vertices'].push( vertex );
+      this.vertices.push( vertex );
 
-      verticesRow.push(this['vertices'].length - 1);
+      verticesRow.push(this.vertices.length - 1);
       // Flip the t texture coordinate (s,t) because the cylinder builds from the top.
       // The texture mapping is simply wrapping a label around a can - almost.
       // I expect sloping cans trapezoidal cans will need some adjustment.
@@ -37154,21 +37264,21 @@ Sk.stdlib.CylinderGeometry = function (radiusTop, radiusBottom, height, radialSe
     var idxThetaHi = (idxAngle + 1) % radialSegments;
     // The vertices already have much of the information required for the normals.
     if (radiusTop !== 0) {
-      na = this['vertices'][vertices[0][idxThetaLo]].clone();
-      nb = this['vertices'][vertices[0][idxThetaHi]].clone();
+      na = this.vertices[vertices[0][idxThetaLo]].clone();
+      nb = this.vertices[vertices[0][idxThetaHi]].clone();
     }
     else {
-      na = this['vertices'][vertices[1][idxThetaLo]].clone();
-      nb = this['vertices'][vertices[1][idxThetaHi]].clone();
+      na = this.vertices[vertices[1][idxThetaLo]].clone();
+      nb = this.vertices[vertices[1][idxThetaHi]].clone();
     }
 
-    c0 = na[METHOD_GET_COMPONENT]((direction + 2) % 3);
-    c1 = na[METHOD_GET_COMPONENT]((direction + 1) % 3);
-    na[METHOD_SET_COMPONENT]((direction + 0) % 3, Math.sqrt(c0 * c0 + c1 * c1) * tanTheta);
+    c0 = na.getComponent((direction + 2) % 3);
+    c1 = na.getComponent((direction + 1) % 3);
+    na.setComponent((direction + 0) % 3, Math.sqrt(c0 * c0 + c1 * c1) * tanTheta);
     na.normalize();
-    c0 = nb[METHOD_GET_COMPONENT]((direction + 2) % 3);
-    c1 = nb[METHOD_GET_COMPONENT]((direction + 1) % 3);
-    nb[METHOD_SET_COMPONENT]((direction + 0) % 3, Math.sqrt(c0 * c0 + c1 * c1) * tanTheta);
+    c0 = nb.getComponent((direction + 2) % 3);
+    c1 = nb.getComponent((direction + 1) % 3);
+    nb.setComponent((direction + 0) % 3, Math.sqrt(c0 * c0 + c1 * c1) * tanTheta);
     nb.normalize();
 
     // Not sure why the limits is one less in this case?
@@ -37189,24 +37299,24 @@ Sk.stdlib.CylinderGeometry = function (radiusTop, radiusBottom, height, radialSe
       var uv3 = uvs[idxSlice + 1][idxThetaHi].clone();
       var uv4 = uvs[idxSlice][idxThetaHi].clone();
 
-      this['faces'].push( new THREE.Face3( v1, v2, v4, [ n1, n2, n4 ] ) );
-      this['faceVertexUvs'][0].push([uv1, uv2, uv4]);
+      this.faces.push( new THREE.Face3( v1, v2, v4, [ n1, n2, n4 ] ) );
+      this.faceVertexUvs[0].push([uv1, uv2, uv4]);
 
-      this['faces'].push( new THREE.Face3( v2, v3, v4, [ n2, n3, n4 ] ) );
-      this['faceVertexUvs'][ 0 ].push( [ uv2, uv3, uv4 ] );
+      this.faces.push( new THREE.Face3( v2, v3, v4, [ n2, n3, n4 ] ) );
+      this.faceVertexUvs[ 0 ].push( [ uv2, uv3, uv4 ] );
     }
   }
   // top cap
   if (openEnded === false && radiusTop > 0) {
 
-    this['vertices'].push(Sk.three.vector3Cycle(+heightHalf, 0, 0, direction));
+    this.vertices.push(Sk.three.vector3Cycle(+heightHalf, 0, 0, direction));
 
     for (idxAngle = 0; idxAngle < radialSegments; idxAngle++) {
       var idxThetaLo = (idxAngle + 0) % radialSegments;
       var idxThetaHi = (idxAngle + 1) % radialSegments;
       var v1 = vertices[0][idxThetaLo];
       var v2 = vertices[0][idxThetaHi];
-      var v3 = this['vertices'].length - 1;
+      var v3 = this.vertices.length - 1;
 
       var n1 = Sk.three.vector3Cycle(+1, 0, 0, direction);
       var n2 = Sk.three.vector3Cycle(+1, 0, 0, direction);
@@ -37216,21 +37326,21 @@ Sk.stdlib.CylinderGeometry = function (radiusTop, radiusBottom, height, radialSe
       var uv2 = uvs[0][idxThetaHi].clone();
       var uv3 = new THREE.Vector2(uv2.u, 0);
 
-      this['faces'].push( new THREE.Face3(v1, v2, v3, [n1, n2, n3]));
-      this['faceVertexUvs'][0].push([uv1, uv2, uv3]);
+      this.faces.push( new THREE.Face3(v1, v2, v3, [n1, n2, n3]));
+      this.faceVertexUvs[0].push([uv1, uv2, uv3]);
     }
   }
   // bottom cap
   if (openEnded === false && radiusBottom > 0) {
 
-    this['vertices'].push(Sk.three.vector3Cycle(-heightHalf, 0, 0, direction));
+    this.vertices.push(Sk.three.vector3Cycle(-heightHalf, 0, 0, direction));
 
     for (idxAngle = 0; idxAngle < radialSegments; idxAngle++) {
       var idxThetaLo = (idxAngle + 0) % radialSegments;
       var idxThetaHi = (idxAngle + 1) % radialSegments;
       var v1 = vertices[heightSegments][idxThetaHi];
       var v2 = vertices[heightSegments][idxThetaLo];
-      var v3 = this['vertices'].length - 1;
+      var v3 = this.vertices.length - 1;
 
       var n1 = Sk.three.vector3Cycle(-1, 0, 0, direction);
       var n2 = Sk.three.vector3Cycle(-1, 0, 0, direction);
@@ -37240,14 +37350,14 @@ Sk.stdlib.CylinderGeometry = function (radiusTop, radiusBottom, height, radialSe
       var uv2 = uvs[heightSegments][idxThetaLo].clone();
       var uv3 = new THREE.Vector2(uv2.u, 1);
 
-      this['faces'].push( new THREE.Face3(v1, v2, v3, [n1, n2, n3]));
-      this['faceVertexUvs'][0].push([uv1, uv2, uv3]);
+      this.faces.push( new THREE.Face3(v1, v2, v3, [n1, n2, n3]));
+      this.faceVertexUvs[0].push([uv1, uv2, uv3]);
     }
   }
-  this['computeCentroids']();
-  this['computeFaceNormals']();
+  this.computeCentroids();
+  this.computeFaceNormals();
 }
-Sk.stdlib.CylinderGeometry.prototype = Object.create(THREE.Geometry.prototype);
+Sk.stdlib.CylinderGeometry.prototype = Object.create(THREE['Geometry'].prototype);
 /**
  * PlaneGeometry
  *
@@ -37739,9 +37849,9 @@ function methodRemove(target) {
   });
 }
 /**
- * Wrapper Python class for interacting with a JavaScript array.
+ *
  */
-function mutableVectorListPy(vertices) {
+function mutableVertexListPy(vertices) {
   return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = Sk.ffi.functionPy(function(selfPy) {
       Sk.ffi.referenceToPy(vertices, PROP_VERTICES, undefined, selfPy);
@@ -37767,6 +37877,42 @@ function mutableVectorListPy(vertices) {
       return Sk.ffi.stringToPy(PROP_VERTICES);
     });
   }, PROP_VERTICES, []));
+}
+/**
+ *
+ */
+function mutableFaceListPy(elements) {
+  return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+    $loc.__init__ = Sk.ffi.functionPy(function(selfPy) {
+      Sk.ffi.referenceToPy(elements, PROP_FACES, undefined, selfPy);
+    });
+    $loc.__getattr__ = Sk.ffi.functionPy(function(verticesPy, name) {
+      switch(name) {
+        case METHOD_APPEND: {
+          return Sk.ffi.callableToPy(mod, METHOD_APPEND, function(methodPy, elementPy) {
+              elements.push(Sk.ffi.remapToJs(elementPy));
+          });
+        }
+      }
+    });
+    $loc.__getitem__ = Sk.ffi.functionPy(function(verticesPy, indexPy) {
+      var index = Sk.ffi.remapToJs(indexPy);
+      return faceToFace3Py(elements[index]);
+    });
+    $loc.mp$length = function() {return elements.length;};
+    $loc.__str__ = Sk.ffi.functionPy(function(self) {
+      return Sk.ffh.str(Sk.ffi.listPy(elements.map(function(elementJs) {return faceToFace3Py(elementJs);})));
+    });
+    $loc.__repr__ = Sk.ffi.functionPy(function(self) {
+      return Sk.ffi.stringToPy(PROP_FACES);
+    });
+  }, PROP_FACES, []));
+}
+/**
+ *
+ */
+function faceToFace3Py(face) {
+  return Sk.ffi.callsim(mod[Sk.three.FACE_3], Sk.ffi.referenceToPy(face, Sk.three.FACE_3));
 }
 /**
  *
@@ -38442,10 +38588,9 @@ mod[COLOR] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
 
 function cameraGetAttr(cameraPy, name, className) {
   var camera = Sk.ffi.remapToJs(cameraPy);
-  var UPDATE_PROJECTION_MATRIX = "updateProjectionMatrix"
   switch(name) {
-    case "aspect": {
-      return Sk.builtin.assk$(camera.aspect, Sk.builtin.nmber.float$);
+    case PROP_ASPECT: {
+      return Sk.ffi.numberToFloatPy(camera.aspect);
     }
     case PROP_POSITION: {
       return vectorToEuclidean3Py(camera[PROP_POSITION]);
@@ -38531,16 +38676,16 @@ mod[PERSPECTIVE_CAMERA] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__init__ = Sk.ffi.functionPy(function(selfPy, fovPy, aspectPy, nearPy, farPy) {
     Sk.ffi.checkMethodArgs(PERSPECTIVE_CAMERA, arguments, 0, 4);
     if (Sk.ffi.isDefined(fovPy)) {
-      Sk.ffi.checkArgType(ARG_FOV, NUM, Sk.ffi.isNum(fovPy), fovPy);
+      Sk.ffi.checkArgType(ARG_FOV, Sk.ffi.PyType.FLOAT, Sk.ffi.isNum(fovPy), fovPy);
     }
     if (Sk.ffi.isDefined(aspectPy)) {
-      Sk.ffi.checkArgType(ARG_ASPECT, NUM, Sk.ffi.isNum(aspectPy), aspectPy);
+      Sk.ffi.checkArgType(ARG_ASPECT, Sk.ffi.PyType.FLOAT, Sk.ffi.isNum(aspectPy), aspectPy);
     }
     if (Sk.ffi.isDefined(nearPy)) {
-      Sk.ffi.checkArgType(ARG_NEAR, NUM, Sk.ffi.isNum(nearPy), nearPy);
+      Sk.ffi.checkArgType(ARG_NEAR, Sk.ffi.PyType.FLOAT, Sk.ffi.isNum(nearPy), nearPy);
     }
     if (Sk.ffi.isDefined(farPy)) {
-      Sk.ffi.checkArgType(ARG_FAR, NUM, Sk.ffi.isNum(farPy), farPy);
+      Sk.ffi.checkArgType(ARG_FAR, Sk.ffi.PyType.FLOAT, Sk.ffi.isNum(farPy), farPy);
     }
     var fieldOfView = Sk.ffi.remapToJs(fovPy);
     var aspectRatio = Sk.ffi.remapToJs(aspectPy);
@@ -38551,10 +38696,9 @@ mod[PERSPECTIVE_CAMERA] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
 
   $loc.__getattr__ = Sk.ffi.functionPy(function(cameraPy, name) {
     var camera = Sk.ffi.remapToJs(cameraPy);
-    var UPDATE_PROJECTION_MATRIX = "updateProjectionMatrix"
     switch(name) {
-      case "aspect": {
-        return Sk.builtin.assk$(camera.aspect, Sk.builtin.nmber.float$);
+      case PROP_ASPECT: {
+        return Sk.ffi.numberToFloatPy(camera.aspect);
       }
       case PROP_POSITION: {
         return vectorToEuclidean3Py(camera.position);
@@ -38653,15 +38797,33 @@ mod[PERSPECTIVE_CAMERA] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
 }, PERSPECTIVE_CAMERA, []);
 
 mod[ORTHOGRAPHIC_CAMERA] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-  $loc.__init__ = Sk.ffi.functionPy(function(self, leftPy, rightPy, topPy, bottomPy, nearPy, farPy) {
-    var left = Sk.builtin.asnum$(leftPy)
-    var right = Sk.builtin.asnum$(rightPy)
-    var top = Sk.builtin.asnum$(topPy)
-    var bottom = Sk.builtin.asnum$(bottomPy)
-    var near = Sk.builtin.asnum$(nearPy)
-    var far = Sk.builtin.asnum$(farPy)
-    self.v = new THREE[ORTHOGRAPHIC_CAMERA](left, right, top, bottom, near, far);
-    self.tp$name = ORTHOGRAPHIC_CAMERA;
+  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, leftPy, rightPy, topPy, bottomPy, nearPy, farPy) {
+    Sk.ffi.checkMethodArgs(ORTHOGRAPHIC_CAMERA, arguments, 0, 6);
+    if (Sk.ffi.isDefined(leftPy)) {
+      Sk.ffi.checkArgType("left", Sk.ffi.PyType.FLOAT, Sk.ffi.isFloat(leftPy), leftPy);
+    }
+    if (Sk.ffi.isDefined(rightPy)) {
+      Sk.ffi.checkArgType("right", Sk.ffi.PyType.FLOAT, Sk.ffi.isFloat(rightPy), rightPy);
+    }
+    if (Sk.ffi.isDefined(topPy)) {
+      Sk.ffi.checkArgType("top", Sk.ffi.PyType.FLOAT, Sk.ffi.isFloat(topPy), topPy);
+    }
+    if (Sk.ffi.isDefined(bottomPy)) {
+      Sk.ffi.checkArgType("bottom", Sk.ffi.PyType.FLOAT, Sk.ffi.isFloat(bottomPy), bottomPy);
+    }
+    if (Sk.ffi.isDefined(nearPy)) {
+      Sk.ffi.checkArgType(ARG_NEAR, Sk.ffi.PyType.FLOAT, Sk.ffi.isFloat(nearPy), nearPy);
+    }
+    if (Sk.ffi.isDefined(farPy)) {
+      Sk.ffi.checkArgType(ARG_FAR, Sk.ffi.PyType.FLOAT, Sk.ffi.isFloat(farPy), farPy);
+    }
+    var left = Sk.ffi.remapToJs(leftPy)
+    var right = Sk.ffi.remapToJs(rightPy)
+    var top = Sk.ffi.remapToJs(topPy)
+    var bottom = Sk.ffi.remapToJs(bottomPy)
+    var near = Sk.ffi.remapToJs(nearPy)
+    var far = Sk.ffi.remapToJs(farPy)
+    Sk.ffi.referenceToPy(new THREE[ORTHOGRAPHIC_CAMERA](left, right, top, bottom, near, far), ORTHOGRAPHIC_CAMERA, undefined, selfPy);
   });
 
   $loc.__getattr__ = Sk.ffi.functionPy(function(cameraPy, name) {
@@ -38710,7 +38872,7 @@ mod[ORTHOGRAPHIC_CAMERA] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         }, UPDATE_PROJECTION_MATRIX, []));
       }
       default: {
-        throw Sk.ffi.err.attribute(name).isNotGetableOnType(ORTHOGRAPHIC_CAMERA);
+        return cameraGetAttr(cameraPy, name, ORTHOGRAPHIC_CAMERA);
       }
     }
   });
@@ -38759,7 +38921,7 @@ mod[ORTHOGRAPHIC_CAMERA] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       }
       break;
       default: {
-        throw Sk.ffi.err.attribute(name).isNotSetableOnType(ORTHOGRAPHIC_CAMERA);
+        return cameraSetAttr(cameraPy, name, valuePy, ORTHOGRAPHIC_CAMERA);
       }
     }
   });
@@ -39611,17 +39773,13 @@ function geometryGetAttr(className, geometryPy, name) {
       return Sk.ffi.stringToPy(geometry.uuid);
     }
     case PROP_FACES: {
-      var facesJs = geometry.faces;
-      var faces = facesJs.map(function(faceJs) {
-        return Sk.ffi.callsim(mod[Sk.three.FACE_3], Sk.ffi.referenceToPy(faceJs, Sk.three.FACE_3));
-      });
-      return Sk.ffi.listPy(faces);
+      return mutableFaceListPy(geometry.faces);
     }
     case PROP_COLORS: {
       return mutableColorListPy(geometry.colors);
     }
     case PROP_VERTICES: {
-      return mutableVectorListPy(geometry.vertices);
+      return mutableVertexListPy(geometry.vertices);
     }
     case PROP_RADIUS: {
       return Sk.ffi.numberToFloatPy(geometry.radius);
@@ -39638,6 +39796,18 @@ function geometryGetAttr(className, geometryPy, name) {
         Sk.ffi.checkMethodArgs(name, arguments, 1, 1);
         Sk.ffi.checkArgType("matrix", Sk.three.MATRIX_4, Sk.ffi.isInstance(matrixPy, Sk.three.MATRIX_4), matrixPy);
         geometry.applyMatrix(Sk.ffi.remapToJs(matrixPy));
+      });
+    }
+    case METHOD_COMPUTE_CENTROIDS: {
+      return Sk.ffi.callableToPy(mod, name, function(methodPy) {
+        Sk.ffi.checkMethodArgs(name, arguments, 0, 0);
+        geometry.computeCentroids();
+      });
+    }
+    case METHOD_COMPUTE_FACE_NORMALS: {
+      return Sk.ffi.callableToPy(mod, name, function(methodPy) {
+        Sk.ffi.checkMethodArgs(name, arguments, 0, 0);
+        geometry.computeFaceNormals();
       });
     }
     default: {
@@ -39687,13 +39857,13 @@ mod[GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__setattr__ = Sk.ffi.functionPy(function(selfPy, name, valuePy) {
     return geometrySetAttr(GEOMETRY, selfPy, name, valuePy);
   });
-  $loc.__str__ = Sk.ffi.functionPy(function(geometryPy) {
-    var geometry = Sk.ffi.remapToJs(geometryPy);
+  $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
+    var geometry = Sk.ffi.remapToJs(selfPy);
     var args = {};
     return Sk.ffi.stringToPy(GEOMETRY + "(" + JSON.stringify(args) + ")");
   });
-  $loc.__repr__ = Sk.ffi.functionPy(function(geometry) {
-    geometry = Sk.ffi.remapToJs(geometry);
+  $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
+    var geometry = Sk.ffi.remapToJs(selfPy);
     var args = [];
     return Sk.ffi.stringToPy(GEOMETRY + "(" + args.map(function(x) {return JSON.stringify(x);}).join(", ") + ")");
   });
@@ -41040,11 +41210,13 @@ mod[Sk.three.FACE_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       Sk.ffi.referenceToPy(face, Sk.three.FACE_3, undefined, selfPy);
     }
     else {
-      Sk.ffi.checkMethodArgs(Sk.three.FACE_3, arguments, 4, 4);
+      Sk.ffi.checkMethodArgs(Sk.three.FACE_3, arguments, 3, 6);
       Sk.ffi.checkArgType(PROP_A, INT, Sk.ffi.isInt(aPy), aPy);
       Sk.ffi.checkArgType(PROP_B, INT, Sk.ffi.isInt(bPy), bPy);
       Sk.ffi.checkArgType(PROP_C, INT, Sk.ffi.isInt(cPy), cPy);
-      Sk.ffi.checkArgType(PROP_NORMAL, EUCLIDEAN_3, Sk.ffi.isInstance(normalPy, EUCLIDEAN_3), normalPy);
+      if (isDefined(normalPy)) {
+        Sk.ffi.checkArgType(PROP_NORMAL, EUCLIDEAN_3, Sk.ffi.isInstance(normalPy, EUCLIDEAN_3), normalPy);
+      }
       var a = Sk.ffi.remapToJs(aPy);
       var b = Sk.ffi.remapToJs(bPy);
       var c = Sk.ffi.remapToJs(cPy);
@@ -41530,8 +41702,10 @@ if (isDefined(THREE)) {
   mod.NoColors      = Sk.ffi.numberToIntPy(THREE.NoColors);
   mod.FaceColors    = Sk.ffi.numberToIntPy(THREE.FaceColors);
   mod.VertexColors  = Sk.ffi.numberToIntPy(THREE.VertexColors);
-}
 
+  mod.FrontSide     = Sk.ffi.numberToIntPy(THREE.FrontSide);
+  mod.BackSide      = Sk.ffi.numberToIntPy(THREE.BackSide);
+  mod.DoubleSide    = Sk.ffi.numberToIntPy(THREE.DoubleSide);}
 };
 }).call(this);
 (function() {
