@@ -5925,7 +5925,7 @@ Sk.builtin.type = function(name, bases, dict)
         klass.prototype.tp$getattr = Sk.builtin.object.prototype.GenericGetAttr;
         klass.prototype.tp$setattr = Sk.builtin.object.prototype.GenericSetAttr;
         klass.prototype.tp$descr_get = function() { goog.asserts.fail("in type tp$descr_get"); };
-        klass.prototype['$r'] = function()
+        klass.prototype.tp$repr = function()
         {
             var reprf = this.tp$getattr("__repr__");
             if (reprf !== undefined)
@@ -5940,7 +5940,7 @@ Sk.builtin.type = function(name, bases, dict)
             var strf = this.tp$getattr("__str__");
             if (strf !== undefined)
                 return Sk.misceval.apply(strf, undefined, undefined, undefined, []);
-            return this['$r']();
+            return this.tp$repr();
         };
         klass.prototype.tp$length = function()
         {
@@ -6028,7 +6028,7 @@ Sk.builtin.type.makeIntoTypeObj = function(name, t)
     goog.asserts.assert(t !== undefined);
     t.ob$type = Sk.builtin.type;
     t.tp$name = name;
-    t['$r'] = function()
+    t.tp$repr = function()
     {
         var mod = t.__module__;
         var cname = "";
@@ -6048,7 +6048,7 @@ Sk.builtin.type.makeIntoTypeObj = function(name, t)
 
 Sk.builtin.type.ob$type = Sk.builtin.type;
 Sk.builtin.type.tp$name = "type";
-Sk.builtin.type['$r'] = function() { return new Sk.builtin.str("<type 'type'>"); };
+Sk.builtin.type.tp$repr = function() { return new Sk.builtin.str("<type 'type'>"); };
 
 //Sk.builtin.type.prototype.tp$descr_get = function() { print("in type descr_get"); };
 
@@ -6228,11 +6228,11 @@ Sk.builtin.type.prototype.tp$richcompare = function(other, op)
 	if (other.ob$type != Sk.builtin.type)
 		return undefined;
 
-	if (!this['$r'] || !other['$r'])
+	if (!this.tp$repr || !other.tp$repr)
 		return undefined;
 
-	var r1 = this['$r']();
-	var r2 = other['$r']();
+	var r1 = this.tp$repr();
+	var r2 = other.tp$repr();
 
 	return r1.tp$richcompare(r2, op);
 };
@@ -6347,13 +6347,6 @@ Sk.builtin.bool = function(x)
 
 Sk.builtin.bool.prototype.tp$name = "bool";
 Sk.builtin.bool.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('bool', Sk.builtin.bool);
-
-Sk.builtin.bool.prototype['$r'] = function()
-{
-    if (this.v)
-    return new Sk.builtin.str('True');
-    return new Sk.builtin.str('False');
-}
 
 Sk.builtin.bool.true$ = Object.create(Sk.builtin.bool.prototype, {v: {value: true, enumerable: true}});
 Sk.builtin.bool.false$ = Object.create(Sk.builtin.bool.prototype, {v: {value: false, enumerable: true}});
@@ -6588,7 +6581,7 @@ Sk.builtin.func.prototype.tp$setattr = function(key,value) {
 //Sk.builtin.type.makeIntoTypeObj('function', Sk.builtin.func);
 Sk.builtin.func.prototype.ob$type = Sk.builtin.type.makeTypeObj('function', new Sk.builtin.func(null, null));
 
-Sk.builtin.func.prototype['$r'] = function()
+Sk.builtin.func.prototype.tp$repr = function()
 {
     var name = (this.func_code && this.func_code['co_name'] && this.func_code['co_name'].v) || '<native JS>';
     return new Sk.builtin.str("<function " + name + ">");
@@ -6678,11 +6671,11 @@ Sk.builtin.method.prototype.tp$call = function(args, kw)
     return this.im_func.func_code.apply(this.im_func.func_globals, args);
 };
 
-Sk.builtin.method.prototype['$r'] = function()
+Sk.builtin.method.prototype.tp$repr = function()
 {
     var name = (this.im_func.func_code && this.im_func.func_code['co_name'] && this.im_func.func_code['co_name'].v) || '<native JS>';
     return new Sk.builtin.str("<bound method " + this.im_self.ob$type.tp$name + "." + name
-            + " of " + this.im_self['$r']().v + ">");
+            + " of " + this.im_self.tp$repr().v + ">");
 };
 Sk.misceval = {};
 
@@ -7056,7 +7049,7 @@ Sk.misceval.objectRepr = function(v)
         return new Sk.builtin.str("False");
     else if (typeof v === "number")
         return new Sk.builtin.str("" + v);
-    else if (!v['$r']) {
+    else if (!v.tp$repr) {
         if (v.tp$name) {
             return new Sk.builtin.str("<" + v.tp$name + " object>");
         } else {
@@ -7073,7 +7066,7 @@ Sk.misceval.objectRepr = function(v)
             return new Sk.builtin.str("" + v.v);
     }
     else
-        return v['$r']();
+        return v.tp$repr();
 };
 goog.exportSymbol("Sk.misceval.objectRepr", Sk.misceval.objectRepr);
 
@@ -8243,11 +8236,13 @@ Sk.builtin.list.prototype.list_ass_slice_ = function(ilow, ihigh, v)
 };
 
 Sk.builtin.list.prototype.tp$name = "list";
-Sk.builtin.list.prototype['$r'] = function()
+Sk.builtin.list.prototype.tp$repr = function()
 {
     var ret = [];
     for (var it = this.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext())
+    {
         ret.push(Sk.misceval.objectRepr(i).v);
+    }
     return new Sk.builtin.str("[" + ret.join(", ") + "]");
 };
 Sk.builtin.list.prototype.tp$getattr = Sk.builtin.object.prototype.GenericGetAttr;
@@ -8844,7 +8839,7 @@ Sk.builtin.str.prototype.tp$richcompare = function(other, op)
     }
 };
 
-Sk.builtin.str.prototype['$r'] = function()
+Sk.builtin.str.prototype.tp$repr = function()
 {
     // single is preferred
     var quote = "'";
@@ -9602,7 +9597,7 @@ Sk.builtin.tuple = function(L)
 };
 
 Sk.builtin.tuple.prototype.tp$name = "tuple";
-Sk.builtin.tuple.prototype['$r'] = function()
+Sk.builtin.tuple.prototype.tp$repr = function()
 {
     if (this.v.length === 0) return new Sk.builtin.str("()");
     var bits = [];
@@ -10035,7 +10030,7 @@ Sk.builtin.dict.prototype['__iter__'] = new Sk.builtin.func(function(self)
     return self.tp$iter();
 });
 
-Sk.builtin.dict.prototype['$r'] = function()
+Sk.builtin.dict.prototype.tp$repr = function()
 {
     var ret = [];
     for (var iter = this.tp$iter(), k = iter.tp$iternext();
@@ -12226,7 +12221,7 @@ Sk.builtin.nmber.prototype.__ge__ = function(me, other) {
 
 Sk.builtin.nmber.prototype.tp$getattr = Sk.builtin.object.prototype.GenericGetAttr;
 
-Sk.builtin.nmber.prototype['$r'] = function()
+Sk.builtin.nmber.prototype.tp$repr = function()
 {
     return new Sk.builtin.str(this.str$(10, true));
 };
@@ -12842,7 +12837,7 @@ Sk.builtin.lng.prototype.__ge__ = function(me, other) {
 	return me.longCompare(other) >= 0;
 };
 
-Sk.builtin.lng.prototype['$r'] = function()
+Sk.builtin.lng.prototype.tp$repr = function()
 {
     return new Sk.builtin.str(this.str$(10, true) + "L");
 };
@@ -13211,7 +13206,7 @@ Sk.builtin.set.prototype.set_reset_ = function()
 };
 
 Sk.builtin.set.prototype.tp$name = 'set';
-Sk.builtin.set.prototype['$r'] = function()
+Sk.builtin.set.prototype.tp$repr = function()
 {
     var ret = [];
     for (var it = this.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext())
@@ -13563,7 +13558,7 @@ Sk.builtin.generator.prototype['next'] = new Sk.builtin.func(function(self)
 
 Sk.builtin.generator.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('generator', Sk.builtin.generator);
 
-Sk.builtin.generator.prototype['$r'] = function()
+Sk.builtin.generator.prototype.tp$repr = function()
 {
     return new Sk.builtin.str("<generator object " + this.func_code['co_name'].v + ">");
 };
@@ -13638,7 +13633,7 @@ Sk.builtin.file.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('file', Sk.b
 
 Sk.builtin.file.prototype.tp$getattr = Sk.builtin.object.prototype.GenericGetAttr;
 
-Sk.builtin.file.prototype['$r'] = function()
+Sk.builtin.file.prototype.tp$repr = function()
 {
     return new Sk.builtin.str("<"
         + (this.closed ? "closed" : "open")
@@ -15081,6 +15076,7 @@ var SPECIAL_METHOD_NEG     = '__neg__';
 var SPECIAL_METHOD_NONZERO = '__nonzero__';
 var SPECIAL_METHOD_POS     = '__pos__';
 var SPECIAL_METHOD_REPR    = '__repr__';
+var SPECIAL_METHOD_RMUL    = '__rmul__';
 var SPECIAL_METHOD_RSHIFT  = '__rshift__';
 var SPECIAL_METHOD_SIN     = '__sin__';
 var SPECIAL_METHOD_SQRT    = '__sqrt__';
@@ -15154,6 +15150,9 @@ goog.exportSymbol("Sk.ffh.subtract", Sk.ffh.subtract);
 Sk.ffh.multiply = function(lhsPy, rhsPy) {return Sk.ffh.binaryExec(SPECIAL_METHOD_MUL, lhsPy, rhsPy, "nb$multiply");};
 goog.exportSymbol("Sk.ffh.multiply", Sk.ffh.multiply);
 
+Sk.ffh.rmultiply = function(lhsPy, rhsPy) {return Sk.ffh.binaryExec(SPECIAL_METHOD_RMUL, lhsPy, rhsPy, "nb$multiply");};
+goog.exportSymbol("Sk.ffh.rmultiply", Sk.ffh.rmultiply);
+
 Sk.ffh.divide = function(lhsPy, rhsPy) {return Sk.ffh.binaryExec(SPECIAL_METHOD_DIV, lhsPy, rhsPy, "nb$divide");};
 goog.exportSymbol("Sk.ffh.divide", Sk.ffh.divide);
 
@@ -15209,7 +15208,7 @@ goog.exportSymbol("Sk.ffh.sqrt", Sk.ffh.sqrt);
 Sk.ffh.str = function(valuePy) {return Sk.ffh.unaryExec(SPECIAL_METHOD_STR, valuePy, "tp$str");};
 goog.exportSymbol("Sk.ffh.str", Sk.ffh.str);
 
-Sk.ffh.repr = function(valuePy) {return Sk.ffh.unaryExec(SPECIAL_METHOD_REPR, valuePy, "tp$str");};
+Sk.ffh.repr = function(valuePy) {return Sk.ffh.unaryExec(SPECIAL_METHOD_REPR, valuePy, "tp$repr");};
 goog.exportSymbol("Sk.ffh.repr", Sk.ffh.repr);
 /**
  *
@@ -17584,7 +17583,7 @@ Sk.parseTreeDump = function parseTreeDump(n, indent)
     }
     else
     {
-        ret += Sk.Tokenizer.tokenNames[n.type] + ": " + new Sk.builtin.str(n.value)['$r']().v + "\n";
+        ret += Sk.Tokenizer.tokenNames[n.type] + ": " + new Sk.builtin.str(n.value).tp$repr().v + "\n";
     }
     return ret;
 };
@@ -20692,7 +20691,7 @@ Sk.astDump = function(node)
             if (node === true) ret = "True";
             else if (node === false) ret = "False";
             else if (node instanceof Sk.builtin.lng) ret = node.tp$str().v;
-            else if (node instanceof Sk.builtin.str) ret = node['$r']().v;
+            else if (node instanceof Sk.builtin.str) ret = node.tp$repr().v;
             else ret = "" + node;
             return indent + ret;
         }
@@ -21566,7 +21565,7 @@ Sk.dumpSymtab = function(st)
         var ret = [];
         for (var i = 0; i < l.length; ++i)
         {
-            ret.push(new Sk.builtin.str(l[i])['$r']().v);
+            ret.push(new Sk.builtin.str(l[i]).tp$repr().v);
         }
         return '[' + ret.join(', ') + ']';
     };
@@ -22145,12 +22144,12 @@ Compiler.prototype.vexpr = function(e, data, augstoreval)
                 return "Sk.longFromStr('" + e.n.tp$str().v + "')";
             goog.asserts.fail("unhandled Num type");
         case Str:
-            return this._gr('str', "new Sk.builtins['str'](", e.s['$r']().v, ")");
+            return this._gr('str', "new Sk.builtins['str'](", e.s.tp$repr().v, ")");
         case Attribute:
             var val;
             if (e.ctx !== AugStore)
                 val = this.vexpr(e.value);
-            var mangled = e.attr['$r']().v;
+            var mangled = e.attr.tp$repr().v;
             mangled = mangled.substring(1, mangled.length-1);
             mangled = mangleName(this.u.private_, new Sk.builtin.str(mangled)).v;
             mangled = fixReservedWords(mangled);
@@ -22664,7 +22663,7 @@ Compiler.prototype.cimport = function(s)
     for (var i = 0; i < n; ++i)
     {
         var alias = s.names[i];
-        var mod = this._gr('module', "Sk.builtin.__import__(", alias.name['$r']().v, ",$gbl,$loc,[])");
+        var mod = this._gr('module', "Sk.builtin.__import__(", alias.name.tp$repr().v, ",$gbl,$loc,[])");
 
         if (alias.asname)
         {
@@ -22686,8 +22685,8 @@ Compiler.prototype.cfromimport = function(s)
     var n = s.names.length;
     var names = [];
     for (var i = 0; i < n; ++i)
-        names[i] = s.names[i].name['$r']().v;
-    var mod = this._gr('module', "Sk.builtin.__import__(", s.module['$r']().v, ",$gbl,$loc,[", names, "])");
+        names[i] = s.names[i].name.tp$repr().v;
+    var mod = this._gr('module', "Sk.builtin.__import__(", s.module.tp$repr().v, ",$gbl,$loc,[", names, "])");
     for (var i = 0; i < n; ++i)
     {
         var alias = s.names[i];
@@ -22698,7 +22697,7 @@ Compiler.prototype.cfromimport = function(s)
             return;
         }
 
-        var got = this._gr('item', "Sk.abstr.gattr(", mod, ",", alias.name['$r']().v, ")");
+        var got = this._gr('item', "Sk.abstr.gattr(", mod, ",", alias.name.tp$repr().v, ")");
         var storeName = alias.name;
         if (alias.asname)
             storeName = alias.asname;
@@ -23119,7 +23118,7 @@ Compiler.prototype.cclass = function(s)
     this.exitScope();
 
     // todo; metaclass
-    var wrapped = this._gr("built", "Sk.misceval.buildClass($gbl,", scopename, ",", s.name['$r']().v, ",[", bases, "])");
+    var wrapped = this._gr("built", "Sk.misceval.buildClass($gbl,", scopename, ",", s.name.tp$repr().v, ",[", bases, "])");
 
     // store our new class under the right name
     this.nameop(s.name, Store, wrapped);
@@ -23406,7 +23405,7 @@ Compiler.prototype.exitScope = function()
         this.u.activateScope();
 
     if (prev.name.v !== "<module>") {// todo; hacky
-        var mangled = prev.name['$r']().v;
+        var mangled = prev.name.tp$repr().v;
         mangled = mangled.substring(1, mangled.length-1);
         mangled = fixReservedWords(mangled);
         mangled = fixReservedNames(mangled);
@@ -25199,14 +25198,13 @@ mod[Sk.matrix.MATRIX_2x2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     return Sk.ffi.callsim(mod[Sk.matrix.MATRIX_2x2], onePy, twoPy);
   });
   $loc.__mul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+    var a00 = Sk.ffh.getitem(Sk.ffh.getitem(selfPy, 0), 0);
+    var a01 = Sk.ffh.getitem(Sk.ffh.getitem(selfPy, 0), 1);
+    var a10 = Sk.ffh.getitem(Sk.ffh.getitem(selfPy, 1), 0);
+    var a11 = Sk.ffh.getitem(Sk.ffh.getitem(selfPy, 1), 1);
     switch(Sk.ffi.getType(otherPy)) {
       case Sk.ffi.PyType.INSTANCE: {
         if (Sk.ffi.isInstance(otherPy, Sk.matrix.MATRIX_2x2)) {
-          var a00 = Sk.ffh.getitem(Sk.ffh.getitem(selfPy, 0), 0);
-          var a01 = Sk.ffh.getitem(Sk.ffh.getitem(selfPy, 0), 1);
-          var a10 = Sk.ffh.getitem(Sk.ffh.getitem(selfPy, 1), 0);
-          var a11 = Sk.ffh.getitem(Sk.ffh.getitem(selfPy, 1), 1);
-
           var b00 = Sk.ffh.getitem(Sk.ffh.getitem(otherPy, 0), 0);
           var b01 = Sk.ffh.getitem(Sk.ffh.getitem(otherPy, 0), 1);
           var b10 = Sk.ffh.getitem(Sk.ffh.getitem(otherPy, 1), 0);
@@ -25221,7 +25219,14 @@ mod[Sk.matrix.MATRIX_2x2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           return Sk.ffi.callsim(mod[Sk.matrix.MATRIX_2x2], onePy, twoPy);
         }
         else {
-          throw Sk.ffi.err.operand(ARG_OTHER).toOperation(OP_MUL).mustHaveType([Sk.ffi.PyType.FLOAT, Sk.matrix.MATRIX_2x2]);
+          var x00 = Sk.ffh.multiply(a00, otherPy);
+          var x01 = Sk.ffh.multiply(a01, otherPy);
+          var x10 = Sk.ffh.multiply(a10, otherPy);
+          var x11 = Sk.ffh.multiply(a11, otherPy);
+
+          var onePy = Sk.ffi.callsim(mod[Sk.matrix.MATRIX_2x1], x00, x01);
+          var twoPy = Sk.ffi.callsim(mod[Sk.matrix.MATRIX_2x1], x10, x11);
+          return Sk.ffi.callsim(mod[Sk.matrix.MATRIX_2x2], onePy, twoPy);
         }
       }
       case Sk.ffi.PyType.FLOAT: {
@@ -25242,6 +25247,36 @@ mod[Sk.matrix.MATRIX_2x2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       default: {
         throw Sk.ffi.err.operand(ARG_OTHER).toOperation(OP_MUL).mustHaveType([Sk.ffi.PyType.FLOAT, Sk.matrix.MATRIX_2x1]);
       }
+    }
+  });
+  $loc.__rmul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+    var a00 = Sk.ffh.getitem(Sk.ffh.getitem(selfPy, 0), 0);
+    var a01 = Sk.ffh.getitem(Sk.ffh.getitem(selfPy, 0), 1);
+    var a10 = Sk.ffh.getitem(Sk.ffh.getitem(selfPy, 1), 0);
+    var a11 = Sk.ffh.getitem(Sk.ffh.getitem(selfPy, 1), 1);
+    if (Sk.ffi.isInstance(otherPy, Sk.matrix.MATRIX_1x2)) {
+      var b00 = Sk.ffh.getitem(Sk.ffh.getitem(otherPy, 0), 0);
+      var b01 = Sk.ffh.getitem(Sk.ffh.getitem(otherPy, 0), 1);
+      var b10 = Sk.ffh.getitem(Sk.ffh.getitem(otherPy, 1), 0);
+      var b11 = Sk.ffh.getitem(Sk.ffh.getitem(otherPy, 1), 1);
+
+      var x00 = Sk.ffh.add(Sk.ffh.multiply(a00, b00), Sk.ffh.multiply(a10, b01));
+      var x01 = Sk.ffh.add(Sk.ffh.multiply(a01, b00), Sk.ffh.multiply(a11, b01));
+      var x10 = Sk.ffh.add(Sk.ffh.multiply(a00, b10), Sk.ffh.multiply(a10, b11));
+      var x11 = Sk.ffh.add(Sk.ffh.multiply(a01, b10), Sk.ffh.multiply(a11, b11));
+      var onePy = Sk.ffi.callsim(mod[Sk.matrix.MATRIX_2x1], x00, x01);
+      var twoPy = Sk.ffi.callsim(mod[Sk.matrix.MATRIX_2x1], x10, x11);
+      return Sk.ffi.callsim(mod[Sk.matrix.MATRIX_2x2], onePy, twoPy);
+    }
+    else {
+      var x00 = Sk.ffh.rmultiply(a00, otherPy);
+      var x01 = Sk.ffh.rmultiply(a01, otherPy);
+      var x10 = Sk.ffh.rmultiply(a10, otherPy);
+      var x11 = Sk.ffh.rmultiply(a11, otherPy);
+
+      var onePy = Sk.ffi.callsim(mod[Sk.matrix.MATRIX_2x1], x00, x01);
+      var twoPy = Sk.ffi.callsim(mod[Sk.matrix.MATRIX_2x1], x10, x11);
+      return Sk.ffi.callsim(mod[Sk.matrix.MATRIX_2x2], onePy, twoPy);
     }
   });
   $loc.__div__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
@@ -25532,27 +25567,36 @@ mod[COMPLEX] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var x, y;
     var a = Sk.ffi.remapToJs(selfPy);
     var b = Sk.ffi.remapToJs(otherPy);
-    if (Sk.ffi.isNum(otherPy)) {
-      x = a.x * b;
-      y = a.y * b;
-    }
-    else {
+    if (isComplexPy(otherPy)) {
       x = a.x * b.x - a.y * b.y;
       y = a.y * b.x + a.x * b.y;
+      return cartesianJsToComplexPy(x, y);
     }
-    return cartesianJsToComplexPy(x, y);
+    else if (Sk.ffi.isNum(otherPy)) {
+      x = a.x * b;
+      y = a.y * b;
+      return cartesianJsToComplexPy(x, y);
+    }
+    else {
+      return Sk.ffh.rmultiply(otherPy, selfPy);
+    }
   });
   $loc.__rmul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
     var x, y;
     var a = Sk.ffi.remapToJs(otherPy);
     var b = Sk.ffi.remapToJs(selfPy);
-    if (Sk.ffi.isNum(otherPy)) {
+    if (isComplexPy(otherPy)) {
+      x = b.x * a.x - b.y * a.y;
+      y = b.y * a.x + b.x * a.y;
+      return cartesianJsToComplexPy(x, y);
+    }
+    else if (Sk.ffi.isNum(otherPy)) {
       x = a * b.x;
       y = a * b.y;
       return cartesianJsToComplexPy(x, y);
     }
     else {
-      throw Sk.ffi.err.argument("a").mustHaveType(NUM);
+      throw Sk.ffi.err.argument(ARG_OTHER).mustHaveType(NUM);
     }
   });
   $loc.__imul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
