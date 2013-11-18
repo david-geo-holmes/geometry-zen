@@ -24587,6 +24587,114 @@ Sk.stdlib.orientation = function(x, y, z) {
   }
 };
 goog.exportSymbol("Sk.stdlib.orientation", Sk.stdlib.orientation);
+Sk.math = Sk.math || {};
+
+Sk.math.PI_TIMES_1_OVER_4 =     Math.PI / 4;
+Sk.math.PI_TIMES_2_OVER_4 =     Math.PI / 2;
+Sk.math.PI_TIMES_3_OVER_4 = 3 * Math.PI / 4;
+Sk.math.PI_TIMES_4_OVER_4 =     Math.PI;
+Sk.math.PI_TIMES_5_OVER_4 = 5 * Math.PI / 4;
+Sk.math.PI_TIMES_6_OVER_4 = 3 * Math.PI / 2;
+Sk.math.PI_TIMES_7_OVER_4 = 7 * Math.PI / 4;
+Sk.math.PI_TIMES_8_OVER_4 = 2 * Math.PI;
+Sk.math.EPSILON           = 0.000000001
+
+Sk.math.isCloseTo = function(x1, x2, epsilon) {
+  return Math.abs(x1 - x2) < epsilon;
+}
+
+Sk.math.cos = function(x) {
+  if (Sk.math.isCloseTo(Math.abs(x), 0, Sk.math.EPSILON)) {
+    return +1;
+  }
+  else if (Sk.math.isCloseTo(Math.abs(x), Sk.math.PI_TIMES_1_OVER_4, Sk.math.EPSILON)) {
+    return +Math.SQRT1_2;
+  }
+  else if (Sk.math.isCloseTo(Math.abs(x), Sk.math.PI_TIMES_2_OVER_4, Sk.math.EPSILON)) {
+    return 0;
+  }
+  else if (Sk.math.isCloseTo(Math.abs(x), Sk.math.PI_TIMES_3_OVER_4, Sk.math.EPSILON)) {
+    return -Math.SQRT1_2;
+  }
+  else if (Sk.math.isCloseTo(Math.abs(x), Sk.math.PI_TIMES_4_OVER_4, Sk.math.EPSILON)) {
+    return -1;
+  }
+  else if (Sk.math.isCloseTo(Math.abs(x), Sk.math.PI_TIMES_5_OVER_4, Sk.math.EPSILON)) {
+    return -Math.SQRT1_2;
+  }
+  else if (Sk.math.isCloseTo(Math.abs(x), Sk.math.PI_TIMES_6_OVER_4, Sk.math.EPSILON)) {
+    return 0;
+  }
+  else if (Sk.math.isCloseTo(Math.abs(x), Sk.math.PI_TIMES_7_OVER_4, Sk.math.EPSILON)) {
+    return +Math.SQRT1_2;
+  }
+  else if (Sk.math.isCloseTo(Math.abs(x), Sk.math.PI_TIMES_8_OVER_4, Sk.math.EPSILON)) {
+    return +1;
+  }
+  else {
+    return Math.cos(x);
+  }
+};
+
+Sk.math.sin = function(x) {
+  if (Sk.math.isCloseTo(x, 0, Sk.math.EPSILON)) {
+    return 0;
+  }
+  else if (Sk.math.isCloseTo(x, +Sk.math.PI_TIMES_1_OVER_4, Sk.math.EPSILON)) {
+    return Math.SQRT1_2;
+  }
+  else if (Sk.math.isCloseTo(x, +Sk.math.PI_TIMES_2_OVER_4, Sk.math.EPSILON)) {
+    return +1;
+  }
+  else if (Sk.math.isCloseTo(x, +Sk.math.PI_TIMES_3_OVER_4, Sk.math.EPSILON)) {
+    return Math.SQRT1_2;
+  }
+  else if (Sk.math.isCloseTo(x, +Sk.math.PI_TIMES_4_OVER_4, Sk.math.EPSILON)) {
+    return 0;
+  }
+  else if (Sk.math.isCloseTo(x, +Sk.math.PI_TIMES_5_OVER_4, Sk.math.EPSILON)) {
+    return -Math.SQRT1_2;
+  }
+  else if (Sk.math.isCloseTo(x, +Sk.math.PI_TIMES_6_OVER_4, Sk.math.EPSILON)) {
+    return -1;
+  }
+  else if (Sk.math.isCloseTo(x, +Sk.math.PI_TIMES_7_OVER_4, Sk.math.EPSILON)) {
+    return -Math.SQRT1_2;
+  }
+  else if (Sk.math.isCloseTo(x, +Sk.math.PI_TIMES_8_OVER_4, Sk.math.EPSILON)) {
+    return 0;
+  }
+  else if (Sk.math.isCloseTo(x, -Sk.math.PI_TIMES_1_OVER_4, Sk.math.EPSILON)) {
+    return -Math.SQRT1_2;
+  }
+  else if (Sk.math.isCloseTo(x, -Sk.math.PI_TIMES_2_OVER_4, Sk.math.EPSILON)) {
+    return -1;
+  }
+  else if (Sk.math.isCloseTo(x, -Sk.math.PI_TIMES_3_OVER_4, Sk.math.EPSILON)) {
+    return -Math.SQRT1_2;
+  }
+  else if (Sk.math.isCloseTo(x, -Sk.math.PI_TIMES_4_OVER_4, Sk.math.EPSILON)) {
+    return 0;
+  }
+  else if (Sk.math.isCloseTo(x, -Sk.math.PI_TIMES_5_OVER_4, Sk.math.EPSILON)) {
+    return +Math.SQRT1_2;
+  }
+  else if (Sk.math.isCloseTo(x, -Sk.math.PI_TIMES_6_OVER_4, Sk.math.EPSILON)) {
+    return +1;
+  }
+  else if (Sk.math.isCloseTo(x, -Sk.math.PI_TIMES_7_OVER_4, Sk.math.EPSILON)) {
+    return +Math.SQRT1_2;
+  }
+  else if (Sk.math.isCloseTo(x, -Sk.math.PI_TIMES_8_OVER_4, Sk.math.EPSILON)) {
+    return 0;
+  }
+  else {
+    var s = Math.sin(x);
+    Sk.debugout({x:x, s:s});
+    return s;
+  }
+};
+
 (function() {
 Sk.builtin.defineMath = function(mod) {
 Sk.ffi.checkFunctionArgs("defineMath", arguments, 1, 1);
@@ -24603,8 +24711,11 @@ var NUMBER = "Number";
 /**
  *
  */
-mod.pi = Sk.ffi.numberToFloatPy(Math.PI);
-mod.e  = Sk.ffi.numberToFloatPy(Math.E);
+mod.e       = Sk.ffi.numberToFloatPy(Math.E);
+mod.pi      = Sk.ffi.numberToFloatPy(Math.PI);
+mod.sqrt2   = Sk.ffi.numberToFloatPy(Math.SQRT2);
+mod.sqrt1_2 = Sk.ffi.numberToFloatPy(Math.SQRT1_2);
+mod.tao     = Sk.ffi.numberToFloatPy(2 * Math.PI);
 
 mod.cliffordConjugate = Sk.ffi.functionPy(function(x) {
   Sk.ffi.checkFunctionArgs("cliffordConjugate", arguments, 1, 1);
@@ -24665,7 +24776,7 @@ mod.exp = Sk.ffi.functionPy(function(anglePy) {
 mod.cos = Sk.ffi.functionPy(function(anglePy) {
   Sk.ffi.checkFunctionArgs("cos", arguments, 1, 1);
   if (Sk.ffi.isNum(anglePy)) {
-    return Sk.ffi.numberToFloatPy(Math.cos(Sk.ffi.remapToJs(anglePy)));
+    return Sk.ffi.numberToFloatPy(Sk.math.cos(Sk.ffi.remapToJs(anglePy)));
   }
   else {
     return Sk.ffh.cos(anglePy);
@@ -24677,7 +24788,7 @@ mod.cos = Sk.ffi.functionPy(function(anglePy) {
 mod.sin = Sk.ffi.functionPy(function(anglePy) {
   Sk.ffi.checkFunctionArgs("sin", arguments, 1, 1);
   if (Sk.ffi.isNum(anglePy)) {
-    return Sk.ffi.numberToFloatPy(Math.sin(Sk.ffi.remapToJs(anglePy)));
+    return Sk.ffi.numberToFloatPy(Sk.math.sin(Sk.ffi.remapToJs(anglePy)));
   }
   else
   {
@@ -24866,6 +24977,11 @@ var METHOD_ABS       = "abs";
  * @const
  * @type {string}
  */
+var METHOD_CONJUGATE = "conjugate";
+/**
+ * @const
+ * @type {string}
+ */
 var METHOD_COS       = "cos";
 /**
  * @const
@@ -24976,11 +25092,16 @@ mod[COMPLEX] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           return Sk.ffi.numberToFloatPy(Math.sqrt(z.x * z.x + z.y * z.y));
         });
       }
+      case METHOD_CONJUGATE: {
+        return Sk.ffi.callableToPy(mod, name, function(methodPy) {
+          return cartesianJsToComplexPy(z.x, -z.y);
+        });
+      }
       case METHOD_EXP: {
         return Sk.ffi.callableToPy(mod, name, function(methodPy) {
           var e = Math.exp(z.x);
-          var c = Math.cos(z.y);
-          var s = Math.sin(z.y);
+          var c = Sk.math.cos(z.y);
+          var s = Sk.math.sin(z.y);
           return cartesianJsToComplexPy(e * c, e * s);
         });
       }
@@ -25150,9 +25271,9 @@ mod[COMPLEX] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var z = Sk.ffi.remapToJs(selfPy);
     var x = z.x;
     var y = z.y;
-    var cosX  = Math.cos(x);
+    var cosX  = Sk.math.cos(x);
     var coshY = cosh(y);
-    var sinX  = Math.sin(x);
+    var sinX  = Sk.math.sin(x);
     var sinhY = sinh(y);
     return cartesianJsToComplexPy(cosX * coshY, - sinX * sinhY);
   });
@@ -25160,17 +25281,17 @@ mod[COMPLEX] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var z = Sk.ffi.remapToJs(selfPy);
     var x = z.x;
     var y = z.y;
-    var cosX  = Math.cos(x);
+    var cosX  = Sk.math.cos(x);
     var coshY = cosh(y);
-    var sinX  = Math.sin(x);
+    var sinX  = Sk.math.sin(x);
     var sinhY = sinh(y);
     return cartesianJsToComplexPy(sinX * coshY, cosX * sinhY);
   });
   $loc.__exp__ = Sk.ffi.functionPy(function(selfPy) {
     var z = Sk.ffi.remapToJs(selfPy);
     var e = Math.exp(z.x);
-    var c = Math.cos(z.y);
-    var s = Math.sin(z.y);
+    var c = Sk.math.cos(z.y);
+    var s = Sk.math.sin(z.y);
     return cartesianJsToComplexPy(e * c, e * s);
   });
   $loc.__pos__ = Sk.ffi.functionPy(function(selfPy) {
@@ -25186,7 +25307,7 @@ mod[COMPLEX] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   });
   $loc.__str__ = Sk.ffi.functionPy(function(z) {
     z = Sk.ffi.remapToJs(z);
-    return Sk.ffi.stringToPy("(" + stringFromCoordinates([z.x, z.y], ["1", "j"], "") + ")");
+    return Sk.ffi.stringToPy("(" + stringFromCoordinates([z.x, z.y], ["1", "i"], "") + ")");
   });
   $loc.__repr__ = Sk.ffi.functionPy(function(z) {
     z = Sk.ffi.remapToJs(z);
@@ -25232,13 +25353,6 @@ mod.polar = Sk.ffi.functionPy(function(xPy) {
     Sk.ffi.checkArgType("x", COMPLEX, false, xPy);
   }
 });
-
-// Constants in complex python form.
-mod.one = cartesianJsToComplexPy(1, 0);
-mod.i   = cartesianJsToComplexPy(0, 1);
-mod.e   = cartesianJsToComplexPy(Math.E, 0);
-mod.pi  = cartesianJsToComplexPy(Math.PI, 0);
-mod.tao = cartesianJsToComplexPy(2 * Math.PI, 0);
 };
 }).call(this);
 (function() {
@@ -31527,9 +31641,9 @@ mod[EUCLIDEAN_2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var mv = Sk.ffi.remapToJs(selfPy);
     var x = mv.w;
     var y = mv.xy;
-    var cosX  = Math.cos(x);
+    var cosX  = Sk.math.cos(x);
     var coshY = cosh(y);
-    var sinX  = Math.sin(x);
+    var sinX  = Sk.math.sin(x);
     var sinhY = sinh(y);
     return coordsJsToE2Py(cosX * coshY, 0, 0, - sinX * sinhY);
   });
@@ -31538,9 +31652,9 @@ mod[EUCLIDEAN_2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var mv = Sk.ffi.remapToJs(selfPy);
     var x = mv.w;
     var y = mv.xy;
-    var cosX  = Math.cos(x);
+    var cosX  = Sk.math.cos(x);
     var coshY = cosh(y);
-    var sinX  = Math.sin(x);
+    var sinX  = Sk.math.sin(x);
     var sinhY = sinh(y);
     return coordsJsToE2Py(sinX * coshY, 0, 0, cosX * sinhY);
   });
@@ -31550,8 +31664,8 @@ mod[EUCLIDEAN_2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var x = mv.w;
     var y = mv.xy;
     var e = Math.exp(x);
-    var c = Math.cos(y);
-    var s = Math.sin(y);
+    var c = Sk.math.cos(y);
+    var s = Sk.math.sin(y);
     return coordsJsToE2Py(e * c, 0, 0, e * s);
   });
   $loc.__sqrt__ = Sk.ffi.functionPy(function(selfPy) {
@@ -31638,11 +31752,6 @@ mod[EUCLIDEAN_2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   });
 }, EUCLIDEAN_2, []);
 
-mod.one = coordsJsToE2Py(1, 0, 0, 0);
-mod.tao = coordsJsToE2Py(2 * Math.PI, 0, 0, 0);
-mod.pi  = coordsJsToE2Py(Math.PI, 0, 0, 0);
-mod.e   = coordsJsToE2Py(Math.E, 0, 0, 0);
-mod.i   = coordsJsToE2Py(0, 0, 0, 1);
 mod[UNIT_VECTOR_NAME_E1] = coordsJsToE2Py(0, 1, 0, 0);
 mod[UNIT_VECTOR_NAME_E2] = coordsJsToE2Py(0, 0, 1, 0);
 mod[PSEUDOSCALAR_NAME]   = coordsJsToE2Py(0, 0, 0, 1);
@@ -32536,7 +32645,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         xyz = Sk.ffi.remapToJs(xyz);
         var mutable = Sk.ffi.isDefined(mutablePy) ? Sk.ffi.remapToJs(mutablePy) : true;
         var vector = new THREE[VECTOR_3](x,y,z);
-        var quaternion = new THREE[QUATERNION](-yz, -zx, -xy, w);
+        var quaternion = new THREE.Quaternion(-yz, -zx, -xy, w);
         Sk.ffi.referenceToPy(new THREE.Euclidean3(vector, quaternion, xyz, mutable), Sk.e3ga.EUCLIDEAN_3, undefined, self);
       }
       break;
@@ -33377,11 +33486,28 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var xy = -quaternion.z;
     var yz = -quaternion.x;
     var zx = -quaternion.y;
-    var angle = Math.sqrt(xy * xy + yz * yz + zx * zx);
-    var c = Math.cos(angle);
-    var s = Math.sin(angle);
-    var k = s / angle;
-    return coordsJsToE3Py(c, 0, 0, 0, k * xy, k * yz, k * zx, 0);
+    if (xy === 0 && yz === 0) {
+      var c = Sk.math.cos(zx);
+      var s = Sk.math.sin(zx);
+      return coordsJsToE3Py(c, 0, 0, 0, 0, 0, s, 0);
+    }
+    else if (yz === 0 && zx === 0) {
+      var c = Sk.math.cos(xy);
+      var s = Sk.math.sin(xy);
+      return coordsJsToE3Py(c, 0, 0, 0, s, 0, 0, 0);
+    }
+    else if (zx === 0 && xy === 0) {
+      var c = Sk.math.cos(yz);
+      var s = Sk.math.sin(yz);
+      return coordsJsToE3Py(c, 0, 0, 0, 0, s, 0, 0);
+    }
+    else {
+      var angle = Math.sqrt(xy * xy + yz * yz + zx * zx);
+      var c = Sk.math.cos(angle);
+      var s = Sk.math.sin(angle);
+      var k = s / angle;
+      return coordsJsToE3Py(c, 0, 0, 0, k * xy, k * yz, k * zx, 0);
+    }
   });
   $loc.__sqrt__ = Sk.ffi.functionPy(function(selfPy) {
     Sk.ffi.checkMethodArgs(METHOD_SQRT, arguments, 0, 0);
@@ -33441,7 +33567,6 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   });
 }, Sk.e3ga.EUCLIDEAN_3, []);
 
-mod.pi                   = coordsJsToE3Py(Math.PI, 0, 0, 0, 0, 0, 0, 0, false);
 mod[UNIT_VECTOR_NAME_E1] = coordsJsToE3Py(0, 1, 0, 0, 0, 0, 0, 0, false);
 mod[UNIT_VECTOR_NAME_E2] = coordsJsToE3Py(0, 0, 1, 0, 0, 0, 0, 0, false);
 mod[UNIT_VECTOR_NAME_E3] = coordsJsToE3Py(0, 0, 0, 1, 0, 0, 0, 0, false);
@@ -34301,8 +34426,8 @@ mod[LORENTZIAN] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__exp__ = Sk.ffi.functionPy(function(selfPy) {
     var mv = Sk.ffi.remapToJs(selfPy);
     var e = Math.exp(mv.w);
-    var c = Math.cos(mv.xy);
-    var s = Math.sin(mv.xy);
+    var c = Sk.math.cos(mv.xy);
+    var s = Sk.math.sin(mv.xy);
     return coordJsToLorentzianPy(e * c, 0, 0, e * s);
   });
   $loc.__repr__ = Sk.ffi.functionPy(function(mv) {
@@ -35752,7 +35877,7 @@ mod[UNIT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           var angle = unit.scale;
           var dimensions = unit.dimensions;
           var labels = unit.labels;
-          var cosAngle = new BLADE[UNIT](Math.cos(angle), dimensions, labels);
+          var cosAngle = new BLADE[UNIT](Sk.math.cos(angle), dimensions, labels);
           return Sk.ffi.callsim(mod[UNIT], Sk.ffi.referenceToPy(cosAngle, UNIT));
         });
       }
@@ -35762,7 +35887,7 @@ mod[UNIT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           var angle = unit.scale;
           var dimensions = unit.dimensions;
           var labels = unit.labels;
-          var cosAngle = new BLADE[UNIT](Math.sin(angle), dimensions, labels);
+          var cosAngle = new BLADE[UNIT](Sk.math.sin(angle), dimensions, labels);
           return Sk.ffi.callsim(mod[UNIT], Sk.ffi.referenceToPy(cosAngle, UNIT));
         });
       }
@@ -37282,7 +37407,7 @@ Sk.stdlib.CylinderGeometry = function (radiusTop, radiusBottom, height, radialSe
       var u = idxAngle / radialSegments;
 
       var theta = u * Math.PI * 2;
-      var vertex = Sk.three.vector3Cycle(z, radius * Math.cos(theta), radius * Math.sin(theta), direction);
+      var vertex = Sk.three.vector3Cycle(z, radius * Sk.math.cos(theta), radius * Sk.math.sin(theta), direction);
 
       this.vertices.push( vertex );
 
@@ -37510,8 +37635,8 @@ Sk.stdlib.RevolutionGeometry = function (points, generator, segments, phiStart, 
 
     var halfAngle = phi / 2;
 
-    var cosHA = Math.cos( halfAngle );
-    var sinHA = Math.sin( halfAngle );
+    var cosHA = Sk.math.cos( halfAngle );
+    var sinHA = Sk.math.sin( halfAngle );
     var rotor = new THREE.Quaternion(generator.x * sinHA, generator.y * sinHA, generator.z * sinHA, cosHA);
 
     for (var j = 0, jl = points.length; j < jl; j++) {
@@ -37605,13 +37730,13 @@ Sk.stdlib.TorusGeometry = function(radius, tube, radialSegments, tubularSegments
       var u = i / this.tubularSegments * this.arc;
       var v = j / this.radialSegments * Math.PI * 2;
 
-      center.x = this.radius * Math.cos( u );
-      center.y = this.radius * Math.sin( u );
+      center.x = this.radius * Sk.math.cos( u );
+      center.y = this.radius * Sk.math.sin( u );
 
       var vertex = new THREE.Vector3();
-      vertex.x = ( this.radius + this.tube * Math.cos( v ) ) * Math.cos( u );
-      vertex.y = ( this.radius + this.tube * Math.cos( v ) ) * Math.sin( u );
-      vertex.z = this.tube * Math.sin( v );
+      vertex.x = ( this.radius + this.tube * Sk.math.cos( v ) ) * Sk.math.cos( u );
+      vertex.y = ( this.radius + this.tube * Sk.math.cos( v ) ) * Sk.math.sin( u );
+      vertex.z = this.tube * Sk.math.sin( v );
 
       this['vertices'].push( vertex );
 
@@ -37715,15 +37840,15 @@ Sk.stdlib.VortexGeometry = function(radius, radiusCone, radiusShaft, lengthCone,
 
     // v is the angle inside the vortex tube.
     var v = twoPI * j / this.radialSegments;
-    var cosV = Math.cos(v);
-    var sinV = Math.sin(v);
+    var cosV = Sk.math.cos(v);
+    var sinV = Sk.math.sin(v);
 
     for ( var i = 0; i <= this.circleSegments; i ++ ) {
 
       // u is the angle in the xy-plane measured from the x-axis clockwise about the z-axis.
       var u = computeAngle(this.circleSegments, i)
-      var cosU = Math.cos(u);
-      var sinU = Math.sin(u);
+      var cosU = Sk.math.cos(u);
+      var sinU = Sk.math.sin(u);
 
       center.x = R * cosU;
       center.y = R * sinU;
