@@ -12844,7 +12844,11 @@
   };
   goog.exportSymbol('Sk.ffh.getitem', Sk.ffh.getitem);
   Sk.ffh.add = function (a, b) {
-    return Sk.ffh.binaryExec(SPECIAL_METHOD_ADD, a, b, 'nb$add');
+    if (a.__add__)
+      return Sk.ffi.callsim(a.__add__, a, b);
+    if (a.nb$add)
+      return a.nb$add.call(a, b);
+    throw Sk.ffi.notImplementedError('add');
   };
   goog.exportSymbol('Sk.ffh.add', Sk.ffh.add);
   Sk.ffh.subtract = function (a, b) {
@@ -25414,6 +25418,8 @@
           return Sk.ffi.callsim(a[Sk.matrix.MATRIX_1x2], h, f);
         });
         c.__mul__ = Sk.ffi.functionPy(function (b, c) {
+          if (Sk.ffi.isInstance(c, Sk.matrix.MATRIX_2x1))
+            return Sk.ffh.add(Sk.ffh.multiply(Sk.ffh.getitem(b, 0), Sk.ffh.getitem(c, 0)), Sk.ffh.multiply(Sk.ffh.getitem(b, 1), Sk.ffh.getitem(c, 1)));
           if (Sk.ffi.isInstance(c, Sk.matrix.MATRIX_1x2))
             throw Sk.ffi.assertionError('multiplication with 2x1 is not supported.');
           var f = Sk.ffi.remapToJs(b).elements, g = Sk.ffh.multiply(f[0], c), f = Sk.ffh.multiply(f[1], c);

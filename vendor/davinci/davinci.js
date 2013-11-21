@@ -15142,7 +15142,20 @@ Sk.ffh.getitem = function(objPy, index)
 };
 goog.exportSymbol("Sk.ffh.getitem", Sk.ffh.getitem);
 
-Sk.ffh.add = function(lhsPy, rhsPy) {return Sk.ffh.binaryExec(SPECIAL_METHOD_ADD, lhsPy, rhsPy, "nb$add");};
+Sk.ffh.add = function(lhsPy, rhsPy) {
+  if (lhsPy["__add__"])
+  {
+    return Sk.ffi.callsim(lhsPy["__add__"], lhsPy, rhsPy);
+  }
+  else if (lhsPy["nb$add"])
+  {
+    return lhsPy["nb$add"].call(lhsPy, rhsPy);
+  }
+  else
+  {
+    throw Sk.ffi.notImplementedError("add");
+  }
+};
 goog.exportSymbol("Sk.ffh.add", Sk.ffh.add);
 
 Sk.ffh.subtract = function(lhsPy, rhsPy) {return Sk.ffh.binaryExec(SPECIAL_METHOD_SUB, lhsPy, rhsPy, "nb$subtract");};
@@ -25209,7 +25222,10 @@ mod[Sk.matrix.MATRIX_1x2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     return Sk.ffi.callsim(mod[Sk.matrix.MATRIX_1x2], onePy, twoPy);
   });
   $loc.__mul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-    if (Sk.ffi.isInstance(otherPy, Sk.matrix.MATRIX_1x2)) {
+    if (Sk.ffi.isInstance(otherPy, Sk.matrix.MATRIX_2x1)) {
+      return Sk.ffh.add(Sk.ffh.multiply(Sk.ffh.getitem(selfPy, 0), Sk.ffh.getitem(otherPy, 0)), Sk.ffh.multiply(Sk.ffh.getitem(selfPy, 1), Sk.ffh.getitem(otherPy, 1)));
+    }
+    else if (Sk.ffi.isInstance(otherPy, Sk.matrix.MATRIX_1x2)) {
       throw Sk.ffi.assertionError("multiplication with 2x1 is not supported.");
     }
     else {
