@@ -15064,6 +15064,7 @@ Sk.ffh = Sk.ffh || {};
 
 var SPECIAL_METHOD_ADD     = '__add__';
 var SPECIAL_METHOD_CLIFFORD_CONJUGATE = '__cliffordConjugate__';
+var SPECIAL_METHOD_CONJUGATE = '__conjugate__';
 var SPECIAL_METHOD_DIV     = '__div__';
 var SPECIAL_METHOD_EQ      = '__eq__';
 var SPECIAL_METHOD_COS     = '__cos__';
@@ -15180,6 +15181,16 @@ goog.exportSymbol("Sk.ffh.equal", Sk.ffh.equal);
 
 Sk.ffh.cliffordConjugate = function(valuePy) {return Sk.ffh.unaryExec(SPECIAL_METHOD_CLIFFORD_CONJUGATE, valuePy, "nb$cliffordConjugate");};
 goog.exportSymbol("Sk.ffh.cliffordConjugate", Sk.ffh.cliffordConjugate);
+
+Sk.ffh.conjugate = function(numberPy) {
+  if (Sk.ffi.isNum(numberPy)) {
+    return numberPy;
+  }
+  else {
+    return Sk.ffh.unaryExec(SPECIAL_METHOD_CONJUGATE, numberPy);
+  }
+};
+goog.exportSymbol("Sk.ffh.conjugate", Sk.ffh.conjugate);
 
 Sk.ffh.cos = function(valuePy) {return Sk.ffh.unaryExec(SPECIAL_METHOD_COS, valuePy, "nb$cos");};
 goog.exportSymbol("Sk.ffh.cos", Sk.ffh.cos);
@@ -24968,6 +24979,18 @@ mod.factorial = Sk.ffi.functionPy(function(x) {
     r *= i;
   return new Sk.builtin.nmber(r, Sk.builtin.nmber.int$);
 });
+/**
+ * conjugate
+ */
+mod.conjugate = Sk.ffi.functionPy(function(numberPy) {
+  Sk.ffi.checkFunctionArgs("conjugate", arguments, 1, 1);
+  if (Sk.ffi.isNum(numberPy)) {
+    return numberPy;
+  }
+  else {
+    return Sk.ffh.conjugate(numberPy);
+  }
+});
 
 };
 }).call(this);
@@ -25011,6 +25034,11 @@ var NUMBER = "Number";
  * @type {string}
  */
 var OP_MUL = "*";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_CONJUGATE = "conjugate";
 /**
  * @const
  * @type {string}
@@ -25095,6 +25123,10 @@ mod[Sk.matrix.MATRIX_2x1] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var onePy = Sk.ffh.divide(lhs[0], otherPy);
     var twoPy = Sk.ffh.divide(lhs[1], otherPy);
     return Sk.ffi.callsim(mod[Sk.matrix.MATRIX_2x1], onePy, twoPy);
+  });
+  $loc.__conjugate__ = Sk.ffi.functionPy(function(selfPy) {
+    Sk.ffi.checkMethodArgs(METHOD_CONJUGATE, arguments, 0, 0);
+    return Sk.ffi.callsim(mod[Sk.matrix.MATRIX_2x1], Sk.ffh.conjugate(Sk.ffh.getitem(selfPy, 0)), Sk.ffh.conjugate(Sk.ffh.getitem(selfPy, 1)));
   });
   $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
     var matrix = Sk.ffi.remapToJs(selfPy);
@@ -25198,6 +25230,10 @@ mod[Sk.matrix.MATRIX_1x2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var onePy = Sk.ffh.divide(lhs[0], otherPy);
     var twoPy = Sk.ffh.divide(lhs[1], otherPy);
     return Sk.ffi.callsim(mod[Sk.matrix.MATRIX_1x2], onePy, twoPy);
+  });
+  $loc.__conjugate__ = Sk.ffi.functionPy(function(selfPy) {
+    Sk.ffi.checkMethodArgs(METHOD_CONJUGATE, arguments, 0, 0);
+    return Sk.ffi.callsim(mod[Sk.matrix.MATRIX_1x2], Sk.ffh.conjugate(Sk.ffh.getitem(selfPy, 0)), Sk.ffh.conjugate(Sk.ffh.getitem(selfPy, 1)));
   });
   $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
     var matrix = Sk.ffi.remapToJs(selfPy);
@@ -25350,6 +25386,10 @@ mod[Sk.matrix.MATRIX_2x2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var onePy = Sk.ffh.divide(lhs[0], otherPy);
     var twoPy = Sk.ffh.divide(lhs[1], otherPy);
     return Sk.ffi.callsim(mod[Sk.matrix.MATRIX_2x2], onePy, twoPy);
+  });
+  $loc.__conjugate__ = Sk.ffi.functionPy(function(selfPy) {
+    Sk.ffi.checkMethodArgs(METHOD_CONJUGATE, arguments, 0, 0);
+    return Sk.ffi.callsim(mod[Sk.matrix.MATRIX_2x2], Sk.ffh.conjugate(Sk.ffh.getitem(selfPy, 0)), Sk.ffh.conjugate(Sk.ffh.getitem(selfPy, 1)));
   });
   $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
     var matrix = Sk.ffi.remapToJs(selfPy);
@@ -25727,6 +25767,10 @@ mod[COMPLEX] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__abs__ = Sk.ffi.functionPy(function(selfPy) {
     var z = Sk.ffi.remapToJs(selfPy);
     return Sk.ffi.numberToFloatPy(Math.sqrt(z.x * z.x + z.y * z.y));
+  });
+  $loc.__conjugate__ = Sk.ffi.functionPy(function(selfPy) {
+    var z = Sk.ffi.remapToJs(selfPy);
+    return cartesianJsToComplexPy(z.x, -z.y);
   });
   $loc.__cos__ = Sk.ffi.functionPy(function(selfPy) {
     var z = Sk.ffi.remapToJs(selfPy);

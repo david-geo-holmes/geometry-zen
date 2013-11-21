@@ -12820,7 +12820,7 @@
   };
   goog.exportSymbol('Sk.ffi.unwrapn', Sk.ffi.unwrapn);
   Sk.ffh = Sk.ffh || {};
-  var SPECIAL_METHOD_ADD = '__add__', SPECIAL_METHOD_CLIFFORD_CONJUGATE = '__cliffordConjugate__', SPECIAL_METHOD_DIV = '__div__', SPECIAL_METHOD_EQ = '__eq__', SPECIAL_METHOD_COS = '__cos__', SPECIAL_METHOD_EXP = '__exp__', SPECIAL_METHOD_GETITEM = '__getitem__', SPECIAL_METHOD_INVERT = '__invert__', SPECIAL_METHOD_LSHIFT = '__lshift__', SPECIAL_METHOD_MUL = '__mul__', SPECIAL_METHOD_NEG = '__neg__', SPECIAL_METHOD_NONZERO = '__nonzero__', SPECIAL_METHOD_POS = '__pos__', SPECIAL_METHOD_REPR = '__repr__', SPECIAL_METHOD_RMUL = '__rmul__', SPECIAL_METHOD_RSHIFT = '__rshift__', SPECIAL_METHOD_SIN = '__sin__', SPECIAL_METHOD_SQRT = '__sqrt__', SPECIAL_METHOD_STR = '__str__', SPECIAL_METHOD_SUB = '__sub__', SPECIAL_METHOD_XOR = '__xor__';
+  var SPECIAL_METHOD_ADD = '__add__', SPECIAL_METHOD_CLIFFORD_CONJUGATE = '__cliffordConjugate__', SPECIAL_METHOD_CONJUGATE = '__conjugate__', SPECIAL_METHOD_DIV = '__div__', SPECIAL_METHOD_EQ = '__eq__', SPECIAL_METHOD_COS = '__cos__', SPECIAL_METHOD_EXP = '__exp__', SPECIAL_METHOD_GETITEM = '__getitem__', SPECIAL_METHOD_INVERT = '__invert__', SPECIAL_METHOD_LSHIFT = '__lshift__', SPECIAL_METHOD_MUL = '__mul__', SPECIAL_METHOD_NEG = '__neg__', SPECIAL_METHOD_NONZERO = '__nonzero__', SPECIAL_METHOD_POS = '__pos__', SPECIAL_METHOD_REPR = '__repr__', SPECIAL_METHOD_RMUL = '__rmul__', SPECIAL_METHOD_RSHIFT = '__rshift__', SPECIAL_METHOD_SIN = '__sin__', SPECIAL_METHOD_SQRT = '__sqrt__', SPECIAL_METHOD_STR = '__str__', SPECIAL_METHOD_SUB = '__sub__', SPECIAL_METHOD_XOR = '__xor__';
   Sk.ffh.unaryExec = function (a, b, c) {
     if (b[a])
       return Sk.ffi.callsim(b[a], b);
@@ -12885,6 +12885,10 @@
     return Sk.ffh.unaryExec(SPECIAL_METHOD_CLIFFORD_CONJUGATE, a, 'nb$cliffordConjugate');
   };
   goog.exportSymbol('Sk.ffh.cliffordConjugate', Sk.ffh.cliffordConjugate);
+  Sk.ffh.conjugate = function (a) {
+    return Sk.ffi.isNum(a) ? a : Sk.ffh.unaryExec(SPECIAL_METHOD_CONJUGATE, a);
+  };
+  goog.exportSymbol('Sk.ffh.conjugate', Sk.ffh.conjugate);
   Sk.ffh.cos = function (a) {
     return Sk.ffh.unaryExec(SPECIAL_METHOD_COS, a, 'nb$cos');
   };
@@ -25292,6 +25296,10 @@
           c *= d;
         return new Sk.builtin.nmber(c, Sk.builtin.nmber.int$);
       });
+      a.conjugate = Sk.ffi.functionPy(function (a) {
+        Sk.ffi.checkFunctionArgs('conjugate', arguments, 1, 1);
+        return Sk.ffi.isNum(a) ? a : Sk.ffh.conjugate(a);
+      });
     };
   }.call(this));
   Sk.matrix = Sk.matrix || {};
@@ -25332,6 +25340,10 @@
         c.__div__ = Sk.ffi.functionPy(function (b, c) {
           var f = Sk.ffi.remapToJs(b).elements, g = Sk.ffh.divide(f[0], c), f = Sk.ffh.divide(f[1], c);
           return Sk.ffi.callsim(a[Sk.matrix.MATRIX_2x1], g, f);
+        });
+        c.__conjugate__ = Sk.ffi.functionPy(function (b) {
+          Sk.ffi.checkMethodArgs('conjugate', arguments, 0, 0);
+          return Sk.ffi.callsim(a[Sk.matrix.MATRIX_2x1], Sk.ffh.conjugate(Sk.ffh.getitem(b, 0)), Sk.ffh.conjugate(Sk.ffh.getitem(b, 1)));
         });
         c.__getattr__ = Sk.ffi.functionPy(function (b, c) {
           Sk.ffi.remapToJs(b);
@@ -25414,6 +25426,10 @@
         c.__div__ = Sk.ffi.functionPy(function (b, c) {
           var f = Sk.ffi.remapToJs(b).elements, g = Sk.ffh.divide(f[0], c), f = Sk.ffh.divide(f[1], c);
           return Sk.ffi.callsim(a[Sk.matrix.MATRIX_1x2], g, f);
+        });
+        c.__conjugate__ = Sk.ffi.functionPy(function (b) {
+          Sk.ffi.checkMethodArgs('conjugate', arguments, 0, 0);
+          return Sk.ffi.callsim(a[Sk.matrix.MATRIX_1x2], Sk.ffh.conjugate(Sk.ffh.getitem(b, 0)), Sk.ffh.conjugate(Sk.ffh.getitem(b, 1)));
         });
         c.__getattr__ = Sk.ffi.functionPy(function (b, c) {
           Sk.ffi.remapToJs(b);
@@ -25512,6 +25528,10 @@
         c.__div__ = Sk.ffi.functionPy(function (b, c) {
           var f = Sk.ffi.remapToJs(b).elements, g = Sk.ffh.divide(f[0], c), f = Sk.ffh.divide(f[1], c);
           return Sk.ffi.callsim(a[Sk.matrix.MATRIX_2x2], g, f);
+        });
+        c.__conjugate__ = Sk.ffi.functionPy(function (b) {
+          Sk.ffi.checkMethodArgs('conjugate', arguments, 0, 0);
+          return Sk.ffi.callsim(a[Sk.matrix.MATRIX_2x2], Sk.ffh.conjugate(Sk.ffh.getitem(b, 0)), Sk.ffh.conjugate(Sk.ffh.getitem(b, 1)));
         });
         c.__getattr__ = Sk.ffi.functionPy(function (b, c) {
           Sk.ffi.remapToJs(b);
@@ -25741,6 +25761,10 @@
         k.__abs__ = Sk.ffi.functionPy(function (a) {
           a = Sk.ffi.remapToJs(a);
           return Sk.ffi.numberToFloatPy(Math.sqrt(a.x * a.x + a.y * a.y));
+        });
+        k.__conjugate__ = Sk.ffi.functionPy(function (a) {
+          a = Sk.ffi.remapToJs(a);
+          return f(a.x, -a.y);
         });
         k.__cos__ = Sk.ffi.functionPy(function (a) {
           a = Sk.ffi.remapToJs(a);
