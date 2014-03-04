@@ -15229,10 +15229,29 @@ goog.exportSymbol("Sk.ffh.nonzero", Sk.ffh.nonzero);
 Sk.ffh.sqrt = function(valuePy) {return Sk.ffh.unaryExec(SPECIAL_METHOD_SQRT, valuePy);};
 goog.exportSymbol("Sk.ffh.sqrt", Sk.ffh.sqrt);
 
-Sk.ffh.str = function(valuePy) {return Sk.ffh.unaryExec(SPECIAL_METHOD_STR, valuePy, "tp$str");};
+Sk.ffh.str = function(valuePy) {
+  if (valuePy[SPECIAL_METHOD_STR])
+  {
+    return Sk.ffi.callsim(valuePy[SPECIAL_METHOD_STR], valuePy);
+  }
+  else if (valuePy["tp$str"])
+  {
+    return valuePy["tp$str"].call(valuePy);
+  }
+  else if (valuePy["tp$repr"])
+  {
+    return valuePy["tp$repr"].call(valuePy);
+  }
+  else
+  {
+    throw Sk.ffi.notImplementedError("str");
+  }
+};
 goog.exportSymbol("Sk.ffh.str", Sk.ffh.str);
 
-Sk.ffh.repr = function(valuePy) {return Sk.ffh.unaryExec(SPECIAL_METHOD_REPR, valuePy, "tp$repr");};
+Sk.ffh.repr = function(valuePy) {
+  return Sk.ffh.unaryExec(SPECIAL_METHOD_REPR, valuePy, "tp$repr");
+};
 goog.exportSymbol("Sk.ffh.repr", Sk.ffh.repr);
 /**
  *
@@ -27417,7 +27436,7 @@ mod[TEXT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       }
       break;
       case PROP_TEXT: {
-        text[PROP_TEXT] = value;
+        text[PROP_TEXT] = Sk.ffi.remapToJs(Sk.ffi.isStr(valuePy) ? valuePy : Sk.ffh.str(valuePy));
       }
       break;
       case PROP_TEXT_ALIGN: {
@@ -32275,11 +32294,9 @@ mod[EUCLIDEAN_2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     }
   });
 }, EUCLIDEAN_2, []);
-
-mod[UNIT_VECTOR_NAME_E1] = coordsJsToE2Py(0, 1, 0, 0);
-mod[UNIT_VECTOR_NAME_E2] = coordsJsToE2Py(0, 0, 1, 0);
-mod[PSEUDOSCALAR_NAME]   = coordsJsToE2Py(0, 0, 0, 1);
-
+/**
+ *
+ */
 };
 }).call(this);
 Sk.e3ga = Sk.e3ga || {};
@@ -33853,7 +33870,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       case METHOD_DIVIDE_SCALAR: {
         return Sk.ffi.callableToPy(mod, name, function(methodPy, sPy) {
           Sk.ffi.checkMethodArgs(name, arguments, 1, 1);
-          Sk.ffi.checkArgType(ARG_S, Sk.ffi.PyType.FLOAT, Sk.ffi.isFloat(sPy), sPy);
+          Sk.ffi.checkArgType(ARG_S, Sk.ffi.PyType.FLOAT, Sk.ffi.isNum(sPy), sPy);
           var s  = Sk.ffi.remapToJs(sPy);
           quaternion.w /= s;
           vector.x     /= s;
@@ -33877,7 +33894,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       case METHOD_MULTIPLY_SCALAR: {
         return Sk.ffi.callableToPy(mod, name, function(methodPy, sPy) {
           Sk.ffi.checkMethodArgs(name, arguments, 1, 1);
-          Sk.ffi.checkArgType(ARG_S, Sk.ffi.PyType.FLOAT, Sk.ffi.isFloat(sPy), sPy);
+          Sk.ffi.checkArgType(ARG_S, Sk.ffi.PyType.FLOAT, Sk.ffi.isNum(sPy), sPy);
           var s  = Sk.ffi.remapToJs(sPy);
           quaternion.w *= s;
           vector.x     *= s;
@@ -34090,12 +34107,9 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     return Sk.ffi.stringToPy(stringFromCoordinates([w, x, y, z, xy, yz, zx, xyz], [UNIT_SCALAR_NAME, UNIT_VECTOR_NAME_E1, UNIT_VECTOR_NAME_E2, UNIT_VECTOR_NAME_E3, UNIT_BIVECTOR_NAME_E12, UNIT_BIVECTOR_NAME_E23, UNIT_BIVECTOR_NAME_E31, PSEUDOSCALAR_NAME]));
   });
 }, Sk.e3ga.EUCLIDEAN_3, []);
-
-mod[UNIT_VECTOR_NAME_E1] = coordsJsToE3Py(0, 1, 0, 0, 0, 0, 0, 0, false);
-mod[UNIT_VECTOR_NAME_E2] = coordsJsToE3Py(0, 0, 1, 0, 0, 0, 0, 0, false);
-mod[UNIT_VECTOR_NAME_E3] = coordsJsToE3Py(0, 0, 0, 1, 0, 0, 0, 0, false);
-mod[PSEUDOSCALAR_NAME]   = coordsJsToE3Py(0, 0, 0, 0, 0, 0, 0, 1, false);
-
+/*
+ *
+ */
 };
 }).call(this);
 /**
@@ -36174,6 +36188,11 @@ var METHOD_EXP        = "exp";
  * @const
  * @type {string}
  */
+var METHOD_MAGNITUDE  = "magnitude";
+/**
+ * @const
+ * @type {string}
+ */
 var METHOD_SIN        = "sin";
 /**
  * @const
@@ -36540,6 +36559,12 @@ mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         return Sk.ffi.callableToPy(mod, METHOD_EXP, function(methodPy) {
           Sk.ffi.checkMethodArgs(METHOD_EXP, arguments, 0, 0);
           return Sk.ffi.callsim(mod[MEASURE], Sk.ffi.callsim(Sk.ffi.gattr(measure[QTY_PY], METHOD_EXP)), measure[UOM_PY]);
+        });
+      }
+      case METHOD_MAGNITUDE: {
+        return Sk.ffi.callableToPy(mod, METHOD_MAGNITUDE, function(methodPy) {
+          Sk.ffi.checkMethodArgs(METHOD_MAGNITUDE, arguments, 0, 0);
+          return Sk.ffi.callsim(mod[MEASURE], Sk.ffi.callsim(Sk.ffi.gattr(measure[QTY_PY], METHOD_MAGNITUDE)), measure[UOM_PY]);
         });
       }
     }
@@ -39797,9 +39822,9 @@ mod[Sk.three.ARROW_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
  mod[CUBE_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__init__ = Sk.ffi.functionPy(function(selfPy, widthPy, heightPy, depthPy, widthSegmentsPy, heightSegmentsPy, depthSegmentsPy) {
     Sk.ffi.checkMethodArgs(CUBE_GEOMETRY, arguments, 3, 6);
-    Sk.ffi.checkArgType(PROP_WIDTH,  NUM, Sk.ffi.isNum(widthPy),  widthPy);
-    Sk.ffi.checkArgType(PROP_HEIGHT, NUM, Sk.ffi.isNum(heightPy), heightPy);
-    Sk.ffi.checkArgType(PROP_DEPTH,  NUM, Sk.ffi.isNum(depthPy),  depthPy);
+    Sk.ffi.checkArgType(PROP_WIDTH,  Sk.ffi.PyType.FLOAT, Sk.ffi.isNum(widthPy),  widthPy);
+    Sk.ffi.checkArgType(PROP_HEIGHT, Sk.ffi.PyType.FLOAT, Sk.ffi.isNum(heightPy), heightPy);
+    Sk.ffi.checkArgType(PROP_DEPTH,  Sk.ffi.PyType.FLOAT, Sk.ffi.isNum(depthPy),  depthPy);
     if (Sk.ffi.isDefined(widthSegmentsPy)) {
       Sk.ffi.checkArgType(PROP_WIDTH_SEGMENTS, INT, Sk.ffi.isInt(widthSegmentsPy), widthSegmentsPy);
     }
@@ -40176,7 +40201,7 @@ mod[REVOLUTION_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         return;
       }
       else {
-        Sk.ffi.checkArgType(PROP_RADIUS, NUM, Sk.ffi.isNum(radiusPy), radiusPy);
+        Sk.ffi.checkArgType(PROP_RADIUS, Sk.ffi.PyType.FLOAT, Sk.ffi.isFloat(radiusPy), radiusPy);
       }
     }
     if (isDefined(widthSegmentsPy)) {
