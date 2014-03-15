@@ -12,6 +12,7 @@ html(lang="en", data-ng-app="app")
     link(rel="stylesheet", href="http://fonts.googleapis.com/css?family=Open+Sans:400italic,600italic,400,600")
     link(rel="stylesheet", href=css, media="all")
     link(rel="icon", type="image/png", href="/img/favicon-48x48.png")
+    script(src="http://jsxgraph.uni-bayreuth.de/distrib/jsxgraphcore.js")
   body
     header
       .navbar.navbar-fixed-top.navbar-inverse
@@ -37,9 +38,7 @@ html(lang="en", data-ng-app="app")
         .container-fluid
           .row-fluid
             #footer-copyright.span4
-              | &copy; 2013 <a href="http://github.com/david-geo-holmes" target="_blank">David Geo Holmes</a>
-            #footer-validator.span4
-              | <a href="http://validator.w3.org/check?uri=referer" target="_blank"><img src="/img/html5.png" id="html5icon" alt="validator"></a>
+              | &copy; 2013-14 <a href="http://github.com/david-geo-holmes" target="_blank">David Geo Holmes</a>
             #footer-terms.span4
               | Dedicated to Geo
     script(src=js)
