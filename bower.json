@@ -1,6 +1,6 @@
 {
   "name": "geometryzen",
-  "version": "0.9.145",
+  "version": "0.9.146",
   "main": "./app/js/main.js",
   "description": "Geometry Zen is an online application for learning Physics and Engineering using Geometric Algebra, Python programming, and WebGL visualization.",
   "author": {
@@ -32,6 +32,6 @@
     "stats.js": "latest",
     "threejs": "latest",
     "tweenjs": "latest",
-    "underscore": "1.5.1"
+    "underscore": "1.6.0"
   }
 }

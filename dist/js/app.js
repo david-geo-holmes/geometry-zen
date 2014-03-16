@@ -33325,7 +33325,7 @@
             return Sk.ffi.callsim(a.Node, Sk.ffi.referenceToPy(d.domElement, 'Node'));
           case 'render':
             return Sk.ffi.callableToPy(a, 'render', function (a, b, c) {
-              Sk.ffi.checkMethodArgs('getClearColor', arguments, 2, 2);
+              Sk.ffi.checkMethodArgs('render', arguments, 2, 2);
               var e = Sk.ffi.remapToJs(b), f = Sk.ffi.remapToJs(c);
               return Sk.ffi.remapToPy(d.render(e, f));
             });
@@ -44749,25 +44749,25 @@ angular.element(document).find('head').append('<style type="text/css">@charset "
   } else {
     root._ = _;
   }
-  _.VERSION = '1.5.1';
+  _.VERSION = '1.6.0';
   var each = _.each = _.forEach = function (obj, iterator, context) {
       if (obj == null)
-        return;
+        return obj;
       if (nativeForEach && obj.forEach === nativeForEach) {
         obj.forEach(iterator, context);
       } else if (obj.length === +obj.length) {
-        for (var i = 0, l = obj.length; i < l; i++) {
+        for (var i = 0, length = obj.length; i < length; i++) {
           if (iterator.call(context, obj[i], i, obj) === breaker)
             return;
         }
       } else {
-        for (var key in obj) {
-          if (_.has(obj, key)) {
-            if (iterator.call(context, obj[key], key, obj) === breaker)
-              return;
-          }
+        var keys = _.keys(obj);
+        for (var i = 0, length = keys.length; i < length; i++) {
+          if (iterator.call(context, obj[keys[i]], keys[i], obj) === breaker)
+            return;
         }
       }
+      return obj;
     };
   _.map = _.collect = function (obj, iterator, context) {
     var results = [];
@@ -44829,55 +44829,55 @@ angular.element(document).find('head').append('<style type="text/css">@charset "
       throw new TypeError(reduceError);
     return memo;
   };
-  _.find = _.detect = function (obj, iterator, context) {
+  _.find = _.detect = function (obj, predicate, context) {
     var result;
     any(obj, function (value, index, list) {
-      if (iterator.call(context, value, index, list)) {
+      if (predicate.call(context, value, index, list)) {
         result = value;
         return true;
       }
     });
     return result;
   };
-  _.filter = _.select = function (obj, iterator, context) {
+  _.filter = _.select = function (obj, predicate, context) {
     var results = [];
     if (obj == null)
       return results;
     if (nativeFilter && obj.filter === nativeFilter)
-      return obj.filter(iterator, context);
+      return obj.filter(predicate, context);
     each(obj, function (value, index, list) {
-      if (iterator.call(context, value, index, list))
+      if (predicate.call(context, value, index, list))
         results.push(value);
     });
     return results;
   };
-  _.reject = function (obj, iterator, context) {
+  _.reject = function (obj, predicate, context) {
     return _.filter(obj, function (value, index, list) {
-      return !iterator.call(context, value, index, list);
+      return !predicate.call(context, value, index, list);
     }, context);
   };
-  _.every = _.all = function (obj, iterator, context) {
-    iterator || (iterator = _.identity);
+  _.every = _.all = function (obj, predicate, context) {
+    predicate || (predicate = _.identity);
     var result = true;
     if (obj == null)
       return result;
     if (nativeEvery && obj.every === nativeEvery)
-      return obj.every(iterator, context);
+      return obj.every(predicate, context);
     each(obj, function (value, index, list) {
-      if (!(result = result && iterator.call(context, value, index, list)))
+      if (!(result = result && predicate.call(context, value, index, list)))
         return breaker;
     });
     return !!result;
   };
-  var any = _.some = _.any = function (obj, iterator, context) {
-      iterator || (iterator = _.identity);
+  var any = _.some = _.any = function (obj, predicate, context) {
+      predicate || (predicate = _.identity);
       var result = false;
       if (obj == null)
         return result;
       if (nativeSome && obj.some === nativeSome)
-        return obj.some(iterator, context);
+        return obj.some(predicate, context);
       each(obj, function (value, index, list) {
-        if (result || (result = iterator.call(context, value, index, list)))
+        if (result || (result = predicate.call(context, value, index, list)))
           return breaker;
       });
       return !!result;
@@ -44899,61 +44899,41 @@ angular.element(document).find('head').append('<style type="text/css">@charset "
     });
   };
   _.pluck = function (obj, key) {
-    return _.map(obj, function (value) {
-      return value[key];
-    });
+    return _.map(obj, _.property(key));
   };
-  _.where = function (obj, attrs, first) {
-    if (_.isEmpty(attrs))
-      return first ? void 0 : [];
-    return _[first ? 'find' : 'filter'](obj, function (value) {
-      for (var key in attrs) {
-        if (attrs[key] !== value[key])
-          return false;
-      }
-      return true;
-    });
+  _.where = function (obj, attrs) {
+    return _.filter(obj, _.matches(attrs));
   };
   _.findWhere = function (obj, attrs) {
-    return _.where(obj, attrs, true);
+    return _.find(obj, _.matches(attrs));
   };
   _.max = function (obj, iterator, context) {
     if (!iterator && _.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
       return Math.max.apply(Math, obj);
     }
-    if (!iterator && _.isEmpty(obj))
-      return -Infinity;
-    var result = {
-        computed: -Infinity,
-        value: -Infinity
-      };
+    var result = -Infinity, lastComputed = -Infinity;
     each(obj, function (value, index, list) {
       var computed = iterator ? iterator.call(context, value, index, list) : value;
-      computed > result.computed && (result = {
-        value: value,
-        computed: computed
-      });
+      if (computed > lastComputed) {
+        result = value;
+        lastComputed = computed;
+      }
     });
-    return result.value;
+    return result;
   };
   _.min = function (obj, iterator, context) {
     if (!iterator && _.isArray(obj) && obj[0] === +obj[0] && obj.length < 65535) {
       return Math.min.apply(Math, obj);
     }
-    if (!iterator && _.isEmpty(obj))
-      return Infinity;
-    var result = {
-        computed: Infinity,
-        value: Infinity
-      };
+    var result = Infinity, lastComputed = Infinity;
     each(obj, function (value, index, list) {
       var computed = iterator ? iterator.call(context, value, index, list) : value;
-      computed < result.computed && (result = {
-        value: value,
-        computed: computed
-      });
+      if (computed < lastComputed) {
+        result = value;
+        lastComputed = computed;
+      }
     });
-    return result.value;
+    return result;
   };
   _.shuffle = function (obj) {
     var rand;
@@ -44966,13 +44946,23 @@ angular.element(document).find('head').append('<style type="text/css">@charset "
     });
     return shuffled;
   };
-  var lookupIterator = function (value) {
-    return _.isFunction(value) ? value : function (obj) {
-      return obj[value];
-    };
+  _.sample = function (obj, n, guard) {
+    if (n == null || guard) {
+      if (obj.length !== +obj.length)
+        obj = _.values(obj);
+      return obj[_.random(obj.length - 1)];
+    }
+    return _.shuffle(obj).slice(0, Math.max(0, n));
   };
-  _.sortBy = function (obj, value, context) {
-    var iterator = lookupIterator(value);
+  var lookupIterator = function (value) {
+    if (value == null)
+      return _.identity;
+    if (_.isFunction(value))
+      return value;
+    return _.property(value);
+  };
+  _.sortBy = function (obj, iterator, context) {
+    iterator = lookupIterator(iterator);
     return _.pluck(_.map(obj, function (value, index, list) {
       return {
         value: value,
@@ -44988,32 +44978,31 @@ angular.element(document).find('head').append('<style type="text/css">@charset "
         if (a < b || b === void 0)
           return -1;
       }
-      return left.index < right.index ? -1 : 1;
+      return left.index - right.index;
     }), 'value');
   };
-  var group = function (obj, value, context, behavior) {
-    var result = {};
-    var iterator = lookupIterator(value == null ? _.identity : value);
-    each(obj, function (value, index) {
-      var key = iterator.call(context, value, index, obj);
-      behavior(result, key, value);
-    });
-    return result;
+  var group = function (behavior) {
+    return function (obj, iterator, context) {
+      var result = {};
+      iterator = lookupIterator(iterator);
+      each(obj, function (value, index) {
+        var key = iterator.call(context, value, index, obj);
+        behavior(result, key, value);
+      });
+      return result;
+    };
   };
-  _.groupBy = function (obj, value, context) {
-    return group(obj, value, context, function (result, key, value) {
-      (_.has(result, key) ? result[key] : result[key] = []).push(value);
-    });
-  };
-  _.countBy = function (obj, value, context) {
-    return group(obj, value, context, function (result, key) {
-      if (!_.has(result, key))
-        result[key] = 0;
-      result[key]++;
-    });
-  };
+  _.groupBy = group(function (result, key, value) {
+    _.has(result, key) ? result[key].push(value) : result[key] = [value];
+  });
+  _.indexBy = group(function (result, key, value) {
+    result[key] = value;
+  });
+  _.countBy = group(function (result, key) {
+    _.has(result, key) ? result[key]++ : result[key] = 1;
+  });
   _.sortedIndex = function (array, obj, iterator, context) {
-    iterator = iterator == null ? _.identity : lookupIterator(iterator);
+    iterator = lookupIterator(iterator);
     var value = iterator.call(context, obj);
     var low = 0, high = array.length;
     while (low < high) {
@@ -45039,7 +45028,11 @@ angular.element(document).find('head').append('<style type="text/css">@charset "
   _.first = _.head = _.take = function (array, n, guard) {
     if (array == null)
       return void 0;
-    return n != null && !guard ? slice.call(array, 0, n) : array[0];
+    if (n == null || guard)
+      return array[0];
+    if (n < 0)
+      return [];
+    return slice.call(array, 0, n);
   };
   _.initial = function (array, n, guard) {
     return slice.call(array, 0, array.length - (n == null || guard ? 1 : n));
@@ -45047,11 +45040,9 @@ angular.element(document).find('head').append('<style type="text/css">@charset "
   _.last = function (array, n, guard) {
     if (array == null)
       return void 0;
-    if (n != null && !guard) {
-      return slice.call(array, Math.max(array.length - n, 0));
-    } else {
+    if (n == null || guard)
       return array[array.length - 1];
-    }
+    return slice.call(array, Math.max(array.length - n, 0));
   };
   _.rest = _.tail = _.drop = function (array, n, guard) {
     return slice.call(array, n == null || guard ? 1 : n);
@@ -45078,6 +45069,16 @@ angular.element(document).find('head').append('<style type="text/css">@charset "
   _.without = function (array) {
     return _.difference(array, slice.call(arguments, 1));
   };
+  _.partition = function (array, predicate) {
+    var pass = [], fail = [];
+    each(array, function (elem) {
+      (predicate(elem) ? pass : fail).push(elem);
+    });
+    return [
+      pass,
+      fail
+    ];
+  };
   _.uniq = _.unique = function (array, isSorted, iterator, context) {
     if (_.isFunction(isSorted)) {
       context = iterator;
@@ -45102,7 +45103,7 @@ angular.element(document).find('head').append('<style type="text/css">@charset "
     var rest = slice.call(arguments, 1);
     return _.filter(_.uniq(array), function (item) {
       return _.every(rest, function (other) {
-        return _.indexOf(other, item) >= 0;
+        return _.contains(other, item);
       });
     });
   };
@@ -45124,7 +45125,7 @@ angular.element(document).find('head').append('<style type="text/css">@charset "
     if (list == null)
       return {};
     var result = {};
-    for (var i = 0, l = list.length; i < l; i++) {
+    for (var i = 0, length = list.length; i < length; i++) {
       if (values) {
         result[list[i]] = values[i];
       } else {
@@ -45136,10 +45137,10 @@ angular.element(document).find('head').append('<style type="text/css">@charset "
   _.indexOf = function (array, item, isSorted) {
     if (array == null)
       return -1;
-    var i = 0, l = array.length;
+    var i = 0, length = array.length;
     if (isSorted) {
       if (typeof isSorted == 'number') {
-        i = isSorted < 0 ? Math.max(0, l + isSorted) : isSorted;
+        i = isSorted < 0 ? Math.max(0, length + isSorted) : isSorted;
       } else {
         i = _.sortedIndex(array, item);
         return array[i] === item ? i : -1;
@@ -45147,7 +45148,7 @@ angular.element(document).find('head').append('<style type="text/css">@charset "
     }
     if (nativeIndexOf && array.indexOf === nativeIndexOf)
       return array.indexOf(item, isSorted);
-    for (; i < l; i++)
+    for (; i < length; i++)
       if (array[i] === item)
         return i;
     return -1;
@@ -45171,10 +45172,10 @@ angular.element(document).find('head').append('<style type="text/css">@charset "
       start = 0;
     }
     step = arguments[2] || 1;
-    var len = Math.max(Math.ceil((stop - start) / step), 0);
+    var length = Math.max(Math.ceil((stop - start) / step), 0);
     var idx = 0;
-    var range = new Array(len);
-    while (idx < len) {
+    var range = new Array(length);
+    while (idx < length) {
       range[idx++] = start;
       start += step;
     }
@@ -45202,9 +45203,17 @@ angular.element(document).find('head').append('<style type="text/css">@charset "
     };
   };
   _.partial = function (func) {
-    var args = slice.call(arguments, 1);
+    var boundArgs = slice.call(arguments, 1);
     return function () {
-      return func.apply(this, args.concat(slice.call(arguments)));
+      var position = 0;
+      var args = boundArgs.slice();
+      for (var i = 0, length = args.length; i < length; i++) {
+        if (args[i] === _)
+          args[i] = arguments[position++];
+      }
+      while (position < arguments.length)
+        args.push(arguments[position++]);
+      return func.apply(this, args);
     };
   };
   _.bindAll = function (obj) {
@@ -45242,12 +45251,13 @@ angular.element(document).find('head').append('<style type="text/css">@charset "
     var previous = 0;
     options || (options = {});
     var later = function () {
-      previous = options.leading === false ? 0 : new Date();
+      previous = options.leading === false ? 0 : _.now();
       timeout = null;
       result = func.apply(context, args);
+      context = args = null;
     };
     return function () {
-      var now = new Date();
+      var now = _.now();
       if (!previous && options.leading === false)
         previous = now;
       var remaining = wait - (now - previous);
@@ -45258,6 +45268,7 @@ angular.element(document).find('head').append('<style type="text/css">@charset "
         timeout = null;
         previous = now;
         result = func.apply(context, args);
+        context = args = null;
       } else if (!timeout && options.trailing !== false) {
         timeout = setTimeout(later, remaining);
       }
@@ -45265,20 +45276,31 @@ angular.element(document).find('head').append('<style type="text/css">@charset "
     };
   };
   _.debounce = function (func, wait, immediate) {
-    var result;
-    var timeout = null;
-    return function () {
-      var context = this, args = arguments;
-      var later = function () {
+    var timeout, args, context, timestamp, result;
+    var later = function () {
+      var last = _.now() - timestamp;
+      if (last < wait) {
+        timeout = setTimeout(later, wait - last);
+      } else {
         timeout = null;
-        if (!immediate)
+        if (!immediate) {
           result = func.apply(context, args);
-      };
+          context = args = null;
+        }
+      }
+    };
+    return function () {
+      context = this;
+      args = arguments;
+      timestamp = _.now();
       var callNow = immediate && !timeout;
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-      if (callNow)
+      if (!timeout) {
+        timeout = setTimeout(later, wait);
+      }
+      if (callNow) {
         result = func.apply(context, args);
+        context = args = null;
+      }
       return result;
     };
   };
@@ -45294,11 +45316,7 @@ angular.element(document).find('head').append('<style type="text/css">@charset "
     };
   };
   _.wrap = function (func, wrapper) {
-    return function () {
-      var args = [func];
-      push.apply(args, arguments);
-      return wrapper.apply(this, args);
-    };
+    return _.partial(wrapper, func);
   };
   _.compose = function () {
     var funcs = arguments;
@@ -45317,9 +45335,11 @@ angular.element(document).find('head').append('<style type="text/css">@charset "
       }
     };
   };
-  _.keys = nativeKeys || function (obj) {
-    if (obj !== Object(obj))
-      throw new TypeError('Invalid object');
+  _.keys = function (obj) {
+    if (!_.isObject(obj))
+      return [];
+    if (nativeKeys)
+      return nativeKeys(obj);
     var keys = [];
     for (var key in obj)
       if (_.has(obj, key))
@@ -45327,27 +45347,32 @@ angular.element(document).find('head').append('<style type="text/css">@charset "
     return keys;
   };
   _.values = function (obj) {
-    var values = [];
-    for (var key in obj)
-      if (_.has(obj, key))
-        values.push(obj[key]);
+    var keys = _.keys(obj);
+    var length = keys.length;
+    var values = new Array(length);
+    for (var i = 0; i < length; i++) {
+      values[i] = obj[keys[i]];
+    }
     return values;
   };
   _.pairs = function (obj) {
-    var pairs = [];
-    for (var key in obj)
-      if (_.has(obj, key))
-        pairs.push([
-          key,
-          obj[key]
-        ]);
+    var keys = _.keys(obj);
+    var length = keys.length;
+    var pairs = new Array(length);
+    for (var i = 0; i < length; i++) {
+      pairs[i] = [
+        keys[i],
+        obj[keys[i]]
+      ];
+    }
     return pairs;
   };
   _.invert = function (obj) {
     var result = {};
-    for (var key in obj)
-      if (_.has(obj, key))
-        result[obj[key]] = key;
+    var keys = _.keys(obj);
+    for (var i = 0, length = keys.length; i < length; i++) {
+      result[obj[keys[i]]] = keys[i];
+    }
     return result;
   };
   _.functions = _.methods = function (obj) {
@@ -45437,7 +45462,7 @@ angular.element(document).find('head').append('<style type="text/css">@charset "
         return bStack[length] == b;
     }
     var aCtor = a.constructor, bCtor = b.constructor;
-    if (aCtor !== bCtor && !(_.isFunction(aCtor) && aCtor instanceof aCtor && _.isFunction(bCtor) && bCtor instanceof bCtor)) {
+    if (aCtor !== bCtor && !(_.isFunction(aCtor) && aCtor instanceof aCtor && _.isFunction(bCtor) && bCtor instanceof bCtor) && ('constructor' in a && 'constructor' in b)) {
       return false;
     }
     aStack.push(a);
@@ -45541,6 +45566,27 @@ angular.element(document).find('head').append('<style type="text/css">@charset "
   _.identity = function (value) {
     return value;
   };
+  _.constant = function (value) {
+    return function () {
+      return value;
+    };
+  };
+  _.property = function (key) {
+    return function (obj) {
+      return obj[key];
+    };
+  };
+  _.matches = function (attrs) {
+    return function (obj) {
+      if (obj === attrs)
+        return true;
+      for (var key in attrs) {
+        if (attrs[key] !== obj[key])
+          return false;
+      }
+      return true;
+    };
+  };
   _.times = function (n, iterator, context) {
     var accum = Array(Math.max(0, n));
     for (var i = 0; i < n; i++)
@@ -45554,14 +45600,16 @@ angular.element(document).find('head').append('<style type="text/css">@charset "
     }
     return min + Math.floor(Math.random() * (max - min + 1));
   };
+  _.now = Date.now || function () {
+    return new Date().getTime();
+  };
   var entityMap = {
       escape: {
         '&': '&amp;',
         '<': '&lt;',
         '>': '&gt;',
         '"': '&quot;',
-        '\'': '&#x27;',
-        '/': '&#x2F;'
+        '\'': '&#x27;'
       }
     };
   entityMap.unescape = _.invert(entityMap.escape);
@@ -45706,6 +45754,11 @@ angular.element(document).find('head').append('<style type="text/css">@charset "
       return this._wrapped;
     }
   });
+  if (typeof define === 'function' && define.amd) {
+    define('underscore', [], function () {
+      return _;
+    });
+  }
 }.call(this));
 (function (root, undef) {
   var ArrayProto = Array.prototype, ObjProto = Object.prototype, slice = ArrayProto.slice, hasOwnProp = ObjProto.hasOwnProperty, nativeForEach = ArrayProto.forEach, breaker = {};
