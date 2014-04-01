@@ -31459,7 +31459,7 @@ return Sk.misceval.buildClass(mod, function($gbl, $loc) {
       case METHOD_PROMPT: {
         return Sk.ffi.callableToPy(mod, METHOD_PROMPT, function(methodPy, textPy, valuePy) {
           Sk.ffi.checkMethodArgs(METHOD_PROMPT, arguments, 0, 2);
-          return Sk.ffi.booleanToPy(window[METHOD_PROMPT](Sk.ffi.remapToJs(textPy), Sk.ffi.remapToJs(valuePy)));
+          return Sk.ffi.stringToPy(window[METHOD_PROMPT](Sk.ffi.remapToJs(textPy), Sk.ffi.remapToJs(valuePy)));
         });
       }
       case METHOD_REQUEST_ANIMATION_FRAME: {
@@ -39084,7 +39084,7 @@ mod[WEBGL_RENDERER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       }
       case METHOD_RENDER: {
         return Sk.ffi.callableToPy(mod, METHOD_RENDER, function(methodPy, scenePy, cameraPy) {
-          Sk.ffi.checkMethodArgs(METHOD_GET_CLEAR_COLOR, arguments, 2, 2);
+          Sk.ffi.checkMethodArgs(METHOD_RENDER, arguments, 2, 2);
           var scene  = Sk.ffi.remapToJs(scenePy);
           var camera = Sk.ffi.remapToJs(cameraPy);
           return Sk.ffi.remapToPy(renderer[METHOD_RENDER](scene, camera));

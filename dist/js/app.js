@@ -29145,7 +29145,7 @@
         case 'prompt':
           return Sk.ffi.callableToPy(a, 'prompt', function (a, b, c) {
             Sk.ffi.checkMethodArgs('prompt', arguments, 0, 2);
-            return Sk.ffi.booleanToPy(window.prompt(Sk.ffi.remapToJs(b), Sk.ffi.remapToJs(c)));
+            return Sk.ffi.stringToPy(window.prompt(Sk.ffi.remapToJs(b), Sk.ffi.remapToJs(c)));
           });
         case 'requestAnimationFrame':
           return Sk.misceval.callsim(Sk.misceval.buildClass(a, function (a, b) {
