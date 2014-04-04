@@ -30,15 +30,5 @@ html(lang="en", data-ng-app="app")
                   | #{marketing.version} #{npm.version}
             .nav-collapse.collapse
               <user-links></user-links>
-    #sticky-wrapper
-      #view(data-ng-view)
-      #sticky-push
-    #sticky-footer
-      footer
-        .container-fluid
-          .row-fluid
-            #footer-copyright.span4
-              | &copy; 2013-14 <a href="http://github.com/david-geo-holmes" target="_blank">David Geo Holmes</a>
-            #footer-terms.span4
-              | Dedicated to Geo
+    #view(data-ng-view)
     script(src=js)
