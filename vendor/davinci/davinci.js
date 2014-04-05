@@ -29738,85 +29738,6 @@ mod[Sk.geometry.VORTEX_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
 };
 }).call(this);
 (function() {
-  Sk.builtin.defineJXG = function(mod) {
-    Sk.ffi.checkFunctionArgs("defineJXG", arguments, 1, 1);
-    /**
-     * @const
-     * @type {string}
-     */
-    var JS_WRAP_CLASS                         = "JavaScriptWrapper";
-
-    mod[JS_WRAP_CLASS] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
-      $loc.__init__ = Sk.ffi.functionPy(function(selfPy, elementPy) {
-        Sk.ffi.checkMethodArgs(JS_WRAP_CLASS, arguments, 1, 1);
-        Sk.ffi.referenceToPy(Sk.ffi.remapToJs(elementPy), JS_WRAP_CLASS, undefined, selfPy);
-      });
-      $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
-        var selfJs = Sk.ffi.remapToJs(selfPy);
-        var propJs = selfJs[name];
-        switch(name) {
-          default: {
-            switch(typeof propJs) {
-              case 'function': {
-                return Sk.ffi.callableToPy(mod, name, function(methodPy) {
-                  Sk.ffi.checkFunctionArgs(name, arguments, 1);
-                  var argumentsPy = Array.prototype.slice.call(arguments, 1);
-                  var argumentsJs = [];
-                  for (var i = 0; i < argumentsPy.length; ++i)
-                  {
-                      argumentsJs.push(Sk.ffi.remapToJs(argumentsPy[i]));
-                  }
-                  var valueJs = propJs.apply(selfJs, argumentsJs);
-                  switch(typeof valueJs) {
-                    case 'number': {
-                      return Sk.ffi.numberToFloatPy(valueJs);
-                    }
-                    case 'object': {
-                      return Sk.ffi.callsim(mod[JS_WRAP_CLASS], Sk.ffi.referenceToPy(valueJs, JS_WRAP_CLASS));
-                    }
-                    default: {
-                      throw Sk.ffi.err.attribute(typeof valueJs).isNotGetableOnType(JS_WRAP_CLASS);
-                    }
-                  }
-                });
-              }
-              break;
-              case 'object': {
-                return Sk.ffi.callsim(mod[JS_WRAP_CLASS], Sk.ffi.referenceToPy(propJs, JS_WRAP_CLASS));
-              }
-              default: {
-                throw Sk.ffi.err.attribute(typeof propJs).isNotGetableOnType(JS_WRAP_CLASS);
-              }
-            }
-          }
-        }
-      });
-      $loc.__setattr__ = Sk.ffi.functionPy(function(selfPy, name, valuePy) {
-        switch(name) {
-          default: {
-            throw Sk.ffi.err.attribute(name).isNotSetableOnType(JS_WRAP_CLASS);
-          }
-        }
-      });
-      $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
-        return Sk.ffi.stringToPy(JS_WRAP_CLASS)
-      })
-      $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
-        return Sk.ffi.stringToPy(JS_WRAP_CLASS)
-      })
-    }, JS_WRAP_CLASS, []);
-
-    mod['JSXGraph'] = Sk.ffi.callsim(mod[JS_WRAP_CLASS], Sk.ffi.referenceToPy(JXG.JSXGraph, JS_WRAP_CLASS));
-
-    mod['require'] = Sk.ffi.functionPy(function(namePy) {
-      Sk.ffi.checkFunctionArgs("require", arguments, 1, 1);
-      Sk.ffi.checkArgType("name", Sk.ffi.PyType.STR, Sk.ffi.isStr(namePy), namePy);
-      return Sk.ffi.callsim(mod[JS_WRAP_CLASS], Sk.ffi.referenceToPy(window[Sk.ffi.remapToJs(namePy)], JS_WRAP_CLASS));
-    });
-
-  };
-}).call(this);
-(function() {
 Sk.builtin.defineNode = function(mod) {
 Sk.ffi.checkFunctionArgs("defineNode", arguments, 1, 1);
 /**
@@ -31460,6 +31381,11 @@ Sk.builtin.buildWindowClass = function(mod) {
    * @const
    * @type {string}
    */
+  var JS_WRAP_CLASS                         = "JavaScriptWrapper";
+  /**
+   * @const
+   * @type {string}
+   */
   var WINDOW_CLASS                          = "Window";
   /**
    * @const
@@ -31540,6 +31466,126 @@ Sk.builtin.buildWindowClass = function(mod) {
   // We must be able to track the JavaScript listener functions.
   // TODO: This should include both the type and the useCapture flag.
   var winListeners = {};
+
+  function defaultGetAttribute(mod, selfJs, name, className) {
+    var propJs = selfJs[name];
+    switch(typeof propJs) {
+      case 'function': {
+        return Sk.ffi.callableToPy(mod, name, function(methodPy) {
+          Sk.ffi.checkFunctionArgs(name, arguments, 1);
+          var argumentsPy = Array.prototype.slice.call(arguments, 1);
+          var argumentsJs = [];
+          for (var i = 0; i < argumentsPy.length; ++i)
+          {
+            argumentsJs.push(Sk.ffi.remapToJs(argumentsPy[i]));
+          }
+          if (name.length > 1 && (name[0] === name[0].toUpperCase())) {
+            // Create a new object that inherits from the constructor's prototype.
+            var that = Object.create(propJs.prototype);
+            // Invoke the constructor function, binding this to the new object.
+            var other = propJs.apply(that, argumentsJs);
+            // If the return value isn't an object, substitute the new object.
+            var valueJs = (typeof other === 'object' && other) || that;
+            return Sk.ffi.callsim(mod[JS_WRAP_CLASS], Sk.ffi.referenceToPy(valueJs, name));
+          }
+          else {
+            var valueJs = propJs.apply(selfJs, argumentsJs);
+            switch(typeof valueJs) {
+              case 'number': {
+                return Sk.ffi.numberToFloatPy(valueJs);
+              }
+              case 'boolean': {
+                return Sk.ffi.booleanToPy(valueJs);
+              }
+              case 'object': {
+                return Sk.ffi.callsim(mod[JS_WRAP_CLASS], Sk.ffi.referenceToPy(valueJs, JS_WRAP_CLASS));
+              }
+              default: {
+                throw Sk.ffi.err.attribute(typeof valueJs).isNotGetableOnType(name);
+              }
+            }
+          }
+        });
+      }
+      break;
+      case 'object': {
+        return Sk.ffi.callsim(mod[JS_WRAP_CLASS], Sk.ffi.referenceToPy(propJs, JS_WRAP_CLASS));
+      }
+      case 'number': {
+        return Sk.ffi.numberToFloatPy(propJs);
+      }
+      case 'boolean': {
+        return Sk.ffi.booleanToPy(propJs);
+      }
+      case 'string': {
+        return Sk.ffi.stringToPy(propJs);
+      }
+      case 'undefined': {
+        return Sk.ffi.none.None;
+      }
+      default: {
+        throw Sk.ffi.err.attribute(typeof propJs).isNotGetableOnType(className);
+      }
+    }
+  }
+
+  mod[JS_WRAP_CLASS] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
+    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, elementPy) {
+      Sk.ffi.checkMethodArgs(JS_WRAP_CLASS, arguments, 1, 1);
+      Sk.ffi.referenceToPy(Sk.ffi.remapToJs(elementPy), elementPy.tp$name, undefined, selfPy);
+    });
+    $loc.__add__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+      var lhs = Sk.ffi.remapToJs(selfPy);
+      var rhs = Sk.ffi.remapToJs(otherPy);
+      var resultJs = lhs.add(rhs);
+      return Sk.ffi.callsim(mod[JS_WRAP_CLASS], Sk.ffi.referenceToPy(resultJs, JS_WRAP_CLASS));
+    });
+    $loc.__sub__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+      var lhs = Sk.ffi.remapToJs(selfPy);
+      var rhs = Sk.ffi.remapToJs(otherPy);
+      var resultJs = lhs.sub(rhs);
+      return Sk.ffi.callsim(mod[JS_WRAP_CLASS], Sk.ffi.referenceToPy(resultJs, JS_WRAP_CLASS));
+    });
+    $loc.__mul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+      var lhs = Sk.ffi.remapToJs(selfPy);
+      var rhs = Sk.ffi.remapToJs(otherPy);
+      var resultJs = lhs.mul(rhs);
+      return Sk.ffi.callsim(mod[JS_WRAP_CLASS], Sk.ffi.referenceToPy(resultJs, JS_WRAP_CLASS));
+    });
+    $loc.__div__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+      var lhs = Sk.ffi.remapToJs(selfPy);
+      var rhs = Sk.ffi.remapToJs(otherPy);
+      var resultJs = lhs.div(rhs);
+      return Sk.ffi.callsim(mod[JS_WRAP_CLASS], Sk.ffi.referenceToPy(resultJs, JS_WRAP_CLASS));
+    });
+    $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
+      return defaultGetAttribute(mod, Sk.ffi.remapToJs(selfPy), name, JS_WRAP_CLASS);
+    });
+    $loc.__setattr__ = Sk.ffi.functionPy(function(selfPy, name, valuePy) {
+      var selfJs = Sk.ffi.remapToJs(selfPy);
+      var propJs = selfJs[name];
+      switch(name) {
+        default: {
+          switch(typeof propJs) {
+            case 'number': {
+              selfJs[name] = Sk.ffi.remapToJs(valuePy);
+            }
+            break;
+            default: {
+              throw Sk.ffi.err.attribute(typeof propJs).isNotSetableOnType(JS_WRAP_CLASS);
+            }
+          }
+        }
+      }
+    });
+    $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
+      var selfJs = Sk.ffi.remapToJs(selfPy);
+      return Sk.ffi.stringToPy(selfJs.toString());
+    })
+    $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
+      return Sk.ffi.stringToPy(JS_WRAP_CLASS);
+    })
+  }, JS_WRAP_CLASS, []);
 
   mod[WINDOW_CLASS] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
     $loc.__init__ = Sk.ffi.functionPy(function(selfPy, windowPy) {
@@ -31675,6 +31721,9 @@ Sk.builtin.buildWindowClass = function(mod) {
               return Sk.ffi.numberToFloatPy(timeoutID);
             });
           }, METHOD_SET_TIMEOUT, []));
+        }
+        default: {
+          return defaultGetAttribute(mod, windowJs, name, WINDOW_CLASS);
         }
       }
     });
