@@ -31497,6 +31497,12 @@ Sk.builtin.buildWindowClass = function(mod) {
               case 'boolean': {
                 return Sk.ffi.booleanToPy(valueJs);
               }
+              case 'string': {
+                return Sk.ffi.stringToPy(valueJs);
+              }
+              case 'undefined': {
+                return Sk.ffi.none.None;
+              }
               case 'object': {
                 return Sk.ffi.callsim(mod[JS_WRAP_CLASS], Sk.ffi.referenceToPy(valueJs, JS_WRAP_CLASS));
               }
@@ -31509,7 +31515,16 @@ Sk.builtin.buildWindowClass = function(mod) {
       }
       break;
       case 'object': {
-        return Sk.ffi.callsim(mod[JS_WRAP_CLASS], Sk.ffi.referenceToPy(propJs, JS_WRAP_CLASS));
+        if (Object.prototype.toString.apply(propJs) === '[object Array]') {
+          var valuesPy = [];
+          for (var i = 0; i < propJs.length; i++) {
+            valuesPy.push(Sk.ffi.remapToPy(propJs[i]));
+          }
+          return Sk.ffi.listPy(valuesPy);
+        }
+        else {
+          return Sk.ffi.callsim(mod[JS_WRAP_CLASS], Sk.ffi.referenceToPy(propJs, JS_WRAP_CLASS));
+        }
       }
       case 'number': {
         return Sk.ffi.numberToFloatPy(propJs);
