@@ -31467,6 +31467,19 @@ Sk.builtin.buildWindowClass = function(mod) {
   // TODO: This should include both the type and the useCapture flag.
   var winListeners = {};
 
+  function isConstructorFunction(name) {
+    // Hacks for JSXGraph.
+    if (name === "Value" || name === "X" || name === "Y") {
+      return false;
+    }
+    if (name[0] === name[0].toUpperCase()) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
   function defaultGetAttribute(mod, selfJs, name, className) {
     var propJs = selfJs[name];
     switch(typeof propJs) {
@@ -31479,7 +31492,7 @@ Sk.builtin.buildWindowClass = function(mod) {
           {
             argumentsJs.push(Sk.ffi.remapToJs(argumentsPy[i]));
           }
-          if (name.length > 1 && (name[0] === name[0].toUpperCase())) {
+          if (isConstructorFunction(name)) {
             // Create a new object that inherits from the constructor's prototype.
             var that = Object.create(propJs.prototype);
             // Invoke the constructor function, binding this to the new object.

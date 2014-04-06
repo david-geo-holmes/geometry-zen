@@ -29124,7 +29124,8 @@
           Sk.ffi.checkFunctionArgs(c, arguments, 1);
           for (var k = Array.prototype.slice.call(arguments, 1), n = [], p = 0; p < k.length; ++p)
             n.push(Sk.ffi.remapToJs(k[p]));
-          if (1 < c.length && c[0] === c[0].toUpperCase())
+          k = 'Value' === c || 'X' === c || 'Y' === c ? !1 : c[0] === c[0].toUpperCase() ? !0 : !1;
+          if (k)
             return k = Object.create(h.prototype), n = h.apply(k, n), Sk.ffi.callsim(a.JavaScriptWrapper, Sk.ffi.referenceToPy('object' === typeof n && n || k, c));
           n = h.apply(b, n);
           switch (typeof n) {
@@ -29499,11 +29500,11 @@
           if (c(e))
             d.w *= e, d.x *= e, d.y *= e, d.xy *= e;
           else {
-            var f = d.w, g = d.x, h = d.y, l = d.xy, k = e.w, m = e.x, C = e.y, e = e.xy;
-            d.w = f * k + g * m + h * C - l * e;
-            d.x = f * m + g * k - h * e + l * C;
-            d.y = f * C + g * e + h * k - l * m;
-            d.xy = f * e + g * C - h * m + l * k;
+            var f = d.w, g = d.x, h = d.y, k = d.xy, l = e.w, m = e.x, C = e.y, e = e.xy;
+            d.w = f * l + g * m + h * C - k * e;
+            d.x = f * m + g * l - h * e + k * C;
+            d.y = f * C + g * e + h * l - k * m;
+            d.xy = f * e + g * C - h * m + k * l;
           }
           return a;
         });
@@ -29529,8 +29530,8 @@
           b = Sk.ffi.remapToJs(b);
           if (c(b))
             return d(a.w * b, a.x * b, a.y * b, a.xy * b);
-          var e = a.w, f = a.x, g = a.y, h = b.w, l = b.x, k = b.y;
-          return d(e * h, e * l + f * h, e * k + g * h, e * b.xy + f * k - g * l + a.xy * h);
+          var e = a.w, f = a.x, g = a.y, h = b.w, k = b.x, l = b.y;
+          return d(e * h, e * k + f * h, e * l + g * h, e * b.xy + f * l - g * k + a.xy * h);
         });
         m.__rxor__ = Sk.ffi.functionPy(function (a, b) {
           b = Sk.ffi.remapToJs(b);
@@ -29544,11 +29545,11 @@
           if (c(e))
             d.w *= e, d.x *= e, d.y *= e, d.xy *= e;
           else {
-            var f = d.w, g = d.x, h = d.y, l = d.xy, k = e.w, m = e.x, C = e.y, e = e.xy;
-            d.w = f * k;
-            d.x = f * m + g * k;
-            d.y = f * C + h * k;
-            d.xy = f * e + g * C - h * m + l * k;
+            var f = d.w, g = d.x, h = d.y, k = d.xy, l = e.w, m = e.x, C = e.y, e = e.xy;
+            d.w = f * l;
+            d.x = f * m + g * l;
+            d.y = f * C + h * l;
+            d.xy = f * e + g * C - h * m + k * l;
           }
           return a;
         });
@@ -29557,8 +29558,8 @@
           b = Sk.ffi.remapToJs(b);
           if (c(b))
             return d(a.w * b, 0, 0, 0);
-          var e = a.w, f = a.x, g = a.y, h = b.x, k = b.y, l = b.xy;
-          return d(e * b.w + f * h + g * k - a.xy * l, e * h - g * l, e * k + f * l, e * l);
+          var e = a.w, f = a.x, g = a.y, h = b.x, l = b.y, k = b.xy;
+          return d(e * b.w + f * h + g * l - a.xy * k, e * h - g * k, e * l + f * k, e * k);
         });
         m.__rlshift__ = Sk.ffi.functionPy(function (a, b) {
           b = Sk.ffi.remapToJs(b);
