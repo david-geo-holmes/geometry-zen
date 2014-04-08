@@ -12451,6 +12451,10 @@
     return Sk.ffi.getType(a) === Sk.ffi.PyType.LIST;
   };
   goog.exportSymbol('Sk.ffi.isList', Sk.ffi.isList);
+  Sk.ffi.isTuple = function (a) {
+    return Sk.ffi.getType(a) === Sk.ffi.PyType.TUPLE;
+  };
+  goog.exportSymbol('Sk.ffi.isTuple', Sk.ffi.isTuple);
   Sk.ffi.isFloat = function (a) {
     return Sk.ffi.getType(a) === Sk.ffi.PyType.FLOAT;
   };
@@ -12666,29 +12670,31 @@
     ]);
   };
   goog.exportSymbol('Sk.ffi.numberToJs', Sk.ffi.numberToJs);
-  Sk.ffi.remapToJs = function (a) {
-    Sk.ffi.checkFunctionArgs('Sk.ffi.remapToJs', arguments, 1, 1);
+  Sk.ffi.remapToJs = function (a, b) {
+    Sk.ffi.checkFunctionArgs('Sk.ffi.remapToJs', arguments, 1, 2);
     switch (Sk.ffi.getType(a)) {
     case Sk.ffi.PyType.STR:
       return a.v;
     case Sk.ffi.PyType.DICT:
-      for (var b = {}, c = a.tp$iter(), d = c.tp$iternext(); void 0 !== d; d = c.tp$iternext()) {
-        var e = a.mp$subscript(d);
-        void 0 === e && (e = null);
-        d = Sk.ffi.remapToJs(d);
-        b[d] = Sk.ffi.remapToJs(e);
+      for (var c = {}, d = a.tp$iter(), e = d.tp$iternext(); void 0 !== e; e = d.tp$iternext()) {
+        var f = a.mp$subscript(e);
+        void 0 === f && (f = null);
+        e = Sk.ffi.remapToJs(e);
+        c[e] = Sk.ffi.remapToJs(f);
       }
-      return b;
+      return c;
     case Sk.ffi.PyType.LIST:
-      b = [];
-      for (c = 0; c < a.v.length; ++c)
-        b.push(Sk.ffi.remapToJs(a.v[c]));
-      return b;
+      if (b)
+        return a.v;
+      c = [];
+      for (d = 0; d < a.v.length; ++d)
+        c.push(Sk.ffi.remapToJs(a.v[d]));
+      return c;
     case Sk.ffi.PyType.TUPLE:
-      b = [];
-      for (c = 0; c < a.v.length; ++c)
-        b.push(Sk.ffi.remapToJs(a.v[c]));
-      return b;
+      c = [];
+      for (d = 0; d < a.v.length; ++d)
+        c.push(Sk.ffi.remapToJs(a.v[d]));
+      return c;
     case Sk.ffi.PyType.BOOL:
       if (a === Sk.builtin.bool.true$)
         return !0;
@@ -12716,7 +12722,7 @@
             d.push(b[e]);
           try {
             return Sk.ffi.remapToJs(Sk.misceval.apply(a, void 0, void 0, void 0, d));
-          } catch (l) {
+          } catch (f) {
             c -= 1, d = -1 == c;
           }
         }
@@ -27194,17 +27200,17 @@
         return c;
       }
       function h(a, c, d, e, f) {
-        var g = new b[Sk.three.OBJECT_3D](), h = a * c, l = d / c, p = a * d;
-        a = f.x * p;
-        d = f.y * p;
-        f = f.z * p;
-        for (p = -h; p <= h; p += 1)
-          if (0 != p) {
-            var k = p * l, q = new b.Geometry();
-            q.vertices.push(new b.Vector3(e.x * k - a, e.y * k - d, e.z * k - f));
-            q.vertices.push(new b.Vector3(e.x * k + a, e.y * k + d, e.z * k + f));
-            k = new b.Line(q, 0 === p % c ? m : n);
-            g.add(k);
+        var g = new b[Sk.three.OBJECT_3D](), h = a * c, l = d / c, k = a * d;
+        a = f.x * k;
+        d = f.y * k;
+        f = f.z * k;
+        for (k = -h; k <= h; k += 1)
+          if (0 != k) {
+            var p = k * l, q = new b.Geometry();
+            q.vertices.push(new b.Vector3(e.x * p - a, e.y * p - d, e.z * p - f));
+            q.vertices.push(new b.Vector3(e.x * p + a, e.y * p + d, e.z * p + f));
+            p = new b.Line(q, 0 === k % c ? m : n);
+            g.add(p);
           }
         return g;
       }
@@ -27742,9 +27748,9 @@
               } else
                 e.a = 'number' === typeof d.radiusTop ? d.radiusTop : 0.5, e.b = 'number' === typeof d.radiusBottom ? d.radiusBottom : 0.5, e.h = 'number' === typeof d.height ? d.height : 1;
               c = e;
-              var e = Sk.ffi.numberToFloatPy(c.a), g = Sk.ffi.numberToFloatPy(c.b), h = Sk.ffi.numberToFloatPy(c.h), n = Sk.ffi.numberToIntPy(d.segments ? d.segments : 32), l = Sk.ffi.numberToIntPy(1), p = Sk.ffi.booleanToPy(!1);
+              var e = Sk.ffi.numberToFloatPy(c.a), g = Sk.ffi.numberToFloatPy(c.b), h = Sk.ffi.numberToFloatPy(c.h), n = Sk.ffi.numberToIntPy(d.segments ? d.segments : 32), l = Sk.ffi.numberToIntPy(1), k = Sk.ffi.booleanToPy(!1);
               c = Sk.ffi.callsim(a.Euclidean3, Sk.ffi.referenceToPy(c.axis, 'Euclidean3'));
-              e = Sk.ffi.callsim(a.CylinderGeometry, e, g, h, n, l, p, c);
+              e = Sk.ffi.callsim(a.CylinderGeometry, e, g, h, n, l, k, c);
               return f(e, d);
             });
           case 'normalize':
@@ -28093,7 +28099,7 @@
                 c.height = h * g;
               } else
                 c.radius = d.radius ? d.radius : 1, c.height = d.height ? d.height : 1;
-              var c = Sk.ffi.numberToFloatPy(c.radius), e = Sk.ffi.numberToFloatPy(0.08), g = Sk.ffi.numberToFloatPy(0.01), h = Sk.ffi.numberToFloatPy(0.2), n = Sk.ffi.numberToFloatPy(0.8), l = Sk.ffi.numberToIntPy(6), p = Sk.ffi.numberToIntPy(d.segments ? d.segments : 32), c = Sk.ffi.callsim(a[Sk.three.VORTEX_GEOMETRY], c, e, g, h, n, l, p);
+              var c = Sk.ffi.numberToFloatPy(c.radius), e = Sk.ffi.numberToFloatPy(0.08), g = Sk.ffi.numberToFloatPy(0.01), h = Sk.ffi.numberToFloatPy(0.2), n = Sk.ffi.numberToFloatPy(0.8), l = Sk.ffi.numberToIntPy(6), k = Sk.ffi.numberToIntPy(d.segments ? d.segments : 32), c = Sk.ffi.callsim(a[Sk.three.VORTEX_GEOMETRY], c, e, g, h, n, l, k);
               return f(c, d);
             });
           case 'normalize':
@@ -28912,18 +28918,146 @@
   }.call(this));
   (function () {
     Sk.builtin.defineNumPy = function (a) {
+      function b(a, c, d) {
+        if (Sk.ffi.isList(a)) {
+          a = Sk.ffi.remapToJs(a, !0);
+          d.level += 1;
+          d.level > d.shape.length && d.shape.push(a.length);
+          for (var h = 0, k = a.length; h < k; h++)
+            b(a[h], c, d);
+          d.level -= 1;
+        } else
+          c.push(a);
+      }
+      function c(a) {
+        for (var b = null, c = null, d = null, k = a.length, b = 0, c = k - 1; b < k / 2; b++, c--)
+          d = a[b], a[b] = a[c], a[c] = d;
+      }
+      function d(a) {
+        for (var b = 1, c = 0, d = a.length; c < d; c++)
+          b *= a[c];
+        return b;
+      }
       Sk.ffi.checkFunctionArgs('defineNumPy', arguments, 1, 1);
-      a.array = Sk.ffi.functionPy(function () {
-        Sk.ffi.checkFunctionArgs('array', arguments, 1, 3);
+      a.ndarray = Sk.ffi.buildClass(a, function (b, f) {
+        f.__init__ = Sk.ffi.functionPy(function (a, b, d, e, f, n, p) {
+          d = {};
+          d.shape = Sk.ffi.remapToJs(b);
+          b = d.shape.slice(0);
+          c(b);
+          f = 1;
+          p = n = 0;
+          for (var q = b.length; p < q; p++)
+            n = b[p], b[p] = f, f *= n;
+          c(b);
+          d.strides = b;
+          Sk.ffi.isDefined(e) && (Sk.ffi.checkArgType('buffer', [Sk.ffi.PyType.LIST], Sk.ffi.isList(e), e), d.buffer = Sk.ffi.remapToJs(e, !0));
+          Sk.ffi.referenceToPy(d, 'ndarray', void 0, a);
+        });
+        f.__getattr__ = Sk.ffi.functionPy(function (a, b) {
+          var c = Sk.ffi.remapToJs(a);
+          switch (b) {
+          case 'ndim':
+            return Sk.ffi.numberToIntPy(c.shape.length);
+          case 'shape':
+            return Sk.ffi.tuplePy(c.shape.map(function (a) {
+              return Sk.ffi.numberToIntPy(a);
+            }));
+          case 'size':
+            return Sk.ffi.numberToIntPy(d(c.shape));
+          case 'strides':
+            return Sk.ffi.tuplePy(c.strides.map(function (a) {
+              return Sk.ffi.numberToIntPy(a);
+            }));
+          case 'buffer':
+            return Sk.ffi.listPy(c.buffer);
+          default:
+            throw Sk.ffi.err.attribute(b).isNotGetableOnType('ndarray');
+          }
+        });
+        f.__getitem__ = Sk.ffi.functionPy(function (a, b) {
+          Sk.ffi.checkMethodArgs('[]', arguments, 1, 1);
+          if (Sk.ffi.isInt(b)) {
+            var c = Sk.ffi.remapToJs(b), d = Sk.ffi.remapToJs(a);
+            if (0 <= c && c < d.buffer.length)
+              return d.buffer[c];
+            throw new Sk.builtin.IndexError('array index out of range');
+          }
+          if (Sk.ffi.isTuple(b)) {
+            for (var c = Sk.ffi.remapToJs(b), d = Sk.ffi.remapToJs(a), e = d.buffer, d = d.strides, f = 0, p = 0, q = d.length; p < q; p++)
+              f += d[p] * c[p];
+            return e[f];
+          }
+          Sk.ffi.checkArgType('index', [
+            Sk.ffi.PyType.INT,
+            Sk.ffi.PyType.TUPLE
+          ], !1, b);
+        });
+        f.__add__ = Sk.ffi.functionPy(function (b, c) {
+          for (var d = Sk.ffi.remapToJs(b), e = d.buffer, f = Sk.ffi.remapToJs(c).buffer, n = [], p = 0, q = e.length; p < q; p++)
+            n[p] = Sk.ffh.add(e[p], f[p]);
+          d = Sk.ffi.tuplePy(d.shape.map(function (a) {
+            return Sk.ffi.numberToIntPy(a);
+          }));
+          n = Sk.ffi.listPy(n);
+          return Sk.ffi.callsim(a.ndarray, d, void 0, n);
+        });
+        f.__sub__ = Sk.ffi.functionPy(function (b, c) {
+          for (var d = Sk.ffi.remapToJs(b), e = d.buffer, f = Sk.ffi.remapToJs(c).buffer, n = [], p = 0, q = e.length; p < q; p++)
+            n[p] = Sk.ffh.subtract(e[p], f[p]);
+          d = Sk.ffi.tuplePy(d.shape.map(function (a) {
+            return Sk.ffi.numberToIntPy(a);
+          }));
+          n = Sk.ffi.listPy(n);
+          return Sk.ffi.callsim(a.ndarray, d, void 0, n);
+        });
+        f.__mul__ = Sk.ffi.functionPy(function (b, c) {
+          for (var d = Sk.ffi.remapToJs(b), e = d.buffer, f = Sk.ffi.remapToJs(c).buffer, n = [], p = 0, q = e.length; p < q; p++)
+            n[p] = Sk.ffh.multiply(e[p], f[p]);
+          d = Sk.ffi.tuplePy(d.shape.map(function (a) {
+            return Sk.ffi.numberToIntPy(a);
+          }));
+          n = Sk.ffi.listPy(n);
+          return Sk.ffi.callsim(a.ndarray, d, void 0, n);
+        });
+        f.__div__ = Sk.ffi.functionPy(function (b, c) {
+          for (var d = Sk.ffi.remapToJs(b), e = d.buffer, f = Sk.ffi.remapToJs(c).buffer, n = [], p = 0, q = e.length; p < q; p++)
+            n[p] = Sk.ffh.divide(e[p], f[p]);
+          d = Sk.ffi.tuplePy(d.shape.map(function (a) {
+            return Sk.ffi.numberToIntPy(a);
+          }));
+          n = Sk.ffi.listPy(n);
+          return Sk.ffi.callsim(a.ndarray, d, void 0, n);
+        });
+      }, 'ndarray', []);
+      a.array = Sk.ffi.functionPy(function (c, d, g, h, k, l) {
+        Sk.ffi.checkFunctionArgs('array', arguments, 1, 6);
+        Sk.ffi.checkArgType('object', [Sk.ffi.PyType.LIST], Sk.ffi.isList(c), c);
+        Sk.ffi.isDefined(d) && Sk.ffi.checkArgType('dtype', [Sk.ffi.PyType.FUNCTION], Sk.ffi.isFunction(d), d);
+        Sk.ffi.isDefined(g) && Sk.ffi.checkArgType('copy', [Sk.ffi.PyType.BOOL], Sk.ffi.isBool(g), g);
+        var m = [], n = {
+            level: 0,
+            shape: []
+          };
+        b(c, m, n);
+        n = Sk.ffi.tuplePy(n.shape.map(function (a) {
+          return Sk.ffi.numberToFloatPy(a);
+        }));
+        m = Sk.ffi.listPy(m);
+        return Sk.ffi.callsim(a.ndarray, n, d, m);
       });
-      a.empty = Sk.ffi.functionPy(function (a, c, d) {
+      a.empty = Sk.ffi.functionPy(function (a, b, c) {
         Sk.ffi.checkFunctionArgs('empty', arguments, 1, 3);
       });
       a.sqrt = Sk.ffi.functionPy(function () {
         Sk.ffi.checkFunctionArgs('sqrt', arguments, 1, 1);
       });
-      a.zeros = Sk.ffi.functionPy(function () {
+      a.zeros = Sk.ffi.functionPy(function (b, c, g) {
         Sk.ffi.checkFunctionArgs('zeros', arguments, 1, 2);
+        Sk.ffi.checkArgType('shape', [Sk.ffi.PyType.TUPLE], Sk.ffi.isTuple(b), b);
+        for (var h = Sk.ffi.remapToJs(b), h = d(h), k = [], l = Sk.ffi.numberToFloatPy(0), m = 0; m < h; m++)
+          k[m] = l;
+        return Sk.ffi.callsim(a.ndarray, b, c, Sk.ffi.listPy(k));
       });
     };
   }.call(this));
@@ -29558,8 +29692,8 @@
           b = Sk.ffi.remapToJs(b);
           if (c(b))
             return d(a.w * b, 0, 0, 0);
-          var e = a.w, f = a.x, g = a.y, h = b.x, l = b.y, k = b.xy;
-          return d(e * b.w + f * h + g * l - a.xy * k, e * h - g * k, e * l + f * k, e * k);
+          var e = a.w, f = a.x, g = a.y, h = b.x, k = b.y, l = b.xy;
+          return d(e * b.w + f * h + g * k - a.xy * l, e * h - g * l, e * k + f * l, e * l);
         });
         m.__rlshift__ = Sk.ffi.functionPy(function (a, b) {
           b = Sk.ffi.remapToJs(b);
