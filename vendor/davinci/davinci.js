@@ -13902,7 +13902,7 @@ Sk.ffi.numberToPy = function(valueJs, kind)
             throw Sk.ffi.assertionError("ead77baa-30b2-470a-bb18-9db949965e45, kind => " + kind);
         }
     }
-}
+};
 goog.exportSymbol("Sk.ffi.numberToPy", Sk.ffi.numberToPy);
 
 /**
@@ -14130,7 +14130,7 @@ goog.exportSymbol("Sk.ffi.functionPy", Sk.ffi.functionPy);
 Sk.ffi.listPy = function(valuesPy)
 {
     return new Sk.builtin.list(valuesPy);
-}
+};
 goog.exportSymbol("Sk.ffi.listPy", Sk.ffi.listPy);
 
 /**
@@ -14141,7 +14141,7 @@ goog.exportSymbol("Sk.ffi.listPy", Sk.ffi.listPy);
 Sk.ffi.tuplePy = function(valuesPy)
 {
     return new Sk.builtin.tuple(valuesPy);
-}
+};
 goog.exportSymbol("Sk.ffi.tuplePy", Sk.ffi.tuplePy);
 
 /**
@@ -14243,7 +14243,7 @@ Sk.ffi.isInstance = function(valuePy, className)
             return true;
         }
         else if (Object.prototype.toString.call(className) === '[object Array]') {
-            var name = Sk.ffi.typeName(valuePy)
+            var name = Sk.ffi.typeName(valuePy);
             return className.some(function(x) {return name === x;});
         }
         else
@@ -14487,7 +14487,7 @@ Sk.ffi.typeString = function(kind, name)
      * @return {string}
      */
     function typeBrackets(s) {
-        return "<type '" + s + "'>"
+        return "<type '" + s + "'>";
     }
     /**
      * @param {Sk.ffi.PyType} kind
@@ -14517,7 +14517,7 @@ Sk.ffi.typeString = function(kind, name)
      * @return {string}
      */
     function classBrackets(name) {
-        return "<class '" + name + "'>"
+        return "<class '" + name + "'>";
     }
 
     if (typeof kind === Sk.ffi.JsType.STRING) {
@@ -14537,7 +14537,7 @@ Sk.ffi.typeString = function(kind, name)
             case Sk.ffi.PyType.NONE:
             case Sk.ffi.PyType.FUNCTION:
             {
-                return typePy(kind)
+                return typePy(kind);
             }
             case Sk.ffi.PyType.INSTANCE:
             {
@@ -14556,7 +14556,7 @@ Sk.ffi.typeString = function(kind, name)
     else {
         throw Sk.ffi.assertionError("c32e2f75-a391-49aa-b567-b376955b4b4c, typeof kind => " + typeof kind);
     }
-}
+};
 goog.exportSymbol("Sk.ffi.typeString", Sk.ffi.typeString);
 
 /**
@@ -31089,21 +31089,81 @@ mod[NODE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         }
       });
       $loc.__getitem__ = Sk.ffi.functionPy(function(selfPy, indexPy) {
+        var ndarrayJs = Sk.ffi.remapToJs(selfPy);
         Sk.ffi.checkMethodArgs("[]", arguments, 1, 1);
         if (Sk.ffi.isInt(indexPy)) {
           var offset  = Sk.ffi.remapToJs(indexPy);
-          var ndarrayJs = Sk.ffi.remapToJs(selfPy);
-          if (offset >= 0 && offset < ndarrayJs.buffer.length) {
-            return ndarrayJs.buffer[offset];
+          if (ndarrayJs.shape.length > 1) {
+            var stride = ndarrayJs.strides[0];
+            var buffer = [];
+            var index = 0;
+            for (var i = offset * stride, ubound = (offset + 1) * stride; i < ubound; i++) {
+              buffer[index++] = ndarrayJs.buffer[i];
+            }
+            var bufferPy = Sk.ffi.listPy(buffer);
+            var shapePy = Sk.ffi.tuplePy(Array.prototype.slice.call(ndarrayJs.shape,1).map(function(x) {return Sk.ffi.numberToIntPy(x);}));
+            return Sk.ffi.callsim(mod['ndarray'], shapePy, undefined, bufferPy);
           }
           else {
-            throw new Sk.builtin.IndexError("array index out of range");
+            if (offset >= 0 && offset < ndarrayJs.buffer.length) {
+              return ndarrayJs.buffer[offset];
+            }
+            else {
+              throw new Sk.builtin.IndexError("array index out of range");
+            }
+          }
+        }
+        else if (Sk.ffi.isTuple(indexPy)) {
+          var keyJs  = Sk.ffi.remapToJs(indexPy);
+          return ndarrayJs.buffer[computeOffset(ndarrayJs.strides, keyJs)];
+        }
+        else if (Sk.ffi.isFunction(indexPy)) {
+          var indices = indexPy.indices();
+//        Sk.debugout("indices: " + indices);
+          var start = indices[0];
+          var stop  = indices[1];
+          var step  = indices[2];
+          var buffer = [];
+          var index = 0;
+          if (step > 0) {
+            for (var i = start; i < stop; i += step) {
+              buffer[index++] = ndarrayJs.buffer[i];
+            }
+          }
+          var bufferPy = Sk.ffi.listPy(buffer);
+          var shapePy = Sk.ffi.tuplePy([buffer.length].map(function(x) {return Sk.ffi.numberToIntPy(x);}));
+          return Sk.ffi.callsim(mod['ndarray'], shapePy, undefined, bufferPy);
+        }
+        else {
+          Sk.ffi.checkArgType('index', [Sk.ffi.PyType.INT, Sk.ffi.PyType.TUPLE, Sk.ffi.PyType.FUNCTION], false, indexPy);
+        }
+      });
+      $loc.__setitem__ = Sk.ffi.functionPy(function(selfPy, indexPy, valuePy) {
+        var ndarrayJs = Sk.ffi.remapToJs(selfPy);
+        Sk.ffi.checkMethodArgs("[]", arguments, 2, 2);
+        if (Sk.ffi.isInt(indexPy)) {
+          var offset  = Sk.ffi.remapToJs(indexPy);
+          if (ndarrayJs.shape.length > 1) {
+            var valueJs = Sk.ffi.remapToJs(valuePy);
+            var stride = ndarrayJs.strides[0];
+            var index = 0;
+            for (var i = offset * stride, ubound = (offset + 1) * stride; i < ubound; i++) {
+              ndarrayJs.buffer[i] = valueJs.buffer[index++];
+            }
+          }
+          else {
+            if (offset >= 0 && offset < ndarrayJs.buffer.length) {
+              ndarrayJs.buffer[offset] = valuePy;
+            }
+            else {
+              throw new Sk.builtin.IndexError("array index out of range");
+            }
           }
         }
         else if (Sk.ffi.isTuple(indexPy)) {
           var keyJs  = Sk.ffi.remapToJs(indexPy);
           var ndarrayJs = Sk.ffi.remapToJs(selfPy);
-          return ndarrayJs.buffer[computeOffset(ndarrayJs.strides, keyJs)];
+          ndarrayJs.buffer[computeOffset(ndarrayJs.strides, keyJs)] = valuePy;
         }
         else {
           Sk.ffi.checkArgType('index', [Sk.ffi.PyType.INT, Sk.ffi.PyType.TUPLE], false, indexPy);
@@ -31186,8 +31246,46 @@ mod[NODE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       Sk.ffi.checkFunctionArgs("empty", arguments, 1, 3);
     });
 
-    mod['sqrt'] = Sk.ffi.functionPy(function() {
-      Sk.ffi.checkFunctionArgs("sqrt", arguments, 1, 1);
+    mod['linspace'] = Sk.ffi.functionPy(function(startPy, stopPy, numPy, endpointPy, retstepPy) {
+      Sk.ffi.checkFunctionArgs("linspace", arguments, 2, 5);
+      Sk.ffi.checkArgType("start", [Sk.ffi.PyType.FLOAT], Sk.ffi.isFloat(startPy), startPy);
+      var start = Sk.ffi.remapToJs(startPy);
+      Sk.ffi.checkArgType("stop",  [Sk.ffi.PyType.FLOAT], Sk.ffi.isFloat(stopPy),  stopPy);
+      var stop = Sk.ffi.remapToJs(stopPy);
+      var num;
+      if (Sk.ffi.isDefined(numPy)) {
+        Sk.ffi.checkArgType("num",   [Sk.ffi.PyType.INT],   Sk.ffi.isInt(numPy),     numPy);
+        num = Sk.ffi.remapToJs(numPy);
+      }
+      else {
+        num = 50;
+      }
+      var endpoint;
+      if (Sk.ffi.isDefined(endpointPy)) {
+        Sk.ffi.checkArgType("endpoint", [Sk.ffi.PyType.BOOL], Sk.ffi.isBool(endpointPy), endpointPy);
+        endpoint = Sk.ffi.remapToJs(endpointPy);
+      }
+      else {
+        endpoint = true;
+      }
+      var retstep;
+      if (Sk.ffi.isDefined(retstepPy)) {
+        Sk.ffi.checkArgType("retstep", [Sk.ffi.PyType.BOOL], Sk.ffi.isBool(retstepPy), retstepPy);
+        retstep = Sk.ffi.remapToJs(retstepPy);
+      }
+      else {
+        retstep = false;
+      }
+      var step = endpoint ? ((stop - start)/(num - 1)) : ((stop - start)/num);
+      var buffer = [];
+      for (var i = 0; i < num; i++) {
+        buffer[i] = Sk.ffi.numberToFloatPy(i * step + start);
+      }
+      var shapeJs = [];
+      shapeJs[0] = Sk.ffi.numberToIntPy(num);
+      var shapePy = Sk.ffi.tuplePy(shapeJs);
+      var arrayPy = Sk.ffi.callsim(mod['ndarray'], shapePy, undefined, Sk.ffi.listPy(buffer));
+      return retstep ? Sk.ffi.tuplePy([arrayPy, Sk.ffi.numberToFloatPy(step)]) : arrayPy;
     });
 
     mod['zeros'] = Sk.ffi.functionPy(function(shapePy, dtypePy, orderPy) {
