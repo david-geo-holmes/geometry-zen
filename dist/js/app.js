@@ -29002,9 +29002,10 @@
             return p = Sk.ffi.remapToJs(c), e.buffer[d(e.strides, p)];
           if (Sk.ffi.isFunction(c)) {
             p = c.indices();
-            r = p[0];
-            f = p[1];
-            g = p[2];
+            r = 'undefined' !== typeof p[0] ? p[0] : 0;
+            f = 'undefined' !== typeof p[1] ? p[1] : e.buffer.length;
+            f = f > e.buffer.length ? e.buffer.length : f;
+            g = 'undefined' !== typeof p[2] ? p[2] : 1;
             p = [];
             q = 0;
             if (0 < g)
@@ -29075,6 +29076,18 @@
           }));
           g = Sk.ffi.listPy(g);
           return Sk.ffi.callsim(a.ndarray, d, void 0, g);
+        });
+        g.__str__ = Sk.ffi.functionPy(function (a) {
+          a = Sk.ffi.remapToJs(a);
+          for (var b = [], c = 0, d = a.buffer.length; c < d; c++)
+            b.push(Sk.ffi.remapToJs(Sk.ffh.str(a.buffer[c])));
+          return Sk.ffi.stringToPy('[' + b.join(', ') + ']');
+        });
+        g.__repr__ = Sk.ffi.functionPy(function (a) {
+          a = Sk.ffi.remapToJs(a);
+          for (var b = [], c = 0, d = a.buffer.length; c < d; c++)
+            b.push(Sk.ffi.remapToJs(Sk.ffh.str(a.buffer[c])));
+          return Sk.ffi.stringToPy('array([' + b.join(', ') + '])');
         });
       }, 'ndarray', []);
       a.array = Sk.ffi.functionPy(function (c, d, e, k, l, m) {
