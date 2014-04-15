@@ -17,6 +17,19 @@ app.config(['$routeProvider', '$locationProvider', ($routeProvider, $locationPro
     templateUrl: 'angular/work.html'
     controller: 'WorkCtrl'
 
+  # The workbench page for GitHub Repositories (Embedding Mode).
+  $routeProvider.when '/embed/users/:user/repos/:repo/blob/:branch/:step0/:step1/:step2',
+    templateUrl: 'angular/embed.html'
+    controller: 'EmbedCtrl'
+
+  $routeProvider.when '/embed/users/:user/repos/:repo/blob/:branch/:step0/:step1',
+    templateUrl: 'angular/embed.html'
+    controller: 'EmbedCtrl'
+
+  $routeProvider.when '/embed/users/:user/repos/:repo/blob/:branch/:step0',
+    templateUrl: 'angular/embed.html'
+    controller: 'EmbedCtrl'
+
   # The workbench page for GitHub Repositories.
   $routeProvider.when '/users/:user/repos/:repo/blob/:branch/:step0/:step1/:step2',
     templateUrl: 'angular/work.html'

@@ -33,6 +33,8 @@ app.run(['$rootScope', '$window' , '$location', 'cookie', 'i18n', ($rootScope, $
 
   $rootScope.userLogin = () -> cookie.getItem(GITHUB_LOGIN_COOKIE_NAME)
 
+  $rootScope.headerEnabled = () -> true
+
   isMenuLocation = () ->
     if $window.location and $window.location.href
       # Note: The $ isn't a typo - it means there is nothing more.

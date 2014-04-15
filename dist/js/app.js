@@ -72283,6 +72283,9 @@ var Stats = function () {
       $rootScope.userLogin = function () {
         return cookie.getItem(GITHUB_LOGIN_COOKIE_NAME);
       };
+      $rootScope.headerEnabled = function () {
+        return true;
+      };
       isMenuLocation = function () {
         if ($window.location && $window.location.href) {
           return !$window.location.href.match(new RegExp('/workbench$')) && !$window.location.href.match(new RegExp('/users/')) && !$window.location.href.match(new RegExp('/gists/'));
@@ -72314,6 +72317,289 @@ var Stats = function () {
           return '/';
         }
       };
+    }
+  ]);
+}.call(this));
+(function () {
+  angular.module('app').controller('EmbedCtrl', [
+    '$rootScope',
+    '$scope',
+    '$location',
+    '$window',
+    '$routeParams',
+    '$',
+    '_',
+    'GitHub',
+    'Base64',
+    'cookie',
+    'GitHubAuthManager',
+    function ($rootScope, $scope, $location, $window, $routeParams, $, _, github, base64, cookie, authManager) {
+      var EVENT_CATEGORY, GITHUB_TOKEN_COOKIE_NAME, code, editor, isFullScreen, n, setFullScreen, steps, token, winHeight, winWidth, _i;
+      EVENT_CATEGORY = 'embed';
+      ga('create', 'UA-41504069-1', 'geometryzen.org');
+      ga('set', 'page', '/embed');
+      ga('send', 'pageview');
+      authManager.handleLoginCallback(function (err, token) {
+        if (err) {
+          return $window.alert(err.message);
+        }
+      });
+      GITHUB_TOKEN_COOKIE_NAME = 'github-token';
+      token = cookie.getItem(GITHUB_TOKEN_COOKIE_NAME);
+      $scope.messages = [];
+      $scope.contextItem = {};
+      $scope.contextGist = {};
+      if ($routeParams.user && $routeParams.repo) {
+        $scope.user = { login: $routeParams.user };
+        $scope.repo = { name: $routeParams.repo };
+        $scope.branch = { name: $routeParams.branch };
+        steps = [];
+        for (n = _i = 0; _i <= 6; n = ++_i) {
+          if ($routeParams['step' + n]) {
+            steps.push($routeParams['step' + n]);
+          }
+        }
+        $scope.path = steps.join('/');
+        $scope.contextItem.name = $routeParams.repo;
+        $scope.contextItem.type = 'repo';
+        github.getPathContents(token, $scope.user.login, $scope.repo.name, $scope.path, function (err, file) {
+          var contextItem;
+          if (!err) {
+            contextItem = {
+              name: file.name,
+              path: file.path,
+              sha: file.sha,
+              type: file.type,
+              parentItem: $scope.contextItem,
+              childItems: []
+            };
+            $scope.contextItem = contextItem;
+            if (file.encoding === 'base64') {
+              return editor.setValue(base64.decode(file.content));
+            } else {
+              return alert('Unknown encoding: ' + file.encoding);
+            }
+          } else {
+            return alert('Error retrieving the page');
+          }
+        });
+      } else if ($routeParams.gistId) {
+        github.getGist(token, $routeParams.gistId, function (err, gist) {
+          if (!err) {
+            $scope.contextGist = gist;
+            $scope.contextItem.name = 'main.py';
+            return editor.setValue(gist.files['main.py'].content);
+          } else {
+            return alert('Error retrieving the Gist.');
+          }
+        });
+      } else {
+        $scope.contextItem.name = 'Untitled';
+        $scope.contextItem.type = void 0;
+      }
+      winHeight = function () {
+        return $window.innerHeight || ($window.document.documentElement || $window.document.body).clientHeight;
+      };
+      winWidth = function () {
+        return $window.innerWidth || ($window.document.documentElement || $window.document.body).clientWidth;
+      };
+      isFullScreen = function (cm) {
+        return /\bCodeMirror-fullscreen\b/.test(cm.getWrapperElement().className);
+      };
+      setFullScreen = function (cm, full) {
+        var wrapperElement;
+        wrapperElement = cm.getWrapperElement();
+        if (full) {
+          wrapperElement.className += ' CodeMirror-fullscreen';
+          wrapperElement.style.height = winHeight() + 'px';
+          document.documentElement.style.overflow = 'hidden';
+        } else {
+          wrapperElement.className = wrapperElement.className.replace(' CodeMirror-fullscreen', '');
+          wrapperElement.style.height = '600px';
+          document.documentElement.style.overflow = '';
+        }
+        return cm.refresh();
+      };
+      code = document.getElementById('code');
+      if (code) {
+        editor = CodeMirror.fromTextArea(code, {
+          'autofocus': false,
+          'indentUnit': 4,
+          'lineNumbers': true,
+          'lineWrapping': true,
+          'autoMatchParens': true,
+          'parserConfig': {
+            'pythonVersion': 2,
+            'strictErrors': true
+          },
+          'theme': 'twilight',
+          'extraKeys': {
+            'Tab': function (cm) {
+              var spaces;
+              spaces = Array(cm.getOption('indentUnit') + 1).join(' ');
+              return cm.replaceSelection(spaces, 'end', '+input');
+            },
+            'Ctrl-S': function (cm) {
+              return $scope.saveFile();
+            },
+            'Ctrl-Enter': function (cm) {
+              return $scope.run();
+            }
+          }
+        });
+      } else {
+        alert('The code element could not be found');
+      }
+      $scope.run = function () {
+        var e, message, name, prog, text;
+        ga('send', 'event', EVENT_CATEGORY, 'run');
+        $rootScope.$broadcast('reset');
+        $scope.messages.length = 0;
+        prog = editor.getValue();
+        Sk.canvas = 'canvas';
+        Sk.configure({
+          'output': function (text) {
+            return $rootScope.$broadcast('print', text);
+          },
+          'debugout': function (arg) {
+            return console.log('' + JSON.stringify(arg, null, 2));
+          },
+          'read': function (searchPath) {
+            if (Sk.builtinFiles === void 0 || Sk.builtinFiles['files'][searchPath] === void 0) {
+              throw new Error('File not found: \'' + searchPath + '\'');
+            } else {
+              return Sk.builtinFiles['files'][searchPath];
+            }
+          }
+        });
+        if (prog.trim().length > 0) {
+          try {
+            return eval(Sk.importMainWithBody('<stdin>', false, prog.trim()));
+          } catch (_error) {
+            e = _error;
+            if (typeof e !== 'undefined') {
+              if (typeof e.toString === 'function') {
+                message = e.toString();
+                name = message.substring(0, message.indexOf(':'));
+                text = message.substring(message.indexOf(':') + 1);
+                return $scope.messages.push({
+                  name: name,
+                  text: text,
+                  severity: 'error'
+                });
+              } else {
+                return console.log(JSON.stringify(e, null, 2));
+              }
+            }
+          }
+        }
+      };
+      $scope.saveFile = function () {
+        var content, data, description, files;
+        ga('send', 'event', EVENT_CATEGORY, 'savePage');
+        content = base64.encode(editor.getValue());
+        if ($scope.user) {
+          return github.putFile(token, $scope.user.login, $scope.repo.name, $scope.contextItem.path, 'Save file.', content, $scope.contextItem.sha, function (err, response, status, headers, config) {
+            if (!err) {
+              return $scope.contextItem.sha = response.content.sha;
+            } else {
+              return alert('Error saving file to repository. Cause: ' + err.message);
+            }
+          });
+        } else {
+          if ($scope.contextGist.id) {
+            description = $scope.contextGist.description;
+            files = { 'main.py': { content: editor.getValue() } };
+            return github.patchGist(token, $scope.contextGist.id, {
+              description: description,
+              files: files
+            }, function (err, response, status, headers, config) {
+              if (!err) {
+              } else {
+                return alert('Error patching Gist. Cause: ' + err.message);
+              }
+            });
+          } else {
+            files = { 'main.py': { content: editor.getValue() } };
+            data = {};
+            data.description = 'GeometryZen Gist';
+            data['public'] = true;
+            data.files = files;
+            return github.postGist(token, data, function (err, response, status, headers, config) {
+              if (!err) {
+                return $location.path('/gists/' + response.id);
+              } else {
+                return alert('Error posting Gist. Cause: ' + err.message);
+              }
+            });
+          }
+        }
+      };
+      $scope.homeBreadcrumbClass = function () {
+        if ($rootScope.breadcrumbStrategy.progressive) {
+          return 'active';
+        } else {
+          return '';
+        }
+      };
+      $scope.userBreadcrumbClass = function () {
+        if ($rootScope.breadcrumbStrategy.progressive) {
+          return 'active';
+        } else {
+          return '';
+        }
+      };
+      $scope.repoBreadcrumbClass = function () {
+        if ($rootScope.breadcrumbStrategy.progressive) {
+          return 'active';
+        } else {
+          if ($scope.workEnabled()) {
+            return '';
+          } else {
+            return 'active';
+          }
+        }
+      };
+      $scope.repoEnabled = function () {
+        return $scope.repo && $scope.repo.name;
+      };
+      $scope.workEnabled = function () {
+        return $scope.contextItem && $scope.contextItem.type === 'file' || !($scope.repo && $scope.repo.name);
+      };
+      $scope.saveEnabled = function () {
+        if ($scope.user) {
+          return $scope.isLoggedIn() && $scope.userLogin() === $scope.user.login && $scope.contextItem && $scope.contextItem.type === 'file';
+        } else {
+          return true;
+        }
+      };
+      $scope.runEnabled = function () {
+        return $scope.workEnabled();
+      };
+      $rootScope.headerEnabled = function () {
+        return false;
+      };
+      $scope.iconFromItem = function (item) {
+        switch (item.type) {
+        case 'file':
+          return 'icon-file';
+        case 'dir':
+          return 'icon-dir';
+        default:
+          return 'icon-question';
+        }
+      };
+      if (editor) {
+        setFullScreen(editor, false);
+      }
+      CodeMirror.on($window, 'resize', function () {
+        var showing;
+        showing = $window.document.body.getElementsByClassName('CodeMirror-fullscreen')[0];
+        if (showing) {
+          return showing.CodeMirror.getWrapperElement().style.height = winHeight() + 'px';
+        } else {
+        }
+      });
     }
   ]);
 }.call(this));
@@ -73124,6 +73410,18 @@ var Stats = function () {
         templateUrl: 'angular/work.html',
         controller: 'WorkCtrl'
       });
+      $routeProvider.when('/embed/users/:user/repos/:repo/blob/:branch/:step0/:step1/:step2', {
+        templateUrl: 'angular/embed.html',
+        controller: 'EmbedCtrl'
+      });
+      $routeProvider.when('/embed/users/:user/repos/:repo/blob/:branch/:step0/:step1', {
+        templateUrl: 'angular/embed.html',
+        controller: 'EmbedCtrl'
+      });
+      $routeProvider.when('/embed/users/:user/repos/:repo/blob/:branch/:step0', {
+        templateUrl: 'angular/embed.html',
+        controller: 'EmbedCtrl'
+      });
       $routeProvider.when('/users/:user/repos/:repo/blob/:branch/:step0/:step1/:step2', {
         templateUrl: 'angular/work.html',
         controller: 'WorkCtrl'
@@ -73825,6 +74123,7 @@ angular.module('app').run([
   '$templateCache',
   function ($templateCache) {
     $templateCache.put('angular/a-home.html', '<a href="/">\n' + '  <i class="icon-home"></i>\n' + '  <span>Home</span>\n' + '</a>\n');
+    $templateCache.put('angular/embed.html', '<div id="work-view">\n' + '  <div class="subnavbar">\n' + '    <div class="subnavbar-inner">\n' + '      <div class="container">\n' + '        <a class="btn-subnavbar collapsed" data-toggle="collapse" data-target=".subnav-collapse">\n' + '          <i class="icon-reorder"></i>\n' + '        </a>\n' + '        <div class="subnav-collapse collapse">\n' + '          <ul class="mainnav">\n' + '            <!--\n' + '            <li ng-show="isLoggedIn()" class="{{userBreadcrumbClass()}}">\n' + '              <a ng-href="/users/{{user.name}}">\n' + '                <i class="icon-user"></i>\n' + '                <span>{{i18n.translate("My Space").fetch()}}</span>\n' + '              </a>\n' + '            </li>\n' + '            -->\n' + '            <!--\n' + '            <li class="active">\n' + '              <a ng-click="reload()" href="#">\n' + '                <i class="icon-edit"></i>\n' + '                <span>Workbench</span>\n' + '              </a>\n' + '            </li>\n' + '            -->\n' + '            <!--\n' + '            <li ng-show="saveEnabled()">\n' + '              <a ng-click="saveFile()" href="#">\n' + '                <i class="icon-save"></i>\n' + '                <span>Save</span>\n' + '              </a>\n' + '            </li>\n' + '            -->\n' + '            <li ng-show="runEnabled()">\n' + '              <a ng-click="run()" href="#">\n' + '                <i class="icon-cogs"></i>\n' + '                <span>Run</span>\n' + '              </a>\n' + '            </li>\n' + '          </ul>\n' + '        </div>\n' + '      </div>\n' + '    </div>\n' + '  </div>\n' + '  \n' + '  <div id="work-layout" class="container-fluid">\n' + '\n' + '    <div class="row-fluid">\n' + '      <div class="span6">\n' + '        <div class="alert alert-block alert-{{message.severity}}" ng-repeat="message in messages"  ng-show="messages.length &gt; 0">\n' + '          <button type="button" class="close" data-dismiss="alert">&times;</button>\n' + '          <h4>{{message.name}}</h4>\n' + '          {{message.text}}\n' + '        </div>\n' + '        <div id="textarea-container">\n' + '          <textarea id="code"></textarea>\n' + '        </div>\n' + '      </div>\n' + '      <div class="span6">\n' + '        <div id="printer-container">\n' + '          <printer></printer>\n' + '        </div>\n' + '        <div id="graph-container">\n' + '        </div>\n' + '        <div id="canvas-container">\n' + '        </div>\n' + '      </div>\n' + '    </div>\n' + '\n' + '  </div>\n' + '</div>');
     $templateCache.put('angular/github-authorize.html', '<li>\n' + '  <!-- When logged out, present the user with an OAuth link-->\n' + '  <a ng-hide="isLoggedIn()" ng-href="https://github.com/login/oauth/authorize?client_id={{clientId()}}&amp;scope=repo,user,gist">\n' + '    <i class="icon-signin"></i>\n' + '    <span>Log In</span>\n' + '  </a>\n' + '\n' + '  <!-- TODO: When logged in, we would like to have a dropdown menu-->\n' + '  <a ng-show="isLoggedIn()" ng-click="logout()" href="#">\n' + '    <i class="icon-signout icon-white"></i>\n' + '    <span>{{userLogin()}}</span>\n' + '  </a>\n' + '</li>');
     $templateCache.put('angular/home.html', '<div id="home-view">\n' + '  <div class="subnavbar">\n' + '    <div class="subnavbar-inner">\n' + '      <div class="container">\n' + '        <a class="btn-subnavbar collapsed" data-toggle="collapse" data-target=".subnav-collapse">\n' + '          <i class="icon-reorder"></i>\n' + '        </a>\n' + '        <div class="subnav-collapse collapse">\n' + '          <ul class="mainnav">\n' + '            <li class="active">\n' + '              <a-home></a-home>\n' + '            </li>\n' + '            <li ng-show="isLoggedIn()">\n' + '              <a ng-href="/users/{{userLogin()}}">\n' + '                <i class="icon-user"></i>\n' + '                <span>{{i18n.translate("My Space").fetch()}}</span>\n' + '              </a>\n' + '            </li>\n' + '            <li class="dropdown">\n' + '              <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">\n' + '                <i class="icon-eye-open"></i>\n' + '                <span>Learn</span>\n' + '                <b class="caret"></b>\n' + '              </a>\n' + '              <ul class="dropdown-menu">\n' + '                <li><a href="http://geometryzen.github.io/mission/" target="_blank">Our Mission</a></li>\n' + '                <li><a href="/users/geometryzen/repos/demos/tree/master">Browse Examples</a></li>\n' + '                <li><a href="http://geometryzen.github.io/start/" target="_blank">Getting Started</a></li>\n' + '              </ul>\n' + '            </li>\n' + '            <li class="dropdown">\n' + '              <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">\n' + '                <i class="icon-external-link"></i>\n' + '                <span>Discuss</span>\n' + '                <b class="caret"></b>\n' + '              </a>\n' + '              <ul class="dropdown-menu">\n' + '                <li><a href="http://groups.google.com/group/geometryzen?src=email&amp;hl=en" target="_blank">Mailing List</a></li>\n' + '                <li><a href="http://webchat.freenode.net/?channels=geometryzen&amp;uio=d4" target="_blank">Web Chat</a></li>\n' + '                <li class="divider"></li>\n' + '                <li><a href="https://twitter.com/#!/geometryzen" target="_blank">Twitter</a></li>\n' + '                <li><a href="https://plus.google.com/u/0/s/Geometry%20Zen/communities" target="_blank">Google+</a></li>\n' + '                <li class="divider"></li>\n' + '                <li class="dropdown-submenu">\n' + '                  <a href="#">Source Code</a>\n' + '                  <ul class="dropdown-menu">\n' + '                    <li><a href="https://github.com/david-geo-holmes/geometry-zen" target="_blank">Application Repository</a></li>\n' + '                    <li><a href="https://github.com/geometryzen/geometryzen.github.io" target="_blank">Documentation Repository</a></li>\n' + '                  </ul>\n' + '                </li>\n' + '                <li class="divider"></li>\n' + '                <li><a href="https://github.com/geometryzen/geometryzen/issues" target="_blank">Issue Tracker</a></li>\n' + '              </ul>\n' + '            </li>\n' + '            <li>\n' + '              <a href="http://geometryzen.github.io/faq/" target="_blank" style="text-decoration: none">\n' + '                <i class="icon-question-sign"></i>\n' + '                <span>FAQ</span>\n' + '              </a>\n' + '            </li>\n' + '            <li>\n' + '              <a href="http://geometryzen.github.io/" target="_blank" style="text-decoration: none">\n' + '                <i class="icon-book"></i>\n' + '                <span>Pages</span>\n' + '              </a>\n' + '            </li>\n' + '          </ul>\n' + '        </div>\n' + '      </div>\n' + '    </div>\n' + '  </div>\n' + '\n' + '  <div class="container-fluid">\n' + '    <div class="row-fluid">\n' + '      <div class="span12">\n' + '        <div class="widget">\n' + '          <div class="widget-content">\n' + '            <div class="text-center">\n' + '              <h1>\n' + '                <large>Geometry Zen</large>\n' + '              </h1>\n' + '              <h1>\n' + '                <small><em>Looking at the multiverse from a Geometric Algebra perspective</em></small>\n' + '              </h1>\n' + '              <br/>\n' + '              <p><em>Geometry Zen</em> is a free, online, open-source, and collaborative tool for <em>Computational Modeling</em> combining the <em>Python</em> programming language, <em>3D visualization</em> (WebGL), <em>Physical Units</em>, and <em>Geometric Algebra</em>, the <em>Unified Mathematical Language for Physics and Engineering in the 21st Century</em>.</p>\n' + '              <p></p>\n' + '              <br/>\n' + '            </div>\n' + '            <div class="text-right">\n' + '              <blockquote>\n' + '                <p class="muted">...for geometry, you know, is the gate of science,<br/>and the gate is so low and small<br/>that one can only enter it as a little child.</p>\n' + '                <small>William K. Clifford</small>\n' + '              </blockquote>\n' + '              <blockquote>\n' + '                <p class="muted">Geometry without algebra is dumb!<br/>Algebra without geometry is blind!</p>\n' + '                <small>David O. Hestenes</small>\n' + '              </blockquote>\n' + '            </div>\n' + '            <div class="text-center">\n' + '              <a href="/users/geometryzen/repos/demos/tree/master" class="btn btn-primary">\n' + '                <i class="icon-th"></i>\n' + '                <span>Browse Examples</span>\n' + '              </a>\n' + '              <a href="{{jumpHRef()}}" class="btn btn-secondary">\n' + '                <i class="{{jumpIcon()}}"></i>\n' + '                <span>{{jumpText()}}</span>\n' + '              </a>\n' + '            </div>\n' + '          </div>\n' + '        </div>\n' + '      </div>\n' + '    </div>\n' + '  </div>\n' + '</div>\n');
     $templateCache.put('angular/printer.html', '<div ng-controller="PrinterCtrl" class="container-fluid">\n' + '  <div class="row-fluid">\n' + '    <div class="span12">\n' + '      <!-- Using anything other than a pre(serve) element is likely too be slow -->\n' + '      <!-- PRESERVE_ELEMENT_ID is defined in the printer controller -->\n' + '      <pre id="a5f435e0-c92e-11e2-8b8b-0800200c9a66" class="printer"></pre>\n' + '    </div>\n' + '  </div>\n' + '</div>\n' + '\n');

@@ -1,0 +1,71 @@
+<div id="work-view">
+  <div class="subnavbar">
+    <div class="subnavbar-inner">
+      <div class="container">
+        <a class="btn-subnavbar collapsed" data-toggle="collapse" data-target=".subnav-collapse">
+          <i class="icon-reorder"></i>
+        </a>
+        <div class="subnav-collapse collapse">
+          <ul class="mainnav">
+            <!--
+            <li ng-show="isLoggedIn()" class="{{userBreadcrumbClass()}}">
+              <a ng-href="/users/{{user.name}}">
+                <i class="icon-user"></i>
+                <span>{{i18n.translate("My Space").fetch()}}</span>
+              </a>
+            </li>
+            -->
+            <!--
+            <li class="active">
+              <a ng-click="reload()" href="#">
+                <i class="icon-edit"></i>
+                <span>Workbench</span>
+              </a>
+            </li>
+            -->
+            <!--
+            <li ng-show="saveEnabled()">
+              <a ng-click="saveFile()" href="#">
+                <i class="icon-save"></i>
+                <span>Save</span>
+              </a>
+            </li>
+            -->
+            <li ng-show="runEnabled()">
+              <a ng-click="run()" href="#">
+                <i class="icon-cogs"></i>
+                <span>Run</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div id="work-layout" class="container-fluid">
+
+    <div class="row-fluid">
+      <div class="span6">
+        <div class="alert alert-block alert-{{message.severity}}" ng-repeat="message in messages"  ng-show="messages.length &gt; 0">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          <h4>{{message.name}}</h4>
+          {{message.text}}
+        </div>
+        <div id="textarea-container">
+          <textarea id="code"></textarea>
+        </div>
+      </div>
+      <div class="span6">
+        <div id="printer-container">
+          <printer></printer>
+        </div>
+        <div id="graph-container">
+        </div>
+        <div id="canvas-container">
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
