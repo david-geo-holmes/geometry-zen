@@ -81,7 +81,6 @@ angular.module("app").controller 'EmbedCtrl', ['$rootScope','$scope', '$location
         "Tab": (cm) ->
           spaces = Array(cm.getOption("indentUnit") + 1).join(" ")
           cm.replaceSelection(spaces, "end", "+input")
-        "Ctrl-S": (cm) -> $scope.saveFile()
         "Ctrl-Enter": (cm) -> $scope.run()
     )
   else

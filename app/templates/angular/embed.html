@@ -1,4 +1,4 @@
-<div id="work-view">
+<div id="embed-view">
   <div class="subnavbar">
     <div class="subnavbar-inner">
       <div class="container">
@@ -37,6 +37,19 @@
                 <span>Run</span>
               </a>
             </li>
+            <li class="dropdown">
+              <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">
+                <i class="icon-book"></i>
+                <span>Help</span>
+                <b class="caret"></b>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a href="https://docs.python.org/3.4/" target="_blank">Python documentation</a></li>
+                <li><a href="http://docs.scipy.org/doc/" target="_blank">Numpy documentation</a></li>
+                <li><a href="http://threejs.org/docs/" target="_blank">three.js documentation</a></li>
+                <li><a href="http://jsxgraph.uni-bayreuth.de/wp/documentation/" target="_blank">JSXGraph documentation</a></li>
+              </ul>
+            </li>
           </ul>
         </div>
       </div>
@@ -46,7 +59,7 @@
   <div id="work-layout" class="container-fluid">
 
     <div class="row-fluid">
-      <div class="span6">
+      <div class="span7">
         <div class="alert alert-block alert-{{message.severity}}" ng-repeat="message in messages"  ng-show="messages.length &gt; 0">
           <button type="button" class="close" data-dismiss="alert">&times;</button>
           <h4>{{message.name}}</h4>
@@ -56,7 +69,7 @@
           <textarea id="code"></textarea>
         </div>
       </div>
-      <div class="span6">
+      <div class="span5">
         <div id="printer-container">
           <printer></printer>
         </div>
