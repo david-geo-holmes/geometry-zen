@@ -35,7 +35,7 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
       "vendor/jed/jed.js",
       "vendor/js/codemirror.js",
       "vendor/codemirror/mode/python/python.js",
-
+      "vendor/d3/d3.min.js",
       "vendor/EaselJS/lib/easeljs-0.6.1.min.js",
       "vendor/TweenJS/lib/tweenjs-0.4.1.min.js",
       "vendor/EaselJS/lib/movieclip-0.6.1.min.js",

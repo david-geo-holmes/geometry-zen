@@ -53,7 +53,10 @@
   <div id="work-layout" class="container-fluid">
 
     <div class="row-fluid">
-      <div class="span6">
+      <div class="span12">
+        <div id="printer-container">
+          <printer></printer>
+        </div>
         <div class="alert alert-block alert-{{message.severity}}" ng-repeat="message in messages"  ng-show="messages.length &gt; 0">
           <button type="button" class="close" data-dismiss="alert">&times;</button>
           <h4>{{message.name}}</h4>
@@ -61,11 +64,6 @@
         </div>
         <div id="textarea-container">
           <textarea id="code"></textarea>
-        </div>
-      </div>
-      <div class="span6">
-        <div id="printer-container">
-          <printer></printer>
         </div>
         <div id="graph-container">
         </div>

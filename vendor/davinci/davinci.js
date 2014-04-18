@@ -29752,6 +29752,86 @@ mod[Sk.geometry.VORTEX_BUILDER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
 };
 }).call(this);
 (function() {
+  Sk.builtin.defineHttp = function(mod) {
+    Sk.ffi.checkFunctionArgs("defineHttp", arguments, 1, 1);
+
+    var XML_HTTP_REQUEST   = "XMLHttpRequest";
+    var METHOD_OPEN        = "open";
+    var METHOD_SEND        = "send";
+    var PROP_ONLOAD        = "onload";
+    var PROP_RESPONSE_TYPE = "responseType";
+
+    mod[XML_HTTP_REQUEST] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
+      $loc.__init__ = Sk.ffi.functionPy(function(selfPy) {
+        var requestJs = new XMLHttpRequest();
+        Sk.ffi.referenceToPy(requestJs, XML_HTTP_REQUEST, undefined, selfPy);
+      });
+      $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
+        var requestJs = Sk.ffi.remapToJs(selfPy);
+        switch(name) {
+          case METHOD_OPEN: {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+              $loc.__init__ = Sk.ffi.functionPy(function(mPy) {
+                Sk.ffi.referenceToPy(null, METHOD_OPEN, null, mPy);
+              });
+              $loc.__call__ = Sk.ffi.functionPy(function(mPy, methodPy, urlPy, asyncPy, userPy, passwordPy) {
+                Sk.ffi.checkMethodArgs(METHOD_OPEN, arguments, 2, 5);
+                Sk.ffi.checkArgType("method", [Sk.ffi.PyType.STR],  Sk.ffi.isStr(methodPy), methodPy);
+                Sk.ffi.checkArgType("url",    [Sk.ffi.PyType.STR],  Sk.ffi.isStr(urlPy),    urlPy);
+                Sk.ffi.checkArgType("async",  [Sk.ffi.PyType.BOOL], Sk.ffi.isBool(asyncPy), asyncPy);
+                var method = Sk.ffi.remapToJs(methodPy);
+                var url = Sk.ffi.remapToJs(urlPy);
+                var async = Sk.ffi.remapToJs(asyncPy);
+                requestJs.open(method, url, async);
+              });
+            }, METHOD_OPEN, []));
+          }
+          case METHOD_SEND: {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+              $loc.__init__ = Sk.ffi.functionPy(function(mPy) {
+                Sk.ffi.referenceToPy(null, METHOD_SEND, null, mPy);
+              });
+              $loc.__call__ = Sk.ffi.functionPy(function(mPy, dataPy) {
+                Sk.ffi.checkMethodArgs(METHOD_SEND, arguments, 0, 1);
+                requestJs.send();
+              });
+            }, METHOD_SEND, []));
+          }
+          default: {
+            throw Sk.ffi.err.attribute(name).isNotGetableOnType(XML_HTTP_REQUEST);
+          }
+        }
+      });
+      $loc.__setattr__ = Sk.ffi.functionPy(function(selfPy, name, valuePy) {
+        var requestJs = Sk.ffi.remapToJs(selfPy);
+        switch(name) {
+          case PROP_ONLOAD: {
+            Sk.ffi.checkArgType(name, [Sk.ffi.PyType.FUNCTION], Sk.ffi.isFunction(valuePy), valuePy);
+            requestJs.onload = Sk.ffi.remapToJs(valuePy);
+          }
+          break;
+          case PROP_RESPONSE_TYPE: {
+            Sk.ffi.checkArgType(name, [Sk.ffi.PyType.STR], Sk.ffi.isStr(valuePy), valuePy);
+            requestJs.responseType = Sk.ffi.remapToJs(valuePy);
+          }
+          break;
+          default: {
+            throw Sk.ffi.err.attribute(name).isNotSetableOnType(XML_HTTP_REQUEST);
+          }
+        }
+      });
+      $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
+        var selfJs = Sk.ffi.remapToJs(selfPy);
+        return Sk.ffi.stringToPy(XML_HTTP_REQUEST);
+      })
+      $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
+        var selfJs = Sk.ffi.remapToJs(selfPy);
+        return Sk.ffi.stringToPy(XML_HTTP_REQUEST+'()');
+      })
+    }, XML_HTTP_REQUEST, []);
+  };
+}).call(this);
+(function() {
 Sk.builtin.defineNode = function(mod) {
 Sk.ffi.checkFunctionArgs("defineNode", arguments, 1, 1);
 /**
@@ -30991,6 +31071,11 @@ mod[NODE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   Sk.builtin.defineNumPy = function(mod) {
     Sk.ffi.checkFunctionArgs("defineNumPy", arguments, 1, 1);
 
+    var METHOD_COPY           = "copy";
+    var METHOD_FILL           = "fill";
+    var METHOD_RESHAPE        = "reshape";
+    var METHOD_TOLIST         = "tolist";
+
     function unpack(objectPy, buffer, state) {
       if (Sk.ffi.isList(objectPy)) {
         var elementsPy = Sk.ffi.remapToJs(objectPy, true);
@@ -31062,6 +31147,7 @@ mod[NODE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         var ndarrayJs = {};
         ndarrayJs.shape = Sk.ffi.remapToJs(shapePy);
         ndarrayJs.strides = computeStrides(ndarrayJs.shape);
+        ndarrayJs.dtypePy = dtypePy;
         if (Sk.ffi.isDefined(bufferPy)) {
           Sk.ffi.checkArgType('buffer', [Sk.ffi.PyType.LIST], Sk.ffi.isList(bufferPy), bufferPy);
           ndarrayJs.buffer = Sk.ffi.remapToJs(bufferPy, true);
@@ -31071,6 +31157,9 @@ mod[NODE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
         var ndarrayJs = Sk.ffi.remapToJs(selfPy);
         switch(name) {
+          case 'dtype': {
+            return ndarrayJs.dtypePy;
+          }
           case 'ndim': {
             return Sk.ffi.numberToIntPy(ndarrayJs.shape.length);
           }
@@ -31086,12 +31175,64 @@ mod[NODE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           case 'buffer': {
             return Sk.ffi.listPy(ndarrayJs.buffer);
           }
+          case METHOD_COPY: {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+              $loc.__init__ = Sk.ffi.functionPy(function(methodPy) {
+                Sk.ffi.referenceToPy(null, METHOD_COPY, null, methodPy);
+              });
+              $loc.__call__ = Sk.ffi.functionPy(function(methodPy) {
+                Sk.ffi.checkMethodArgs(METHOD_COPY, arguments, 0, 0);
+                var shapePy = Sk.ffi.tuplePy(ndarrayJs.shape.map(function(x) {return Sk.ffi.numberToIntPy(x);}));
+                var buffer = ndarrayJs.buffer.map(function(x) {return x;});
+                return Sk.ffi.callsim(mod['ndarray'], shapePy, ndarrayJs.dtypePy, Sk.ffi.listPy(buffer));
+              });
+            }, METHOD_COPY, []));
+          }
+          case METHOD_FILL: {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+              $loc.__init__ = Sk.ffi.functionPy(function(methodPy) {
+                Sk.ffi.referenceToPy(null, METHOD_FILL, null, methodPy);
+              });
+              $loc.__call__ = Sk.ffi.functionPy(function(methodPy, valuePy) {
+                Sk.ffi.checkMethodArgs(METHOD_FILL, arguments, 1, 1);
+                for (var i = 0, len = ndarrayJs.buffer.length; i < len; i++) {
+                  if (ndarrayJs.dtypePy) {
+                    ndarrayJs.buffer[i] = Sk.misceval.callsim(ndarrayJs.dtypePy, valuePy);
+                  }
+                }
+              });
+            }, METHOD_FILL, []));
+          }
+          case METHOD_RESHAPE: {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+              $loc.__init__ = Sk.ffi.functionPy(function(methodPy) {
+                Sk.ffi.referenceToPy(null, METHOD_RESHAPE, null, methodPy);
+              });
+              $loc.__call__ = Sk.ffi.functionPy(function(methodPy, shapePy) {
+                Sk.ffi.checkMethodArgs(METHOD_RESHAPE, arguments, 0, 1);
+                return Sk.ffi.callsim(mod['ndarray'], shapePy, ndarrayJs.dtypePy, Sk.ffi.listPy(ndarrayJs.buffer));
+              });
+            }, METHOD_RESHAPE, []));
+          }
+          case METHOD_TOLIST: {
+            return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+              $loc.__init__ = Sk.ffi.functionPy(function(methodPy) {
+                Sk.ffi.referenceToPy(null, METHOD_TOLIST, null, methodPy);
+              });
+              $loc.__call__ = Sk.ffi.functionPy(function(methodPy) {
+                Sk.ffi.checkMethodArgs(METHOD_TOLIST, arguments, 0, 0);
+                var buffer = ndarrayJs.buffer.map(function(x) {return x;});
+                return Sk.ffi.listPy(buffer);
+              });
+            }, METHOD_TOLIST, []));
+          }
           default: {
             throw Sk.ffi.err.attribute(name).isNotGetableOnType('ndarray');
           }
         }
       });
       $loc.__getitem__ = Sk.ffi.functionPy(function(selfPy, indexPy) {
+//      Sk.debugout("__getitem__: " + Sk.ffi.getType(indexPy));
         var ndarrayJs = Sk.ffi.remapToJs(selfPy);
         Sk.ffi.checkMethodArgs("[]", arguments, 1, 1);
         if (Sk.ffi.isInt(indexPy)) {
@@ -31175,6 +31316,25 @@ mod[NODE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           Sk.ffi.checkArgType('index', [Sk.ffi.PyType.INT, Sk.ffi.PyType.TUPLE], false, indexPy);
         }
       });
+      $loc.__len__ = Sk.ffi.functionPy(function(selfPy) {
+        var selfJs = Sk.ffi.remapToJs(selfPy);
+        return Sk.ffi.numberToIntPy(selfJs.shape[0]);
+      });
+      $loc.__iter__ = Sk.ffi.functionPy(function(selfPy) {
+        var ndarrayJs = Sk.ffi.remapToJs(selfPy);
+        var ret =
+        {
+            tp$iter: function() { return ret; },
+            $obj: ndarrayJs,
+            $index: 0,
+            tp$iternext: function()
+            {
+                if (ret.$index >= ret.$obj.buffer.length) return undefined;
+                return ret.$obj.buffer[ret.$index++];
+            }
+        };
+        return ret;
+      });
       $loc.__add__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
         var selfJs = Sk.ffi.remapToJs(selfPy);
         var lhs = selfJs.buffer;
@@ -31244,9 +31404,6 @@ mod[NODE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     mod['array'] = Sk.ffi.functionPy(function(objectPy, dtypePy, copyPy, orderPy, subokPy, ndminPy) {
       Sk.ffi.checkFunctionArgs("array", arguments, 1, 6);
       Sk.ffi.checkArgType("object", [Sk.ffi.PyType.LIST], Sk.ffi.isList(objectPy), objectPy);
-      if (Sk.ffi.isDefined(dtypePy)) {
-        Sk.ffi.checkArgType("dtype",  [Sk.ffi.PyType.FUNCTION], Sk.ffi.isFunction(dtypePy), dtypePy);
-      }
       if (Sk.ffi.isDefined(copyPy)) {
         Sk.ffi.checkArgType("copy", [Sk.ffi.PyType.BOOL], Sk.ffi.isBool(copyPy), copyPy);
       }
@@ -31258,6 +31415,14 @@ mod[NODE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       state.level = 0;
       state.shape = [];
       unpack(objectPy, elementsPy, state);
+
+      // Apply the dtype casting function, if it has been provided.
+      if (Sk.ffi.isDefined(dtypePy)) {
+        Sk.ffi.checkArgType("dtype",  [Sk.ffi.PyType.FUNCTION], Sk.ffi.isFunction(dtypePy), dtypePy);
+        for (var i = 0, len = elementsPy.length; i < len; i++) {
+          elementsPy[i] = Sk.misceval.callsim(dtypePy, elementsPy[i])
+        }
+      }
 
       var shapePy = Sk.ffi.tuplePy(state.shape.map(function(x) {return Sk.ffi.numberToFloatPy(x);}));
       var bufferPy = Sk.ffi.listPy(elementsPy);
