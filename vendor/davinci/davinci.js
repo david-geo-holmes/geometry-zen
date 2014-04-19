@@ -6473,30 +6473,32 @@ goog.exportSymbol("Sk.builtin.checkFunction", Sk.builtin.checkFunction);
  * @param {Object=} globals the globals where this function was defined.
  * Can be undefined (which will be stored as null) for builtins. (is
  * that ok?)
- * @param {Object=} closure dict of free variables
- * @param {Object=} closure2 another dict of free variables that will be
- * merged into 'closure'. there's 2 to simplify generated code (one is $free,
+ * @param {Object=} cellVars dict of free variables
+ * @param {Object=} freeVars another dict of free variables that will be
+ * merged into 'cellVars'. there's 2 to simplify generated code (one is $free,
  * the other is $cell)
  *
- * closure is the cell variables from the parent scope that we need to close
- * over. closure2 is the free variables in the parent scope that we also might
+ * cellVars is the cell variables from the parent scope that we need to close
+ * over. freeVars is the free variables in the parent scope that we also might
  * need to access.
  *
  * NOTE: co_varnames and co_name are defined by compiled code only, so we have
- * to access them via dict-style lookup for closure.
+ * to access them via dict-style lookup for cellVars.
  *
  */
-Sk.builtin.func = function(code, globals, closure, closure2)
+Sk.builtin.func = function(code, globals, cellVars, freeVars)
 {
     this.func_code = code;
     this.func_globals = globals || null;
-    if (closure2 !== undefined)
+    if (freeVars !== undefined)
     {
         // todo; confirm that modification here can't cause problems
-        for (var k in closure2)
-            closure[k] = closure2[k];
+        for (var k in freeVars)
+            cellVars[k] = freeVars[k];
     }
-    this.func_closure = closure;
+    // This is Python 2.x. Python 3 uses __closure__.
+    // But does this actually work?
+    this.func_closure = cellVars;
     return this;
 };
 goog.exportSymbol("Sk.builtin.func", Sk.builtin.func);
@@ -15175,6 +15177,8 @@ Sk.ffh.getitem = function(objPy, index)
 goog.exportSymbol("Sk.ffh.getitem", Sk.ffh.getitem);
 
 Sk.ffh.add = function(lhsPy, rhsPy) {
+  return Sk.abstr.binary_op_(lhsPy, rhsPy, "Add");
+  /*
   if (lhsPy["__add__"])
   {
     return Sk.ffi.callsim(lhsPy["__add__"], lhsPy, rhsPy);
@@ -15187,13 +15191,20 @@ Sk.ffh.add = function(lhsPy, rhsPy) {
   {
     throw Sk.ffi.notImplementedError("add");
   }
+  */
 };
 goog.exportSymbol("Sk.ffh.add", Sk.ffh.add);
 
-Sk.ffh.subtract = function(lhsPy, rhsPy) {return Sk.ffh.binaryExec(SPECIAL_METHOD_SUB, lhsPy, rhsPy, "nb$subtract");};
+Sk.ffh.subtract = function(lhsPy, rhsPy) {
+  return Sk.abstr.binary_op_(lhsPy, rhsPy, "Sub");
+//return Sk.ffh.binaryExec(SPECIAL_METHOD_SUB, lhsPy, rhsPy, "nb$subtract");
+};
 goog.exportSymbol("Sk.ffh.subtract", Sk.ffh.subtract);
 
-Sk.ffh.multiply = function(lhsPy, rhsPy) {return Sk.ffh.binaryExec(SPECIAL_METHOD_MUL, lhsPy, rhsPy, "nb$multiply");};
+Sk.ffh.multiply = function(lhsPy, rhsPy) {
+  return Sk.abstr.binary_op_(lhsPy, rhsPy, "Mult");
+//return Sk.ffh.binaryExec(SPECIAL_METHOD_MUL, lhsPy, rhsPy, "nb$multiply");
+};
 goog.exportSymbol("Sk.ffh.multiply", Sk.ffh.multiply);
 
 Sk.ffh.rmultiply = function(lhsPy, rhsPy) {return Sk.ffh.binaryExec(SPECIAL_METHOD_RMUL, lhsPy, rhsPy, "nb$multiply");};
@@ -20858,6 +20869,9 @@ function SymbolTableScope(table, name, type, ast, lineno)
     this.symFlags = {};
     this.name = name;
     this.varnames = [];
+    /**
+     * @type Array.<SymbolTableScope>
+     */
     this.children = [];
     this.blockType = type;
 
@@ -21010,6 +21024,10 @@ function SymbolTable(filename)
     // here for the compiler to lookup later.
     this.stss = {};
 }
+
+/**
+ * Lookup the SymbolTableScope for a scopeId of the AST.
+ */
 SymbolTable.prototype.getStsForAst = function(ast)
 {
     goog.asserts.assert(ast.scopeId !== undefined, "ast wasn't added to st?");
@@ -21460,6 +21478,9 @@ function _dictUpdate(a, b)
     }
 }
 
+/**
+ * @param {SymbolTableScope} ste The Symbol Table Scope.
+ */
 SymbolTable.prototype.analyzeBlock = function(ste, bound, free, global)
 {
     var local = {};
@@ -21568,6 +21589,9 @@ SymbolTable.prototype.updateSymbols = function(symbols, scope, bound, free, clas
     }
 };
 
+/**
+ * @param {SymbolTableScope} ste The Symbol Table Scope.
+ */
 SymbolTable.prototype.analyzeName = function(ste, dict, name, flags, bound, local, free, global)
 {
     if (flags & DEF_GLOBAL)
@@ -21714,18 +21738,30 @@ Sk.gensymcount = 0;
 function Compiler(filename, st, flags, sourceCodeForAnnotation)
 {
     this.filename = filename;
+    /**
+     * @type {SymbolTable}
+     * @private
+     */
     this.st = st;
     this.flags = flags;
     this.interactive = false;
     this.nestlevel = 0;
 
     this.u = null;
+    /**
+     * @type Array.<CompilerUnit>
+     * @private
+     */
     this.stack = [];
 
     this.result = [];
 
     // this.gensymcount = 0;
 
+    /**
+     * @type Array.<CompilerUnit>
+     * @private
+     */
     this.allUnits = [];
 
     this.source = sourceCodeForAnnotation ? sourceCodeForAnnotation.split("\n") : false;
@@ -21742,6 +21778,9 @@ function Compiler(filename, st, flags, sourceCodeForAnnotation)
 
 function CompilerUnit()
 {
+    /**
+     * @type {?SymbolTableScope}
+     */
     this.ste = null;
     this.name = null;
 
@@ -21797,8 +21836,8 @@ Compiler.prototype.annotateSource = function(ast)
         for (var i = 0; i < col_offset; ++i) out(" ");
         out("^\n//\n");
 
-		out("\nSk.currLineNo = ",lineno, ";\nSk.currColNo = ",col_offset,"\n\n");	//	Added by RNL
-		out("\nSk.currFilename = '",this.filename,"';\n\n");	//	Added by RNL
+        out("\nSk.currLineNo = ",lineno, ";\nSk.currColNo = ",col_offset,"\n\n");
+        out("\nSk.currFilename = '",this.filename,"';\n\n");
     }
 };
 
@@ -21903,34 +21942,35 @@ Compiler.prototype._gr = function(hint, rest)
 * Function to test if an interrupt should occur if the program has been running for too long.
 * This function is executed at every test/branch operation.
 */
-Compiler.prototype._interruptTest = function() { // Added by RNL
-	out("if (Sk.execStart === undefined) {Sk.execStart=new Date()}");
-  	out("if (Sk.execLimit != null && new Date() - Sk.execStart > Sk.execLimit) {throw new Sk.builtin.TimeLimitError(Sk.timeoutMsg())}");
+Compiler.prototype._interruptTest = function()
+{
+    out("if (Sk.execStart === undefined) {Sk.execStart=new Date()}");
+    out("if (Sk.execLimit != null && new Date() - Sk.execStart > Sk.execLimit) {throw new Sk.builtin.TimeLimitError(Sk.timeoutMsg())}");
 }
 
 Compiler.prototype._jumpfalse = function(test, block)
 {
     var cond = this._gr('jfalse', "(", test, "===false||!Sk.misceval.isTrue(", test, "))");
-    this._interruptTest();	// Added by RNL
+    this._interruptTest();
     out("if(", cond, "){/*test failed */$blk=", block, ";continue;}");
 };
 
 Compiler.prototype._jumpundef = function(test, block)
 {
-    this._interruptTest();	// Added by RNL
+    this._interruptTest();
     out("if(", test, "===undefined){$blk=", block, ";continue;}");
 };
 
 Compiler.prototype._jumptrue = function(test, block)
 {
     var cond = this._gr('jtrue', "(", test, "===true||Sk.misceval.isTrue(", test, "))");
-    this._interruptTest();	// Added by RNL
+    this._interruptTest();
     out("if(", cond, "){/*test passed */$blk=", block, ";continue;}");
 };
 
 Compiler.prototype._jump = function(block)
 {
-    this._interruptTest();	// Added by RNL
+    this._interruptTest();
     out("$blk=", block, ";/* jump */continue;");
 };
 
@@ -22213,8 +22253,8 @@ Compiler.prototype.vexpr = function(e, data, augstoreval)
         case Num:
             if (typeof e.n === "number")
                 return e.n;
-	    else if (e.n instanceof Sk.builtin.nmber)
-		return "new Sk.builtin.nmber(" + e.n.v + ",'" + e.n.skType + "')";
+            else if (e.n instanceof Sk.builtin.nmber)
+                return "new Sk.builtin.nmber(" + e.n.v + ",'" + e.n.skType + "')";
             else if (e.n instanceof Sk.builtin.lng)
                 return "Sk.longFromStr('" + e.n.tp$str().v + "')";
             goog.asserts.fail("unhandled Num type");
@@ -22821,14 +22861,40 @@ Compiler.prototype.buildcodeobj = function(n, coname, decorator_list, args, call
     if (args && args.kwarg)
         kwarg = args.kwarg;
 
-    //
-    // enter the new scope, and create the first block
-    //
+    /**
+     * @const
+     * @type {boolean}
+     */
+    var containingHasFree = this.u.ste.hasFree;
+    /**
+     * @const
+     * @type {boolean}
+     */
+    var containingHasCell = this.u.ste.childHasFree;
+
+    /**
+     * enter the new scope, and create the first block
+     * @const
+     * @type {string}
+     */
     var scopename = this.enterScope(coname, n, n.lineno);
 
     var isGenerator = this.u.ste.generator;
+    /**
+     * @const
+     * @type {boolean}
+     */
     var hasFree = this.u.ste.hasFree;
+    /**
+     * @const
+     * @type {boolean}
+     */
     var hasCell = this.u.ste.childHasFree;
+    /**
+     * @const
+     * @type {boolean}
+     */
+    var descendantOrSelfHasFree = this.u.ste.hasFree/* || this.u.ste.childHasFree*/;
 
     var entryBlock = this.newBlock('codeobj entry');
 
@@ -22857,13 +22923,17 @@ Compiler.prototype.buildcodeobj = function(n, coname, decorator_list, args, call
         for (var i = 0; args && i < args.args.length; ++i)
             funcArgs.push(this.nameop(args.args[i].id, Param));
     }
-    if (hasFree)
+    if (descendantOrSelfHasFree)
+    {
         funcArgs.push("$free");
+    }
     this.u.prefixCode += funcArgs.join(",");
 
     this.u.prefixCode += "){";
 
     if (isGenerator) this.u.prefixCode += "\n// generator\n";
+    if (containingHasFree) this.u.prefixCode += "\n// containing has free\n";
+    if (containingHasCell) this.u.prefixCode += "\n// containing has cell\n";
     if (hasFree) this.u.prefixCode += "\n// has free\n";
     if (hasCell) this.u.prefixCode += "\n// has cell\n";
 
@@ -22904,7 +22974,7 @@ Compiler.prototype.buildcodeobj = function(n, coname, decorator_list, args, call
         var kw = kwarg ? true : false;
         this.u.varDeclsCode += "Sk.builtin.pyCheckArgs(\"" + coname.v + 
             "\", arguments, " + minargs + ", " + maxargs + ", " + kw + 
-            ", " + hasFree + ");";
+            ", " + descendantOrSelfHasFree + ");";
     }
 
     //
@@ -23025,7 +23095,6 @@ Compiler.prototype.buildcodeobj = function(n, coname, decorator_list, args, call
         // if the scope we're in where we're defining this one has free
         // vars, they may also be cell vars, so we pass those to the
         // closure too.
-        var containingHasFree = this.u.ste.hasFree;
         if (containingHasFree)
             frees += ",$free";
     }
@@ -23173,6 +23242,10 @@ Compiler.prototype.cclass = function(s)
     
     var bases = this.vseqexpr(s.bases);
 
+    /**
+     * @const
+     * @type {string}
+     */
     var scopename = this.enterScope(s.name, s, s.lineno);
     var entryBlock = this.newBlock('class entry');
 
@@ -23445,6 +23518,10 @@ Compiler.prototype.nameop = function(name, ctx, dataToStore)
     }
 };
 
+/**
+ * @param {Sk.builtin.str} name
+ * @return {string} The generated name of the scope, usually $scopeN.
+ */
 Compiler.prototype.enterScope = function(name, key, lineno)
 {
     var u = new CompilerUnit();
@@ -23508,10 +23585,15 @@ Compiler.prototype.cprint = function(s)
     if (s.nl)
         out('Sk.misceval.print_(', /*dest, ',*/ '"\\n");');
 };
+
 Compiler.prototype.cmod = function(mod)
 {
     //print("-----");
     //print(Sk.astDump(mod));
+    /**
+     * @const
+     * @type {string}
+     */
     var modf = this.enterScope(new Sk.builtin.str("<module>"), mod, 0);
 
     var entryBlock = this.newBlock('module entry');
@@ -31361,11 +31443,34 @@ mod[NODE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       });
       $loc.__mul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
         var selfJs = Sk.ffi.remapToJs(selfPy);
-        var lhs = selfJs.buffer;
-        var rhs = Sk.ffi.remapToJs(otherPy).buffer;
+        if (Sk.ffi.isNum(otherPy)) {
+          var lhs = selfJs.buffer;
+          var buffer = [];
+          for (var i = 0, len = lhs.length; i < len; i++) {
+            buffer[i] = Sk.ffh.multiply(lhs[i], otherPy);
+          }
+          var shapePy = Sk.ffi.tuplePy(selfJs.shape.map(function(x) {return Sk.ffi.numberToIntPy(x);}));
+          var bufferPy = Sk.ffi.listPy(buffer);
+          return Sk.ffi.callsim(mod['ndarray'], shapePy, undefined, bufferPy);
+        }
+        else {
+          var lhs = selfJs.buffer;
+          var rhs = Sk.ffi.remapToJs(otherPy).buffer;
+          var buffer = [];
+          for (var i = 0, len = lhs.length; i < len; i++) {
+            buffer[i] = Sk.ffh.multiply(lhs[i], rhs[i]);
+          }
+          var shapePy = Sk.ffi.tuplePy(selfJs.shape.map(function(x) {return Sk.ffi.numberToIntPy(x);}));
+          var bufferPy = Sk.ffi.listPy(buffer);
+          return Sk.ffi.callsim(mod['ndarray'], shapePy, undefined, bufferPy);
+        }
+      });
+      $loc.__rmul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+        var selfJs = Sk.ffi.remapToJs(selfPy);
+        var rhsBuffer = selfJs.buffer;
         var buffer = [];
-        for (var i = 0, len = lhs.length; i < len; i++) {
-          buffer[i] = Sk.ffh.multiply(lhs[i], rhs[i]);
+        for (var i = 0, len = rhsBuffer.length; i < len; i++) {
+          buffer[i] = Sk.ffh.multiply(otherPy, rhsBuffer[i]);
         }
         var shapePy = Sk.ffi.tuplePy(selfJs.shape.map(function(x) {return Sk.ffi.numberToIntPy(x);}));
         var bufferPy = Sk.ffi.listPy(buffer);
@@ -32095,11 +32200,18 @@ Sk.builtin.buildWindowClass = function(mod) {
             }
             break;
             default: {
-              throw Sk.ffi.err.attribute(typeof propJs).isNotSetableOnType(JS_WRAP_CLASS);
+              selfJs[name] = Sk.ffi.remapToJs(valuePy);
+//            throw Sk.ffi.err.attribute(typeof propJs).isNotSetableOnType(JS_WRAP_CLASS);
             }
           }
         }
       }
+    });
+    $loc.__getitem__ = Sk.ffi.functionPy(function(selfPy, indexPy) {
+      Sk.ffi.checkMethodArgs("[]", arguments, 1, 1);
+      Sk.ffi.checkArgType("index", Sk.ffi.PyType.INT, Sk.ffi.isInt(indexPy), indexPy);
+      var index  = Sk.ffi.remapToJs(indexPy);
+      return defaultGetAttribute(mod, Sk.ffi.remapToJs(selfPy), "" + index, JS_WRAP_CLASS);
     });
     $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
       var selfJs = Sk.ffi.remapToJs(selfPy);
