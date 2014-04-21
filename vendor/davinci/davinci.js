@@ -15178,39 +15178,25 @@ goog.exportSymbol("Sk.ffh.getitem", Sk.ffh.getitem);
 
 Sk.ffh.add = function(lhsPy, rhsPy) {
   return Sk.abstr.binary_op_(lhsPy, rhsPy, "Add");
-  /*
-  if (lhsPy["__add__"])
-  {
-    return Sk.ffi.callsim(lhsPy["__add__"], lhsPy, rhsPy);
-  }
-  else if (lhsPy["nb$add"])
-  {
-    return lhsPy["nb$add"].call(lhsPy, rhsPy);
-  }
-  else
-  {
-    throw Sk.ffi.notImplementedError("add");
-  }
-  */
 };
 goog.exportSymbol("Sk.ffh.add", Sk.ffh.add);
 
 Sk.ffh.subtract = function(lhsPy, rhsPy) {
   return Sk.abstr.binary_op_(lhsPy, rhsPy, "Sub");
-//return Sk.ffh.binaryExec(SPECIAL_METHOD_SUB, lhsPy, rhsPy, "nb$subtract");
 };
 goog.exportSymbol("Sk.ffh.subtract", Sk.ffh.subtract);
 
 Sk.ffh.multiply = function(lhsPy, rhsPy) {
   return Sk.abstr.binary_op_(lhsPy, rhsPy, "Mult");
-//return Sk.ffh.binaryExec(SPECIAL_METHOD_MUL, lhsPy, rhsPy, "nb$multiply");
 };
 goog.exportSymbol("Sk.ffh.multiply", Sk.ffh.multiply);
 
 Sk.ffh.rmultiply = function(lhsPy, rhsPy) {return Sk.ffh.binaryExec(SPECIAL_METHOD_RMUL, lhsPy, rhsPy, "nb$multiply");};
 goog.exportSymbol("Sk.ffh.rmultiply", Sk.ffh.rmultiply);
 
-Sk.ffh.divide = function(lhsPy, rhsPy) {return Sk.ffh.binaryExec(SPECIAL_METHOD_DIV, lhsPy, rhsPy, "nb$divide");};
+Sk.ffh.divide = function(lhsPy, rhsPy) {
+  return Sk.abstr.binary_op_(lhsPy, rhsPy, "Div");
+};
 goog.exportSymbol("Sk.ffh.divide", Sk.ffh.divide);
 
 Sk.ffh.xor = function(lhsPy, rhsPy) {return Sk.ffh.binaryExec(SPECIAL_METHOD_XOR, lhsPy, rhsPy, "nb$xor");};
@@ -31314,7 +31300,6 @@ mod[NODE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         }
       });
       $loc.__getitem__ = Sk.ffi.functionPy(function(selfPy, indexPy) {
-//      Sk.debugout("__getitem__: " + Sk.ffi.getType(indexPy));
         var ndarrayJs = Sk.ffi.remapToJs(selfPy);
         Sk.ffi.checkMethodArgs("[]", arguments, 1, 1);
         if (Sk.ffi.isInt(indexPy)) {
@@ -31345,9 +31330,6 @@ mod[NODE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         }
         else if (Sk.ffi.isFunction(indexPy)) {
           var indices = indexPy.indices();
-//        Sk.debugout("indices[0]: " + indices[0]);
-//        Sk.debugout("indices[1]: " + indices[1]);
-//        Sk.debugout("indices[2]: " + indices[2]);
           var start = typeof indices[0] !== 'undefined' ? indices[0] : 0;
           var stop  = typeof indices[1] !== 'undefined' ? indices[1] : ndarrayJs.buffer.length;
           stop = stop > ndarrayJs.buffer.length ? ndarrayJs.buffer.length : stop;
@@ -31478,15 +31460,27 @@ mod[NODE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       });
       $loc.__div__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
         var selfJs = Sk.ffi.remapToJs(selfPy);
-        var lhs = selfJs.buffer;
-        var rhs = Sk.ffi.remapToJs(otherPy).buffer;
-        var buffer = [];
-        for (var i = 0, len = lhs.length; i < len; i++) {
-          buffer[i] = Sk.ffh.divide(lhs[i], rhs[i]);
+        if (Sk.ffi.isNum(otherPy)) {
+          var lhs = selfJs.buffer;
+          var buffer = [];
+          for (var i = 0, len = lhs.length; i < len; i++) {
+            buffer[i] = Sk.ffh.divide(lhs[i], otherPy);
+          }
+          var shapePy = Sk.ffi.tuplePy(selfJs.shape.map(function(x) {return Sk.ffi.numberToIntPy(x);}));
+          var bufferPy = Sk.ffi.listPy(buffer);
+          return Sk.ffi.callsim(mod['ndarray'], shapePy, undefined, bufferPy);
         }
-        var shapePy = Sk.ffi.tuplePy(selfJs.shape.map(function(x) {return Sk.ffi.numberToIntPy(x);}));
-        var bufferPy = Sk.ffi.listPy(buffer);
-        return Sk.ffi.callsim(mod['ndarray'], shapePy, undefined, bufferPy);
+        else {
+          var lhs = selfJs.buffer;
+          var rhs = Sk.ffi.remapToJs(otherPy).buffer;
+          var buffer = [];
+          for (var i = 0, len = lhs.length; i < len; i++) {
+            buffer[i] = Sk.ffh.divide(lhs[i], rhs[i]);
+          }
+          var shapePy = Sk.ffi.tuplePy(selfJs.shape.map(function(x) {return Sk.ffi.numberToIntPy(x);}));
+          var bufferPy = Sk.ffi.listPy(buffer);
+          return Sk.ffi.callsim(mod['ndarray'], shapePy, undefined, bufferPy);
+        }
       });
       $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
         var selfJs = Sk.ffi.remapToJs(selfPy);

@@ -1,6 +1,6 @@
 {
   "name": "davinci",
-  "version": "0.9.165",
+  "version": "0.9.166",
   "description": "Python to JavaScript cross compiler",
   "author": {
     "name": "David Holmes",

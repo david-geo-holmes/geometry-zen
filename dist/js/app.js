@@ -12873,7 +12873,7 @@
   };
   goog.exportSymbol('Sk.ffh.rmultiply', Sk.ffh.rmultiply);
   Sk.ffh.divide = function (a, b) {
-    return Sk.ffh.binaryExec(SPECIAL_METHOD_DIV, a, b, 'nb$divide');
+    return Sk.abstr.binary_op_(a, b, 'Div');
   };
   goog.exportSymbol('Sk.ffh.divide', Sk.ffh.divide);
   Sk.ffh.xor = function (a, b) {
@@ -27199,17 +27199,17 @@
         return c;
       }
       function h(a, c, d, e, f) {
-        var g = new b[Sk.three.OBJECT_3D](), h = a * c, l = d / c, k = a * d;
-        a = f.x * k;
-        d = f.y * k;
-        f = f.z * k;
-        for (k = -h; k <= h; k += 1)
-          if (0 != k) {
-            var p = k * l, q = new b.Geometry();
-            q.vertices.push(new b.Vector3(e.x * p - a, e.y * p - d, e.z * p - f));
-            q.vertices.push(new b.Vector3(e.x * p + a, e.y * p + d, e.z * p + f));
-            p = new b.Line(q, 0 === k % c ? m : n);
-            g.add(p);
+        var g = new b[Sk.three.OBJECT_3D](), h = a * c, l = d / c, p = a * d;
+        a = f.x * p;
+        d = f.y * p;
+        f = f.z * p;
+        for (p = -h; p <= h; p += 1)
+          if (0 != p) {
+            var k = p * l, q = new b.Geometry();
+            q.vertices.push(new b.Vector3(e.x * k - a, e.y * k - d, e.z * k - f));
+            q.vertices.push(new b.Vector3(e.x * k + a, e.y * k + d, e.z * k + f));
+            k = new b.Line(q, 0 === p % c ? m : n);
+            g.add(k);
           }
         return g;
       }
@@ -27747,9 +27747,9 @@
               } else
                 e.a = 'number' === typeof d.radiusTop ? d.radiusTop : 0.5, e.b = 'number' === typeof d.radiusBottom ? d.radiusBottom : 0.5, e.h = 'number' === typeof d.height ? d.height : 1;
               c = e;
-              var e = Sk.ffi.numberToFloatPy(c.a), g = Sk.ffi.numberToFloatPy(c.b), h = Sk.ffi.numberToFloatPy(c.h), n = Sk.ffi.numberToIntPy(d.segments ? d.segments : 32), l = Sk.ffi.numberToIntPy(1), k = Sk.ffi.booleanToPy(!1);
+              var e = Sk.ffi.numberToFloatPy(c.a), g = Sk.ffi.numberToFloatPy(c.b), h = Sk.ffi.numberToFloatPy(c.h), n = Sk.ffi.numberToIntPy(d.segments ? d.segments : 32), l = Sk.ffi.numberToIntPy(1), p = Sk.ffi.booleanToPy(!1);
               c = Sk.ffi.callsim(a.Euclidean3, Sk.ffi.referenceToPy(c.axis, 'Euclidean3'));
-              e = Sk.ffi.callsim(a.CylinderGeometry, e, g, h, n, l, k, c);
+              e = Sk.ffi.callsim(a.CylinderGeometry, e, g, h, n, l, p, c);
               return f(e, d);
             });
           case 'normalize':
@@ -28098,7 +28098,7 @@
                 c.height = h * g;
               } else
                 c.radius = d.radius ? d.radius : 1, c.height = d.height ? d.height : 1;
-              var c = Sk.ffi.numberToFloatPy(c.radius), e = Sk.ffi.numberToFloatPy(0.08), g = Sk.ffi.numberToFloatPy(0.01), h = Sk.ffi.numberToFloatPy(0.2), n = Sk.ffi.numberToFloatPy(0.8), l = Sk.ffi.numberToIntPy(6), k = Sk.ffi.numberToIntPy(d.segments ? d.segments : 32), c = Sk.ffi.callsim(a[Sk.three.VORTEX_GEOMETRY], c, e, g, h, n, l, k);
+              var c = Sk.ffi.numberToFloatPy(c.radius), e = Sk.ffi.numberToFloatPy(0.08), g = Sk.ffi.numberToFloatPy(0.01), h = Sk.ffi.numberToFloatPy(0.2), n = Sk.ffi.numberToFloatPy(0.8), l = Sk.ffi.numberToIntPy(6), p = Sk.ffi.numberToIntPy(d.segments ? d.segments : 32), c = Sk.ffi.callsim(a[Sk.three.VORTEX_GEOMETRY], c, e, g, h, n, l, p);
               return f(c, d);
             });
           case 'normalize':
@@ -29214,13 +29214,18 @@
           return Sk.ffi.callsim(a.ndarray, d, void 0, f);
         });
         g.__div__ = Sk.ffi.functionPy(function (b, c) {
-          for (var d = Sk.ffi.remapToJs(b), e = d.buffer, f = Sk.ffi.remapToJs(c).buffer, g = [], q = 0, s = e.length; q < s; q++)
-            g[q] = Sk.ffh.divide(e[q], f[q]);
+          var d = Sk.ffi.remapToJs(b);
+          if (Sk.ffi.isNum(c))
+            for (var e = d.buffer, f = [], g = 0, q = e.length; g < q; g++)
+              f[g] = Sk.ffh.divide(e[g], c);
+          else
+            for (var e = d.buffer, s = Sk.ffi.remapToJs(c).buffer, f = [], g = 0, q = e.length; g < q; g++)
+              f[g] = Sk.ffh.divide(e[g], s[g]);
           d = Sk.ffi.tuplePy(d.shape.map(function (a) {
             return Sk.ffi.numberToIntPy(a);
           }));
-          g = Sk.ffi.listPy(g);
-          return Sk.ffi.callsim(a.ndarray, d, void 0, g);
+          f = Sk.ffi.listPy(f);
+          return Sk.ffi.callsim(a.ndarray, d, void 0, f);
         });
         g.__str__ = Sk.ffi.functionPy(function (a) {
           a = Sk.ffi.remapToJs(a);
@@ -29869,11 +29874,11 @@
           if (c(e))
             d.w *= e, d.x *= e, d.y *= e, d.xy *= e;
           else {
-            var f = d.w, g = d.x, h = d.y, k = d.xy, l = e.w, m = e.x, C = e.y, e = e.xy;
-            d.w = f * l + g * m + h * C - k * e;
-            d.x = f * m + g * l - h * e + k * C;
-            d.y = f * C + g * e + h * l - k * m;
-            d.xy = f * e + g * C - h * m + k * l;
+            var f = d.w, g = d.x, h = d.y, l = d.xy, k = e.w, m = e.x, C = e.y, e = e.xy;
+            d.w = f * k + g * m + h * C - l * e;
+            d.x = f * m + g * k - h * e + l * C;
+            d.y = f * C + g * e + h * k - l * m;
+            d.xy = f * e + g * C - h * m + l * k;
           }
           return a;
         });
@@ -29899,8 +29904,8 @@
           b = Sk.ffi.remapToJs(b);
           if (c(b))
             return d(a.w * b, a.x * b, a.y * b, a.xy * b);
-          var e = a.w, f = a.x, g = a.y, h = b.w, k = b.x, l = b.y;
-          return d(e * h, e * k + f * h, e * l + g * h, e * b.xy + f * l - g * k + a.xy * h);
+          var e = a.w, f = a.x, g = a.y, h = b.w, l = b.x, k = b.y;
+          return d(e * h, e * l + f * h, e * k + g * h, e * b.xy + f * k - g * l + a.xy * h);
         });
         m.__rxor__ = Sk.ffi.functionPy(function (a, b) {
           b = Sk.ffi.remapToJs(b);
@@ -29914,11 +29919,11 @@
           if (c(e))
             d.w *= e, d.x *= e, d.y *= e, d.xy *= e;
           else {
-            var f = d.w, g = d.x, h = d.y, k = d.xy, l = e.w, m = e.x, C = e.y, e = e.xy;
-            d.w = f * l;
-            d.x = f * m + g * l;
-            d.y = f * C + h * l;
-            d.xy = f * e + g * C - h * m + k * l;
+            var f = d.w, g = d.x, h = d.y, l = d.xy, k = e.w, m = e.x, C = e.y, e = e.xy;
+            d.w = f * k;
+            d.x = f * m + g * k;
+            d.y = f * C + h * k;
+            d.xy = f * e + g * C - h * m + l * k;
           }
           return a;
         });
