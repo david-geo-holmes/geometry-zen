@@ -31210,6 +31210,43 @@ mod[NODE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       return size;
     }
 
+    /**
+     * @param {Array.<number>} buffer
+     * @param {Array.<number>} shape
+     * @return {string}
+     */
+    function stringify(buffer, shape) {
+      var emits = shape.map(function(x) {return 0;});
+      var uBound = shape.length - 1;
+      var idxLevel = 0;
+      var str = "[";
+      var i = 0;
+      while(idxLevel !== -1) {
+        if (emits[idxLevel] < shape[idxLevel]) {
+          if (emits[idxLevel] !== 0) {
+            str += ", ";
+          }
+          if (idxLevel < uBound) {
+            str += "[";
+            idxLevel += 1;
+          }
+          else {
+            str += Sk.ffi.remapToJs(Sk.ffh.str(buffer[i++]));
+            emits[idxLevel] += 1;
+          }
+        }
+        else {
+          emits[idxLevel] = 0;
+          str += "]";
+          idxLevel -= 1;
+          if (idxLevel >= 0) {
+            emits[idxLevel] += 1;
+          }
+        }
+      }
+      return str;
+    }
+
     mod['ndarray'] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       $loc.__init__ = Sk.ffi.functionPy(function(selfPy, shapePy, dtypePy, bufferPy, offsetPy, stridesPy, orderPy) {
         var ndarrayJs = {};
@@ -31484,19 +31521,11 @@ mod[NODE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       });
       $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
         var selfJs = Sk.ffi.remapToJs(selfPy);
-        var ret = [];
-        for (var i = 0, len = selfJs.buffer.length; i < len; i++) {
-          ret.push(Sk.ffi.remapToJs(Sk.ffh.str(selfJs.buffer[i])));
-        }
-        return Sk.ffi.stringToPy("[" + ret.join(", ") + "]");
+        return Sk.ffi.stringToPy(stringify(selfJs.buffer, selfJs.shape));
       })
       $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
         var selfJs = Sk.ffi.remapToJs(selfPy);
-        var ret = [];
-        for (var i = 0, len = selfJs.buffer.length; i < len; i++) {
-          ret.push(Sk.ffi.remapToJs(Sk.ffh.str(selfJs.buffer[i])));
-        }
-        return Sk.ffi.stringToPy("array([" + ret.join(", ") + "])");
+        return Sk.ffi.stringToPy("array(" + stringify(selfJs.buffer, selfJs.shape) + ")");
       })
     }, 'ndarray', []);
 
