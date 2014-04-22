@@ -7452,7 +7452,9 @@ Sk.abstr.binary_op_ = function(v, w, opname)
     {   
         if (vop.call) {
             ret = vop.call(v, w);
-        } else {  // assume that vop is an __xxx__ type method
+        }
+        else {
+            // assume that vop is an __xxx__ type method
             ret = Sk.misceval.callsim(vop,v,w)
         }
         if (ret !== undefined) return ret;
@@ -7462,7 +7464,9 @@ Sk.abstr.binary_op_ = function(v, w, opname)
     {
         if (wop.call) {
             ret = wop.call(w, v);
-        } else { // assume that wop is an __xxx__ type method
+        }
+        else {
+            // assume that wop is an __xxx__ type method
             ret = Sk.misceval.callsim(wop,w,v)
         }
         if (ret !== undefined) return ret;
@@ -7695,9 +7699,9 @@ Sk.abstr.numberUnaryOp = function(valuePy, op)
     else if (valuePy instanceof Sk.builtin.nmber || valuePy instanceof Sk.builtin.bool)
     {
         var value = Sk.builtin.asnum$(valuePy);
-        if (op === "USub") return new Sk.builtin.nmber(-value, value.skType);
+        if (op === "USub")   return new Sk.builtin.nmber(-value, value.skType);
         if (op === "Invert") return new Sk.builtin.nmber(~value, value.skType);
-        if (op === "UAdd") return new Sk.builtin.nmber(value, value.skType);
+        if (op === "UAdd")   return new Sk.builtin.nmber(value, value.skType);
     }
     else
     {
@@ -12151,10 +12155,23 @@ Sk.builtin.nmber.prototype.nb$inplace_rshift = Sk.builtin.nmber.prototype.nb$rsh
 
 Sk.builtin.nmber.prototype.nb$negative = function()
 {
-	return new Sk.builtin.nmber(-this.v, undefined);
+    return new Sk.builtin.nmber(-this.v, undefined);
 };
 
-Sk.builtin.nmber.prototype.nb$positive = function() { return this.clone(); };
+Sk.builtin.nmber.prototype.nb$positive = function()
+{
+    return this.clone();
+};
+
+Sk.builtin.nmber.prototype.nb$exp = function()
+{
+    return new Sk.builtin.nmber(Math.exp(this.v), this.skType);
+};
+
+Sk.builtin.nmber.prototype.nb$sin = function()
+{
+    return new Sk.builtin.nmber(Math.sin(this.v), this.skType);
+};
 
 Sk.builtin.nmber.prototype.nb$nonzero = function()
 {
@@ -15141,25 +15158,6 @@ Sk.ffh.unaryExec = function(specialMethod, valuePy, internalMethod)
 };
 goog.exportSymbol("Sk.ffh.unaryExec", Sk.ffh.unaryExec);
 /**
- *
- */
-Sk.ffh.binaryExec = function(specialMethod, lhsPy, rhsPy, internalMethod)
-{
-  if (lhsPy[specialMethod])
-  {
-    return Sk.ffi.callsim(lhsPy[specialMethod], lhsPy, rhsPy);
-  }
-  else if (typeof internalMethod !== 'undefined' && lhsPy[internalMethod])
-  {
-    return lhsPy[internalMethod].call(lhsPy, rhsPy);
-  }
-  else
-  {
-    throw Sk.ffi.notImplementedError(specialMethod);
-  }
-};
-goog.exportSymbol("Sk.ffh.binaryExec", Sk.ffh.binaryExec);
-/**
  * @param {Object} objPy
  * @param {number} index
  */
@@ -15191,21 +15189,29 @@ Sk.ffh.multiply = function(lhsPy, rhsPy) {
 };
 goog.exportSymbol("Sk.ffh.multiply", Sk.ffh.multiply);
 
-Sk.ffh.rmultiply = function(lhsPy, rhsPy) {return Sk.ffh.binaryExec(SPECIAL_METHOD_RMUL, lhsPy, rhsPy, "nb$multiply");};
-goog.exportSymbol("Sk.ffh.rmultiply", Sk.ffh.rmultiply);
-
 Sk.ffh.divide = function(lhsPy, rhsPy) {
   return Sk.abstr.binary_op_(lhsPy, rhsPy, "Div");
 };
 goog.exportSymbol("Sk.ffh.divide", Sk.ffh.divide);
 
-Sk.ffh.xor = function(lhsPy, rhsPy) {return Sk.ffh.binaryExec(SPECIAL_METHOD_XOR, lhsPy, rhsPy, "nb$xor");};
+Sk.ffh.modulo = function(lhsPy, rhsPy) {
+  return Sk.abstr.binary_op_(lhsPy, rhsPy, "Mod");
+};
+goog.exportSymbol("Sk.ffh.modulo", Sk.ffh.modulo);
+
+Sk.ffh.xor = function(lhsPy, rhsPy) {
+  return Sk.abstr.binary_op_(lhsPy, rhsPy, "BitXor");
+};
 goog.exportSymbol("Sk.ffh.xor", Sk.ffh.xor);
 
-Sk.ffh.lshift = function(lhsPy, rhsPy) {return Sk.ffh.binaryExec(SPECIAL_METHOD_LSHIFT, lhsPy, rhsPy, "nb$lshift");};
+Sk.ffh.lshift = function(lhsPy, rhsPy) {
+  return Sk.abstr.binary_op_(lhsPy, rhsPy, "LShift");
+};
 goog.exportSymbol("Sk.ffh.lshift", Sk.ffh.lshift);
 
-Sk.ffh.rshift = function(lhsPy, rhsPy) {return Sk.ffh.binaryExec(SPECIAL_METHOD_RSHIFT, lhsPy, rhsPy, "nb$rshift");};
+Sk.ffh.rshift = function(lhsPy, rhsPy) {
+  return Sk.abstr.binary_op_(lhsPy, rhsPy, "RShift");
+};
 goog.exportSymbol("Sk.ffh.rshift", Sk.ffh.rshift);
 
 Sk.ffh.equal = function(lhsPy, rhsPy)
@@ -15234,19 +15240,29 @@ Sk.ffh.conjugate = function(numberPy) {
 };
 goog.exportSymbol("Sk.ffh.conjugate", Sk.ffh.conjugate);
 
-Sk.ffh.cos = function(valuePy) {return Sk.ffh.unaryExec(SPECIAL_METHOD_COS, valuePy, "nb$cos");};
+Sk.ffh.cos = function(valuePy) {
+  return Sk.ffh.unaryExec(SPECIAL_METHOD_COS, valuePy, "nb$cos");
+};
 goog.exportSymbol("Sk.ffh.cos", Sk.ffh.cos);
 
-Sk.ffh.sin = function(valuePy) {return Sk.ffh.unaryExec(SPECIAL_METHOD_SIN, valuePy, "nb$sin");};
+Sk.ffh.sin = function(valuePy) {
+  return Sk.ffh.unaryExec(SPECIAL_METHOD_SIN, valuePy, "nb$sin");
+};
 goog.exportSymbol("Sk.ffh.sin", Sk.ffh.sin);
 
-Sk.ffh.exp = function(valuePy) {return Sk.ffh.unaryExec(SPECIAL_METHOD_EXP, valuePy, "nb$exp");};
+Sk.ffh.exp = function(valuePy) {
+  return Sk.ffh.unaryExec(SPECIAL_METHOD_EXP, valuePy, "nb$exp");
+};
 goog.exportSymbol("Sk.ffh.exp", Sk.ffh.exp);
 
-Sk.ffh.positive = function(valuePy) {return Sk.ffh.unaryExec(SPECIAL_METHOD_POS, valuePy, "nb$positive");};
+Sk.ffh.positive = function(valuePy) {
+  return Sk.abstr.numberUnaryOp(valuePy, "UAdd");
+};
 goog.exportSymbol("Sk.ffh.positive", Sk.ffh.positive);
 
-Sk.ffh.negative = function(valuePy) {return Sk.ffh.unaryExec(SPECIAL_METHOD_NEG, valuePy, "nb$negative");};
+Sk.ffh.negative = function(valuePy) {
+  return Sk.abstr.numberUnaryOp(valuePy, "USub");
+};
 goog.exportSymbol("Sk.ffh.negative", Sk.ffh.negative);
 
 Sk.ffh.invert = function(valuePy) {return Sk.ffh.unaryExec(SPECIAL_METHOD_INVERT, valuePy, "nb$invert");};
@@ -25506,10 +25522,10 @@ mod[Sk.matrix.MATRIX_2x2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       return Sk.ffi.callsim(mod[Sk.matrix.MATRIX_2x2], onePy, twoPy);
     }
     else {
-      var x00 = Sk.ffh.rmultiply(a00, otherPy);
-      var x01 = Sk.ffh.rmultiply(a01, otherPy);
-      var x10 = Sk.ffh.rmultiply(a10, otherPy);
-      var x11 = Sk.ffh.rmultiply(a11, otherPy);
+      var x00 = Sk.ffh.multiply(otherPy, a00);
+      var x01 = Sk.ffh.multiply(otherPy, a01);
+      var x10 = Sk.ffh.multiply(otherPy, a10);
+      var x11 = Sk.ffh.multiply(otherPy, a11);
 
       var onePy = Sk.ffi.callsim(mod[Sk.matrix.MATRIX_2x1], x00, x01);
       var twoPy = Sk.ffi.callsim(mod[Sk.matrix.MATRIX_2x1], x10, x11);
@@ -25821,7 +25837,7 @@ mod[COMPLEX] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       return cartesianJsToComplexPy(x, y);
     }
     else {
-      return Sk.ffh.rmultiply(otherPy, selfPy);
+      return undefined;
     }
   });
   $loc.__rmul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
@@ -31139,6 +31155,10 @@ mod[NODE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   Sk.builtin.defineNumPy = function(mod) {
     Sk.ffi.checkFunctionArgs("defineNumPy", arguments, 1, 1);
 
+    /**
+     * @const
+     * @type {string}
+     */
     var METHOD_COPY           = "copy";
     var METHOD_FILL           = "fill";
     var METHOD_RESHAPE        = "reshape";
@@ -31210,6 +31230,54 @@ mod[NODE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       return size;
     }
 
+    function makeNumericBinaryOpLhs(operationPy) {
+      return function(selfPy, otherPy) {
+        var selfJs = Sk.ffi.remapToJs(selfPy);
+        if (Sk.ffi.isNum(otherPy)) {
+          var lhs = selfJs.buffer;
+          var buffer = [];
+          for (var i = 0, len = lhs.length; i < len; i++) {
+            buffer[i] = operationPy(lhs[i], otherPy);
+          }
+          var shapePy = Sk.ffi.tuplePy(selfJs.shape.map(function(x) {return Sk.ffi.numberToIntPy(x);}));
+          var bufferPy = Sk.ffi.listPy(buffer);
+          return Sk.ffi.callsim(mod['ndarray'], shapePy, undefined, bufferPy);
+        }
+        else {
+          var lhs = selfJs.buffer;
+          var rhs = Sk.ffi.remapToJs(otherPy).buffer;
+          var buffer = [];
+          for (var i = 0, len = lhs.length; i < len; i++) {
+            buffer[i] = operationPy(lhs[i], rhs[i]);
+          }
+          var shapePy = Sk.ffi.tuplePy(selfJs.shape.map(function(x) {return Sk.ffi.numberToIntPy(x);}));
+          var bufferPy = Sk.ffi.listPy(buffer);
+          return Sk.ffi.callsim(mod['ndarray'], shapePy, undefined, bufferPy);
+        }
+      };
+    }
+    function makeNumericBinaryOpRhs(operationPy) {
+      return function(selfPy, otherPy) {
+        var selfJs = Sk.ffi.remapToJs(selfPy);
+        var rhsBuffer = selfJs.buffer;
+        var buffer = [];
+        for (var i = 0, len = rhsBuffer.length; i < len; i++) {
+          buffer[i] = operationPy(otherPy, rhsBuffer[i]);
+        }
+        var shapePy = Sk.ffi.tuplePy(selfJs.shape.map(function(x) {return Sk.ffi.numberToIntPy(x);}));
+        var bufferPy = Sk.ffi.listPy(buffer);
+        return Sk.ffi.callsim(mod['ndarray'], shapePy, undefined, bufferPy);
+      };
+    }
+    function makeUnaryOp(operationPy) {
+      return function(selfPy) {
+        var selfJs = Sk.ffi.remapToJs(selfPy);
+        var buffer = selfJs.buffer.map(function(valuePy) {return operationPy(valuePy);});
+        var shapePy = Sk.ffi.tuplePy(selfJs.shape.map(function(x) {return Sk.ffi.numberToIntPy(x);}));
+        var bufferPy = Sk.ffi.listPy(buffer);
+        return Sk.ffi.callsim(mod['ndarray'], shapePy, undefined, bufferPy);
+      };
+    }
     /**
      * @param {Array.<number>} buffer
      * @param {Array.<number>} shape
@@ -31436,89 +31504,37 @@ mod[NODE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         };
         return ret;
       });
-      $loc.__add__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-        var selfJs = Sk.ffi.remapToJs(selfPy);
-        var lhs = selfJs.buffer;
-        var rhs = Sk.ffi.remapToJs(otherPy).buffer;
-        var buffer = [];
-        for (var i = 0, len = lhs.length; i < len; i++) {
-          buffer[i] = Sk.ffh.add(lhs[i], rhs[i]);
-        }
-        var shapePy = Sk.ffi.tuplePy(selfJs.shape.map(function(x) {return Sk.ffi.numberToIntPy(x);}));
-        var bufferPy = Sk.ffi.listPy(buffer);
-        return Sk.ffi.callsim(mod['ndarray'], shapePy, undefined, bufferPy);
-      });
-      $loc.__sub__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-        var selfJs = Sk.ffi.remapToJs(selfPy);
-        var lhs = selfJs.buffer;
-        var rhs = Sk.ffi.remapToJs(otherPy).buffer;
-        var buffer = [];
-        for (var i = 0, len = lhs.length; i < len; i++) {
-          buffer[i] = Sk.ffh.subtract(lhs[i], rhs[i]);
-        }
-        var shapePy = Sk.ffi.tuplePy(selfJs.shape.map(function(x) {return Sk.ffi.numberToIntPy(x);}));
-        var bufferPy = Sk.ffi.listPy(buffer);
-        return Sk.ffi.callsim(mod['ndarray'], shapePy, undefined, bufferPy);
-      });
-      $loc.__mul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-        var selfJs = Sk.ffi.remapToJs(selfPy);
-        if (Sk.ffi.isNum(otherPy)) {
-          var lhs = selfJs.buffer;
-          var buffer = [];
-          for (var i = 0, len = lhs.length; i < len; i++) {
-            buffer[i] = Sk.ffh.multiply(lhs[i], otherPy);
-          }
-          var shapePy = Sk.ffi.tuplePy(selfJs.shape.map(function(x) {return Sk.ffi.numberToIntPy(x);}));
-          var bufferPy = Sk.ffi.listPy(buffer);
-          return Sk.ffi.callsim(mod['ndarray'], shapePy, undefined, bufferPy);
-        }
-        else {
-          var lhs = selfJs.buffer;
-          var rhs = Sk.ffi.remapToJs(otherPy).buffer;
-          var buffer = [];
-          for (var i = 0, len = lhs.length; i < len; i++) {
-            buffer[i] = Sk.ffh.multiply(lhs[i], rhs[i]);
-          }
-          var shapePy = Sk.ffi.tuplePy(selfJs.shape.map(function(x) {return Sk.ffi.numberToIntPy(x);}));
-          var bufferPy = Sk.ffi.listPy(buffer);
-          return Sk.ffi.callsim(mod['ndarray'], shapePy, undefined, bufferPy);
-        }
-      });
-      $loc.__rmul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-        var selfJs = Sk.ffi.remapToJs(selfPy);
-        var rhsBuffer = selfJs.buffer;
-        var buffer = [];
-        for (var i = 0, len = rhsBuffer.length; i < len; i++) {
-          buffer[i] = Sk.ffh.multiply(otherPy, rhsBuffer[i]);
-        }
-        var shapePy = Sk.ffi.tuplePy(selfJs.shape.map(function(x) {return Sk.ffi.numberToIntPy(x);}));
-        var bufferPy = Sk.ffi.listPy(buffer);
-        return Sk.ffi.callsim(mod['ndarray'], shapePy, undefined, bufferPy);
-      });
-      $loc.__div__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-        var selfJs = Sk.ffi.remapToJs(selfPy);
-        if (Sk.ffi.isNum(otherPy)) {
-          var lhs = selfJs.buffer;
-          var buffer = [];
-          for (var i = 0, len = lhs.length; i < len; i++) {
-            buffer[i] = Sk.ffh.divide(lhs[i], otherPy);
-          }
-          var shapePy = Sk.ffi.tuplePy(selfJs.shape.map(function(x) {return Sk.ffi.numberToIntPy(x);}));
-          var bufferPy = Sk.ffi.listPy(buffer);
-          return Sk.ffi.callsim(mod['ndarray'], shapePy, undefined, bufferPy);
-        }
-        else {
-          var lhs = selfJs.buffer;
-          var rhs = Sk.ffi.remapToJs(otherPy).buffer;
-          var buffer = [];
-          for (var i = 0, len = lhs.length; i < len; i++) {
-            buffer[i] = Sk.ffh.divide(lhs[i], rhs[i]);
-          }
-          var shapePy = Sk.ffi.tuplePy(selfJs.shape.map(function(x) {return Sk.ffi.numberToIntPy(x);}));
-          var bufferPy = Sk.ffi.listPy(buffer);
-          return Sk.ffi.callsim(mod['ndarray'], shapePy, undefined, bufferPy);
-        }
-      });
+
+      $loc.__add__  = Sk.ffi.functionPy(makeNumericBinaryOpLhs(Sk.ffh.add));
+      $loc.__radd__ = Sk.ffi.functionPy(makeNumericBinaryOpRhs(Sk.ffh.add));
+
+      $loc.__sub__  = Sk.ffi.functionPy(makeNumericBinaryOpLhs(Sk.ffh.subtract));
+      $loc.__rsub__ = Sk.ffi.functionPy(makeNumericBinaryOpRhs(Sk.ffh.subtract));
+
+      $loc.__mul__  = Sk.ffi.functionPy(makeNumericBinaryOpLhs(Sk.ffh.multiply));
+      $loc.__rmul__ = Sk.ffi.functionPy(makeNumericBinaryOpRhs(Sk.ffh.multiply));
+
+      $loc.__div__  = Sk.ffi.functionPy(makeNumericBinaryOpLhs(Sk.ffh.divide));
+      $loc.__rdiv__ = Sk.ffi.functionPy(makeNumericBinaryOpRhs(Sk.ffh.divide));
+
+      $loc.__mod__  = Sk.ffi.functionPy(makeNumericBinaryOpLhs(Sk.ffh.modulo));
+      $loc.__rmod__ = Sk.ffi.functionPy(makeNumericBinaryOpRhs(Sk.ffh.modulo));
+
+      $loc.__xor__  = Sk.ffi.functionPy(makeNumericBinaryOpLhs(Sk.ffh.xor));
+      $loc.__rxor__ = Sk.ffi.functionPy(makeNumericBinaryOpRhs(Sk.ffh.xor));
+
+      $loc.__lshift__  = Sk.ffi.functionPy(makeNumericBinaryOpLhs(Sk.ffh.lshift));
+      $loc.__rlshift__ = Sk.ffi.functionPy(makeNumericBinaryOpRhs(Sk.ffh.lshift));
+
+      $loc.__rshift__  = Sk.ffi.functionPy(makeNumericBinaryOpLhs(Sk.ffh.rshift));
+      $loc.__rrshift__ = Sk.ffi.functionPy(makeNumericBinaryOpRhs(Sk.ffh.rshift));
+
+      $loc.__pos__ = Sk.ffi.functionPy(makeUnaryOp(Sk.ffh.positive));
+      $loc.__neg__ = Sk.ffi.functionPy(makeUnaryOp(Sk.ffh.negative));
+
+      $loc.__exp__ = Sk.ffi.functionPy(makeUnaryOp(Sk.ffh.exp));
+      $loc.__sin__ = Sk.ffi.functionPy(makeUnaryOp(Sk.ffh.sin));
+
       $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
         var selfJs = Sk.ffi.remapToJs(selfPy);
         return Sk.ffi.stringToPy(stringify(selfJs.buffer, selfJs.shape));

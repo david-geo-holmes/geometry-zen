@@ -18,6 +18,14 @@ app.config(['$routeProvider', '$locationProvider', ($routeProvider, $locationPro
     controller: 'WorkCtrl'
 
   # The workbench page for GitHub Repositories (Embedding Mode).
+  $routeProvider.when '/embed/users/:user/repos/:repo/blob/:branch/:step0/:step1/:step2/:step3/:step4',
+    templateUrl: 'angular/embed.html'
+    controller: 'EmbedCtrl'
+
+  $routeProvider.when '/embed/users/:user/repos/:repo/blob/:branch/:step0/:step1/:step2/:step3',
+    templateUrl: 'angular/embed.html'
+    controller: 'EmbedCtrl'
+
   $routeProvider.when '/embed/users/:user/repos/:repo/blob/:branch/:step0/:step1/:step2',
     templateUrl: 'angular/embed.html'
     controller: 'EmbedCtrl'
@@ -31,6 +39,14 @@ app.config(['$routeProvider', '$locationProvider', ($routeProvider, $locationPro
     controller: 'EmbedCtrl'
 
   # The workbench page for GitHub Repositories.
+  $routeProvider.when '/users/:user/repos/:repo/blob/:branch/:step0/:step1/:step2/:step3/:step4',
+    templateUrl: 'angular/work.html'
+    controller: 'WorkCtrl'
+
+  $routeProvider.when '/users/:user/repos/:repo/blob/:branch/:step0/:step1/:step2/:step3',
+    templateUrl: 'angular/work.html'
+    controller: 'WorkCtrl'
+
   $routeProvider.when '/users/:user/repos/:repo/blob/:branch/:step0/:step1/:step2',
     templateUrl: 'angular/work.html'
     controller: 'WorkCtrl'
@@ -44,6 +60,18 @@ app.config(['$routeProvider', '$locationProvider', ($routeProvider, $locationPro
     controller: 'WorkCtrl'
 
   # The tree page.
+  $routeProvider.when '/users/:user/repos/:repo/tree/:branch/:step0/:step1/:step2/:step3/:step4',
+    templateUrl: 'angular/tree.html'
+    controller: 'TreeCtrl'
+
+  $routeProvider.when '/users/:user/repos/:repo/tree/:branch/:step0/:step1/:step2/:step3',
+    templateUrl: 'angular/tree.html'
+    controller: 'TreeCtrl'
+
+  $routeProvider.when '/users/:user/repos/:repo/tree/:branch/:step0/:step1/:step2',
+    templateUrl: 'angular/tree.html'
+    controller: 'TreeCtrl'
+
   $routeProvider.when '/users/:user/repos/:repo/tree/:branch/:step0/:step1',
     templateUrl: 'angular/tree.html'
     controller: 'TreeCtrl'
