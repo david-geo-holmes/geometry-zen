@@ -32761,7 +32761,159 @@
         e.__str__ = Sk.ffi.functionPy(function (a) {
           var b = Sk.ffi.remapToJs(a);
           a = Sk.ffi.customToJs(a);
-          return a.name ? Sk.ffi.stringToPy(a.name) : Sk.ffi.stringToPy('' + b);
+          if (a.name)
+            return Sk.ffi.stringToPy(a.name);
+          a = [
+            [
+              0,
+              1,
+              1,
+              1,
+              -1,
+              1,
+              0,
+              1,
+              'm / s'
+            ],
+            [
+              0,
+              1,
+              1,
+              1,
+              -2,
+              1,
+              0,
+              1,
+              'm / s ** 2'
+            ],
+            [
+              1,
+              1,
+              1,
+              1,
+              -2,
+              1,
+              0,
+              1,
+              'N'
+            ],
+            [
+              1,
+              1,
+              0,
+              1,
+              -2,
+              1,
+              0,
+              1,
+              'N / m'
+            ],
+            [
+              -1,
+              1,
+              3,
+              1,
+              -2,
+              1,
+              0,
+              1,
+              'N m ** 2 / kg ** 2'
+            ],
+            [
+              1,
+              1,
+              2,
+              1,
+              -2,
+              1,
+              0,
+              1,
+              'J'
+            ],
+            [
+              1,
+              1,
+              2,
+              1,
+              -1,
+              1,
+              0,
+              1,
+              'J s'
+            ],
+            [
+              1,
+              1,
+              2,
+              1,
+              -3,
+              1,
+              0,
+              1,
+              'W'
+            ],
+            [
+              1,
+              1,
+              2,
+              1,
+              -2,
+              1,
+              -1,
+              1,
+              'V'
+            ],
+            [
+              1,
+              1,
+              1,
+              1,
+              -2,
+              1,
+              -1,
+              1,
+              'V / m'
+            ],
+            [
+              0,
+              1,
+              0,
+              1,
+              -1,
+              1,
+              1,
+              1,
+              'A'
+            ],
+            [
+              1,
+              1,
+              2,
+              1,
+              -1,
+              1,
+              -2,
+              1,
+              'ohms'
+            ],
+            [
+              1,
+              1,
+              0,
+              1,
+              -1,
+              1,
+              -1,
+              1,
+              'T'
+            ]
+          ];
+          for (var c = b.dimensions.M, d = b.dimensions.L, e = b.dimensions.T, f = b.dimensions.Q, g = 0, s = a.length; g < s; g++) {
+            var r = a[g];
+            if (c.numer === r[0] && c.denom === r[1] && d.numer === r[2] && d.denom === r[3] && e.numer === r[4] && e.denom === r[5] && f.numer === r[6] && f.denom === r[7])
+              return Sk.ffi.stringToPy(r[8]);
+          }
+          return Sk.ffi.stringToPy('' + b);
         });
         e.__repr__ = Sk.ffi.functionPy(function (a) {
           var b = [{

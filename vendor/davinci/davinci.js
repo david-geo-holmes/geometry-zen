@@ -37579,7 +37579,38 @@ mod[UNIT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     if (custom.name) {
       return Sk.ffi.stringToPy(custom.name);
     }
-    else {
+    else
+    {
+      var patterns = [
+        [ 0,1,1,1,-1,1, 0,1, "m / s"],
+        [ 0,1,1,1,-2,1, 0,1, "m / s ** 2"],
+        [ 1,1,1,1,-2,1, 0,1, "N"],
+        [ 1,1,0,1,-2,1, 0,1, "N / m"],
+        [-1,1,3,1,-2,1, 0,1, "N m ** 2 / kg ** 2"],
+        [ 1,1,2,1,-2,1, 0,1, "J"],
+        [ 1,1,2,1,-1,1, 0,1, "J s"],
+        [ 1,1,2,1,-3,1, 0,1, "W"],
+        [ 1,1,2,1,-2,1,-1,1, "V"],
+        [ 1,1,1,1,-2,1,-1,1, "V / m"],
+        [ 0,1,0,1,-1,1,+1,1, "A"],
+        [ 1,1,2,1,-1,1,-2,1, "ohms"],
+        [ 1,1,0,1,-1,1,-1,1, "T"]
+      ];
+      var M = unitJs.dimensions.M;
+      var L = unitJs.dimensions.L;
+      var T = unitJs.dimensions.T;
+      var Q = unitJs.dimensions.Q;
+      for (var i = 0, len = patterns.length; i < len; i++)
+      {
+        var pattern = patterns[i];
+        if (M.numer === pattern[0] && M.denom === pattern[1] &&
+            L.numer === pattern[2] && L.denom === pattern[3] &&
+            T.numer === pattern[4] && T.denom === pattern[5] &&
+            Q.numer === pattern[6] && Q.denom === pattern[7])
+        {
+          return Sk.ffi.stringToPy(pattern[8]);
+        }
+      }
       return Sk.ffi.stringToPy("" + unitJs);
     }
   });
