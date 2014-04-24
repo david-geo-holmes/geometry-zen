@@ -9862,6 +9862,15 @@
     return this;
   };
   Sk.builtin.tuple.prototype.tp$name = 'tuple';
+  Sk.builtin.tuple.prototype.tp$str = function () {
+    if (0 === this.v.length)
+      return new Sk.builtin.str('()');
+    for (var a = [], b = 0; b < this.v.length; ++b)
+      a[b] = Sk.ffi.remapToJs(Sk.ffh.str(this.v[b]));
+    a = a.join(', ');
+    1 === this.v.length && (a += ',');
+    return new Sk.builtin.str('(' + a + ')');
+  };
   Sk.builtin.tuple.prototype.tp$repr = function () {
     if (0 === this.v.length)
       return new Sk.builtin.str('()');
@@ -26432,8 +26441,8 @@
               Sk.ffi.checkArgType('width', f, Sk.ffi.isNum(g), g);
               Sk.ffi.checkArgType('height', f, Sk.ffi.isNum(h), h);
               Sk.ffi.checkArgType('radius', f, Sk.ffi.isNum(l), l);
-              var x = Sk.ffi.remapToJs(c), z = Sk.ffi.remapToJs(e), C = Sk.ffi.remapToJs(g), w = Sk.ffi.remapToJs(h), D = Sk.ffi.remapToJs(l);
-              d.drawRoundRect(x, z, C, w, D);
+              var x = Sk.ffi.remapToJs(c), z = Sk.ffi.remapToJs(e), D = Sk.ffi.remapToJs(g), w = Sk.ffi.remapToJs(h), C = Sk.ffi.remapToJs(l);
+              d.drawRoundRect(x, z, D, w, C);
               return b;
             });
           case 'endFill':
@@ -29291,27 +29300,24 @@
       });
       a.linspace = Sk.ffi.functionPy(function (b, c, d, e, f) {
         Sk.ffi.checkFunctionArgs('linspace', arguments, 2, 5);
-        Sk.ffi.checkArgType('start', [Sk.ffi.PyType.FLOAT], Sk.ffi.isFloat(b), b);
-        var g = Sk.ffi.remapToJs(b);
-        Sk.ffi.checkArgType('stop', [Sk.ffi.PyType.FLOAT], Sk.ffi.isFloat(c), c);
-        var h = Sk.ffi.remapToJs(c), k;
-        Sk.ffi.isDefined(d) ? (Sk.ffi.checkArgType('num', [Sk.ffi.PyType.INT], Sk.ffi.isInt(d), d), k = Sk.ffi.remapToJs(d)) : k = 50;
-        var x;
-        Sk.ffi.isDefined(e) ? (Sk.ffi.checkArgType('endpoint', [Sk.ffi.PyType.BOOL], Sk.ffi.isBool(e), e), x = Sk.ffi.remapToJs(e)) : x = !0;
-        var z;
-        Sk.ffi.isDefined(f) ? (Sk.ffi.checkArgType('retstep', [Sk.ffi.PyType.BOOL], Sk.ffi.isBool(f), f), z = Sk.ffi.remapToJs(f)) : z = !1;
-        h = x ? (h - g) / (k - 1) : (h - g) / k;
-        x = [];
-        for (var C = 0; C < k; C++)
-          x[C] = Sk.ffi.numberToFloatPy(C * h + g);
+        var g;
+        Sk.ffi.isDefined(d) ? (Sk.ffi.checkArgType('num', [Sk.ffi.PyType.INT], Sk.ffi.isInt(d), d), g = Sk.ffi.remapToJs(d)) : (g = 50, d = Sk.ffi.numberToIntPy(50));
+        var h;
+        Sk.ffi.isDefined(e) ? (Sk.ffi.checkArgType('endpoint', [Sk.ffi.PyType.BOOL], Sk.ffi.isBool(e), e), h = Sk.ffi.remapToJs(e)) : h = !0;
+        var k;
+        Sk.ffi.isDefined(f) ? (Sk.ffi.checkArgType('retstep', [Sk.ffi.PyType.BOOL], Sk.ffi.isBool(f), f), k = Sk.ffi.remapToJs(f)) : k = !1;
+        var x = Sk.ffh.subtract(c, b);
+        h = h ? Sk.ffh.divide(x, Sk.ffh.subtract(d, Sk.ffi.numberToIntPy(1))) : Sk.ffh.divide(x, d);
+        for (var x = [], z = 0; z < g; z++)
+          x[z] = Sk.ffh.add(Sk.ffh.multiply(Sk.ffi.numberToFloatPy(z), h), b);
         g = [];
-        g[0] = Sk.ffi.numberToIntPy(k);
-        k = Sk.ffi.tuplePy(g);
-        k = Sk.ffi.callsim(a.ndarray, k, void 0, Sk.ffi.listPy(x));
-        return z ? Sk.ffi.tuplePy([
-          k,
-          Sk.ffi.numberToFloatPy(h)
-        ]) : k;
+        g[0] = d;
+        g = Sk.ffi.tuplePy(g);
+        g = Sk.ffi.callsim(a.ndarray, g, void 0, Sk.ffi.listPy(x));
+        return k ? Sk.ffi.tuplePy([
+          g,
+          h
+        ]) : g;
       });
       a.zeros = Sk.ffi.functionPy(function (b, c, d) {
         Sk.ffi.checkFunctionArgs('zeros', arguments, 1, 2);
@@ -29407,7 +29413,7 @@
               n = Math.pow(Math.abs(p), 1 / 3);
               try {
                 Sk.ffi.sattr(a.grade3, 'orientation', Sk.ffi.booleanToPy(0 <= ('number' === typeof p ? p ? 0 > p ? -1 : 1 : isNaN(p) ? NaN : 0 : NaN)));
-              } catch (C) {
+              } catch (D) {
               }
               c(m, n);
             } else
@@ -29762,7 +29768,7 @@
         return 0 < f.length ? f.join('') : '0';
       }
       function f(a, b, c, e, f, g, h, k, x) {
-        var z = +f, C = +g, w = +h, D = -k, I = +(f * z + g * C + h * w - k * D), J = z * I + -0 * C + -0 * w - -0 * D, K = -0 * z + C * I - -0 * w + -0 * D, H = -0 * z + -0 * C + w * I - -0 * D, z = -0 * z + -0 * C - -0 * w + D * I;
+        var z = +f, D = +g, w = +h, C = -k, I = +(f * z + g * D + h * w - k * C), J = z * I + -0 * D + -0 * w - -0 * C, K = -0 * z + D * I - -0 * w + -0 * C, H = -0 * z + -0 * D + w * I - -0 * C, z = -0 * z + -0 * D - -0 * w + C * I;
         f = f * J + g * K + h * H - k * z;
         J /= f;
         K /= f;
@@ -29873,8 +29879,8 @@
           case Sk.ffi.PyType.INSTANCE:
             switch (Sk.ffi.typeName(c)) {
             case 'Euclidean2':
-              var e = Sk.ffi.remapToJs(b), f = Sk.ffi.remapToJs(c), g = e.w, h = e.x, l = e.y, e = e.xy, m = f.w, C = f.x, w = f.y, f = f.xy;
-              return d(g * m + h * C + l * w - e * f, g * C + h * m - l * f + e * w, g * w + h * f + l * m - e * C, g * f + h * w - l * C + e * m);
+              var e = Sk.ffi.remapToJs(b), f = Sk.ffi.remapToJs(c), g = e.w, h = e.x, l = e.y, e = e.xy, m = f.w, D = f.x, w = f.y, f = f.xy;
+              return d(g * m + h * D + l * w - e * f, g * D + h * m - l * f + e * w, g * w + h * f + l * m - e * D, g * f + h * w - l * D + e * m);
             case 'Unit':
               return Sk.ffi.callsim(a.Measure, b, c);
             default:
@@ -29900,11 +29906,11 @@
           if (c(e))
             d.w *= e, d.x *= e, d.y *= e, d.xy *= e;
           else {
-            var f = d.w, g = d.x, h = d.y, k = d.xy, l = e.w, m = e.x, D = e.y, e = e.xy;
-            d.w = f * l + g * m + h * D - k * e;
-            d.x = f * m + g * l - h * e + k * D;
-            d.y = f * D + g * e + h * l - k * m;
-            d.xy = f * e + g * D - h * m + k * l;
+            var f = d.w, g = d.x, h = d.y, k = d.xy, l = e.w, m = e.x, C = e.y, e = e.xy;
+            d.w = f * l + g * m + h * C - k * e;
+            d.x = f * m + g * l - h * e + k * C;
+            d.y = f * C + g * e + h * l - k * m;
+            d.xy = f * e + g * C - h * m + k * l;
           }
           return a;
         });
@@ -29945,11 +29951,11 @@
           if (c(e))
             d.w *= e, d.x *= e, d.y *= e, d.xy *= e;
           else {
-            var f = d.w, g = d.x, h = d.y, k = d.xy, l = e.w, m = e.x, D = e.y, e = e.xy;
+            var f = d.w, g = d.x, h = d.y, k = d.xy, l = e.w, m = e.x, C = e.y, e = e.xy;
             d.w = f * l;
             d.x = f * m + g * l;
-            d.y = f * D + h * l;
-            d.xy = f * e + g * D - h * m + k * l;
+            d.y = f * C + h * l;
+            d.xy = f * e + g * C - h * m + k * l;
           }
           return a;
         });
@@ -29999,13 +30005,13 @@
         m.__irshift__ = Sk.ffi.functionPy(function (a, b) {
           var d = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(b);
           if (c(e)) {
-            var f = d.w, g = d.x, h = d.y, k = d.xy, l = e, m = 0, D = 0, I = 0;
+            var f = d.w, g = d.x, h = d.y, k = d.xy, l = e, m = 0, C = 0, I = 0;
             d.w *= e;
             d.x *= -e;
             d.y *= -e;
             d.xy *= e;
           } else
-            f = d.w, g = d.x, h = d.y, k = d.xy, l = e.w, m = e.x, D = e.y, I = e.xy, d.w = f * l + g * m + h * D - k * I, d.x = +g * l + k * D, d.y = +h * l - k * m, d.xy = k * l;
+            f = d.w, g = d.x, h = d.y, k = d.xy, l = e.w, m = e.x, C = e.y, I = e.xy, d.w = f * l + g * m + h * C - k * I, d.x = +g * l + k * C, d.y = +h * l - k * m, d.xy = k * l;
           return a;
         });
         m.nb$negative = function () {
@@ -31238,7 +31244,7 @@
         return 0 < f.length ? f.join('') : '0';
       }
       function f(a, b, c, e, f, g, h, k, x) {
-        var z = +f, C = +g, w = +h, D = -k, I = +(f * z + g * C + h * w - k * D), J = z * I + -0 * C + -0 * w - -0 * D, K = -0 * z + C * I - -0 * w + -0 * D, H = -0 * z + -0 * C + w * I - -0 * D, z = -0 * z + -0 * C - -0 * w + D * I;
+        var z = +f, D = +g, w = +h, C = -k, I = +(f * z + g * D + h * w - k * C), J = z * I + -0 * D + -0 * w - -0 * C, K = -0 * z + D * I - -0 * w + -0 * C, H = -0 * z + -0 * D + w * I - -0 * C, z = -0 * z + -0 * D - -0 * w + C * I;
         f = f * J + g * K + h * H - k * z;
         J /= f;
         K /= f;
@@ -31281,7 +31287,7 @@
         return d(0, 0, 0, Sk.ffi.remapToJs(a));
       });
       a.Lorentzian = Sk.ffi.buildClass(a, function (b, g) {
-        g.__init__ = Sk.ffi.functionPy(function (a, b, c, d, e, f, g, h, l, m, D, I, J, K, H, G, L) {
+        g.__init__ = Sk.ffi.functionPy(function (a, b, c, d, e, f, g, h, l, m, C, I, J, K, H, G, L) {
           Sk.ffi.checkMethodArgs('Lorentzian', arguments, 1, 16);
           if (k(b))
             Sk.ffi.checkMethodArgs('Lorentzian', arguments, 1, 1), Sk.ffi.referenceToPy(Sk.ffi.remapToJs(b), 'Lorentzian', void 0, a);
@@ -31297,7 +31303,7 @@
             A[6] = h;
             A[7] = l;
             A[8] = m;
-            A[9] = D;
+            A[9] = C;
             A[10] = I;
             A[11] = J;
             A[12] = K;
@@ -31310,8 +31316,8 @@
         g.__add__ = Sk.ffi.functionPy(function (b, c) {
           var d = Sk.ffi.remapToJs(b), e = Sk.ffi.remapToJs(c);
           if (k(c)) {
-            var f = Sk.ffi.numberToFloatPy(0), g = Sk.ffh.add(d[0], e[0]), l = Sk.ffh.add(d[1], e[1]), m = Sk.ffh.add(d[2], e[2]), C = f, w = Sk.ffh.add(d[4], e[4]), D = f, I = f, J = f, d = Sk.ffh.add(d[8], e[8]);
-            return Sk.ffi.callsim(a.Lorentzian, g, l, m, C, w, D, I, J, d, f, f, f, f, f, f, f);
+            var f = Sk.ffi.numberToFloatPy(0), g = Sk.ffh.add(d[0], e[0]), l = Sk.ffh.add(d[1], e[1]), m = Sk.ffh.add(d[2], e[2]), D = f, w = Sk.ffh.add(d[4], e[4]), C = f, I = f, J = f, d = Sk.ffh.add(d[8], e[8]);
+            return Sk.ffi.callsim(a.Lorentzian, g, l, m, D, w, C, I, J, d, f, f, f, f, f, f, f);
           }
           if (Sk.ffi.isNum(c))
             return f = Sk.ffi.numberToFloatPy(0), g = Sk.ffh.add(d[0], e), l = d[1], m = d[2], w = d[4], d = d[8], Sk.ffi.callsim(a.Lorentzian, g, l, m, f, w, f, f, f, d, f, f, f, f, f, f, f);
@@ -31506,7 +31512,7 @@
                   11,
                   10
                 ]
-              ])), C = d(e([
+              ])), D = d(e([
                 [
                   1,
                   2,
@@ -31603,7 +31609,7 @@
                   12,
                   15
                 ]
-              ])), D = d(e([[
+              ])), C = d(e([[
                   1,
                   4,
                   0
@@ -31652,10 +31658,10 @@
                   15,
                   0
                 ]]));
-            return Sk.ffi.callsim(a.Lorentzian, l, m, C, w, D, I, J, K, H, G, L, A, F, y, t, v);
+            return Sk.ffi.callsim(a.Lorentzian, l, m, D, w, C, I, J, K, H, G, L, A, F, y, t, v);
           }
           if (Sk.ffi.isNum(c))
-            return l = Sk.ffh.add(f[0], g), m = Sk.ffh.add(f[1], g), C = Sk.ffh.add(f[2], g), w = Sk.ffh.add(f[3], g), D = Sk.ffh.add(f[4], g), I = Sk.ffh.add(f[5], g), J = Sk.ffh.add(f[6], g), K = Sk.ffh.add(f[7], g), H = Sk.ffh.add(f[8], g), G = Sk.ffh.add(f[9], g), L = Sk.ffh.add(f[10], g), A = Sk.ffh.add(f[11], g), F = Sk.ffh.add(f[12], g), y = Sk.ffh.add(f[13], g), t = Sk.ffh.add(f[14], g), v = Sk.ffh.add(f[15], g), Sk.ffi.callsim(a.Lorentzian, l, m, C, w, D, I, J, K, H, G, L, A, F, y, t, v);
+            return l = Sk.ffh.add(f[0], g), m = Sk.ffh.add(f[1], g), D = Sk.ffh.add(f[2], g), w = Sk.ffh.add(f[3], g), C = Sk.ffh.add(f[4], g), I = Sk.ffh.add(f[5], g), J = Sk.ffh.add(f[6], g), K = Sk.ffh.add(f[7], g), H = Sk.ffh.add(f[8], g), G = Sk.ffh.add(f[9], g), L = Sk.ffh.add(f[10], g), A = Sk.ffh.add(f[11], g), F = Sk.ffh.add(f[12], g), y = Sk.ffh.add(f[13], g), t = Sk.ffh.add(f[14], g), v = Sk.ffh.add(f[15], g), Sk.ffi.callsim(a.Lorentzian, l, m, D, w, C, I, J, K, H, G, L, A, F, y, t, v);
           Sk.ffi.checkRhsOperandType('multiply', h, !1, c);
         });
         g.__rmul__ = Sk.ffi.functionPy(function (a, b) {
@@ -31670,11 +31676,11 @@
           if (c(e))
             d.w *= e, d.x *= e, d.y *= e, d.xy *= e;
           else {
-            var f = d.w, g = d.x, h = d.y, k = d.xy, l = e.w, m = e.x, D = e.y, e = e.xy;
-            d.w = f * l + g * m + h * D - k * e;
-            d.x = f * m + g * l - h * e + k * D;
-            d.y = f * D + g * e + h * l - k * m;
-            d.xy = f * e + g * D - h * m + k * l;
+            var f = d.w, g = d.x, h = d.y, k = d.xy, l = e.w, m = e.x, C = e.y, e = e.xy;
+            d.w = f * l + g * m + h * C - k * e;
+            d.x = f * m + g * l - h * e + k * C;
+            d.y = f * C + g * e + h * l - k * m;
+            d.xy = f * e + g * C - h * m + k * l;
           }
           return a;
         });
@@ -31715,11 +31721,11 @@
           if (c(e))
             d.w *= e, d.x *= e, d.y *= e, d.xy *= e;
           else {
-            var f = d.w, g = d.x, h = d.y, k = d.xy, l = e.w, m = e.x, D = e.y, e = e.xy;
+            var f = d.w, g = d.x, h = d.y, k = d.xy, l = e.w, m = e.x, C = e.y, e = e.xy;
             d.w = f * l;
             d.x = f * m + g * l;
-            d.y = f * D + h * l;
-            d.xy = f * e + g * D - h * m + k * l;
+            d.y = f * C + h * l;
+            d.xy = f * e + g * C - h * m + k * l;
           }
           return a;
         });
@@ -31769,13 +31775,13 @@
         g.__irshift__ = Sk.ffi.functionPy(function (a, b) {
           var d = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(b);
           if (c(e)) {
-            var f = d.w, g = d.x, h = d.y, k = d.xy, l = e, m = 0, D = 0, I = 0;
+            var f = d.w, g = d.x, h = d.y, k = d.xy, l = e, m = 0, C = 0, I = 0;
             d.w *= e;
             d.x *= -e;
             d.y *= -e;
             d.xy *= e;
           } else
-            f = d.w, g = d.x, h = d.y, k = d.xy, l = e.w, m = e.x, D = e.y, I = e.xy, d.w = f * l + g * m + h * D - k * I, d.x = +g * l + k * D, d.y = +h * l - k * m, d.xy = k * l;
+            f = d.w, g = d.x, h = d.y, k = d.xy, l = e.w, m = e.x, C = e.y, I = e.xy, d.w = f * l + g * m + h * C - k * I, d.x = +g * l + k * C, d.y = +h * l - k * m, d.xy = k * l;
           return a;
         });
         g.nb$negative = function () {
@@ -32821,18 +32827,14 @@
           var d = Sk.ffi.remapToJs(b), f = Sk.ffi.remapToJs(c);
           return Sk.ffi.callsim(a.Measure, Sk.ffh.subtract(d.qtyPy, f.qtyPy), Sk.ffi.callsim(Sk.ffi.gattr(d.uomPy, 'compatible'), f.uomPy));
         });
-        d.__mul__ = Sk.ffi.functionPy(function (b, d) {
-          var f = Sk.ffi.remapToJs(b);
-          if (e(d)) {
-            var g = Sk.ffi.remapToJs(d);
-            return Sk.ffi.callsim(a.Measure, Sk.ffh.multiply(f.qtyPy, g.qtyPy), Sk.ffh.multiply(f.uomPy, g.uomPy));
+        d.__mul__ = Sk.ffi.functionPy(function (b, c) {
+          var d = Sk.ffi.remapToJs(b);
+          if (e(c)) {
+            var f = Sk.ffi.remapToJs(c);
+            return Sk.ffi.callsim(a.Measure, Sk.ffh.multiply(d.qtyPy, f.qtyPy), Sk.ffh.multiply(d.uomPy, f.uomPy));
           }
-          if (Sk.ffi.isNum(d))
-            return Sk.ffi.callsim(a.Measure, Sk.ffh.multiply(f.qtyPy, d), f.uomPy);
-          Sk.ffi.checkArgType('other', [
-            'Measure',
-            c
-          ], !1, d);
+          if (Sk.ffi.isNum(c))
+            return Sk.ffi.callsim(a.Measure, Sk.ffh.multiply(d.qtyPy, c), d.uomPy);
         });
         d.__rmul__ = Sk.ffi.functionPy(function (b, c) {
           var d = Sk.ffi.remapToJs(b);
@@ -33182,14 +33184,14 @@
           });
           d.__getitem__ = Sk.ffi.functionPy(function (a, c) {
             var d = Sk.ffi.remapToJs(c);
-            return C(b[d]);
+            return D(b[d]);
           });
           d.mp$length = function () {
             return b.length;
           };
           d.__str__ = Sk.ffi.functionPy(function (a) {
             return Sk.ffh.str(Sk.ffi.listPy(b.map(function (a) {
-              return C(a);
+              return D(a);
             })));
           });
           d.__repr__ = Sk.ffi.functionPy(function (a) {
@@ -33197,13 +33199,13 @@
           });
         }, 'faces', []));
       }
-      function C(b) {
+      function D(b) {
         return Sk.ffi.callsim(a[Sk.three.FACE_3], Sk.ffi.referenceToPy(b, Sk.three.FACE_3));
       }
       function w(b) {
         return Sk.ffi.callsim(a.Color, Sk.ffi.referenceToPy(b, 'Color'));
       }
-      function D(b) {
+      function C(b) {
         return Sk.ffi.callsim(Sk.ffi.buildClass(a, function (c, d) {
           d.__init__ = Sk.ffi.functionPy(function (a) {
             Sk.ffi.referenceToPy(b, 'colors', void 0, a);
@@ -33344,7 +33346,7 @@
         case 'faces':
           return z(e.faces);
         case 'colors':
-          return D(e.colors);
+          return C(e.colors);
         case 'vertices':
           return x(e.vertices);
         case 'radius':
@@ -33479,15 +33481,15 @@
         c = (b - a) / c;
         for (g = 0; g < d; g++)
           for (r = (g + 0) % d, s = (g + 1) % d, 0 !== a ? (p = this.vertices[m[0][r]].clone(), q = this.vertices[m[0][s]].clone()) : (p = this.vertices[m[1][r]].clone(), q = this.vertices[m[1][s]].clone()), l = p.getComponent((k + 2) % 3), t = p.getComponent((k + 1) % 3), p.setComponent((k + 0) % 3, Math.sqrt(l * l + t * t) * c), p.normalize(), l = q.getComponent((k + 2) % 3), t = q.getComponent((k + 1) % 3), q.setComponent((k + 0) % 3, Math.sqrt(l * l + t * t) * c), q.normalize(), l = 0; l < e; l++) {
-            var t = m[l][r], u = m[l + 1][r], v = m[l + 1][s], w = m[l][s], x = p.clone(), y = p.clone(), z = q.clone(), A = q.clone(), C = n[l][r].clone(), D = n[l + 1][r].clone(), F = n[l + 1][s].clone(), G = n[l][s].clone();
+            var t = m[l][r], u = m[l + 1][r], v = m[l + 1][s], w = m[l][s], x = p.clone(), y = p.clone(), z = q.clone(), A = q.clone(), D = n[l][r].clone(), C = n[l + 1][r].clone(), F = n[l + 1][s].clone(), G = n[l][s].clone();
             this.faces.push(new THREE.Face3(t, u, w, [
               x,
               y,
               A
             ]));
             this.faceVertexUvs[0].push([
-              C,
               D,
+              C,
               G
             ]);
             this.faces.push(new THREE.Face3(u, v, w, [
@@ -33496,31 +33498,31 @@
               A
             ]));
             this.faceVertexUvs[0].push([
-              D,
+              C,
               F,
               G
             ]);
           }
         if (!1 === f && 0 < a)
           for (this.vertices.push(Sk.three.vector3Cycle(+h, 0, 0, k)), g = 0; g < d; g++)
-            r = (g + 0) % d, s = (g + 1) % d, t = m[0][r], u = m[0][s], v = this.vertices.length - 1, x = Sk.three.vector3Cycle(1, 0, 0, k), y = Sk.three.vector3Cycle(1, 0, 0, k), z = Sk.three.vector3Cycle(1, 0, 0, k), C = n[0][r].clone(), D = n[0][s].clone(), F = new THREE.Vector2(D.u, 0), this.faces.push(new THREE.Face3(t, u, v, [
+            r = (g + 0) % d, s = (g + 1) % d, t = m[0][r], u = m[0][s], v = this.vertices.length - 1, x = Sk.three.vector3Cycle(1, 0, 0, k), y = Sk.three.vector3Cycle(1, 0, 0, k), z = Sk.three.vector3Cycle(1, 0, 0, k), D = n[0][r].clone(), C = n[0][s].clone(), F = new THREE.Vector2(C.u, 0), this.faces.push(new THREE.Face3(t, u, v, [
               x,
               y,
               z
             ])), this.faceVertexUvs[0].push([
-              C,
               D,
+              C,
               F
             ]);
         if (!1 === f && 0 < b)
           for (this.vertices.push(Sk.three.vector3Cycle(-h, 0, 0, k)), g = 0; g < d; g++)
-            r = (g + 0) % d, s = (g + 1) % d, t = m[e][s], u = m[e][r], v = this.vertices.length - 1, x = Sk.three.vector3Cycle(-1, 0, 0, k), y = Sk.three.vector3Cycle(-1, 0, 0, k), z = Sk.three.vector3Cycle(-1, 0, 0, k), C = n[e][s].clone(), D = n[e][r].clone(), F = new THREE.Vector2(D.u, 1), this.faces.push(new THREE.Face3(t, u, v, [
+            r = (g + 0) % d, s = (g + 1) % d, t = m[e][s], u = m[e][r], v = this.vertices.length - 1, x = Sk.three.vector3Cycle(-1, 0, 0, k), y = Sk.three.vector3Cycle(-1, 0, 0, k), z = Sk.three.vector3Cycle(-1, 0, 0, k), D = n[e][s].clone(), C = n[e][r].clone(), F = new THREE.Vector2(C.u, 1), this.faces.push(new THREE.Face3(t, u, v, [
               x,
               y,
               z
             ])), this.faceVertexUvs[0].push([
-              C,
               D,
+              C,
               F
             ]);
         this.computeCentroids();
@@ -37015,16 +37017,16 @@
     var a, b, c;
     a = this.BLADE = this.BLADE || {};
     c = function (b, c, f, g, h, k, l, m, n) {
-      var p, q, s, r, u, x, z, C;
+      var p, q, s, r, u, x, z, D;
       u = +h;
       x = +k;
       z = +l;
-      C = -m;
-      p = +(h * u + k * x + l * z - m * C);
-      q = u * p + -0 * x + -0 * z - -0 * C;
-      s = -0 * u + x * p - -0 * z + -0 * C;
-      r = -0 * u + -0 * x + z * p - -0 * C;
-      p = -0 * u + -0 * x - -0 * z + C * p;
+      D = -m;
+      p = +(h * u + k * x + l * z - m * D);
+      q = u * p + -0 * x + -0 * z - -0 * D;
+      s = -0 * u + x * p - -0 * z + -0 * D;
+      r = -0 * u + -0 * x + z * p - -0 * D;
+      p = -0 * u + -0 * x - -0 * z + D * p;
       h = h * q + k * s + l * r - m * p;
       q /= h;
       s /= h;
@@ -37285,8 +37287,8 @@
   (function () {
     var a, b, c, d;
     a = this.BLADE = this.BLADE || {};
-    d = function (a, b, c, d, k, l, m, n, p, q, s, r, u, x, z, C, w) {
-      var D;
+    d = function (a, b, c, d, k, l, m, n, p, q, s, r, u, x, z, D, w) {
+      var C;
       a = +a;
       b = +b;
       c = +c;
@@ -37302,37 +37304,37 @@
       u = +u;
       x = +x;
       z = +z;
-      C = +C;
-      D = 0;
+      D = +D;
+      C = 0;
       switch (~~(w | 0)) {
       case 0:
-        D = +(a * p + b * q + c * s + d * r - k * u - l * x - m * z - n * C);
+        C = +(a * p + b * q + c * s + d * r - k * u - l * x - m * z - n * D);
         break;
       case 1:
-        D = +(a * q + b * p - c * u + d * z + k * s - l * C - m * r - n * x);
+        C = +(a * q + b * p - c * u + d * z + k * s - l * D - m * r - n * x);
         break;
       case 2:
-        D = +(a * s + b * u + c * p - d * x - k * q + l * r - m * C - n * z);
+        C = +(a * s + b * u + c * p - d * x - k * q + l * r - m * D - n * z);
         break;
       case 3:
-        D = +(a * r - b * z + c * x + d * p - k * C - l * s + m * q - n * u);
+        C = +(a * r - b * z + c * x + d * p - k * D - l * s + m * q - n * u);
         break;
       case 4:
-        D = +(a * u + b * s - c * q + d * C + k * p - l * z + m * x + n * r);
+        C = +(a * u + b * s - c * q + d * D + k * p - l * z + m * x + n * r);
         break;
       case 5:
-        D = +(a * x + b * C + c * r - d * s + k * z + l * p - m * u + n * q);
+        C = +(a * x + b * D + c * r - d * s + k * z + l * p - m * u + n * q);
         break;
       case 6:
-        D = +(a * z - b * r + c * C + d * q - k * x + l * u + m * p + n * s);
+        C = +(a * z - b * r + c * D + d * q - k * x + l * u + m * p + n * s);
         break;
       case 7:
-        D = +(a * C + b * x + c * z + d * u + k * r + l * q + m * s + n * p);
+        C = +(a * D + b * x + c * z + d * u + k * r + l * q + m * s + n * p);
       }
-      return +D;
+      return +C;
     };
-    c = function (b, c, g, h, k, l, m, n, p, q, s, r, u, x, z, C, w) {
-      var D, I, J, K, H, G, L, A, F, y, t, v, E, B, M, N, O, P, T;
+    c = function (b, c, g, h, k, l, m, n, p, q, s, r, u, x, z, D, w) {
+      var C, I, J, K, H, G, L, A, F, y, t, v, E, B, M, N, O, P, T;
       y = +p;
       t = +q;
       A = +s;
@@ -37340,24 +37342,24 @@
       E = +u;
       B = -x;
       M = -z;
-      N = -C;
-      F = d(p, q, s, u, r, z, -x, C, y, t, A, E, v, M, -B, N, 0);
-      H = d(p, q, s, u, r, z, -x, C, y, t, A, E, v, M, -B, N, 1);
-      G = d(p, q, s, u, r, z, -x, C, y, t, A, E, v, M, -B, N, 2);
-      L = d(p, q, s, u, r, z, -x, C, y, t, A, E, v, M, -B, N, 3);
-      D = +F;
+      N = -D;
+      F = d(p, q, s, u, r, z, -x, D, y, t, A, E, v, M, -B, N, 0);
+      H = d(p, q, s, u, r, z, -x, D, y, t, A, E, v, M, -B, N, 1);
+      G = d(p, q, s, u, r, z, -x, D, y, t, A, E, v, M, -B, N, 2);
+      L = d(p, q, s, u, r, z, -x, D, y, t, A, E, v, M, -B, N, 3);
+      C = +F;
       I = -H;
       J = -G;
       K = -L;
-      O = d(y, t, A, E, v, M, -B, N, D, I, J, K, -0, -0, 0, 0, 0);
-      P = d(y, t, A, E, v, M, -B, N, D, I, J, K, -0, -0, 0, 0, 1);
-      T = d(y, t, A, E, v, M, -B, N, D, I, J, K, -0, -0, 0, 0, 2);
-      F = d(y, t, A, E, v, M, -B, N, D, I, J, K, -0, -0, 0, 0, 4);
-      H = d(y, t, A, E, v, M, -B, N, D, I, J, K, -0, -0, 0, 0, 3);
-      G = -d(y, t, A, E, v, M, -B, N, D, I, J, K, -0, -0, 0, 0, 6);
-      L = d(y, t, A, E, v, M, -B, N, D, I, J, K, -0, -0, 0, 0, 5);
-      y = d(y, t, A, E, v, M, -B, N, D, I, J, K, -0, -0, 0, 0, 7);
-      u = d(p, q, s, u, r, z, -x, C, O, P, T, H, F, L, -G, y, 0);
+      O = d(y, t, A, E, v, M, -B, N, C, I, J, K, -0, -0, 0, 0, 0);
+      P = d(y, t, A, E, v, M, -B, N, C, I, J, K, -0, -0, 0, 0, 1);
+      T = d(y, t, A, E, v, M, -B, N, C, I, J, K, -0, -0, 0, 0, 2);
+      F = d(y, t, A, E, v, M, -B, N, C, I, J, K, -0, -0, 0, 0, 4);
+      H = d(y, t, A, E, v, M, -B, N, C, I, J, K, -0, -0, 0, 0, 3);
+      G = -d(y, t, A, E, v, M, -B, N, C, I, J, K, -0, -0, 0, 0, 6);
+      L = d(y, t, A, E, v, M, -B, N, C, I, J, K, -0, -0, 0, 0, 5);
+      y = d(y, t, A, E, v, M, -B, N, C, I, J, K, -0, -0, 0, 0, 7);
+      u = d(p, q, s, u, r, z, -x, D, O, P, T, H, F, L, -G, y, 0);
       p = O / u;
       q = P / u;
       s = T / u;
@@ -37369,13 +37371,13 @@
       u = d(b, c, g, k, h, m, -l, n, p, q, s, H, r, L, -G, A, 0);
       x = d(b, c, g, k, h, m, -l, n, p, q, s, H, r, L, -G, A, 1);
       z = d(b, c, g, k, h, m, -l, n, p, q, s, H, r, L, -G, A, 2);
-      C = d(b, c, g, k, h, m, -l, n, p, q, s, H, r, L, -G, A, 4);
+      D = d(b, c, g, k, h, m, -l, n, p, q, s, H, r, L, -G, A, 4);
       F = d(b, c, g, k, h, m, -l, n, p, q, s, H, r, L, -G, A, 3);
       t = -d(b, c, g, k, h, m, -l, n, p, q, s, H, r, L, -G, A, 6);
       y = d(b, c, g, k, h, m, -l, n, p, q, s, H, r, L, -G, A, 5);
       b = d(b, c, g, k, h, m, -l, n, p, q, s, H, r, L, -G, A, 7);
       c = -t;
-      return 'undefined' !== typeof w ? (w.w = u, w.x = x, w.y = z, w.z = F, w.xy = C, w.yz = y, w.zx = c, w.xyz = b) : new a.Euclidean3(u, x, z, F, C, y, c, b);
+      return 'undefined' !== typeof w ? (w.w = u, w.x = x, w.y = z, w.z = F, w.xy = D, w.yz = y, w.zx = c, w.xyz = b) : new a.Euclidean3(u, x, z, F, D, y, c, b);
     };
     b = function () {
       function b(a, c, d, e, l, m, n, p) {
@@ -37426,7 +37428,7 @@
         }
       };
       b.compute = function (a, b, c, d, e) {
-        var m, n, p, q, s, r, u, x, z, C, w, D, I, J, K, H, G, L, A, F;
+        var m, n, p, q, s, r, u, x, z, D, w, C, I, J, K, H, G, L, A, F;
         m = d(b, 0);
         n = d(b, 1);
         p = d(b, 2);
@@ -37437,20 +37439,20 @@
         b = d(b, 7);
         x = d(c, 0);
         z = d(c, 1);
-        C = d(c, 2);
+        D = d(c, 2);
         w = d(c, 3);
-        D = d(c, 4);
+        C = d(c, 4);
         I = d(c, 5);
         J = d(c, 6);
         K = d(c, 7);
-        c = a(m, n, p, q, s, r, u, b, x, z, C, w, D, I, J, K, 0);
-        d = a(m, n, p, q, s, r, u, b, x, z, C, w, D, I, J, K, 1);
-        H = a(m, n, p, q, s, r, u, b, x, z, C, w, D, I, J, K, 2);
-        G = a(m, n, p, q, s, r, u, b, x, z, C, w, D, I, J, K, 3);
-        L = a(m, n, p, q, s, r, u, b, x, z, C, w, D, I, J, K, 4);
-        A = a(m, n, p, q, s, r, u, b, x, z, C, w, D, I, J, K, 5);
-        F = a(m, n, p, q, s, r, u, b, x, z, C, w, D, I, J, K, 6);
-        a = a(m, n, p, q, s, r, u, b, x, z, C, w, D, I, J, K, 7);
+        c = a(m, n, p, q, s, r, u, b, x, z, D, w, C, I, J, K, 0);
+        d = a(m, n, p, q, s, r, u, b, x, z, D, w, C, I, J, K, 1);
+        H = a(m, n, p, q, s, r, u, b, x, z, D, w, C, I, J, K, 2);
+        G = a(m, n, p, q, s, r, u, b, x, z, D, w, C, I, J, K, 3);
+        L = a(m, n, p, q, s, r, u, b, x, z, D, w, C, I, J, K, 4);
+        A = a(m, n, p, q, s, r, u, b, x, z, D, w, C, I, J, K, 5);
+        F = a(m, n, p, q, s, r, u, b, x, z, D, w, C, I, J, K, 6);
+        a = a(m, n, p, q, s, r, u, b, x, z, D, w, C, I, J, K, 7);
         return e(c, d, H, G, L, A, F, a);
       };
       b.prototype.add = function (c) {
@@ -38068,9 +38070,9 @@
           }
           return +p;
         },
-        addE3: function (a, b, c, g, h, k, l, m, n, p, q, s, r, u, x, z, C) {
+        addE3: function (a, b, c, g, h, k, l, m, n, p, q, s, r, u, x, z, D) {
           var w = 0;
-          switch (~~(C | 0)) {
+          switch (~~(D | 0)) {
           case 0:
             w = +(+a + +n);
             break;
@@ -38097,9 +38099,9 @@
           }
           return +w;
         },
-        subE3: function (a, b, c, g, h, k, l, m, n, p, q, s, r, u, x, z, C) {
+        subE3: function (a, b, c, g, h, k, l, m, n, p, q, s, r, u, x, z, D) {
           var w = 0;
-          switch (~~(C | 0)) {
+          switch (~~(D | 0)) {
           case 0:
             w = +(+a - +n);
             break;
@@ -38126,7 +38128,7 @@
           }
           return +w;
         },
-        mulE3: function (a, b, c, g, h, k, l, m, n, p, q, s, r, u, x, z, C) {
+        mulE3: function (a, b, c, g, h, k, l, m, n, p, q, s, r, u, x, z, D) {
           a = +a;
           b = +b;
           c = +c;
@@ -38144,7 +38146,7 @@
           x = +x;
           z = +z;
           var w = 0;
-          switch (~~(C | 0)) {
+          switch (~~(D | 0)) {
           case 0:
             w = +(a * n + b * p + c * q + g * s - h * r - k * u - l * x - m * z);
             break;
@@ -38171,7 +38173,7 @@
           }
           return +w;
         },
-        extE3: function (a, b, c, g, h, k, l, m, n, p, q, s, r, u, x, z, C) {
+        extE3: function (a, b, c, g, h, k, l, m, n, p, q, s, r, u, x, z, D) {
           a = +a;
           b = +b;
           c = +c;
@@ -38187,7 +38189,7 @@
           u = +u;
           x = +x;
           var w = 0;
-          switch (~~(C | 0)) {
+          switch (~~(D | 0)) {
           case 0:
             w = +(a * n);
             break;
@@ -38214,7 +38216,7 @@
           }
           return +w;
         },
-        lcoE3: function (a, b, c, g, h, k, l, m, n, p, q, s, r, u, x, z, C) {
+        lcoE3: function (a, b, c, g, h, k, l, m, n, p, q, s, r, u, x, z, D) {
           a = +a;
           b = +b;
           c = +c;
@@ -38230,7 +38232,7 @@
           x = +x;
           z = +z;
           var w = 0;
-          switch (~~(C | 0)) {
+          switch (~~(D | 0)) {
           case 0:
             w = +(a * +n + b * p + c * q + g * s - h * r - k * u - l * x - +m * z);
             break;
@@ -38257,7 +38259,7 @@
           }
           return +w;
         },
-        rcoE3: function (a, b, c, g, h, k, l, m, n, p, q, s, r, u, x, z, C) {
+        rcoE3: function (a, b, c, g, h, k, l, m, n, p, q, s, r, u, x, z, D) {
           b = +b;
           c = +c;
           g = +g;
@@ -38273,7 +38275,7 @@
           u = +u;
           x = +x;
           var w = 0;
-          switch (~~(C | 0)) {
+          switch (~~(D | 0)) {
           case 0:
             w = +(+a * n + b * p + c * q + g * s - h * r - k * u - l * x - m * +z);
             break;
@@ -81750,7 +81752,7 @@ angular.module('app').run([
     $templateCache.put('angular/a-home.html', '<a href="/">\n' + '  <i class="icon-home"></i>\n' + '  <span>Home</span>\n' + '</a>\n');
     $templateCache.put('angular/embed.html', '<div id="embed-view">\n' + '  <div class="subnavbar">\n' + '    <div class="subnavbar-inner">\n' + '      <div class="container">\n' + '        <a class="btn-subnavbar collapsed" data-toggle="collapse" data-target=".subnav-collapse">\n' + '          <i class="icon-reorder"></i>\n' + '        </a>\n' + '        <div class="subnav-collapse collapse">\n' + '          <ul class="mainnav">\n' + '            <!--\n' + '            <li ng-show="isLoggedIn()" class="{{userBreadcrumbClass()}}">\n' + '              <a ng-href="/users/{{user.name}}">\n' + '                <i class="icon-user"></i>\n' + '                <span>{{i18n.translate("My Space").fetch()}}</span>\n' + '              </a>\n' + '            </li>\n' + '            -->\n' + '            <!--\n' + '            <li class="active">\n' + '              <a ng-click="reload()" href="#">\n' + '                <i class="icon-edit"></i>\n' + '                <span>Workbench</span>\n' + '              </a>\n' + '            </li>\n' + '            -->\n' + '            <!--\n' + '            <li ng-show="saveEnabled()">\n' + '              <a ng-click="saveFile()" href="#">\n' + '                <i class="icon-save"></i>\n' + '                <span>Save</span>\n' + '              </a>\n' + '            </li>\n' + '            -->\n' + '            <li ng-show="runEnabled()">\n' + '              <a ng-click="run()" href="#">\n' + '                <i class="icon-cogs"></i>\n' + '                <span>Run</span>\n' + '              </a>\n' + '            </li>\n' + '            <li class="dropdown">\n' + '              <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">\n' + '                <i class="icon-book"></i>\n' + '                <span>Help</span>\n' + '                <b class="caret"></b>\n' + '              </a>\n' + '              <ul class="dropdown-menu">\n' + '                <li><a href="https://docs.python.org/3.4/" target="_blank">Python documentation</a></li>\n' + '                <li><a href="http://docs.scipy.org/doc/" target="_blank">Numpy documentation</a></li>\n' + '                <li><a href="http://threejs.org/docs/" target="_blank">three.js documentation</a></li>\n' + '                <li><a href="http://jsxgraph.uni-bayreuth.de/wp/documentation/" target="_blank">JSXGraph documentation</a></li>\n' + '              </ul>\n' + '            </li>\n' + '          </ul>\n' + '        </div>\n' + '      </div>\n' + '    </div>\n' + '  </div>\n' + '  \n' + '  <div id="embed-layout" class="container-fluid">\n' + '\n' + '    <div class="row-fluid">\n' + '      <div class="span7">\n' + '        <div class="alert alert-block alert-{{message.severity}}" ng-repeat="message in messages"  ng-show="messages.length &gt; 0">\n' + '          <button type="button" class="close" data-dismiss="alert">&times;</button>\n' + '          <h4>{{message.name}}</h4>\n' + '          {{message.text}}\n' + '        </div>\n' + '        <div id="textarea-container">\n' + '          <textarea id="code"></textarea>\n' + '        </div>\n' + '      </div>\n' + '      <div class="span5">\n' + '        <div id="printer-container">\n' + '          <printer></printer>\n' + '        </div>\n' + '        <div id="graph-container">\n' + '        </div>\n' + '        <div id="canvas-container">\n' + '        </div>\n' + '      </div>\n' + '    </div>\n' + '\n' + '  </div>\n' + '</div>');
     $templateCache.put('angular/github-authorize.html', '<li>\n' + '  <!-- When logged out, present the user with an OAuth link-->\n' + '  <a ng-hide="isLoggedIn()" ng-href="https://github.com/login/oauth/authorize?client_id={{clientId()}}&amp;scope=repo,user,gist">\n' + '    <i class="icon-signin"></i>\n' + '    <span>Log In</span>\n' + '  </a>\n' + '\n' + '  <!-- TODO: When logged in, we would like to have a dropdown menu-->\n' + '  <a ng-show="isLoggedIn()" ng-click="logout()" href="#">\n' + '    <i class="icon-signout icon-white"></i>\n' + '    <span>{{userLogin()}}</span>\n' + '  </a>\n' + '</li>');
-    $templateCache.put('angular/home.html', '<div id="home-view">\n' + '  <div class="subnavbar">\n' + '    <div class="subnavbar-inner">\n' + '      <div class="container">\n' + '        <a class="btn-subnavbar collapsed" data-toggle="collapse" data-target=".subnav-collapse">\n' + '          <i class="icon-reorder"></i>\n' + '        </a>\n' + '        <div class="subnav-collapse collapse">\n' + '          <ul class="mainnav">\n' + '            <li class="active">\n' + '              <a-home></a-home>\n' + '            </li>\n' + '            <li ng-show="isLoggedIn()">\n' + '              <a ng-href="/users/{{userLogin()}}">\n' + '                <i class="icon-user"></i>\n' + '                <span>{{i18n.translate("My Space").fetch()}}</span>\n' + '              </a>\n' + '            </li>\n' + '            <li class="dropdown">\n' + '              <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">\n' + '                <i class="icon-eye-open"></i>\n' + '                <span>Learn</span>\n' + '                <b class="caret"></b>\n' + '              </a>\n' + '              <ul class="dropdown-menu">\n' + '                <li><a href="http://geometryzen.github.io/mission/" target="_blank">Our Mission</a></li>\n' + '                <li><a href="/users/geometryzen/repos/demos/tree/master">Browse Examples</a></li>\n' + '                <li><a href="http://geometryzen.github.io/start/" target="_blank">Getting Started</a></li>\n' + '              </ul>\n' + '            </li>\n' + '            <li class="dropdown">\n' + '              <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">\n' + '                <i class="icon-external-link"></i>\n' + '                <span>Discuss</span>\n' + '                <b class="caret"></b>\n' + '              </a>\n' + '              <ul class="dropdown-menu">\n' + '                <li><a href="http://groups.google.com/group/geometryzen?src=email&amp;hl=en" target="_blank">Mailing List</a></li>\n' + '                <li><a href="http://webchat.freenode.net/?channels=geometryzen&amp;uio=d4" target="_blank">Web Chat</a></li>\n' + '                <li class="divider"></li>\n' + '                <li><a href="https://twitter.com/#!/geometryzen" target="_blank">Twitter</a></li>\n' + '                <li><a href="https://plus.google.com/u/0/s/Geometry%20Zen/communities" target="_blank">Google+</a></li>\n' + '                <li class="divider"></li>\n' + '                <li class="dropdown-submenu">\n' + '                  <a href="#">Source Code</a>\n' + '                  <ul class="dropdown-menu">\n' + '                    <li><a href="https://github.com/david-geo-holmes/geometry-zen" target="_blank">Application Repository</a></li>\n' + '                    <li><a href="https://github.com/geometryzen/geometryzen.github.io" target="_blank">Documentation Repository</a></li>\n' + '                  </ul>\n' + '                </li>\n' + '                <li class="divider"></li>\n' + '                <li><a href="https://github.com/geometryzen/geometryzen/issues" target="_blank">Issue Tracker</a></li>\n' + '              </ul>\n' + '            </li>\n' + '            <li>\n' + '              <a href="http://geometryzen.github.io/faq/" target="_blank" style="text-decoration: none">\n' + '                <i class="icon-question-sign"></i>\n' + '                <span>FAQ</span>\n' + '              </a>\n' + '            </li>\n' + '            <li>\n' + '              <a href="http://geometryzen.github.io/" target="_blank" style="text-decoration: none">\n' + '                <i class="icon-book"></i>\n' + '                <span>Pages</span>\n' + '              </a>\n' + '            </li>\n' + '          </ul>\n' + '        </div>\n' + '      </div>\n' + '    </div>\n' + '  </div>\n' + '\n' + '  <div class="container-fluid">\n' + '    <div class="row-fluid">\n' + '      <div class="span12">\n' + '        <div class="widget">\n' + '          <div class="widget-content">\n' + '            <div class="text-center">\n' + '              <h1>\n' + '                <large>Geometry Zen</large>\n' + '              </h1>\n' + '              <h1>\n' + '                <small><em>Computational Modeling from a Geometric perspective</em></small>\n' + '              </h1>\n' + '              <br/>\n' + '              <p><em>Geometry Zen</em> is a free, online, open-source, and collaborative tool for <em>Computational Modeling</em> combining the <em>Python</em> programming language, <em>3D visualization</em> (WebGL), <em>Physical Units</em>, and <em>Geometric Algebra</em>, the <em>Unified Mathematical Language for Physics and Engineering in the 21st Century</em>.</p>\n' + '              <p></p>\n' + '              <br/>\n' + '              <h3>Simple Harmonic Motion using Euler solution (e3ga, NumPy, JSXGraph)</h3>\n' + '              <iframe width="1000" height="760" src="http://www.geometryzen.org/embed/users/geometryzen/repos/demos/blob/master/Modeling/ode/euler3D.py" frameborder="0">\n' + '              </iframe>\n' + '              <div class="text-right">\n' + '                <blockquote>\n' + '                  <p class="muted">Science is what we understand well enough to explain to a computer.<br/>Art is everything else we do.</p>\n' + '                  <small>Donald Knuth</small>\n' + '                </blockquote>\n' + '              </div>\n' + '              <h3>Charged Particle near a Wire (e3ga, WebGL, Three.JS) Press Esc to quit</h3>\n' + '              <iframe width="1000" height="760" src="http://www.geometryzen.org/embed/users/geometryzen/repos/demos/blob/master/Physics/charged-particle-wire-2.py" frameborder="0">\n' + '              </iframe>\n' + '              <div class="text-right">\n' + '                <blockquote>\n' + '                  <p class="muted">The purpose of computing is insight, not numbers!</p>\n' + '                  <small>R. W. Hamming</small>\n' + '                </blockquote>\n' + '              </div>\n' + '              <h3>Mouse Tracking for fun (D3.JS) Press Esc to quit</h3>\n' + '              <iframe width="1000" height="760" src="http://www.geometryzen.org/embed/users/geometryzen/repos/demos/blob/master/D3/basic.py" frameborder="0">\n' + '              </iframe>\n' + '              <div class="text-right">\n' + '                <blockquote>\n' + '                  <p class="muted">If I have not seen as far as others, it is because \n' + '     giants were standing on my shoulders.</p>\n' + '                  <small>Hal Abelson</small>\n' + '                </blockquote>\n' + '              </div>\n' + '            </div>\n' + '            <div class="text-center">\n' + '              <a href="/users/geometryzen/repos/demos/tree/master" class="btn btn-primary">\n' + '                <i class="icon-th"></i>\n' + '                <span>Browse Examples</span>\n' + '              </a>\n' + '              <a href="{{jumpHRef()}}" class="btn btn-secondary">\n' + '                <i class="{{jumpIcon()}}"></i>\n' + '                <span>{{jumpText()}}</span>\n' + '              </a>\n' + '            </div>\n' + '          </div>\n' + '        </div>\n' + '      </div>\n' + '    </div>\n' + '  </div>\n' + '</div>\n');
+    $templateCache.put('angular/home.html', '<div id="home-view">\n' + '  <div class="subnavbar">\n' + '    <div class="subnavbar-inner">\n' + '      <div class="container">\n' + '        <a class="btn-subnavbar collapsed" data-toggle="collapse" data-target=".subnav-collapse">\n' + '          <i class="icon-reorder"></i>\n' + '        </a>\n' + '        <div class="subnav-collapse collapse">\n' + '          <ul class="mainnav">\n' + '            <li class="active">\n' + '              <a-home></a-home>\n' + '            </li>\n' + '            <li ng-show="isLoggedIn()">\n' + '              <a ng-href="/users/{{userLogin()}}">\n' + '                <i class="icon-user"></i>\n' + '                <span>{{i18n.translate("My Space").fetch()}}</span>\n' + '              </a>\n' + '            </li>\n' + '            <li class="dropdown">\n' + '              <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">\n' + '                <i class="icon-eye-open"></i>\n' + '                <span>Learn</span>\n' + '                <b class="caret"></b>\n' + '              </a>\n' + '              <ul class="dropdown-menu">\n' + '                <li><a href="http://geometryzen.github.io/mission/" target="_blank">Our Mission</a></li>\n' + '                <li><a href="/users/geometryzen/repos/demos/tree/master">Browse Examples</a></li>\n' + '                <li><a href="http://geometryzen.github.io/start/" target="_blank">Getting Started</a></li>\n' + '              </ul>\n' + '            </li>\n' + '            <li class="dropdown">\n' + '              <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">\n' + '                <i class="icon-external-link"></i>\n' + '                <span>Discuss</span>\n' + '                <b class="caret"></b>\n' + '              </a>\n' + '              <ul class="dropdown-menu">\n' + '                <li><a href="http://groups.google.com/group/geometryzen?src=email&amp;hl=en" target="_blank">Mailing List</a></li>\n' + '                <li><a href="http://webchat.freenode.net/?channels=geometryzen&amp;uio=d4" target="_blank">Web Chat</a></li>\n' + '                <li class="divider"></li>\n' + '                <li><a href="https://twitter.com/#!/geometryzen" target="_blank">Twitter</a></li>\n' + '                <li><a href="https://plus.google.com/u/0/s/Geometry%20Zen/communities" target="_blank">Google+</a></li>\n' + '                <li class="divider"></li>\n' + '                <li class="dropdown-submenu">\n' + '                  <a href="#">Source Code</a>\n' + '                  <ul class="dropdown-menu">\n' + '                    <li><a href="https://github.com/david-geo-holmes/geometry-zen" target="_blank">Application Repository</a></li>\n' + '                    <li><a href="https://github.com/geometryzen/geometryzen.github.io" target="_blank">Documentation Repository</a></li>\n' + '                  </ul>\n' + '                </li>\n' + '                <li class="divider"></li>\n' + '                <li><a href="https://github.com/geometryzen/geometryzen/issues" target="_blank">Issue Tracker</a></li>\n' + '              </ul>\n' + '            </li>\n' + '            <li>\n' + '              <a href="http://geometryzen.github.io/faq/" target="_blank" style="text-decoration: none">\n' + '                <i class="icon-question-sign"></i>\n' + '                <span>FAQ</span>\n' + '              </a>\n' + '            </li>\n' + '            <li>\n' + '              <a href="http://geometryzen.github.io/" target="_blank" style="text-decoration: none">\n' + '                <i class="icon-book"></i>\n' + '                <span>Pages</span>\n' + '              </a>\n' + '            </li>\n' + '          </ul>\n' + '        </div>\n' + '      </div>\n' + '    </div>\n' + '  </div>\n' + '\n' + '  <div class="container-fluid">\n' + '    <div class="row-fluid">\n' + '      <div class="span12">\n' + '        <div class="widget">\n' + '          <div class="widget-content">\n' + '            <div class="text-center">\n' + '              <h1>\n' + '                <large>Geometry Zen</large>\n' + '              </h1>\n' + '              <h1>\n' + '                <small><em>Computational Modeling from a Geometric perspective</em></small>\n' + '              </h1>\n' + '              <br/>\n' + '              <p><em>Geometry Zen</em> is a free, online, open-source, and collaborative tool for <em>Computational Modeling</em> combining the <em>Python</em> programming language, <em>3D visualization</em> (WebGL), <em>Physical Units</em>, and <em>Geometric Algebra</em>, the <em>Unified Mathematical Language for Physics and Engineering in the 21st Century</em>.</p>\n' + '              <p></p>\n' + '              <br/>\n' + '\n' + '              <h3>Simple Harmonic Motion using Euler (e3ga, NumPy, JSXGraph)</h3>\n' + '              <iframe width="1000" height="760" src="http://www.geometryzen.org/embed/users/geometryzen/repos/demos/blob/master/Modeling/ode/euler.py" frameborder="0">\n' + '              </iframe>\n' + '              <div class="text-right">\n' + '                <blockquote>\n' + '                  <p class="muted">Science is what we understand well enough to explain to a computer.<br/>Art is everything else we do.</p>\n' + '                  <small>Donald Knuth</small>\n' + '                </blockquote>\n' + '              </div>\n' + '\n' + '              <h3>Damped Simple Harmonic Motion using Runge-Kutta 4 (e3ga, units, NumPy, JSXGraph)</h3>\n' + '              <iframe width="1000" height="760" src="http://www.geometryzen.org/embed/users/geometryzen/repos/demos/blob/master/Modeling/ode/runge-kutta-4-with-units.py" frameborder="0">\n' + '              </iframe>\n' + '              <div class="text-right">\n' + '                <blockquote>\n' + '                  <p class="muted">The purpose of computing is insight, not numbers!</p>\n' + '                  <small>R. W. Hamming</small>\n' + '                </blockquote>\n' + '              </div>\n' + '\n' + '              <h3>Charged Particle near a Wire (e3ga, WebGL, Three.JS) Press Esc to quit</h3>\n' + '              <iframe width="1000" height="760" src="http://www.geometryzen.org/embed/users/geometryzen/repos/demos/blob/master/Physics/charged-particle-wire-2.py" frameborder="0">\n' + '              </iframe>\n' + '              <div class="text-right">\n' + '                <blockquote>\n' + '                  <p class="muted">What I cannot create, I do not understand.</p>\n' + '                  <small>Richard. P. Feynman</small>\n' + '                </blockquote>\n' + '              </div>\n' + '\n' + '              <h3>Mouse Tracking for fun (D3.JS) Press Esc to quit</h3>\n' + '              <iframe width="1000" height="760" src="http://www.geometryzen.org/embed/users/geometryzen/repos/demos/blob/master/D3/basic.py" frameborder="0">\n' + '              </iframe>\n' + '              <div class="text-right">\n' + '                <blockquote>\n' + '                  <p class="muted">If I have not seen as far as others, it is because \n' + '     giants were standing on my shoulders.</p>\n' + '                  <small>Hal Abelson</small>\n' + '                </blockquote>\n' + '              </div>\n' + '            </div>\n' + '            <div class="text-center">\n' + '              <a href="/users/geometryzen/repos/demos/tree/master" class="btn btn-primary">\n' + '                <i class="icon-th"></i>\n' + '                <span>Browse Examples</span>\n' + '              </a>\n' + '              <a href="{{jumpHRef()}}" class="btn btn-secondary">\n' + '                <i class="{{jumpIcon()}}"></i>\n' + '                <span>{{jumpText()}}</span>\n' + '              </a>\n' + '            </div>\n' + '          </div>\n' + '        </div>\n' + '      </div>\n' + '    </div>\n' + '  </div>\n' + '</div>\n');
     $templateCache.put('angular/printer.html', '<div ng-controller="PrinterCtrl" class="container-fluid">\n' + '  <div class="row-fluid">\n' + '    <div class="span12">\n' + '      <!-- Using anything other than a pre(serve) element is likely too be slow -->\n' + '      <!-- PRESERVE_ELEMENT_ID is defined in the printer controller -->\n' + '      <pre id="a5f435e0-c92e-11e2-8b8b-0800200c9a66" class="printer"></pre>\n' + '    </div>\n' + '  </div>\n' + '</div>\n' + '\n');
     $templateCache.put('angular/tree.html', '<div id="repo-view">\n' + '\n' + '  <div class="subnavbar">\n' + '    <div class="subnavbar-inner">\n' + '      <div class="container">\n' + '        <a class="btn-subnavbar collapsed" data-toggle="collapse" data-target=".subnav-collapse">\n' + '          <i class="icon-reorder"></i>\n' + '        </a>\n' + '        <div class="subnav-collapse collapse">\n' + '          <ul class="mainnav">\n' + '            <li ng-show="isLoggedIn()" class="{{userBreadcrumbClass()}}">\n' + '              <a ng-href="/users/{{user.login}}">\n' + '                <i class="icon-user"></i>\n' + '                <span>{{i18n.translate("My Space").fetch()}}</span>\n' + '              </a>\n' + '            </li>\n' + '            <li class="{{repoBreadcrumbClass()}}">\n' + '              <a ng-click="bookView()" href="#">\n' + '                <i class="{{i18n.translate(\'icon-repo\').fetch()}}"></i>\n' + '                <span>{{i18n.translate("Repo").fetch()}}</span>\n' + '              </a>\n' + '            </li>\n' + '          </ul>\n' + '        </div>\n' + '      </div>\n' + '    </div>\n' + '  </div>\n' + '  \n' + '  <div id="work-layout" class="container-fluid">\n' + '    <div class="row-fluid">\n' + '      <div class="widget">\n' + '        <div class="widget-header">\n' + '          <i class="{{i18n.translate(\'icon-repo\').fetch()}}"></i>\n' + '          <h3>{{repo.name}}</h3>\n' + '        </div>\n' + '        <div class="widget-content">\n' + '          <div>\n' + '            <!--\n' + '            <i class="icon-user muted"></i>\n' + '            <span><a ng-href="/users/{{user.login}}">{{user.login}}</a></span>\n' + '            -->\n' + '            <!--\n' + '            <a ng-href="https://github.com/{{user.login}}" target="_blank" class="muted">\n' + '              <i class="icon-github"></i>\n' + '            </a>\n' + '            -->\n' + '            <span>{{repo.description}}</span>\n' + '          </div>\n' + '          <ul class="nav nav-tabs" id="myTab">\n' + '            <li><a data-target="#items" data-toggle="tab">{{i18n.translate(\'File\').ifPlural(2, \'Files\').fetch()}}</a></li>\n' + '            <!--li><a data-target="#commits" data-toggle="tab">Commits</a></li-->\n' + '            <!--li><a data-target="#branches" data-toggle="tab">Branches</a></li-->\n' + '          </ul>\n' + '          <div class="tab-content">\n' + '            <div class="tab-pane" id="items">\n' + '              <div class ="row-fluid">\n' + '                <table class="table table-condensed">\n' + '                  <tbody>\n' + '                    <tr ng-show="isNewFileEnabled()">\n' + '                      <td nowrap=nowrap>\n' + '                        <!--input type="text" placeHolder="Filter..."></input-->\n' + '                      </td>\n' + '                      <td nowrap=nowrap>\n' + '                        <button ng-click="newFile()" ng-show="isNewFileEnabled()" class="btn btn-primary">\n' + '                          <i class="icon-plus-sign-alt"></i> <i class="{{i18n.translate(\'icon-file\').fetch()}}"></i>\n' + '                          <span>{{i18n.translate("Create a New File").fetch()}}</span>\n' + '                        </button>\n' + '                      </td>\n' + '                    </tr>\n' + '                    <!-- Reminder: An item is a book or a page -->\n' + '                    <tr ng-repeat="item in contextItem.childItems">\n' + '                      <td nowrap=nowrap>\n' + '                        <h3>\n' + '                          <i class="{{i18n.translate(iconFromItem(item)).fetch()}} muted"></i>\n' + '                          <a href="{{hrefFromItem(item)}}" class="btn btn-link">\n' + '                            <span>{{item.name}}</span>\n' + '                          </a>\n' + '                        </h3>\n' + '                      </td>\n' + '                      <td nowrap=nowrap>\n' + '                        <a href="{{item.html_url}}" target="_blank" class="btn btn-secondary">\n' + '                          <i class="icon-github"></i>\n' + '                          <span>GitHub</span>\n' + '                        </a>\n' + '                      </td>\n' + '                    </tr>\n' + '                  </tbody>\n' + '                </table>\n' + '              </div>\n' + '            </div>\n' + '            <div class="tab-pane" id="commits">\n' + '              <p>Under Construction: Commits</p>\n' + '            </div>\n' + '            <div class="tab-pane" id="branches">\n' + '              <p>Under Construction: Branches</p>\n' + '            </div>\n' + '          </div>\n' + '          <script>\n' + '            $(function () {\n' + '              $(\'#myTab a[data-target="#items"]\').tab(\'show\');\n' + '            })\n' + '          </script>\n' + '          <script>\n' + '            $(\'#myTab a[data-target="#items"]\').click(function(e) {\n' + '              e.preventDefault();\n' + '              $(this).tab(\'show\');\n' + '            });\n' + '          </script>\n' + '          <script>\n' + '            $(\'#myTab a[data-target="#commits"]\').click(function(e) {\n' + '              e.preventDefault();\n' + '              $(this).tab(\'show\');\n' + '            });\n' + '          </script>\n' + '          <script>\n' + '            $(\'#myTab a[data-target="#branches"]\').click(function(e) {\n' + '              e.preventDefault();\n' + '              $(this).tab(\'show\');\n' + '            });\n' + '          </script>\n' + '        </div> <!-- div.widget-content -->\n' + '      </div> <!-- div.widget -->\n' + '    </div> <!-- div.row-fluid -->\n' + '  </div> <!-- div.container-fluid -->\n' + '  <div id="new-file-dialog" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="new-file-dialog-label" aria-hidden="true">\n' + '    <div class="modal-header">\n' + '      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>\n' + '      <h3 id="new-file-dialog-label"><i class="icon-plus-sign-alt muted"></i> <i class="{{i18n.translate(\'icon-file\').fetch()}} muted"></i> {{i18n.translate("Create a New File").fetch()}}</h3>\n' + '    </div>\n' + '    <form ng-controller="NewFileCtrl">\n' + '      <fieldset>\n' + '        <div class="modal-body">\n' + '          <label>{{i18n.translate(\'File name\').fetch()}}</label>\n' + '          <input type="text" name="name" ng-model="file.name"></input>\n' + '          <label>Commit message:</label>\n' + '          <input type="text" name="message" ng-model="file.message" placeholder="{{i18n.translate(\'Create file\').fetch()}}"></input>\n' + '        </div>\n' + '        <div class="modal-footer">\n' + '          <button id="btnCancel" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>\n' + '          <button type="submit" ng-click="createFile()" id="btnOK" class="btn btn-primary">{{i18n.translate("Create file").fetch()}}</button>\n' + '        </div>\n' + '      </fieldset>\n' + '    </form>\n' + '  </div>\n' + '</div>\n');
     $templateCache.put('angular/user.html', '<div id="user-view">\n' + '  <div class="subnavbar">\n' + '    <div class="subnavbar-inner">\n' + '      <div class="container">\n' + '        <a class="btn-subnavbar collapsed" data-toggle="collapse" data-target=".subnav-collapse">\n' + '          <i class="icon-reorder"></i>\n' + '        </a>\n' + '        <div class="subnav-collapse collapse">\n' + '          <ul class="mainnav">\n' + '            <li class="{{userBreadcrumbClass()}}">\n' + '              <a ng-href="/users/{{user.login}}">\n' + '                <i class="icon-user"></i>\n' + '                <span>{{i18n.translate("My Space").fetch()}}</span>\n' + '              </a>\n' + '            </li>\n' + '            <li>\n' + '              <a ng-href="/workbench" href="#">\n' + '                <i class="icon-edit"></i>\n' + '                <span>Workbench</span>\n' + '              </a>\n' + '            </li>\n' + '          </ul>\n' + '        </div> <!-- /.subnav-collapse -->\n' + '      </div> <!-- /container -->\n' + '    </div> <!-- /subnavbar-inner -->\n' + '  </div> <!-- /subnavbar -->\n' + '\n' + '  <div class="container-fluid">\n' + '    <div class="row-fluid">\n' + '      <div class="span4">\n' + '        <div class="widget">\n' + '          <div class="widget-header">\n' + '              <i class="icon-user"></i>\n' + '              <h3>Profile</h3>\n' + '          </div>\n' + '          <div class="widget-content">\n' + '            <h3>\n' + '              <span>{{user.name}}</span>\n' + '            </h3>\n' + '            <h4>\n' + '              <span>{{user.login}}</span>\n' + '            </h4>\n' + '            <!-- HATEOAS GitHub link? -->\n' + '            <!--\n' + '            <a href="https://github.com/{{user.login}}?tab=repositories" target="_blank" class="btn btn-secondary">\n' + '              <i class="icon-github"></i>\n' + '              <span>GitHub</span>\n' + '            </a>\n' + '            -->\n' + '          </div>\n' + '        </div>\n' + '      </div>\n' + '      <div class="span8">\n' + '        <div class="widget stacked">\n' + '          <div class="widget-content">\n' + '            <ul class="nav nav-tabs" id="myTab">\n' + '              <li><a data-target="#gists" data-toggle="tab">{{i18n.translate("Gist").ifPlural(2, "Gists").fetch()}}</a></li>\n' + '              <li><a data-target="#repos" data-toggle="tab">{{i18n.translate("Repo").ifPlural(2, "Repos").fetch()}}</a></li>\n' + '            </ul>\n' + '            <div class="tab-content">\n' + '              <div class="tab-pane" id="gists">\n' + '                <div class ="row-fluid">\n' + '                  <table class="table table-condensed">\n' + '                    <tbody>\n' + '                      <tr>\n' + '                        <td nowrap=nowrap>\n' + '                          <!--input type="text" placeHolder="Filter..."></input-->\n' + '                        </td>\n' + '                        <td nowrap=nowrap>\n' + '                          <button ng-click="newGist()" class="btn btn-primary">\n' + '                            <i class="icon-plus-sign-alt"></i> <i class="{{i18n.translate(\'icon-gist\').fetch()}}"></i>\n' + '                            <span>{{i18n.translate("Create a New Gist").fetch()}}</span>\n' + '                          </button>\n' + '                        </td>\n' + '                      </tr>\n' + '                      <tr ng-repeat="gist in gists">\n' + '                        <td nowrap=nowrap>\n' + '                          <h3>\n' + '                            <i class="{{i18n.translate(\'icon-gist\').fetch()}} muted"></i>\n' + '                            <a href="/gists/{{gist.id}}" class="btn btn-link">\n' + '                              <span>{{gist.id}}</span>\n' + '                            </a>\n' + '                          </h3>\n' + '                          <p>{{gist.description}}</p>\n' + '                        </td>\n' + '                        <td nowrap=nowrap>\n' + '                          <a href="{{gist.html_url}}" target="_blank" class="btn btn-secondary">\n' + '                            <i class="icon-github"></i>\n' + '                            <span>GitHub</span>\n' + '                          </a>\n' + '                          <!--\n' + '                          <button ng-click="deleteGist(user.login, gist.id)" class="btn btn-tertiary">\n' + '                            <i class="icon-minus-sign-alt"></i>\n' + '                            <span>Delete</span>\n' + '                          </button>\n' + '                          -->\n' + '                        </td>\n' + '                      </tr>\n' + '                    </tbody>\n' + '                  </table>\n' + '                </div>\n' + '              </div>\n' + '              <div class="tab-pane" id="repos">\n' + '                <div class ="row-fluid">\n' + '                  <table class="table table-condensed">\n' + '                    <tbody>\n' + '                      <tr>\n' + '                        <td nowrap=nowrap>\n' + '                          <!--input type="text" placeHolder="Filter..."></input-->\n' + '                        </td>\n' + '                        <td nowrap=nowrap>\n' + '                          <button ng-click="newRepo(user.login)" class="btn btn-primary">\n' + '                            <i class="icon-plus-sign-alt"></i> <i class="{{i18n.translate(\'icon-repo\').fetch()}}"></i>\n' + '                            <span>{{i18n.translate("Create a New Repo").fetch()}}</span>\n' + '                          </button>\n' + '                        </td>\n' + '                      </tr>\n' + '                      <tr ng-repeat="repo in repos">\n' + '                        <td nowrap=nowrap>\n' + '                          <h3>\n' + '                            <i class="{{i18n.translate(\'icon-repo\').fetch()}} muted"></i>\n' + '                            <a href="/users/{{user.login}}/repos/{{repo.name}}/tree/master" class="btn btn-link">\n' + '                              <span>{{repo.name}}</span>\n' + '                            </a>\n' + '                          </h3>\n' + '                          <p>{{repo.description}}</p>\n' + '                        </td>\n' + '                        <td nowrap=nowrap>\n' + '                          <a href="{{repo.html_url}}" target="_blank" class="btn btn-secondary">\n' + '                            <i class="icon-github"></i>\n' + '                            <span>GitHub</span>\n' + '                          </a>\n' + '                          <!--\n' + '                          <button ng-click="deleteRepo(user.login, repo.name)" class="btn btn-tertiary">\n' + '                            <i class="icon-minus-sign-alt"></i>\n' + '                            <span>Delete</span>\n' + '                          </button>\n' + '                          -->\n' + '                        </td>\n' + '                      </tr>\n' + '                    </tbody>\n' + '                  </table>\n' + '                </div>\n' + '              </div>\n' + '            </div>\n' + '            <script>\n' + '              $(function () {\n' + '                $(\'#myTab a[data-target="#gists"]\').tab(\'show\');\n' + '              })\n' + '            </script>\n' + '            <script>\n' + '              $(\'#myTab a[data-target="#gists"]\').click(function(e) {\n' + '                e.preventDefault();\n' + '                $(this).tab(\'show\');\n' + '              });\n' + '            </script>\n' + '            <script>\n' + '              $(\'#myTab a[data-target="#repos"]\').click(function(e) {\n' + '                e.preventDefault();\n' + '                $(this).tab(\'show\');\n' + '              });\n' + '            </script>\n' + '          </div>\n' + '        </div>\n' + '\n' + '        <div id="new-gist-dialog" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="new-gist-dialog-label" aria-hidden="true">\n' + '          <div class="modal-header">\n' + '            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>\n' + '            <h3 id="new-gist-dialog-label"><i class="icon-plus-sign-alt muted"></i> <i class="{{i18n.translate(\'icon-gist\').fetch()}} muted"></i> {{i18n.translate("Create a New Gist").fetch()}}</h3>\n' + '          </div>\n' + '          <form ng-controller="NewGistCtrl">\n' + '            <fieldset>\n' + '              <div class="modal-body">\n' + '                <label>Description<span class="muted"> (optional)</span></label>\n' + '                <input type="text" name="description" ng-model="gist.description"></input>\n' + '              </div>\n' + '              <div class="modal-footer">\n' + '                <button id="btnCancel" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>\n' + '                <button type="submit" ng-click="createGist()" id="btnOK" class="btn btn-primary">{{i18n.translate("Create gist").fetch()}}</button>\n' + '              </div>\n' + '            </fieldset>\n' + '          </form>\n' + '        </div>\n' + '\n' + '        <div id="new-repo-dialog" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="new-repo-dialog-label" aria-hidden="true">\n' + '          <div class="modal-header">\n' + '            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>\n' + '            <h3 id="new-repo-dialog-label"><i class="icon-plus-sign-alt muted"></i> <i class="{{i18n.translate(\'icon-repo\').fetch()}} muted"></i> {{i18n.translate("Create a New Repo").fetch()}}</h3>\n' + '          </div>\n' + '          <form ng-controller="NewRepoCtrl">\n' + '            <fieldset>\n' + '              <div class="modal-body">\n' + '                <label>{{i18n.translate("Repo name").fetch()}}</label>\n' + '                <input type="text" name="repo" ng-model="repo.name"></input>\n' + '                <span class="help-block">{{i18n.translate("Great repo names are short and memorable.").fetch()}}</span>\n' + '                <label>Description<span class="muted"> (optional)</span></label>\n' + '                <input type="text" name="description" ng-model="repo.description"></input>\n' + '                <!--\n' + '                <hr/>\n' + '                <input type="radio" ng-model="repo.private" value="false"> <i class="{{i18n.translate(\'icon-repo\').fetch()}} muted"></i> Public<br/>\n' + '                <span class="help-block">Anyone can see this repository. You choose who can commit.</span>\n' + '                <input type="radio" ng-model="repo.private" value="true"> Private <br/>\n' + '                <span class="help-block">You choose who can see and commit to this repository.</span>\n' + '                -->\n' + '                <hr/>\n' + '                <label class="checkbox">\n' + '                  <input type="checkbox" name="markdown-readme" ng-model="repo.markdownReadme"> {{i18n.translate("Initialize this repo with a README.md").fetch()}}</input>\n' + '                </label>\n' + '                <span class="help-block">{{i18n.translate("This will allow you to clone the repo immediately in GitHub.").fetch()}}</span>\n' + '                <!--\n' + '                <label class="checkbox">\n' + '                  <input type="checkbox" name="python-readme" ng-model="repo.pythonReadme"> Initialize this book with a README.py</input>\n' + '                </label>\n' + '                <span class="help-block">Having at least one Python file will ensure that the GitHub repository is visible to Geometry Zen.</span>\n' + '                -->\n' + '              </div>\n' + '              <div class="modal-footer">\n' + '                <button id="btnCancel" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>\n' + '                <button type="submit" ng-click="createRepo()" id="btnOK" class="btn btn-primary">{{i18n.translate("Create repo").fetch()}}</button>\n' + '              </div>\n' + '            </fieldset>\n' + '          </form>\n' + '        </div>\n' + '\n' + '      </div>\n' + '    </div>\n' + '  </div>\n' + '</div>');

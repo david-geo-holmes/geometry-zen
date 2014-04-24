@@ -1,7 +1,7 @@
 {
   "name": "geometryzen",
   "description": "Geometry Zen is a free, online, open-source, and collaborative tool for Computational Modeling combining the Python programming language, 3D visualization (WebGL), Physical Units, and Geometric Algebra, the Unified Mathematical Language for Physics and Engineering in the 21st Century.",
-  "version": "0.9.170",
+  "version": "0.9.172",
   "title": "Geometry Zen",
   "private": false,
   "author": {
