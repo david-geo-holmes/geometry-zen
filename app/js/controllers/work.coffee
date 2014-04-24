@@ -97,6 +97,7 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
     prog = editor.getValue()
     Sk.canvas = "canvas"
 
+    Sk.python3 = false
     Sk.configure
       "output": (text) ->
         $rootScope.$broadcast('print', text)

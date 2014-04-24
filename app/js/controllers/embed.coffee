@@ -96,6 +96,7 @@ angular.module("app").controller 'EmbedCtrl', ['$rootScope','$scope', '$location
     prog = editor.getValue()
     Sk.canvas = "canvas"
 
+    Sk.python3 = true
     Sk.configure
       "output": (text) ->
         $rootScope.$broadcast('print', text)
