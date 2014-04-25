@@ -1,6 +1,6 @@
 {
   "name": "geometryzen",
-  "version": "0.9.177",
+  "version": "0.9.178",
   "main": "./app/js/main.js",
   "description": "Geometry Zen is a free, online, open-source, and collaborative tool for Computational Modeling combining the Python programming language, 3D visualization (WebGL), Physical Units, and Geometric Algebra, the Unified Mathematical Language for Physics and Engineering in the 21st Century.",
   "author": {
@@ -17,7 +17,7 @@
   "licenses": [
     {
       "type": "MIT",
-      "url": "https://github.com/geometryzen/geometryzen/LICENSE"
+      "url": "https://github.com/geometryzen/geometryzen/blob/master/LICENSE"
     }
   ],
   "dependencies": {
