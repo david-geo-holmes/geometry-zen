@@ -1,6 +1,6 @@
 {
   "name": "Geometry Zen",
   "version": "Hydrogen",
-  "tagLine": "Computational Modeling from a Geometric perspective",
-  "description": "Geometry Zen is a free, online, open-source, and collaborative tool for Computational Modeling combining the Python programming language, 3D visualization (WebGL), Physical Units, and Geometric Algebra, the Unified Mathematical Language for Physics and Engineering in the 21st Century."
+  "tagLine": "Educational Computational Physics, Modeling and Geometry",
+  "description": "Geometry Zen is a free, online, open-source, and collaborative tool for Computational Physics, Modeling and Geometry combining the Python programming language, 3D visualization (WebGL), Physical Units, and Geometric Algebra, the Unified Mathematical Language for Physics and Engineering in the 21st Century."
 }
