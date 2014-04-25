@@ -37582,19 +37582,25 @@ mod[UNIT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     else
     {
       var patterns = [
-        [ 0,1,1,1,-1,1, 0,1, "m / s"],
-        [ 0,1,1,1,-2,1, 0,1, "m / s ** 2"],
-        [ 1,1,1,1,-2,1, 0,1, "N"],
-        [ 1,1,0,1,-2,1, 0,1, "N / m"],
-        [-1,1,3,1,-2,1, 0,1, "N m ** 2 / kg ** 2"],
-        [ 1,1,2,1,-2,1, 0,1, "J"],
-        [ 1,1,2,1,-1,1, 0,1, "J s"],
-        [ 1,1,2,1,-3,1, 0,1, "W"],
-        [ 1,1,2,1,-2,1,-1,1, "V"],
-        [ 1,1,1,1,-2,1,-1,1, "V / m"],
-        [ 0,1,0,1,-1,1,+1,1, "A"],
-        [ 1,1,2,1,-1,1,-2,1, "ohms"],
-        [ 1,1,0,1,-1,1,-1,1, "T"]
+        [-1,1,-2,1, 1,1, 2,1, "S"],
+        [-1,1,-2,1, 2,1, 2,1, "F"],
+        [-1,1, 3,1,-2,1, 0,1, "N m ** 2 / kg ** 2"],
+        [ 0,1, 0,1,-1,1, 0,1, "Hz"],
+        [ 0,1, 0,1,-1,1, 1,1, "A"],
+        [ 0,1, 1,1,-1,1, 0,1, "m / s"],
+        [ 0,1, 1,1,-2,1, 0,1, "m / s ** 2"],
+        [ 1,1,-1,1,-2,1, 0,1, "Pa"],
+        [ 1,1, 0,1,-2,1, 0,1, "N / m"],
+        [ 1,1, 0,1,-1,1,-1,1, "T"],
+        [ 1,1, 1,1,-2,1,-1,1, "V / m"],
+        [ 1,1, 1,1,-2,1, 0,1, "N"],
+        [ 1,1, 2,1,-2,1, 0,1, "J"],
+        [ 1,1, 2,1,-1,1, 0,1, "J s"],
+        [ 1,1, 2,1,-3,1, 0,1, "W"],
+        [ 1,1, 2,1,-2,1,-1,1, "V"],
+        [ 1,1, 2,1,-1,1,-2,1, "Ω"],
+        [ 1,1, 2,1, 0,1,-2,1, "H"],
+        [ 1,1, 2,1,-1,1,-1,1, "Wb"]
       ];
       var M = unitJs.dimensions.M;
       var L = unitJs.dimensions.L;
@@ -37915,7 +37921,7 @@ mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   var voltPy     = Sk.ffi.callsim(mod[UNIT], onePy, Sk.ffi.referenceToPy(new BLADE.Dimensions(1, 2, -2, -1), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS), Sk.ffi.stringToPy("V"));
   mod[VOLT]      = Sk.ffi.callsim(mod[MEASURE], onePy, voltPy);
 
-  var teslaPy    = Sk.ffi.callsim(mod[UNIT], onePy, Sk.ffi.referenceToPy(new BLADE.Dimensions(1, 1, -2, -1), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS), Sk.ffi.stringToPy("T"));
+  var teslaPy    = Sk.ffi.callsim(mod[UNIT], onePy, Sk.ffi.referenceToPy(new BLADE.Dimensions(1, 0, -1, -1), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS), Sk.ffi.stringToPy("T"));
   mod[TESLA]     = Sk.ffi.callsim(mod[MEASURE], onePy, teslaPy);
 
   var radianPy   = Sk.ffi.callsim(mod[UNIT], onePy, Sk.ffi.referenceToPy(new BLADE.Dimensions(0, 0, 0, 0), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS), Sk.ffi.stringToPy("radian"));

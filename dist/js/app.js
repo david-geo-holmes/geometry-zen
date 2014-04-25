@@ -32765,6 +32765,61 @@
             return Sk.ffi.stringToPy(a.name);
           a = [
             [
+              -1,
+              1,
+              -2,
+              1,
+              1,
+              1,
+              2,
+              1,
+              'S'
+            ],
+            [
+              -1,
+              1,
+              -2,
+              1,
+              2,
+              1,
+              2,
+              1,
+              'F'
+            ],
+            [
+              -1,
+              1,
+              3,
+              1,
+              -2,
+              1,
+              0,
+              1,
+              'N m ** 2 / kg ** 2'
+            ],
+            [
+              0,
+              1,
+              0,
+              1,
+              -1,
+              1,
+              0,
+              1,
+              'Hz'
+            ],
+            [
+              0,
+              1,
+              0,
+              1,
+              -1,
+              1,
+              1,
+              1,
+              'A'
+            ],
+            [
               0,
               1,
               1,
@@ -32789,13 +32844,13 @@
             [
               1,
               1,
-              1,
+              -1,
               1,
               -2,
               1,
               0,
               1,
-              'N'
+              'Pa'
             ],
             [
               1,
@@ -32809,15 +32864,37 @@
               'N / m'
             ],
             [
+              1,
+              1,
+              0,
+              1,
               -1,
               1,
-              3,
+              -1,
+              1,
+              'T'
+            ],
+            [
+              1,
+              1,
+              1,
+              1,
+              -2,
+              1,
+              -1,
+              1,
+              'V / m'
+            ],
+            [
+              1,
+              1,
+              1,
               1,
               -2,
               1,
               0,
               1,
-              'N m ** 2 / kg ** 2'
+              'N'
             ],
             [
               1,
@@ -32866,24 +32943,24 @@
             [
               1,
               1,
+              2,
               1,
+              -1,
               1,
               -2,
               1,
-              -1,
-              1,
-              'V / m'
+              '\u03a9'
             ],
             [
-              0,
+              1,
+              1,
+              2,
               1,
               0,
               1,
-              -1,
+              -2,
               1,
-              1,
-              1,
-              'A'
+              'H'
             ],
             [
               1,
@@ -32892,20 +32969,9 @@
               1,
               -1,
               1,
-              -2,
-              1,
-              'ohms'
-            ],
-            [
-              1,
-              1,
-              0,
-              1,
               -1,
               1,
-              -1,
-              1,
-              'T'
+              'Wb'
             ]
           ];
           for (var c = b.dimensions.M, d = b.dimensions.L, e = b.dimensions.T, f = b.dimensions.Q, g = 0, s = a.length; g < s; g++) {
@@ -33169,7 +33235,7 @@
         a.ampere = Sk.ffi.callsim(a.Measure, c, e);
         e = Sk.ffi.callsim(a.Unit, c, Sk.ffi.referenceToPy(new b.Dimensions(1, 2, -2, -1), 'Dimensions'), Sk.ffi.remapToPy(d), Sk.ffi.stringToPy('V'));
         a.volt = Sk.ffi.callsim(a.Measure, c, e);
-        e = Sk.ffi.callsim(a.Unit, c, Sk.ffi.referenceToPy(new b.Dimensions(1, 1, -2, -1), 'Dimensions'), Sk.ffi.remapToPy(d), Sk.ffi.stringToPy('T'));
+        e = Sk.ffi.callsim(a.Unit, c, Sk.ffi.referenceToPy(new b.Dimensions(1, 0, -1, -1), 'Dimensions'), Sk.ffi.remapToPy(d), Sk.ffi.stringToPy('T'));
         a.tesla = Sk.ffi.callsim(a.Measure, c, e);
         e = Sk.ffi.callsim(a.Unit, c, Sk.ffi.referenceToPy(new b.Dimensions(0, 0, 0, 0), 'Dimensions'), Sk.ffi.remapToPy(d), Sk.ffi.stringToPy('radian'));
         a.radian = Sk.ffi.callsim(a.Measure, c, e);
