@@ -14957,24 +14957,7 @@ Sk.ffi.remapToJs = function(valuePy, shallow)
             return function() {
                 var argsJs = Array.prototype.slice.call(arguments, 0);
                 var argsPy = argsJs.map(function(argJs) {return Sk.ffi.remapToPy(argJs);});
-                // Improve interoperability by allowing third-party JavaScript libraries
-                // to call functions in Python which are declared with lower arity.
-                var maxargs = argsPy.length;
-                var done = false;
-                while(!done) {
-                    var args = []
-                    for (var i = 0; i < maxargs; i++)
-                    {
-                        args.push(argsPy[i]);
-                    }
-                    try {
-                        return Sk.ffi.remapToJs(Sk.misceval.apply(valuePy, undefined, undefined, undefined, args));
-                    }
-                    catch(e) {
-                        maxargs -= 1;
-                        done = (maxargs == -1);
-                    }
-                }
+                return Sk.ffi.remapToJs(Sk.misceval.apply(valuePy, undefined, undefined, undefined, argsPy));
             };
         }
         default:
