@@ -15255,7 +15255,7 @@ Sk.ffh.unaryExec = function(specialMethod, valuePy, internalMethod)
   }
   else
   {
-    throw Sk.ffi.notImplementedError(specialMethod);
+    throw Sk.ffi.notImplementedError(specialMethod + Sk.ffi.remapToJs(Sk.ffh.repr(valuePy)));
   }
 };
 goog.exportSymbol("Sk.ffh.unaryExec", Sk.ffh.unaryExec);
@@ -15383,7 +15383,9 @@ goog.exportSymbol("Sk.ffh.invert", Sk.ffh.invert);
 Sk.ffh.nonzero = function(valuePy) {return Sk.ffh.unaryExec(SPECIAL_METHOD_NONZERO, valuePy, "nb$nonzero");};
 goog.exportSymbol("Sk.ffh.nonzero", Sk.ffh.nonzero);
 
-Sk.ffh.sqrt = function(valuePy) {return Sk.ffh.unaryExec(SPECIAL_METHOD_SQRT, valuePy);};
+Sk.ffh.sqrt = function(valuePy) {
+  return Sk.ffh.unaryExec(SPECIAL_METHOD_SQRT, valuePy);
+};
 goog.exportSymbol("Sk.ffh.sqrt", Sk.ffh.sqrt);
 
 Sk.ffh.str = function(valuePy) {
@@ -35071,9 +35073,16 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       return coordsJsToE3Py(c, 0, 0, 0, k * xy, k * yz, k * zx, 0);
     }
   });
+  $loc.__pow__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+    var self  = Sk.ffi.remapToJs(selfPy);
+    var other = Sk.ffi.remapToJs(otherPy);
+    // TODO: generalize.
+    return coordsJsToE3Py(Math.pow(self.w, other), 0, 0, 0, 0, 0, 0, 0);
+  });
   $loc.__sqrt__ = Sk.ffi.functionPy(function(selfPy) {
     Sk.ffi.checkMethodArgs(METHOD_SQRT, arguments, 0, 0);
     var self = Sk.ffi.remapToJs(selfPy);
+    // TODO: generalize.
     return coordsJsToE3Py(Math.sqrt(self.w), 0, 0, 0, 0, 0, 0, 0);
   });
   $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
@@ -37601,6 +37610,10 @@ mod[UNIT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var c = lhs.pow(rhs);
     return Sk.ffi.callsim(mod[UNIT], Sk.ffi.numberToFloatPy(c.scale), Sk.ffi.referenceToPy(c.dimensions, DIMENSIONS), Sk.ffi.remapToPy(c.labels));
   });
+  $loc.__sqrt__ = Sk.ffi.functionPy(function(unitPy) {
+    var unitJs = Sk.ffi.remapToJs(unitPy);
+    return Sk.ffi.callsim(mod[UNIT], Sk.ffi.referenceToPy(unitJs.pow(0.5), UNIT));
+  });
   $loc.__str__ = Sk.ffi.functionPy(function(unitPy) {
     var unitJs = Sk.ffi.remapToJs(unitPy);
     var custom = Sk.ffi.customToJs(unitPy);
@@ -37913,6 +37926,11 @@ mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__exp__ = Sk.ffi.functionPy(function(selfPy) {
     var quantityPy = Sk.ffh.exp(Sk.ffi.gattr(selfPy, PROP_QUANTITY));
     var uomPy      = Sk.ffi.gattr(selfPy, PROP_UOM);
+    return Sk.ffi.callsim(mod[MEASURE], quantityPy, uomPy);
+  });
+  $loc.__sqrt__ = Sk.ffi.functionPy(function(selfPy) {
+    var quantityPy = Sk.ffh.sqrt(Sk.ffi.gattr(selfPy, PROP_QUANTITY));
+    var uomPy      = Sk.ffh.sqrt(Sk.ffi.gattr(selfPy, PROP_UOM));
     return Sk.ffi.callsim(mod[MEASURE], quantityPy, uomPy);
   });
   $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {

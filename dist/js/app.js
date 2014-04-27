@@ -12868,7 +12868,7 @@
       return Sk.ffi.callsim(b[a], b);
     if ('undefined' !== typeof c && b[c])
       return b[c].call(b);
-    throw Sk.ffi.notImplementedError(a);
+    throw Sk.ffi.notImplementedError(a + Sk.ffi.remapToJs(Sk.ffh.repr(b)));
   };
   goog.exportSymbol('Sk.ffh.unaryExec', Sk.ffh.unaryExec);
   Sk.ffh.getitem = function (a, b) {
@@ -31149,6 +31149,10 @@
           var h = Math.sqrt(c * c + d * d + b * b), e = Sk.math.cos(h), g = Sk.math.sin(h), g = g / h;
           return f(e, 0, 0, 0, g * c, g * d, g * b, 0);
         });
+        r.__pow__ = Sk.ffi.functionPy(function (a, b) {
+          var c = Sk.ffi.remapToJs(a), d = Sk.ffi.remapToJs(b);
+          return f(Math.pow(c.w, d), 0, 0, 0, 0, 0, 0, 0);
+        });
         r.__sqrt__ = Sk.ffi.functionPy(function (a) {
           Sk.ffi.checkMethodArgs('sqrt', arguments, 0, 0);
           var b = Sk.ffi.remapToJs(a);
@@ -32750,6 +32754,10 @@
           var d = Sk.ffi.remapToJs(b), e = Sk.ffi.remapToJs(c), d = d.pow(e);
           return Sk.ffi.callsim(a.Unit, Sk.ffi.numberToFloatPy(d.scale), Sk.ffi.referenceToPy(d.dimensions, 'Dimensions'), Sk.ffi.remapToPy(d.labels));
         });
+        e.__sqrt__ = Sk.ffi.functionPy(function (b) {
+          b = Sk.ffi.remapToJs(b);
+          return Sk.ffi.callsim(a.Unit, Sk.ffi.referenceToPy(b.pow(0.5), 'Unit'));
+        });
         e.__str__ = Sk.ffi.functionPy(function (a) {
           var b = Sk.ffi.remapToJs(a);
           a = Sk.ffi.customToJs(a);
@@ -33473,6 +33481,11 @@
         d.__exp__ = Sk.ffi.functionPy(function (b) {
           var c = Sk.ffh.exp(Sk.ffi.gattr(b, 'quantity'));
           b = Sk.ffi.gattr(b, 'uom');
+          return Sk.ffi.callsim(a.Measure, c, b);
+        });
+        d.__sqrt__ = Sk.ffi.functionPy(function (b) {
+          var c = Sk.ffh.sqrt(Sk.ffi.gattr(b, 'quantity'));
+          b = Sk.ffh.sqrt(Sk.ffi.gattr(b, 'uom'));
           return Sk.ffi.callsim(a.Measure, c, b);
         });
         d.__str__ = Sk.ffi.functionPy(function (a) {
