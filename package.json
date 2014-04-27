@@ -49,8 +49,8 @@
   ],
   "readmeFilename": "README.md",
   "engines": {
-    "node": "~>0.10.17",
-    "npm": "~>1.2.30"
+    "node": "~>0.10.26",
+    "npm": "~>1.4.3"
   },
   "main": "web.js"
 }
