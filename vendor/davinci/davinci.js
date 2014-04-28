@@ -4743,24 +4743,27 @@ Sk.builtin.abs = function abs(xPy)
   }
   else
   {
-      try
+    return Sk.ffh.abs(xPy);
+    /*
+    try
+    {
+      var methodPy = xPy['__abs__'];
+      if (methodPy)
       {
-        var methodPy = xPy['__abs__'];
-        if (methodPy)
-        {
-            return Sk.ffi.callsim(methodPy, xPy);
-        }
-        else
-        {
-            throw new Sk.builtin.NotImplementedError("abs");
-        }
-//      var methodPy = Sk.ffi.gattr(xPy, "abs");
-//      return Sk.ffi.callsim(methodPy);
+        return Sk.ffi.callsim(methodPy, xPy);
+      }
+      else
+      {
+        throw new Sk.builtin.NotImplementedError("abs");
+      }
+//    var methodPy = Sk.ffi.gattr(xPy, "abs");
+//    return Sk.ffi.callsim(methodPy);
     }
     catch(e)
     {
         throw Sk.ffi.err.argument("x").inFunction("abs").mustHaveType("number");
     }
+    */
   }
 };
 
@@ -5939,6 +5942,7 @@ Sk.builtin.type = function(name, bases, dict)
 {
     if (bases === undefined && dict === undefined)
     {
+        // FIXME: This part of the code is not usually accessible because of the @constructor!
         // 1 arg version of type()
         // the argument is an object, not a name and returns a type object
         var obj = name;
@@ -7748,7 +7752,7 @@ Sk.abstr.uboNameToSlotFunc_ = function(obj, name) {
   };
   switch (name) {
     case "USub": {
-        return obj.nb$negative          ? obj.nb$negative        : obj['__neg__'];
+        return obj.nu$negative          ? obj.nu$negative        : obj['__neg__'];
     }
     case "Invert": {
         return obj.nb$invert            ? obj.nb$invert          : obj['__invert__'];
@@ -12252,14 +12256,14 @@ Sk.builtin.nmber.prototype.nb$inplace_lshift = Sk.builtin.nmber.prototype.nb$lsh
 
 Sk.builtin.nmber.prototype.nb$inplace_rshift = Sk.builtin.nmber.prototype.nb$rshift;
 
-Sk.builtin.nmber.prototype.nb$negative = function()
+Sk.builtin.nmber.prototype.nu$negative = function()
 {
-    return new Sk.builtin.nmber(-this.v, undefined);
+    return new Sk.builtin.nmber(-this.v, this.skType);
 };
 
 Sk.builtin.nmber.prototype.nb$positive = function()
 {
-    return this.clone();
+    return this;
 };
 
 Sk.builtin.nmber.prototype.nb$cos = function()
@@ -12277,9 +12281,19 @@ Sk.builtin.nmber.prototype.nb$tan = function()
     return new Sk.builtin.nmber(Math.tan(this.v), this.skType);
 };
 
-Sk.builtin.nmber.prototype.nb$exp = function()
+Sk.builtin.nmber.prototype.nu$exponential = function()
 {
     return new Sk.builtin.nmber(Math.exp(this.v), this.skType);
+};
+
+Sk.builtin.nmber.prototype.nu$magnitude = function()
+{
+    return new Sk.builtin.nmber(Math.abs(this.v), this.skType);
+};
+
+Sk.builtin.nmber.prototype.nu$quadrance = function()
+{
+    return new Sk.builtin.nmber(this.v * this.v, this.skType);
 };
 
 Sk.builtin.nmber.prototype.nb$nonzero = function()
@@ -12878,7 +12892,7 @@ Sk.builtin.lng.prototype.nb$xor = function(other)
 
 Sk.builtin.lng.prototype.nb$inplace_xor = Sk.builtin.lng.prototype.nb$xor;
 
-Sk.builtin.lng.prototype.nb$negative = function()
+Sk.builtin.lng.prototype.nu$negative = function()
 {
 	return new Sk.builtin.lng(this.biginteger.negate());
 };
@@ -13948,6 +13962,29 @@ Sk.ffi.JsType = {
     'BOOLEAN':    'boolean',
     'FUNCTION':   'function'
 };
+
+/**
+ * FIXME: Having some problems using this to observe the type of a klass.
+ * @nosideeffects
+ * @param {*} valuePy
+ * @return {Sk.builtin.type}
+ */
+Sk.ffi.type = function(valuePy)
+{
+    if (valuePy.constructor === Sk.builtin.nmber)
+    {
+        if (valuePy.skType === Sk.builtin.nmber.int$)
+        {
+            return Sk.builtin.int_.prototype.ob$type;
+        }
+        else
+        {
+            return Sk.builtin.float_.prototype.ob$type;
+        }
+    }
+    return valuePy.ob$type;
+}
+goog.exportSymbol("Sk.ffi.type", Sk.ffi.type);
 
 /**
  * Enumeration for Python bool values.
@@ -15239,11 +15276,12 @@ var SPECIAL_METHOD_TAN     = '__tan__';
 var SPECIAL_METHOD_XOR     = '__xor__';
 
 /**
+ * @param {string} name
  * @param {string} specialMethod
  * @param {Object} valuePy
  * @param {string=} internalMethod
  */
-Sk.ffh.unaryExec = function(specialMethod, valuePy, internalMethod)
+Sk.ffh.unaryExec = function(name, specialMethod, valuePy, internalMethod)
 {
   if (valuePy[specialMethod])
   {
@@ -15255,7 +15293,7 @@ Sk.ffh.unaryExec = function(specialMethod, valuePy, internalMethod)
   }
   else
   {
-    throw Sk.ffi.notImplementedError(specialMethod + Sk.ffi.remapToJs(Sk.ffh.repr(valuePy)));
+    throw Sk.ffi.typeError(name + "(" + Sk.ffi.remapToJs(Sk.ffh.repr(valuePy)) + ")");
   }
 };
 goog.exportSymbol("Sk.ffh.unaryExec", Sk.ffh.unaryExec);
@@ -15296,10 +15334,10 @@ Sk.ffh.divide = function(lhsPy, rhsPy) {
 };
 goog.exportSymbol("Sk.ffh.divide", Sk.ffh.divide);
 
-Sk.ffh.modulo = function(lhsPy, rhsPy) {
+Sk.ffh.mod = function(lhsPy, rhsPy) {
   return Sk.abstr.binary_op_(lhsPy, rhsPy, "Mod");
 };
-goog.exportSymbol("Sk.ffh.modulo", Sk.ffh.modulo);
+goog.exportSymbol("Sk.ffh.mod", Sk.ffh.mod);
 
 Sk.ffh.xor = function(lhsPy, rhsPy) {
   return Sk.abstr.binary_op_(lhsPy, rhsPy, "BitXor");
@@ -15334,7 +15372,9 @@ Sk.ffh.equal = function(lhsPy, rhsPy)
 };
 goog.exportSymbol("Sk.ffh.equal", Sk.ffh.equal);
 
-Sk.ffh.cliffordConjugate = function(valuePy) {return Sk.ffh.unaryExec(SPECIAL_METHOD_CLIFFORD_CONJUGATE, valuePy, "nb$cliffordConjugate");};
+Sk.ffh.cliffordConjugate = function(valuePy) {
+  return Sk.ffh.unaryExec("", SPECIAL_METHOD_CLIFFORD_CONJUGATE, valuePy, "nb$cliffordConjugate");
+};
 goog.exportSymbol("Sk.ffh.cliffordConjugate", Sk.ffh.cliffordConjugate);
 
 Sk.ffh.conjugate = function(numberPy) {
@@ -15342,28 +15382,32 @@ Sk.ffh.conjugate = function(numberPy) {
     return numberPy;
   }
   else {
-    return Sk.ffh.unaryExec(SPECIAL_METHOD_CONJUGATE, numberPy);
+    return Sk.ffh.unaryExec("", SPECIAL_METHOD_CONJUGATE, numberPy);
   }
 };
 goog.exportSymbol("Sk.ffh.conjugate", Sk.ffh.conjugate);
 
-Sk.ffh.cos = function(valuePy) {
-  return Sk.ffh.unaryExec(SPECIAL_METHOD_COS, valuePy, "nb$cos");
+Sk.ffh.cos = function(valuePy)
+{
+  return Sk.ffh.unaryExec("cos", SPECIAL_METHOD_COS, valuePy, "nb$cos");
 };
 goog.exportSymbol("Sk.ffh.cos", Sk.ffh.cos);
 
-Sk.ffh.sin = function(valuePy) {
-  return Sk.ffh.unaryExec(SPECIAL_METHOD_SIN, valuePy, "nb$sin");
+Sk.ffh.sin = function(valuePy)
+{
+  return Sk.ffh.unaryExec("sin", SPECIAL_METHOD_SIN, valuePy, "nb$sin");
 };
 goog.exportSymbol("Sk.ffh.sin", Sk.ffh.sin);
 
-Sk.ffh.tan = function(valuePy) {
-  return Sk.ffh.unaryExec(SPECIAL_METHOD_TAN, valuePy, "nb$tan");
+Sk.ffh.tan = function(valuePy)
+{
+  return Sk.ffh.unaryExec("tan", SPECIAL_METHOD_TAN, valuePy, "nb$tan");
 };
 goog.exportSymbol("Sk.ffh.tan", Sk.ffh.tan);
 
-Sk.ffh.exp = function(valuePy) {
-  return Sk.ffh.unaryExec(SPECIAL_METHOD_EXP, valuePy, "nb$exp");
+Sk.ffh.exp = function(valuePy)
+{
+  return Sk.ffh.unaryExec("exp", SPECIAL_METHOD_EXP, valuePy, "nu$exponential");
 };
 goog.exportSymbol("Sk.ffh.exp", Sk.ffh.exp);
 
@@ -15377,14 +15421,39 @@ Sk.ffh.negative = function(valuePy) {
 };
 goog.exportSymbol("Sk.ffh.negative", Sk.ffh.negative);
 
-Sk.ffh.invert = function(valuePy) {return Sk.ffh.unaryExec(SPECIAL_METHOD_INVERT, valuePy, "nb$invert");};
+Sk.ffh.invert = function(valuePy)
+{
+  return Sk.ffh.unaryExec("~", SPECIAL_METHOD_INVERT, valuePy, "nb$invert");
+};
 goog.exportSymbol("Sk.ffh.invert", Sk.ffh.invert);
 
-Sk.ffh.nonzero = function(valuePy) {return Sk.ffh.unaryExec(SPECIAL_METHOD_NONZERO, valuePy, "nb$nonzero");};
+Sk.ffh.nonzero = function(valuePy)
+{
+  return Sk.ffh.unaryExec("", SPECIAL_METHOD_NONZERO, valuePy, "nb$nonzero");
+};
 goog.exportSymbol("Sk.ffh.nonzero", Sk.ffh.nonzero);
 
-Sk.ffh.sqrt = function(valuePy) {
-  return Sk.ffh.unaryExec(SPECIAL_METHOD_SQRT, valuePy);
+Sk.ffh.abs = function(valuePy)
+{
+  return Sk.ffh.unaryExec("abs", '__abs__', valuePy, "nu$abs");
+};
+goog.exportSymbol("Sk.ffh.abs", Sk.ffh.abs);
+
+Sk.ffh.magnitude = function(valuePy)
+{
+  return Sk.ffh.unaryExec("magnitude", '__magnitude__', valuePy, "nu$magnitude");
+};
+goog.exportSymbol("Sk.ffh.magnitude", Sk.ffh.magnitude);
+
+Sk.ffh.quadrance = function(valuePy)
+{
+  return Sk.ffh.unaryExec("quadrance", '__quadrance__', valuePy, "nu$quadrance");
+};
+goog.exportSymbol("Sk.ffh.quadrance", Sk.ffh.quadrance);
+
+Sk.ffh.sqrt = function(valuePy)
+{
+  return Sk.ffh.unaryExec("sqrt", SPECIAL_METHOD_SQRT, valuePy);
 };
 goog.exportSymbol("Sk.ffh.sqrt", Sk.ffh.sqrt);
 
@@ -15406,10 +15475,17 @@ Sk.ffh.str = function(valuePy) {
     throw Sk.ffi.notImplementedError("str");
   }
 };
+/* FIXME: Apparently, not everything distinguishes str and repr.
+Sk.ffh.str = function(valuePy)
+{
+  return Sk.ffh.unaryExec("str", SPECIAL_METHOD_STR, valuePy, "tp$str");
+};
+*/
 goog.exportSymbol("Sk.ffh.str", Sk.ffh.str);
 
-Sk.ffh.repr = function(valuePy) {
-  return Sk.ffh.unaryExec(SPECIAL_METHOD_REPR, valuePy, "tp$repr");
+Sk.ffh.repr = function(valuePy)
+{
+  return Sk.ffh.unaryExec("repr", SPECIAL_METHOD_REPR, valuePy, "tp$repr");
 };
 goog.exportSymbol("Sk.ffh.repr", Sk.ffh.repr);
 /**
@@ -25230,6 +25306,7 @@ mod.factorial = Sk.ffi.functionPy(function(x) {
     r *= i;
   return new Sk.builtin.nmber(r, Sk.builtin.nmber.int$);
 });
+
 /**
  * conjugate
  */
@@ -25241,6 +25318,22 @@ mod.conjugate = Sk.ffi.functionPy(function(numberPy) {
   else {
     return Sk.ffh.conjugate(numberPy);
   }
+});
+
+/**
+ * magnitude
+ */
+mod.magnitude = Sk.ffi.functionPy(function(numberPy) {
+  Sk.ffi.checkFunctionArgs("magnitude", arguments, 1, 1);
+  return Sk.ffh.magnitude(numberPy);
+});
+
+/**
+ * quadrance
+ */
+mod.quadrance = Sk.ffi.functionPy(function(numberPy) {
+  Sk.ffi.checkFunctionArgs("quadrance", arguments, 1, 1);
+  return Sk.ffh.quadrance(numberPy);
 });
 
 };
@@ -26053,6 +26146,49 @@ mod[COMPLEX] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var s = Sk.math.sin(z.y);
     return cartesianJsToComplexPy(e * c, e * s);
   });
+  $loc.__magnitude__ = Sk.ffi.functionPy(function(selfPy) {
+    return Sk.ffh.sqrt(Sk.ffh.quadrance(selfPy));
+  });
+  $loc.__quadrance__ = Sk.ffi.functionPy(function(selfPy) {
+    var z = Sk.ffi.remapToJs(selfPy);
+    return cartesianJsToComplexPy(z.x * z.x + z.y * z.y, 0);
+  });
+  $loc.__sqrt__ = Sk.ffi.functionPy(function(selfPy) {
+    var z = Sk.ffi.remapToJs(selfPy);
+    if (z.y !== 0)
+    {
+      if (z.x !== 0)
+      {
+        var a = Math.sqrt((z.x + Math.sqrt(z.x * z.x + z.y * z.y))/2);
+        var b = z.y / (2 * a);
+        return cartesianJsToComplexPy(a, b);
+      }
+      else
+      {
+        var a = Math.sqrt(Math.abs(z.y)/2);
+        var b = z.y / (2 * a);
+        return cartesianJsToComplexPy(a, b);
+      }
+    }
+    else
+    {
+      if (z.x !== 0)
+      {
+        if (z.x > 0)
+        {
+          return cartesianJsToComplexPy(Math.sqrt(z.x), 0);
+        }
+        else
+        {
+          return cartesianJsToComplexPy(0, Math.sqrt(-z.x));
+        }
+      }
+      else
+      {
+        return cartesianJsToComplexPy(0, 0);
+      }
+    }
+  });
   $loc.__pos__ = Sk.ffi.functionPy(function(selfPy) {
     return selfPy;
   });
@@ -26416,7 +26552,7 @@ mod[QUATERNION] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.nb$positive = function() {
     return this;
   };
-  $loc.nb$negative = function() {
+  $loc.nu$negative = function() {
     var q = Sk.ffi.remapToJs(this);
     return wxyzToPy(-q.w, -q.x, -q.y, -q.z);
   };
@@ -31626,8 +31762,8 @@ mod[NODE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       $loc.__div__  = Sk.ffi.functionPy(makeNumericBinaryOpLhs(Sk.ffh.divide));
       $loc.__rdiv__ = Sk.ffi.functionPy(makeNumericBinaryOpRhs(Sk.ffh.divide));
 
-      $loc.__mod__  = Sk.ffi.functionPy(makeNumericBinaryOpLhs(Sk.ffh.modulo));
-      $loc.__rmod__ = Sk.ffi.functionPy(makeNumericBinaryOpRhs(Sk.ffh.modulo));
+      $loc.__mod__  = Sk.ffi.functionPy(makeNumericBinaryOpLhs(Sk.ffh.mod));
+      $loc.__rmod__ = Sk.ffi.functionPy(makeNumericBinaryOpRhs(Sk.ffh.mod));
 
       $loc.__xor__  = Sk.ffi.functionPy(makeNumericBinaryOpLhs(Sk.ffh.xor));
       $loc.__rxor__ = Sk.ffi.functionPy(makeNumericBinaryOpRhs(Sk.ffh.xor));
@@ -33166,7 +33302,7 @@ mod[EUCLIDEAN_2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       return selfPy;
     }
   });
-  $loc.nb$negative = function() {
+  $loc.nu$negative = function() {
     var self = Sk.ffi.remapToJs(this);
     return coordsJsToE2Py(-self.w, -self.x, -self.y, -self.xy);
   };
@@ -33232,6 +33368,9 @@ mod[EUCLIDEAN_2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var c = Sk.math.cos(y);
     var s = Sk.math.sin(y);
     return coordsJsToE2Py(e * c, 0, 0, e * s);
+  });
+  $loc.__quadrance__ = Sk.ffi.functionPy(function(selfPy) {
+    return Sk.ffh.multiply(selfPy, selfPy);
   });
   $loc.__sqrt__ = Sk.ffi.functionPy(function(selfPy) {
     Sk.ffi.checkMethodArgs(METHOD_SQRT, arguments, 0, 0);
@@ -34492,7 +34631,8 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__mod__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
     var s  = Sk.ffi.remapToJs(selfPy);
     var o = Sk.ffi.remapToJs(otherPy);
-    return Sk.ffi.numberToFloatPy(s.x * o.x + s.y * o.y + s.z * o.z);
+    // FIXME: This should be generalized to the full scalar product between multivectors.
+    return coordsJsToE3Py(s.x * o.x + s.y * o.y + s.z * o.z, 0, 0, 0, 0, 0, 0, 0);
   });
   $loc.__xor__ = Sk.ffi.functionPy(function(a, b) {
     a = Sk.ffi.remapToJs(a);
@@ -35079,6 +35219,15 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     // TODO: generalize.
     return coordsJsToE3Py(Math.pow(self.w, other), 0, 0, 0, 0, 0, 0, 0);
   });
+  $loc.__abs__ = Sk.ffi.functionPy(function(selfPy) {
+    return Sk.ffh.sqrt(Sk.ffh.quadrance(selfPy));
+  });
+  $loc.__magnitude__ = Sk.ffi.functionPy(function(selfPy) {
+    return Sk.ffh.sqrt(Sk.ffh.quadrance(selfPy));
+  });
+  $loc.__quadrance__ = Sk.ffi.functionPy(function(selfPy) {
+    return Sk.ffh.mod(selfPy, selfPy);
+  });
   $loc.__sqrt__ = Sk.ffi.functionPy(function(selfPy) {
     Sk.ffi.checkMethodArgs(METHOD_SQRT, arguments, 0, 0);
     var self = Sk.ffi.remapToJs(selfPy);
@@ -35123,6 +35272,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     }
   });
   $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
+    Sk.ffi.checkMethodArgs("__str__", arguments, 0, 0);
     Sk.ffi.checkFunctionArgs("str", arguments, 1, 1);
     Sk.ffi.checkArgType(ARG_SELF, Sk.e3ga.EUCLIDEAN_3, isEuclidean3Py(selfPy), selfPy);
     var self = Sk.ffi.remapToJs(selfPy);
@@ -35961,7 +36111,7 @@ mod[LORENTZIAN] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       return selfPy;
     }
   });
-  $loc.nb$negative = function() {
+  $loc.nu$negative = function() {
     var self = Sk.ffi.remapToJs(this);
     return coordJsToLorentzianPy(-self.w, -self.x, -self.y, -self.xy);
   };
@@ -37610,6 +37760,18 @@ mod[UNIT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var c = lhs.pow(rhs);
     return Sk.ffi.callsim(mod[UNIT], Sk.ffi.numberToFloatPy(c.scale), Sk.ffi.referenceToPy(c.dimensions, DIMENSIONS), Sk.ffi.remapToPy(c.labels));
   });
+  $loc.__abs__ = Sk.ffi.functionPy(function(unitPy) {
+    var unitJs = Sk.ffi.remapToJs(unitPy);
+    return Sk.ffi.callsim(mod[UNIT], Sk.ffi.numberToFloatPy(Math.abs(unitJs.scale)), Sk.ffi.referenceToPy(unitJs.dimensions, DIMENSIONS), Sk.ffi.remapToPy(unitJs.labels));
+  });
+  $loc.__magnitude__ = Sk.ffi.functionPy(function(unitPy) {
+    var unitJs = Sk.ffi.remapToJs(unitPy);
+    return Sk.ffi.callsim(mod[UNIT], Sk.ffi.numberToFloatPy(Math.abs(unitJs.scale)), Sk.ffi.referenceToPy(unitJs.dimensions, DIMENSIONS), Sk.ffi.remapToPy(unitJs.labels));
+  });
+  $loc.__quadrance__ = Sk.ffi.functionPy(function(unitPy) {
+    var unitJs = Sk.ffi.remapToJs(unitPy);
+    return Sk.ffi.callsim(mod[UNIT], Sk.ffi.referenceToPy(unitJs.pow(2.0), UNIT));
+  });
   $loc.__sqrt__ = Sk.ffi.functionPy(function(unitPy) {
     var unitJs = Sk.ffi.remapToJs(unitPy);
     return Sk.ffi.callsim(mod[UNIT], Sk.ffi.referenceToPy(unitJs.pow(0.5), UNIT));
@@ -37791,6 +37953,23 @@ mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     // Sk.ffi.checkArgType(ARG_OTHER, NUMBER, Sk.ffi.isNum(otherPy), otherPy);
     return Sk.ffi.callsim(mod[MEASURE], Sk.ffh.divide(otherPy, self[QTY_PY]), Sk.ffh.divide(Sk.ffi.numberToFloatPy(1.0),self[UOM_PY]));
   });
+  $loc.__mod__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
+    var self = Sk.ffi.remapToJs(selfPy);
+    if (isMeasurePy(otherPy))
+    {
+      var other = Sk.ffi.remapToJs(otherPy);
+      return Sk.ffi.callsim(mod[MEASURE], Sk.ffh.mod(self[QTY_PY], other[QTY_PY]), Sk.ffh.multiply(self[UOM_PY], other[UOM_PY]));
+    }
+    else if (Sk.ffi.isNum(otherPy))
+    {
+      return Sk.ffi.callsim(mod[MEASURE], Sk.ffh.mod(self[QTY_PY], otherPy), self[UOM_PY]);
+    }
+    else
+    {
+      Sk.ffi.checkArgType(ARG_OTHER, [MEASURE, NUMBER], false, otherPy);
+    }
+  });
   $loc.__xor__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
     var self = Sk.ffi.remapToJs(selfPy);
     if (isMeasurePy(otherPy)) {
@@ -37926,6 +38105,21 @@ mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__exp__ = Sk.ffi.functionPy(function(selfPy) {
     var quantityPy = Sk.ffh.exp(Sk.ffi.gattr(selfPy, PROP_QUANTITY));
     var uomPy      = Sk.ffi.gattr(selfPy, PROP_UOM);
+    return Sk.ffi.callsim(mod[MEASURE], quantityPy, uomPy);
+  });
+  $loc.__abs__ = Sk.ffi.functionPy(function(selfPy) {
+    var quantityPy = Sk.ffh.abs(Sk.ffi.gattr(selfPy, PROP_QUANTITY));
+    var uomPy      = Sk.ffh.abs(Sk.ffi.gattr(selfPy, PROP_UOM));
+    return Sk.ffi.callsim(mod[MEASURE], quantityPy, uomPy);
+  });
+  $loc.__magnitude__ = Sk.ffi.functionPy(function(selfPy) {
+    var quantityPy = Sk.ffh.magnitude(Sk.ffi.gattr(selfPy, PROP_QUANTITY));
+    var uomPy      = Sk.ffh.magnitude(Sk.ffi.gattr(selfPy, PROP_UOM));
+    return Sk.ffi.callsim(mod[MEASURE], quantityPy, uomPy);
+  });
+  $loc.__quadrance__ = Sk.ffi.functionPy(function(selfPy) {
+    var quantityPy = Sk.ffh.quadrance(Sk.ffi.gattr(selfPy, PROP_QUANTITY));
+    var uomPy      = Sk.ffh.quadrance(Sk.ffi.gattr(selfPy, PROP_UOM));
     return Sk.ffi.callsim(mod[MEASURE], quantityPy, uomPy);
   });
   $loc.__sqrt__ = Sk.ffi.functionPy(function(selfPy) {

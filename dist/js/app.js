@@ -7275,16 +7275,7 @@
   };
   Sk.builtin.abs = function (a) {
     Sk.ffi.checkFunctionArgs('abs', arguments, 1, 1);
-    if (Sk.ffi.isNum(a))
-      return Sk.ffi.numberToPy(Math.abs(Sk.ffi.remapToJs(a)), Sk.ffi.getType(a));
-    try {
-      var b = a.__abs__;
-      if (b)
-        return Sk.ffi.callsim(b, a);
-      throw new Sk.builtin.NotImplementedError('abs');
-    } catch (c) {
-      throw Sk.ffi.err.argument('x').inFunction('abs').mustHaveType('number');
-    }
+    return Sk.ffi.isNum(a) ? Sk.ffi.numberToPy(Math.abs(Sk.ffi.remapToJs(a)), Sk.ffi.getType(a)) : Sk.ffh.abs(a);
   };
   Sk.builtin.ord = function (a) {
     Sk.builtin.pyCheckArgs('ord', arguments, 1, 1);
@@ -8845,7 +8836,7 @@
     if (null !== a)
       switch (b) {
       case 'USub':
-        return a.nb$negative ? a.nb$negative : a.__neg__;
+        return a.nu$negative ? a.nu$negative : a.__neg__;
       case 'Invert':
         return a.nb$invert ? a.nb$invert : a.__invert__;
       case 'UAdd':
@@ -11446,11 +11437,11 @@
   Sk.builtin.nmber.prototype.nb$inplace_xor = Sk.builtin.nmber.prototype.nb$xor;
   Sk.builtin.nmber.prototype.nb$inplace_lshift = Sk.builtin.nmber.prototype.nb$lshift;
   Sk.builtin.nmber.prototype.nb$inplace_rshift = Sk.builtin.nmber.prototype.nb$rshift;
-  Sk.builtin.nmber.prototype.nb$negative = function () {
-    return new Sk.builtin.nmber(-this.v, void 0);
+  Sk.builtin.nmber.prototype.nu$negative = function () {
+    return new Sk.builtin.nmber(-this.v, this.skType);
   };
   Sk.builtin.nmber.prototype.nb$positive = function () {
-    return this.clone();
+    return this;
   };
   Sk.builtin.nmber.prototype.nb$cos = function () {
     return new Sk.builtin.nmber(Math.cos(this.v), this.skType);
@@ -11461,8 +11452,14 @@
   Sk.builtin.nmber.prototype.nb$tan = function () {
     return new Sk.builtin.nmber(Math.tan(this.v), this.skType);
   };
-  Sk.builtin.nmber.prototype.nb$exp = function () {
+  Sk.builtin.nmber.prototype.nu$exponential = function () {
     return new Sk.builtin.nmber(Math.exp(this.v), this.skType);
+  };
+  Sk.builtin.nmber.prototype.nu$magnitude = function () {
+    return new Sk.builtin.nmber(Math.abs(this.v), this.skType);
+  };
+  Sk.builtin.nmber.prototype.nu$quadrance = function () {
+    return new Sk.builtin.nmber(this.v * this.v, this.skType);
   };
   Sk.builtin.nmber.prototype.nb$nonzero = function () {
     return 0 !== this.v ? Sk.builtin.bool.true$ : Sk.builtin.bool.false$;
@@ -11747,7 +11744,7 @@
     return new Sk.builtin.lng(this.biginteger.xor(new Sk.builtin.biginteger(a)));
   };
   Sk.builtin.lng.prototype.nb$inplace_xor = Sk.builtin.lng.prototype.nb$xor;
-  Sk.builtin.lng.prototype.nb$negative = function () {
+  Sk.builtin.lng.prototype.nu$negative = function () {
     return new Sk.builtin.lng(this.biginteger.negate());
   };
   Sk.builtin.lng.prototype.nb$positive = function () {
@@ -12262,6 +12259,10 @@
     BOOLEAN: 'boolean',
     FUNCTION: 'function'
   };
+  Sk.ffi.type = function (a) {
+    return a.constructor === Sk.builtin.nmber ? a.skType === Sk.builtin.nmber.int$ ? Sk.builtin.int_.prototype.ob$type : Sk.builtin.float_.prototype.ob$type : a.ob$type;
+  };
+  goog.exportSymbol('Sk.ffi.type', Sk.ffi.type);
   Sk.ffi.bool = {
     True: Sk.builtin.bool.true$,
     False: Sk.builtin.bool.false$
@@ -12863,12 +12864,12 @@
   goog.exportSymbol('Sk.ffi.unwrapn', Sk.ffi.unwrapn);
   Sk.ffh = Sk.ffh || {};
   var SPECIAL_METHOD_ADD = '__add__', SPECIAL_METHOD_CLIFFORD_CONJUGATE = '__cliffordConjugate__', SPECIAL_METHOD_CONJUGATE = '__conjugate__', SPECIAL_METHOD_DIV = '__div__', SPECIAL_METHOD_EQ = '__eq__', SPECIAL_METHOD_COS = '__cos__', SPECIAL_METHOD_EXP = '__exp__', SPECIAL_METHOD_GETITEM = '__getitem__', SPECIAL_METHOD_INVERT = '__invert__', SPECIAL_METHOD_LSHIFT = '__lshift__', SPECIAL_METHOD_MUL = '__mul__', SPECIAL_METHOD_NEG = '__neg__', SPECIAL_METHOD_NONZERO = '__nonzero__', SPECIAL_METHOD_POS = '__pos__', SPECIAL_METHOD_REPR = '__repr__', SPECIAL_METHOD_RMUL = '__rmul__', SPECIAL_METHOD_RSHIFT = '__rshift__', SPECIAL_METHOD_SIN = '__sin__', SPECIAL_METHOD_SQRT = '__sqrt__', SPECIAL_METHOD_STR = '__str__', SPECIAL_METHOD_SUB = '__sub__', SPECIAL_METHOD_TAN = '__tan__', SPECIAL_METHOD_XOR = '__xor__';
-  Sk.ffh.unaryExec = function (a, b, c) {
-    if (b[a])
-      return Sk.ffi.callsim(b[a], b);
-    if ('undefined' !== typeof c && b[c])
-      return b[c].call(b);
-    throw Sk.ffi.notImplementedError(a + Sk.ffi.remapToJs(Sk.ffh.repr(b)));
+  Sk.ffh.unaryExec = function (a, b, c, d) {
+    if (c[b])
+      return Sk.ffi.callsim(c[b], c);
+    if ('undefined' !== typeof d && c[d])
+      return c[d].call(c);
+    throw Sk.ffi.typeError(a + '(' + Sk.ffi.remapToJs(Sk.ffh.repr(c)) + ')');
   };
   goog.exportSymbol('Sk.ffh.unaryExec', Sk.ffh.unaryExec);
   Sk.ffh.getitem = function (a, b) {
@@ -12893,10 +12894,10 @@
     return Sk.abstr.binary_op_(a, b, 'Div');
   };
   goog.exportSymbol('Sk.ffh.divide', Sk.ffh.divide);
-  Sk.ffh.modulo = function (a, b) {
+  Sk.ffh.mod = function (a, b) {
     return Sk.abstr.binary_op_(a, b, 'Mod');
   };
-  goog.exportSymbol('Sk.ffh.modulo', Sk.ffh.modulo);
+  goog.exportSymbol('Sk.ffh.mod', Sk.ffh.mod);
   Sk.ffh.xor = function (a, b) {
     return Sk.abstr.binary_op_(a, b, 'BitXor');
   };
@@ -12920,27 +12921,27 @@
   };
   goog.exportSymbol('Sk.ffh.equal', Sk.ffh.equal);
   Sk.ffh.cliffordConjugate = function (a) {
-    return Sk.ffh.unaryExec(SPECIAL_METHOD_CLIFFORD_CONJUGATE, a, 'nb$cliffordConjugate');
+    return Sk.ffh.unaryExec('', SPECIAL_METHOD_CLIFFORD_CONJUGATE, a, 'nb$cliffordConjugate');
   };
   goog.exportSymbol('Sk.ffh.cliffordConjugate', Sk.ffh.cliffordConjugate);
   Sk.ffh.conjugate = function (a) {
-    return Sk.ffi.isNum(a) ? a : Sk.ffh.unaryExec(SPECIAL_METHOD_CONJUGATE, a);
+    return Sk.ffi.isNum(a) ? a : Sk.ffh.unaryExec('', SPECIAL_METHOD_CONJUGATE, a);
   };
   goog.exportSymbol('Sk.ffh.conjugate', Sk.ffh.conjugate);
   Sk.ffh.cos = function (a) {
-    return Sk.ffh.unaryExec(SPECIAL_METHOD_COS, a, 'nb$cos');
+    return Sk.ffh.unaryExec('cos', SPECIAL_METHOD_COS, a, 'nb$cos');
   };
   goog.exportSymbol('Sk.ffh.cos', Sk.ffh.cos);
   Sk.ffh.sin = function (a) {
-    return Sk.ffh.unaryExec(SPECIAL_METHOD_SIN, a, 'nb$sin');
+    return Sk.ffh.unaryExec('sin', SPECIAL_METHOD_SIN, a, 'nb$sin');
   };
   goog.exportSymbol('Sk.ffh.sin', Sk.ffh.sin);
   Sk.ffh.tan = function (a) {
-    return Sk.ffh.unaryExec(SPECIAL_METHOD_TAN, a, 'nb$tan');
+    return Sk.ffh.unaryExec('tan', SPECIAL_METHOD_TAN, a, 'nb$tan');
   };
   goog.exportSymbol('Sk.ffh.tan', Sk.ffh.tan);
   Sk.ffh.exp = function (a) {
-    return Sk.ffh.unaryExec(SPECIAL_METHOD_EXP, a, 'nb$exp');
+    return Sk.ffh.unaryExec('exp', SPECIAL_METHOD_EXP, a, 'nu$exponential');
   };
   goog.exportSymbol('Sk.ffh.exp', Sk.ffh.exp);
   Sk.ffh.positive = function (a) {
@@ -12952,15 +12953,27 @@
   };
   goog.exportSymbol('Sk.ffh.negative', Sk.ffh.negative);
   Sk.ffh.invert = function (a) {
-    return Sk.ffh.unaryExec(SPECIAL_METHOD_INVERT, a, 'nb$invert');
+    return Sk.ffh.unaryExec('~', SPECIAL_METHOD_INVERT, a, 'nb$invert');
   };
   goog.exportSymbol('Sk.ffh.invert', Sk.ffh.invert);
   Sk.ffh.nonzero = function (a) {
-    return Sk.ffh.unaryExec(SPECIAL_METHOD_NONZERO, a, 'nb$nonzero');
+    return Sk.ffh.unaryExec('', SPECIAL_METHOD_NONZERO, a, 'nb$nonzero');
   };
   goog.exportSymbol('Sk.ffh.nonzero', Sk.ffh.nonzero);
+  Sk.ffh.abs = function (a) {
+    return Sk.ffh.unaryExec('abs', '__abs__', a, 'nu$abs');
+  };
+  goog.exportSymbol('Sk.ffh.abs', Sk.ffh.abs);
+  Sk.ffh.magnitude = function (a) {
+    return Sk.ffh.unaryExec('magnitude', '__magnitude__', a, 'nu$magnitude');
+  };
+  goog.exportSymbol('Sk.ffh.magnitude', Sk.ffh.magnitude);
+  Sk.ffh.quadrance = function (a) {
+    return Sk.ffh.unaryExec('quadrance', '__quadrance__', a, 'nu$quadrance');
+  };
+  goog.exportSymbol('Sk.ffh.quadrance', Sk.ffh.quadrance);
   Sk.ffh.sqrt = function (a) {
-    return Sk.ffh.unaryExec(SPECIAL_METHOD_SQRT, a);
+    return Sk.ffh.unaryExec('sqrt', SPECIAL_METHOD_SQRT, a);
   };
   goog.exportSymbol('Sk.ffh.sqrt', Sk.ffh.sqrt);
   Sk.ffh.str = function (a) {
@@ -12974,7 +12987,7 @@
   };
   goog.exportSymbol('Sk.ffh.str', Sk.ffh.str);
   Sk.ffh.repr = function (a) {
-    return Sk.ffh.unaryExec(SPECIAL_METHOD_REPR, a, 'tp$repr');
+    return Sk.ffh.unaryExec('repr', SPECIAL_METHOD_REPR, a, 'tp$repr');
   };
   goog.exportSymbol('Sk.ffh.repr', Sk.ffh.repr);
   Sk.ffh.evaluate = function (a, b) {
@@ -25341,6 +25354,14 @@
         Sk.ffi.checkFunctionArgs('conjugate', arguments, 1, 1);
         return Sk.ffi.isNum(a) ? a : Sk.ffh.conjugate(a);
       });
+      a.magnitude = Sk.ffi.functionPy(function (a) {
+        Sk.ffi.checkFunctionArgs('magnitude', arguments, 1, 1);
+        return Sk.ffh.magnitude(a);
+      });
+      a.quadrance = Sk.ffi.functionPy(function (a) {
+        Sk.ffi.checkFunctionArgs('quadrance', arguments, 1, 1);
+        return Sk.ffh.quadrance(a);
+      });
     };
   }.call(this));
   Sk.matrix = Sk.matrix || {};
@@ -25832,6 +25853,17 @@
           var c = Sk.math.cos(b.y), b = Sk.math.sin(b.y);
           return f(a * c, a * b);
         });
+        k.__magnitude__ = Sk.ffi.functionPy(function (a) {
+          return Sk.ffh.sqrt(Sk.ffh.quadrance(a));
+        });
+        k.__quadrance__ = Sk.ffi.functionPy(function (a) {
+          a = Sk.ffi.remapToJs(a);
+          return f(a.x * a.x + a.y * a.y, 0);
+        });
+        k.__sqrt__ = Sk.ffi.functionPy(function (a) {
+          var b = Sk.ffi.remapToJs(a);
+          return 0 !== b.y ? (a = 0 !== b.x ? Math.sqrt((b.x + Math.sqrt(b.x * b.x + b.y * b.y)) / 2) : Math.sqrt(Math.abs(b.y) / 2), b = b.y / (2 * a), f(a, b)) : 0 !== b.x ? 0 < b.x ? f(Math.sqrt(b.x), 0) : f(0, Math.sqrt(-b.x)) : f(0, 0);
+        });
         k.__pos__ = Sk.ffi.functionPy(function (a) {
           return a;
         });
@@ -25977,7 +26009,7 @@
         f.nb$positive = function () {
           return this;
         };
-        f.nb$negative = function () {
+        f.nu$negative = function () {
           var a = Sk.ffi.remapToJs(this);
           return d(-a.w, -a.x, -a.y, -a.z);
         };
@@ -29249,8 +29281,8 @@
         m.__rmul__ = Sk.ffi.functionPy(g(Sk.ffh.multiply));
         m.__div__ = Sk.ffi.functionPy(f(Sk.ffh.divide));
         m.__rdiv__ = Sk.ffi.functionPy(g(Sk.ffh.divide));
-        m.__mod__ = Sk.ffi.functionPy(f(Sk.ffh.modulo));
-        m.__rmod__ = Sk.ffi.functionPy(g(Sk.ffh.modulo));
+        m.__mod__ = Sk.ffi.functionPy(f(Sk.ffh.mod));
+        m.__rmod__ = Sk.ffi.functionPy(g(Sk.ffh.mod));
         m.__xor__ = Sk.ffi.functionPy(f(Sk.ffh.xor));
         m.__rxor__ = Sk.ffi.functionPy(g(Sk.ffh.xor));
         m.__lshift__ = Sk.ffi.functionPy(f(Sk.ffh.lshift));
@@ -30009,7 +30041,7 @@
             f = d.w, g = d.x, h = d.y, k = d.xy, l = e.w, m = e.x, C = e.y, I = e.xy, d.w = f * l + g * m + h * C - k * I, d.x = +g * l + k * C, d.y = +h * l - k * m, d.xy = k * l;
           return a;
         });
-        m.nb$negative = function () {
+        m.nu$negative = function () {
           var a = Sk.ffi.remapToJs(this);
           return d(-a.w, -a.x, -a.y, -a.xy);
         };
@@ -30055,6 +30087,9 @@
           Sk.ffi.checkMethodArgs('exp', arguments, 0, 0);
           var b = Sk.ffi.remapToJs(a), c = b.xy, b = Math.exp(b.w), e = Sk.math.cos(c), c = Sk.math.sin(c);
           return d(b * e, 0, 0, b * c);
+        });
+        m.__quadrance__ = Sk.ffi.functionPy(function (a) {
+          return Sk.ffh.multiply(a, a);
         });
         m.__sqrt__ = Sk.ffi.functionPy(function (a) {
           Sk.ffi.checkMethodArgs('sqrt', arguments, 0, 0);
@@ -30770,7 +30805,7 @@
         });
         r.__mod__ = Sk.ffi.functionPy(function (a, b) {
           var c = Sk.ffi.remapToJs(a), d = Sk.ffi.remapToJs(b);
-          return Sk.ffi.numberToFloatPy(c.x * d.x + c.y * d.y + c.z * d.z);
+          return f(c.x * d.x + c.y * d.y + c.z * d.z, 0, 0, 0, 0, 0, 0, 0);
         });
         r.__xor__ = Sk.ffi.functionPy(function (a, b) {
           a = Sk.ffi.remapToJs(a);
@@ -31153,6 +31188,15 @@
           var c = Sk.ffi.remapToJs(a), d = Sk.ffi.remapToJs(b);
           return f(Math.pow(c.w, d), 0, 0, 0, 0, 0, 0, 0);
         });
+        r.__abs__ = Sk.ffi.functionPy(function (a) {
+          return Sk.ffh.sqrt(Sk.ffh.quadrance(a));
+        });
+        r.__magnitude__ = Sk.ffi.functionPy(function (a) {
+          return Sk.ffh.sqrt(Sk.ffh.quadrance(a));
+        });
+        r.__quadrance__ = Sk.ffi.functionPy(function (a) {
+          return Sk.ffh.mod(a, a);
+        });
         r.__sqrt__ = Sk.ffi.functionPy(function (a) {
           Sk.ffi.checkMethodArgs('sqrt', arguments, 0, 0);
           var b = Sk.ffi.remapToJs(a);
@@ -31197,6 +31241,7 @@
           return Sk.ffi.stringToPy(Sk.e3ga.SCALAR_E3 + '(' + a.join(', ') + ')');
         });
         r.__str__ = Sk.ffi.functionPy(function (a) {
+          Sk.ffi.checkMethodArgs('__str__', arguments, 0, 0);
           Sk.ffi.checkFunctionArgs('str', arguments, 1, 1);
           Sk.ffi.checkArgType('self', Sk.e3ga.EUCLIDEAN_3, e(a), a);
           var b = Sk.ffi.remapToJs(a);
@@ -31783,7 +31828,7 @@
             f = d.w, g = d.x, h = d.y, k = d.xy, l = e.w, m = e.x, C = e.y, I = e.xy, d.w = f * l + g * m + h * C - k * I, d.x = +g * l + k * C, d.y = +h * l - k * m, d.xy = k * l;
           return a;
         });
-        g.nb$negative = function () {
+        g.nu$negative = function () {
           var a = Sk.ffi.remapToJs(this);
           return d(-a.w, -a.x, -a.y, -a.xy);
         };
@@ -32754,6 +32799,18 @@
           var d = Sk.ffi.remapToJs(b), e = Sk.ffi.remapToJs(c), d = d.pow(e);
           return Sk.ffi.callsim(a.Unit, Sk.ffi.numberToFloatPy(d.scale), Sk.ffi.referenceToPy(d.dimensions, 'Dimensions'), Sk.ffi.remapToPy(d.labels));
         });
+        e.__abs__ = Sk.ffi.functionPy(function (b) {
+          b = Sk.ffi.remapToJs(b);
+          return Sk.ffi.callsim(a.Unit, Sk.ffi.numberToFloatPy(Math.abs(b.scale)), Sk.ffi.referenceToPy(b.dimensions, 'Dimensions'), Sk.ffi.remapToPy(b.labels));
+        });
+        e.__magnitude__ = Sk.ffi.functionPy(function (b) {
+          b = Sk.ffi.remapToJs(b);
+          return Sk.ffi.callsim(a.Unit, Sk.ffi.numberToFloatPy(Math.abs(b.scale)), Sk.ffi.referenceToPy(b.dimensions, 'Dimensions'), Sk.ffi.remapToPy(b.labels));
+        });
+        e.__quadrance__ = Sk.ffi.functionPy(function (b) {
+          b = Sk.ffi.remapToJs(b);
+          return Sk.ffi.callsim(a.Unit, Sk.ffi.referenceToPy(b.pow(2), 'Unit'));
+        });
         e.__sqrt__ = Sk.ffi.functionPy(function (b) {
           b = Sk.ffi.remapToJs(b);
           return Sk.ffi.callsim(a.Unit, Sk.ffi.referenceToPy(b.pow(0.5), 'Unit'));
@@ -33364,6 +33421,19 @@
           var d = Sk.ffi.remapToJs(b);
           return Sk.ffi.callsim(a.Measure, Sk.ffh.divide(c, d.qtyPy), Sk.ffh.divide(Sk.ffi.numberToFloatPy(1), d.uomPy));
         });
+        d.__mod__ = Sk.ffi.functionPy(function (b, d) {
+          var f = Sk.ffi.remapToJs(b);
+          if (e(d)) {
+            var g = Sk.ffi.remapToJs(d);
+            return Sk.ffi.callsim(a.Measure, Sk.ffh.mod(f.qtyPy, g.qtyPy), Sk.ffh.multiply(f.uomPy, g.uomPy));
+          }
+          if (Sk.ffi.isNum(d))
+            return Sk.ffi.callsim(a.Measure, Sk.ffh.mod(f.qtyPy, d), f.uomPy);
+          Sk.ffi.checkArgType('other', [
+            'Measure',
+            c
+          ], !1, d);
+        });
         d.__xor__ = Sk.ffi.functionPy(function (b, d) {
           var f = Sk.ffi.remapToJs(b);
           if (e(d)) {
@@ -33481,6 +33551,21 @@
         d.__exp__ = Sk.ffi.functionPy(function (b) {
           var c = Sk.ffh.exp(Sk.ffi.gattr(b, 'quantity'));
           b = Sk.ffi.gattr(b, 'uom');
+          return Sk.ffi.callsim(a.Measure, c, b);
+        });
+        d.__abs__ = Sk.ffi.functionPy(function (b) {
+          var c = Sk.ffh.abs(Sk.ffi.gattr(b, 'quantity'));
+          b = Sk.ffh.abs(Sk.ffi.gattr(b, 'uom'));
+          return Sk.ffi.callsim(a.Measure, c, b);
+        });
+        d.__magnitude__ = Sk.ffi.functionPy(function (b) {
+          var c = Sk.ffh.magnitude(Sk.ffi.gattr(b, 'quantity'));
+          b = Sk.ffh.magnitude(Sk.ffi.gattr(b, 'uom'));
+          return Sk.ffi.callsim(a.Measure, c, b);
+        });
+        d.__quadrance__ = Sk.ffi.functionPy(function (b) {
+          var c = Sk.ffh.quadrance(Sk.ffi.gattr(b, 'quantity'));
+          b = Sk.ffh.quadrance(Sk.ffi.gattr(b, 'uom'));
           return Sk.ffi.callsim(a.Measure, c, b);
         });
         d.__sqrt__ = Sk.ffi.functionPy(function (b) {
