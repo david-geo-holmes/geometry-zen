@@ -37830,6 +37830,32 @@ var DIMLESS           = "dimensionless";
 var isMeasurePy    = function(valuePy) {return Sk.ffi.isInstance(valuePy, MEASURE);};
 var isDimensionsPy = function(valuePy) {return Sk.ffi.isInstance(valuePy, DIMENSIONS);};
 var isUnitPy       = function(valuePy) {return Sk.ffi.isInstance(valuePy, UNIT);};
+/**
+ * Be selective about which classes can be treated as quantities in a measure.
+ */
+var isQuantityPy     = function(valuePy)
+{
+  if (Sk.ffi.isNum(valuePy))
+  {
+    return true;
+  }
+  else if (Sk.ffi.isInstance(valuePy, 'Euclidean3'))
+  {
+    return true;
+  }
+  else if (Sk.ffi.isInstance(valuePy, 'Euclidean2'))
+  {
+    return true;
+  }
+  else if (Sk.ffi.isInstance(valuePy, 'complex'))
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+};
 
 Sk.builtin.defineFractions(mod, RATIONAL, function(n, d) {return new BLADE.Rational(n, d)});
 
@@ -38235,7 +38261,7 @@ mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc)
         var other = Sk.ffi.remapToJs(otherPy);
         return Sk.ffi.callsim(mod[MEASURE], op(self[QTY_PY], other[QTY_PY]), Sk.ffh.multiply(self[UOM_PY], other[UOM_PY]));
       }
-      else
+      else if (isQuantityPy(otherPy))
       {
         var quantityPy = op(self[QTY_PY], otherPy);
         if (typeof quantityPy !== 'undefined')
@@ -38247,16 +38273,27 @@ mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc)
           return undefined;
         }
       }
+      else
+      {
+        return undefined;
+      }
     };
   };
   var makeMeasureRhsBinary = function(op)
   {
     return function(selfPy, otherPy)
     {
-      var quantityPy = op(otherPy, getQuantityPy(selfPy));
-      if (typeof quantityPy !== 'undefined')
+      if (isQuantityPy(otherPy))
       {
-        return Sk.ffi.callsim(mod[MEASURE], quantityPy, getUomPy(selfPy));
+        var quantityPy = op(otherPy, getQuantityPy(selfPy));
+        if (typeof quantityPy !== 'undefined')
+        {
+          return Sk.ffi.callsim(mod[MEASURE], quantityPy, getUomPy(selfPy));
+        }
+        else
+        {
+          return undefined;
+        }
       }
       else
       {
