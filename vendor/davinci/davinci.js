@@ -4653,42 +4653,53 @@ Sk.builtin.sum = function sum(iter,start)
 
     Sk.builtin.pyCheckArgs("sum", arguments, 1, 2);
     Sk.builtin.pyCheckType("iter", "iterable", Sk.builtin.checkIterable(iter));
-    if (start !== undefined && Sk.builtin.checkString(start)) {
-    throw new Sk.builtin.TypeError("sum() can't sum strings [use ''.join(seq) instead]");
+    if (start !== undefined && Sk.builtin.checkString(start))
+    {
+        throw new Sk.builtin.TypeError("sum() can't sum strings [use ''.join(seq) instead]");
     };
 
-    if (start === undefined ) {
-    tot = new Sk.builtin.nmber(0, Sk.builtin.nmber.int$);
+    if (start === undefined )
+    {
+        tot = new Sk.builtin.nmber(0, Sk.builtin.nmber.int$);
     }
-    else {
-    tot = start;
+    else
+    {
+        tot = start;
     }
 
     it = iter.tp$iter();
-    for (i = it.tp$iternext(); i !== undefined; i = it.tp$iternext()) {
-    if (i.skType === Sk.builtin.nmber.float$) {
-        has_float = true;
-        if (tot.skType !== Sk.builtin.nmber.float$) {
-        tot = new Sk.builtin.nmber(Sk.builtin.asnum$(tot),
-                       Sk.builtin.nmber.float$)
+    for (i = it.tp$iternext(); i !== undefined; i = it.tp$iternext())
+    {
+        if (i.skType === Sk.builtin.nmber.float$)
+        {
+            has_float = true;
+            if (tot.skType !== Sk.builtin.nmber.float$)
+            {
+                tot = new Sk.builtin.nmber(Sk.builtin.asnum$(tot), Sk.builtin.nmber.float$);
+            }
         }
-    } else if (i instanceof Sk.builtin.lng) {
-        if (!has_float) {
-        if (!(tot instanceof Sk.builtin.lng)) {
-            tot = new Sk.builtin.lng(tot)
+        else if (i instanceof Sk.builtin.lng)
+        {
+            if (!has_float)
+            {
+                if (!(tot instanceof Sk.builtin.lng))
+                {
+                    tot = new Sk.builtin.lng(tot);
+                }
+            }
         }
-        }
-    }
 
-    if (tot.nb$add(i) !== undefined) {
-        tot = tot.nb$add(i);
-    } else {
-        throw new Sk.builtin.TypeError("unsupported operand type(s) for +: '"
+        if (tot.nb$add(i) !== undefined)
+        {
+            tot = tot.nb$add(i);
+        }
+        else
+        {
+            throw new Sk.builtin.TypeError("unsupported operand type(s) for +: '"
                        + Sk.abstr.typeName(tot) + "' and '"
                        + Sk.abstr.typeName(i)+"'");
+        }
     }
-    }
-
     return tot;
 };
 
@@ -7434,7 +7445,8 @@ Sk.abstr = {};
 //
 //
 
-Sk.abstr.typeName = function(valuePy) {
+Sk.abstr.typeName = function(valuePy)
+{
     if (valuePy instanceof Sk.builtin.nmber)
     {
         return valuePy.skType;
@@ -26036,22 +26048,26 @@ mod[COMPLEX] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       return undefined;
     }
   });
-  $loc.__rmul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+  $loc.__rmul__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
     var x, y;
     var a = Sk.ffi.remapToJs(otherPy);
     var b = Sk.ffi.remapToJs(selfPy);
-    if (isComplexPy(otherPy)) {
+    if (isComplexPy(otherPy))
+    {
       x = b.x * a.x - b.y * a.y;
       y = b.y * a.x + b.x * a.y;
       return cartesianJsToComplexPy(x, y);
     }
-    else if (Sk.ffi.isNum(otherPy)) {
+    else if (Sk.ffi.isNum(otherPy))
+    {
       x = a * b.x;
       y = a * b.y;
       return cartesianJsToComplexPy(x, y);
     }
-    else {
-      throw Sk.ffi.err.argument(ARG_OTHER).mustHaveType(NUM);
+    else
+    {
+      return undefined;
     }
   });
   $loc.__imul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
@@ -32661,7 +32677,6 @@ Sk.builtin.buildWindowClass = function(mod) {
 (function() {
 Sk.builtin.defineEuclidean2 = function(mod, BLADE) {
 Sk.ffi.checkFunctionArgs("defineEuclidean2", arguments, 2, 2);
-Sk.builtin.defineUnits(mod, BLADE);
 /**
  * @const
  * @type {string}
@@ -32682,16 +32697,6 @@ var VECTOR_E2           = "VectorE2";
  * @type {string}
  */
 var PSEUDOSCALAR_E2     = "PseudoscalarE2";
-/**
- * @const
- * @type {string}
- */
-var UNIT                = "Unit";
-/**
- * @const
- * @type {string}
- */
-var MEASURE             = "Measure";
 /**
  * @const
  * @type {!Array.<Sk.ffi.PyType>}
@@ -32781,32 +32786,29 @@ var OP_EQ               = "equal";
  * @const
  * @type {string}
  */
-var UNIT_SCALAR_NAME     = "1";
+var ONE_NAME            = "1";
 /**
  * @const
  * @type {string}
  */
-var UNIT_VECTOR_NAME_E1  = "e1";
+var E1_NAME             = "e1";
 /**
  * @const
  * @type {string}
  */
-var UNIT_VECTOR_NAME_E2  = "e2";
+var E2_NAME             = "e2";
 /**
  * @const
  * @type {string}
  */
-var PSEUDOSCALAR_NAME    = "I";
-
-var E2_OR_NUMBER = [EUCLIDEAN_2, NUM];
-var E2_OR_NUMBER_OR_UNIT = [EUCLIDEAN_2, UNIT];
+var PSEUDOSCALAR_NAME   = "I";
 
 function isNumber(x) {return typeof x === 'number';}
-  /**
-   * @param {Object} valuePy
-   * @return {boolean} true if the value is a Euclidean2, otherwise false.
-   */
-  var isEuclidean2Py = function(valuePy) {return Sk.ffi.isInstance(valuePy, EUCLIDEAN_2);};
+/**
+ * @param {Object} valuePy
+ * @return {boolean} true if the value is a Euclidean2, otherwise false.
+ */
+var isEuclidean2Py = function(valuePy) {return Sk.ffi.isInstance(valuePy, EUCLIDEAN_2);};
 
 function coordsJsToE2Py(s, x, y, xy) {
   return Sk.ffi.callsim(mod[EUCLIDEAN_2], Sk.ffi.numberToFloatPy(s), Sk.ffi.numberToFloatPy(x), Sk.ffi.numberToFloatPy(y), Sk.ffi.numberToFloatPy(xy));
@@ -32830,7 +32832,7 @@ function stringFromCoordinates(coordinates, labels, multiplier) {
         return sb.push(label);
       } else {
         sb.push(n.toString());
-        if (label !== UNIT_SCALAR_NAME) {
+        if (label !== ONE_NAME) {
           sb.push(multiplier);
           return sb.push(label);
         }
@@ -32940,58 +32942,70 @@ mod[EUCLIDEAN_2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       }
     }
   });
-  $loc.__add__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+  $loc.__add__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
     var lhs = Sk.ffi.remapToJs(selfPy);
     var rhs = Sk.ffi.remapToJs(otherPy);
-    if (Sk.ffi.isNum(otherPy)) {
+    if (Sk.ffi.isNum(otherPy))
+    {
       return coordsJsToE2Py(lhs.w + rhs, lhs.x, lhs.y, lhs.xy);
     }
-    else if (isEuclidean2Py(otherPy)) {
+    else if (isEuclidean2Py(otherPy))
+    {
       return coordsJsToE2Py(lhs.w + rhs.w, lhs.x + rhs.x, lhs.y + rhs.y, lhs.xy + rhs.xy);
     }
-    else {
-      Sk.ffi.checkRhsOperandType(OP_ADD, E2_OR_NUMBER, Sk.ffi.isNum(otherPy), otherPy);
+    else
+    {
+      return undefined;
     }
   });
   $loc.__radd__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-    Sk.ffi.checkLhsOperandType(OP_ADD, E2_OR_NUMBER, Sk.ffi.isNum(otherPy), otherPy);
+    Sk.ffi.checkLhsOperandType(OP_ADD, NUM, Sk.ffi.isNum(otherPy), otherPy);
     var lhs = Sk.ffi.remapToJs(otherPy);
     var rhs = Sk.ffi.remapToJs(selfPy);
     return coordsJsToE2Py(lhs + rhs.w, rhs.x, rhs.y, rhs.xy);
   });
-  $loc.__iadd__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+  $loc.__iadd__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
     var self = Sk.ffi.remapToJs(selfPy);
     var other = Sk.ffi.remapToJs(otherPy);
-    if (Sk.ffi.isNum(otherPy)) {
+    if (Sk.ffi.isNum(otherPy))
+    {
       self.w += other;
       return selfPy;
     }
-    else if (isEuclidean2Py(otherPy)) {
+    else if (isEuclidean2Py(otherPy))
+    {
       self.w  += other.w;
       self.x  += other.x;
       self.y  += other.y;
       self.xy += other.xy;
       return selfPy;
     }
-    else {
-      Sk.ffi.checkRhsOperandType(OP_ADD, E2_OR_NUMBER, Sk.ffi.isNum(otherPy), otherPy);
+    else
+    {
+      return undefined;
     }
   });
-  $loc.__sub__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+  $loc.__sub__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
     var lhs = Sk.ffi.remapToJs(selfPy);
     var rhs = Sk.ffi.remapToJs(otherPy);
-    if (Sk.ffi.isNum(otherPy)) {
+    if (Sk.ffi.isNum(otherPy))
+    {
       return coordsJsToE2Py(lhs.w - rhs, lhs.x, lhs.y, lhs.xy);
     }
-    else if (isEuclidean2Py(otherPy)) {
+    else if (isEuclidean2Py(otherPy))
+    {
       return coordsJsToE2Py(lhs.w - rhs.w, lhs.x - rhs.x, lhs.y - rhs.y, lhs.xy - rhs.xy);
     }
-    else {
-      Sk.ffi.checkRhsOperandType(OP_SUB, E2_OR_NUMBER, Sk.ffi.isNum(otherPy), otherPy);
+    else
+    {
+      return undefined;
     }
   });
   $loc.__rsub__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-    Sk.ffi.checkLhsOperandType(OP_ADD, E2_OR_NUMBER, Sk.ffi.isNum(otherPy), otherPy);
+    Sk.ffi.checkLhsOperandType(OP_ADD, NUM, Sk.ffi.isNum(otherPy), otherPy);
     var lhs = Sk.ffi.remapToJs(otherPy);
     var rhs = Sk.ffi.remapToJs(selfPy);
     return coordsJsToE2Py(lhs - rhs.w, -rhs.x, -rhs.y, -rhs.xy);
@@ -33011,11 +33025,16 @@ mod[EUCLIDEAN_2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       return selfPy;
     }
   });
-  $loc.__mul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-    switch(Sk.ffi.getType(otherPy)) {
-      case Sk.ffi.PyType.INSTANCE: {
-        switch(Sk.ffi.typeName(otherPy)) {
-          case EUCLIDEAN_2: {
+  $loc.__mul__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
+    switch(Sk.ffi.getType(otherPy))
+    {
+      case Sk.ffi.PyType.INSTANCE:
+      {
+        switch(Sk.ffi.typeName(otherPy))
+        {
+          case EUCLIDEAN_2:
+          {
             var a = Sk.ffi.remapToJs(selfPy);
             var b = Sk.ffi.remapToJs(otherPy);
             var a00 = a.w;
@@ -33032,34 +33051,37 @@ mod[EUCLIDEAN_2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
             var x11 = a00 * b11 + a01 * b10 - a10 * b01 + a11 * b00;
             return coordsJsToE2Py(x00, x01, x10, x11);
           }
-          case UNIT: {
-            return Sk.ffi.callsim(mod[MEASURE], selfPy, otherPy);
-          }
-          default: {
-            Sk.ffi.checkLhsOperandType(OP_MUL, E2_OR_NUMBER_OR_UNIT, false, otherPy);
+          default:
+          {
+            return undefined;
           }
         }
       }
       case Sk.ffi.PyType.FLOAT:
       case Sk.ffi.PyType.INT:
-      case Sk.ffi.PyType.LONG: {
+      case Sk.ffi.PyType.LONG:
+      {
         var a = Sk.ffi.remapToJs(selfPy);
         var b = Sk.ffi.remapToJs(otherPy);
         return coordsJsToE2Py(a.w * b, a.x * b, a.y * b, a.xy * b);
       }
-      default: {
-        Sk.ffi.checkLhsOperandType(OP_MUL, E2_OR_NUMBER_OR_UNIT, false, otherPy);
+      default:
+      {
+        return undefined;
       }
     }
   });
-  $loc.__rmul__ = Sk.ffi.functionPy(function(rhs, lhs) {
+  $loc.__rmul__ = Sk.ffi.functionPy(function(rhs, lhs)
+  {
     lhs = Sk.ffi.remapToJs(lhs);
     rhs = Sk.ffi.remapToJs(rhs);
-    if (isNumber(lhs)) {
+    if (isNumber(lhs))
+    {
       return coordsJsToE2Py(lhs * rhs.w, lhs * rhs.x, lhs * rhs.y, lhs * rhs.xy);
     }
-    else {
-      throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " * " + JSON.stringify(rhs, null, 2));
+    else
+    {
+      return undefined;
     }
   });
   $loc.__imul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
@@ -33120,36 +33142,118 @@ mod[EUCLIDEAN_2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       return selfPy;
     }
   });
-  $loc.__xor__ = Sk.ffi.functionPy(function(a, b) {
-    a = Sk.ffi.remapToJs(a);
-    b = Sk.ffi.remapToJs(b);
-    if (isNumber(b)) {
-      return coordsJsToE2Py(a.w * b, a.x * b, a.y * b, a.xy * b);
-    }
-    else {
-      var a00 = a.w;
-      var a01 = a.x;
-      var a10 = a.y;
-      var a11 = a.xy;
-      var b00 = b.w;
-      var b01 = b.x;
-      var b10 = b.y;
-      var b11 = b.xy;
-      var x00 = a00 * b00;
-      var x01 = a00 * b01 + a01 * b00;
-      var x10 = a00 * b10             + a10 * b00;
-      var x11 = a00 * b11 + a01 * b10 - a10 * b01 + a11 * b00;
-      return coordsJsToE2Py(x00, x01, x10, x11);
+  $loc.__mod__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
+    switch(Sk.ffi.getType(otherPy))
+    {
+      case Sk.ffi.PyType.INSTANCE:
+      {
+        switch(Sk.ffi.typeName(otherPy))
+        {
+          case EUCLIDEAN_2:
+          {
+            var a = Sk.ffi.remapToJs(selfPy);
+            var b = Sk.ffi.remapToJs(otherPy);
+            var a00 = a.w;
+            var a01 = a.x;
+            var a10 = a.y;
+            var a11 = a.xy;
+            var b00 = b.w;
+            var b01 = b.x;
+            var b10 = b.y;
+            var b11 = b.xy;
+            return coordsJsToE2Py(a.w * b.w + a.x * b.x + a.y * b.y + a.xy * b.xy, 0, 0, 0);
+          }
+          default:
+          {
+            return undefined;
+          }
+        }
+      }
+      case Sk.ffi.PyType.FLOAT:
+      case Sk.ffi.PyType.INT:
+      case Sk.ffi.PyType.LONG:
+      {
+        var a = Sk.ffi.remapToJs(selfPy);
+        var b = Sk.ffi.remapToJs(otherPy);
+        return coordsJsToE2Py(a.w * b, a.x * b, a.y * b, a.xy * b);
+      }
+      default:
+      {
+        return undefined;
+      }
     }
   });
-  $loc.__rxor__ = Sk.ffi.functionPy(function(rhs, lhs) {
-    lhs = Sk.ffi.remapToJs(lhs);
-    rhs = Sk.ffi.remapToJs(rhs);
-    if (isNumber(lhs)) {
+  $loc.__rmod__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
+    var rhs = Sk.ffi.remapToJs(selfPy);
+    var lhs = Sk.ffi.remapToJs(otherPy);
+    if (isNumber(lhs))
+    {
       return coordsJsToE2Py(lhs * rhs.w, lhs * rhs.x, lhs * rhs.y, lhs * rhs.xy);
     }
-    else {
-      throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " ^ " + JSON.stringify(rhs, null, 2));
+    else
+    {
+      return undefined;
+    }
+  });
+  $loc.__xor__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
+    switch(Sk.ffi.getType(otherPy))
+    {
+      case Sk.ffi.PyType.INSTANCE:
+      {
+        switch(Sk.ffi.typeName(otherPy))
+        {
+          case EUCLIDEAN_2:
+          {
+            var a = Sk.ffi.remapToJs(selfPy);
+            var b = Sk.ffi.remapToJs(otherPy);
+            var a00 = a.w;
+            var a01 = a.x;
+            var a10 = a.y;
+            var a11 = a.xy;
+            var b00 = b.w;
+            var b01 = b.x;
+            var b10 = b.y;
+            var b11 = b.xy;
+            var x00 = a00 * b00;
+            var x01 = a00 * b01 + a01 * b00;
+            var x10 = a00 * b10             + a10 * b00;
+            var x11 = a00 * b11 + a01 * b10 - a10 * b01 + a11 * b00;
+            return coordsJsToE2Py(x00, x01, x10, x11);
+          }
+          default:
+          {
+            return undefined;
+          }
+        }
+      }
+      case Sk.ffi.PyType.FLOAT:
+      case Sk.ffi.PyType.INT:
+      case Sk.ffi.PyType.LONG:
+      {
+        var a = Sk.ffi.remapToJs(selfPy);
+        var b = Sk.ffi.remapToJs(otherPy);
+        return coordsJsToE2Py(a.w * b, a.x * b, a.y * b, a.xy * b);
+      }
+      default:
+      {
+        return undefined;
+      }
+    }
+  });
+  $loc.__rxor__ = Sk.ffi.functionPy(function(rhs, lhs)
+  {
+    lhs = Sk.ffi.remapToJs(lhs);
+    rhs = Sk.ffi.remapToJs(rhs);
+    if (isNumber(lhs))
+    {
+      return coordsJsToE2Py(lhs * rhs.w, lhs * rhs.x, lhs * rhs.y, lhs * rhs.xy);
+    }
+    else
+    {
+      return undefined;
     }
   });
   $loc.__ixor__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
@@ -33178,36 +33282,63 @@ mod[EUCLIDEAN_2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       return selfPy;
     }
   });
-  $loc.__lshift__ = Sk.ffi.functionPy(function(a, b) {
-    a = Sk.ffi.remapToJs(a);
-    b = Sk.ffi.remapToJs(b);
-    if (isNumber(b)) {
-      return coordsJsToE2Py(a.w * b, 0, 0, 0);
-    }
-    else {
-      var a00 = a.w;
-      var a01 = a.x;
-      var a10 = a.y;
-      var a11 = a.xy;
-      var b00 = b.w;
-      var b01 = b.x;
-      var b10 = b.y;
-      var b11 = b.xy;
-      var x00 = a00 * b00 + a01 * b01 + a10 * b10 - a11 * b11;
-      var x01 = a00 * b01             - a10 * b11;
-      var x10 = a00 * b10 + a01 * b11;
-      var x11 = a00 * b11;
-      return coordsJsToE2Py(x00, x01, x10, x11);
+  $loc.__lshift__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
+    switch(Sk.ffi.getType(otherPy))
+    {
+      case Sk.ffi.PyType.INSTANCE:
+      {
+        switch(Sk.ffi.typeName(otherPy))
+        {
+          case EUCLIDEAN_2:
+          {
+            var a = Sk.ffi.remapToJs(selfPy);
+            var b = Sk.ffi.remapToJs(otherPy);
+            var a00 = a.w;
+            var a01 = a.x;
+            var a10 = a.y;
+            var a11 = a.xy;
+            var b00 = b.w;
+            var b01 = b.x;
+            var b10 = b.y;
+            var b11 = b.xy;
+            var x00 = a00 * b00 + a01 * b01 + a10 * b10 - a11 * b11;
+            var x01 = a00 * b01             - a10 * b11;
+            var x10 = a00 * b10 + a01 * b11;
+            var x11 = a00 * b11;
+            return coordsJsToE2Py(x00, x01, x10, x11);
+          }
+          default:
+          {
+            return undefined;
+          }
+        }
+      }
+      case Sk.ffi.PyType.FLOAT:
+      case Sk.ffi.PyType.INT:
+      case Sk.ffi.PyType.LONG:
+      {
+        var a = Sk.ffi.remapToJs(selfPy);
+        var b = Sk.ffi.remapToJs(otherPy);
+        return coordsJsToE2Py(a.w * b, 0, 0, 0);
+      }
+      default:
+      {
+        return undefined;
+      }
     }
   });
-  $loc.__rlshift__ = Sk.ffi.functionPy(function(rhs, lhs) {
+  $loc.__rlshift__ = Sk.ffi.functionPy(function(rhs, lhs)
+  {
     lhs = Sk.ffi.remapToJs(lhs);
     rhs = Sk.ffi.remapToJs(rhs);
-    if (isNumber(lhs)) {
+    if (isNumber(lhs))
+    {
       return coordsJsToE2Py(lhs * rhs.w, lhs * rhs.x, lhs * rhs.y, lhs * rhs.xy);
     }
-    else {
-      throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " << " + JSON.stringify(rhs, null, 2));
+    else
+    {
+      return undefined;
     }
   });
   $loc.__ilshift__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
@@ -33236,36 +33367,63 @@ mod[EUCLIDEAN_2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       return selfPy;
     }
   });
-  $loc.__rshift__ = Sk.ffi.functionPy(function(a, b) {
-    a = Sk.ffi.remapToJs(a);
-    b = Sk.ffi.remapToJs(b);
-    if (isNumber(b)) {
-      return coordsJsToE2Py(a.w * b, -a.x * b, -a.y * b, a.xy * b);
-    }
-    else {
-      var a00 = a.w;
-      var a01 = a.x;
-      var a10 = a.y;
-      var a11 = a.xy;
-      var b00 = b.w;
-      var b01 = b.x;
-      var b10 = b.y;
-      var b11 = b.xy;
-      var x00 = a00 * b00 + a01 * b01 + a10 * b10 - a11 * b11;
-      var x01 =           + a01 * b00             + a11 * b10;
-      var x10 =                       + a10 * b00 - a11 * b01;
-      var x11 =                                     a11 * b00;
-      return coordsJsToE2Py(x00, x01, x10, x11);
+  $loc.__rshift__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
+    switch(Sk.ffi.getType(otherPy))
+    {
+      case Sk.ffi.PyType.INSTANCE:
+      {
+        switch(Sk.ffi.typeName(otherPy))
+        {
+          case EUCLIDEAN_2:
+          {
+            var a = Sk.ffi.remapToJs(selfPy);
+            var b = Sk.ffi.remapToJs(otherPy);
+            var a00 = a.w;
+            var a01 = a.x;
+            var a10 = a.y;
+            var a11 = a.xy;
+            var b00 = b.w;
+            var b01 = b.x;
+            var b10 = b.y;
+            var b11 = b.xy;
+            var x00 = a00 * b00 + a01 * b01 + a10 * b10 - a11 * b11;
+            var x01 =           + a01 * b00             + a11 * b10;
+            var x10 =                       + a10 * b00 - a11 * b01;
+            var x11 =                                     a11 * b00;
+            return coordsJsToE2Py(x00, x01, x10, x11);
+          }
+          default:
+          {
+            return undefined;
+          }
+        }
+      }
+      case Sk.ffi.PyType.FLOAT:
+      case Sk.ffi.PyType.INT:
+      case Sk.ffi.PyType.LONG:
+      {
+        var a = Sk.ffi.remapToJs(selfPy);
+        var b = Sk.ffi.remapToJs(otherPy);
+        return coordsJsToE2Py(a.w * b, -a.x * b, -a.y * b, a.xy * b);
+      }
+      default:
+      {
+        return undefined;
+      }
     }
   });
-  $loc.__rrshift__ = Sk.ffi.functionPy(function(rhs, lhs) {
+  $loc.__rrshift__ = Sk.ffi.functionPy(function(rhs, lhs)
+  {
     lhs = Sk.ffi.remapToJs(lhs);
     rhs = Sk.ffi.remapToJs(rhs);
-    if (isNumber(lhs)) {
+    if (isNumber(lhs))
+    {
       return coordsJsToE2Py(lhs * rhs.w, 0, 0, 0);
     }
-    else {
-      throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " >> " + JSON.stringify(rhs, null, 2));
+    else
+    {
+      return undefined;
     }
   });
   $loc.__irshift__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
@@ -33328,10 +33486,6 @@ mod[EUCLIDEAN_2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       }
     }
   });
-  $loc.__abs__ = Sk.ffi.functionPy(function(selfPy) {
-    var mv = Sk.ffi.remapToJs(selfPy);
-    return Sk.ffi.numberToFloatPy(Math.sqrt(mv.w * mv.w + mv.x * mv.x + mv.y * mv.y - mv.xy * mv.xy));
-  });
   $loc.__cliffordConjugate__ = Sk.ffi.functionPy(function(selfPy) {
     Sk.ffi.checkMethodArgs(METHOD_CLIFFORD_CONJUGATE, arguments, 0, 0);
     var self = Sk.ffi.remapToJs(selfPy);
@@ -33369,8 +33523,17 @@ mod[EUCLIDEAN_2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var s = Sk.math.sin(y);
     return coordsJsToE2Py(e * c, 0, 0, e * s);
   });
+  $loc.__abs__ = Sk.ffi.functionPy(function(selfPy) {
+    var mv = Sk.ffi.remapToJs(selfPy);
+    return coordsJsToE2Py(Math.sqrt(mv.w * mv.w + mv.x * mv.x + mv.y * mv.y + mv.xy * mv.xy), 0, 0, 0);
+  });
+  $loc.__magnitude__ = Sk.ffi.functionPy(function(selfPy) {
+    var mv = Sk.ffi.remapToJs(selfPy);
+    return coordsJsToE2Py(Math.sqrt(mv.w * mv.w + mv.x * mv.x + mv.y * mv.y + mv.xy * mv.xy), 0, 0, 0);
+  });
   $loc.__quadrance__ = Sk.ffi.functionPy(function(selfPy) {
-    return Sk.ffh.multiply(selfPy, selfPy);
+    var mv = Sk.ffi.remapToJs(selfPy);
+    return coordsJsToE2Py(mv.w * mv.w + mv.x * mv.x + mv.y * mv.y + mv.xy * mv.xy, 0, 0, 0);
   });
   $loc.__sqrt__ = Sk.ffi.functionPy(function(selfPy) {
     Sk.ffi.checkMethodArgs(METHOD_SQRT, arguments, 0, 0);
@@ -33387,7 +33550,7 @@ mod[EUCLIDEAN_2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       return Sk.ffi.stringToPy("NaN");
     }
     else {
-      return Sk.ffi.stringToPy(stringFromCoordinates([mv.w, mv.x, mv.y, mv.xy], [UNIT_SCALAR_NAME, UNIT_VECTOR_NAME_E1, UNIT_VECTOR_NAME_E2, PSEUDOSCALAR_NAME], "*"));
+      return Sk.ffi.stringToPy(stringFromCoordinates([mv.w, mv.x, mv.y, mv.xy], [ONE_NAME, E1_NAME, E2_NAME, PSEUDOSCALAR_NAME], "*"));
     }
   });
   $loc.__eq__ = Sk.ffi.functionPy(function(a, b) {
@@ -33496,7 +33659,6 @@ Sk.ffi.checkFunctionArgs("defineEuclidean3", arguments, 3, 3);
  */
 Sk.builtin.defineVector3(mod, THREE);
 Sk.builtin.defineQuaternion(mod, THREE);
-Sk.builtin.defineUnits(mod, BLADE);
 /**
  * @const
  * @type {string}
@@ -33507,16 +33669,6 @@ var VECTOR_3                   = "Vector3";
  * @type {string}
  */
 var QUATERNION                 = "Quaternion";
-/**
- * @const
- * @type {string}
- */
-var UNIT                       = "Unit";
-/**
- * @const
- * @type {string}
- */
-var MEASURE                    = "Measure";
 /**
  * @const
  * @type {string}
@@ -34361,15 +34513,18 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       }
     }
   });
-  $loc.__add__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+  $loc.__add__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
     var self = Sk.ffi.remapToJs(selfPy);
     var vector = self.vector;
     var quaternion = self.quaternion;
     var b = Sk.ffi.remapToJs(otherPy);
-    if (Sk.ffi.isNum(otherPy)) {
+    if (Sk.ffi.isNum(otherPy))
+    {
       return coordsJsToE3Py(quaternion.w + b, vector.x, vector.y, vector.z, -quaternion.z, -quaternion.x, -quaternion.y, self.xyz);
     }
-    else if (Sk.ffi.isInstance(otherPy, Sk.e3ga.EUCLIDEAN_3)) {
+    else if (Sk.ffi.isInstance(otherPy, Sk.e3ga.EUCLIDEAN_3))
+    {
       var w = quaternion.w + b.quaternion.w;
       var x = vector.x + b.vector.x;
       var y = vector.y + b.vector.y;
@@ -34380,31 +34535,38 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       var xyz = self.xyz + b.xyz;
       return coordsJsToE3Py(w, x, y, z, xy, yz, zx, xyz);
     }
-    else {
-      throw Sk.ffi.err.operand(ARG_OTHER).toOperation(OP_ADD).mustHaveType([Sk.ffi.PyType.FLOAT, Sk.e3ga.EUCLIDEAN_3]);
+    else
+    {
+      return undefined;
     }
   });
-  $loc.__radd__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+  $loc.__radd__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
     var a = Sk.ffi.remapToJs(otherPy);
     var self = Sk.ffi.remapToJs(selfPy);
     var vector = self.vector;
     var quaternion = self.quaternion;
-    if (Sk.ffi.isNum(otherPy)) {
+    if (Sk.ffi.isNum(otherPy))
+    {
       return coordsJsToE3Py(a + quaternion.w, vector.x, vector.y, vector.z, -quaternion.z, -quaternion.x, -quaternion.y, self.xyz);
     }
-    else {
-      throw Sk.ffi.err.operand(ARG_OTHER).toOperation(OP_ADD).mustHaveType([Sk.ffi.PyType.FLOAT, Sk.e3ga.EUCLIDEAN_3]);
+    else
+    {
+      return undefined;
     }
   });
-  $loc.__iadd__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+  $loc.__iadd__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
     var self = Sk.ffi.remapToJs(selfPy);
     var vs = self.vector;
     var qs = self.quaternion;
     var other = Sk.ffi.remapToJs(otherPy);
-    if (Sk.ffi.isNum(otherPy)) {
+    if (Sk.ffi.isNum(otherPy))
+    {
       qs.w += other;
     }
-    else if (isEuclidean3Py(otherPy)) {
+    else if (isEuclidean3Py(otherPy))
+    {
       var vo = other.vector;
       var qo = other.quaternion;
       qs.w     += qo.w;
@@ -34416,20 +34578,24 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       qs.y     += qo.y;
       self.xyz += other.xyz;
     }
-    else {
-      throw Sk.ffi.err.operand(ARG_OTHER).toOperation(OP_ADD).mustHaveType([Sk.ffi.PyType.FLOAT, Sk.e3ga.EUCLIDEAN_3]);
+    else
+    {
+      return undefined;
     }
     return selfPy;
   });
-  $loc.__sub__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+  $loc.__sub__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
     var self = Sk.ffi.remapToJs(selfPy);
     var vs = self.vector;
     var qs = self.quaternion;
     var other = Sk.ffi.remapToJs(otherPy);
-    if (Sk.ffi.isNum(otherPy)) {
+    if (Sk.ffi.isNum(otherPy))
+    {
       return coordsJsToE3Py(qs.w - other, vs.x, vs.y, vs.z, -qs.z, -qs.x, -qs.y, self.xyz);
     }
-    else if (Sk.ffi.isInstance(otherPy, Sk.e3ga.EUCLIDEAN_3)) {
+    else if (Sk.ffi.isInstance(otherPy, Sk.e3ga.EUCLIDEAN_3))
+    {
       var vo = other.vector;
       var qo = other.quaternion;
       var w = qs.w - qo.w;
@@ -34442,7 +34608,8 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       var xyz = self.xyz - other.xyz;
       return coordsJsToE3Py(w, x, y, z, xy, yz, zx, xyz);
     }
-    else {
+    else
+    {
       throw Sk.ffi.err.operand(ARG_OTHER).toOperation(OP_SUB).mustHaveType([Sk.ffi.PyType.FLOAT, Sk.e3ga.EUCLIDEAN_3]);
     }
   });
@@ -34483,47 +34650,54 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     }
     return selfPy;
   });
-  $loc.__mul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-    switch(Sk.ffi.getType(otherPy)) {
-      case Sk.ffi.PyType.INSTANCE: {
-        switch(Sk.ffi.typeName(otherPy)) {
-          case Sk.e3ga.EUCLIDEAN_3: {
+  $loc.__mul__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
+    switch(Sk.ffi.getType(otherPy))
+    {
+      case Sk.ffi.PyType.INSTANCE:
+      {
+        switch(Sk.ffi.typeName(otherPy))
+        {
+          case Sk.e3ga.EUCLIDEAN_3:
+          {
             var lhs = Sk.ffi.remapToJs(selfPy);
             var rhs = Sk.ffi.remapToJs(otherPy);
             return compute(mulE3, lhs, rhs, coord, coordsJsToE3Py);
           }
-          case UNIT: {
-            return Sk.ffi.callsim(mod[MEASURE], selfPy, otherPy);
-          }
-          default: {
+          default:
+          {
             return undefined;
-            // throw Sk.ffi.err.operand(ARG_OTHER).toOperation(OP_MUL).mustHaveType([Sk.ffi.PyType.FLOAT, Sk.e3ga.EUCLIDEAN_3, UNIT]);
           }
         }
       }
       case Sk.ffi.PyType.INT:
-      case Sk.ffi.PyType.FLOAT: {
+      case Sk.ffi.PyType.FLOAT:
+      {
         var self = Sk.ffi.remapToJs(selfPy);
         var vector = self.vector;
         var quaternion = self.quaternion;
         var b = Sk.ffi.remapToJs(otherPy);
         return coordsJsToE3Py(quaternion.w * b, vector.x * b, vector.y * b, vector.z * b, -quaternion.z * b, -quaternion.x * b, -quaternion.y * b, self.xyz * b);
       }
-      default: {
-        throw Sk.ffi.err.operand(ARG_OTHER).toOperation(OP_MUL).mustHaveType([Sk.ffi.PyType.FLOAT, Sk.e3ga.EUCLIDEAN_3, UNIT]);
+      default:
+      {
+        return undefined;
       }
     }
   });
-  $loc.__rmul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+  $loc.__rmul__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
     var self = Sk.ffi.remapToJs(selfPy);
     var vector = self.vector;
     var quaternion = self.quaternion;
-    if (Sk.ffi.isNum(otherPy)) {
+    if (Sk.ffi.isNum(otherPy))
+    {
       var a = Sk.ffi.remapToJs(otherPy);
       return coordsJsToE3Py(a * quaternion.w, a * vector.x, a * vector.y, a * vector.z, -a * quaternion.z, -a * quaternion.x, -a * quaternion.y, a * self.xyz);
     }
-    else {
-      throw Sk.ffi.err.operand(ARG_OTHER).toOperation(OP_MUL).mustHaveType([Sk.ffi.PyType.FLOAT, Sk.e3ga.EUCLIDEAN_3, UNIT]);
+    else
+    {
+      return undefined;
     }
   });
   $loc.__imul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
@@ -34568,11 +34742,16 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     a.xyz = mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 7);
     return selfPy;
   });
-  $loc.__div__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-    switch(Sk.ffi.getType(otherPy)) {
-      case Sk.ffi.PyType.INSTANCE: {
-        switch(Sk.ffi.typeName(otherPy)) {
-          case Sk.e3ga.EUCLIDEAN_3: {
+  $loc.__div__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
+    switch(Sk.ffi.getType(otherPy))
+    {
+      case Sk.ffi.PyType.INSTANCE:
+      {
+        switch(Sk.ffi.typeName(otherPy))
+        {
+          case Sk.e3ga.EUCLIDEAN_3:
+          {
             var self = Sk.ffi.remapToJs(selfPy);
             var vs = self.vector;
             var qs = self.quaternion;
@@ -34581,28 +34760,24 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
             var qo = other.quaternion;
             return divide(qs.w, vs.x, vs.y, -qs.z, vs.z, qs.y, -qs.x, self.xyz, qo.w, vo.x, vo.y, -qo.z, vo.z, qo.y, -qo.x, other.xyz, undefined);
           }
-          case UNIT: {
-            var quantityPy = selfPy;
-            var unit = Sk.ffi.remapToJs(otherPy);
-            var zero = new BLADE[RATIONAL](0, 1);
-            var one = new BLADE[UNIT](1, new BLADE[DIMENSIONS](zero, zero, zero, zero), unit.labels);
-            return Sk.ffi.callsim(mod[MEASURE], quantityPy, Sk.ffi.callsim(mod[UNIT], Sk.ffi.referenceToPy(one.div(unit), UNIT)));
-          }
-          default: {
-            throw Sk.ffi.err.operand(ARG_OTHER).toOperation(OP_MUL).mustHaveType([Sk.ffi.PyType.FLOAT, Sk.e3ga.EUCLIDEAN_3, UNIT]);
+          default:
+          {
+            return undefined;
           }
         }
       }
       case Sk.ffi.PyType.INT:
-      case Sk.ffi.PyType.FLOAT: {
+      case Sk.ffi.PyType.FLOAT:
+      {
         var self = Sk.ffi.remapToJs(selfPy);
         var vs = self.vector;
         var qs = self.quaternion;
         var other = Sk.ffi.remapToJs(otherPy);
         return divide(qs.w, vs.x, vs.y, -qs.z, vs.z, qs.y, -qs.x, self.xyz, other, 0, 0, 0, 0, 0, 0, 0, undefined);
       }
-      default: {
-        throw Sk.ffi.err.operand(ARG_OTHER).toOperation(OP_MUL).mustHaveType([Sk.ffi.PyType.FLOAT, Sk.e3ga.EUCLIDEAN_3, UNIT]);
+      default:
+      {
+        return undefined;
       }
     }
   });
@@ -34628,30 +34803,84 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       return selfPy;
     }
   });
-  $loc.__mod__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-    var s  = Sk.ffi.remapToJs(selfPy);
-    var o = Sk.ffi.remapToJs(otherPy);
-    // FIXME: This should be generalized to the full scalar product between multivectors.
-    return coordsJsToE3Py(s.x * o.x + s.y * o.y + s.z * o.z, 0, 0, 0, 0, 0, 0, 0);
-  });
-  $loc.__xor__ = Sk.ffi.functionPy(function(a, b) {
-    a = Sk.ffi.remapToJs(a);
-    b = Sk.ffi.remapToJs(b);
-    if (isNumber(b)) {
-      return coordsJsToE3Py(a.w * b, a.x * b, a.y * b, a.z * b, a.xy * b, a.yz * b, a.zx * b, a.xyz * b);
+  $loc.__mod__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
+    switch(Sk.ffi.getType(otherPy))
+    {
+      case Sk.ffi.PyType.INSTANCE:
+      {
+        switch(Sk.ffi.typeName(otherPy)) {
+          case Sk.e3ga.EUCLIDEAN_3:
+          {
+            var s  = Sk.ffi.remapToJs(selfPy);
+            var o = Sk.ffi.remapToJs(otherPy);
+            // FIXME: This should be generalized to the full scalar product between multivectors.
+            return coordsJsToE3Py(s.x * o.x + s.y * o.y + s.z * o.z, 0, 0, 0, 0, 0, 0, 0);
+          }
+          default:
+          {
+            return undefined;
+          }
+        }
+      }
+      case Sk.ffi.PyType.INT:
+      case Sk.ffi.PyType.FLOAT:
+      {
+        var self = Sk.ffi.remapToJs(selfPy);
+        var vector = self.vector;
+        var quaternion = self.quaternion;
+        var b = Sk.ffi.remapToJs(otherPy);
+        return coordsJsToE3Py(quaternion.w * b, vector.x * b, vector.y * b, vector.z * b, -quaternion.z * b, -quaternion.x * b, -quaternion.y * b, self.xyz * b);
+      }
+      default:
+      {
+        return undefined;
+      }
     }
-    else {
-      return compute(extE3, a, b, coord, coordsJsToE3Py);
+  });
+  $loc.__xor__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
+    switch(Sk.ffi.getType(otherPy))
+    {
+      case Sk.ffi.PyType.INSTANCE:
+      {
+        switch(Sk.ffi.typeName(otherPy)) {
+          case Sk.e3ga.EUCLIDEAN_3:
+          {
+            var a = Sk.ffi.remapToJs(selfPy);
+            var b = Sk.ffi.remapToJs(otherPy);
+            return compute(extE3, a, b, coord, coordsJsToE3Py);
+          }
+          default:
+          {
+            return undefined;
+          }
+        }
+      }
+      case Sk.ffi.PyType.INT:
+      case Sk.ffi.PyType.FLOAT:
+      {
+        var a = Sk.ffi.remapToJs(selfPy);
+        var b = Sk.ffi.remapToJs(otherPy);
+        return coordsJsToE3Py(a.w * b, a.x * b, a.y * b, a.z * b, a.xy * b, a.yz * b, a.zx * b, a.xyz * b);
+      }
+      default:
+      {
+        return undefined;
+      }
     }
   });
-  $loc.__rxor__ = Sk.ffi.functionPy(function(b, a) {
-    a = Sk.ffi.remapToJs(a);
-    b = Sk.ffi.remapToJs(b);
-    if (isNumber(a)) {
+  $loc.__rxor__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
+    if (Sk.ffi.isNum(otherPy))
+    {
+      var a = Sk.ffi.remapToJs(otherPy);
+      var b = Sk.ffi.remapToJs(selfPy);
       return coordsJsToE3Py(a * b.w, a * b.x, a * b.y, a * b.z, a * b.xy, a * b.yz, a * b.zx, a * b.xyz);
     }
-    else {
-      throw new Sk.builtin.AssertionError();
+    else
+    {
+      return undefined;
     }
   });
   $loc.__ixor__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
@@ -34696,24 +34925,49 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     a.xyz = extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 7);
     return selfPy;
   });
-  $loc.__lshift__ = Sk.ffi.functionPy(function(a, b) {
-    a = Sk.ffi.remapToJs(a);
-    b = Sk.ffi.remapToJs(b);
-    if (isNumber(b)) {
-      return coordsJsToE3Py(a.w * b, 0, 0, 0, 0, 0, 0, 0);
-    }
-    else {
-      return compute(lcoE3, a, b, coord, coordsJsToE3Py);
+  $loc.__lshift__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
+    switch(Sk.ffi.getType(otherPy))
+    {
+      case Sk.ffi.PyType.INSTANCE:
+      {
+        switch(Sk.ffi.typeName(otherPy)) {
+          case Sk.e3ga.EUCLIDEAN_3:
+          {
+            var a = Sk.ffi.remapToJs(selfPy);
+            var b = Sk.ffi.remapToJs(otherPy);
+            return compute(lcoE3, a, b, coord, coordsJsToE3Py);
+          }
+          default:
+          {
+            return undefined;
+          }
+        }
+      }
+      case Sk.ffi.PyType.INT:
+      case Sk.ffi.PyType.FLOAT:
+      {
+        var a = Sk.ffi.remapToJs(selfPy);
+        var b = Sk.ffi.remapToJs(otherPy);
+        return coordsJsToE3Py(a.w * b, 0, 0, 0, 0, 0, 0, 0);
+      }
+      default:
+      {
+        return undefined;
+      }
     }
   });
-  $loc.__rlshift__ = Sk.ffi.functionPy(function(b, a) {
+  $loc.__rlshift__ = Sk.ffi.functionPy(function(b, a)
+  {
     a = Sk.ffi.remapToJs(a);
     b = Sk.ffi.remapToJs(b);
-    if (isNumber(a)) {
+    if (isNumber(a))
+    {
       return coordsJsToE3Py(a * b.w, a * b.x, a * b.y, a * b.z, a * b.xy, a * b.yz, a * b.zx, a * b.xyz);
     }
-    else {
-      throw new Sk.builtin.AssertionError();
+    else
+    {
+      return undefined;
     }
   });
   $loc.__ilshift__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
@@ -34758,24 +35012,49 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     a.xyz = lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 7);
     return selfPy;
   });
-  $loc.__rshift__ = Sk.ffi.functionPy(function(a, b) {
-    a = Sk.ffi.remapToJs(a);
-    b = Sk.ffi.remapToJs(b);
-    if (isNumber(b)) {
-      return coordsJsToE3Py(a.w * b, a.x * b, a.y * b, a.z * b, a.xy * b, a.yz * b, a.zx * b, a.xyz * b);
-    }
-    else {
-      return compute(rcoE3, a, b, coord, coordsJsToE3Py);
+  $loc.__rshift__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
+    switch(Sk.ffi.getType(otherPy))
+    {
+      case Sk.ffi.PyType.INSTANCE:
+      {
+        switch(Sk.ffi.typeName(otherPy)) {
+          case Sk.e3ga.EUCLIDEAN_3:
+          {
+            var a = Sk.ffi.remapToJs(selfPy);
+            var b = Sk.ffi.remapToJs(otherPy);
+            return compute(rcoE3, a, b, coord, coordsJsToE3Py);
+          }
+          default:
+          {
+            return undefined;
+          }
+        }
+      }
+      case Sk.ffi.PyType.INT:
+      case Sk.ffi.PyType.FLOAT:
+      {
+        var a = Sk.ffi.remapToJs(selfPy);
+        var b = Sk.ffi.remapToJs(otherPy);
+        return coordsJsToE3Py(a.w * b, a.x * b, a.y * b, a.z * b, a.xy * b, a.yz * b, a.zx * b, a.xyz * b);
+      }
+      default:
+      {
+        return undefined;
+      }
     }
   });
-  $loc.__rrshift__ = Sk.ffi.functionPy(function(b, a) {
+  $loc.__rrshift__ = Sk.ffi.functionPy(function(b, a)
+  {
     a = Sk.ffi.remapToJs(a);
     b = Sk.ffi.remapToJs(b);
-    if (isNumber(a)) {
+    if (isNumber(a))
+    {
       return coordsJsToE3Py(a * b.w, 0, 0, 0, 0, 0, 0, 0);
     }
-    else {
-      throw new Sk.builtin.AssertionError();
+    else
+    {
+      return undefined;
     }
   });
   $loc.__irshift__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
@@ -34819,6 +35098,40 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     a.zx  = rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 6);
     a.xyz = rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 7);
     return selfPy;
+  });
+  $loc.__pow__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
+    switch(Sk.ffi.getType(otherPy))
+    {
+      case Sk.ffi.PyType.INSTANCE:
+      {
+        switch(Sk.ffi.typeName(otherPy)) {
+          case Sk.e3ga.EUCLIDEAN_3:
+          {
+            var a = Sk.ffi.remapToJs(selfPy);
+            var b = Sk.ffi.remapToJs(otherPy);
+            // TODO: generalize.
+            return coordsJsToE3Py(Math.pow(a.w, b.w), 0, 0, 0, 0, 0, 0, 0);
+          }
+          default:
+          {
+            return undefined;
+          }
+        }
+      }
+      case Sk.ffi.PyType.INT:
+      case Sk.ffi.PyType.FLOAT:
+      {
+        var a = Sk.ffi.remapToJs(selfPy);
+        var b = Sk.ffi.remapToJs(otherPy);
+        // TODO: generalize.
+        return coordsJsToE3Py(Math.pow(a.w, b), 0, 0, 0, 0, 0, 0, 0);
+      }
+      default:
+      {
+        return undefined;
+      }
+    }
   });
   $loc.__len__ = Sk.ffi.functionPy(function(selfPy) {
     return Sk.ffi.numberToFloatPy(8);
@@ -35212,12 +35525,6 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       var k = s / angle;
       return coordsJsToE3Py(c, 0, 0, 0, k * xy, k * yz, k * zx, 0);
     }
-  });
-  $loc.__pow__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-    var self  = Sk.ffi.remapToJs(selfPy);
-    var other = Sk.ffi.remapToJs(otherPy);
-    // TODO: generalize.
-    return coordsJsToE3Py(Math.pow(self.w, other), 0, 0, 0, 0, 0, 0, 0);
   });
   $loc.__abs__ = Sk.ffi.functionPy(function(selfPy) {
     return Sk.ffh.sqrt(Sk.ffh.quadrance(selfPy));
@@ -37518,7 +37825,7 @@ var DEGREE            = "degree";
  * @const
  * @type {string}
  */
-var DIMENSIONLESS     = "dimensionless";
+var DIMLESS           = "dimensionless";
 
 var isMeasurePy    = function(valuePy) {return Sk.ffi.isInstance(valuePy, MEASURE);};
 var isDimensionsPy = function(valuePy) {return Sk.ffi.isInstance(valuePy, DIMENSIONS);};
@@ -37717,12 +38024,48 @@ mod[UNIT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       throw Sk.ffi.assertionError(e.message)
     }
   });
-  $loc.__mul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-    Sk.ffi.checkRhsOperandType(OP_MUL, UNIT, isUnitPy(otherPy), otherPy);
-    var lhs = Sk.ffi.remapToJs(selfPy);
-    var rhs = Sk.ffi.remapToJs(otherPy);
-    var c = lhs.mul(rhs);
-    return Sk.ffi.callsim(mod[UNIT], Sk.ffi.numberToFloatPy(c.scale), Sk.ffi.referenceToPy(c.dimensions, DIMENSIONS), Sk.ffi.remapToPy(c.labels));
+  $loc.__mod__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
+    var selfJs = Sk.ffi.remapToJs(selfPy);
+    if (isMeasurePy(otherPy))
+    {
+      var quantityPy = Sk.ffi.gattr(otherPy, PROP_QUANTITY);
+      var uomPy      = Sk.ffi.gattr(otherPy, PROP_UOM);
+      return Sk.ffi.callsim(mod[MEASURE], quantityPy, Sk.ffh.multiply(selfPy, uomPy));
+    }
+    else if (Sk.ffi.isNum(otherPy) || isUnitPy(otherPy))
+    {
+      return Sk.ffi.callsim(mod[UNIT], Sk.ffi.referenceToPy(selfJs.mul(Sk.ffi.remapToJs(otherPy)), UNIT));
+    }
+    else
+    {
+      // TODO: How to check that otherPy is a reasonable quantity.
+      return Sk.ffi.callsim(mod[MEASURE], otherPy, selfPy);
+    }
+  });
+  $loc.__rmod__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
+    // TODO: How to check that otherPy is a reasonable quantity.
+    return Sk.ffi.callsim(mod[MEASURE], otherPy, selfPy);
+  });
+  $loc.__mul__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
+    var selfJs = Sk.ffi.remapToJs(selfPy);
+    if (isMeasurePy(otherPy))
+    {
+      var quantityPy = Sk.ffi.gattr(otherPy, PROP_QUANTITY);
+      var uomPy      = Sk.ffi.gattr(otherPy, PROP_UOM);
+      return Sk.ffi.callsim(mod[MEASURE], quantityPy, Sk.ffh.multiply(selfPy, uomPy));
+    }
+    else if (Sk.ffi.isNum(otherPy) || isUnitPy(otherPy))
+    {
+      return Sk.ffi.callsim(mod[UNIT], Sk.ffi.referenceToPy(selfJs.mul(Sk.ffi.remapToJs(otherPy)), UNIT));
+    }
+    else
+    {
+      // TODO: How to check that otherPy is a reasonable quantity.
+      return Sk.ffi.callsim(mod[MEASURE], otherPy, selfPy);
+    }
   });
   $loc.__rmul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
     Sk.ffi.checkLhsOperandType(OP_MUL, NUMBER, Sk.ffi.isNum(otherPy), otherPy);
@@ -37730,11 +38073,23 @@ mod[UNIT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var rhs = Sk.ffi.remapToJs(selfPy);
     return Sk.ffi.callsim(mod[UNIT], Sk.ffi.numberToFloatPy(lhs * rhs.scale), Sk.ffi.referenceToPy(rhs.dimensions, DIMENSIONS), Sk.ffi.remapToPy(rhs.labels));
   });
-  $loc.__div__ = Sk.ffi.functionPy(function(lhsPy, rhsPy) {
-    var lhs = Sk.ffi.remapToJs(lhsPy);
-    var rhs = Sk.ffi.remapToJs(rhsPy);
-    var c = lhs.div(rhs);
-    return Sk.ffi.callsim(mod[UNIT], Sk.ffi.numberToFloatPy(c.scale), Sk.ffi.referenceToPy(c.dimensions, DIMENSIONS), Sk.ffi.remapToPy(c.labels));
+  $loc.__div__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+    var selfJs = Sk.ffi.remapToJs(selfPy);
+    if (isMeasurePy(otherPy))
+    {
+      var quantityPy = Sk.ffi.gattr(otherPy, PROP_QUANTITY);
+      var uomPy      = Sk.ffi.gattr(otherPy, PROP_UOM);
+      return Sk.ffi.callsim(mod[MEASURE], Sk.ffh.divide(Sk.ffi.numberToFloatPy(1), quantityPy), Sk.ffh.divide(selfPy, uomPy));
+    }
+    else if (Sk.ffi.isNum(otherPy) || isUnitPy(otherPy))
+    {
+      return Sk.ffi.callsim(mod[UNIT], Sk.ffi.referenceToPy(selfJs.div(Sk.ffi.remapToJs(otherPy)), UNIT));
+    }
+    else
+    {
+      // TODO: How to check that otherPy is a reasonable quantity.
+      return Sk.ffi.callsim(mod[MEASURE], otherPy, selfPy);
+    }
   });
   $loc.__rdiv__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
     Sk.ffi.checkLhsOperandType(OP_MUL, NUMBER, Sk.ffi.isNum(otherPy), otherPy);
@@ -37833,7 +38188,14 @@ mod[UNIT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
             amount.numer      === pattern[10] && amount.denom      === pattern[11] &&
             intensity.numer   === pattern[12] && intensity.denom   === pattern[13])
         {
-          return Sk.ffi.stringToPy(pattern[14]);
+          if (unitJs.scale !== 1)
+          {
+            return Sk.ffi.stringToPy(unitJs.scale + " * " + pattern[14]);
+          }
+          else
+          {
+            return Sk.ffi.stringToPy(pattern[14]);
+          }
         }
       }
       return Sk.ffi.stringToPy("" + unitJs);
@@ -37851,23 +38213,76 @@ mod[UNIT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   });
 }, UNIT, []);
 
-mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
+mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc)
+{
   var QTY_PY = "qtyPy";
   var UOM_PY = "uomPy";
-  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, qtyPy, uomPy) {
+  var getQuantityPy = function(measurePy)
+  {
+    return Sk.ffi.gattr(measurePy, PROP_QUANTITY);
+  };
+  var getUomPy = function(measurePy)
+  {
+    return Sk.ffi.gattr(measurePy, PROP_UOM);
+  };
+  var makeMeasureLhsBinary = function(op)
+  {
+    return function(selfPy, otherPy)
+    {
+      var self = Sk.ffi.remapToJs(selfPy);
+      if (isMeasurePy(otherPy))
+      {
+        var other = Sk.ffi.remapToJs(otherPy);
+        return Sk.ffi.callsim(mod[MEASURE], op(self[QTY_PY], other[QTY_PY]), Sk.ffh.multiply(self[UOM_PY], other[UOM_PY]));
+      }
+      else
+      {
+        var quantityPy = op(self[QTY_PY], otherPy);
+        if (typeof quantityPy !== 'undefined')
+        {
+          return Sk.ffi.callsim(mod[MEASURE], quantityPy, self[UOM_PY]);
+        }
+        else
+        {
+          return undefined;
+        }
+      }
+    };
+  };
+  var makeMeasureRhsBinary = function(op)
+  {
+    return function(selfPy, otherPy)
+    {
+      var quantityPy = op(otherPy, getQuantityPy(selfPy));
+      if (typeof quantityPy !== 'undefined')
+      {
+        return Sk.ffi.callsim(mod[MEASURE], quantityPy, getUomPy(selfPy));
+      }
+      else
+      {
+        return undefined;
+      }
+    };
+  };
+  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, qtyPy, uomPy)
+  {
     Sk.ffi.checkMethodArgs(MEASURE, arguments, 1, 2);
-    if (Sk.ffi.typeName(qtyPy) === MEASURE) {
+    if (Sk.ffi.typeName(qtyPy) === MEASURE)
+    {
       Sk.ffi.referenceToPy(Sk.ffi.remapToJs(qtyPy), MEASURE, qtyPy.custom, selfPy);
     }
-    else {
+    else
+    {
       var scalePy = Sk.ffi.gattr(uomPy, PROP_SCALE);
-      if (Sk.ffi.remapToJs(scalePy) === 1) {
+      if (Sk.ffi.remapToJs(scalePy) === 1)
+      {
         var measure = {};
         measure[QTY_PY] = qtyPy;
         measure[UOM_PY] = uomPy;
         Sk.ffi.referenceToPy(measure, MEASURE, undefined, selfPy);
       }
-      else {
+      else
+      {
         var measure = {};
         measure[QTY_PY] = Sk.ffh.multiply(qtyPy, scalePy);
         measure[UOM_PY] = Sk.ffi.callsim(mod[UNIT], Sk.ffi.numberToFloatPy(1), Sk.ffi.gattr(uomPy, PROP_DIMENSIONS), Sk.ffi.gattr(uomPy, PROP_LABELS), Sk.ffi.gattr(uomPy, PROP_NAME));
@@ -37875,22 +38290,28 @@ mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       }
     }
   });
-  $loc.__getattr__ = Sk.ffi.functionPy(function(measurePy, name) {
+  $loc.__getattr__ = Sk.ffi.functionPy(function(measurePy, name)
+  {
     var measure = Sk.ffi.remapToJs(measurePy);
     switch(name) {
-      case PROP_QUANTITY: {
+      case PROP_QUANTITY:
+      {
         return measure[QTY_PY];
       }
-      case PROP_UOM: {
+      case PROP_UOM:
+      {
         return measure[UOM_PY];
       }
-      case METHOD_EXP: {
-        return Sk.ffi.callableToPy(mod, METHOD_EXP, function(methodPy) {
+      case METHOD_EXP:
+      {
+        return Sk.ffi.callableToPy(mod, METHOD_EXP, function(methodPy)
+        {
           Sk.ffi.checkMethodArgs(METHOD_EXP, arguments, 0, 0);
           return Sk.ffi.callsim(mod[MEASURE], Sk.ffi.callsim(Sk.ffi.gattr(measure[QTY_PY], METHOD_EXP)), measure[UOM_PY]);
         });
       }
-      case METHOD_MAGNITUDE: {
+      case METHOD_MAGNITUDE:
+      {
         return Sk.ffi.callableToPy(mod, METHOD_MAGNITUDE, function(methodPy) {
           Sk.ffi.checkMethodArgs(METHOD_MAGNITUDE, arguments, 0, 0);
           return Sk.ffi.callsim(mod[MEASURE], Sk.ffi.callsim(Sk.ffi.gattr(measure[QTY_PY], METHOD_MAGNITUDE)), measure[UOM_PY]);
@@ -37912,25 +38333,13 @@ mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var other = Sk.ffi.remapToJs(otherPy);
     return Sk.ffi.callsim(mod[MEASURE], Sk.ffh.subtract(self[QTY_PY], other[QTY_PY]), Sk.ffi.callsim(Sk.ffi.gattr(self[UOM_PY], METHOD_COMPATIBLE), other[UOM_PY]));
   });
-  $loc.__mul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-    var self = Sk.ffi.remapToJs(selfPy);
-    if (isMeasurePy(otherPy)) {
-      var other = Sk.ffi.remapToJs(otherPy);
-      return Sk.ffi.callsim(mod[MEASURE], Sk.ffh.multiply(self[QTY_PY], other[QTY_PY]), Sk.ffh.multiply(self[UOM_PY], other[UOM_PY]));
-    }
-    else if (Sk.ffi.isNum(otherPy)) {
-      return Sk.ffi.callsim(mod[MEASURE], Sk.ffh.multiply(self[QTY_PY], otherPy), self[UOM_PY]);
-    }
-    else {
-      return undefined;
-    }
-  });
-  $loc.__rmul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-    var self = Sk.ffi.remapToJs(selfPy);
-    // TODO: The quantity should probably satisfy field axioms? add, multiply, ...
-    // Sk.ffi.checkArgType(ARG_OTHER, NUMBER, Sk.ffi.isNum(otherPy), otherPy);
-    return Sk.ffi.callsim(mod[MEASURE], Sk.ffh.multiply(otherPy, self[QTY_PY]), self[UOM_PY]);
-  });
+
+  $loc.__mod__  = Sk.ffi.functionPy(makeMeasureLhsBinary(Sk.ffh.mod));
+  $loc.__rmod__ = Sk.ffi.functionPy(makeMeasureRhsBinary(Sk.ffh.mod));
+
+  $loc.__mul__  = Sk.ffi.functionPy(makeMeasureLhsBinary(Sk.ffh.multiply));
+  $loc.__rmul__ = Sk.ffi.functionPy(makeMeasureRhsBinary(Sk.ffh.multiply));
+
   $loc.__div__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
     var self = Sk.ffi.remapToJs(selfPy);
     if (isMeasurePy(otherPy)) {
@@ -37953,62 +38362,16 @@ mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     // Sk.ffi.checkArgType(ARG_OTHER, NUMBER, Sk.ffi.isNum(otherPy), otherPy);
     return Sk.ffi.callsim(mod[MEASURE], Sk.ffh.divide(otherPy, self[QTY_PY]), Sk.ffh.divide(Sk.ffi.numberToFloatPy(1.0),self[UOM_PY]));
   });
-  $loc.__mod__ = Sk.ffi.functionPy(function(selfPy, otherPy)
-  {
-    var self = Sk.ffi.remapToJs(selfPy);
-    if (isMeasurePy(otherPy))
-    {
-      var other = Sk.ffi.remapToJs(otherPy);
-      return Sk.ffi.callsim(mod[MEASURE], Sk.ffh.mod(self[QTY_PY], other[QTY_PY]), Sk.ffh.multiply(self[UOM_PY], other[UOM_PY]));
-    }
-    else if (Sk.ffi.isNum(otherPy))
-    {
-      return Sk.ffi.callsim(mod[MEASURE], Sk.ffh.mod(self[QTY_PY], otherPy), self[UOM_PY]);
-    }
-    else
-    {
-      Sk.ffi.checkArgType(ARG_OTHER, [MEASURE, NUMBER], false, otherPy);
-    }
-  });
-  $loc.__xor__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-    var self = Sk.ffi.remapToJs(selfPy);
-    if (isMeasurePy(otherPy)) {
-      var other = Sk.ffi.remapToJs(otherPy);
-      return Sk.ffi.callsim(mod[MEASURE], Sk.ffh.xor(self[QTY_PY], other[QTY_PY]), Sk.ffh.multiply(self[UOM_PY], other[UOM_PY]));
-    }
-    else if (Sk.ffi.isNum(otherPy)) {
-      return Sk.ffi.callsim(mod[MEASURE], Sk.ffh.xor(self[QTY_PY], otherPy), self[UOM_PY]);
-    }
-    else {
-      Sk.ffi.checkArgType(ARG_OTHER, [MEASURE, NUMBER], false, otherPy);
-    }
-  });
-  $loc.__lshift__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-    var self = Sk.ffi.remapToJs(selfPy);
-    if (isMeasurePy(otherPy)) {
-      var other = Sk.ffi.remapToJs(otherPy);
-      return Sk.ffi.callsim(mod[MEASURE], Sk.ffh.lshift(self[QTY_PY], other[QTY_PY]), Sk.ffh.multiply(self[UOM_PY], other[UOM_PY]));
-    }
-    else if (Sk.ffi.isNum(otherPy)) {
-      return Sk.ffi.callsim(mod[MEASURE], Sk.ffh.lshift(self[QTY_PY], otherPy), self[UOM_PY]);
-    }
-    else {
-      Sk.ffi.checkArgType(ARG_OTHER, [MEASURE, NUMBER], false, otherPy);
-    }
-  });
-  $loc.__rshift__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-    var self = Sk.ffi.remapToJs(selfPy);
-    if (isMeasurePy(otherPy)) {
-      var other = Sk.ffi.remapToJs(otherPy);
-      return Sk.ffi.callsim(mod[MEASURE], Sk.ffh.rshift(self[QTY_PY], other[QTY_PY]), Sk.ffh.multiply(self[UOM_PY], other[UOM_PY]));
-    }
-    else if (Sk.ffi.isNum(otherPy)) {
-      return Sk.ffi.callsim(mod[MEASURE], Sk.ffh.rshift(self[QTY_PY], otherPy), self[UOM_PY]);
-    }
-    else {
-      Sk.ffi.checkArgType(ARG_OTHER, [MEASURE, NUMBER], false, otherPy);
-    }
-  });
+
+  $loc.__xor__     = Sk.ffi.functionPy(makeMeasureLhsBinary(Sk.ffh.xor));
+  $loc.__rxor__    = Sk.ffi.functionPy(makeMeasureRhsBinary(Sk.ffh.xor));
+
+  $loc.__lshift__  = Sk.ffi.functionPy(makeMeasureLhsBinary(Sk.ffh.lshift));
+  $loc.__rlshift__ = Sk.ffi.functionPy(makeMeasureRhsBinary(Sk.ffh.lshift));
+
+  $loc.__rshift__  = Sk.ffi.functionPy(makeMeasureLhsBinary(Sk.ffh.rshift));
+  $loc.__rrshift__ = Sk.ffi.functionPy(makeMeasureRhsBinary(Sk.ffh.rshift));
+
   $loc.__pow__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
     var isMeasure = isMeasurePy(otherPy);
     Sk.ffi.checkArgType(ARG_OTHER, [MEASURE, NUMBER], Sk.ffi.isNum(otherPy) || isMeasure, otherPy);
@@ -38054,7 +38417,7 @@ mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         quantityPy = Sk.ffh.cos(Sk.ffi.gattr(selfPy, PROP_QUANTITY));
       }
     }
-    return Sk.ffi.callsim(mod[MEASURE], quantityPy, Sk.ffi.gattr(mod[DIMENSIONLESS], PROP_UOM));
+    return Sk.ffi.callsim(mod[MEASURE], quantityPy, Sk.ffi.gattr(mod[DIMLESS], PROP_UOM));
   });
   $loc.__sin__ = Sk.ffi.functionPy(function(selfPy) {
     var quantityPy;
@@ -38077,7 +38440,7 @@ mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         quantityPy = Sk.ffh.sin(Sk.ffi.gattr(selfPy, PROP_QUANTITY));
       }
     }
-    return Sk.ffi.callsim(mod[MEASURE], quantityPy, Sk.ffi.gattr(mod[DIMENSIONLESS], PROP_UOM));
+    return Sk.ffi.callsim(mod[MEASURE], quantityPy, Sk.ffi.gattr(mod[DIMLESS], PROP_UOM));
   });
   $loc.__tan__ = Sk.ffi.functionPy(function(selfPy) {
     var quantityPy;
@@ -38100,7 +38463,7 @@ mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
         quantityPy = Sk.ffh.tan(Sk.ffi.gattr(selfPy, PROP_QUANTITY));
       }
     }
-    return Sk.ffi.callsim(mod[MEASURE], quantityPy, Sk.ffi.gattr(mod[DIMENSIONLESS], PROP_UOM));
+    return Sk.ffi.callsim(mod[MEASURE], quantityPy, Sk.ffi.gattr(mod[DIMLESS], PROP_UOM));
   });
   $loc.__exp__ = Sk.ffi.functionPy(function(selfPy) {
     var quantityPy = Sk.ffh.exp(Sk.ffi.gattr(selfPy, PROP_QUANTITY));
@@ -38142,61 +38505,40 @@ mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
 }, MEASURE, []);
 
 (function(){
-  var onePy      = Sk.ffi.numberToFloatPy(1);
-  
-  var kilogramPy = Sk.ffi.callsim(mod[UNIT], Sk.ffi.referenceToPy(BLADE.UNIT_KILOGRAM, UNIT));
-  mod[KILOGRAM]  = Sk.ffi.callsim(mod[MEASURE], onePy, kilogramPy);
+  var onePy     = Sk.ffi.numberToFloatPy(1);
 
-  var meterPy    = Sk.ffi.callsim(mod[UNIT], Sk.ffi.referenceToPy(BLADE.UNIT_METER, UNIT));
-  mod[METER]     = Sk.ffi.callsim(mod[MEASURE], onePy, meterPy);
+  function makeUnitPy(unitJs)
+  {
+    var unitPy = Sk.ffi.callsim(mod[UNIT], Sk.ffi.referenceToPy(unitJs, UNIT));
+    return Sk.ffi.callsim(mod[MEASURE], onePy, unitPy);
+  }
 
-  var secondPy   = Sk.ffi.callsim(mod[UNIT], Sk.ffi.referenceToPy(BLADE.UNIT_SECOND, UNIT));
-  mod[SECOND]    = Sk.ffi.callsim(mod[MEASURE], onePy, secondPy);
+  mod[DIMLESS]  = makeUnitPy(new BLADE.Unit(1, new BLADE.Dimensions(0, 0, 0, 0, 0, 0, 0), SI_LABELS));
 
-  var amperePy   = Sk.ffi.callsim(mod[UNIT], Sk.ffi.referenceToPy(BLADE.UNIT_AMPERE, UNIT));
-  mod[AMPERE]    = Sk.ffi.callsim(mod[MEASURE], onePy, amperePy);
+  mod[KILOGRAM] = makeUnitPy(BLADE.UNIT_KILOGRAM);
+  mod[METER]    = makeUnitPy(BLADE.UNIT_METER);
+  mod[SECOND]   = makeUnitPy(BLADE.UNIT_SECOND);
+  mod[AMPERE]   = makeUnitPy(BLADE.UNIT_AMPERE);
+  mod[KELVIN]   = makeUnitPy(BLADE.UNIT_KELVIN);
+  mod[MOLE]     = makeUnitPy(BLADE.UNIT_MOLE);
+  mod[CANDELA]  = makeUnitPy(BLADE.UNIT_CANDELA);
 
-  var kelvinPy   = Sk.ffi.callsim(mod[UNIT], Sk.ffi.referenceToPy(BLADE.UNIT_KELVIN, UNIT));
-  mod[KELVIN]    = Sk.ffi.callsim(mod[MEASURE], onePy, kelvinPy);
+  mod[COULOMB]  = makeUnitPy(BLADE.UNIT_COULOMB);
 
-  var molePy     = Sk.ffi.callsim(mod[UNIT], Sk.ffi.referenceToPy(BLADE.UNIT_MOLE, UNIT));
-  mod[MOLE]      = Sk.ffi.callsim(mod[MEASURE], onePy, molePy);
+  mod[GRAM]     = Sk.ffh.multiply(mod.milli, mod[KILOGRAM]);
+  mod[CM]       = Sk.ffh.multiply(mod.centi, mod[METER]);
 
-  var candelaPy  = Sk.ffi.callsim(mod[UNIT], Sk.ffi.referenceToPy(BLADE.UNIT_CANDELA, UNIT));
-  mod[CANDELA]   = Sk.ffi.callsim(mod[MEASURE], onePy, candelaPy);
+  mod[NEWTON]   = Sk.ffh.divide(Sk.ffh.multiply(mod[KILOGRAM], mod[METER]), Sk.ffh.multiply(mod[SECOND], mod[SECOND]));
+  mod[JOULE]    = Sk.ffh.multiply(mod[NEWTON], mod[METER]);
+  mod[WATT]     = Sk.ffh.divide(mod[JOULE], mod[SECOND]);
+  mod[VOLT]     = Sk.ffh.divide(mod[JOULE], mod[COULOMB]);
+  mod[TESLA]    = makeUnitPy(new BLADE.Unit(1, new BLADE.Dimensions(1, 0, -1, -1, 0, 0, 0), SI_LABELS));
 
-  var coulombPy  = Sk.ffi.callsim(mod[UNIT], Sk.ffi.referenceToPy(BLADE.UNIT_COULOMB, UNIT));
-  mod[COULOMB]   = Sk.ffi.callsim(mod[MEASURE], onePy, coulombPy);
+  var radianPy  = Sk.ffi.callsim(mod[UNIT], onePy, Sk.ffi.referenceToPy(new BLADE.Dimensions(0, 0, 0, 0, 0, 0, 0), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS), Sk.ffi.stringToPy("radian"));
+  mod[RADIAN]   = makeUnitPy(Sk.ffi.remapToJs(radianPy));
 
-  var gramPy     = Sk.ffi.callsim(mod[UNIT], Sk.ffi.numberToFloatPy(0.001), Sk.ffi.referenceToPy(new BLADE.Dimensions(1, 0, 0, 0, 0, 0, 0),  DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS), Sk.ffi.stringToPy("g"));
-  mod[GRAM]      = Sk.ffi.callsim(mod[MEASURE], onePy, gramPy);
-
-  var cmPy       = Sk.ffi.callsim(mod[UNIT], Sk.ffi.numberToFloatPy(0.01),  Sk.ffi.referenceToPy(new BLADE.Dimensions(0, 1, 0, 0, 0, 0, 0),  DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS), Sk.ffi.stringToPy("cm"));
-  mod[CM]        = Sk.ffi.callsim(mod[MEASURE], onePy, cmPy);
-
-  var newtonPy   = Sk.ffi.callsim(mod[UNIT], onePy, Sk.ffi.referenceToPy(new BLADE.Dimensions(1, 1, -2, 0, 0, 0, 0), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS), Sk.ffi.stringToPy("N"));
-  mod[NEWTON]    = Sk.ffi.callsim(mod[MEASURE], onePy, newtonPy);
-
-  var joulePy    = Sk.ffi.callsim(mod[UNIT], onePy, Sk.ffi.referenceToPy(new BLADE.Dimensions(1, 2, -2, 0, 0, 0, 0), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS), Sk.ffi.stringToPy("J"));
-  mod[JOULE]     = Sk.ffi.callsim(mod[MEASURE], onePy, joulePy);
-
-  var wattPy     = Sk.ffi.callsim(mod[UNIT], onePy, Sk.ffi.referenceToPy(new BLADE.Dimensions(1, 2, -3, 0, 0, 0, 0), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS), Sk.ffi.stringToPy("W"));
-  mod[WATT]      = Sk.ffi.callsim(mod[MEASURE], onePy, wattPy);
-
-  var voltPy     = Sk.ffi.callsim(mod[UNIT], onePy, Sk.ffi.referenceToPy(new BLADE.Dimensions(1, 2, -2, -1, 0, 0, 0), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS), Sk.ffi.stringToPy("V"));
-  mod[VOLT]      = Sk.ffi.callsim(mod[MEASURE], onePy, voltPy);
-
-  var teslaPy    = Sk.ffi.callsim(mod[UNIT], onePy, Sk.ffi.referenceToPy(new BLADE.Dimensions(1, 0, -1, -1, 0, 0, 0), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS), Sk.ffi.stringToPy("T"));
-  mod[TESLA]     = Sk.ffi.callsim(mod[MEASURE], onePy, teslaPy);
-
-  var radianPy   = Sk.ffi.callsim(mod[UNIT], onePy, Sk.ffi.referenceToPy(new BLADE.Dimensions(0, 0, 0, 0, 0, 0, 0), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS), Sk.ffi.stringToPy("radian"));
-  mod[RADIAN]    = Sk.ffi.callsim(mod[MEASURE], onePy, radianPy);
-
-  var degreePy   = Sk.ffi.callsim(mod[UNIT], onePy, Sk.ffi.referenceToPy(new BLADE.Dimensions(0, 0, 0, 0, 0, 0, 0), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS), Sk.ffi.stringToPy("degree"));
-  mod[DEGREE]    = Sk.ffi.callsim(mod[MEASURE], onePy, degreePy);
-
-  var dimlessPy  = Sk.ffi.callsim(mod[UNIT], onePy, Sk.ffi.referenceToPy(new BLADE.Dimensions(0, 0, 0, 0, 0, 0, 0), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS), Sk.ffi.stringToPy(""));
-  mod[DIMENSIONLESS]  = Sk.ffi.callsim(mod[MEASURE], onePy, dimlessPy);
+  var degreePy  = Sk.ffi.callsim(mod[UNIT], onePy, Sk.ffi.referenceToPy(new BLADE.Dimensions(0, 0, 0, 0, 0, 0, 0), DIMENSIONS), Sk.ffi.remapToPy(SI_LABELS), Sk.ffi.stringToPy("degree"));
+  mod[DEGREE]   = makeUnitPy(Sk.ffi.remapToJs(degreePy));
 })();
 
 };
