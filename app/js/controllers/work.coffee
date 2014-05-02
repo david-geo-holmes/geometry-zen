@@ -111,6 +111,9 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
 
     if prog.trim().length > 0
       try
+        # I think this first parameter is a convention. It could be anything?
+        # As a file, the DaVinci library uses it as <stdin>.py
+        # debugger
         eval(Sk.importMainWithBody("<stdin>", false, prog.trim()))
       catch e
         # Unfortunately, we have to parse the string representation of the message.

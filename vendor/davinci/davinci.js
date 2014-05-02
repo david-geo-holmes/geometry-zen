@@ -6069,7 +6069,9 @@ Sk.builtin.type = function(name, bases, dict)
         {
             var getf = this.tp$getattr("__getitem__");
             if (getf !== undefined)
-            return Sk.misceval.apply(getf, undefined, undefined, undefined, [key]);
+            {
+                return Sk.misceval.apply(getf, undefined, undefined, undefined, [key]);
+            }
             throw new Sk.builtin.TypeError("'" + Sk.abstr.typeName(this) + "' object does not support indexing");
         }
         klass.prototype.tp$setitem = function(key, value)
@@ -6324,6 +6326,10 @@ Sk.builtin.type.prototype.tp$richcompare = function(other, op)
 	return r1.tp$richcompare(r2, op);
 };
 /**
+ * Return a new featureless object. object is a base for all classes.
+ * It has methods that are common to all instances of Python classes.
+ * This (Built-in Function) function does not accept any arguments.
+ *
  * @constructor
  */
 Sk.builtin.object = function()
@@ -7472,8 +7478,8 @@ Sk.abstr.binop_type_error = function(lhsPy, rhsPy, name)
 Sk.abstr.boNameToSlotFuncLhs_ = function(obj, name) {
   if (obj === null) {
     return undefined;
-  };
-  switch (name) {
+};
+switch (name) {
     case "Add":      return obj.nb$add          ? obj.nb$add :          obj['__add__'];
     case "Sub":      return obj.nb$subtract     ? obj.nb$subtract :     obj['__sub__'];
     case "Mult":     return obj.nb$multiply     ? obj.nb$multiply :     obj['__mul__'];
@@ -7486,14 +7492,14 @@ Sk.abstr.boNameToSlotFuncLhs_ = function(obj, name) {
     case "BitAnd":   return obj.nb$and          ? obj.nb$and :          obj['__and__'];
     case "BitXor":   return obj.nb$xor          ? obj.nb$xor :          obj['__xor__'];
     case "BitOr":    return obj.nb$or           ? obj.nb$or :           obj['__or__'];
-  }
+}
 };
 
 Sk.abstr.boNameToSlotFuncRhs_ = function(obj, name) {
   if (obj === null) {
     return undefined;
-  };
-  switch (name) {
+};
+switch (name) {
     case "Add":      return obj.nb$add          ? obj.nb$add :          obj['__radd__'];
     case "Sub":      return obj.nb$subtract     ? obj.nb$subtract :     obj['__rsub__'];
     case "Mult":     return obj.nb$multiply     ? obj.nb$multiply :     obj['__rmul__'];
@@ -7506,17 +7512,17 @@ Sk.abstr.boNameToSlotFuncRhs_ = function(obj, name) {
     case "BitAnd":   return obj.nb$and          ? obj.nb$and :          obj['__rand__'];
     case "BitXor":   return obj.nb$xor          ? obj.nb$xor :          obj['__rxor__'];
     case "BitOr":    return obj.nb$or           ? obj.nb$or :           obj['__ror__'];
-  }
+}
 };
 
 /**
  * In-place operations (+=, -=, *=, /=, //=, %=, **=, <<=, >>=, &=, ^=, |=)
  */
-Sk.abstr.iboNameToSlotFunc_ = function(obj, name) {
+ Sk.abstr.iboNameToSlotFunc_ = function(obj, name) {
   if (obj === null) {
     return undefined;
-  };
-  switch (name) {
+};
+switch (name) {
     case "Add":      return obj.nb$inplace_add          ? obj.nb$inplace_add          : obj['__iadd__'];
     case "Sub":      return obj.nb$inplace_subtract     ? obj.nb$inplace_subtract     : obj['__isub__'];
     case "Mult":     return obj.nb$inplace_multiply     ? obj.nb$inplace_multiply     : obj['__imul__'];
@@ -7529,7 +7535,7 @@ Sk.abstr.iboNameToSlotFunc_ = function(obj, name) {
     case "BitAnd":   return obj.nb$inplace_and;
     case "BitOr":    return obj.nb$inplace_or;
     case "BitXor":   return obj.nb$inplace_xor          ? obj.nb$inplace_xor          : obj['__ixor__'];
-  }
+}
 };
 
 Sk.abstr.binary_op_ = function(v, w, opname)
@@ -7568,24 +7574,24 @@ Sk.abstr.binary_iop_ = function(v, w, opname)
     var vop = Sk.abstr.iboNameToSlotFunc_(v, opname);
     if (vop !== undefined)
     {
-    if (vop.call) {
+        if (vop.call) {
             ret = vop.call(v, w);
     } else {  // assume that vop is an __xxx__ type method
         ret = Sk.misceval.callsim(vop,v,w); //  added to be like not-in-place... is this okay?
-        }
-        if (ret !== undefined) return ret;
     }
-    var wop = Sk.abstr.iboNameToSlotFunc_(w, opname);
-    if (wop !== undefined)
-    {
+    if (ret !== undefined) return ret;
+}
+var wop = Sk.abstr.iboNameToSlotFunc_(w, opname);
+if (wop !== undefined)
+{
     if (wop.call) {
-            ret = wop.call(w, v);
+        ret = wop.call(w, v);
     } else { // assume that wop is an __xxx__ type method
         ret = Sk.misceval.callsim(wop,w,v); //  added to be like not-in-place... is this okay?
-        }
-        if (ret !== undefined) return ret;
     }
-    Sk.abstr.binop_type_error(v, w, opname);
+    if (ret !== undefined) return ret;
+}
+Sk.abstr.binop_type_error(v, w, opname);
 };
 
 //
@@ -7605,7 +7611,7 @@ Sk.abstr.numOpAndPromote = function(a, b, opfn)
         && Math.floor(ans) === ans) {                                               // RNL
             return [Sk.builtin.lng.fromInt$(a), Sk.builtin.lng.fromInt$(b)];        // RNL
         } else                                                                      // RNL
-            return ans;
+        return ans;
     }
     else if (a === undefined || b === undefined) {
         throw new Sk.builtin.NameError('Undefined variable in expression')
@@ -7618,14 +7624,14 @@ Sk.abstr.numOpAndPromote = function(a, b, opfn)
 //              return [tmp, b];
 //          } else
 //              return [a, b.v];
-        return [a, b];
-    } else if (a.constructor === Sk.builtin.nmber) {
-        return [a, b];
-    } else if (typeof a === "number") {
-        var tmp = new Sk.builtin.nmber(a, undefined);
-        return [tmp, b];
-    } else
-        return undefined;
+return [a, b];
+} else if (a.constructor === Sk.builtin.nmber) {
+    return [a, b];
+} else if (typeof a === "number") {
+    var tmp = new Sk.builtin.nmber(a, undefined);
+    return [tmp, b];
+} else
+return undefined;
 };
 
 Sk.abstr.boNumPromote_ = {
@@ -7672,24 +7678,24 @@ Sk.abstr.boNumPromote_ = {
         return m;
     },
     "LShift": function(a, b) { 
-    if (b < 0) {
-        throw new Sk.builtin.ValueError("negative shift count");
-    }
-    var m = a << b;
-    if (m > a) {
-        return m; 
-    }
-    else {
-        // Fail, this will get recomputed with longs
-        return a * Math.pow(2, b);
-    }
-    },
-    "RShift": function(a, b) { 
         if (b < 0) {
             throw new Sk.builtin.ValueError("negative shift count");
         }
-        var m = a >> b;
-        if ((a > 0) && (m < 0)) {
+        var m = a << b;
+        if (m > a) {
+            return m; 
+        }
+        else {
+        // Fail, this will get recomputed with longs
+        return a * Math.pow(2, b);
+    }
+},
+"RShift": function(a, b) { 
+    if (b < 0) {
+        throw new Sk.builtin.ValueError("negative shift count");
+    }
+    var m = a >> b;
+    if ((a > 0) && (m < 0)) {
             // fix incorrect sign extension
             m = m & (Math.pow(2, 32-b) - 1);
         }
@@ -7758,11 +7764,11 @@ goog.exportSymbol("Sk.abstr.numberInplaceBinOp", Sk.abstr.numberInplaceBinOp);
 /**
  * Unary arithmetic operations (-, +, abs(), and ~)
  */
-Sk.abstr.uboNameToSlotFunc_ = function(obj, name) {
+ Sk.abstr.uboNameToSlotFunc_ = function(obj, name) {
   if (obj === null) {
     return undefined;
-  };
-  switch (name) {
+};
+switch (name) {
     case "USub": {
         return obj.nu$negative          ? obj.nu$negative        : obj['__neg__'];
     }
@@ -7775,7 +7781,7 @@ Sk.abstr.uboNameToSlotFunc_ = function(obj, name) {
     default: {
         throw new Sk.builtin.AssertionError("7fb8237f-879b-4192-89ce-13ad6fa3b2d8 " + name);
     }
-  }
+}
 };
 
 Sk.abstr.numberUnaryOp = function(valuePy, op)
@@ -7970,19 +7976,24 @@ goog.exportSymbol("Sk.abstr.objectDelItem", Sk.abstr.objectDelItem);
 
 Sk.abstr.objectGetItem = function(o, key)
 {
-    if (o !== null) 
+  if (o !== null) 
+  {
+    if (o.mp$subscript)
     {
-        if (o.mp$subscript)
-            return o.mp$subscript(key);
-        else if (Sk.misceval.isIndex(key) && o.sq$item)
-            return Sk.abstr.sequenceGetItem(o, Sk.misceval.asIndex(key));
-        else if (o.tp$getitem) {
-            return o.tp$getitem(key);
-        }
+      return o.mp$subscript(key);
     }
+    else if (Sk.misceval.isIndex(key) && o.sq$item)
+    {
+      return Sk.abstr.sequenceGetItem(o, Sk.misceval.asIndex(key));
+    }
+    else if (o.tp$getitem)
+    {
+      return o.tp$getitem(key);
+    }
+  }
 
-    var otypename = Sk.abstr.typeName(o);
-    throw new Sk.builtin.TypeError("'" + otypename + "' does not support indexing");
+  var otypename = Sk.abstr.typeName(o);
+  throw new Sk.builtin.TypeError("'" + otypename + "' does not support indexing");
 };
 goog.exportSymbol("Sk.abstr.objectGetItem", Sk.abstr.objectGetItem);
 
@@ -7994,8 +8005,8 @@ Sk.abstr.objectSetItem = function(o, key, v)
             return o.mp$ass_subscript(key, v);
         else if (Sk.misceval.isIndex(key) && o.sq$ass_item)
             return Sk.abstr.sequenceSetItem(o, Sk.misceval.asIndex(key), v);
-    else if (o.tp$setitem)
-        return o.tp$setitem(key, v);
+        else if (o.tp$setitem)
+            return o.tp$setitem(key, v);
     }
 
     var otypename = Sk.abstr.typeName(o);
@@ -8775,8 +8786,8 @@ Sk.builtin.str = function(x)
     else if ((x === null) || (x instanceof Sk.builtin.none)) ret = "None";
     else if (x instanceof Sk.builtin.bool)
     {
-	if (x.v) ret = "True";
-	else ret = "False";
+        if (x.v) ret = "True";
+        else ret = "False";
     }
     else if (typeof x === "number")
     {
@@ -8814,7 +8825,7 @@ Sk.builtin.str.$emptystr = new Sk.builtin.str('');
 
 Sk.builtin.str.prototype.mp$subscript = function(index)
 {
-	index = Sk.builtin.asnum$(index);
+    index = Sk.builtin.asnum$(index);
     if (typeof index === "number" && Math.floor(index) === index /* not a float*/ )
     {
         if (index < 0) index = this.v.length + index;
@@ -8852,7 +8863,7 @@ Sk.builtin.str.prototype.nb$add = Sk.builtin.str.prototype.sq$concat;
 Sk.builtin.str.prototype.nb$inplace_add = Sk.builtin.str.prototype.sq$concat;
 Sk.builtin.str.prototype.sq$repeat = function(n)
 {
-	n = Sk.builtin.asnum$(n);
+    n = Sk.builtin.asnum$(n);
     var ret = "";
     for (var i = 0; i < n; ++i)
         ret += this.v;
@@ -8863,8 +8874,8 @@ Sk.builtin.str.prototype.nb$inplace_multiply = Sk.builtin.str.prototype.sq$repea
 Sk.builtin.str.prototype.sq$item = function() { goog.asserts.fail(); };
 Sk.builtin.str.prototype.sq$slice = function(i1, i2)
 {
-	i1 = Sk.builtin.asnum$(i1);
-	i2 = Sk.builtin.asnum$(i2);
+    i1 = Sk.builtin.asnum$(i1);
+    i2 = Sk.builtin.asnum$(i2);
     if (i1 < 0) i1 = 0;
     return new Sk.builtin.str(this.v.substr(i1, i2 - i1));
 };
@@ -8989,7 +9000,7 @@ Sk.builtin.str.prototype.tp$repr = function()
 Sk.builtin.str.re_escape_ = function(s)
 {
     var ret = [];
-	var re = /^[A-Za-z0-9]+$/;
+    var re = /^[A-Za-z0-9]+$/;
     for (var i = 0; i < s.length; ++i)
     {
         var c = s.charAt(i);
@@ -9076,8 +9087,8 @@ Sk.builtin.str.prototype['split'] = new Sk.builtin.func(function(self, on, howma
     if (on === null) {
         str = str.trimLeft();
     } else {
-	// Escape special characters in "on" so we can use a regexp
-	var s = on.v.replace(/([.*+?=|\\\/()\[\]\{\}^$])/g, "\\$1");
+    // Escape special characters in "on" so we can use a regexp
+    var s = on.v.replace(/([.*+?=|\\\/()\[\]\{\}^$])/g, "\\$1");
         regex = new RegExp(s, "g");
     }
 
@@ -9112,15 +9123,15 @@ Sk.builtin.str.prototype['strip'] = new Sk.builtin.func(function(self, chars)
 {
     Sk.builtin.pyCheckArgs("strip", arguments, 1, 2);
     if ((chars !== undefined) && !Sk.builtin.checkString(chars)) {
-	throw new Sk.builtin.TypeError("strip arg must be None or str");
+    throw new Sk.builtin.TypeError("strip arg must be None or str");
     }
     var pattern;
     if (chars === undefined) {
-	pattern =  /^\s+|\s+$/g;
+    pattern =  /^\s+|\s+$/g;
     }
     else {
-	var regex = Sk.builtin.str.re_escape_(chars.v);
-	pattern = new RegExp("^["+regex+"]+|["+regex+"]+$","g");
+    var regex = Sk.builtin.str.re_escape_(chars.v);
+    pattern = new RegExp("^["+regex+"]+|["+regex+"]+$","g");
     }
     return new Sk.builtin.str(self.v.replace(pattern, ''));
 });
@@ -9129,15 +9140,15 @@ Sk.builtin.str.prototype['lstrip'] = new Sk.builtin.func(function(self, chars)
 {
     Sk.builtin.pyCheckArgs("lstrip", arguments, 1, 2);
     if ((chars !== undefined) && !Sk.builtin.checkString(chars)) {
-	throw new Sk.builtin.TypeError("lstrip arg must be None or str");
+    throw new Sk.builtin.TypeError("lstrip arg must be None or str");
     }
     var pattern;
     if (chars === undefined) {
-	pattern =  /^\s+/g;
+    pattern =  /^\s+/g;
     }
     else {
-	var regex = Sk.builtin.str.re_escape_(chars.v);
-	pattern = new RegExp("^["+regex+"]+","g");
+    var regex = Sk.builtin.str.re_escape_(chars.v);
+    pattern = new RegExp("^["+regex+"]+","g");
     }
     return new Sk.builtin.str(self.v.replace(pattern, ''));
 });
@@ -9146,15 +9157,15 @@ Sk.builtin.str.prototype['rstrip'] = new Sk.builtin.func(function(self, chars)
 {
     Sk.builtin.pyCheckArgs("rstrip", arguments, 1, 2);
     if ((chars !== undefined) && !Sk.builtin.checkString(chars)) {
-	throw new Sk.builtin.TypeError("rstrip arg must be None or str");
+    throw new Sk.builtin.TypeError("rstrip arg must be None or str");
     }
     var pattern;
     if (chars === undefined) {
-	pattern =  /\s+$/g;
+    pattern =  /\s+$/g;
     }
     else {
-	var regex = Sk.builtin.str.re_escape_(chars.v);
-	pattern = new RegExp("["+regex+"]+$","g");
+    var regex = Sk.builtin.str.re_escape_(chars.v);
+    pattern = new RegExp("["+regex+"]+$","g");
     }
     return new Sk.builtin.str(self.v.replace(pattern, ''));
 });
@@ -9196,27 +9207,27 @@ Sk.builtin.str.prototype['rpartition'] = new Sk.builtin.func(function(self, sep)
 Sk.builtin.str.prototype['count'] = new Sk.builtin.func(function(self, pat, start, end) {
     Sk.builtin.pyCheckArgs("count", arguments, 2, 4);
     if (!Sk.builtin.checkString(pat)) {
-	throw new Sk.builtin.TypeError("expected a character buffer object");
+    throw new Sk.builtin.TypeError("expected a character buffer object");
     }
     if ((start !== undefined) && !Sk.builtin.checkInt(start)) {
-	throw new Sk.builtin.TypeError("slice indices must be integers or None or have an __index__ method");
+    throw new Sk.builtin.TypeError("slice indices must be integers or None or have an __index__ method");
     }
     if ((end !== undefined) && !Sk.builtin.checkInt(end)) {
-	throw new Sk.builtin.TypeError("slice indices must be integers or None or have an __index__ method");
+    throw new Sk.builtin.TypeError("slice indices must be integers or None or have an __index__ method");
     }
 
     if (start === undefined)
-	start = 0;
+    start = 0;
     else {
-	start = Sk.builtin.asnum$(start);
-	start = start >= 0 ? start : self.v.length + start;
+    start = Sk.builtin.asnum$(start);
+    start = start >= 0 ? start : self.v.length + start;
     }
 
     if (end === undefined)
-	end = self.v.length;
+    end = self.v.length;
     else {
-	end = Sk.builtin.asnum$(end);
-	end = end >= 0 ? end : self.v.length + end;
+    end = Sk.builtin.asnum$(end);
+    end = end >= 0 ? end : self.v.length + end;
     }
 
     var m = new RegExp(pat.v,'g');
@@ -9233,20 +9244,20 @@ Sk.builtin.str.prototype['count'] = new Sk.builtin.func(function(self, pat, star
 Sk.builtin.str.prototype['ljust'] = new Sk.builtin.func(function(self, len, fillchar) {
     Sk.builtin.pyCheckArgs("ljust", arguments, 2, 3);
     if (!Sk.builtin.checkInt(len)) {
-	throw new Sk.builtin.TypeError("integer argument exepcted, got "
-				       + Sk.abstr.typeName(len));
+    throw new Sk.builtin.TypeError("integer argument exepcted, got "
+                       + Sk.abstr.typeName(len));
     }
     if ((fillchar !== undefined) && (!Sk.builtin.checkString(fillchar)
-				     || fillchar.v.length !== 1)) {
-	throw new Sk.builtin.TypeError("must be char, not "
-				       + Sk.abstr.typeName(fillchar))
+                     || fillchar.v.length !== 1)) {
+    throw new Sk.builtin.TypeError("must be char, not "
+                       + Sk.abstr.typeName(fillchar))
     }
     if (fillchar === undefined) {
-	fillchar = " ";
+    fillchar = " ";
     } else {
-	fillchar = fillchar.v;
+    fillchar = fillchar.v;
     }
-	len = Sk.builtin.asnum$(len);
+    len = Sk.builtin.asnum$(len);
     if (self.v.length >= len) {
         return self;
     } else {
@@ -9258,20 +9269,20 @@ Sk.builtin.str.prototype['ljust'] = new Sk.builtin.func(function(self, len, fill
 Sk.builtin.str.prototype['rjust'] = new Sk.builtin.func(function(self, len, fillchar) {
     Sk.builtin.pyCheckArgs("rjust", arguments, 2, 3);
     if (!Sk.builtin.checkInt(len)) {
-	throw new Sk.builtin.TypeError("integer argument exepcted, got "
-				       + Sk.abstr.typeName(len));
+    throw new Sk.builtin.TypeError("integer argument exepcted, got "
+                       + Sk.abstr.typeName(len));
     }
     if ((fillchar !== undefined) && (!Sk.builtin.checkString(fillchar)
-				     || fillchar.v.length !== 1)) {
-	throw new Sk.builtin.TypeError("must be char, not "
-				       + Sk.abstr.typeName(fillchar))
+                     || fillchar.v.length !== 1)) {
+    throw new Sk.builtin.TypeError("must be char, not "
+                       + Sk.abstr.typeName(fillchar))
     }
     if (fillchar === undefined) {
-	fillchar = " ";
+    fillchar = " ";
     } else {
-	fillchar = fillchar.v;
+    fillchar = fillchar.v;
     }
-	len = Sk.builtin.asnum$(len);
+    len = Sk.builtin.asnum$(len);
     if (self.v.length >= len) {
         return self;
     } else {
@@ -9284,20 +9295,20 @@ Sk.builtin.str.prototype['rjust'] = new Sk.builtin.func(function(self, len, fill
 Sk.builtin.str.prototype['center'] = new Sk.builtin.func(function(self, len, fillchar) {
     Sk.builtin.pyCheckArgs("center", arguments, 2, 3);
     if (!Sk.builtin.checkInt(len)) {
-	throw new Sk.builtin.TypeError("integer argument exepcted, got "
-				       + Sk.abstr.typeName(len));
+    throw new Sk.builtin.TypeError("integer argument exepcted, got "
+                       + Sk.abstr.typeName(len));
     }
     if ((fillchar !== undefined) && (!Sk.builtin.checkString(fillchar)
-				     || fillchar.v.length !== 1)) {
-	throw new Sk.builtin.TypeError("must be char, not "
-				       + Sk.abstr.typeName(fillchar))
+                     || fillchar.v.length !== 1)) {
+    throw new Sk.builtin.TypeError("must be char, not "
+                       + Sk.abstr.typeName(fillchar))
     }
     if (fillchar === undefined) {
-	fillchar = " ";
+    fillchar = " ";
     } else {
-	fillchar = fillchar.v;
+    fillchar = fillchar.v;
     }
-	len = Sk.builtin.asnum$(len);
+    len = Sk.builtin.asnum$(len);
     if (self.v.length >= len) {
         return self;
     } else {
@@ -9314,27 +9325,27 @@ Sk.builtin.str.prototype['center'] = new Sk.builtin.func(function(self, len, fil
 Sk.builtin.str.prototype['find'] = new Sk.builtin.func(function(self, tgt, start, end) {
     Sk.builtin.pyCheckArgs("find", arguments, 2, 4);
     if (!Sk.builtin.checkString(tgt)) {
-	throw new Sk.builtin.TypeError("expected a character buffer object");
+    throw new Sk.builtin.TypeError("expected a character buffer object");
     }
     if ((start !== undefined) && !Sk.builtin.checkInt(start)) {
-	throw new Sk.builtin.TypeError("slice indices must be integers or None or have an __index__ method");
+    throw new Sk.builtin.TypeError("slice indices must be integers or None or have an __index__ method");
     }
     if ((end !== undefined) && !Sk.builtin.checkInt(end)) {
-	throw new Sk.builtin.TypeError("slice indices must be integers or None or have an __index__ method");
+    throw new Sk.builtin.TypeError("slice indices must be integers or None or have an __index__ method");
     }
 
     if (start === undefined)
-	start = 0;
+    start = 0;
     else {
-	start = Sk.builtin.asnum$(start);
-	start = start >= 0 ? start : self.v.length + start;
+    start = Sk.builtin.asnum$(start);
+    start = start >= 0 ? start : self.v.length + start;
     }
 
     if (end === undefined)
-	end = self.v.length;
+    end = self.v.length;
     else {
-	end = Sk.builtin.asnum$(end);
-	end = end >= 0 ? end : self.v.length + end;
+    end = Sk.builtin.asnum$(end);
+    end = end >= 0 ? end : self.v.length + end;
     }
 
     var idx = self.v.indexOf(tgt.v, start);
@@ -9355,27 +9366,27 @@ Sk.builtin.str.prototype['index'] = new Sk.builtin.func(function(self, tgt, star
 Sk.builtin.str.prototype['rfind'] = new Sk.builtin.func(function(self, tgt, start, end) {
     Sk.builtin.pyCheckArgs("rfind", arguments, 2, 4);
     if (!Sk.builtin.checkString(tgt)) {
-	throw new Sk.builtin.TypeError("expected a character buffer object");
+    throw new Sk.builtin.TypeError("expected a character buffer object");
     }
     if ((start !== undefined) && !Sk.builtin.checkInt(start)) {
-	throw new Sk.builtin.TypeError("slice indices must be integers or None or have an __index__ method");
+    throw new Sk.builtin.TypeError("slice indices must be integers or None or have an __index__ method");
     }
     if ((end !== undefined) && !Sk.builtin.checkInt(end)) {
-	throw new Sk.builtin.TypeError("slice indices must be integers or None or have an __index__ method");
+    throw new Sk.builtin.TypeError("slice indices must be integers or None or have an __index__ method");
     }
 
     if (start === undefined)
-	start = 0;
+    start = 0;
     else {
-	start = Sk.builtin.asnum$(start);
-	start = start >= 0 ? start : self.v.length + start;
+    start = Sk.builtin.asnum$(start);
+    start = start >= 0 ? start : self.v.length + start;
     }
 
     if (end === undefined)
-	end = self.v.length;
+    end = self.v.length;
     else {
-	end = Sk.builtin.asnum$(end);
-	end = end >= 0 ? end : self.v.length + end;
+    end = Sk.builtin.asnum$(end);
+    end = end >= 0 ? end : self.v.length + end;
     }
 
     var idx = self.v.lastIndexOf(tgt.v, end);
@@ -9413,23 +9424,23 @@ Sk.builtin.str.prototype['replace'] = new Sk.builtin.func(function(self, oldS, n
     Sk.builtin.pyCheckType("oldS", "string", Sk.builtin.checkString(oldS));
     Sk.builtin.pyCheckType("newS", "string", Sk.builtin.checkString(newS));
     if ((count !== undefined) && !Sk.builtin.checkInt(count)) {
-	throw new Sk.builtin.TypeError("integer argument expected, got " +
-				       Sk.abstr.typeName(count));
+    throw new Sk.builtin.TypeError("integer argument expected, got " +
+                       Sk.abstr.typeName(count));
     }
     count = Sk.builtin.asnum$(count);
     var patt = new RegExp(Sk.builtin.str.re_escape_(oldS.v), "g");
 
     if ((count === undefined) || (count < 0)) {
-	return new Sk.builtin.str(self.v.replace(patt, newS.v));
+    return new Sk.builtin.str(self.v.replace(patt, newS.v));
     }
 
     var c = 0;
     function replacer(match) {
-	c++;
-	if (c <= count) {
-	    return newS.v;
-	}
-	return match;
+    c++;
+    if (c <= count) {
+        return newS.v;
+    }
+    return match;
     }
     return new Sk.builtin.str(self.v.replace(patt, replacer));
 });
@@ -9475,8 +9486,8 @@ Sk.builtin.str.prototype.nb$remainder = function(rhs)
     var index = 0;
     var replFunc = function(substring, mappingKey, conversionFlags, fieldWidth, precision, precbody, conversionType)
     {
-		fieldWidth = Sk.builtin.asnum$(fieldWidth);
-		precision  = Sk.builtin.asnum$(precision);
+        fieldWidth = Sk.builtin.asnum$(fieldWidth);
+        precision  = Sk.builtin.asnum$(precision);
 
         var i;
         if (mappingKey === undefined || mappingKey === "" ) i = index++; // ff passes '' not undef for some reason
@@ -9504,7 +9515,7 @@ Sk.builtin.str.prototype.nb$remainder = function(rhs)
 
         var formatNumber = function(n, base)
         {
-			base = Sk.builtin.asnum$(base);
+            base = Sk.builtin.asnum$(base);
             var j;
             var r;
             var neg = false;
@@ -9521,14 +9532,14 @@ Sk.builtin.str.prototype.nb$remainder = function(rhs)
             else if (n instanceof Sk.builtin.nmber)
             {
                 r = n.str$(base, false);
-				if (r.length > 2 && r.substr(-2) === ".0")
-					r = r.substr(0, r.length - 2);
+                if (r.length > 2 && r.substr(-2) === ".0")
+                    r = r.substr(0, r.length - 2);
                 neg = n.nb$isnegative();
             }
             else if (n instanceof Sk.builtin.lng)
             {
                 r = n.str$(base, false);
-                neg = n.nb$isnegative();	//	neg = n.size$ < 0;	RNL long.js change
+                neg = n.nb$isnegative();    //  neg = n.size$ < 0;  RNL long.js change
             }
 
             goog.asserts.assert(r !== undefined, "unhandled number format");
@@ -9615,21 +9626,21 @@ Sk.builtin.str.prototype.nb$remainder = function(rhs)
             case 'E':
             case 'g':
             case 'G':
-				var convValue = Sk.builtin.asnum$(value);
-				if (typeof convValue === "string")
-					convValue = Number(convValue);
-				if (convValue === Infinity)
-					return "inf";
-				if (convValue === -Infinity)
-					return "-inf";
-				if (isNaN(convValue))
-					return "nan";
+                var convValue = Sk.builtin.asnum$(value);
+                if (typeof convValue === "string")
+                    convValue = Number(convValue);
+                if (convValue === Infinity)
+                    return "inf";
+                if (convValue === -Infinity)
+                    return "-inf";
+                if (isNaN(convValue))
+                    return "nan";
                 var convName = ['toExponential', 'toFixed', 'toPrecision']['efg'.indexOf(conversionType.toLowerCase())];
-				if (precision === undefined || precision === "")
-					if (conversionType === 'e' || conversionType === 'E')
-						precision = 6;
-					else if (conversionType === 'f' || conversionType === 'F')
-						precision = 7;
+                if (precision === undefined || precision === "")
+                    if (conversionType === 'e' || conversionType === 'E')
+                        precision = 6;
+                    else if (conversionType === 'f' || conversionType === 'F')
+                        precision = 7;
                 var result = (convValue)[convName](precision);
                 if ('EFG'.indexOf(conversionType) !== -1) result = result.toUpperCase();
                 // todo; signs etc.
@@ -10017,7 +10028,7 @@ Sk.builtin.dict.prototype.key$pop = function(bucket, key)
             return item;
         }
     }
-    return undefined;    
+    return undefined;
 }
 
 // Perform dictionary lookup, either return value or undefined if key not in dictionary
@@ -14343,11 +14354,14 @@ Sk.ffi.remapToPy = function(valueJs, className, custom)
     if (t === Sk.ffi.JsType.OBJECT) {
         if (Object.prototype.toString.call(valueJs) === "[object Array]")
         {
+            return new Sk.ffi.ObjectPy(/** @type {Object} */ (valueJs));
+            /*
             var valuesPy = [];
             for (var i = 0; i < valueJs.length; ++i) {
                 valuesPy.push(Sk.ffi.remapToPy(valueJs[i]));
             }
             return Sk.ffi.listPy(valuesPy);
+            */
         }
         else if (typeof className === Sk.ffi.JsType.STRING)
         {
@@ -14359,6 +14373,10 @@ Sk.ffi.remapToPy = function(valueJs, className, custom)
         }
         else
         {
+            // When presented with a vanilla JavaScript object,
+            // we can no longer treat it as a dictionary.
+            return new Sk.ffi.ObjectPy(/** @type {Object} */ (valueJs));
+            /*
             var kvsPy = [];
             for (var k in valueJs)
             {
@@ -14366,6 +14384,7 @@ Sk.ffi.remapToPy = function(valueJs, className, custom)
                 kvsPy.push(Sk.ffi.remapToPy(valueJs[k]));
             }
             return new Sk.builtin.dict(kvsPy);
+            */
         }
     }
     else if (t === Sk.ffi.JsType.STRING)
@@ -14442,6 +14461,9 @@ goog.exportSymbol("Sk.ffi.isInstance", Sk.ffi.isInstance);
 
 Sk.ffi.isDefined = function(valuePy) {return Sk.ffi.getType(valuePy) !== Sk.ffi.PyType.UNDEFINED;};
 goog.exportSymbol("Sk.ffi.isDefined", Sk.ffi.isDefined);
+
+Sk.ffi.isObject = function(valuePy) {return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.OBJECT;};
+goog.exportSymbol("Sk.ffi.isObject", Sk.ffi.isObject);
 
 Sk.ffi.isDict = function(valuePy) {return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.DICT;};
 goog.exportSymbol("Sk.ffi.isDict", Sk.ffi.isDict);
@@ -14639,17 +14661,18 @@ goog.exportSymbol("Sk.ffi.checkRhsOperandType", Sk.ffi.checkRhsOperandType);
  * @enum {number}
  */
 Sk.ffi.PyType = {
-    'DICT':       1,
-    'LIST':       2,
-    'TUPLE':      3,
-    'BOOL':       4,
-    'FLOAT':      5,
-    'INT':        6,
-    'LONG':       7,
-    'STR':        8,
-    'NONE':       9,
-    'FUNCTION':  10,
-    'INSTANCE':  11,
+    'OBJECT':     1, // A (wrapper around a) JavaScript Object.
+    'DICT':       2,
+    'LIST':       3,
+    'TUPLE':      4,
+    'BOOL':       5,
+    'FLOAT':      6,
+    'INT':        7,
+    'LONG':       8,
+    'STR':        9,
+    'NONE':      10,
+    'FUNCTION':  11,
+    'INSTANCE':  12,
     'UNDEFINED': -1,
     'FUNREF':    -2
 };
@@ -14675,6 +14698,7 @@ Sk.ffi.typeString = function(kind, name)
     function typePy(kind) {
         switch(kind)
         {
+            case Sk.ffi.PyType.OBJECT:      {return typeBrackets('object');}
             case Sk.ffi.PyType.DICT:        {return typeBrackets('dict');}
             case Sk.ffi.PyType.LIST:        {return typeBrackets('list');}
             case Sk.ffi.PyType.TUPLE:       {return typeBrackets('tuple');}
@@ -14705,6 +14729,7 @@ Sk.ffi.typeString = function(kind, name)
     else if (typeof kind === Sk.ffi.JsType.NUMBER) {
         switch(kind)
         {
+            case Sk.ffi.PyType.OBJECT:
             case Sk.ffi.PyType.DICT:
             case Sk.ffi.PyType.LIST:
             case Sk.ffi.PyType.TUPLE:
@@ -14748,6 +14773,15 @@ Sk.ffi.getType = function(valuePy)
     if (typeof valuePy === Sk.ffi.JsType.UNDEFINED)
     {
         return Sk.ffi.PyType.UNDEFINED;
+    }
+    else if (valuePy instanceof Sk.ffi.ObjectPy)
+    {
+        return Sk.ffi.PyType.OBJECT;
+    }
+    else if (valuePy instanceof Sk.builtin.object)
+    {
+        throw new Error("Ooch - object");
+//      return Sk.ffi.PyType.DICT;
     }
     else if (valuePy instanceof Sk.builtin.dict)
     {
@@ -14794,6 +14828,7 @@ Sk.ffi.getType = function(valuePy)
     }
     else
     {
+        // FIXME: This is bad, we can easily get lost.
         var x = typeof valuePy.v;
         if (x !== Sk.ffi.JsType.UNDEFINED)
         {
@@ -14923,6 +14958,10 @@ Sk.ffi.remapToJs = function(valuePy, shallow)
     switch(Sk.ffi.getType(valuePy))
     {
         case Sk.ffi.PyType.STR:
+        {
+            return valuePy.v;
+        }
+        case Sk.ffi.PyType.OBJECT:
         {
             return valuePy.v;
         }
@@ -15261,6 +15300,270 @@ goog.exportSymbol("Sk.ffi.unwrapo", Sk.ffi.unwrapo);
  */
 Sk.ffi.unwrapn = function(obj) { return Sk.ffi.remapToJs(obj); };
 goog.exportSymbol("Sk.ffi.unwrapn", Sk.ffi.unwrapn);
+
+/**
+ * @constructor
+ * @param {Object} objectJs The JavaScript object.
+ */
+Sk.ffi.ObjectPy = function(objectJs)
+{
+    this.v = objectJs;
+}
+
+/**
+ * @param {string} name The name of the attribute.
+ */
+Sk.ffi.ObjectPy.prototype.tp$getattr = function(name)
+{
+  goog.asserts.assertString(name);
+  goog.asserts.assert(this.ob$type !== undefined, "object has no ob$type!");
+  var selfJs = this.v;
+  var propJs = this.v[name];
+  switch(typeof propJs)
+  {
+    case 'function':
+    {
+//    return new Sk.builtin.func(propJs);
+      return new Sk.ffi.CallablePy(this.v, name);
+      /*
+      return Sk.ffi.callableToPy(mod, name, function(methodPy) {
+        Sk.ffi.checkFunctionArgs(name, arguments, 1);
+        var argumentsPy = Array.prototype.slice.call(arguments, 1);
+        var argumentsJs = [];
+        for (var i = 0; i < argumentsPy.length; ++i)
+        {
+          argumentsJs.push(Sk.ffi.remapToJs(argumentsPy[i]));
+        }
+        // debugger;
+        if (isConstructorFunction(name)) {
+          // Do I have to simulate the 'new' keyword? Maybe not!
+          var valueJs = new propJs(argumentsJs);
+          return Sk.ffi.callsim(mod[JS_WRAP_CLASS], Sk.ffi.referenceToPy(valueJs, name));
+        }
+        else {
+          var valueJs = propJs.apply(selfJs, argumentsJs);
+          return remapToPy(valueJs, className);
+        }
+      });
+      */
+    }
+    case 'number':
+    {
+      return Sk.ffi.numberToFloatPy(propJs);
+    }
+    case 'object':
+    {
+      // It may be that JavaScript clients have added methods to the prototype.
+      // e.g. d3 added append to an array.
+      return new Sk.ffi.ObjectPy(propJs);
+      /*
+      if (Object.prototype.toString.apply(propJs) === '[object Array]')
+      {
+        var valuesPy = [];
+        for (var i = 0; i < propJs.length; i++)
+        {
+          // FIXME: Is the remapToPy correct?
+          valuesPy.push(Sk.ffi.remapToPy(propJs[i]));
+        }
+        return Sk.ffi.listPy(valuesPy);
+      }
+      else
+      {
+        return new Sk.ffi.ObjectPy(propJs);
+      }
+      */
+    }
+    case 'boolean':
+    {
+      return Sk.ffi.booleanToPy(propJs);
+    }
+    case 'undefined':
+    {
+      switch(name)
+      {
+        case 'append':
+        {
+          return new Sk.builtin.func(function(itemPy)
+          {
+            Sk.builtin.pyCheckArgs("append", arguments, 1, 1);
+            selfJs.push(Sk.ffi.remapToJs(itemPy));
+            return Sk.ffi.none.None;
+          });
+        }
+        default:
+        {
+          return Sk.ffi.none.None;
+        }
+      }
+    }
+    default:
+    {
+      goog.asserts.assertString(propJs);
+      return Sk.ffi.stringToPy(propJs);
+    }
+  }
+};
+
+/**
+ * @param {string} name The name of the attribute.
+ */
+Sk.ffi.ObjectPy.prototype.tp$setattr = function(name, valuePy)
+{
+    goog.asserts.assert(typeof name === "string");
+    this.v[name] = Sk.ffi.remapToJs(valuePy);
+};
+
+/**
+ *
+ */
+Sk.ffi.ObjectPy.prototype.mp$subscript = function(index)
+{
+  if (!Array.isArray(this.v))
+  {
+    throw new Sk.builtin.TypeError("'" + Sk.abstr.typeName(this) + "' object does not support indexing.");
+  }
+  if (Sk.misceval.isIndex(index))
+  {
+    var i = Sk.misceval.asIndex(index);
+    if (i !== undefined) 
+    {
+      if (i < 0)
+      {
+          i = this.v.length + i;
+      } 
+      if (i < 0 || i >= this.v.length)
+      {
+        throw new Sk.builtin.IndexError("list index out of range");
+      }
+      return this.v[i]
+    }
+    else
+    {
+      // Fall through
+    }
+  }
+  else if (index instanceof Sk.builtin.slice)
+  {
+    var ret = [];
+    index.sssiter$(this, function(i, wrt) {ret.push(wrt.v[i]);});
+    return new Sk.builtin.list(ret);
+  }
+  throw new Sk.builtin.TypeError("list indices must be integers, not " + Sk.abstr.typeName(index));
+};
+
+Sk.ffi.ObjectPy.prototype.tp$iter = function()
+{
+    var ret =
+    {
+        tp$iter: function() { return ret; },
+        $obj: this,
+        $index: 0,
+        tp$iternext: function()
+        {
+            // todo; StopIteration
+            if (ret.$index >= ret.$obj.v.length) return undefined;
+            return Sk.ffi.remapToPy(ret.$obj.v[ret.$index++]);
+        }
+    };
+    return ret;
+};
+
+
+/**
+ * We will masquerade as a Python object created using object().
+ */
+Sk.ffi.ObjectPy.prototype.tp$name = "ObjectPy";
+Sk.ffi.ObjectPy.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('ObjectPy', Sk.ffi.ObjectPy);
+
+Sk.ffi.ObjectPy.prototype.tp$str = function()
+{
+    return Sk.ffi.stringToPy("" + this.v);
+};
+
+Sk.ffi.ObjectPy.prototype.tp$repr = function()
+{
+    return Sk.ffi.stringToPy("" + this.v);
+};
+
+Sk.ffi.ObjectPy.prototype.nb$add = function(otherPy)
+{
+    return Sk.ffi.remapToPy(this.v.add(Sk.ffi.remapToJs(otherPy)));
+}
+
+Sk.ffi.ObjectPy.prototype.nb$subtract = function(otherPy)
+{
+    return Sk.ffi.remapToPy(this.v.sub(Sk.ffi.remapToJs(otherPy)));
+}
+
+Sk.ffi.ObjectPy.prototype.nb$multiply = function(otherPy)
+{
+    return Sk.ffi.remapToPy(this.v.mul(Sk.ffi.remapToJs(otherPy)));
+}
+
+Sk.ffi.ObjectPy.prototype.nb$divide = function(otherPy)
+{
+    return Sk.ffi.remapToPy(this.v.div(Sk.ffi.remapToJs(otherPy)));
+}
+
+goog.exportSymbol("Sk.ffi.ObjectPy", Sk.ffi.ObjectPy);
+
+/**
+ * FIXME: Do I really need a new class here. What about using ObjectPy?
+ * A callable property, the arguments are not known until the call is made.
+ * @constructor
+ * @param {Object} objectJs The JavaScript object.
+ * @param {string} name The name of the function to call.
+ */
+Sk.ffi.CallablePy = function(objectJs, name)
+{
+  this.v = objectJs;
+  this.name = name;
+}
+
+/**
+ * @param {Array.<Object>} args A JavaScript array containing Py objects!
+ */
+Sk.ffi.CallablePy.prototype.tp$call = function(args, kw)
+{
+  var objectJs = this.v;
+  var name = this.name;
+  var propJs = objectJs[name];
+  var argsJs = args.map(function(xPy) {return Sk.ffi.remapToJs(xPy);});
+  /**
+   * If it's a constructor function then we must call it using the new keyword.
+   * The only clue we have got is the naming convention.
+   */
+  function isConstructorFunction(name)
+  {
+    // Hacks for JSXGraph.
+    if (name === "Value" || name === "X" || name === "Y")
+    {
+      return false;
+    }
+    if (name[0] === name[0].toUpperCase())
+    {
+      return true;
+    }
+    else
+    {
+      return false;
+    }
+  }
+
+  if (isConstructorFunction(name))
+  {
+    var that = Object.create(propJs.prototype);
+    // Invoke the constructor function, binding this to the new object.
+    var other = propJs.apply(that, argsJs);
+    // If the return value isn't an object, substitute the new object.
+    var valueJs = (typeof other === 'object' && other) || that;
+    return Sk.ffi.remapToPy(valueJs);
+  }
+  else
+  {
+    return Sk.ffi.remapToPy(propJs.apply(objectJs, argsJs));
+  }
+}
 Sk.ffh = Sk.ffh || {};
 
 var SPECIAL_METHOD_ADD     = '__add__';
@@ -23919,24 +24222,25 @@ Sk.doOneTimeInitialization = function()
 };
 
 /**
- * currently only pull once from Sk.syspath. User might want to change
- * from js or from py.
+ * Currently only pull once from Sk.syspath. User might want to change from js or from py.
  */
 Sk.importSetUpPath = function()
 {
     if (!Sk.realsyspath)
     {
-        var paths = [
+        var paths =
+        [
             new Sk.builtin.str("src/builtin"),
             new Sk.builtin.str("src/lib"),
             new Sk.builtin.str(".")
         ];
         for (var i = 0; i < Sk.syspath.length; ++i)
+        {
             paths.push(new Sk.builtin.str(Sk.syspath[i]));
+        }
         Sk.realsyspath = new Sk.builtin.list(paths);
 
         Sk.doOneTimeInitialization();
-
     }
 };
 
@@ -23966,14 +24270,17 @@ Sk.importModuleInternal_ = function(name, dumpJS, modname, suppliedPyBody)
     var parentModName;
 
     // if leaf is already in sys.modules, early out
-    try {
+    try
+    {
         var prev = Sk.sysmodules.mp$subscript(modname);
         // if we're a dotted module, return the top level, otherwise ourselves
         if (modNameSplit.length > 1)
             return Sk.sysmodules.mp$subscript(modNameSplit[0]);
         else
             return prev;        
-    } catch (x) {
+    }
+    catch (x)
+    {
         // not in sys.modules, continue
     }
 
@@ -24019,10 +24326,11 @@ Sk.importModuleInternal_ = function(name, dumpJS, modname, suppliedPyBody)
 
     module.$js = co.code; // todo; only in DEBUG?
     var finalcode = co.code;
-	if (Sk.dateSet == null || !Sk.dateSet) {
-		finalcode = 'Sk.execStart = new Date();\n' + co.code;
-		Sk.dateSet = true;
-	}
+    if (Sk.dateSet == null || !Sk.dateSet)
+    {
+        finalcode = 'Sk.execStart = new Date();\n' + co.code;
+        Sk.dateSet = true;
+    }
 
     {
         if (dumpJS)
@@ -24084,29 +24392,36 @@ Sk.importModule = function(name, dumpJS)
 
 Sk.importMain = function(name, dumpJS)
 {
-	Sk.dateSet = false;
-	Sk.filesLoaded = false
-	//	Added to reset imports
-	Sk.sysmodules = new Sk.builtin.dict([]);
-	Sk.realsyspath = undefined;
+    Sk.dateSet = false;
+    Sk.filesLoaded = false
+    //  Added to reset imports
+    Sk.sysmodules = new Sk.builtin.dict([]);
+    Sk.realsyspath = undefined;
 
     Sk.resetCompiler();
 
     return Sk.importModuleInternal_(name, dumpJS, "__main__");
 };
+goog.exportSymbol("Sk.importMain", Sk.importMain);
 
+/**
+ * @param {string} name The name of module to import.
+ * @param {boolean} dumpJS Whether to output (to Sk.debugout) the generated JavaScript code.
+ * @param {string} body Use as the body of the text for the module.
+ */
 Sk.importMainWithBody = function(name, dumpJS, body)
 {
-	Sk.dateSet = false;
-	Sk.filesLoaded = false
-	//	Added to reset imports
-	Sk.sysmodules = new Sk.builtin.dict([]);
-	Sk.realsyspath = undefined;
+    Sk.dateSet = false;
+    Sk.filesLoaded = false
+    //  Added to reset imports
+    Sk.sysmodules = new Sk.builtin.dict([]);
+    Sk.realsyspath = undefined;
     
     Sk.resetCompiler();
 
     return Sk.importModuleInternal_(name, dumpJS, "__main__", body);
 };
+goog.exportSymbol("Sk.importMainWithBody", Sk.importMainWithBody);
 
 Sk.builtin.__import__ = function(name, globals, locals, fromlist)
 {
@@ -24119,17 +24434,16 @@ Sk.builtin.__import__ = function(name, globals, locals, fromlist)
     goog.asserts.assert(ret);
     return ret;
 };
+goog.exportSymbol("Sk.builtin.__import__", Sk.builtin.__import__);
 
-Sk.importStar = function(module,loc) {
+Sk.importStar = function(module,loc)
+{
     var props = Object['getOwnPropertyNames'](module['$d'])
-    for(var i in props) {
+    for(var i in props)
+    {
         loc[props[i]] = module['$d'][props[i]];
     }
 }
-
-goog.exportSymbol("Sk.importMain", Sk.importMain);
-goog.exportSymbol("Sk.importMainWithBody", Sk.importMainWithBody);
-goog.exportSymbol("Sk.builtin.__import__", Sk.builtin.__import__);
 goog.exportSymbol("Sk.importStar", Sk.importStar);
 /**
  * @constructor
@@ -27705,7 +28019,7 @@ mod[SHAPE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
 mod[STAGE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__init__ = Sk.ffi.functionPy(function(selfPy, canvasPy) {
     Sk.ffi.checkMethodArgs(STAGE, arguments, 1, 1);
-    Sk.ffi.checkArgType(PROP_CANVAS, NODE, Sk.ffi.isInstance(canvasPy, NODE), canvasPy);
+    Sk.ffi.checkArgType(PROP_CANVAS, NODE, Sk.ffi.isObject(canvasPy) || Sk.ffi.isInstance(canvasPy, NODE), canvasPy);
     var canvas = Sk.ffi.remapToJs(canvasPy);
     Sk.ffi.referenceToPy(new createjs[STAGE](canvas), STAGE, undefined, selfPy);
   });
@@ -28962,12 +29276,14 @@ function completeMesh(geometryPy, parameters) {
   }
 }
 
-mod[WORLD] = Sk.ffi.functionPy(function() {
+mod[WORLD] = Sk.ffi.functionPy(function()
+{
   Sk.ffi.checkFunctionArgs(WORLD, arguments, 0, 0);
   var scenePy = Sk.ffi.callsim(mod[SCENE]);
   var scene = Sk.ffi.remapToJs(scenePy);
 
-  function addPointLight(x, y, z) {
+  function addPointLight(x, y, z)
+  {
     var pointLight = new THREE[POINT_LIGHT](0xFFFFFF);
     pointLight.position.set(x, y, z);
     scene.add(pointLight);
@@ -29033,22 +29349,28 @@ function createCartesianLines(majorSteps, minorsPerMajorMark, majorScale, e, o) 
   return grid;
 }
 
-mod[CARTESIAN_SPACE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, scenePy, rendererPy) {
+mod[CARTESIAN_SPACE] = Sk.ffi.buildClass(mod, function($gbl, $loc)
+{
+  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, scenePy, rendererPy)
+  {
     var scene;
     var renderer;
     Sk.ffi.checkMethodArgs(CARTESIAN_SPACE, arguments, 0, 2);
-    if (Sk.ffi.isDefined(scenePy)) {
+    if (Sk.ffi.isDefined(scenePy))
+    {
       Sk.ffi.checkArgType(PROP_SCENE, SCENE, Sk.ffi.isInstance(scenePy, SCENE), scenePy);
     }
-    else {
+    else
+    {
       scenePy = Sk.ffi.callsim(mod[WORLD]);
     }
     scene = Sk.ffi.remapToJs(scenePy);
-    if (Sk.ffi.isDefined(rendererPy)) {
+    if (Sk.ffi.isDefined(rendererPy))
+    {
       Sk.ffi.checkArgType(PROP_RENDERER, [CANVAS_RENDERER, WEBGL_RENDERER], Sk.ffi.isInstance(rendererPy, WEBGL_RENDERER) || Sk.ffi.isInstance(rendererPy, CANVAS_RENDERER), rendererPy);
     }
-    else {
+    else
+    {
       rendererPy = Sk.ffi.callsim(mod[WEBGL_RENDERER], Sk.ffi.remapToPy({"antialias": true}));
     }
     renderer = Sk.ffi.remapToJs(rendererPy);
@@ -32382,6 +32704,44 @@ Sk.builtin.buildWindowClass = function(mod) {
     }
   }
 
+  function remapToPy(valueJs, name)
+  {
+    switch(typeof valueJs) {
+      case 'number': {
+        return Sk.ffi.numberToFloatPy(valueJs);
+      }
+      case 'boolean': {
+        return Sk.ffi.booleanToPy(valueJs);
+      }
+      case 'string': {
+        return Sk.ffi.stringToPy(valueJs);
+      }
+      case 'undefined': {
+        return Sk.ffi.none.None;
+      }
+      case 'object': {
+        if (Object.prototype.toString.apply(valueJs) === '[object Array]')
+        {
+          return Sk.ffi.callsim(mod[JS_WRAP_CLASS], Sk.ffi.referenceToPy(valueJs, JS_WRAP_CLASS));
+          /*
+          var valuesPy = [];
+          for (var i = 0; i < valueJs.length; i++) {
+            valuesPy.push(remapToPy(valueJs[i], name));
+          }
+          return Sk.ffi.listPy(valuesPy);
+          */
+        }
+        else
+        {
+          return Sk.ffi.callsim(mod[JS_WRAP_CLASS], Sk.ffi.referenceToPy(valueJs, JS_WRAP_CLASS));
+        }
+      }
+      default: {
+        throw Sk.ffi.err.attribute(typeof valueJs).isNotGetableOnType(name);
+      }
+    }
+  }
+
   function defaultGetAttribute(mod, selfJs, name, className) {
     var propJs = selfJs[name];
     switch(typeof propJs) {
@@ -32394,7 +32754,10 @@ Sk.builtin.buildWindowClass = function(mod) {
           {
             argumentsJs.push(Sk.ffi.remapToJs(argumentsPy[i]));
           }
+          // debugger;
           if (isConstructorFunction(name)) {
+            // Do I have to simulate the 'new' keyword? Maybe not!
+            // var valueJs = new propJs(argumentsJs);
             // Create a new object that inherits from the constructor's prototype.
             var that = Object.create(propJs.prototype);
             // Invoke the constructor function, binding this to the new object.
@@ -32405,26 +32768,7 @@ Sk.builtin.buildWindowClass = function(mod) {
           }
           else {
             var valueJs = propJs.apply(selfJs, argumentsJs);
-            switch(typeof valueJs) {
-              case 'number': {
-                return Sk.ffi.numberToFloatPy(valueJs);
-              }
-              case 'boolean': {
-                return Sk.ffi.booleanToPy(valueJs);
-              }
-              case 'string': {
-                return Sk.ffi.stringToPy(valueJs);
-              }
-              case 'undefined': {
-                return Sk.ffi.none.None;
-              }
-              case 'object': {
-                return Sk.ffi.callsim(mod[JS_WRAP_CLASS], Sk.ffi.referenceToPy(valueJs, JS_WRAP_CLASS));
-              }
-              default: {
-                throw Sk.ffi.err.attribute(typeof valueJs).isNotGetableOnType(name);
-              }
-            }
+            return remapToPy(valueJs, className);
           }
         });
       }
@@ -33525,7 +33869,7 @@ mod[EUCLIDEAN_2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   });
   $loc.__abs__ = Sk.ffi.functionPy(function(selfPy) {
     var mv = Sk.ffi.remapToJs(selfPy);
-    return coordsJsToE2Py(Math.sqrt(mv.w * mv.w + mv.x * mv.x + mv.y * mv.y + mv.xy * mv.xy), 0, 0, 0);
+    return Sk.ffi.numberToFloatPy(Math.sqrt(mv.w * mv.w + mv.x * mv.x + mv.y * mv.y + mv.xy * mv.xy));
   });
   $loc.__magnitude__ = Sk.ffi.functionPy(function(selfPy) {
     var mv = Sk.ffi.remapToJs(selfPy);
@@ -35527,18 +35871,26 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     }
   });
   $loc.__abs__ = Sk.ffi.functionPy(function(selfPy) {
-    return Sk.ffh.sqrt(Sk.ffh.quadrance(selfPy));
+    return Sk.ffi.gattr(Sk.ffh.sqrt(Sk.ffh.quadrance(selfPy)), PROP_W);
   });
   $loc.__magnitude__ = Sk.ffi.functionPy(function(selfPy) {
     return Sk.ffh.sqrt(Sk.ffh.quadrance(selfPy));
   });
   $loc.__quadrance__ = Sk.ffi.functionPy(function(selfPy) {
-    return Sk.ffh.mod(selfPy, selfPy);
+    var s = Sk.ffi.remapToJs(selfPy);
+    var w   = s.w;
+    var x   = s.x;
+    var y   = s.y;
+    var z   = s.z;
+    var xy  = s.xy;
+    var yz  = s.yz;
+    var zx  = s.zx;
+    var xyz = s.xyz;
+    return coordsJsToE3Py(w * w + x * x + y * y + z * z + xy * xy + yz * yz + zx * zx + xyz * xyz, 0, 0, 0, 0, 0, 0, 0);
   });
   $loc.__sqrt__ = Sk.ffi.functionPy(function(selfPy) {
     Sk.ffi.checkMethodArgs(METHOD_SQRT, arguments, 0, 0);
     var self = Sk.ffi.remapToJs(selfPy);
-    // TODO: generalize.
     return coordsJsToE3Py(Math.sqrt(self.w), 0, 0, 0, 0, 0, 0, 0);
   });
   $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
@@ -37848,6 +38200,14 @@ var isQuantityPy     = function(valuePy)
     return true;
   }
   else if (Sk.ffi.isInstance(valuePy, 'complex'))
+  {
+    return true;
+  }
+  else if (Sk.ffi.isInstance(valuePy, 'Rational'))
+  {
+    return true;
+  }
+  else if (Sk.ffi.isInstance(valuePy, 'Fraction'))
   {
     return true;
   }
@@ -40916,15 +41276,18 @@ mod[CANVAS_RENDERER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   });
 }, CANVAS_RENDERER, []);
 
-mod[WEBGL_RENDERER] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
+mod[WEBGL_RENDERER] = Sk.ffi.buildClass(mod, function($gbl, $loc)
+{
   var PROP_AUTO_CLEAR   = "autoClear";
   var PROP_CLEAR_COLOR  = "clearColor";
   var PROP_GAMMA_INPUT  = "gammaInput";
   var PROP_GAMMA_OUTPUT = "gammaOutput";
   var PROP_SORT_OBJECTS = "sortObjects";
-  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, parametersPy) {
-    if (Sk.ffi.checkMethodArgs(WEBGL_RENDERER, arguments, 0, 1) > 0) {
-      Sk.ffi.checkArgType("parameters", Sk.ffi.PyType.DICT, Sk.ffi.isDict(parametersPy), parametersPy);
+  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, parametersPy)
+  {
+    if (Sk.ffi.checkMethodArgs(WEBGL_RENDERER, arguments, 0, 1) > 0)
+    {
+      Sk.ffi.checkArgType("parameters", [Sk.ffi.PyType.OBJECT, Sk.ffi.PyType.DICT], Sk.ffi.isObject(parametersPy) || Sk.ffi.isDict(parametersPy), parametersPy);
     }
     var parameters = Sk.ffi.remapToJs(parametersPy);
     Sk.ffi.referenceToPy(new THREE[WEBGL_RENDERER](parameters), WEBGL_RENDERER, undefined, selfPy);
@@ -44878,16 +45241,36 @@ Sk.builtin.defineFractions = function(mod, RATIONAL, factory) {
       var other = factory(Sk.ffi.remapToJs(otherPy), 1);
       return Sk.ffi.callsim(mod[RATIONAL], Sk.ffi.referenceToPy(other.sub(self), RATIONAL));
     });
-    $loc.__mul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-      var a = Sk.ffi.remapToJs(selfPy);
-      var b = Sk.ffi.remapToJs(otherPy);
-      if (Sk.ffi.isNum(otherPy)) {
-        Sk.ffi.checkRhsOperandType(OP_MUL, RATIONAL_OR_INT, Sk.ffi.isInt(otherPy), otherPy);
-        return Sk.ffi.callsim(mod[RATIONAL], Sk.ffi.numberToIntPy(a.numer * b), Sk.ffi.numberToIntPy(a.denom));
-      }
-      else {
-        Sk.ffi.checkRhsOperandType(OP_MUL, RATIONAL_OR_INT, isRational(otherPy), otherPy);
-        return Sk.ffi.callsim(mod[RATIONAL], Sk.ffi.referenceToPy(a.mul(b), RATIONAL));
+    $loc.__mul__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+    {
+      switch(Sk.ffi.getType(otherPy))
+      {
+        case Sk.ffi.PyType.INSTANCE:
+        {
+          switch(Sk.ffi.typeName(otherPy))
+          {
+            case RATIONAL:
+            {
+              var a = Sk.ffi.remapToJs(selfPy);
+              var b = Sk.ffi.remapToJs(otherPy);
+              return Sk.ffi.callsim(mod[RATIONAL], Sk.ffi.referenceToPy(a.mul(b), RATIONAL));
+            }
+            default:
+            {
+              return undefined;
+            }
+          }
+        }
+        case Sk.ffi.PyType.INT:
+        {
+          var a = Sk.ffi.remapToJs(selfPy);
+          var b = Sk.ffi.remapToJs(otherPy);
+          return Sk.ffi.callsim(mod[RATIONAL], Sk.ffi.numberToIntPy(a.numer * b), Sk.ffi.numberToIntPy(a.denom));
+        }
+        default:
+        {
+          return undefined;
+        }
       }
     });
     $loc.__rmul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
@@ -45008,7 +45391,7 @@ function removeElementsByTagName(tagName) {
 mod[WORKBENCH_2D] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__init__ = Sk.ffi.functionPy(function(selfPy, canvasPy) {
     Sk.ffi.checkMethodArgs(WORKBENCH_2D, arguments, 1, 1);
-    Sk.ffi.checkArgType(PROP_CANVAS, "Element", Sk.ffi.isInstance(canvasPy), canvasPy);
+    Sk.ffi.checkArgType(PROP_CANVAS, [Sk.ffi.PyType.OBJECT], Sk.ffi.isObject(canvasPy) || Sk.ffi.isInstance(canvasPy), canvasPy);
     var canvas = Sk.ffi.remapToJs(canvasPy);
     function onWindowResize(event) {
       var width  = window.innerWidth;
