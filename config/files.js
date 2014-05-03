@@ -22,7 +22,7 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
     vendor: [
       "vendor/async/lib/async.js",
       "vendor/jquery/jquery.js",
-      "../davinci-dev/dist/davinci.min.js",
+      "../davinci-dev/dist/davinci.js",
       "../davinci-dev/dist/davinci-stdlib.js",
       "vendor/bootstrap/js/bootstrap-carousel.js",
       "vendor/bootstrap/js/bootstrap-collapse.js",
