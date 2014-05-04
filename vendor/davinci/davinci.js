@@ -4449,7 +4449,7 @@ Sk.builtin.range = function range(start, stop, step)
 Sk.builtin.asnum$ = function(a) {
     if (a === undefined) return a;
     if (a === null) return a;
-    if (a.constructor === Sk.builtin.none) return null;
+    if (a === Sk.builtin.none.none$) return null;
     if (a.constructor === Sk.builtin.bool) {
         if (a.v)
         return 1;
@@ -4479,14 +4479,21 @@ goog.exportSymbol("Sk.builtin.asnum$", Sk.builtin.asnum$);
 Sk.builtin.asnum$nofloat = function(a) {
     if (a === undefined) return a;
     if (a === null) return a;
-    if (a.constructor === Sk.builtin.none) return null;
+    if (a === Sk.builtin.none.none$) return null;
     if (a.constructor === Sk.builtin.bool) {
         if (a.v)
         return 1;
         return 0;
     }
     if (typeof a === "number") a = a.toString();
-    if (a.constructor === Sk.builtin.NumberPy) a = a.v.toString();
+    if (Sk.ffi.isFloat(a))
+    {
+        a = Sk.ffi.remapToJs(a).toString();
+    }
+    if (Sk.ffi.isInt(a))
+    {
+        a = Sk.ffi.remapToJs(a).toString();
+    }
     if (a.constructor === Sk.builtin.lng)   a = a.str$(10, true);
     if (a.constructor === Sk.builtin.biginteger) a = a.toString();
 
@@ -4988,16 +4995,19 @@ Sk.builtin.isinstance = function isinstance(obj, type)
         throw new Sk.builtin.TypeError("isinstance() arg 2 must be a class, type, or tuple of classes and types");
     }
 
-    if (type === Sk.builtin.int_.prototype.ob$type) {
-    return (obj.tp$name === 'number') && (obj.skType === Sk.builtin.NumberPy.int$);
+    if (type === Sk.builtin.int_.prototype.ob$type)
+    {
+        return (obj.tp$name === 'number') && (obj.skType === Sk.builtin.NumberPy.int$);
     }
 
-    if (type === Sk.builtin.float_.prototype.ob$type) {
+    if (type === Sk.builtin.float_.prototype.ob$type)
+    {
         return (obj.tp$name === 'number') && (Sk.ffi.isFloat(obj)); 
     }
 
-    if (type === Sk.builtin.none.prototype.ob$type) {
-        return (obj instanceof Sk.builtin.none);
+    if (type === Sk.builtin.none.none$.ob$type)
+    {
+        return (obj === Sk.builtin.none.none$);
     }
 
     // Normal case
@@ -5053,9 +5063,9 @@ Sk.builtin.hash = function hash(value)
         return 1;
     return 0;
     }
-    else if (value instanceof Sk.builtin.none)
+    else if (value === Sk.builtin.none.none$)
     {
-    return 0;
+        return 0;
     }
     else if (value instanceof Object)
     {
@@ -5273,7 +5283,7 @@ Sk.builtin.filter = function filter(fun, iterable)
     }
     
     //simulate default identity function
-    if (fun instanceof Sk.builtin.none)
+    if (fun === Sk.builtin.none.none$)
     {
         fun = { func_code: function (x) { return Sk.builtin.bool(x); } } 
     }
@@ -5400,9 +5410,9 @@ Sk.builtin.quit = function quit(msg)
 Sk.builtin.sorted = function sorted(iterable, cmp, key, reverse) {
     var compare_func;
     var list;
-    if (key !== undefined && !(key instanceof Sk.builtin.none))
+    if (key !== undefined && !(key === Sk.builtin.none.none$))
     {
-        if (cmp instanceof Sk.builtin.none) {
+        if (cmp === Sk.builtin.none.none$) {
             compare_func = { func_code: 
                 function(a,b)
                 {
@@ -5425,7 +5435,7 @@ Sk.builtin.sorted = function sorted(iterable, cmp, key, reverse) {
     }
     else
     {
-        if (!(cmp instanceof Sk.builtin.none) && cmp !== undefined)
+        if (!(cmp === Sk.builtin.none.none$) && cmp !== undefined)
         {
             compare_func = cmp;
         }
@@ -5444,7 +5454,7 @@ Sk.builtin.sorted = function sorted(iterable, cmp, key, reverse) {
         list.list_reverse_(list);
     }
     
-    if (key !== undefined && !(key instanceof Sk.builtin.none)) {
+    if (key !== undefined && !(key === Sk.builtin.none.none$)) {
         var iter = list.tp$iter();
         var next = iter.tp$iternext()
         var arr = [];
@@ -5682,8 +5692,10 @@ Sk.builtin.IndexError.prototype.tp$name = "IndexError";
  * @extends Sk.builtin.Exception
  * @param {...*} args
  */
-Sk.builtin.KeyError = function(args) {
-    if (!(this instanceof Sk.builtin.KeyError)) {
+Sk.builtin.KeyError = function(args)
+{
+    if (!(this instanceof Sk.builtin.KeyError))
+    {
         var o = Object.create(Sk.builtin.KeyError.prototype);
         o.constructor.apply(o, arguments);
         return o;
@@ -6439,13 +6451,29 @@ Sk.builtin.object.prototype.tp$setattr = Sk.builtin.object.prototype.GenericSetA
 Sk.builtin.object.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('object', Sk.builtin.object);
 
 /**
- * @constructor
+ * Singleton enumeration for Python None value.
+ *
+ * @enum {!Object}
  */
-Sk.builtin.none = function() {};
-Sk.builtin.none.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('NoneType', Sk.builtin.none);
-Sk.builtin.none.prototype.tp$name = "NoneType";
-Sk.builtin.none.none$ = Object.create(Sk.builtin.none.prototype, {v: {value: null, enumerable: true}});
-
+Sk.builtin.none = {none$:
+    (function(){
+        /**
+         * @constructor
+         */
+        var None = function() {};
+        None.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('NoneType', None);
+        None.prototype.tp$name = "NoneType";
+        None.prototype.tp$repr = function()
+        {
+            return Sk.ffi.stringToPy("None");
+        }
+        None.prototype.tp$str = function()
+        {
+            return Sk.ffi.stringToPy("None");
+        }
+        return Object.create(None.prototype, {v: {value: null, enumerable: true}});
+    })()
+};
 goog.exportSymbol("Sk.builtin.none", Sk.builtin.none);
 Sk.builtin.bool = function(x)
 {
@@ -6990,7 +7018,7 @@ Sk.misceval.richCompareBool = function(v, w, op)
         // NoneTypes are considered less than any other type in Python
         // note: this only handles comparing NoneType with any non-NoneType.
         // Comparing NoneType with NoneType is handled further down.
-        if (v_type === Sk.builtin.none.prototype.ob$type)
+        if (v_type === Sk.builtin.none.none$.ob$type)
         {
             switch (op)
             {
@@ -7001,7 +7029,7 @@ Sk.misceval.richCompareBool = function(v, w, op)
             }
         }
 
-        if (w_type === Sk.builtin.none.prototype.ob$type)
+        if (w_type === Sk.builtin.none.none$.ob$type)
         {
             switch (op)
             {
@@ -7145,7 +7173,7 @@ Sk.misceval.richCompareBool = function(v, w, op)
     }
 
     // handle special cases for comparing None with None or Bool with Bool
-    if (((v instanceof Sk.builtin.none) && (w instanceof Sk.builtin.none))
+    if (((v === Sk.builtin.none.none$) && (w === Sk.builtin.none.none$))
     || ((v instanceof Sk.builtin.bool) && (w instanceof Sk.builtin.bool)))
     {
     // Javascript happens to return the same values when comparing null
@@ -7211,7 +7239,7 @@ goog.exportSymbol("Sk.misceval.richCompareBool", Sk.misceval.richCompareBool);
 Sk.misceval.objectRepr = function(v)
 {
     goog.asserts.assert(v !== undefined, "trying to repr undefined");
-    if ((v === null) || (v instanceof Sk.builtin.none))
+    if ((v === null) || (v === Sk.builtin.none.none$))
         return Sk.ffi.stringToPy("None"); // todo; these should be consts
     else if (v === true)
         return Sk.ffi.stringToPy("True");
@@ -7258,7 +7286,7 @@ Sk.misceval.isTrue = function(x)
     if (x === true) return true;
     if (x === false) return false;
     if (x === null) return false;
-    if (x.constructor === Sk.builtin.none) return false;
+    if (x === Sk.builtin.none.none$) return false;
     if (x.constructor === Sk.builtin.bool) return x.v;
     if (typeof x === "number") return x !== 0;
     if (x instanceof Sk.builtin.lng) return x.nb$nonzero();
@@ -7406,7 +7434,7 @@ goog.exportSymbol("Sk.misceval.callsim", Sk.misceval.callsim);
  */
 Sk.misceval.apply = function(func, kwdict, varargseq, kws, args)
 {
-    if (func === null || func instanceof Sk.builtin.none)
+    if (func === null || func === Sk.builtin.none.none$)
     {
         throw new Sk.builtin.TypeError("'" + Sk.ffi.typeName(func) + "' object is not callable");
     }
@@ -7946,16 +7974,22 @@ Sk.abstr.fixSeqIndex_ = function(seq, i)
     return i;
 };
 
-Sk.abstr.sequenceContains = function(seq, ob)
+/**
+ * Expects Python arguments but returns a JavaScript response.
+ *
+ * @param {*} objectPy
+ * @return {boolean}
+ */
+Sk.abstr.sequenceContains = function(seq, objectPy)
 {
-    if (seq.sq$contains) return seq.sq$contains(ob);
+    if (seq.sq$contains) return seq.sq$contains(objectPy);
 
     var seqtypename = Sk.ffi.typeName(seq);
     if (!seq.tp$iter) throw new Sk.builtin.TypeError("argument of type '" + seqtypename + "' is not iterable");
     
     for (var it = seq.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext())
     {
-        if (Sk.misceval.richCompareBool(i, ob, Sk.misceval.compareOp.Eq))
+        if (Sk.misceval.richCompareBool(i, objectPy, Sk.misceval.compareOp.Eq))
         {
             return true;
         }
@@ -8911,7 +8945,7 @@ Sk.builtin.str = function(x)
     var ret;
     if (x === true) ret = "True";
     else if (x === false) ret = "False";
-    else if ((x === null) || (x instanceof Sk.builtin.none)) ret = "None";
+    else if ((x === null) || (x === Sk.builtin.none.none$)) ret = "None";
     else if (x instanceof Sk.builtin.bool)
     {
         if (x.v) ret = "True";
@@ -8924,15 +8958,20 @@ Sk.builtin.str = function(x)
         else if (ret === "-Infinity") ret = "-inf";
     }
     else if (typeof x === "string")
+    {
         ret = x;
+    }
     else if (x.tp$str !== undefined)
     {
         ret = x.tp$str();
         if (!(ret instanceof Sk.builtin.str)) throw new Sk.builtin.ValueError("__str__ didn't return a str");
         return ret;
     }
-    else 
+    else
+    {
+        // Fallback to the representation.
         return Sk.misceval.objectRepr(x);
+    }
 
     // interning required for strings in py
     if (Object.prototype.hasOwnProperty.call(interned, "1"+ret)) // note, have to use Object to avoid __proto__, etc. failing
@@ -9019,13 +9058,19 @@ Sk.builtin.str.prototype.sq$slice = function(i1, i2)
     return Sk.ffi.stringToPy(Sk.ffi.remapToJs(this).substr(i1, i2 - i1));
 };
 
-Sk.builtin.str.prototype.sq$contains = function(ob)
+/**
+ * Expects Python arguments but returns a JavaScript response.
+ *
+ * @param {*} objectPy
+ * @return {boolean}
+ */
+Sk.builtin.str.prototype.sq$contains = function(objectPy)
 {
-    if (Sk.ffi.remapToJs(ob) === undefined || Sk.ffi.remapToJs(ob).constructor != String)
+    if (Sk.ffi.remapToJs(objectPy) === undefined || Sk.ffi.remapToJs(objectPy).constructor != String)
     {
         throw new Sk.builtin.TypeError("TypeError: 'In <string> requires string as left operand");
     }
-    if (this.v.indexOf(Sk.ffi.remapToJs(ob)) != -1)
+    if (this.v.indexOf(Sk.ffi.remapToJs(objectPy)) != -1)
     {
         return true;
     }
@@ -9143,6 +9188,12 @@ Sk.builtin.str.prototype.tp$repr = function()
     return Sk.ffi.stringToPy(ret);
 };
 
+/*
+Sk.builtin.str.prototype.tp$str = function()
+{
+    return this;
+};
+*/
 
 Sk.builtin.str.re_escape_ = function(s)
 {
@@ -9216,7 +9267,7 @@ Sk.builtin.str.prototype['join'] = new Sk.builtin.func(function(self, seq)
 Sk.builtin.str.prototype['split'] = new Sk.builtin.func(function(self, on, howmany)
 {
     Sk.builtin.pyCheckArgs("split", arguments, 1, 3);
-    if ((on === undefined) || (on instanceof Sk.builtin.none)) {
+    if ((on === undefined) || (on === Sk.builtin.none.none$)) {
         on = null;
     }
     if ((on !== null) && !Sk.builtin.checkString(on)) { 
@@ -9355,14 +9406,17 @@ Sk.builtin.str.prototype['rpartition'] = new Sk.builtin.func(function(self, sepP
 
 Sk.builtin.str.prototype['count'] = new Sk.builtin.func(function(self, pat, start, end) {
     Sk.builtin.pyCheckArgs("count", arguments, 2, 4);
-    if (!Sk.builtin.checkString(pat)) {
-    throw new Sk.builtin.TypeError("expected a character buffer object");
+    if (!Sk.builtin.checkString(pat))
+    {
+        throw new Sk.builtin.TypeError("expected a character buffer object");
     }
-    if ((start !== undefined) && !Sk.builtin.checkInt(start)) {
-    throw new Sk.builtin.TypeError("slice indices must be integers or None or have an __index__ method");
+    if ((start !== undefined) && !Sk.builtin.checkInt(start))
+    {
+        throw new Sk.builtin.TypeError("slice indices must be integers or None or have an __index__ method");
     }
-    if ((end !== undefined) && !Sk.builtin.checkInt(end)) {
-    throw new Sk.builtin.TypeError("slice indices must be integers or None or have an __index__ method");
+    if ((end !== undefined) && !Sk.builtin.checkInt(end))
+    {
+        throw new Sk.builtin.TypeError("slice indices must be integers or None or have an __index__ method");
     }
 
     if (start === undefined)
@@ -10152,17 +10206,20 @@ Sk.builtin.dict = function dict(L)
     }
     else if (L instanceof Sk.builtin.dict) {
         // Handle calls of type "dict(mapping)" from Python code
-        for (var it = L.tp$iter(), k = it.tp$iternext();
-             k !== undefined;
-             k = it.tp$iternext())
+        for (var it = L.tp$iter(), k = it.tp$iternext(); k !== undefined; k = it.tp$iternext())
         {
+            /**
+             * @const
+             */
             var v = L.mp$subscript(k);
             if (v === undefined)
             {
-                //print(k, "had undefined v");
-                v = null;
+                this.mp$ass_subscript(k, Sk.builtin.none.none$);
             }
-            this.mp$ass_subscript(k, v);
+            else
+            {
+                this.mp$ass_subscript(k, v);
+            }
         }
     }
     else if (L.tp$iter)
@@ -10194,22 +10251,20 @@ Sk.builtin.dict.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('dict', Sk.b
 
 var kf = Sk.builtin.hash;
 
-Sk.builtin.dict.prototype.key$lookup = function(bucket, key)
+Sk.builtin.dict.prototype.key$lookup = function(bucket, keyPy)
 {
-    var item;
-    var eq;
-    var i;
-
-    for (i=0; i<bucket.items.length; i++)
+    for (var i=0; i < bucket.items.length; i++)
     {
-        item = bucket.items[i];
-        eq = Sk.misceval.richCompareBool(item.lhs, key, Sk.misceval.compareOp.Eq);
-        if (eq)
+        /**
+         * @const
+         */
+        var item = bucket.items[i];
+        if (Sk.misceval.richCompareBool(item.lhs, keyPy, Sk.misceval.compareOp.Eq))
         {
             return item;
         }
     }
-    return null;
+    return undefined;
 }   
 
 Sk.builtin.dict.prototype.key$pop = function(bucket, key)
@@ -10243,7 +10298,8 @@ Sk.builtin.dict.prototype.mp$lookup = function(key)
     if (bucket !== undefined)
     {
         item = this.key$lookup(bucket, key);
-        if (item) {
+        if (item)
+        {
             return item.rhs;
         };
     }
@@ -10264,43 +10320,57 @@ Sk.builtin.dict.prototype.mp$subscript = function(key)
     else
     {
         // Not found in dictionary
-        // TODO: This must be a coercion.
-        var s = new Sk.builtin.str(key);
-        throw new Sk.builtin.KeyError(s.v);
+        throw new Sk.builtin.KeyError(Sk.ffi.remapToJs(Sk.ffh.str(key)));
     }
 };
 
-Sk.builtin.dict.prototype.sq$contains = function(ob)
+/**
+ * Expects Python arguments but returns a JavaScript response.
+ *
+ * @param {*} objectPy
+ * @return {boolean}
+ */
+Sk.builtin.dict.prototype.sq$contains = function(objectPy)
 {
-    var res = this.mp$lookup(ob);
+    var res = this.mp$lookup(objectPy);
 
     return (res !== undefined);
 }
 
-Sk.builtin.dict.prototype.mp$ass_subscript = function(key, w)
+Sk.builtin.dict.prototype.mp$ass_subscript = function(keyPy, wPy)
 {
-    var k = kf(key);
+    /**
+     * @const
+     */
+    var k = kf(keyPy);
+    /**
+     * @const
+     */
     var bucket = this[k];
-    var item;
 
     if (bucket === undefined)
     {
         // New bucket
-        bucket = {$hash: k, items: [{lhs: key, rhs: w}]};
-        this[k] = bucket;
+        this[k] = {$hash: k, items: [{lhs: keyPy, rhs: wPy}]};
         this.size += 1;
-        return;
     }
-
-    item = this.key$lookup(bucket, key);
-    if (item) {
-        item.rhs = w;
-        return;
-    };
-
-    // Not found in dictionary
-    bucket.items.push({lhs: key, rhs: w});
-    this.size += 1;
+    else
+    {
+        /**
+         * @const
+         */
+        var item = this.key$lookup(bucket, keyPy);
+        if (item)
+        {
+            item.rhs = wPy;
+        }
+        else
+        {
+            // Not found in dictionary
+            bucket.items.push({lhs: keyPy, rhs: wPy});
+            this.size += 1;
+        }
+    }
 };
 
 Sk.builtin.dict.prototype.mp$del_subscript = function(key)
@@ -10314,14 +10384,14 @@ Sk.builtin.dict.prototype.mp$del_subscript = function(key)
     if (bucket !== undefined)
     {
         item = this.key$pop(bucket, key);
-        if (item !== undefined) {
+        if (item !== undefined)
+        {
             return;
         };
     }
 
     // Not found in dictionary
-    s = new Sk.builtin.str(key);
-    throw new Sk.builtin.KeyError(s.v);
+    throw new Sk.builtin.KeyError(Sk.ffi.remapToJs(Sk.ffh.str(key)));
 }
 
 Sk.builtin.dict.prototype.tp$iter = function()
@@ -10369,18 +10439,25 @@ Sk.builtin.dict.prototype['__iter__'] = new Sk.builtin.func(function(self)
 
 Sk.builtin.dict.prototype.tp$repr = function()
 {
+    /**
+     * @const
+     */
     var ret = [];
-    for (var iter = this.tp$iter(), k = iter.tp$iternext();
-            k !== undefined;
-            k = iter.tp$iternext())
+    for (var iter = this.tp$iter(), keyPy = iter.tp$iternext(); keyPy !== undefined; keyPy = iter.tp$iternext())
     {
-        var v = this.mp$subscript(k);
-        if (v === undefined)
-        {
-            //print(k, "had undefined v");
-            v = null;
-        }
-        ret.push(Sk.misceval.objectRepr(k).v + ": " + Sk.misceval.objectRepr(v).v);
+        /**
+         * @const
+         */
+        var keyString = Sk.ffi.remapToJs(Sk.misceval.objectRepr(keyPy));
+        /**
+         * @const
+         */
+        var valPy = this.mp$subscript(keyPy);
+        /**
+         * @const
+         */
+        var valString = Sk.ffi.remapToJs(Sk.misceval.objectRepr((valPy !== undefined) ? valPy : Sk.builtin.none.none$));
+        ret.push(keyString + ": " + valString);
     }
     return Sk.ffi.stringToPy("{" + ret.join(", ") + "}");
 };
@@ -10468,44 +10545,44 @@ Sk.builtin.dict.prototype.tp$richcompare = function(other, op)
     }
 }
 
-Sk.builtin.dict.prototype['get'] = new Sk.builtin.func(function(self, k, d)
+Sk.builtin.dict.prototype['get'] = new Sk.builtin.func(function(selfPy, keyPy, defaultPy)
 {
-    var ret;
-
-    if (d === undefined) {
-        //d = new Sk.builtin.NoneObj();
-        d = null;
-    }
-
-    ret = self.mp$lookup(k);
-    if (ret === undefined)
+    /**
+     * @const
+     */
+    var valuePy = selfPy.mp$lookup(keyPy);
+    if (valuePy === undefined)
     {
-        ret = d;
+        return (defaultPy === undefined) ? Sk.builtin.none.none$ : defaultPy;
     }
-
-    return ret;
+    else
+    {
+        return valuePy;
+    }
 });
 
-Sk.builtin.dict.prototype['has_key'] = new Sk.builtin.func(function(self, k)
+Sk.builtin.dict.prototype['has_key'] = new Sk.builtin.func(function(selfPy, keyPy)
 {
-    return self.sq$contains(k);
+    return Sk.ffi.booleanToPy(selfPy.sq$contains(keyPy));
 });
 
-Sk.builtin.dict.prototype['items'] = new Sk.builtin.func(function(self)
+Sk.builtin.dict.prototype['items'] = new Sk.builtin.func(function(selfPy)
 {
     var ret = [];
-
-    for (var iter = self.tp$iter(), k = iter.tp$iternext();
-            k !== undefined;
-            k = iter.tp$iternext())
+    for (var iter = selfPy.tp$iter(), k = iter.tp$iternext(); k !== undefined; k = iter.tp$iternext())
     {
-        var v = self.mp$subscript(k);
+        /**
+         * @const
+         */
+        var v = selfPy.mp$subscript(k);
         if (v === undefined)
         {
-            //print(k, "had undefined v");
-            v = null;
+            ret.push(new Sk.builtin.tuple([k, Sk.builtin.none.none$]));
         }
-        ret.push(new Sk.builtin.tuple([k, v]));
+        else
+        {
+            ret.push(new Sk.builtin.tuple([k, v]));
+        }
     }
     return new Sk.builtin.list(ret);
 });
@@ -10513,10 +10590,7 @@ Sk.builtin.dict.prototype['items'] = new Sk.builtin.func(function(self)
 Sk.builtin.dict.prototype['keys'] = new Sk.builtin.func(function(self)
 {
     var ret = [];
-
-    for (var iter = self.tp$iter(), k = iter.tp$iternext();
-            k !== undefined;
-            k = iter.tp$iternext())
+    for (var iter = self.tp$iter(), k = iter.tp$iternext(); k !== undefined; k = iter.tp$iternext())
     {
         ret.push(k);
     }
@@ -10526,17 +10600,20 @@ Sk.builtin.dict.prototype['keys'] = new Sk.builtin.func(function(self)
 Sk.builtin.dict.prototype['values'] = new Sk.builtin.func(function(self)
 {
     var ret = [];
-
-    for (var iter = self.tp$iter(), k = iter.tp$iternext();
-            k !== undefined;
-            k = iter.tp$iternext())
+    for (var iter = self.tp$iter(), k = iter.tp$iternext(); k !== undefined; k = iter.tp$iternext())
     {
+        /**
+         * @const
+         */
         var v = self.mp$subscript(k);
         if (v === undefined)
         {
-            v = null;
+            ret.push(Sk.builtin.none.none$);
         }
-        ret.push(v);
+        else
+        {
+            ret.push(v);
+        }
     }
     return new Sk.builtin.list(ret);
 });
@@ -10544,83 +10621,6 @@ Sk.builtin.dict.prototype['values'] = new Sk.builtin.func(function(self)
 Sk.builtin.dict.prototype.tp$name = "dict";
 
 goog.exportSymbol("Sk.builtin.dict", Sk.builtin.dict);
-
-/*
-
-$.prototype.clear = function() { throw "todo; dict.clear"; };
-$.prototype.copy = function() { throw "todo; dict.copy"; };
-$.prototype.fromkeys = function() { throw "todo; dict.fromkeys"; };
-$.prototype.get = function() { throw "todo; dict.get"; };
-
-$.prototype.has_key = function(key)
-{
-	return this.hasOwnProperty(kf(key));
-};
-
-$.prototype.items = function() { throw "todo; dict.items"; };
-$.prototype.iteritems = function() { throw "todo; dict.iteritems"; };
-$.prototype.iterkeys = function() { throw "todo; dict.iterkeys"; };
-$.prototype.itervalues = function() { throw "todo; dict.itervalues"; };
-$.prototype.keys = function() { throw "todo; dict.keys"; };
-$.prototype.pop = function() { throw "todo; dict.pop"; };
-$.prototype.popitem = function() { throw "todo; dict.popitem"; };
-$.prototype.setdefault = function() { throw "todo; dict.setdefault"; };
-$.prototype.update = function() { throw "todo; dict.update"; };
-$.prototype.values = function() { throw "todo; dict.values"; };
-
-$.prototype.__getitem__ = function(key)
-{
-    var entry = this[kf(key)];
-    return typeof entry === 'undefined' ? undefined : entry.rhs;
-};
-
-$.prototype.__delitem__ = function(key)
-{
-    var k = kf(key);
-
-    if (this.hasOwnProperty(k))
-    {
-        this.size -= 1;
-        delete this[k];
-    }
-
-    return this;
-};
-
-$.prototype.__class__ = new Sk.builtin.type('dict', [Sk.types.object], {});
-
-$.prototype.__iter__ = function()
-{
-    var allkeys = [];
-    for (var k in this)
-    {
-        if (this.hasOwnProperty(k))
-        {
-            var i = this[k];
-            if (i && i.hasOwnProperty('lhs')) // skip internal stuff. todo; merge pyobj and this
-            {
-                allkeys.push(k);
-            }
-        }
-    }
-    //print(allkeys);
-
-    var ret =
-    {
-        __iter__: function() { return ret; },
-        $obj: this,
-        $index: 0,
-        $keys: allkeys,
-        next: function()
-        {
-            // todo; StopIteration
-            if (ret.$index >= ret.$keys.length) return undefined;
-            return ret.$obj[ret.$keys[ret.$index++]].lhs;
-        }
-    };
-    return ret;
-};
-*/
 /**
  * @fileoverview
  * @suppress {checkTypes}
@@ -12166,10 +12166,12 @@ Sk.builtin.NumberPy.prototype.nb$multiply = function(other)
     }
     else
     {
+      // Neither this nor other is a float.
+      // But other is {float|int} so other must be {int}.
+      // And self is {float|int}, being a NumberPy, so self must be {int} also.
       if (prodJs > Sk.builtin.NumberPy.threshold$ || prodJs < -Sk.builtin.NumberPy.threshold$)
       {
-        //  Promote to long
-        return new Sk.builtin.lng(selfJs).nb$multiply(otherJs);
+        return Sk.ffh.multiply(Sk.ffi.promoteIntToLong(this),Sk.ffi.promoteIntToLong(other));
       }
       else
       {
@@ -12845,7 +12847,7 @@ Sk.builtin.NumberPy.prototype.numberCompare = function(other)
       other = Sk.builtin.asnum$(other);
   }
 
-  if (other instanceof Sk.builtin.none)
+  if (other === Sk.builtin.none.none$)
   {
     other = 0;
   }
@@ -12886,11 +12888,11 @@ Sk.builtin.NumberPy.prototype.numberCompare = function(other)
 
 Sk.builtin.NumberPy.prototype.__eq__ = function(me, other)
 {
-  return (me.numberCompare(other) == 0) && !(other instanceof Sk.builtin.none);
+  return (me.numberCompare(other) == 0) && !(other === Sk.builtin.none.none$);
 };
 
 Sk.builtin.NumberPy.prototype.__ne__ = function(me, other) {
-  return (me.numberCompare(other) != 0) || (other instanceof Sk.builtin.none);
+  return (me.numberCompare(other) != 0) || (other === Sk.builtin.none.none$);
 };
 
 Sk.builtin.NumberPy.prototype.__lt__ = function(me, other) {
@@ -13186,7 +13188,7 @@ Sk.builtin.lng.prototype.nb$multiply = function(other)
   {
     if (Sk.ffi.isFloat(other))
     {
-      return Sk.ffi.numberToPy(parseFloat(this.str$(10, true))).nb$multiply(other);
+      return Sk.ffh.multiply(Sk.ffh.promoteLongToFloat(this), other);
     }
     else
     {
@@ -13562,11 +13564,11 @@ Sk.builtin.lng.prototype.longCompare = function(other)
 }
 
 Sk.builtin.lng.prototype.__eq__ = function(me, other) {
-  return me.longCompare(other) == 0 && !(other instanceof Sk.builtin.none);
+  return me.longCompare(other) == 0 && !(other === Sk.builtin.none.none$);
 };
 
 Sk.builtin.lng.prototype.__ne__ = function(me, other) {
-  return me.longCompare(other) != 0 || (other instanceof Sk.builtin.none);
+  return me.longCompare(other) != 0 || (other === Sk.builtin.none.none$);
 };
 
 Sk.builtin.lng.prototype.__lt__ = function(me, other) {
@@ -14607,19 +14609,11 @@ Sk.ffi.bool = {True: Sk.builtin.bool.true$, False: Sk.builtin.bool.false$};
 goog.exportSymbol("Sk.ffi.bool", Sk.ffi.bool);
 
 /**
- * Singleton Python None value.
- *
- * @enum {!Object}
- */
-Sk.ffi.none = {None: Sk.builtin.none.none$};
-goog.exportSymbol("Sk.ffi.none", Sk.ffi.none);
-
-/**
  * Converts a JavaScript boolean or null to the internal Python bool representation.
  *
  * @param {?boolean=} valueJs
  * @param {boolean=} defaultJs
- * @return {Sk.ffi.bool|Sk.ffi.none|undefined}
+ * @return {Sk.ffi.bool|Sk.builtin.none|undefined}
  */
 Sk.ffi.booleanToPy = function(valueJs, defaultJs)
 {
@@ -14630,7 +14624,7 @@ Sk.ffi.booleanToPy = function(valueJs, defaultJs)
     }
     else if (t === Sk.ffi.JsType.OBJECT && valueJs === null)
     {
-        return Sk.ffi.none.None;
+        return Sk.builtin.none.none$;
     }
     else if (t === Sk.ffi.JsType.UNDEFINED)
     {
@@ -14645,7 +14639,7 @@ Sk.ffi.booleanToPy = function(valueJs, defaultJs)
         }
         else if (d === Sk.ffi.JsType.OBJECT && defaultJs === null)
         {
-            return Sk.ffi.none.None;
+            return Sk.builtin.none.none$;
         }
         else
         {
@@ -14692,7 +14686,7 @@ goog.exportSymbol("Sk.ffi.numberToPy", Sk.ffi.numberToPy);
  *
  * @param {?number=} valueJs
  * @param {number=} defaultJs
- * @return {Object|Sk.ffi.none|undefined}
+ * @return {Object|Sk.builtin.none|undefined}
  */
 Sk.ffi.numberToFloatPy = function(valueJs, defaultJs)
 {
@@ -14703,7 +14697,7 @@ Sk.ffi.numberToFloatPy = function(valueJs, defaultJs)
     }
     else if (t === Sk.ffi.JsType.OBJECT && valueJs === null)
     {
-        return Sk.ffi.none.None;
+        return Sk.builtin.none.none$;
     }
     else if (t === Sk.ffi.JsType.UNDEFINED)
     {
@@ -14718,7 +14712,7 @@ Sk.ffi.numberToFloatPy = function(valueJs, defaultJs)
         }
         else if (d === Sk.ffi.JsType.OBJECT && defaultJs === null)
         {
-            return Sk.ffi.none.None;
+            return Sk.builtin.none.none$;
         }
         else
         {
@@ -14743,7 +14737,7 @@ goog.exportSymbol("Sk.ffi.numberToFloatPy", Sk.ffi.numberToFloatPy);
  *
  * @param {?number} valueJs
  * @param {number=} defaultJs
- * @return {Object|Sk.ffi.none|undefined}
+ * @return {Object|Sk.builtin.none|undefined}
  */
 Sk.ffi.numberToIntPy = function(valueJs, defaultJs)
 {
@@ -14755,7 +14749,7 @@ Sk.ffi.numberToIntPy = function(valueJs, defaultJs)
     }
     else if (t === Sk.ffi.JsType.OBJECT && valueJs === null)
     {
-        return Sk.ffi.none.None;
+        return Sk.builtin.none.none$;
     }
     else if (t === Sk.ffi.JsType.UNDEFINED)
     {
@@ -14770,7 +14764,7 @@ Sk.ffi.numberToIntPy = function(valueJs, defaultJs)
         }
         else if (d === Sk.ffi.JsType.OBJECT && defaultJs === null)
         {
-            return Sk.ffi.none.None;
+            return Sk.builtin.none.none$;
         }
         else
         {
@@ -14813,7 +14807,7 @@ Sk.ffi.stringToPy = function(valueJs, defaultJs)
     }
     else if (t === Sk.ffi.JsType.OBJECT && valueJs === null)
     {
-        return Sk.ffi.none.None;
+        return Sk.builtin.none.none$;
     }
     else if (t === Sk.ffi.JsType.UNDEFINED)
     {
@@ -14828,7 +14822,7 @@ Sk.ffi.stringToPy = function(valueJs, defaultJs)
         }
         else if (d === Sk.ffi.JsType.OBJECT && defaultJs === null)
         {
-            return Sk.ffi.none.None;
+            return Sk.builtin.none.none$;
         }
         else
         {
@@ -14899,6 +14893,8 @@ goog.exportSymbol("Sk.ffi.referenceToPy", Sk.ffi.referenceToPy);
 
 /**
  * Constructs a Python function.
+ * 
+ * Implementations should expect Python arguments and return Python values.
  *
  * @param {Function} code The implementation of the function.
  */
@@ -14962,7 +14958,7 @@ Sk.ffi.remapToPy = function(valueJs, className, custom)
         }
         else if (t === Sk.ffi.JsType.OBJECT && valueJs === null)
         {
-            return Sk.ffi.none.None;
+            return Sk.builtin.none.none$;
         }
         else
         {
@@ -14998,7 +14994,7 @@ Sk.ffi.remapToPy = function(valueJs, className, custom)
     }
     else if (t === Sk.ffi.JsType.UNDEFINED)
     {
-        return Sk.ffi.none.None;
+        return Sk.builtin.none.none$;
     }
     else
     {
@@ -15464,7 +15460,7 @@ Sk.ffi.getType = function(valuePy)
     {
         return Sk.ffi.PyType.BOOL;
     }
-    else if (valuePy === Sk.ffi.none.None)
+    else if (valuePy === Sk.builtin.none.none$)
     {
         return Sk.ffi.PyType.NONE;
     }
@@ -16076,12 +16072,12 @@ Sk.ffi.ObjectPy.prototype.tp$getattr = function(name)
           {
             Sk.builtin.pyCheckArgs("append", arguments, 1, 1);
             selfJs.push(Sk.ffi.remapToJs(itemPy));
-            return Sk.ffi.none.None;
+            return Sk.builtin.none.none$;
           });
         }
         default:
         {
-          return Sk.ffi.none.None;
+          return Sk.builtin.none.none$;
         }
       }
     }
@@ -16689,6 +16685,23 @@ Sk.ffh.evaluate = function(exprPy, envPy)
   }
 }
 goog.exportSymbol("Sk.ffh.evaluate", Sk.ffh.evaluate);
+
+/**
+ * @param {*} longPy
+ * @return {Sk.builtin.NumberPy|number}
+ */
+Sk.ffi.promoteLongToFloat = function(longPy)
+{
+    goog.asserts.assert(Sk.ffi.isLong(longPy));
+
+    var strPy = Sk.ffh.str(longPy);
+    var strJs = Sk.ffi.remapToJs(strPy);
+    goog.asserts.assertString(strJs);
+    var valueJs = parseFloat(strJs);
+    goog.asserts.assertNumber(valueJs);
+    return Sk.ffi.numberToPy(valueJs)
+};
+goog.exportSymbol("Sk.ffi.promoteLongToFloat", Sk.ffi.promoteLongToFloat);
 /**
  * @constructor
  * @param {Object} iterable
@@ -24535,7 +24548,7 @@ Compiler.prototype.cfunction = function(s)
         function(scopename)
         {
             this.vseqstmt(s.body);
-            out("return Sk.ffi.none.None;"); // if we fall off the bottom, we want the ret to be None
+            out("return Sk.builtin.none.none$;"); // if we fall off the bottom, we want the ret to be None
         }
     );
     this.nameop(s.name, Store, funcorgen);
@@ -24815,7 +24828,7 @@ Compiler.prototype.nameop = function(name, ctx, dataToStore)
         throw new Sk.builtin.SyntaxError("can not assign to None");
     }
 
-    if (Sk.ffi.remapToJs(name) === "None")  return "Sk.ffi.none.None";
+    if (Sk.ffi.remapToJs(name) === "None")  return "Sk.builtin.none.none$";
     if (Sk.ffi.remapToJs(name) === "True")  return "Sk.ffi.bool.True";
     if (Sk.ffi.remapToJs(name) === "False") return "Sk.ffi.bool.False";
 
@@ -28095,7 +28108,7 @@ Sk.builtin.buildDocumentClass = function(mod) {
       return Sk.ffi.callsim(mod[NODE], Sk.ffi.referenceToPy(node, NODE));
     }
     else {
-      return Sk.ffi.none.None;
+      return Sk.builtin.none.none$;
     }
   }
 
@@ -31761,7 +31774,7 @@ var nodeToPy = function(node) {
     return Sk.ffi.callsim(mod[NODE], Sk.ffi.referenceToPy(node, NODE));
   }
   else {
-    return Sk.ffi.none.None;
+    return Sk.builtin.none.none$;
   }
 }
 /**
@@ -33265,7 +33278,7 @@ mod[PROBE_E3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     probe[PROP_GRADE_1]  = grade1;
     probe[PROP_GRADE_2]  = grade2;
     probe[PROP_GRADE_3]  = grade3;
-    probe[PROP_QUANTITY] = Sk.ffi.none.None;
+    probe[PROP_QUANTITY] = Sk.builtin.none.none$;
     Sk.ffi.referenceToPy(probe, PROBE_E3, undefined, selfPy);
   });
   $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
@@ -33645,7 +33658,7 @@ Sk.builtin.buildWindowClass = function(mod) {
         return Sk.ffi.stringToPy(valueJs);
       }
       case 'undefined': {
-        return Sk.ffi.none.None;
+        return Sk.builtin.none.none$;
       }
       case 'object': {
         if (Object.prototype.toString.apply(valueJs) === '[object Array]')
@@ -33722,7 +33735,7 @@ Sk.builtin.buildWindowClass = function(mod) {
         return Sk.ffi.stringToPy(propJs);
       }
       case 'undefined': {
-        return Sk.ffi.none.None;
+        return Sk.builtin.none.none$;
       }
       default: {
         throw Sk.ffi.err.attribute(typeof propJs).isNotGetableOnType(className);
@@ -38182,7 +38195,7 @@ mod[ENVIRONMENT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
             return Sk.ffi.callsim(Sk.ffi.gattr(env[PROP_PARENT], METHOD_LOOKUP), namePy);
           }
           else {
-            return Sk.ffi.none.None;
+            return Sk.builtin.none.none$;
           }
         });
       }
@@ -39273,7 +39286,7 @@ mod[UNIT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           return Sk.ffi.stringToPy(unitPy.custom[PROP_NAME]);
         }
         else {
-          return Sk.ffi.none.None;
+          return Sk.builtin.none.none$;
         }
       }
       case METHOD_COMPATIBLE: {
@@ -45219,7 +45232,7 @@ mod[INTERSECTION] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           return Sk.ffi.callsim(mod[Sk.three.FACE_3], Sk.ffi.referenceToPy(intersection[PROP_FACE], Sk.three.FACE_3));
         }
         else {
-          return Sk.ffi.none.None;
+          return Sk.builtin.none.none$;
         }
       }
       case PROP_OBJECT: {
