@@ -4368,6 +4368,7 @@ Sk.flyweight = false;
 goog.exportSymbol("Sk.flyweight", Sk.flyweight);
 /**
  * The flyweight mode for strings (in development).
+ * This is not quite production-ready.
  * @type {boolean}
  */
 Sk.flyString = true;
@@ -4601,8 +4602,10 @@ Sk.builtin.min = function min()
     var lowest = argArray[0];
     for (var i = 1; i < argArray.length; ++i)
     {
-        if (Sk.misceval.richCompareBool(argArray[i], lowest, 'Lt'))
+        if (Sk.misceval.richCompareBool(argArray[i], lowest, Sk.misceval.compareOp.Lt))
+        {
             lowest = argArray[i];
+        }
     }
     return lowest;
 };
@@ -4615,8 +4618,10 @@ Sk.builtin.max = function max()
     var highest = argArray[0];
     for (var i = 1; i < argArray.length; ++i)
     {
-        if (Sk.misceval.richCompareBool(argArray[i], highest, 'Gt'))
+        if (Sk.misceval.richCompareBool(argArray[i], highest, Sk.misceval.compareOp.Gt))
+        {
             highest = argArray[i];
+        }
     }
     return highest;
 };
@@ -4710,9 +4715,7 @@ Sk.builtin.sum = function sum(iter,start)
         }
         else
         {
-            throw new Sk.builtin.TypeError("unsupported operand type(s) for +: '"
-                       + Sk.ffi.typeName(tot) + "' and '"
-                       + Sk.ffi.typeName(i)+"'");
+            throw new Sk.builtin.TypeError("unsupported operand type(s) for +: '" + Sk.ffi.typeName(tot) + "' and '" + Sk.ffi.typeName(i)+"'");
         }
     }
     return tot;
@@ -5403,7 +5406,7 @@ Sk.builtin.sorted = function sorted(iterable, cmp, key, reverse) {
             compare_func = { func_code: 
                 function(a,b)
                 {
-                    return Sk.misceval.richCompareBool(a[0], b[0], "Lt") ? Sk.ffi.numberToIntPy(-1) : Sk.ffi.numberToIntPy(0);
+                    return Sk.misceval.richCompareBool(a[0], b[0], Sk.misceval.compareOp.Lt) ? Sk.ffi.numberToIntPy(-1) : Sk.ffi.numberToIntPy(0);
                 }
             };
         }
@@ -6806,7 +6809,7 @@ Sk.misceval = {};
 Sk.misceval.isIndex = function(o)
 {
     if (o === null || o.constructor === Sk.builtin.lng || o.tp$index
-	|| o === true || o === false) {
+    || o === true || o === false) {
         return true;
     }
 
@@ -6821,8 +6824,8 @@ Sk.misceval.asIndex = function(o)
     if (o === true) return 1;
     if (o === false) return 0;
     if (typeof o === "number") return o;
-	if (o.constructor === Sk.builtin.NumberPy) return o.v;
-	if (o.constructor === Sk.builtin.lng) return o.tp$index();
+    if (o.constructor === Sk.builtin.NumberPy) return o.v;
+    if (o.constructor === Sk.builtin.lng) return o.tp$index();
     goog.asserts.fail("todo;");
 };
 
@@ -6912,22 +6915,44 @@ Sk.misceval.arrayFromArguments = function(args)
 goog.exportSymbol("Sk.misceval.arrayFromArguments", Sk.misceval.arrayFromArguments);
 
 /**
+ * @enum {string}
+ */
+Sk.misceval.compareOp =
+{
+    Eq:    'Eq',
+    NotEq: 'NotEq',
+    Lt:    'Lt',
+    LtE:   'LtE',
+    Gt:    'Gt',
+    GtE:   'GtE',
+    Is:    'Is',
+    IsNot: 'IsNot',
+    In_:   'In_',
+    NotIn: 'NotIn'
+};
+goog.exportSymbol("Sk.misceval.compareOp", Sk.misceval.compareOp);
+
+/**
  * for reversed comparison: Gt -> Lt, etc.
  */
-Sk.misceval.swappedOp_ = {
-    'Eq': 'Eq',
-    'NotEq': 'NotEq',
-    'Lt': 'GtE',
-    'LtE': 'Gt',
-    'Gt': 'LtE',
-    'GtE': 'Lt',
-    'Is': 'IsNot',
-    'IsNot': 'Is',
-    'In_': 'NotIn',
-    'NotIn': 'In_'
-};
+Sk.misceval.swappedOp_ = {};
+Sk.misceval.swappedOp_[Sk.misceval.compareOp.Eq]    = Sk.misceval.compareOp.Eq;
+Sk.misceval.swappedOp_[Sk.misceval.compareOp.NotEq] = Sk.misceval.compareOp.NotEq;
+Sk.misceval.swappedOp_[Sk.misceval.compareOp.Lt]    = Sk.misceval.compareOp.GtE;
+Sk.misceval.swappedOp_[Sk.misceval.compareOp.LtE]   = Sk.misceval.compareOp.Gt;
+Sk.misceval.swappedOp_[Sk.misceval.compareOp.Gt]    = Sk.misceval.compareOp.LtE;
+Sk.misceval.swappedOp_[Sk.misceval.compareOp.GtE]   = Sk.misceval.compareOp.Lt;
+Sk.misceval.swappedOp_[Sk.misceval.compareOp.Is]    = Sk.misceval.compareOp.IsNot;
+Sk.misceval.swappedOp_[Sk.misceval.compareOp.IsNot] = Sk.misceval.compareOp.Is;
+Sk.misceval.swappedOp_[Sk.misceval.compareOp.In_]   = Sk.misceval.compareOp.NotIn;
+Sk.misceval.swappedOp_[Sk.misceval.compareOp.NotIn] = Sk.misceval.compareOp.In_;
 
-
+/**
+ * @param {*} v
+ * @param {*} w
+ * @param {Sk.misceval.compareOp} op
+ * @return {boolean}
+ */
 Sk.misceval.richCompareBool = function(v, w, op)
 {
     // v and w must be Python objects. will return Javascript true or false for internal use only
@@ -6936,14 +6961,15 @@ Sk.misceval.richCompareBool = function(v, w, op)
     goog.asserts.assert((v !== null) && (v !== undefined), "passed undefined or null parameter to Sk.misceval.richCompareBool");
     goog.asserts.assert((w !== null) && (w !== undefined), "passed undefined or null parameter to Sk.misceval.richCompareBool");
 
+    // FIXME: Constructing objects is a bit heavyweight!
+    // It's also not very abstract unless centralized to Sk.ffi.*
     var v_type = new Sk.builtin.type(v);
     var w_type = new Sk.builtin.type(w);
 
     // Python has specific rules when comparing two different builtin types
     // currently, this code will execute even if the objects are not builtin types
     // but will fall through and not return anything in this section
-    if ((v_type !== w_type)
-        && (op === 'GtE' || op === 'Gt' || op === 'LtE' || op === 'Lt'))
+    if ((v_type !== w_type) && (op === Sk.misceval.compareOp.GtE || op === Sk.misceval.compareOp.Gt || op === 'LtE' || op === Sk.misceval.compareOp.Lt))
     {
         // note: sets are omitted here because they can only be compared to other sets
         var numeric_types = [Sk.builtin.float_.prototype.ob$type,
@@ -6968,10 +6994,10 @@ Sk.misceval.richCompareBool = function(v, w, op)
         {
             switch (op)
             {
-                case 'Lt':  return true;
+                case Sk.misceval.compareOp.Lt:  return true;
                 case 'LtE': return true;
-                case 'Gt':  return false;
-                case 'GtE': return false;
+                case Sk.misceval.compareOp.Gt:  return false;
+                case Sk.misceval.compareOp.GtE: return false;
             }
         }
 
@@ -6979,10 +7005,10 @@ Sk.misceval.richCompareBool = function(v, w, op)
         {
             switch (op)
             {
-                case 'Lt':  return false;
+                case Sk.misceval.compareOp.Lt:  return false;
                 case 'LtE': return false;
-                case 'Gt':  return true;
-                case 'GtE': return true;
+                case Sk.misceval.compareOp.Gt:  return true;
+                case Sk.misceval.compareOp.GtE: return true;
             }
         }
 
@@ -6991,10 +7017,10 @@ Sk.misceval.richCompareBool = function(v, w, op)
         {
             switch (op)
             {
-                case 'Lt':  return true;
+                case Sk.misceval.compareOp.Lt:  return true;
                 case 'LtE': return true;
-                case 'Gt':  return false;
-                case 'GtE': return false;
+                case Sk.misceval.compareOp.Gt:  return false;
+                case Sk.misceval.compareOp.GtE: return false;
             }
         }
 
@@ -7002,10 +7028,10 @@ Sk.misceval.richCompareBool = function(v, w, op)
         {
             switch (op)
             {
-                case 'Lt':  return false;
+                case Sk.misceval.compareOp.Lt:  return false;
                 case 'LtE': return false;
-                case 'Gt':  return true;
-                case 'GtE': return true;
+                case Sk.misceval.compareOp.Gt:  return true;
+                case Sk.misceval.compareOp.GtE: return true;
             }
         }
 
@@ -7015,39 +7041,39 @@ Sk.misceval.richCompareBool = function(v, w, op)
         {
             switch (op)
             {
-                case 'Lt':  return v_seq_type < w_seq_type;
+                case Sk.misceval.compareOp.Lt:  return v_seq_type < w_seq_type;
                 case 'LtE': return v_seq_type <= w_seq_type;
-                case 'Gt':  return v_seq_type > w_seq_type;
-                case 'GtE': return v_seq_type >= w_seq_type;
+                case Sk.misceval.compareOp.Gt:  return v_seq_type > w_seq_type;
+                case Sk.misceval.compareOp.GtE: return v_seq_type >= w_seq_type;
             }
         }
     }
 
 
     // handle identity and membership comparisons
-    if (op === 'Is') {
-	if (v instanceof Sk.builtin.NumberPy && w instanceof Sk.builtin.NumberPy)
-	{
-	    return (v.numberCompare(w) === 0) && (v.skType === w.skType);
-	}
-	else if (v instanceof Sk.builtin.lng && w instanceof Sk.builtin.lng)
-	{
-	    return v.longCompare(w) === 0;
-	}
-
+    if (op === Sk.misceval.compareOp.Is)
+    {
+        if (v instanceof Sk.builtin.NumberPy && w instanceof Sk.builtin.NumberPy)
+        {
+            return (v.numberCompare(w) === 0) && (v.skType === w.skType);
+        }
+        else if (v instanceof Sk.builtin.lng && w instanceof Sk.builtin.lng)
+        {
+            return v.longCompare(w) === 0;
+        }
         return v === w;
     }
 
-    if (op === 'IsNot') {
-	if (v instanceof Sk.builtin.NumberPy && w instanceof Sk.builtin.NumberPy)
-	{
-	    return (v.numberCompare(w) !== 0) || (v.skType !== w.skType);
-	}
-	else if (v instanceof Sk.builtin.lng && w instanceof Sk.builtin.lng)
-	{
-	    return v.longCompare(w) !== 0;
-	}
-
+    if (op === Sk.misceval.compareOp.IsNot)
+    {
+        if (v instanceof Sk.builtin.NumberPy && w instanceof Sk.builtin.NumberPy)
+        {
+            return (v.numberCompare(w) !== 0) || (v.skType !== w.skType);
+        }
+        else if (v instanceof Sk.builtin.lng && w instanceof Sk.builtin.lng)
+        {
+            return v.longCompare(w) !== 0;
+        }
         return v !== w;
     }
 
@@ -7073,14 +7099,13 @@ Sk.misceval.richCompareBool = function(v, w, op)
     // depending on the op, try left:op:right, and if not, then
     // right:reversed-top:left
 
-    var op2method = {
-        'Eq': '__eq__',
-        'NotEq': '__ne__',
-        'Gt': '__gt__',
-        'GtE': '__ge__',
-        'Lt': '__lt__',
-        'LtE': '__le__'
-    };
+    var op2method = {};
+    op2method[Sk.misceval.compareOp.Eq]    = '__eq__';
+    op2method[Sk.misceval.compareOp.NotEq] = '__ne__';
+    op2method[Sk.misceval.compareOp.Gt]    = '__gt__';
+    op2method[Sk.misceval.compareOp.GtE]   = '__ge__';
+    op2method[Sk.misceval.compareOp.Lt]    = '__lt__';
+    op2method[Sk.misceval.compareOp.LtE]   = '__le__';
 
     var method = op2method[op];
     var swapped_method = op2method[Sk.misceval.swappedOp_[op]];
@@ -7097,62 +7122,80 @@ Sk.misceval.richCompareBool = function(v, w, op)
     if (v['__cmp__'])
     {
         var ret = Sk.misceval.callsim(v['__cmp__'], v, w);
-	ret = Sk.builtin.asnum$(ret);
-        if (op === 'Eq') return ret === 0;
-        else if (op === 'NotEq') return ret !== 0;
-        else if (op === 'Lt') return ret < 0;
-        else if (op === 'Gt') return ret > 0;
+        ret = Sk.builtin.asnum$(ret);
+        if (op === Sk.misceval.compareOp.Eq) return ret === 0;
+        else if (op === Sk.misceval.compareOp.NotEq) return ret !== 0;
+        else if (op === Sk.misceval.compareOp.Lt) return ret < 0;
+        else if (op === Sk.misceval.compareOp.Gt) return ret > 0;
         else if (op === 'LtE') return ret <= 0;
-        else if (op === 'GtE') return ret >= 0;
+        else if (op === Sk.misceval.compareOp.GtE) return ret >= 0;
     }
 
     if (w['__cmp__'])
     {
         // note, flipped on return value and call
         var ret = Sk.misceval.callsim(w['__cmp__'], w, v);
-	ret = Sk.builtin.asnum$(ret);
-        if (op === 'Eq') return ret === 0;
-        else if (op === 'NotEq') return ret !== 0;
-        else if (op === 'Lt') return ret > 0;
-        else if (op === 'Gt') return ret < 0;
+        ret = Sk.builtin.asnum$(ret);
+        if (op === Sk.misceval.compareOp.Eq) return ret === 0;
+        else if (op === Sk.misceval.compareOp.NotEq) return ret !== 0;
+        else if (op === Sk.misceval.compareOp.Lt) return ret > 0;
+        else if (op === Sk.misceval.compareOp.Gt) return ret < 0;
         else if (op === 'LtE') return ret >= 0;
-        else if (op === 'GtE') return ret <= 0;
+        else if (op === Sk.misceval.compareOp.GtE) return ret <= 0;
     }
 
     // handle special cases for comparing None with None or Bool with Bool
     if (((v instanceof Sk.builtin.none) && (w instanceof Sk.builtin.none))
-	|| ((v instanceof Sk.builtin.bool) && (w instanceof Sk.builtin.bool)))
+    || ((v instanceof Sk.builtin.bool) && (w instanceof Sk.builtin.bool)))
     {
-	// Javascript happens to return the same values when comparing null
+    // Javascript happens to return the same values when comparing null
         // with null or true/false with true/false as Python does when
         // comparing None with None or True/False with True/False
-
-	if (op === 'Eq')
-	    return v.v === w.v;
-	if (op === 'NotEq')
-	    return v.v !== w.v;
-	if (op === 'Gt')
-	    return v.v > w.v;
-	if (op === 'GtE')
-	    return v.v >= w.v;
-	if (op === 'Lt')
-	    return v.v < w.v;
-	if (op === 'LtE')
-	    return v.v <= w.v;
+        if (op === Sk.misceval.compareOp.Eq)
+            return v.v === w.v;
+        if (op === Sk.misceval.compareOp.NotEq)
+            return v.v !== w.v;
+        if (op === Sk.misceval.compareOp.Gt)
+            return v.v > w.v;
+        if (op === Sk.misceval.compareOp.GtE)
+            return v.v >= w.v;
+        if (op === Sk.misceval.compareOp.Lt)
+            return v.v < w.v;
+        if (op === 'LtE')
+            return v.v <= w.v;
     }
-
 
     // handle equality comparisons for any remaining objects
-    if (op === 'Eq')
+    if (op === Sk.misceval.compareOp.Eq)
     {
         if ((v instanceof Sk.builtin.str) && (w instanceof Sk.builtin.str))
+        {
             return v.v === w.v;
+        }
         return v === w;
     }
-    if (op === 'NotEq')
+    if (op === Sk.misceval.compareOp.Lt)
+    {
+        return v < w;
+    }
+    if (op === 'LtE')
+    {
+        return v <= w;
+    }
+    if (op === Sk.misceval.compareOp.Gt)
+    {
+        return v > w;
+    }
+    if (op === Sk.misceval.compareOp.GtE)
+    {
+        return v >= w;
+    }
+    if (op === Sk.misceval.compareOp.NotEq)
     {
         if ((v instanceof Sk.builtin.str) && (w instanceof Sk.builtin.str))
+        {
             return v.v !== w.v;
+        }
         return v !== w;
     }
 
@@ -7202,8 +7245,8 @@ Sk.misceval.opAllowsEquality = function(op)
     switch (op)
     {
         case 'LtE':
-        case 'Eq':
-        case 'GtE':
+        case Sk.misceval.compareOp.Eq:
+        case Sk.misceval.compareOp.GtE:
             return true;
     }
     return false;
@@ -7380,11 +7423,11 @@ Sk.misceval.apply = function(func, kwdict, varargseq, kws, args)
         // builtin.js, for example) as they are javascript functions,
         // not Sk.builtin.func objects.
 
-	if (func.sk$klass)
-	{
-	    // klass wrapper around __init__ requires special handling
-	    return func.apply(null, [kwdict, varargseq, kws, args]);
-	}
+    if (func.sk$klass)
+    {
+        // klass wrapper around __init__ requires special handling
+        return func.apply(null, [kwdict, varargseq, kws, args]);
+    }
 
         if (varargseq)
         {
@@ -7393,7 +7436,7 @@ Sk.misceval.apply = function(func, kwdict, varargseq, kws, args)
                 args.push(i);
             }
         }
-	if (kwdict)
+    if (kwdict)
         {
             goog.asserts.fail("kwdict not implemented;");
         }
@@ -7489,10 +7532,12 @@ Sk.abstr.binop_type_error = function(lhsPy, rhsPy, name)
 };
 
 Sk.abstr.boNameToSlotFuncLhs_ = function(obj, name) {
-  if (obj === null) {
+  if (obj === null)
+  {
     return undefined;
-};
-switch (name) {
+  };
+  switch (name)
+  {
     case "Add":      return obj.nb$add          ? obj.nb$add :          obj['__add__'];
     case "Sub":      return obj.nb$subtract     ? obj.nb$subtract :     obj['__sub__'];
     case "Mult":     return obj.nb$multiply     ? obj.nb$multiply :     obj['__mul__'];
@@ -7505,14 +7550,14 @@ switch (name) {
     case "BitAnd":   return obj.nb$and          ? obj.nb$and :          obj['__and__'];
     case "BitXor":   return obj.nb$xor          ? obj.nb$xor :          obj['__xor__'];
     case "BitOr":    return obj.nb$or           ? obj.nb$or :           obj['__or__'];
-}
+  }
 };
 
 Sk.abstr.boNameToSlotFuncRhs_ = function(obj, name) {
   if (obj === null) {
     return undefined;
-};
-switch (name) {
+  };
+  switch (name) {
     case "Add":      return obj.nb$add          ? obj.nb$add :          obj['__radd__'];
     case "Sub":      return obj.nb$subtract     ? obj.nb$subtract :     obj['__rsub__'];
     case "Mult":     return obj.nb$multiply     ? obj.nb$multiply :     obj['__rmul__'];
@@ -7525,17 +7570,19 @@ switch (name) {
     case "BitAnd":   return obj.nb$and          ? obj.nb$and :          obj['__rand__'];
     case "BitXor":   return obj.nb$xor          ? obj.nb$xor :          obj['__rxor__'];
     case "BitOr":    return obj.nb$or           ? obj.nb$or :           obj['__ror__'];
-}
+  }
 };
 
 /**
  * In-place operations (+=, -=, *=, /=, //=, %=, **=, <<=, >>=, &=, ^=, |=)
  */
- Sk.abstr.iboNameToSlotFunc_ = function(obj, name) {
+ Sk.abstr.iboNameToSlotFunc_ = function(obj, name)
+ {
   if (obj === null) {
     return undefined;
-};
-switch (name) {
+  };
+  switch (name)
+  {
     case "Add":      return obj.nb$inplace_add          ? obj.nb$inplace_add          : obj['__iadd__'];
     case "Sub":      return obj.nb$inplace_subtract     ? obj.nb$inplace_subtract     : obj['__isub__'];
     case "Mult":     return obj.nb$inplace_multiply     ? obj.nb$inplace_multiply     : obj['__imul__'];
@@ -7548,7 +7595,7 @@ switch (name) {
     case "BitAnd":   return obj.nb$inplace_and;
     case "BitOr":    return obj.nb$inplace_or;
     case "BitXor":   return obj.nb$inplace_xor          ? obj.nb$inplace_xor          : obj['__ixor__'];
-}
+  }
 };
 
 Sk.abstr.binary_op_ = function(v, w, opname)
@@ -7557,10 +7604,12 @@ Sk.abstr.binary_op_ = function(v, w, opname)
     var vop = Sk.abstr.boNameToSlotFuncLhs_(v, opname);
     if (vop !== undefined)
     {   
-        if (vop.call) {
+        if (vop.call)
+        {
             ret = vop.call(v, w);
         }
-        else {
+        else
+        {
             // assume that vop is an __xxx__ type method
             ret = Sk.misceval.callsim(vop,v,w)
         }
@@ -7569,10 +7618,12 @@ Sk.abstr.binary_op_ = function(v, w, opname)
     var wop = Sk.abstr.boNameToSlotFuncRhs_(w, opname);
     if (wop !== undefined)
     {
-        if (wop.call) {
+        if (wop.call)
+        {
             ret = wop.call(w, v);
         }
-        else {
+        else
+        {
             // assume that wop is an __xxx__ type method
             ret = Sk.misceval.callsim(wop,w,v)
         }
@@ -7589,22 +7640,29 @@ Sk.abstr.binary_iop_ = function(v, w, opname)
     {
         if (vop.call) {
             ret = vop.call(v, w);
-    } else {  // assume that vop is an __xxx__ type method
-        ret = Sk.misceval.callsim(vop,v,w); //  added to be like not-in-place... is this okay?
+        }
+        else
+        {
+            // assume that vop is an __xxx__ type method
+            ret = Sk.misceval.callsim(vop,v,w);
+        }
+        if (ret !== undefined) return ret;
     }
-    if (ret !== undefined) return ret;
-}
-var wop = Sk.abstr.iboNameToSlotFunc_(w, opname);
-if (wop !== undefined)
-{
-    if (wop.call) {
-        ret = wop.call(w, v);
-    } else { // assume that wop is an __xxx__ type method
-        ret = Sk.misceval.callsim(wop,w,v); //  added to be like not-in-place... is this okay?
+    var wop = Sk.abstr.iboNameToSlotFunc_(w, opname);
+    if (wop !== undefined)
+    {
+        if (wop.call)
+        {
+            ret = wop.call(w, v);
+        }
+        else
+        {
+            // assume that wop is an __xxx__ type method
+            ret = Sk.misceval.callsim(wop,w,v);
+        }
+        if (ret !== undefined) return ret;
     }
-    if (ret !== undefined) return ret;
-}
-Sk.abstr.binop_type_error(v, w, opname);
+    Sk.abstr.binop_type_error(v, w, opname);
 };
 
 //
@@ -7612,21 +7670,25 @@ Sk.abstr.binop_type_error(v, w, opname);
 // result, or if either of the ops are already longs
 Sk.abstr.numOpAndPromote = function(a, b, opfn)
 {
-    if (a === null || b === null) {
+    if (a === null || b === null)
+    {
         return undefined;
     };
 
     if (typeof a === "number" && typeof b === "number")
     {
         var ans = opfn(a, b);
-        // todo; handle float   Removed RNL (bugs in lng, and it should be a question of precision, not magnitude -- this was just wrong)
-        if ( (ans > Sk.builtin.lng.threshold$ || ans < -Sk.builtin.lng.threshold$)  // RNL
-        && Math.floor(ans) === ans) {                                               // RNL
-            return [Sk.builtin.lng.fromInt$(a), Sk.builtin.lng.fromInt$(b)];        // RNL
-        } else                                                                      // RNL
-        return ans;
+        if ( (ans > Sk.builtin.lng.threshold$ || ans < -Sk.builtin.lng.threshold$) && Math.floor(ans) === ans)
+        {
+            return [Sk.builtin.lng.fromInt$(a), Sk.builtin.lng.fromInt$(b)];
+        }
+        else
+        {
+            return ans;
+        }
     }
-    else if (a === undefined || b === undefined) {
+    else if (a === undefined || b === undefined)
+    {
         throw new Sk.builtin.NameError('Undefined variable in expression')
     }
 
@@ -7634,7 +7696,8 @@ Sk.abstr.numOpAndPromote = function(a, b, opfn)
     {
         return [a, b];
     }
-    else if (a.constructor === Sk.builtin.NumberPy) {
+    else if (a.constructor === Sk.builtin.NumberPy)
+    {
         return [a, b];
     }
     else if (typeof a === "number")
@@ -7716,8 +7779,12 @@ Sk.abstr.boNumPromote_ = {
     }
 };
 
+/**
+ * This is the entry point for the compiler.
+ */
 Sk.abstr.numberBinOp = function(v, w, op)
 {
+    // Look for a shortcut function for JavaScipt number.
     var numPromoteFunc = Sk.abstr.boNumPromote_[op];
     if (numPromoteFunc !== undefined)
     {
@@ -7740,7 +7807,7 @@ Sk.abstr.numberBinOp = function(v, w, op)
             w = tmp[1];
         }
     }
-
+    // The fall back is to do the object-oriented operation.
     return Sk.abstr.binary_op_(v, w, op);
 };
 goog.exportSymbol("Sk.abstr.numberBinOp", Sk.abstr.numberBinOp);
@@ -7776,39 +7843,69 @@ goog.exportSymbol("Sk.abstr.numberInplaceBinOp", Sk.abstr.numberInplaceBinOp);
 
 /**
  * Unary arithmetic operations (-, +, abs(), and ~)
+ * @param {*} obj
+ * @param {Sk.abstr.unaryOp} name
  */
  Sk.abstr.uboNameToSlotFunc_ = function(obj, name) {
-  if (obj === null) {
+  if (obj === null)
+  {
     return undefined;
-};
-switch (name) {
-    case "USub": {
+  };
+  switch (name)
+  {
+    case Sk.abstr.unaryOp.USub:
+    {
         return obj.nu$negative          ? obj.nu$negative        : obj['__neg__'];
     }
-    case "Invert": {
+    case Sk.abstr.unaryOp.Invert:
+    {
         return obj.nb$invert            ? obj.nb$invert          : obj['__invert__'];
     }
-    case "UAdd": {
+    case Sk.abstr.unaryOp.UAdd:
+    {
         return obj.nb$positive          ? obj.nb$positive        : obj['__pos__'];
     }
-    default: {
+    default:
+    {
         throw new Sk.builtin.AssertionError("7fb8237f-879b-4192-89ce-13ad6fa3b2d8 " + name);
     }
-}
+  }
 };
 
+/**
+ * @enum {string}
+ */
+Sk.abstr.unaryOp =
+{
+    Not:    'Not',
+    USub:   'USub',
+    Invert: 'Invert',
+    UAdd:   'UAdd'
+};
+goog.exportSymbol("Sk.abstr.unaryOp", Sk.abstr.unaryOp);
+
+/**
+ * This is the compiler entry point.
+ * @param {*} valuePy
+ * @param {Sk.abstr.unaryOp} op
+ */
 Sk.abstr.numberUnaryOp = function(valuePy, op)
 {
-    if (op === "Not")
+    goog.asserts.assertString(op, "op must be a string");
+
+    if (op === Sk.abstr.unaryOp.Not)
     {
         return Sk.misceval.isTrue(valuePy) ? Sk.builtin.bool.false$ : Sk.builtin.bool.true$;
     }
-    else if (valuePy instanceof Sk.builtin.NumberPy || valuePy instanceof Sk.builtin.bool)
+    else if (Sk.ffi.isFloat(valuePy) || Sk.ffi.isInt(valuePy) || Sk.ffi.isBool(valuePy))
     {
+        /**
+         * @const
+         */
         var value = Sk.ffi.remapToJs(valuePy);
-        if (op === "USub")   return Sk.builtin.numberPy(-value, value.skType);
-        if (op === "Invert") return Sk.builtin.numberPy(~value, value.skType);
-        if (op === "UAdd")   return Sk.builtin.numberPy(value, value.skType);
+        if (op === Sk.abstr.unaryOp.USub)   return Sk.builtin.numberPy(-value, value.skType);
+        if (op === Sk.abstr.unaryOp.Invert) return Sk.builtin.numberPy(~value, value.skType);
+        if (op === Sk.abstr.unaryOp.UAdd)   return Sk.builtin.numberPy(value, value.skType);
     }
     else
     {
@@ -7858,8 +7955,10 @@ Sk.abstr.sequenceContains = function(seq, ob)
     
     for (var it = seq.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext())
     {
-        if (Sk.misceval.richCompareBool(i, ob, "Eq"))
+        if (Sk.misceval.richCompareBool(i, ob, Sk.misceval.compareOp.Eq))
+        {
             return true;
+        }
     }
     return false;
 };
@@ -8097,9 +8196,9 @@ goog.exportSymbol("Sk.abstr.iternext", Sk.abstr.iternext);
  * @param {Sk.builtin.func=} key
  * @param {boolean=} reverse
  */
-Sk.mergeSort = function(arr, cmp, key, reverse)	//	Replaced by quicksort
+Sk.mergeSort = function(arr, cmp, key, reverse) //  Replaced by quicksort
 {
-	Sk.quickSort(arr, cmp, key, reverse)
+  Sk.quickSort(arr, cmp, key, reverse)
 }
 
 Sk.quickSort = function(arr, cmp, key, reverse)
@@ -8112,51 +8211,51 @@ Sk.quickSort = function(arr, cmp, key, reverse)
     }
 
     var partition = function(arr, begin, end, pivot, reverse)
-	{
-		var tmp;
-		var piv=arr[pivot];
-		
-//		swap pivot, end-1
-		tmp=arr[pivot];
-		arr[pivot]=arr[end-1];
-		arr[end-1]=tmp;
+  {
+    var tmp;
+    var piv=arr[pivot];
+    
+//    swap pivot, end-1
+    tmp=arr[pivot];
+    arr[pivot]=arr[end-1];
+    arr[end-1]=tmp;
 
-		var store=begin;
-		var ix;
-		for(ix=begin; ix<end-1; ++ix) {
+    var store=begin;
+    var ix;
+    for(ix=begin; ix<end-1; ++ix) {
             if ( reverse ) {
-			  var cmpresult = Sk.misceval.callsim(cmp, piv, arr[ix]);
+        var cmpresult = Sk.misceval.callsim(cmp, piv, arr[ix]);
             } else {
-			  var cmpresult = Sk.misceval.callsim(cmp, arr[ix], piv);
+        var cmpresult = Sk.misceval.callsim(cmp, arr[ix], piv);
             }
             if( Sk.builtin.asnum$(cmpresult) < 0 ) {
-//				swap store, ix
-				tmp=arr[store];
-				arr[store]=arr[ix];
-				arr[ix]=tmp;
-				++store;
-			}
-		}
-		
-//		swap end-1, store
-		tmp=arr[end-1];
-		arr[end-1]=arr[store];
-		arr[store]=tmp;
-	
-		return store;
-	}
-	
-	var qsort = function(arr, begin, end, reverse)
-	{
-		if(end-1>begin) {
-			var pivot=begin+Math.floor(Math.random()*(end-begin));
-	
-			pivot=partition(arr, begin, end, pivot, reverse);
-	
-			qsort(arr, begin, pivot, reverse);
-			qsort(arr, pivot+1, end, reverse);
-		}
-	}
+//        swap store, ix
+        tmp=arr[store];
+        arr[store]=arr[ix];
+        arr[ix]=tmp;
+        ++store;
+      }
+    }
+    
+//    swap end-1, store
+    tmp=arr[end-1];
+    arr[end-1]=arr[store];
+    arr[store]=tmp;
+  
+    return store;
+  }
+  
+  var qsort = function(arr, begin, end, reverse)
+  {
+    if(end-1>begin) {
+      var pivot=begin+Math.floor(Math.random()*(end-begin));
+  
+      pivot=partition(arr, begin, end, pivot, reverse);
+  
+      qsort(arr, begin, pivot, reverse);
+      qsort(arr, pivot+1, end, reverse);
+    }
+  }
 
     qsort(arr, 0, arr.length, reverse);
     return null;
@@ -8165,12 +8264,12 @@ Sk.quickSort = function(arr, cmp, key, reverse)
 Sk.mergeSort.stdCmp = new Sk.builtin.func(function(k0, k1)
 {
     //print("CMP", JSON.stringify(k0), JSON.stringify(k1));
-    var res = Sk.misceval.richCompareBool(k0, k1, "Lt") ? -1 : 0;
+    var res = Sk.misceval.richCompareBool(k0, k1, Sk.misceval.compareOp.Lt) ? -1 : 0;
     //print("  ret:", res);
     return res;
 });
 
-//	A javascript mergesort from the web
+//  A javascript mergesort from the web
 
 //function merge_sort(arr) {  
 //    var l = arr.length, m = Math.floor(l/2);  
@@ -8198,7 +8297,7 @@ Sk.mergeSort.stdCmp = new Sk.builtin.func(function(k0, k1)
 //    return result;  
 //} 
 
-//	Old, original code (doesn't work)
+//  Old, original code (doesn't work)
 //Sk.mergeSort = function(arr, cmp, key, reverse)
 //{
 //    goog.asserts.assert(!key, "todo;");
@@ -8378,6 +8477,10 @@ Sk.builtin.list.prototype.tp$repr = function()
 Sk.builtin.list.prototype.tp$getattr = Sk.builtin.object.prototype.GenericGetAttr;
 Sk.builtin.list.prototype.tp$hash = Sk.builtin.object.prototype.HashNotImplemented;
 
+/**
+ * @param {*} w
+ * @param {Sk.misceval.compareOp} op
+ */
 Sk.builtin.list.prototype.tp$richcompare = function(w, op)
 {
     // todo; can't figure out where cpy handles this silly case (test/run/t96.py)
@@ -8392,8 +8495,8 @@ Sk.builtin.list.prototype.tp$richcompare = function(w, op)
     if (!w.__class__ || w.__class__ != Sk.builtin.list)
     {
         // shortcuts for eq/not
-        if (op === 'Eq') return false;
-        if (op === 'NotEq') return true;
+        if (op === Sk.misceval.compareOp.Eq) return false;
+        if (op === Sk.misceval.compareOp.NotEq) return true;
 
         // todo; other types should have an arbitrary order
         return false;
@@ -8407,7 +8510,7 @@ Sk.builtin.list.prototype.tp$richcompare = function(w, op)
     var i;
     for (i = 0; i < vl && i < wl; ++i)
     {
-        var k = Sk.misceval.richCompareBool(v[i], w[i], 'Eq');
+        var k = Sk.misceval.richCompareBool(v[i], w[i], Sk.misceval.compareOp.Eq);
         if (!k) break;
     }
 
@@ -8416,12 +8519,12 @@ Sk.builtin.list.prototype.tp$richcompare = function(w, op)
         // no more items to compare, compare sizes
         switch (op)
         {
-            case 'Lt': return vl < wl;
+            case Sk.misceval.compareOp.Lt: return vl < wl;
             case 'LtE': return vl <= wl;
-            case 'Eq': return vl === wl;
-            case 'NotEq': return vl !== wl;
-            case 'Gt': return vl > wl;
-            case 'GtE': return vl >= wl;
+            case Sk.misceval.compareOp.Eq: return vl === wl;
+            case Sk.misceval.compareOp.NotEq: return vl !== wl;
+            case Sk.misceval.compareOp.Gt: return vl > wl;
+            case Sk.misceval.compareOp.GtE: return vl >= wl;
             default: goog.asserts.fail();
         }
     }
@@ -8429,8 +8532,8 @@ Sk.builtin.list.prototype.tp$richcompare = function(w, op)
     // we have an item that's different
 
     // shortcuts for eq/not
-    if (op === 'Eq') return false;
-    if (op === 'NotEq') return true;
+    if (op === Sk.misceval.compareOp.Eq) return false;
+    if (op === Sk.misceval.compareOp.NotEq) return true;
 
     // or, compare the differing element using the proper operator
     return Sk.misceval.richCompareBool(v[i], w[i], op);
@@ -8597,14 +8700,14 @@ Sk.builtin.list.prototype.list_sort_ = function(self, cmp, key, reverse) {
         {
             timsort.lt = function(a, b)
             {
-                return Sk.misceval.richCompareBool(cmp.func_code(a[0], b[0]), zero, "Lt");
+                return Sk.misceval.richCompareBool(cmp.func_code(a[0], b[0]), zero, Sk.misceval.compareOp.Lt);
             };
         }
         else
         {
             timsort.lt = function(a, b)
             {
-                return Sk.misceval.richCompareBool(a[0], b[0], "Lt");
+                return Sk.misceval.richCompareBool(a[0], b[0], Sk.misceval.compareOp.Lt);
             }
         }
         for (var i =0; i < timsort.listlength; i++)
@@ -8616,18 +8719,21 @@ Sk.builtin.list.prototype.list_sort_ = function(self, cmp, key, reverse) {
     }
     else if (has_cmp)
     {
-        timsort.lt = function(a, b){
-            return Sk.misceval.richCompareBool(cmp.func_code(a, b), zero, "Lt");
+        timsort.lt = function(a, b)
+        {
+            return Sk.misceval.richCompareBool(cmp.func_code(a, b), zero, Sk.misceval.compareOp.Lt);
         };
     }
 
-    if (reverse){
+    if (reverse)
+    {
         timsort.list.list_reverse_(timsort.list);
     }
 
     timsort.sort();
 
-    if (reverse){
+    if (reverse)
+    {
         timsort.list.list_reverse_(timsort.list);
     }
 
@@ -8642,7 +8748,8 @@ Sk.builtin.list.prototype.list_sort_ = function(self, cmp, key, reverse) {
 
     self.v = timsort.list.v;
 
-    if (mucked) {
+    if (mucked)
+    {
         throw new Sk.builtin.OperationError("list modified during sort");
     }
 }
@@ -8754,7 +8861,7 @@ Sk.builtin.list.prototype['index'] = new Sk.builtin.func(function(self, item)
     var obj = self.v;
     for (var i = 0; i < len; ++i)
     {
-        if (Sk.misceval.richCompareBool(obj[i], item, "Eq"))
+        if (Sk.misceval.richCompareBool(obj[i], item, Sk.misceval.compareOp.Eq))
         {
             return i;
         }
@@ -8771,7 +8878,7 @@ Sk.builtin.list.prototype['count'] = new Sk.builtin.func(function(self, item)
     var count = 0;
     for (var i = 0; i < len; ++i)
     {
-        if (Sk.misceval.richCompareBool(obj[i], item, "Eq"))
+        if (Sk.misceval.richCompareBool(obj[i], item, Sk.misceval.compareOp.Eq))
         {
             count += 1;
         }
@@ -8958,9 +9065,9 @@ Sk.builtin.str.prototype.tp$richcompare = function(other, op)
     {
         switch (op)
         {
-            case 'Eq': case 'LtE': case 'GtE':
+            case Sk.misceval.compareOp.Eq: case 'LtE': case Sk.misceval.compareOp.GtE:
                 return true;
-            case 'NotEq': case 'Lt': case 'Gt':
+            case Sk.misceval.compareOp.NotEq: case Sk.misceval.compareOp.Lt: case Sk.misceval.compareOp.Gt:
                 return false;
         }
     }
@@ -8991,12 +9098,12 @@ Sk.builtin.str.prototype.tp$richcompare = function(other, op)
 
     switch (op)
     {
-        case 'Lt': return c < 0;
+        case Sk.misceval.compareOp.Lt: return c < 0;
         case 'LtE': return c <= 0;
-        case 'Eq': return c == 0;
-        case 'NotEq': return c != 0;
-        case 'Gt': return c > 0;
-        case 'GtE': return c >= 0;
+        case Sk.misceval.compareOp.Eq: return c == 0;
+        case Sk.misceval.compareOp.NotEq: return c != 0;
+        case Sk.misceval.compareOp.Gt: return c > 0;
+        case Sk.misceval.compareOp.GtE: return c >= 0;
         default:
             goog.asserts.fail();
     }
@@ -9617,7 +9724,7 @@ Sk.builtin.str.prototype.nb$remainder = function(rhs)
             else if (Sk.ffi.isLong(n))
             {
                 r = n.str$(base, false);
-                neg = n.nb$isnegative();    //  neg = n.size$ < 0;  RNL long.js change
+                neg = n.nb$isnegative();
             }
 
             goog.asserts.assert(r !== undefined, "unhandled number format");
@@ -9798,7 +9905,7 @@ Sk.builtin.tuple = function(L)
                 this.v.push(i);
         }
         else
-            throw new Sk.builtin.ValueError("expecting Array or iterable");        
+            throw new Sk.builtin.ValueError("expecting Array or iterable");
     }
 
     this.__class__ = Sk.builtin.tuple;
@@ -9922,6 +10029,10 @@ Sk.builtin.tuple.prototype['__iter__'] = new Sk.builtin.func(function(self)
 
 Sk.builtin.tuple.prototype.tp$getattr = Sk.builtin.object.prototype.GenericGetAttr;
 
+/**
+ * @param {*} w
+ * @param {Sk.misceval.compareOp} op
+ */
 Sk.builtin.tuple.prototype.tp$richcompare = function(w, op)
 {
     //print("  tup rc", JSON.stringify(this.v), JSON.stringify(w), op);
@@ -9930,8 +10041,8 @@ Sk.builtin.tuple.prototype.tp$richcompare = function(w, op)
     if (!w.__class__ || w.__class__ != Sk.builtin.tuple)
     {
         // shortcuts for eq/not
-        if (op === 'Eq') return false;
-        if (op === 'NotEq') return true;
+        if (op === Sk.misceval.compareOp.Eq) return false;
+        if (op === Sk.misceval.compareOp.NotEq) return true;
 
         // todo; other types should have an arbitrary order
         return false;
@@ -9945,7 +10056,7 @@ Sk.builtin.tuple.prototype.tp$richcompare = function(w, op)
     var i;
     for (i = 0; i < vl && i < wl; ++i)
     {
-        var k = Sk.misceval.richCompareBool(v[i], w[i], 'Eq');
+        var k = Sk.misceval.richCompareBool(v[i], w[i], Sk.misceval.compareOp.Eq);
         if (!k) break;
     }
 
@@ -9954,12 +10065,12 @@ Sk.builtin.tuple.prototype.tp$richcompare = function(w, op)
         // no more items to compare, compare sizes
         switch (op)
         {
-            case 'Lt': return vl < wl;
+            case Sk.misceval.compareOp.Lt: return vl < wl;
             case 'LtE': return vl <= wl;
-            case 'Eq': return vl === wl;
-            case 'NotEq': return vl !== wl;
-            case 'Gt': return vl > wl;
-            case 'GtE': return vl >= wl;
+            case Sk.misceval.compareOp.Eq: return vl === wl;
+            case Sk.misceval.compareOp.NotEq: return vl !== wl;
+            case Sk.misceval.compareOp.Gt: return vl > wl;
+            case Sk.misceval.compareOp.GtE: return vl >= wl;
             default: goog.asserts.fail();
         }
     }
@@ -9967,8 +10078,8 @@ Sk.builtin.tuple.prototype.tp$richcompare = function(w, op)
     // we have an item that's different
 
     // shortcuts for eq/not
-    if (op === 'Eq') return false;
-    if (op === 'NotEq') return true;
+    if (op === Sk.misceval.compareOp.Eq) return false;
+    if (op === Sk.misceval.compareOp.NotEq) return true;
 
     // or, compare the differing element using the proper operator
     //print("  tup rcb end", i, v[i] instanceof Sk.builtin.str, JSON.stringify(v[i]), w[i] instanceof Sk.builtin.str, JSON.stringify(w[i]), op);
@@ -9992,8 +10103,10 @@ Sk.builtin.tuple.prototype['index'] = new Sk.builtin.func(function(self, item)
     var obj = self.v;
     for (var i = 0; i < len; ++i)
     {
-        if (Sk.misceval.richCompareBool(obj[i], item, "Eq"))
+        if (Sk.misceval.richCompareBool(obj[i], item, Sk.misceval.compareOp.Eq))
+        {
             return i;
+        }
     }
     throw new Sk.builtin.ValueError("tuple.index(x): x not in tuple");
 });
@@ -10005,7 +10118,7 @@ Sk.builtin.tuple.prototype['count'] = new Sk.builtin.func(function(self, item)
     var count = 0;
     for (var i = 0; i < len; ++i)
     {
-        if (Sk.misceval.richCompareBool(obj[i], item, "Eq"))
+        if (Sk.misceval.richCompareBool(obj[i], item, Sk.misceval.compareOp.Eq))
         {
             count += 1;
         }
@@ -10090,7 +10203,7 @@ Sk.builtin.dict.prototype.key$lookup = function(bucket, key)
     for (i=0; i<bucket.items.length; i++)
     {
         item = bucket.items[i];
-        eq = Sk.misceval.richCompareBool(item.lhs, key, 'Eq');
+        eq = Sk.misceval.richCompareBool(item.lhs, key, Sk.misceval.compareOp.Eq);
         if (eq)
         {
             return item;
@@ -10108,7 +10221,7 @@ Sk.builtin.dict.prototype.key$pop = function(bucket, key)
     for (i=0; i<bucket.items.length; i++)
     {
         item = bucket.items[i];
-        eq = Sk.misceval.richCompareBool(item.lhs, key, 'Eq');
+        eq = Sk.misceval.richCompareBool(item.lhs, key, Sk.misceval.compareOp.Eq);
         if (eq)
         {
             bucket.items.splice(i, 1);
@@ -10277,6 +10390,10 @@ Sk.builtin.dict.prototype.mp$length = function() { return this.size; };
 Sk.builtin.dict.prototype.tp$getattr = Sk.builtin.object.prototype.GenericGetAttr;
 Sk.builtin.dict.prototype.tp$hash = Sk.builtin.object.prototype.HashNotImplemented;
 
+/**
+ * @param {*} other
+ * @param {Sk.misceval.compareOp} op
+ */
 Sk.builtin.dict.prototype.tp$richcompare = function(other, op)
 {
     // if the comparison allows for equality then short-circuit it here
@@ -10286,18 +10403,20 @@ Sk.builtin.dict.prototype.tp$richcompare = function(other, op)
     // Only support Eq and NotEq comparisons
     switch (op)
     {
-        case 'Lt': return undefined;
-        case 'LtE': return undefined;
-        case 'Eq': break;
-        case 'NotEq': break;
-        case 'Gt': return undefined;
-        case 'GtE': return undefined;
+        case Sk.misceval.compareOp.Lt: return undefined;
+        case Sk.misceval.compareOp.LtE: return undefined;
+        case Sk.misceval.compareOp.Eq: break;
+        case Sk.misceval.compareOp.NotEq: break;
+        case Sk.misceval.compareOp.Gt: return undefined;
+        case Sk.misceval.compareOp.GtE: return undefined;
         default:
             goog.asserts.fail();
     }
 
-    if (!(other instanceof Sk.builtin.dict)) {
-        if (op === 'Eq') {
+    if (!(other instanceof Sk.builtin.dict))
+    {
+        if (op === Sk.misceval.compareOp.Eq)
+        {
             return false;
         } else {
             return true;
@@ -10307,10 +10426,14 @@ Sk.builtin.dict.prototype.tp$richcompare = function(other, op)
     var thisl = this.size;
     var otherl = other.size;
 
-    if (thisl !== otherl) {
-        if (op === 'Eq') {
+    if (thisl !== otherl)
+    {
+        if (op === Sk.misceval.compareOp.Eq)
+        {
             return false;
-        } else {
+        }
+        else
+        {
             return true;
         }
     }
@@ -10322,21 +10445,27 @@ Sk.builtin.dict.prototype.tp$richcompare = function(other, op)
         var v = this.mp$subscript(k);
         var otherv = other.mp$subscript(k);
 
-        if (!Sk.misceval.richCompareBool(v, otherv, 'Eq'))
+        if (!Sk.misceval.richCompareBool(v, otherv, Sk.misceval.compareOp.Eq))
         {
-            if (op === 'Eq') {
+            if (op === Sk.misceval.compareOp.Eq)
+            {
                 return false;
-            } else {
+            }
+            else
+            {
                 return true;
-            }            
+            }
         }
     }
 
-    if (op === 'Eq') {
+    if (op === Sk.misceval.compareOp.Eq)
+    {
         return true;
-    } else {
+    }
+    else
+    {
         return false;
-    }                
+    }
 }
 
 Sk.builtin.dict.prototype['get'] = new Sk.builtin.func(function(self, k, d)
@@ -11786,7 +11915,7 @@ Sk.builtin.numberPy = function(x, skType)
   {
     if (x > Sk.builtin.NumberPy.threshold$ || x < -Sk.builtin.NumberPy.threshold$ || x % 1 != 0)
     {
-      return new Sk.builtin.NumberPy(x, Sk.builtin.NumberPy.float$);
+      return Sk.ffi.numberToPy(x);
     }
     else
     {
@@ -13698,9 +13827,9 @@ Sk.builtin.float_.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('float', S
  */
 Sk.builtin.slice = function slice(start, stop, step)
 {
-	start = Sk.builtin.asnum$(start);
-	stop  = Sk.builtin.asnum$(stop);
-	step  = Sk.builtin.asnum$(step);
+    start = Sk.builtin.asnum$(start);
+    stop  = Sk.builtin.asnum$(stop);
+    step  = Sk.builtin.asnum$(step);
     if (!(this instanceof Sk.builtin.slice)) return new Sk.builtin.slice(start, stop, step);
 
     if (stop === undefined && step === undefined)
@@ -13734,7 +13863,7 @@ Sk.builtin.slice.prototype.tp$str = function()
 
 Sk.builtin.slice.prototype.indices = function(length)
 {
-	length = Sk.builtin.asnum$(length);
+    length = Sk.builtin.asnum$(length);
     // this seems ugly, better way?
     var start = this.start, stop = this.stop, step = this.step, i;
     if (step === null) step = 1;
@@ -13774,19 +13903,18 @@ Sk.builtin.slice.prototype.indices = function(length)
 
 Sk.builtin.slice.prototype.sssiter$ = function(wrt, f)
 {
-	var wrtv = Sk.builtin.asnum$(wrt);
+    var wrtv = Sk.builtin.asnum$(wrt);
     var sss = this.indices(typeof wrtv === "number" ? wrtv : wrt.v.length);
     if (sss[2] > 0)
     {
         var i;
         for (i = sss[0]; i < sss[1]; i += sss[2])
-            if (f(i, wrtv) === false) return;	//	wrt or wrtv? RNL
+            if (f(i, wrtv) === false) return;   //  wrt or wrtv?
     }
     else
     {
         for (i = sss[0]; i > sss[1]; i += sss[2])
-            if (f(i, wrtv) === false) return;	//	wrt or wrtv? RNL
-
+            if (f(i, wrtv) === false) return;
     }
 };
 /**
@@ -13857,8 +13985,8 @@ Sk.builtin.set.prototype.tp$richcompare = function(w, op)
     if (!w.__class__ || w.__class__ != Sk.builtin.set)
     {
         // shortcuts for eq/not
-        if (op === 'Eq') return false;
-        if (op === 'NotEq') return true;
+        if (op === Sk.misceval.compareOp.Eq) return false;
+        if (op === Sk.misceval.compareOp.NotEq) return true;
 
         // todo; other types should have an arbitrary order
         return false;
@@ -13870,9 +13998,9 @@ Sk.builtin.set.prototype.tp$richcompare = function(w, op)
     // easy short-cut
     if (wl !== vl)
     {
-        if (op === 'Eq')
+        if (op === Sk.misceval.compareOp.Eq)
             return false;
-        if (op === 'NotEq')
+        if (op === Sk.misceval.compareOp.NotEq)
             return true;
     }
 
@@ -13883,14 +14011,14 @@ Sk.builtin.set.prototype.tp$richcompare = function(w, op)
     // gather common info
     switch (op)
     {
-        case 'Lt':
+        case Sk.misceval.compareOp.Lt:
         case 'LtE':
-        case 'Eq':
-        case 'NotEq':
+        case Sk.misceval.compareOp.Eq:
+        case Sk.misceval.compareOp.NotEq:
             isSub = Sk.builtin.set.prototype['issubset'].func_code(this, w);
             break;
-        case 'Gt':
-        case 'GtE':
+        case Sk.misceval.compareOp.Gt:
+        case Sk.misceval.compareOp.GtE:
             isSuper = Sk.builtin.set.prototype['issuperset'].func_code(this, w);
             break;
         default:
@@ -13899,16 +14027,16 @@ Sk.builtin.set.prototype.tp$richcompare = function(w, op)
 
     switch (op)
     {
-        case 'Lt':
+        case Sk.misceval.compareOp.Lt:
             return vl < wl && isSub;
         case 'LtE':
-        case 'Eq':  // we already know that the lengths are equal
+        case Sk.misceval.compareOp.Eq:  // we already know that the lengths are equal
             return isSub;
-        case 'NotEq':
+        case Sk.misceval.compareOp.NotEq:
             return !isSub;
-        case 'Gt':
+        case Sk.misceval.compareOp.Gt:
             return vl > wl && isSuper;
-        case 'GtE':
+        case Sk.misceval.compareOp.GtE:
             return isSuper;
     }
 };
@@ -14881,10 +15009,13 @@ goog.exportSymbol("Sk.ffi.remapToPy", Sk.ffi.remapToPy);
 
 /**
  * @nosideeffects
- * @param {Object} valuePy
+ * @param {*} valuePy
  * @return {boolean}
  */
-Sk.ffi.isBool = function(valuePy) {return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.BOOL;};
+Sk.ffi.isBool = function(valuePy)
+{
+    return Sk.ffi.getType(valuePy) === Sk.ffi.PyType.BOOL;
+};
 goog.exportSymbol("Sk.ffi.isBool", Sk.ffi.isBool);
 
 /**
@@ -14941,7 +15072,7 @@ goog.exportSymbol("Sk.ffi.isTuple", Sk.ffi.isTuple);
 
 /**
  * @nosideeffects
- * @param {Object} valuePy
+ * @param {*} valuePy
  * @return {boolean}
  */
 Sk.ffi.isFloat = function(valuePy)
@@ -14958,7 +15089,7 @@ goog.exportSymbol("Sk.ffi.isFunctionRef", Sk.ffi.isFunctionRef);
 
 /**
  * @nosideeffects
- * @param {Object} valuePy
+ * @param {*} valuePy
  * @return {boolean}
  */
 Sk.ffi.isInt = function(valuePy)
@@ -16237,83 +16368,83 @@ Sk.ffh.getitem = function(objPy, index)
 goog.exportSymbol("Sk.ffh.getitem", Sk.ffh.getitem);
 
 Sk.ffh.add = function(lhsPy, rhsPy) {
-  return Sk.abstr.binary_op_(lhsPy, rhsPy, "Add");
+  return Sk.abstr.numberBinOp(lhsPy, rhsPy, "Add");
 };
 goog.exportSymbol("Sk.ffh.add", Sk.ffh.add);
 
 Sk.ffh.subtract = function(lhsPy, rhsPy) {
-  return Sk.abstr.binary_op_(lhsPy, rhsPy, "Sub");
+  return Sk.abstr.numberBinOp(lhsPy, rhsPy, "Sub");
 };
 goog.exportSymbol("Sk.ffh.subtract", Sk.ffh.subtract);
 
 Sk.ffh.multiply = function(lhsPy, rhsPy) {
-  return Sk.abstr.binary_op_(lhsPy, rhsPy, "Mult");
+  return Sk.abstr.numberBinOp(lhsPy, rhsPy, "Mult");
 };
 goog.exportSymbol("Sk.ffh.multiply", Sk.ffh.multiply);
 
 Sk.ffh.divide = function(lhsPy, rhsPy) {
-  return Sk.abstr.binary_op_(lhsPy, rhsPy, "Div");
+  return Sk.abstr.numberBinOp(lhsPy, rhsPy, "Div");
 };
 goog.exportSymbol("Sk.ffh.divide", Sk.ffh.divide);
 
 Sk.ffh.mod = function(lhsPy, rhsPy) {
-  return Sk.abstr.binary_op_(lhsPy, rhsPy, "Mod");
+  return Sk.abstr.numberBinOp(lhsPy, rhsPy, "Mod");
 };
 goog.exportSymbol("Sk.ffh.mod", Sk.ffh.mod);
 
 Sk.ffh.xor = function(lhsPy, rhsPy) {
-  return Sk.abstr.binary_op_(lhsPy, rhsPy, "BitXor");
+  return Sk.abstr.numberBinOp(lhsPy, rhsPy, "BitXor");
 };
 goog.exportSymbol("Sk.ffh.xor", Sk.ffh.xor);
 
 Sk.ffh.lshift = function(lhsPy, rhsPy) {
-  return Sk.abstr.binary_op_(lhsPy, rhsPy, "LShift");
+  return Sk.abstr.numberBinOp(lhsPy, rhsPy, "LShift");
 };
 goog.exportSymbol("Sk.ffh.lshift", Sk.ffh.lshift);
 
 Sk.ffh.rshift = function(lhsPy, rhsPy) {
-  return Sk.abstr.binary_op_(lhsPy, rhsPy, "RShift");
+  return Sk.abstr.numberBinOp(lhsPy, rhsPy, "RShift");
 };
 goog.exportSymbol("Sk.ffh.rshift", Sk.ffh.rshift);
 
 Sk.ffh.pow = function(lhsPy, rhsPy) {
-  return Sk.abstr.binary_op_(lhsPy, rhsPy, "Pow");
+  return Sk.abstr.numberBinOp(lhsPy, rhsPy, "Pow");
 };
 goog.exportSymbol("Sk.ffh.rshift", Sk.ffh.rshift);
 
 Sk.ffh.eq = function(lhsPy, rhsPy)
 {
-    return Sk.builtin.bool(Sk.misceval.richCompareBool(lhsPy, rhsPy, "Eq"));
+    return Sk.builtin.bool(Sk.misceval.richCompareBool(lhsPy, rhsPy, Sk.misceval.compareOp.Eq));
 };
 goog.exportSymbol("Sk.ffh.eq", Sk.ffh.eq);
 
 Sk.ffh.lt = function(lhsPy, rhsPy)
 {
-    return Sk.builtin.bool(Sk.misceval.richCompareBool(lhsPy, rhsPy, "Lt"));
+    return Sk.builtin.bool(Sk.misceval.richCompareBool(lhsPy, rhsPy, Sk.misceval.compareOp.Lt));
 };
 goog.exportSymbol("Sk.ffh.lt", Sk.ffh.lt);
 
 Sk.ffh.le = function(lhsPy, rhsPy)
 {
-    return Sk.builtin.bool(Sk.misceval.richCompareBool(lhsPy, rhsPy, "LtE"));
+    return Sk.builtin.bool(Sk.misceval.richCompareBool(lhsPy, rhsPy, Sk.misceval.compareOp.LtE));
 };
 goog.exportSymbol("Sk.ffh.le", Sk.ffh.le);
 
 Sk.ffh.gt = function(lhsPy, rhsPy)
 {
-    return Sk.builtin.bool(Sk.misceval.richCompareBool(lhsPy, rhsPy, "Gt"));
+    return Sk.builtin.bool(Sk.misceval.richCompareBool(lhsPy, rhsPy, Sk.misceval.compareOp.Gt));
 };
 goog.exportSymbol("Sk.ffh.gt", Sk.ffh.gt);
 
 Sk.ffh.ge = function(lhsPy, rhsPy)
 {
-    return Sk.builtin.bool(Sk.misceval.richCompareBool(lhsPy, rhsPy, "GtE"));
+    return Sk.builtin.bool(Sk.misceval.richCompareBool(lhsPy, rhsPy, Sk.misceval.compareOp.GtE));
 };
 goog.exportSymbol("Sk.ffh.ge", Sk.ffh.ge);
 
 Sk.ffh.ne = function(lhsPy, rhsPy)
 {
-    return Sk.builtin.bool(Sk.misceval.richCompareBool(lhsPy, rhsPy, "NotEq"));
+    return Sk.builtin.bool(Sk.misceval.richCompareBool(lhsPy, rhsPy, Sk.misceval.compareOp.NotEq));
 };
 goog.exportSymbol("Sk.ffh.ne", Sk.ffh.ne);
 
@@ -16356,24 +16487,41 @@ Sk.ffh.exp = function(valuePy)
 };
 goog.exportSymbol("Sk.ffh.exp", Sk.ffh.exp);
 
-Sk.ffh.positive = function(valuePy) {
-  return Sk.abstr.numberUnaryOp(valuePy, "UAdd");
+Sk.ffh.positive = function(valuePy)
+{
+  if (Sk.ffi.isFloat(valuePy))
+  {
+    return valuePy;
+  }
+  return Sk.abstr.numberUnaryOp(valuePy, Sk.abstr.unaryOp.UAdd);
 };
 goog.exportSymbol("Sk.ffh.positive", Sk.ffh.positive);
 
-Sk.ffh.negative = function(valuePy) {
-  return Sk.abstr.numberUnaryOp(valuePy, "USub");
+Sk.ffh.negative = function(valuePy)
+{
+  if (Sk.ffi.isFloat(valuePy))
+  {
+    var valueJs = Sk.ffi.remapToJs(valuePy);
+    return Sk.ffi.numberToPy(-valueJs);
+  }
+  return Sk.abstr.numberUnaryOp(valuePy, Sk.abstr.unaryOp.USub);
 };
 goog.exportSymbol("Sk.ffh.negative", Sk.ffh.negative);
 
 Sk.ffh.invert = function(valuePy)
 {
+  // TODO: Make like others?
   return Sk.ffh.unaryExec("~", SPECIAL_METHOD_INVERT, valuePy, "nb$invert");
 };
 goog.exportSymbol("Sk.ffh.invert", Sk.ffh.invert);
 
 Sk.ffh.nonzero = function(valuePy)
 {
+  if (Sk.ffi.isFloat(valuePy))
+  {
+    var valueJs = Sk.ffi.remapToJs(valuePy);
+    return Sk.ffi.booleanToPy(valueJs !== 0);
+  }
   return Sk.ffh.unaryExec("", SPECIAL_METHOD_NONZERO, valuePy, "nb$nonzero");
 };
 goog.exportSymbol("Sk.ffh.nonzero", Sk.ffh.nonzero);
@@ -16402,7 +16550,84 @@ Sk.ffh.sqrt = function(valuePy)
 };
 goog.exportSymbol("Sk.ffh.sqrt", Sk.ffh.sqrt);
 
-Sk.ffh.str = function(valuePy) {
+/**
+ * @param {number} thisJs
+ * @param {number} radix
+ * @param {boolean} sign
+ * @return {string}
+ */
+Sk.ffh.numberToFloatString = function(thisJs, radix, sign)
+{
+  goog.asserts.assertNumber(radix);
+  goog.asserts.assertBoolean(sign);
+
+  if (isNaN(thisJs))
+  {
+    return "nan";
+  }
+
+  if (sign === undefined) sign = true;
+
+  if (thisJs == Infinity)
+    return 'inf';
+  if (thisJs == -Infinity && sign)
+    return '-inf';
+  if (thisJs == -Infinity && !sign)
+    return 'inf';
+
+  var work = sign ? thisJs : Math.abs(thisJs);
+
+  var tmp;
+  if (radix === undefined || radix === 10)
+  {
+    tmp = work.toPrecision(12);
+
+    // transform fractions with 4 or more leading zeroes into exponents
+    var idx = tmp.indexOf('.');
+    var pre = work.toString().slice(0,idx);
+    var post = work.toString().slice(idx);
+    if (pre.match(/^-?0$/) && post.slice(1).match(/^0{4,}/))
+    {
+      if (tmp.length < 12)
+          tmp = work.toExponential();
+      else
+          tmp = work.toExponential(11);
+    }
+
+    while (tmp.charAt(tmp.length-1) == "0" && tmp.indexOf('e') < 0)
+    {
+      tmp = tmp.substring(0,tmp.length-1)
+    }
+    if (tmp.charAt(tmp.length-1) == ".")
+    {
+      tmp = tmp + "0";
+    }
+    tmp = tmp.replace(new RegExp('\\.0+e'),'e',"i");
+    // make exponent two digits instead of one (ie e+09 not e+9)
+    tmp = tmp.replace(/(e[-+])([1-9])$/, "$10$2");
+    // remove trailing zeroes before the exponent
+    tmp = tmp.replace(/0+(e.*)/,'$1');
+  }
+  else
+  {
+    tmp = work.toString(radix);
+  }
+
+  if (tmp.indexOf('.') < 0 && tmp.indexOf('E') < 0 && tmp.indexOf('e') < 0)
+  {
+    tmp = tmp + '.0';
+  }
+  return tmp;
+}
+goog.exportSymbol("Sk.ffh.numberToFloatString", Sk.ffh.numberToFloatString);
+
+Sk.ffh.str = function(valuePy)
+{
+  if (Sk.flyweight && Sk.ffi.isFloat(valuePy))
+  {
+    return Sk.ffi.stringToPy(Sk.ffh.numberToFloatString(valuePy, 10, true));
+  }
+
   if (valuePy[SPECIAL_METHOD_STR])
   {
     return Sk.ffi.callsim(valuePy[SPECIAL_METHOD_STR], valuePy);
@@ -16430,14 +16655,33 @@ goog.exportSymbol("Sk.ffh.str", Sk.ffh.str);
 
 Sk.ffh.repr = function(valuePy)
 {
-  return Sk.ffh.unaryExec("repr", SPECIAL_METHOD_REPR, valuePy, "tp$repr");
+  if (Sk.flyweight && Sk.ffi.isFloat(valuePy))
+  {
+    return Sk.ffi.stringToPy(Sk.ffh.numberToFloatString(valuePy, 10, true));
+  }
+
+  if (valuePy[SPECIAL_METHOD_REPR])
+  {
+    return Sk.ffi.callsim(valuePy[SPECIAL_METHOD_REPR], valuePy);
+  }
+  else if (valuePy["tp$repr"])
+  {
+    return valuePy["tp$repr"].call(valuePy);
+  }
+  else
+  {
+    throw Sk.ffi.notImplementedError("repr");
+  }
 };
 goog.exportSymbol("Sk.ffh.repr", Sk.ffh.repr);
+
 /**
  *
  */
-Sk.ffh.evaluate = function(exprPy, envPy) {
-  if (Sk.ffi.isFloat(exprPy) ||  Sk.ffi.isInt(exprPy) || Sk.ffi.isLong(exprPy)) {
+Sk.ffh.evaluate = function(exprPy, envPy)
+{
+  if (Sk.ffi.isFloat(exprPy) ||  Sk.ffi.isInt(exprPy) || Sk.ffi.isLong(exprPy))
+  {
     return exprPy;
   }
   else {
@@ -18597,8 +18841,7 @@ OUTERWHILE:
         {
             // no transition
             var errline = context[0][0];
-            throw new Sk.builtin.ParseError("bad input", this.filename, errline, context);  //  RNL
-//          throw new Sk.builtin.ParseError("bad input on line " + errline.toString());     RNL
+            throw new Sk.builtin.ParseError("bad input", this.filename, errline, context);
         }
     }
 };
@@ -25141,15 +25384,19 @@ Sk.builtin.timSort = function(list, length){
     }
 };
 
-Sk.builtin.timSort.prototype.lt = function(a, b){
-	return Sk.misceval.richCompareBool(a, b, "Lt");
+Sk.builtin.timSort.prototype.lt = function(a, b)
+{
+    return Sk.misceval.richCompareBool(a, b, Sk.misceval.compareOp.Lt);
 };
 
-Sk.builtin.timSort.prototype.le = function(a, b){
+Sk.builtin.timSort.prototype.le = function(a, b)
+{
+    // TODO: This does not look right!
     return !this.lt(b, a)
 };
 
-Sk.builtin.timSort.prototype.setitem = function(item ,value){
+Sk.builtin.timSort.prototype.setitem = function(item ,value)
+{
     this.list.v[item] = value;
 };
 
@@ -25174,7 +25421,7 @@ Sk.builtin.timSort.prototype.binary_sort = function(a, sorted) {
         // The second is vacuously true at the start.
         while(l < r){
             var p = l + ((r - l) >> 1);
-			if (this.lt(pivot, a.getitem(p))){
+            if (this.lt(pivot, a.getitem(p))){
                 r = p;
             }
             else {
@@ -25195,8 +25442,8 @@ Sk.builtin.timSort.prototype.binary_sort = function(a, sorted) {
 };
 
 Sk.builtin.timSort.prototype.count_run = function(a){
-	/*
-	# Compute the length of the run in the slice "a".
+    /*
+    # Compute the length of the run in the slice "a".
     # "A run" is the longest ascending sequence, with
     #
     #     a[0] <= a[1] <= a[2] <= ...
@@ -25212,136 +25459,136 @@ Sk.builtin.timSort.prototype.count_run = function(a){
     # sequence without violating stability (strict > ensures there are no equal
     # elements to get out of order).
 */
-	var descending;
-	if (a.len <= 1) {
-		var n = a.len;
-		descending = false;
-	}
-	else {
-		var n = 2;
-		if (this.lt(a.getitem(a.base + 1), a.getitem(a.base))){
-			descending = true;
-			for (var p = a.base + 2; p < a.base + a.len; p++){
-				if (this.lt(a.getitem(p), a.getitem(p-1))){
-					n++;
-				}
-				else {
-					break;
-				}
-			}
-		}
-		else{
-			descending = false;
-			for (p = a.base + 2; p < a.base + a.len; p++){
-	        	if (this.lt(a.getitem(p), a.getitem(p-1)))
-				{
-			        break;
-			    }
-				else {
-					n++;
-				}
-			}
-		}
-	}
-	return {'run': new Sk.builtin.listSlice(a.list, a.base, n), 'descending': descending};
+    var descending;
+    if (a.len <= 1) {
+        var n = a.len;
+        descending = false;
+    }
+    else {
+        var n = 2;
+        if (this.lt(a.getitem(a.base + 1), a.getitem(a.base))){
+            descending = true;
+            for (var p = a.base + 2; p < a.base + a.len; p++){
+                if (this.lt(a.getitem(p), a.getitem(p-1))){
+                    n++;
+                }
+                else {
+                    break;
+                }
+            }
+        }
+        else{
+            descending = false;
+            for (p = a.base + 2; p < a.base + a.len; p++){
+                if (this.lt(a.getitem(p), a.getitem(p-1)))
+                {
+                    break;
+                }
+                else {
+                    n++;
+                }
+            }
+        }
+    }
+    return {'run': new Sk.builtin.listSlice(a.list, a.base, n), 'descending': descending};
 };
 
 Sk.builtin.timSort.prototype.sort = function (){
-	/*
-	# ____________________________________________________________
+    /*
+    # ____________________________________________________________
     # Entry point.
-	*/
+    */
 
-	var remaining = new Sk.builtin.listSlice(this.list, 0, this.listlength);
-	if (remaining.len < 2){
-		return;
-	}
+    var remaining = new Sk.builtin.listSlice(this.list, 0, this.listlength);
+    if (remaining.len < 2){
+        return;
+    }
 
     // March over the array once, left to right, finding natural runs,
     // and extending short natural runs to minrun elements.
     this.merge_init();
     var minrun = this.merge_compute_minrun(remaining.len);
-	while (remaining.len > 0){
-		// Identify next run.
-		var cr = this.count_run(remaining);
-		if (cr.descending){
-			cr.run.reverse();
-		}
-		// If short, extend to min(minrun, nremaining).
-		if (cr.run.len < minrun){
-			var sorted = cr.run.len;
+    while (remaining.len > 0){
+        // Identify next run.
+        var cr = this.count_run(remaining);
+        if (cr.descending){
+            cr.run.reverse();
+        }
+        // If short, extend to min(minrun, nremaining).
+        if (cr.run.len < minrun){
+            var sorted = cr.run.len;
             if (minrun < remaining.len){
                 cr.run.len = minrun;
             }
             else {
                 cr.run.len = remaining.len;
             }
-			this.binary_sort(cr.run, sorted)
-		}
-		// Advance remaining past this run.
+            this.binary_sort(cr.run, sorted)
+        }
+        // Advance remaining past this run.
         remaining.advance(cr.run.len);
-		// Push run onto pending-runs stack, and maybe merge.
+        // Push run onto pending-runs stack, and maybe merge.
         this.pending.push(cr.run);
         this.merge_collapse();
-  	}
-	goog.asserts.assert(remaining.base == this.listlength);
+    }
+    goog.asserts.assert(remaining.base == this.listlength);
 
-  	this.merge_force_collapse();
-  	goog.asserts.assert(this.pending.length == 1);
-	goog.asserts.assert(this.pending[0].base == 0);
-	goog.asserts.assert(this.pending[0].len == this.listlength);
+    this.merge_force_collapse();
+    goog.asserts.assert(this.pending.length == 1);
+    goog.asserts.assert(this.pending[0].base == 0);
+    goog.asserts.assert(this.pending[0].len == this.listlength);
 };
 
 /*
-	# Locate the proper position of key in a sorted vector; if the vector
-	# contains an element equal to key, return the position immediately to the
-	# left of the leftmost equal element -- or to the right of the rightmost
-	# equal element if the flag "rightmost" is set.
-	#
-	# "hint" is an index at which to begin the search, 0 <= hint < a.len.
-	# The closer hint is to the final result, the faster this runs.
-	#
-	# The return value is the index 0 <= k <= a.len such that
-	#
-	#     a[k-1] < key <= a[k]      (if rightmost is False)
-	#     a[k-1] <= key < a[k]      (if rightmost is True)
-	#
-	# as long as the indices are in bound.  IOW, key belongs at index k;
-	# or, IOW, the first k elements of a should precede key, and the last
-	# n-k should follow key.
+    # Locate the proper position of key in a sorted vector; if the vector
+    # contains an element equal to key, return the position immediately to the
+    # left of the leftmost equal element -- or to the right of the rightmost
+    # equal element if the flag "rightmost" is set.
+    #
+    # "hint" is an index at which to begin the search, 0 <= hint < a.len.
+    # The closer hint is to the final result, the faster this runs.
+    #
+    # The return value is the index 0 <= k <= a.len such that
+    #
+    #     a[k-1] < key <= a[k]      (if rightmost is False)
+    #     a[k-1] <= key < a[k]      (if rightmost is True)
+    #
+    # as long as the indices are in bound.  IOW, key belongs at index k;
+    # or, IOW, the first k elements of a should precede key, and the last
+    # n-k should follow key.
 */
 Sk.builtin.timSort.prototype.gallop = function(key, a, hint, rightmost){
     goog.asserts.assert(0 <= hint && hint < a.len);
-	var lower;
-	var self = this;
- 	if (rightmost) {
-		lower = function (a,b) { return self.le(a,b); } // search for the largest k for which a[k] <= key
-	}
-	else {
-		lower = function (a,b) { return self.lt(a,b); } // search for the largest k for which a[k] < key
-	}
-	var p = a.base + hint;
-	var lastofs = 0;
-	var ofs = 1;
+    var lower;
+    var self = this;
+    if (rightmost) {
+        lower = function (a,b) { return self.le(a,b); } // search for the largest k for which a[k] <= key
+    }
+    else {
+        lower = function (a,b) { return self.lt(a,b); } // search for the largest k for which a[k] < key
+    }
+    var p = a.base + hint;
+    var lastofs = 0;
+    var ofs = 1;
     var maxofs;
-	if (lower(a.getitem(p), key)) {
-		// a[hint] < key -- gallop right, until
-	    // a[hint + lastofs] < key <= a[hint + ofs]
+    if (lower(a.getitem(p), key)) {
+        // a[hint] < key -- gallop right, until
+        // a[hint + lastofs] < key <= a[hint + ofs]
 
-	    maxofs = a.len - hint // a[a.len-1] is highest
-	    while (ofs < maxofs){
-	    	if (lower(a.getitem(p + ofs), key)) {
-	        	lastofs = ofs
-	        	try {
-	            	ofs = (ofs << 1) + 1;
+        maxofs = a.len - hint // a[a.len-1] is highest
+        while (ofs < maxofs){
+            if (lower(a.getitem(p + ofs), key)) {
+                lastofs = ofs
+                try {
+                    ofs = (ofs << 1) + 1;
                 } catch (err){
-					ofs = maxofs
-				}
-			}
-	        else {
-	        	// key <= a[hint + ofs]
-	            break;
-			}
+                    ofs = maxofs
+                }
+            }
+            else {
+                // key <= a[hint + ofs]
+                break;
+            }
         }
         if (ofs > maxofs) {
             ofs = maxofs;
@@ -25349,35 +25596,35 @@ Sk.builtin.timSort.prototype.gallop = function(key, a, hint, rightmost){
         // Translate back to offsets relative to a.
         lastofs += hint;
         ofs += hint;
-	}
-	else {
-		// key <= a[hint] -- gallop left, until
+    }
+    else {
+        // key <= a[hint] -- gallop left, until
         // a[hint - ofs] < key <= a[hint - lastofs]
         maxofs = hint + 1   // a[0] is lowest
         while (ofs < maxofs) {
             if (lower(a.getitem(p - ofs), key)) {
                 break;
-			}
+            }
             else {
                 // key <= a[hint - ofs]
                 lastofs = ofs
                 try {
                     ofs = (ofs << 1) + 1;
                 } catch(err) {
-					ofs = maxofs;
-				}
-			}
-		}
+                    ofs = maxofs;
+                }
+            }
+        }
         if (ofs > maxofs){
             ofs = maxofs
-		}
+        }
         // Translate back to positive offsets relative to a.
         var hintminofs = hint-ofs;
-		var hintminlastofs = hint-lastofs;
+        var hintminlastofs = hint-lastofs;
         lastofs = hintminofs;
         ofs = hintminlastofs;
-	}
-	goog.asserts.assert( -1 <= lastofs < ofs <= a.len);
+    }
+    goog.asserts.assert( -1 <= lastofs < ofs <= a.len);
 
     // Now a[lastofs] < key <= a[ofs], so key belongs somewhere to the
     // right of lastofs but no farther right than ofs.  Do a binary
@@ -25389,10 +25636,10 @@ Sk.builtin.timSort.prototype.gallop = function(key, a, hint, rightmost){
         if (lower(a.getitem(a.base + m), key)){
             lastofs = m+1;   // a[m] < key
         }
-		else{
+        else{
             ofs = m;         // key <= a[m]
-		}
-	}
+        }
+    }
     goog.asserts.assert(lastofs == ofs);         // so a[ofs-1] < key <= a[ofs]
     return ofs;
 };
@@ -25643,9 +25890,9 @@ Sk.builtin.timSort.prototype.merge_hi= function(a, b) {
 // Merge the two runs at stack indices i and i+1.
 
 Sk.builtin.timSort.prototype.merge_at = function(i){
-	if (i < 0) {
-		i = this.pending.length + i;
-	}
+    if (i < 0) {
+        i = this.pending.length + i;
+    }
 
     var a = this.pending[i];
     var b = this.pending[i+1];
@@ -25761,8 +26008,8 @@ Sk.builtin.listSlice.prototype.copyitems = function (){
 
 Sk.builtin.listSlice.prototype.advance = function (n){
     this.base += n;
-	this.len -= n;
-	goog.asserts.assert(this.base <= this.list.sq$length());
+    this.len -= n;
+    goog.asserts.assert(this.base <= this.list.sq$length());
 };
 
 Sk.builtin.listSlice.prototype.getitem = function (item){
