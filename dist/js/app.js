@@ -24494,7 +24494,7 @@
     h && out(a, '.co_kwargs=1;');
     h = '';
     n && (h = ',$cell', c && (h += ',$free'));
-    return l ? d && 0 < d.args.length ? this._gr('gener', '(function(){var $origargs=Array.prototype.slice.call(arguments);Sk.builtin.pyCheckArgs("', Sk.ffi.remapToJs(b), '",arguments,', d.args.length - f.length, ',', d.args.length, ');return new Sk.builtins[\'generator\'](', a, ',$gbl,$origargs', h, ');})') : this._gr('gener', '(function(){Sk.builtin.pyCheckArgs("', Sk.ffi.remapToJs(b), '",arguments,0,0);return new Sk.builtins[\'generator\'](', a, ',$gbl,[]', h, ');})') : this._gr('funcobj', 'new Sk.builtins[\'function\'](', a, ',$gbl', h, ')');
+    return l ? d && 0 < d.args.length ? this._gr('gener', 'new Sk.builtins[\'function\']((function(){var $origargs=Array.prototype.slice.call(arguments);Sk.builtin.pyCheckArgs("', Sk.ffi.remapToJs(b), '",arguments,', d.args.length - f.length, ',', d.args.length, ');return new Sk.builtins[\'generator\'](', a, ',$gbl,$origargs', h, ');}))') : this._gr('gener', 'new Sk.builtins[\'function\']((function(){Sk.builtin.pyCheckArgs("', Sk.ffi.remapToJs(b), '",arguments,0,0);return new Sk.builtins[\'generator\'](', a, ',$gbl,[]', h, ');}))') : this._gr('funcobj', 'new Sk.builtins[\'function\'](', a, ',$gbl', h, ')');
   };
   Compiler.prototype.cfunction = function (a) {
     goog.asserts.assert(a instanceof FunctionDef);
@@ -24552,7 +24552,7 @@
   Compiler.prototype.cgenexp = function (a) {
     var b = this.buildcodeobj(a, Sk.builtin.stringToPy('<genexpr>'), null, null, function (b) {
         this.cgenexpgen(a.generators, 0, a.elt);
-      }), b = this._gr('gener', b, '()');
+      }), b = this._gr('gener', 'Sk.misceval.callsim(', b, ');');
     out(b, '.gi$locals.$iter0=Sk.abstr.iter(', this.vexpr(a.generators[0].iter), ');');
     return b;
   };

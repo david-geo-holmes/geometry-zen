@@ -24705,14 +24705,20 @@ Compiler.prototype.buildcodeobj = function(n, coname, decorator_list, args, call
         // Keyword and variable arguments are not currently supported in generators.
         // The call to pyCheckArgs assumes they can't be true.
         if (args && args.args.length > 0)
-            return this._gr("gener", "(function(){var $origargs=Array.prototype.slice.call(arguments);Sk.builtin.pyCheckArgs(\"", 
+        {
+            return this._gr("gener", "new Sk.builtins['function']((function(){var $origargs=Array.prototype.slice.call(arguments);Sk.builtin.pyCheckArgs(\"", 
                                      Sk.ffi.remapToJs(coname), "\",arguments,", args.args.length - defaults.length, ",", args.args.length, 
-                                     ");return new Sk.builtins['generator'](", scopename, ",$gbl,$origargs", frees, ");})");
+                                     ");return new Sk.builtins['generator'](", scopename, ",$gbl,$origargs", frees, ");}))");
+        }
         else
-            return this._gr("gener", "(function(){Sk.builtin.pyCheckArgs(\"", Sk.ffi.remapToJs(coname), 
-                                     "\",arguments,0,0);return new Sk.builtins['generator'](", scopename, ",$gbl,[]", frees, ");})");
+        {
+            return this._gr("gener", "new Sk.builtins['function']((function(){Sk.builtin.pyCheckArgs(\"", Sk.ffi.remapToJs(coname), 
+                                     "\",arguments,0,0);return new Sk.builtins['generator'](", scopename, ",$gbl,[]", frees, ");}))");
+        }
     else
+    {
         return this._gr("funcobj", "new Sk.builtins['function'](", scopename, ",$gbl", frees ,")");
+    }
 };
 
 Compiler.prototype.cfunction = function(s)
@@ -24819,16 +24825,17 @@ Compiler.prototype.cgenexpgen = function(generators, genIndex, elt)
 
 Compiler.prototype.cgenexp = function(e)
 {
-    var gen = this.buildcodeobj(e, Sk.builtin.stringToPy("<genexpr>"), null, null, function(scopename)
-            {
-                this.cgenexpgen(e.generators, 0, e.elt);
-            });
+    var gen = this.buildcodeobj(e, Sk.builtin.stringToPy("<genexpr>"), null, null,
+        function(scopename)
+        {
+            this.cgenexpgen(e.generators, 0, e.elt);
+        });
 
     // call the generator maker to get the generator. this is kind of dumb,
     // but the code builder builds a wrapper that makes generators for normal
     // function generators, so we just do it outside (even just new'ing it
     // inline would be fine).
-    var gener = this._gr("gener", gen, "()");
+    var gener = this._gr("gener", "Sk.misceval.callsim(", gen, ");");
     // stuff the outermost iterator into the generator after evaluating it
     // outside of the function. it's retrieved by the fixed name above.
     out(gener, ".gi$locals.$iter0=Sk.abstr.iter(", this.vexpr(e.generators[0].iter), ");");
