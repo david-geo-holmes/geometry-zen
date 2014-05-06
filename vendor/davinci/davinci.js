@@ -12144,20 +12144,27 @@ Sk.builtin.numberPy = function(x, skType)
  *
  * This function is the entry point for converting the generated script literals.
  *
- * @param {number} valueJs
- * @return {Sk.builtin.NumberPy|number}
+ * @param {number|undefined} valueJs
+ * @return {Sk.builtin.NumberPy|number|undefined}
  */
 Sk.builtin.numberToPy = function(valueJs)
 {
-  goog.asserts.assertNumber(valueJs);
-  if (Sk.flyweight)
+  if (typeof valueJs !== 'undefined')
   {
-    return valueJs;
+    goog.asserts.assertNumber(valueJs);
+    if (Sk.flyweight)
+    {
+      return valueJs;
+    }
+    else
+    {
+      // This is the one place where we can legitimately construct a float.
+      return new Sk.builtin.NumberPy(valueJs, Sk.builtin.NumberPy.float$);
+    }
   }
   else
   {
-    // This is the one place where we can legitimately construct a float.
-    return new Sk.builtin.NumberPy(valueJs, Sk.builtin.NumberPy.float$);
+    return undefined;
   }
 };
 goog.exportSymbol("Sk.builtin.numberToPy", Sk.builtin.numberToPy);
@@ -14012,6 +14019,8 @@ Sk.builtin.int_ = function(x, base)
 Sk.builtin.int_.prototype.tp$name = "int";
 Sk.builtin.int_.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('int', Sk.builtin.int_);
 /**
+ * undefined => zero
+ *
  * @param {*} xPy
  * @return {Sk.builtin.NumberPy|number}
  */
@@ -14019,7 +14028,7 @@ Sk.builtin.float_ = function(xPy)
 {
     if (xPy === undefined)
     {
-        return Sk.builtin.numberToPy(0);
+        return /** @type {Sk.builtin.NumberPy|number} */(Sk.builtin.numberToPy(0));
     }
 
     if (Sk.builtin.isStringPy(xPy))
@@ -14031,18 +14040,18 @@ Sk.builtin.float_ = function(xPy)
 
         if (stringJs.match(/^-inf$/i))
         {
-            return Sk.builtin.numberToPy(-Infinity);
+            return /** @type {Sk.builtin.NumberPy|number} */(Sk.builtin.numberToPy(-Infinity));
         }
         else if (stringJs.match(/^[+]?inf$/i))
         {
-            return Sk.builtin.numberToPy(Infinity);
+            return /** @type {Sk.builtin.NumberPy|number} */(Sk.builtin.numberToPy(Infinity));
         }
         else if (stringJs.match(/^[-+]?nan$/i)) {
-            return Sk.builtin.numberToPy(NaN);
+            return /** @type {Sk.builtin.NumberPy|number} */(Sk.builtin.numberToPy(NaN));
         }
         else if (!isNaN(stringJs))
         {
-            return Sk.builtin.numberToPy(parseFloat(stringJs));
+            return /** @type {Sk.builtin.NumberPy|number} */(Sk.builtin.numberToPy(parseFloat(stringJs)));
         }
         else
         {
@@ -14054,14 +14063,14 @@ Sk.builtin.float_ = function(xPy)
     if (typeof xPy === "number" || xPy instanceof Sk.builtin.NumberPy || xPy instanceof Sk.builtin.lng)
     {
         xPy = Sk.builtin.asnum$(xPy);
-        return Sk.builtin.numberToPy(xPy);
+        return /** @type {Sk.builtin.NumberPy|number} */(Sk.builtin.numberToPy(xPy));
     }
 
     // Convert booleans
     if (xPy instanceof Sk.builtin.bool)
     {
         xPy = Sk.builtin.asnum$(xPy);
-        return Sk.builtin.numberToPy(xPy);
+        return /** @type {Sk.builtin.NumberPy|number} */(Sk.builtin.numberToPy(xPy));
     }
 
     throw new Sk.builtin.TypeError("float() argument must be a string or a number");
@@ -16873,7 +16882,7 @@ Sk.ffi.promoteLongToFloat = function(longPy)
     goog.asserts.assertString(strJs);
     var valueJs = parseFloat(strJs);
     goog.asserts.assertNumber(valueJs);
-    return Sk.builtin.numberToPy(valueJs)
+    return /** @type {Sk.builtin.NumberPy|number} */(Sk.builtin.numberToPy(valueJs));
 };
 goog.exportSymbol("Sk.ffi.promoteLongToFloat", Sk.ffi.promoteLongToFloat);
 /**
@@ -36781,21 +36790,39 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           return selfPy;
         });
       }
-      case METHOD_CROSS: {
-        return Sk.ffi.callableToPy(mod, METHOD_CROSS, function(methodPy, otherPy) {
+      case METHOD_CROSS:
+      {
+        // This is a generalized cross product: A x B = -I * (A ^ B)
+        return Sk.ffi.callableToPy(mod, METHOD_CROSS, function(methodPy, otherPy)
+        {
           Sk.ffi.checkMethodArgs(METHOD_CROSS, arguments, 1, 1);
           Sk.ffi.checkArgType(ARG_OTHER, Sk.e3ga.EUCLIDEAN_3, Sk.ffi.isInstance(otherPy, Sk.e3ga.EUCLIDEAN_3), otherPy);
           var other  = Sk.ffi.remapToJs(otherPy);
-          var Ax = self.x;
-          var Ay = self.y;
-          var Az = self.z;
-          var Bx = other.x;
-          var By = other.y;
-          var Bz = other.z;
-          var Cx = Ay * Bz - Az * By;
-          var Cy = Az * Bx - Ax * Bz;
-          var Cz = Ax * By - Ay * Bx;
-          return coordsJsToE3Py(0, Cx, Cy, Cz, 0, 0, 0, 0);
+          var Aw   = self.w;
+          var Ax   = self.x;
+          var Ay   = self.y;
+          var Az   = self.z;
+          var Axy  = self.xy;
+          var Ayz  = self.yz;
+          var Azx  = self.zx;
+          var Axyz = self.xyz;
+          var Bw   = other.w;
+          var Bx   = other.x;
+          var By   = other.y;
+          var Bz   = other.z;
+          var Bxy  = other.xy;
+          var Byz  = other.yz;
+          var Bzx  = other.zx;
+          var Bxyz = other.xyz;
+          var Cw   = Aw * Bw + Ax * Byz + Ay * Bzx + Az * Bxy + Axy * Bz + Ayz * Bx + Azx * By;
+          var Cx   = Aw * Bx + Ax * Bw + Ay * Bz - Az * By;
+          var Cy   = Aw * By + Ay * Bw + Az * Bx - Ax * Bz;
+          var Cz   = Aw * Bz + Az * Bw + Ax * By - Ay * Bx;
+          var Cxy  = Aw * Bxy + Axy * Bw;
+          var Cyz  = Aw * Byz + Ayz * Bw;
+          var Czx  = Aw * Bzx + Azx * Bw;
+          var Cxyz = Aw * Bxyz + Axyz * Bw;
+          return coordsJsToE3Py(Cw, Cx, Cy, Cz, Cxy, Cyz, Czx, Cxyz);
         });
       }
       case METHOD_DISTANCE_TO: {
@@ -39169,6 +39196,11 @@ var METHOD_COS        = "cos";
  * @const
  * @type {string}
  */
+var METHOD_CROSS      = "cross";
+/**
+ * @const
+ * @type {string}
+ */
 var METHOD_EXP        = "exp";
 /**
  * @const
@@ -39839,6 +39871,24 @@ mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc)
         return Sk.ffi.callableToPy(mod, METHOD_MAGNITUDE, function(methodPy) {
           Sk.ffi.checkMethodArgs(METHOD_MAGNITUDE, arguments, 0, 0);
           return Sk.ffi.callsim(mod[MEASURE], Sk.ffi.callsim(Sk.ffi.gattr(measure[QTY_PY], METHOD_MAGNITUDE)), measure[UOM_PY]);
+        });
+      }
+      case METHOD_CROSS:
+      {
+        return Sk.ffi.callableToPy(mod, METHOD_EXP, function(methodPy, otherPy)
+        {
+          Sk.ffi.checkMethodArgs(METHOD_CROSS, arguments, 1, 1);
+          if (isMeasurePy(otherPy))
+          {
+            var other = Sk.ffi.remapToJs(otherPy);
+            var qtyPy = Sk.ffi.callsim(Sk.ffi.gattr(measure[QTY_PY], METHOD_CROSS), other[QTY_PY]);
+            return Sk.ffi.callsim(mod[MEASURE], qtyPy, Sk.ffh.multiply(measure[UOM_PY], other[UOM_PY]));
+          }
+          else
+          {
+            var qtyPy = Sk.ffi.callsim(Sk.ffi.gattr(measure[QTY_PY], METHOD_CROSS), otherPy);
+            return Sk.ffi.callsim(mod[MEASURE], qtyPy, measure[UOM_PY]);
+          }
         });
       }
     }
