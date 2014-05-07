@@ -34227,6 +34227,11 @@ var METHOD_COS          = "cos";
  * @const
  * @type {string}
  */
+var METHOD_DOT          = "dot";
+/**
+ * @const
+ * @type {string}
+ */
 var METHOD_SIN          = "sin";
 /**
  * @const
@@ -34272,7 +34277,7 @@ var OP_EQ               = "equal";
  * @const
  * @type {string}
  */
-var ONE_NAME            = "1";
+var ONE_NAME            = Sk.builtin.numberToFloatStringJs(1, 10, true);
 /**
  * @const
  * @type {string}
@@ -34296,44 +34301,63 @@ function isNumber(x) {return typeof x === 'number';}
  */
 var isEuclidean2Py = function(valuePy) {return Sk.ffi.isInstance(valuePy, EUCLIDEAN_2);};
 
-function coordsJsToE2Py(s, x, y, xy) {
+function coordsJsToE2Py(s, x, y, xy)
+{
   return Sk.ffi.callsim(mod[EUCLIDEAN_2], Sk.ffi.numberToFloatPy(s), Sk.ffi.numberToFloatPy(x), Sk.ffi.numberToFloatPy(y), Sk.ffi.numberToFloatPy(xy));
 }
 
-function stringFromCoordinates(coordinates, labels, multiplier) {
-  var append, i, sb, str, _i, _ref;
-  sb = [];
-  append = function(number, label) {
+function stringFromCoordinates(coordinates, labels, multiplier)
+{
+  var append, i, _i, _ref;
+  /**
+   * @const
+   */
+  var sb = [];
+  append = function(number, label)
+  {
     var n;
-    if (number !== 0) {
-      if (number >= 0) {
-        if (sb.length > 0) {
+    if (number !== 0)
+    {
+      if (number >= 0)
+      {
+        if (sb.length > 0)
+        {
           sb.push("+");
         }
-      } else {
+      }
+      else
+      {
         sb.push("-");
       }
       n = Math.abs(number);
-      if (n === 1) {
+      if (n === 1)
+      {
         return sb.push(label);
-      } else {
-        sb.push(n.toString());
-        if (label !== ONE_NAME) {
+      }
+      else
+      {
+        // We indicate that we want to retain the sign, even though we already have the absolute value.
+        sb.push(Sk.builtin.numberToFloatStringJs(n, 10, true));
+        if (label !== ONE_NAME)
+        {
           sb.push(multiplier);
           return sb.push(label);
         }
       }
     }
   };
-  for (i = _i = 0, _ref = coordinates.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+  for (i = _i = 0, _ref = coordinates.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i)
+  {
     append(coordinates[i], labels[i]);
   }
-  if (sb.length > 0) {
-    str = sb.join("");
-  } else {
-    str = "0";
+  if (sb.length > 0)
+  {
+    return sb.join("");
   }
-  return str;
+  else
+  {
+    return Sk.builtin.numberToFloatStringJs(0, 10, true);
+  }
 }
 
 function cosh(x) {return (Math.pow(Math.E, x) + Math.pow(Math.E, -x)) / 2;}
@@ -35064,14 +35088,34 @@ mod[EUCLIDEAN_2] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       case PROP_XY: {
         return Sk.ffi.numberToFloatPy(mv[PROP_XY]);
       }
-      case METHOD_CLONE: {
-        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
-          $loc.__init__ = Sk.ffi.functionPy(function(methodPy) {
+      case METHOD_CLONE:
+      {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc){
+          $loc.__init__ = Sk.ffi.functionPy(function(methodPy)
+          {
           });
-          $loc.__call__ = Sk.ffi.functionPy(function(methodPy) {
+          $loc.__call__ = Sk.ffi.functionPy(function(methodPy)
+          {
             return coordsJsToE2Py(mv.w, mv.x, mv.y, mv.xy);
           });
         }, METHOD_CLONE, []));
+      }
+      case METHOD_DOT: {
+        return Sk.ffi.callableToPy(mod, name, function(methodPy, otherPy)
+        {
+          Sk.ffi.checkMethodArgs(name, arguments, 1, 1);
+          Sk.ffi.checkArgType("other", EUCLIDEAN_2, Sk.ffi.isInstance(otherPy, EUCLIDEAN_2), otherPy);
+          var other  = Sk.ffi.remapToJs(otherPy);
+          var Aw  = mv.w;
+          var Ax  = mv.x;
+          var Ay  = mv.y;
+          var Axy = mv.xy;
+          var Bw  = other.w;
+          var Bx  = other.x;
+          var By  = other.y;
+          var Bxy = other.xy;
+          return coordsJsToE2Py(Ax * Bx + Ay * By, 0, 0, 0);
+        });
       }
       case METHOD_MAGNITUDE: {
         return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
@@ -39799,6 +39843,7 @@ mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc)
   {
     return Sk.ffi.gattr(measurePy, PROP_UOM);
   };
+  // FIXME: I think I'd prefer asking about Measure and Unit and delegate the quantity.
   var makeMeasureLhsBinary = function(op)
   {
     return function(selfPy, otherPy)
@@ -39955,29 +40000,32 @@ mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc)
     return Sk.ffi.callsim(mod[MEASURE], Sk.ffh.subtract(self[QTY_PY], other[QTY_PY]), Sk.ffi.callsim(Sk.ffi.gattr(self[UOM_PY], METHOD_COMPATIBLE), other[UOM_PY]));
   });
 
+  // FIXME: Now that I look at these, I think I prefer the duplication and clarity of unrolling them.
   $loc.__mod__  = Sk.ffi.functionPy(makeMeasureLhsBinary(Sk.ffh.mod));
   $loc.__rmod__ = Sk.ffi.functionPy(makeMeasureRhsBinary(Sk.ffh.mod));
 
   $loc.__mul__  = Sk.ffi.functionPy(makeMeasureLhsBinary(Sk.ffh.multiply));
   $loc.__rmul__ = Sk.ffi.functionPy(makeMeasureRhsBinary(Sk.ffh.multiply));
 
-  $loc.__div__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+  $loc.__div__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
     var self = Sk.ffi.remapToJs(selfPy);
-    if (isMeasurePy(otherPy)) {
+    if (isMeasurePy(otherPy))
+    {
       var other = Sk.ffi.remapToJs(otherPy);
       return Sk.ffi.callsim(mod[MEASURE], Sk.ffh.divide(self[QTY_PY], other[QTY_PY]), Sk.ffh.divide(self[UOM_PY], other[UOM_PY]));
     }
-    else if (Sk.ffi.isNum(otherPy)) {
-      return Sk.ffi.callsim(mod[MEASURE], Sk.ffh.divide(self[QTY_PY], otherPy), self[UOM_PY]);
-    }
-    else if (isUnitPy(otherPy)) {
+    else if (isUnitPy(otherPy))
+    {
       return Sk.ffi.callsim(mod[MEASURE], self[QTY_PY], Sk.ffh.divide(self[UOM_PY], otherPy));
     }
-    else {
-      Sk.ffi.checkArgType(ARG_OTHER, [MEASURE, NUMBER, UNIT], false, otherPy);
+    else
+    {
+      return Sk.ffi.callsim(mod[MEASURE], Sk.ffh.divide(self[QTY_PY], otherPy), self[UOM_PY]);
     }
   });
-  $loc.__rdiv__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+  $loc.__rdiv__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
     var self = Sk.ffi.remapToJs(selfPy);
     // TODO: The quantity should probably satisfy field axioms? add, multiply, ...
     // Sk.ffi.checkArgType(ARG_OTHER, NUMBER, Sk.ffi.isNum(otherPy), otherPy);
