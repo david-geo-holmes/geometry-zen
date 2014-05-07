@@ -13169,6 +13169,11 @@ Sk.builtin.NumberPy.prototype.str$ = function(radix, sign)
 
   var thisJs = Sk.ffi.remapToJs(this);
 
+  if (Sk.ffi.isFloat(this))
+  {
+    return Sk.builtin.numberToFloatStringJs(thisJs, radix, sign);
+  }
+
   if (isNaN(thisJs))
   {
     return "nan";
@@ -13232,12 +13237,84 @@ Sk.builtin.NumberPy.prototype.str$ = function(radix, sign)
   {
     return tmp;
   }
+  
   if (tmp.indexOf('.') < 0 && tmp.indexOf('E') < 0 && tmp.indexOf('e') < 0)
   {
     tmp = tmp + '.0';
   }
   return tmp;
 };
+
+/**
+ * @param {number} numberJs
+ * @param {number} radix
+ * @param {boolean} sign If true, the sign will be retained, otherwise treat as the absolute value.
+ * @return {string}
+ */
+Sk.builtin.numberToFloatStringJs = function(numberJs, radix, sign)
+{
+  goog.asserts.assertNumber(radix);
+  goog.asserts.assertBoolean(sign);
+
+  if (isNaN(numberJs))
+  {
+    return "nan";
+  }
+
+  if (sign === undefined) sign = true;
+
+  if (numberJs == Infinity)
+    return 'inf';
+  if (numberJs == -Infinity && sign)
+    return '-inf';
+  if (numberJs == -Infinity && !sign)
+    return 'inf';
+
+  var work = sign ? numberJs : Math.abs(numberJs);
+
+  var tmp;
+  if (radix === undefined || radix === 10)
+  {
+    tmp = work.toPrecision(12);
+
+    // transform fractions with 4 or more leading zeroes into exponents
+    var idx = tmp.indexOf('.');
+    var pre = work.toString().slice(0,idx);
+    var post = work.toString().slice(idx);
+    if (pre.match(/^-?0$/) && post.slice(1).match(/^0{4,}/))
+    {
+      if (tmp.length < 12)
+          tmp = work.toExponential();
+      else
+          tmp = work.toExponential(11);
+    }
+
+    while (tmp.charAt(tmp.length-1) == "0" && tmp.indexOf('e') < 0)
+    {
+      tmp = tmp.substring(0,tmp.length-1)
+    }
+    if (tmp.charAt(tmp.length-1) == ".")
+    {
+      tmp = tmp + "0";
+    }
+    tmp = tmp.replace(new RegExp('\\.0+e'),'e',"i");
+    // make exponent two digits instead of one (ie e+09 not e+9)
+    tmp = tmp.replace(/(e[-+])([1-9])$/, "$10$2");
+    // remove trailing zeroes before the exponent
+    tmp = tmp.replace(/0+(e.*)/,'$1');
+  }
+  else
+  {
+    tmp = work.toString(radix);
+  }
+
+  if (tmp.indexOf('.') < 0 && tmp.indexOf('E') < 0 && tmp.indexOf('e') < 0)
+  {
+    tmp = tmp + '.0';
+  }
+  return tmp;
+}
+goog.exportSymbol("Sk.builtin.numberToFloatStringJs", Sk.builtin.numberToFloatStringJs);
 
 goog.exportSymbol("Sk.builtin.NumberPy", Sk.builtin.NumberPy);// long aka "bignumber" implementation
 //
@@ -16729,82 +16806,11 @@ Sk.ffh.sqrt = function(valuePy)
 };
 goog.exportSymbol("Sk.ffh.sqrt", Sk.ffh.sqrt);
 
-/**
- * @param {number} thisJs
- * @param {number} radix
- * @param {boolean} sign
- * @return {string}
- */
-Sk.ffh.numberToFloatString = function(thisJs, radix, sign)
-{
-  goog.asserts.assertNumber(radix);
-  goog.asserts.assertBoolean(sign);
-
-  if (isNaN(thisJs))
-  {
-    return "nan";
-  }
-
-  if (sign === undefined) sign = true;
-
-  if (thisJs == Infinity)
-    return 'inf';
-  if (thisJs == -Infinity && sign)
-    return '-inf';
-  if (thisJs == -Infinity && !sign)
-    return 'inf';
-
-  var work = sign ? thisJs : Math.abs(thisJs);
-
-  var tmp;
-  if (radix === undefined || radix === 10)
-  {
-    tmp = work.toPrecision(12);
-
-    // transform fractions with 4 or more leading zeroes into exponents
-    var idx = tmp.indexOf('.');
-    var pre = work.toString().slice(0,idx);
-    var post = work.toString().slice(idx);
-    if (pre.match(/^-?0$/) && post.slice(1).match(/^0{4,}/))
-    {
-      if (tmp.length < 12)
-          tmp = work.toExponential();
-      else
-          tmp = work.toExponential(11);
-    }
-
-    while (tmp.charAt(tmp.length-1) == "0" && tmp.indexOf('e') < 0)
-    {
-      tmp = tmp.substring(0,tmp.length-1)
-    }
-    if (tmp.charAt(tmp.length-1) == ".")
-    {
-      tmp = tmp + "0";
-    }
-    tmp = tmp.replace(new RegExp('\\.0+e'),'e',"i");
-    // make exponent two digits instead of one (ie e+09 not e+9)
-    tmp = tmp.replace(/(e[-+])([1-9])$/, "$10$2");
-    // remove trailing zeroes before the exponent
-    tmp = tmp.replace(/0+(e.*)/,'$1');
-  }
-  else
-  {
-    tmp = work.toString(radix);
-  }
-
-  if (tmp.indexOf('.') < 0 && tmp.indexOf('E') < 0 && tmp.indexOf('e') < 0)
-  {
-    tmp = tmp + '.0';
-  }
-  return tmp;
-}
-goog.exportSymbol("Sk.ffh.numberToFloatString", Sk.ffh.numberToFloatString);
-
 Sk.ffh.str = function(valuePy)
 {
   if (Sk.flyweight && Sk.ffi.isFloat(valuePy))
   {
-    return Sk.builtin.stringToPy(Sk.ffh.numberToFloatString(valuePy, 10, true));
+    return Sk.builtin.stringToPy(Sk.builtin.numberToFloatStringJs(valuePy, 10, true));
   }
 
   if (valuePy[SPECIAL_METHOD_STR])
@@ -16836,7 +16842,7 @@ Sk.ffh.repr = function(valuePy)
 {
   if (Sk.flyweight && Sk.ffi.isFloat(valuePy))
   {
-    return Sk.builtin.stringToPy(Sk.ffh.numberToFloatString(valuePy, 10, true));
+    return Sk.builtin.stringToPy(Sk.builtin.numberToFloatStringJs(valuePy, 10, true));
   }
 
   if (valuePy[SPECIAL_METHOD_REPR])
@@ -35489,40 +35495,58 @@ function coordsJsToE3Py(w, x, y, z, xy, yz, zx, xyz, mutable) {
   return Sk.ffi.callsim(mod[Sk.e3ga.EUCLIDEAN_3], wPy, xPy, yPy, zPy, xyPy, yzPy, zxPy, xyzPy, mutablePy);
 }
 
-function stringFromCoordinates(coordinates, labels) {
-  var append, i, sb, str, _i, _ref;
-  sb = [];
-  append = function(number, label) {
+function stringFromCoordinates(coordinates, labels)
+{
+  var append, i, _i, _ref;
+  /**
+   * @const
+   */
+  var sb = [];
+  append = function(number, label)
+  {
     var n;
-    if (number !== 0) {
-      if (number >= 0) {
-        if (sb.length > 0) {
+    if (number !== 0)
+    {
+      if (number >= 0)
+      {
+        if (sb.length > 0)
+        {
           sb.push("+");
         }
-      } else {
+      }
+      else
+      {
         sb.push("-");
       }
       n = Math.abs(number);
-      if (n === 1) {
+      if (n === 1)
+      {
         return sb.push(label);
-      } else {
-        sb.push(n.toString());
-        if (label !== "1") {
+      }
+      else
+      {
+        // We indicate that we want to retain the sign, even though we already have the absolute value.
+        sb.push(Sk.builtin.numberToFloatStringJs(n, 10, true));
+        if (label !== "1")
+        {
           sb.push("*");
           return sb.push(label);
         }
       }
     }
   };
-  for (i = _i = 0, _ref = coordinates.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+  for (i = _i = 0, _ref = coordinates.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i)
+  {
     append(coordinates[i], labels[i]);
   }
-  if (sb.length > 0) {
-    str = sb.join("");
-  } else {
-    str = "0";
+  if (sb.length > 0)
+  {
+    return sb.join("");
   }
-  return str;
+  else
+  {
+    return Sk.builtin.numberToFloatStringJs(0, 10, true);
+  }
 }
 
 function mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, index) {
@@ -39201,6 +39225,11 @@ var METHOD_CROSS      = "cross";
  * @const
  * @type {string}
  */
+var METHOD_DOT        = "dot";
+/**
+ * @const
+ * @type {string}
+ */
 var METHOD_EXP        = "exp";
 /**
  * @const
@@ -39887,6 +39916,24 @@ mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc)
           else
           {
             var qtyPy = Sk.ffi.callsim(Sk.ffi.gattr(measure[QTY_PY], METHOD_CROSS), otherPy);
+            return Sk.ffi.callsim(mod[MEASURE], qtyPy, measure[UOM_PY]);
+          }
+        });
+      }
+      case METHOD_DOT:
+      {
+        return Sk.ffi.callableToPy(mod, METHOD_EXP, function(methodPy, otherPy)
+        {
+          Sk.ffi.checkMethodArgs(METHOD_DOT, arguments, 1, 1);
+          if (isMeasurePy(otherPy))
+          {
+            var other = Sk.ffi.remapToJs(otherPy);
+            var qtyPy = Sk.ffi.callsim(Sk.ffi.gattr(measure[QTY_PY], METHOD_DOT), other[QTY_PY]);
+            return Sk.ffi.callsim(mod[MEASURE], qtyPy, Sk.ffh.multiply(measure[UOM_PY], other[UOM_PY]));
+          }
+          else
+          {
+            var qtyPy = Sk.ffi.callsim(Sk.ffi.gattr(measure[QTY_PY], METHOD_DOT), otherPy);
             return Sk.ffi.callsim(mod[MEASURE], qtyPy, measure[UOM_PY]);
           }
         });

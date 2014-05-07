@@ -11560,6 +11560,8 @@
     goog.asserts.assertNumber(a);
     goog.asserts.assertBoolean(b);
     var c = Sk.ffi.remapToJs(this);
+    if (Sk.ffi.isFloat(this))
+      return Sk.builtin.numberToFloatStringJs(c, a, b);
     if (isNaN(c))
       return 'nan';
     void 0 === b && (b = !0);
@@ -11589,6 +11591,36 @@
     0 > d.indexOf('.') && (0 > d.indexOf('E') && 0 > d.indexOf('e')) && (d += '.0');
     return d;
   };
+  Sk.builtin.numberToFloatStringJs = function (a, b, c) {
+    goog.asserts.assertNumber(b);
+    goog.asserts.assertBoolean(c);
+    if (isNaN(a))
+      return 'nan';
+    void 0 === c && (c = !0);
+    if (Infinity == a)
+      return 'inf';
+    if (-Infinity == a && c)
+      return '-inf';
+    if (-Infinity == a && !c)
+      return 'inf';
+    a = c ? a : Math.abs(a);
+    if (void 0 === b || 10 === b) {
+      b = a.toPrecision(12);
+      var d = b.indexOf('.');
+      c = a.toString().slice(0, d);
+      d = a.toString().slice(d);
+      for (c.match(/^-?0$/) && d.slice(1).match(/^0{4,}/) && (b = 12 > b.length ? a.toExponential() : a.toExponential(11)); '0' == b.charAt(b.length - 1) && 0 > b.indexOf('e');)
+        b = b.substring(0, b.length - 1);
+      '.' == b.charAt(b.length - 1) && (b += '0');
+      b = b.replace(/\.0+e/, 'e', 'i');
+      b = b.replace(/(e[-+])([1-9])$/, '$10$2');
+      b = b.replace(/0+(e.*)/, '$1');
+    } else
+      b = a.toString(b);
+    0 > b.indexOf('.') && (0 > b.indexOf('E') && 0 > b.indexOf('e')) && (b += '.0');
+    return b;
+  };
+  goog.exportSymbol('Sk.builtin.numberToFloatStringJs', Sk.builtin.numberToFloatStringJs);
   goog.exportSymbol('Sk.builtin.NumberPy', Sk.builtin.NumberPy);
   Sk.builtin.lng = function (a, b) {
     b = Sk.builtin.asnum$(b);
@@ -13104,39 +13136,9 @@
     return Sk.ffh.unaryExec('sqrt', SPECIAL_METHOD_SQRT, a);
   };
   goog.exportSymbol('Sk.ffh.sqrt', Sk.ffh.sqrt);
-  Sk.ffh.numberToFloatString = function (a, b, c) {
-    goog.asserts.assertNumber(b);
-    goog.asserts.assertBoolean(c);
-    if (isNaN(a))
-      return 'nan';
-    void 0 === c && (c = !0);
-    if (Infinity == a)
-      return 'inf';
-    if (-Infinity == a && c)
-      return '-inf';
-    if (-Infinity == a && !c)
-      return 'inf';
-    a = c ? a : Math.abs(a);
-    if (void 0 === b || 10 === b) {
-      b = a.toPrecision(12);
-      var d = b.indexOf('.');
-      c = a.toString().slice(0, d);
-      d = a.toString().slice(d);
-      for (c.match(/^-?0$/) && d.slice(1).match(/^0{4,}/) && (b = 12 > b.length ? a.toExponential() : a.toExponential(11)); '0' == b.charAt(b.length - 1) && 0 > b.indexOf('e');)
-        b = b.substring(0, b.length - 1);
-      '.' == b.charAt(b.length - 1) && (b += '0');
-      b = b.replace(/\.0+e/, 'e', 'i');
-      b = b.replace(/(e[-+])([1-9])$/, '$10$2');
-      b = b.replace(/0+(e.*)/, '$1');
-    } else
-      b = a.toString(b);
-    0 > b.indexOf('.') && (0 > b.indexOf('E') && 0 > b.indexOf('e')) && (b += '.0');
-    return b;
-  };
-  goog.exportSymbol('Sk.ffh.numberToFloatString', Sk.ffh.numberToFloatString);
   Sk.ffh.str = function (a) {
     if (Sk.flyweight && Sk.ffi.isFloat(a))
-      return Sk.builtin.stringToPy(Sk.ffh.numberToFloatString(a, 10, !0));
+      return Sk.builtin.stringToPy(Sk.builtin.numberToFloatStringJs(a, 10, !0));
     if (a[SPECIAL_METHOD_STR])
       return Sk.ffi.callsim(a[SPECIAL_METHOD_STR], a);
     if (a.tp$str)
@@ -13148,7 +13150,7 @@
   goog.exportSymbol('Sk.ffh.str', Sk.ffh.str);
   Sk.ffh.repr = function (a) {
     if (Sk.flyweight && Sk.ffi.isFloat(a))
-      return Sk.builtin.stringToPy(Sk.ffh.numberToFloatString(a, 10, !0));
+      return Sk.builtin.stringToPy(Sk.builtin.numberToFloatStringJs(a, 10, !0));
     if (a[SPECIAL_METHOD_REPR])
       return Sk.ffi.callsim(a[SPECIAL_METHOD_REPR], a);
     if (a.tp$repr)
@@ -30423,24 +30425,23 @@
         return Sk.ffi.callsim(a[Sk.e3ga.EUCLIDEAN_3], b, c, d, e, f, g, h, m, k);
       }
       function g(a, b) {
-        var c, d, e, f, g;
-        e = [];
+        var c, d, e, f, g = [];
         c = function (a, b) {
           var c;
           if (0 !== a) {
-            0 <= a ? 0 < e.length && e.push('+') : e.push('-');
+            0 <= a ? 0 < g.length && g.push('+') : g.push('-');
             c = Math.abs(a);
             if (1 === c)
-              return e.push(b);
-            e.push(c.toString());
+              return g.push(b);
+            g.push(Sk.builtin.numberToFloatStringJs(c, 10, !0));
             if ('1' !== b)
-              return e.push('*'), e.push(b);
+              return g.push('*'), g.push(b);
           }
         };
-        d = f = 0;
-        for (g = a.length - 1; 0 <= g ? f <= g : f >= g; d = 0 <= g ? ++f : --f)
+        d = e = 0;
+        for (f = a.length - 1; 0 <= f ? e <= f : e >= f; d = 0 <= f ? ++e : --e)
           c(a[d], b[d]);
-        return 0 < e.length ? e.join('') : '0';
+        return 0 < g.length ? g.join('') : Sk.builtin.numberToFloatStringJs(0, 10, !0);
       }
       function h(a, b, c, d, e, f, g, h, m, k, l, p, n, q, A, F, z) {
         a = +a;
@@ -33654,6 +33655,16 @@
                 return Sk.ffi.callsim(a.Measure, g, Sk.ffh.multiply(d.uomPy, f.uomPy));
               }
               g = Sk.ffi.callsim(Sk.ffi.gattr(d.qtyPy, 'cross'), c);
+              return Sk.ffi.callsim(a.Measure, g, d.uomPy);
+            });
+          case 'dot':
+            return Sk.ffi.callableToPy(a, 'exp', function (b, c) {
+              Sk.ffi.checkMethodArgs('dot', arguments, 1, 1);
+              if (e(c)) {
+                var f = Sk.ffi.remapToJs(c), g = Sk.ffi.callsim(Sk.ffi.gattr(d.qtyPy, 'dot'), f.qtyPy);
+                return Sk.ffi.callsim(a.Measure, g, Sk.ffh.multiply(d.uomPy, f.uomPy));
+              }
+              g = Sk.ffi.callsim(Sk.ffi.gattr(d.qtyPy, 'dot'), c);
               return Sk.ffi.callsim(a.Measure, g, d.uomPy);
             });
           }
