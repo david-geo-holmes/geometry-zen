@@ -36909,8 +36909,10 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           return Sk.ffi.numberToFloatPy(vector[METHOD_DISTANCE_TO_SQUARED](point.vector));
         });
       }
-      case METHOD_DIVIDE_SCALAR: {
-        return Sk.ffi.callableToPy(mod, name, function(methodPy, sPy) {
+      case METHOD_DIVIDE_SCALAR:
+      {
+        return Sk.ffi.callableToPy(mod, name, function(methodPy, sPy)
+        {
           Sk.ffi.checkMethodArgs(name, arguments, 1, 1);
           Sk.ffi.checkArgType(ARG_S, Sk.ffi.PyType.FLOAT, Sk.ffi.isNum(sPy), sPy);
           var s  = Sk.ffi.remapToJs(sPy);
@@ -36925,12 +36927,38 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           return selfPy;
         });
       }
-      case METHOD_DOT: {
-        return Sk.ffi.callableToPy(mod, name, function(methodPy, otherPy) {
-          Sk.ffi.checkMethodArgs(name, arguments, 1, 1);
+      case METHOD_DOT:
+      {
+        return Sk.ffi.callableToPy(mod, name, function(methodPy, otherPy)
+        {
+          Sk.ffi.checkMethodArgs(METHOD_DOT, arguments, 1, 1);
           Sk.ffi.checkArgType(ARG_OTHER, Sk.e3ga.EUCLIDEAN_3, Sk.ffi.isInstance(otherPy, Sk.e3ga.EUCLIDEAN_3), otherPy);
           var other  = Sk.ffi.remapToJs(otherPy);
-          return Sk.ffi.numberToFloatPy(vector[METHOD_DOT](other.vector));
+          var Aw   = self.w;
+          var Ax   = self.x;
+          var Ay   = self.y;
+          var Az   = self.z;
+          var Axy  = self.xy;
+          var Ayz  = self.yz;
+          var Azx  = self.zx;
+          var Axyz = self.xyz;
+          var Bw   = other.w;
+          var Bx   = other.x;
+          var By   = other.y;
+          var Bz   = other.z;
+          var Bxy  = other.xy;
+          var Byz  = other.yz;
+          var Bzx  = other.zx;
+          var Bxyz = other.xyz;
+          var Cw   = Ax * Bx + Ay * By + Az * Bz;
+          var Cx   = 0;
+          var Cy   = 0;
+          var Cz   = 0;
+          var Cxy  = 0;
+          var Cyz  = 0;
+          var Czx  = 0;
+          var Cxyz = 0;
+          return coordsJsToE3Py(Cw, Cx, Cy, Cz, Cxy, Cyz, Czx, Cxyz);
         });
       }
       case METHOD_MULTIPLY_SCALAR: {

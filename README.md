@@ -1,9 +1,9 @@
 # geometry-zen
 
-Geometry Zen is an online application for learning and researching Physics and Engineering using Geometric Algebra
+Geometric Physics is an online application for learning and researching Physics and Engineering using Geometric Algebra
 with Python programming and WebGL.
 
-Geometry Zen consists of a Single Page Application (SPA) served up by a companion Node.JS server. The purpose of the
+Geometric Physics consists of a Single Page Application (SPA) served up by a companion Node.JS server. The purpose of the
 server is to provide some extra flexibility over a CDN solution, circumvent CORS issues and overcome some security
 challenges.
 
