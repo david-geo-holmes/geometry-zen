@@ -16476,12 +16476,69 @@ Sk.ffi.CallablePy.prototype.tp$call = function(args, kw)
 
   if (isConstructorFunction(name))
   {
-    var that = Object.create(propJs.prototype);
-    // Invoke the constructor function, binding this to the new object.
-    var other = propJs.apply(that, argsJs);
-    // If the return value isn't an object, substitute the new object.
-    var valueJs = (typeof other === 'object' && other) || that;
-    return Sk.ffi.remapToPy(valueJs);
+    var createObject = function()
+    {
+        var that = Object.create(propJs.prototype);
+        // Invoke the constructor function, binding this to the new object.
+        var other = propJs.apply(that, argsJs);
+        // If the return value isn't an object, substitute the new object.
+        var valueJs = (typeof other === 'object' && other) || that;
+        return Sk.ffi.remapToPy(valueJs);
+    }
+    try
+    {
+        switch(argsJs.length)
+        {
+            case 0:
+            {
+                var valueJs = new propJs();
+                return Sk.ffi.remapToPy(valueJs);
+            }
+            case 1:
+            {
+                var valueJs = new propJs(argsJs[0]);
+                return Sk.ffi.remapToPy(valueJs);
+            }
+            case 2:
+            {
+                var valueJs = new propJs(argsJs[0], argsJs[1]);
+                return Sk.ffi.remapToPy(valueJs);
+            }
+            case 3:
+            {
+                var valueJs = new propJs(argsJs[0], argsJs[1], argsJs[2]);
+                return Sk.ffi.remapToPy(valueJs);
+            }
+            case 4:
+            {
+                var valueJs = new propJs(argsJs[0], argsJs[1], argsJs[2], argsJs[3]);
+                return Sk.ffi.remapToPy(valueJs);
+            }
+            case 5:
+            {
+                var valueJs = new propJs(argsJs[0], argsJs[1], argsJs[2], argsJs[3], argsJs[4]);
+                return Sk.ffi.remapToPy(valueJs);
+            }
+            case 6:
+            {
+                var valueJs = new propJs(argsJs[0], argsJs[1], argsJs[2], argsJs[3], argsJs[4], argsJs[5]);
+                return Sk.ffi.remapToPy(valueJs);
+            }
+            case 7:
+            {
+                var valueJs = new propJs(argsJs[0], argsJs[1], argsJs[2], argsJs[3], argsJs[4], argsJs[5], argsJs[6]);
+                return Sk.ffi.remapToPy(valueJs);
+            }
+            default:
+            {
+                return createObject();
+            }
+        }
+    }
+    catch(e)
+    {
+        return createObject();
+    }
   }
   else
   {
@@ -28223,225 +28280,6 @@ mod[QUATERNION] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
 }, QUATERNION, []);
 };
 }).call(this);
-Sk.builtin.buildDocumentClass = function(mod) {
-  /**
-   * @const
-   * @type {string}
-   */
-  var DOCUMENT_CLASS                        = "Document";
-  /**
-   * @const
-   * @type {string}
-   */
-  var EVENT                                 = "Event";
-  /**
-   * @const
-   * @type {string}
-   */
-  var NODE                                  = "Node";
-  /**
-   * @const
-   * @type {string}
-   */
-  var PROP_BODY                             = "body";
-  /**
-   * @const
-   * @type {string}
-   */
-  var PROP_TITLE                            = "title";
-  /**
-   * @const
-   * @type {string}
-   */
-  var PROP_WEBKIT_HIDDEN                    = "webkitHidden";
-  /**
-   * @const
-   * @type {string}
-   */
-  var METHOD_ADD_EVENT_LISTENER             = "addEventListener";
-  /**
-   * @const
-   * @type {string}
-   */
-  var METHOD_CREATE_ELEMENT                 = "createElement";
-  /**
-   * @const
-   * @type {string}
-   */
-  var METHOD_GET_ELEMENT_BY_ID              = "getElementById";
-  /**
-   * @const
-   * @type {string}
-   */
-  var METHOD_GET_ELEMENTS_BY_TAG_NAME       = "getElementsByTagName";
-  /**
-   * @const
-   * @type {string}
-   */
-  var METHOD_REMOVE_ELEMENTS_BY_TAG_NAME    = "removeElementsByTagName";
-  /**
-   * @const
-   * @type {string}
-   */
-  var METHOD_REMOVE_EVENT_LISTENER          = "removeEventListener";
-  /**
-   * @const
-   * @type {string}
-   */
-  var METHOD_WRITE                          = "write";
-  /**
-   * @const
-   * @type {string}
-   */
-  var ARG_ID                                = "id";
-  /**
-   * @const
-   * @type {string}
-   */
-  var ARG_TAG_NAME                          = "tagName";
-
-  var nodeToPy = function(node) {
-    if (node) {
-      return Sk.ffi.callsim(mod[NODE], Sk.ffi.referenceToPy(node, NODE));
-    }
-    else {
-      return Sk.builtin.none.none$;
-    }
-  }
-
-  // We must be able to track the JavaScript listener functions.
-  // TODO: This should include both the type and the useCapture flag.
-  var docListeners = {};
-
-  mod[DOCUMENT_CLASS] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, documentPy) {
-      Sk.ffi.checkMethodArgs(DOCUMENT_CLASS, arguments, 1, 1);
-      Sk.ffi.referenceToPy(Sk.ffi.remapToJs(documentPy), DOCUMENT_CLASS, undefined, selfPy);
-    });
-    $loc.__getattr__ = Sk.ffi.functionPy(function(documentPy, name) {
-      var documentJs = Sk.ffi.remapToJs(documentPy);
-      switch(name) {
-        case PROP_BODY: {
-          return nodeToPy(documentJs.body);
-        }
-        case PROP_WEBKIT_HIDDEN: {
-          return Sk.ffi.booleanToPy(documentJs[PROP_WEBKIT_HIDDEN]);
-        }
-        case METHOD_ADD_EVENT_LISTENER: {
-          return Sk.ffi.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.functionPy(function(self) {
-            });
-            $loc.__call__ = Sk.ffi.functionPy(function(self, typePy, listenerPy, useCapture) {
-              var type = Sk.ffi.remapToJs(typePy);
-              var listener = function(event) {
-                var eventPy = Sk.ffi.callsim(mod[EVENT], Sk.ffi.referenceToPy(event, EVENT));
-                Sk.ffi.callsim(listenerPy, eventPy);
-              };
-              docListeners[type] = listener;
-              documentJs[METHOD_ADD_EVENT_LISTENER](type, listener, useCapture);
-            });
-          }, METHOD_ADD_EVENT_LISTENER, []));
-        }
-        case METHOD_REMOVE_EVENT_LISTENER: {
-          return Sk.ffi.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.functionPy(function(self) {
-            });
-            $loc.__call__ = Sk.ffi.functionPy(function(self, typePy, listener, useCapture) {
-              var type = Sk.ffi.remapToJs(typePy);
-              var listener = docListeners[type];
-              delete docListeners[type];
-              documentJs[METHOD_REMOVE_EVENT_LISTENER](type, listener, useCapture);
-            });
-          }, METHOD_REMOVE_EVENT_LISTENER, []));
-        }
-        case METHOD_CREATE_ELEMENT: {
-          return Sk.ffi.callableToPy(mod, METHOD_CREATE_ELEMENT, function(methodPy, tagNamePy, attributesPy) {
-            Sk.ffi.checkMethodArgs(METHOD_CREATE_ELEMENT, arguments, 1, 2);
-            Sk.ffi.checkArgType(ARG_TAG_NAME, Sk.ffi.PyType.STR, Sk.builtin.isStringPy(tagNamePy), tagNamePy);
-            var element = documentJs.createElement(Sk.builtin.stringToJs(tagNamePy));
-            if (attributesPy instanceof Sk.builtin.dict) {
-              for (var iter = attributesPy.tp$iter(), k = iter.tp$iternext(); k !== undefined; k = iter.tp$iternext()) {
-                var v = attributesPy.mp$subscript(k);
-                if (v === undefined)
-                {
-                  v = null;
-                }
-                var kAsJs = Sk.ffi.remapToJs(k);
-                var vAsJs = Sk.ffi.remapToJs(v);
-                element.setAttribute(kAsJs, vAsJs);
-              }
-            }
-            return nodeToPy(element);
-          });
-        }
-        case METHOD_GET_ELEMENT_BY_ID: {
-          return Sk.ffi.callableToPy(mod, METHOD_GET_ELEMENT_BY_ID, function(methodPy, idPy) {
-            Sk.ffi.checkMethodArgs(METHOD_GET_ELEMENT_BY_ID, arguments, 1, 1);
-            Sk.ffi.checkArgType(ARG_ID, Sk.ffi.PyType.STR, Sk.builtin.isStringPy(idPy), idPy);
-            return nodeToPy(documentJs.getElementById(Sk.ffi.remapToJs(idPy)));
-          });
-        }
-        case METHOD_GET_ELEMENTS_BY_TAG_NAME: {
-          return Sk.ffi.callableToPy(mod, METHOD_GET_ELEMENTS_BY_TAG_NAME, function(methodPy, tagNamePy) {
-            Sk.ffi.checkMethodArgs(METHOD_GET_ELEMENTS_BY_TAG_NAME, arguments, 1, 1);
-            Sk.ffi.checkArgType(ARG_TAG_NAME, Sk.ffi.PyType.STR, Sk.builtin.isStringPy(tagNamePy), tagNamePy);
-            var elements = documentJs.getElementsByTagName(Sk.ffi.remapToJs(tagNamePy));
-            var valuesPy = [];
-            for (var i = elements.length - 1; i >= 0; i--) {
-              valuesPy.push(nodeToPy(elements[i]));
-            }
-            return Sk.ffi.listPy(valuesPy);
-          });
-        }
-        case METHOD_REMOVE_ELEMENTS_BY_TAG_NAME: {
-          return Sk.ffi.callableToPy(mod, METHOD_REMOVE_ELEMENTS_BY_TAG_NAME, function(methodPy, tagNamePy) {
-            Sk.ffi.checkMethodArgs(METHOD_REMOVE_ELEMENTS_BY_TAG_NAME, arguments, 1, 1);
-            Sk.ffi.checkArgType(ARG_TAG_NAME, Sk.ffi.PyType.STR, Sk.builtin.isStringPy(tagNamePy), tagNamePy);
-            var elements = documentJs.getElementsByTagName(Sk.ffi.remapToJs(tagNamePy));
-            var valuesPy = [];
-            for (var i = elements.length - 1; i >= 0; i--) {
-              var e = elements[i];
-              e.parentNode.removeChild(e);
-              valuesPy.push(nodeToPy(e));
-            }
-            return Sk.ffi.listPy(valuesPy);
-          });
-        }
-        case METHOD_WRITE: {
-          return Sk.ffi.callableToPy(mod, METHOD_WRITE, function(methodPy, expPy) {
-            Sk.ffi.checkMethodArgs(METHOD_WRITE, arguments, 0, 1);
-            Sk.ffi.checkArgType("exp1", Sk.ffi.PyType.STR, Sk.builtin.isStringPy(expPy), expPy);
-            documentJs.write(Sk.ffi.remapToJs(expPy));
-          });
-        }
-        default: {
-          throw Sk.ffi.err.attribute(name).isNotGetableOnType(DOCUMENT_CLASS);
-        }
-      }
-    });
-    $loc.__setattr__ = Sk.ffi.functionPy(function(selfPy, name, valuePy) {
-      var documentJs = Sk.ffi.remapToJs(selfPy);
-      switch(name) {
-        case PROP_TITLE: {
-          Sk.ffi.checkArgType(name, [Sk.ffi.PyType.STR], Sk.builtin.isStringPy(valuePy), valuePy);
-          documentJs[name] = Sk.ffi.remapToJs(valuePy);
-        }
-        break;
-        default: {
-          throw Sk.ffi.err.attribute(name).isNotSetableOnType(DOCUMENT_CLASS);
-        }
-      }
-    });
-    $loc.__str__ = Sk.ffi.functionPy(function(self) {
-      return Sk.builtin.stringToPy(DOCUMENT_CLASS)
-    })
-    $loc.__repr__ = Sk.ffi.functionPy(function(self) {
-      return Sk.builtin.stringToPy(DOCUMENT_CLASS)
-    })
-  }, DOCUMENT_CLASS, []);
-
-  return mod[DOCUMENT_CLASS];
-};
 (function() {
 Sk.builtin.defineEasel = function(mod, createjs, BLADE) {
 Sk.ffi.checkFunctionArgs("defineEasel", arguments, 3, 3);
@@ -33729,437 +33567,6 @@ mod[PROBE_BUILDER_E3] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
  */
 };
 }).call(this);
-Sk.builtin.buildWindowClass = function(mod) {
-  /**
-   * @const
-   * @type {string}
-   */
-  var DOCUMENT_CLASS                        = "Document";
-  /**
-   * @const
-   * @type {string}
-   */
-  var EVENT                                 = "Event";
-  /**
-   * @const
-   * @type {string}
-   */
-  var JS_WRAP_CLASS                         = "JavaScriptWrapper";
-  /**
-   * @const
-   * @type {string}
-   */
-  var WINDOW_CLASS                          = "Window";
-  /**
-   * @const
-   * @type {string}
-   */
-  var PROP_ANIMATION_TIME                   = "animationTime";
-  /**
-   * @const
-   * @type {string}
-   */
-  var PROP_DOCUMENT                         = "document";
-  /**
-   * @const
-   * @type {string}
-   */
-  var PROP_DEVICE_PIXEL_RATIO               = "devicePixelRatio";
-  /**
-   * @const
-   * @type {string}
-   */
-  var PROP_INNER_WIDTH                      = "innerWidth";
-  /**
-   * @const
-   * @type {string}
-   */
-  var PROP_INNER_HEIGHT                     = "innerHeight";
-  /**
-   * @const
-   * @type {string}
-   */
-  var METHOD_ADD_EVENT_LISTENER             = "addEventListener";
-  /**
-   * @const
-   * @type {string}
-   */
-  var METHOD_ALERT                          = "alert";
-  /**
-   * @const
-   * @type {string}
-   */
-  var METHOD_CANCEL_ANIMATION_FRAME         = "cancelAnimationFrame";
-  /**
-   * @const
-   * @type {string}
-   */
-  var METHOD_CLOSE                          = "close";
-  /**
-   * @const
-   * @type {string}
-   */
-  var METHOD_CONFIRM                        = "confirm";
-  /**
-   * @const
-   * @type {string}
-   */
-  var METHOD_OPEN                           = "open";
-  /**
-   * @const
-   * @type {string}
-   */
-  var METHOD_PROMPT                         = "prompt";
-  /**
-   * @const
-   * @type {string}
-   */
-  var METHOD_REMOVE_EVENT_LISTENER          = "removeEventListener";
-  /**
-   * @const
-   * @type {string}
-   */
-  var METHOD_REQUEST_ANIMATION_FRAME        = "requestAnimationFrame";
-  /**
-   * @const
-   * @type {string}
-   */
-  var METHOD_SET_TIMEOUT                    = "setTimeout";
-
-  // We must be able to track the JavaScript listener functions.
-  // TODO: This should include both the type and the useCapture flag.
-  var winListeners = {};
-
-  function isConstructorFunction(name) {
-    // Hacks for JSXGraph.
-    if (name === "Value" || name === "X" || name === "Y") {
-      return false;
-    }
-    if (name[0] === name[0].toUpperCase()) {
-      return true;
-    }
-    else {
-      return false;
-    }
-  }
-
-  function remapToPy(valueJs, name)
-  {
-    switch(typeof valueJs) {
-      case 'number': {
-        return Sk.ffi.numberToFloatPy(valueJs);
-      }
-      case 'boolean': {
-        return Sk.ffi.booleanToPy(valueJs);
-      }
-      case 'string': {
-        return Sk.builtin.stringToPy(valueJs);
-      }
-      case 'undefined': {
-        return Sk.builtin.none.none$;
-      }
-      case 'object': {
-        if (Object.prototype.toString.apply(valueJs) === '[object Array]')
-        {
-          return Sk.ffi.callsim(mod[JS_WRAP_CLASS], Sk.ffi.referenceToPy(valueJs, JS_WRAP_CLASS));
-          /*
-          var valuesPy = [];
-          for (var i = 0; i < valueJs.length; i++) {
-            valuesPy.push(remapToPy(valueJs[i], name));
-          }
-          return Sk.ffi.listPy(valuesPy);
-          */
-        }
-        else
-        {
-          return Sk.ffi.callsim(mod[JS_WRAP_CLASS], Sk.ffi.referenceToPy(valueJs, JS_WRAP_CLASS));
-        }
-      }
-      default: {
-        throw Sk.ffi.err.attribute(typeof valueJs).isNotGetableOnType(name);
-      }
-    }
-  }
-
-  function defaultGetAttribute(mod, selfJs, name, className) {
-    var propJs = selfJs[name];
-    switch(typeof propJs) {
-      case 'function': {
-        return Sk.ffi.callableToPy(mod, name, function(methodPy) {
-          Sk.ffi.checkFunctionArgs(name, arguments, 1);
-          var argumentsPy = Array.prototype.slice.call(arguments, 1);
-          var argumentsJs = [];
-          for (var i = 0; i < argumentsPy.length; ++i)
-          {
-            argumentsJs.push(Sk.ffi.remapToJs(argumentsPy[i]));
-          }
-          if (isConstructorFunction(name)) {
-            // Do I have to simulate the 'new' keyword? Maybe not!
-            // var valueJs = new propJs(argumentsJs);
-            // Create a new object that inherits from the constructor's prototype.
-            var that = Object.create(propJs.prototype);
-            // Invoke the constructor function, binding this to the new object.
-            var other = propJs.apply(that, argumentsJs);
-            // If the return value isn't an object, substitute the new object.
-            var valueJs = (typeof other === 'object' && other) || that;
-            return Sk.ffi.callsim(mod[JS_WRAP_CLASS], Sk.ffi.referenceToPy(valueJs, name));
-          }
-          else {
-            var valueJs = propJs.apply(selfJs, argumentsJs);
-            return remapToPy(valueJs, className);
-          }
-        });
-      }
-      break;
-      case 'object': {
-        if (Object.prototype.toString.apply(propJs) === '[object Array]') {
-          var valuesPy = [];
-          for (var i = 0; i < propJs.length; i++) {
-            valuesPy.push(Sk.ffi.remapToPy(propJs[i]));
-          }
-          return Sk.ffi.listPy(valuesPy);
-        }
-        else {
-          return Sk.ffi.callsim(mod[JS_WRAP_CLASS], Sk.ffi.referenceToPy(propJs, JS_WRAP_CLASS));
-        }
-      }
-      case 'number': {
-        return Sk.ffi.numberToFloatPy(propJs);
-      }
-      case 'boolean': {
-        return Sk.ffi.booleanToPy(propJs);
-      }
-      case 'string': {
-        return Sk.builtin.stringToPy(propJs);
-      }
-      case 'undefined': {
-        return Sk.builtin.none.none$;
-      }
-      default: {
-        throw Sk.ffi.err.attribute(typeof propJs).isNotGetableOnType(className);
-      }
-    }
-  }
-
-  mod[JS_WRAP_CLASS] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, elementPy) {
-      Sk.ffi.checkMethodArgs(JS_WRAP_CLASS, arguments, 1, 1);
-      Sk.ffi.referenceToPy(Sk.ffi.remapToJs(elementPy), elementPy.tp$name, undefined, selfPy);
-    });
-    $loc.__add__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-      var lhs = Sk.ffi.remapToJs(selfPy);
-      var rhs = Sk.ffi.remapToJs(otherPy);
-      var resultJs = lhs.add(rhs);
-      return Sk.ffi.callsim(mod[JS_WRAP_CLASS], Sk.ffi.referenceToPy(resultJs, JS_WRAP_CLASS));
-    });
-    $loc.__sub__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-      var lhs = Sk.ffi.remapToJs(selfPy);
-      var rhs = Sk.ffi.remapToJs(otherPy);
-      var resultJs = lhs.sub(rhs);
-      return Sk.ffi.callsim(mod[JS_WRAP_CLASS], Sk.ffi.referenceToPy(resultJs, JS_WRAP_CLASS));
-    });
-    $loc.__mul__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-      var lhs = Sk.ffi.remapToJs(selfPy);
-      var rhs = Sk.ffi.remapToJs(otherPy);
-      var resultJs = lhs.mul(rhs);
-      return Sk.ffi.callsim(mod[JS_WRAP_CLASS], Sk.ffi.referenceToPy(resultJs, JS_WRAP_CLASS));
-    });
-    $loc.__div__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
-      var lhs = Sk.ffi.remapToJs(selfPy);
-      var rhs = Sk.ffi.remapToJs(otherPy);
-      var resultJs = lhs.div(rhs);
-      return Sk.ffi.callsim(mod[JS_WRAP_CLASS], Sk.ffi.referenceToPy(resultJs, JS_WRAP_CLASS));
-    });
-    $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
-      return defaultGetAttribute(mod, Sk.ffi.remapToJs(selfPy), name, JS_WRAP_CLASS);
-    });
-    $loc.__setattr__ = Sk.ffi.functionPy(function(selfPy, name, valuePy) {
-      var selfJs = Sk.ffi.remapToJs(selfPy);
-      var propJs = selfJs[name];
-      switch(name) {
-        default: {
-          switch(typeof propJs) {
-            case 'number': {
-              selfJs[name] = Sk.ffi.remapToJs(valuePy);
-            }
-            break;
-            default: {
-              selfJs[name] = Sk.ffi.remapToJs(valuePy);
-//            throw Sk.ffi.err.attribute(typeof propJs).isNotSetableOnType(JS_WRAP_CLASS);
-            }
-          }
-        }
-      }
-    });
-    $loc.__getitem__ = Sk.ffi.functionPy(function(selfPy, indexPy) {
-      Sk.ffi.checkMethodArgs("[]", arguments, 1, 1);
-      Sk.ffi.checkArgType("index", Sk.ffi.PyType.INT, Sk.ffi.isInt(indexPy), indexPy);
-      var index  = Sk.ffi.remapToJs(indexPy);
-      return defaultGetAttribute(mod, Sk.ffi.remapToJs(selfPy), "" + index, JS_WRAP_CLASS);
-    });
-    $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
-      var selfJs = Sk.ffi.remapToJs(selfPy);
-      return Sk.builtin.stringToPy(selfJs.toString());
-    })
-    $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
-      return Sk.builtin.stringToPy(JS_WRAP_CLASS);
-    })
-  }, JS_WRAP_CLASS, []);
-
-  mod[WINDOW_CLASS] = Sk.misceval.buildClass(mod, function($gbl, $loc) {
-    $loc.__init__ = Sk.ffi.functionPy(function(selfPy, windowPy) {
-      Sk.ffi.checkMethodArgs(WINDOW_CLASS, arguments, 1, 1);
-      Sk.ffi.referenceToPy(Sk.ffi.remapToJs(windowPy), WINDOW_CLASS, undefined, selfPy);
-    });
-    $loc.__getattr__ = Sk.ffi.functionPy(function(windowPy, name) {
-      var windowJs = Sk.ffi.remapToJs(windowPy);
-      switch(name) {
-        case PROP_ANIMATION_TIME: {
-          return Sk.ffi.numberToFloatPy(windowJs[PROP_ANIMATION_TIME]);
-        }
-        case PROP_DOCUMENT: {
-          return Sk.ffi.callsim(mod[DOCUMENT_CLASS], Sk.ffi.referenceToPy(windowJs.document, DOCUMENT_CLASS));
-        }
-        case PROP_INNER_HEIGHT: {
-          return Sk.ffi.numberToIntPy(windowJs[PROP_INNER_HEIGHT]);
-        }
-        case PROP_INNER_WIDTH: {
-          return Sk.ffi.numberToIntPy(windowJs[PROP_INNER_WIDTH]);
-        }
-        case PROP_DEVICE_PIXEL_RATIO: {
-          return Sk.ffi.numberToIntPy(windowJs[PROP_DEVICE_PIXEL_RATIO]);
-        }
-        case METHOD_ADD_EVENT_LISTENER: {
-          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.functionPy(function(self) {
-              self.tp$name = METHOD_ADD_EVENT_LISTENER;
-            });
-            $loc.__call__ = Sk.ffi.functionPy(function(self, typePy, listenerPy, useCapture) {
-              var type = Sk.ffi.remapToJs(typePy);
-              var listener = function(event) {
-                var eventPy = Sk.misceval.callsim(mod[EVENT], Sk.ffi.referenceToPy(event, EVENT));
-                Sk.misceval.callsim(listenerPy, eventPy);
-              };
-              winListeners[type] = listener;
-              windowJs[METHOD_ADD_EVENT_LISTENER](type, listener, useCapture);
-            });
-          }, METHOD_ADD_EVENT_LISTENER, []));
-        }
-        case METHOD_ALERT: {
-          return Sk.ffi.callableToPy(mod, METHOD_ALERT, function(methodPy, messagePy) {
-            Sk.ffi.checkMethodArgs(METHOD_ALERT, arguments, 0, 1);
-            windowJs[METHOD_ALERT](Sk.ffi.remapToJs(messagePy));
-          });
-        }
-        case METHOD_REMOVE_EVENT_LISTENER: {
-          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.functionPy(function(self) {
-              self.tp$name = METHOD_REMOVE_EVENT_LISTENER;
-            });
-            $loc.__call__ = Sk.ffi.functionPy(function(self, typePy, listener, useCapture) {
-              var type = Sk.ffi.remapToJs(typePy);
-              var listener = winListeners[type];
-              delete winListeners[type];
-              windowJs[METHOD_REMOVE_EVENT_LISTENER](type, listener, useCapture);
-            });
-          }, METHOD_REMOVE_EVENT_LISTENER, []));
-        }
-        case METHOD_CANCEL_ANIMATION_FRAME: {
-          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.functionPy(function(self) {
-              self.tp$name = METHOD_CANCEL_ANIMATION_FRAME;
-            });
-            $loc.__call__ = Sk.ffi.functionPy(function(self, requestID) {
-              if (requestID) {
-                windowJs[METHOD_CANCEL_ANIMATION_FRAME](Sk.ffi.remapToJs(requestID));
-              }
-            });
-          }, METHOD_CANCEL_ANIMATION_FRAME, []));
-        }
-        case METHOD_CLOSE: {
-          return Sk.ffi.callableToPy(mod, METHOD_CLOSE, function(methodPy) {
-            Sk.ffi.checkMethodArgs(METHOD_CLOSE, arguments, 0, 0);
-            windowJs[METHOD_CLOSE]();
-          });
-        }
-        case METHOD_CONFIRM: {
-          return Sk.ffi.callableToPy(mod, METHOD_CONFIRM, function(methodPy, messagePy) {
-            Sk.ffi.checkMethodArgs(METHOD_CONFIRM, arguments, 0, 1);
-            return Sk.ffi.booleanToPy(windowJs[METHOD_CONFIRM](Sk.ffi.remapToJs(messagePy)));
-          });
-        }
-        case METHOD_OPEN: {
-          return Sk.ffi.callableToPy(mod, METHOD_OPEN, function(methodPy, urlPy, namePy, specsPy, replacePy) {
-            Sk.ffi.checkMethodArgs(METHOD_OPEN, arguments, 0, 4);
-            if (Sk.ffi.isDefined(urlPy))
-            {
-              Sk.ffi.checkArgType("URL", Sk.ffi.PyType.STR, Sk.builtin.isStringPy(urlPy), urlPy);
-            }
-            if (Sk.ffi.isDefined(namePy))
-            {
-              Sk.ffi.checkArgType("name", Sk.ffi.PyType.STR, Sk.builtin.isStringPy(namePy), namePy);
-            }
-            if (Sk.ffi.isDefined(specsPy))
-            {
-              Sk.ffi.checkArgType("specs", Sk.ffi.PyType.STR, Sk.builtin.isStringPy(specsPy), specsPy);
-            }
-            if (Sk.ffi.isDefined(replacePy))
-            {
-              Sk.ffi.checkArgType("replace", Sk.ffi.PyType.BOOL, Sk.ffi.isBool(replacePy), replacePy);
-            }
-            var w = windowJs[METHOD_OPEN](Sk.builtin.stringToJs(urlPy), Sk.builtin.stringToJs(namePy), Sk.builtin.stringToJs(specsPy), Sk.ffi.remapToJs(replacePy));
-            return Sk.ffi.callsim(mod[WINDOW_CLASS], Sk.ffi.referenceToPy(w, WINDOW_CLASS));
-          });
-        }
-        case METHOD_PROMPT: {
-          return Sk.ffi.callableToPy(mod, METHOD_PROMPT, function(methodPy, textPy, valuePy) {
-            Sk.ffi.checkMethodArgs(METHOD_PROMPT, arguments, 0, 2);
-            return Sk.builtin.stringToPy(windowJs[METHOD_PROMPT](Sk.ffi.remapToJs(textPy), Sk.ffi.remapToJs(valuePy)));
-          });
-        }
-        case METHOD_REQUEST_ANIMATION_FRAME: {
-          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.functionPy(function(self) {
-              self.tp$name = METHOD_REQUEST_ANIMATION_FRAME;
-            });
-            $loc.__call__ = Sk.ffi.functionPy(function(self, callback) {
-              var requestID = windowJs[METHOD_REQUEST_ANIMATION_FRAME](function(timestamp) {
-                Sk.misceval.callsim(callback, Sk.ffi.numberToFloatPy(timestamp));
-              });
-              return Sk.ffi.numberToFloatPy(requestID);
-            });
-          }, METHOD_REQUEST_ANIMATION_FRAME, []));
-        }
-        case METHOD_SET_TIMEOUT: {
-          return Sk.misceval.callsim(Sk.misceval.buildClass(mod, function($gbl, $loc) {
-            $loc.__init__ = Sk.ffi.functionPy(function(self) {
-              self.tp$name = METHOD_SET_TIMEOUT;
-            });
-            $loc.__call__ = Sk.ffi.functionPy(function(self, funcPy, delayPy, paramsPy) {
-              var delay = Sk.ffi.remapToJs(delayPy);
-              var params = Sk.ffi.remapToJs(paramsPy);
-              var timeoutID = windowJs[METHOD_SET_TIMEOUT](function() {
-                Sk.misceval.callsim(funcPy);
-              }, delay, params);
-              return Sk.ffi.numberToFloatPy(timeoutID);
-            });
-          }, METHOD_SET_TIMEOUT, []));
-        }
-        default: {
-          return defaultGetAttribute(mod, windowJs, name, WINDOW_CLASS);
-        }
-      }
-    });
-    $loc.__str__ = Sk.ffi.functionPy(function(self) {
-      return Sk.builtin.stringToPy(WINDOW_CLASS)
-    })
-    $loc.__repr__ = Sk.ffi.functionPy(function(self, arg) {
-      return Sk.builtin.stringToPy(WINDOW_CLASS)
-    })
-  }, WINDOW_CLASS, []);
-
-  return mod[WINDOW_CLASS];
-};
 (function() {
 Sk.builtin.defineEuclidean2 = function(mod, BLADE) {
 Sk.ffi.checkFunctionArgs("defineEuclidean2", arguments, 2, 2);

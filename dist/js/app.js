@@ -12981,7 +12981,38 @@
         return Sk.ffi.remapToJs(a);
       });
     d = 'Value' === d || 'X' === d || 'Y' === d ? !1 : d[0] === d[0].toUpperCase() ? !0 : !1;
-    return d ? (c = Object.create(e.prototype), e = e.apply(c, f), Sk.ffi.remapToPy('object' === typeof e && e || c)) : Sk.ffi.remapToPy(e.apply(c, f));
+    if (d) {
+      c = function () {
+        var a = Object.create(e.prototype), b = e.apply(a, f);
+        return Sk.ffi.remapToPy('object' === typeof b && b || a);
+      };
+      try {
+        switch (f.length) {
+        case 0:
+          var g = new e();
+          return Sk.ffi.remapToPy(g);
+        case 1:
+          return g = new e(f[0]), Sk.ffi.remapToPy(g);
+        case 2:
+          return g = new e(f[0], f[1]), Sk.ffi.remapToPy(g);
+        case 3:
+          return g = new e(f[0], f[1], f[2]), Sk.ffi.remapToPy(g);
+        case 4:
+          return g = new e(f[0], f[1], f[2], f[3]), Sk.ffi.remapToPy(g);
+        case 5:
+          return g = new e(f[0], f[1], f[2], f[3], f[4]), Sk.ffi.remapToPy(g);
+        case 6:
+          return g = new e(f[0], f[1], f[2], f[3], f[4], f[5]), Sk.ffi.remapToPy(g);
+        case 7:
+          return g = new e(f[0], f[1], f[2], f[3], f[4], f[5], f[6]), Sk.ffi.remapToPy(g);
+        default:
+          return c();
+        }
+      } catch (h) {
+        return c();
+      }
+    } else
+      return Sk.ffi.remapToPy(e.apply(c, f));
   };
   Sk.ffi.promoteIntToLong = function (a) {
     goog.asserts.assert(Sk.ffi.isInt(a));
@@ -26381,117 +26412,6 @@
       }, 'Quaternion', []);
     };
   }.call(this));
-  Sk.builtin.buildDocumentClass = function (a) {
-    var b = function (b) {
-        return b ? Sk.ffi.callsim(a.Node, Sk.ffi.referenceToPy(b, 'Node')) : Sk.builtin.none.none$;
-      }, c = {};
-    a.Document = Sk.misceval.buildClass(a, function (d, e) {
-      e.__init__ = Sk.ffi.functionPy(function (a, b) {
-        Sk.ffi.checkMethodArgs('Document', arguments, 1, 1);
-        Sk.ffi.referenceToPy(Sk.ffi.remapToJs(b), 'Document', void 0, a);
-      });
-      e.__getattr__ = Sk.ffi.functionPy(function (d, e) {
-        var h = Sk.ffi.remapToJs(d);
-        switch (e) {
-        case 'body':
-          return b(h.body);
-        case 'webkitHidden':
-          return Sk.ffi.booleanToPy(h.webkitHidden);
-        case 'addEventListener':
-          return Sk.ffi.callsim(Sk.misceval.buildClass(a, function (b, d) {
-            d.__init__ = Sk.ffi.functionPy(function (a) {
-            });
-            d.__call__ = Sk.ffi.functionPy(function (b, d, e, f) {
-              b = Sk.ffi.remapToJs(d);
-              d = function (b) {
-                b = Sk.ffi.callsim(a.Event, Sk.ffi.referenceToPy(b, 'Event'));
-                Sk.ffi.callsim(e, b);
-              };
-              c[b] = d;
-              h.addEventListener(b, d, f);
-            });
-          }, 'addEventListener', []));
-        case 'removeEventListener':
-          return Sk.ffi.callsim(Sk.misceval.buildClass(a, function (a, b) {
-            b.__init__ = Sk.ffi.functionPy(function (a) {
-            });
-            b.__call__ = Sk.ffi.functionPy(function (a, b, d, e) {
-              a = Sk.ffi.remapToJs(b);
-              d = c[a];
-              delete c[a];
-              h.removeEventListener(a, d, e);
-            });
-          }, 'removeEventListener', []));
-        case 'createElement':
-          return Sk.ffi.callableToPy(a, 'createElement', function (a, c, d) {
-            Sk.ffi.checkMethodArgs('createElement', arguments, 1, 2);
-            Sk.ffi.checkArgType('tagName', Sk.ffi.PyType.STR, Sk.builtin.isStringPy(c), c);
-            var e = h.createElement(Sk.builtin.stringToJs(c));
-            if (d instanceof Sk.builtin.dict)
-              for (var f = d.tp$iter(), g = f.tp$iternext(); void 0 !== g; g = f.tp$iternext()) {
-                var s = d.mp$subscript(g);
-                void 0 === s && (s = null);
-                g = Sk.ffi.remapToJs(g);
-                s = Sk.ffi.remapToJs(s);
-                e.setAttribute(g, s);
-              }
-            return b(e);
-          });
-        case 'getElementById':
-          return Sk.ffi.callableToPy(a, 'getElementById', function (a, c) {
-            Sk.ffi.checkMethodArgs('getElementById', arguments, 1, 1);
-            Sk.ffi.checkArgType('id', Sk.ffi.PyType.STR, Sk.builtin.isStringPy(c), c);
-            return b(h.getElementById(Sk.ffi.remapToJs(c)));
-          });
-        case 'getElementsByTagName':
-          return Sk.ffi.callableToPy(a, 'getElementsByTagName', function (a, c) {
-            Sk.ffi.checkMethodArgs('getElementsByTagName', arguments, 1, 1);
-            Sk.ffi.checkArgType('tagName', Sk.ffi.PyType.STR, Sk.builtin.isStringPy(c), c);
-            for (var d = h.getElementsByTagName(Sk.ffi.remapToJs(c)), e = [], f = d.length - 1; 0 <= f; f--)
-              e.push(b(d[f]));
-            return Sk.ffi.listPy(e);
-          });
-        case 'removeElementsByTagName':
-          return Sk.ffi.callableToPy(a, 'removeElementsByTagName', function (a, c) {
-            Sk.ffi.checkMethodArgs('removeElementsByTagName', arguments, 1, 1);
-            Sk.ffi.checkArgType('tagName', Sk.ffi.PyType.STR, Sk.builtin.isStringPy(c), c);
-            for (var d = h.getElementsByTagName(Sk.ffi.remapToJs(c)), e = [], f = d.length - 1; 0 <= f; f--) {
-              var g = d[f];
-              g.parentNode.removeChild(g);
-              e.push(b(g));
-            }
-            return Sk.ffi.listPy(e);
-          });
-        case 'write':
-          return Sk.ffi.callableToPy(a, 'write', function (a, b) {
-            Sk.ffi.checkMethodArgs('write', arguments, 0, 1);
-            Sk.ffi.checkArgType('exp1', Sk.ffi.PyType.STR, Sk.builtin.isStringPy(b), b);
-            h.write(Sk.ffi.remapToJs(b));
-          });
-        default:
-          throw Sk.ffi.err.attribute(e).isNotGetableOnType('Document');
-        }
-      });
-      e.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
-        a = Sk.ffi.remapToJs(a);
-        switch (b) {
-        case 'title':
-          Sk.ffi.checkArgType(b, [Sk.ffi.PyType.STR], Sk.builtin.isStringPy(c), c);
-          a[b] = Sk.ffi.remapToJs(c);
-          break;
-        default:
-          throw Sk.ffi.err.attribute(b).isNotSetableOnType('Document');
-        }
-      });
-      e.__str__ = Sk.ffi.functionPy(function (a) {
-        return Sk.builtin.stringToPy('Document');
-      });
-      e.__repr__ = Sk.ffi.functionPy(function (a) {
-        return Sk.builtin.stringToPy('Document');
-      });
-    }, 'Document', []);
-    return a.Document;
-  };
   (function () {
     Sk.builtin.defineEasel = function (a, b, c) {
       function d(b, c, d) {
@@ -29724,231 +29644,6 @@
       }, 'ProbeBuilderE3', []);
     };
   }.call(this));
-  Sk.builtin.buildWindowClass = function (a) {
-    function b(b, c) {
-      switch (typeof b) {
-      case 'number':
-        return Sk.ffi.numberToFloatPy(b);
-      case 'boolean':
-        return Sk.ffi.booleanToPy(b);
-      case 'string':
-        return Sk.builtin.stringToPy(b);
-      case 'undefined':
-        return Sk.builtin.none.none$;
-      case 'object':
-        return Object.prototype.toString.apply(b), Sk.ffi.callsim(a.JavaScriptWrapper, Sk.ffi.referenceToPy(b, 'JavaScriptWrapper'));
-      default:
-        throw Sk.ffi.err.attribute(typeof b).isNotGetableOnType(c);
-      }
-    }
-    function c(a, c, d, h) {
-      var k = c[d];
-      switch (typeof k) {
-      case 'function':
-        return Sk.ffi.callableToPy(a, d, function (n) {
-          Sk.ffi.checkFunctionArgs(d, arguments, 1);
-          for (var p = Array.prototype.slice.call(arguments, 1), m = [], l = 0; l < p.length; ++l)
-            m.push(Sk.ffi.remapToJs(p[l]));
-          p = 'Value' === d || 'X' === d || 'Y' === d ? !1 : d[0] === d[0].toUpperCase() ? !0 : !1;
-          if (p)
-            return p = Object.create(k.prototype), m = k.apply(p, m), Sk.ffi.callsim(a.JavaScriptWrapper, Sk.ffi.referenceToPy('object' === typeof m && m || p, d));
-          m = k.apply(c, m);
-          return b(m, h);
-        });
-      case 'object':
-        if ('[object Array]' === Object.prototype.toString.apply(k)) {
-          for (var l = [], m = 0; m < k.length; m++)
-            l.push(Sk.ffi.remapToPy(k[m]));
-          return Sk.ffi.listPy(l);
-        }
-        return Sk.ffi.callsim(a.JavaScriptWrapper, Sk.ffi.referenceToPy(k, 'JavaScriptWrapper'));
-      case 'number':
-        return Sk.ffi.numberToFloatPy(k);
-      case 'boolean':
-        return Sk.ffi.booleanToPy(k);
-      case 'string':
-        return Sk.builtin.stringToPy(k);
-      case 'undefined':
-        return Sk.builtin.none.none$;
-      default:
-        throw Sk.ffi.err.attribute(typeof k).isNotGetableOnType(h);
-      }
-    }
-    var d = {};
-    a.JavaScriptWrapper = Sk.misceval.buildClass(a, function (b, d) {
-      d.__init__ = Sk.ffi.functionPy(function (a, b) {
-        Sk.ffi.checkMethodArgs('JavaScriptWrapper', arguments, 1, 1);
-        Sk.ffi.referenceToPy(Sk.ffi.remapToJs(b), b.tp$name, void 0, a);
-      });
-      d.__add__ = Sk.ffi.functionPy(function (b, c) {
-        var d = Sk.ffi.remapToJs(b), e = Sk.ffi.remapToJs(c), d = d.add(e);
-        return Sk.ffi.callsim(a.JavaScriptWrapper, Sk.ffi.referenceToPy(d, 'JavaScriptWrapper'));
-      });
-      d.__sub__ = Sk.ffi.functionPy(function (b, c) {
-        var d = Sk.ffi.remapToJs(b), e = Sk.ffi.remapToJs(c), d = d.sub(e);
-        return Sk.ffi.callsim(a.JavaScriptWrapper, Sk.ffi.referenceToPy(d, 'JavaScriptWrapper'));
-      });
-      d.__mul__ = Sk.ffi.functionPy(function (b, c) {
-        var d = Sk.ffi.remapToJs(b), e = Sk.ffi.remapToJs(c), d = d.mul(e);
-        return Sk.ffi.callsim(a.JavaScriptWrapper, Sk.ffi.referenceToPy(d, 'JavaScriptWrapper'));
-      });
-      d.__div__ = Sk.ffi.functionPy(function (b, c) {
-        var d = Sk.ffi.remapToJs(b), e = Sk.ffi.remapToJs(c), d = d.div(e);
-        return Sk.ffi.callsim(a.JavaScriptWrapper, Sk.ffi.referenceToPy(d, 'JavaScriptWrapper'));
-      });
-      d.__getattr__ = Sk.ffi.functionPy(function (b, d) {
-        return c(a, Sk.ffi.remapToJs(b), d, 'JavaScriptWrapper');
-      });
-      d.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
-        a = Sk.ffi.remapToJs(a);
-        switch (b) {
-        default:
-          switch (typeof a[b]) {
-          case 'number':
-            a[b] = Sk.ffi.remapToJs(c);
-            break;
-          default:
-            a[b] = Sk.ffi.remapToJs(c);
-          }
-        }
-      });
-      d.__getitem__ = Sk.ffi.functionPy(function (b, d) {
-        Sk.ffi.checkMethodArgs('[]', arguments, 1, 1);
-        Sk.ffi.checkArgType('index', Sk.ffi.PyType.INT, Sk.ffi.isInt(d), d);
-        var e = Sk.ffi.remapToJs(d);
-        return c(a, Sk.ffi.remapToJs(b), '' + e, 'JavaScriptWrapper');
-      });
-      d.__str__ = Sk.ffi.functionPy(function (a) {
-        a = Sk.ffi.remapToJs(a);
-        return Sk.builtin.stringToPy(a.toString());
-      });
-      d.__repr__ = Sk.ffi.functionPy(function (a) {
-        return Sk.builtin.stringToPy('JavaScriptWrapper');
-      });
-    }, 'JavaScriptWrapper', []);
-    a.Window = Sk.misceval.buildClass(a, function (b, f) {
-      f.__init__ = Sk.ffi.functionPy(function (a, b) {
-        Sk.ffi.checkMethodArgs('Window', arguments, 1, 1);
-        Sk.ffi.referenceToPy(Sk.ffi.remapToJs(b), 'Window', void 0, a);
-      });
-      f.__getattr__ = Sk.ffi.functionPy(function (b, e) {
-        var f = Sk.ffi.remapToJs(b);
-        switch (e) {
-        case 'animationTime':
-          return Sk.ffi.numberToFloatPy(f.animationTime);
-        case 'document':
-          return Sk.ffi.callsim(a.Document, Sk.ffi.referenceToPy(f.document, 'Document'));
-        case 'innerHeight':
-          return Sk.ffi.numberToIntPy(f.innerHeight);
-        case 'innerWidth':
-          return Sk.ffi.numberToIntPy(f.innerWidth);
-        case 'devicePixelRatio':
-          return Sk.ffi.numberToIntPy(f.devicePixelRatio);
-        case 'addEventListener':
-          return Sk.misceval.callsim(Sk.misceval.buildClass(a, function (b, c) {
-            c.__init__ = Sk.ffi.functionPy(function (a) {
-              a.tp$name = 'addEventListener';
-            });
-            c.__call__ = Sk.ffi.functionPy(function (b, c, e, g) {
-              b = Sk.ffi.remapToJs(c);
-              c = function (b) {
-                b = Sk.misceval.callsim(a.Event, Sk.ffi.referenceToPy(b, 'Event'));
-                Sk.misceval.callsim(e, b);
-              };
-              d[b] = c;
-              f.addEventListener(b, c, g);
-            });
-          }, 'addEventListener', []));
-        case 'alert':
-          return Sk.ffi.callableToPy(a, 'alert', function (a, b) {
-            Sk.ffi.checkMethodArgs('alert', arguments, 0, 1);
-            f.alert(Sk.ffi.remapToJs(b));
-          });
-        case 'removeEventListener':
-          return Sk.misceval.callsim(Sk.misceval.buildClass(a, function (a, b) {
-            b.__init__ = Sk.ffi.functionPy(function (a) {
-              a.tp$name = 'removeEventListener';
-            });
-            b.__call__ = Sk.ffi.functionPy(function (a, b, c, e) {
-              a = Sk.ffi.remapToJs(b);
-              c = d[a];
-              delete d[a];
-              f.removeEventListener(a, c, e);
-            });
-          }, 'removeEventListener', []));
-        case 'cancelAnimationFrame':
-          return Sk.misceval.callsim(Sk.misceval.buildClass(a, function (a, b) {
-            b.__init__ = Sk.ffi.functionPy(function (a) {
-              a.tp$name = 'cancelAnimationFrame';
-            });
-            b.__call__ = Sk.ffi.functionPy(function (a, b) {
-              b && f.cancelAnimationFrame(Sk.ffi.remapToJs(b));
-            });
-          }, 'cancelAnimationFrame', []));
-        case 'close':
-          return Sk.ffi.callableToPy(a, 'close', function (a) {
-            Sk.ffi.checkMethodArgs('close', arguments, 0, 0);
-            f.close();
-          });
-        case 'confirm':
-          return Sk.ffi.callableToPy(a, 'confirm', function (a, b) {
-            Sk.ffi.checkMethodArgs('confirm', arguments, 0, 1);
-            return Sk.ffi.booleanToPy(f.confirm(Sk.ffi.remapToJs(b)));
-          });
-        case 'open':
-          return Sk.ffi.callableToPy(a, 'open', function (b, c, d, e, g) {
-            Sk.ffi.checkMethodArgs('open', arguments, 0, 4);
-            Sk.ffi.isDefined(c) && Sk.ffi.checkArgType('URL', Sk.ffi.PyType.STR, Sk.builtin.isStringPy(c), c);
-            Sk.ffi.isDefined(d) && Sk.ffi.checkArgType('name', Sk.ffi.PyType.STR, Sk.builtin.isStringPy(d), d);
-            Sk.ffi.isDefined(e) && Sk.ffi.checkArgType('specs', Sk.ffi.PyType.STR, Sk.builtin.isStringPy(e), e);
-            Sk.ffi.isDefined(g) && Sk.ffi.checkArgType('replace', Sk.ffi.PyType.BOOL, Sk.ffi.isBool(g), g);
-            var h = f.open(Sk.builtin.stringToJs(c), Sk.builtin.stringToJs(d), Sk.builtin.stringToJs(e), Sk.ffi.remapToJs(g));
-            return Sk.ffi.callsim(a.Window, Sk.ffi.referenceToPy(h, 'Window'));
-          });
-        case 'prompt':
-          return Sk.ffi.callableToPy(a, 'prompt', function (a, b, c) {
-            Sk.ffi.checkMethodArgs('prompt', arguments, 0, 2);
-            return Sk.builtin.stringToPy(f.prompt(Sk.ffi.remapToJs(b), Sk.ffi.remapToJs(c)));
-          });
-        case 'requestAnimationFrame':
-          return Sk.misceval.callsim(Sk.misceval.buildClass(a, function (a, b) {
-            b.__init__ = Sk.ffi.functionPy(function (a) {
-              a.tp$name = 'requestAnimationFrame';
-            });
-            b.__call__ = Sk.ffi.functionPy(function (a, b) {
-              var c = f.requestAnimationFrame(function (a) {
-                  Sk.misceval.callsim(b, Sk.ffi.numberToFloatPy(a));
-                });
-              return Sk.ffi.numberToFloatPy(c);
-            });
-          }, 'requestAnimationFrame', []));
-        case 'setTimeout':
-          return Sk.misceval.callsim(Sk.misceval.buildClass(a, function (a, b) {
-            b.__init__ = Sk.ffi.functionPy(function (a) {
-              a.tp$name = 'setTimeout';
-            });
-            b.__call__ = Sk.ffi.functionPy(function (a, b, c, d) {
-              a = Sk.ffi.remapToJs(c);
-              d = Sk.ffi.remapToJs(d);
-              d = f.setTimeout(function () {
-                Sk.misceval.callsim(b);
-              }, a, d);
-              return Sk.ffi.numberToFloatPy(d);
-            });
-          }, 'setTimeout', []));
-        default:
-          return c(a, f, e, 'Window');
-        }
-      });
-      f.__str__ = Sk.ffi.functionPy(function (a) {
-        return Sk.builtin.stringToPy('Window');
-      });
-      f.__repr__ = Sk.ffi.functionPy(function (a, b) {
-        return Sk.builtin.stringToPy('Window');
-      });
-    }, 'Window', []);
-    return a.Window;
-  };
   (function () {
     Sk.builtin.defineEuclidean2 = function (a, b) {
       function c(a) {
@@ -34361,19 +34056,19 @@
         var e = a / 2, f = b / 2;
         c = this.widthSegments;
         d = this.heightSegments;
-        var g = c + 1, h = d + 1, k = this.width / c, l = this.height / d, m = new THREE.Vector3(0, 0, 1);
+        var g = c + 1, h = d + 1, l = this.width / c, k = this.height / d, m = new THREE.Vector3(0, 0, 1);
         for (a = 0; a < h; a++)
           for (b = 0; b < g; b++)
-            this.vertices.push(new THREE.Vector3(b * k - e, -(a * l - f), 0));
+            this.vertices.push(new THREE.Vector3(b * l - e, -(a * k - f), 0));
         for (a = 0; a < d; a++)
           for (b = 0; b < c; b++) {
-            var n = b + g * a, e = b + g * (a + 1), f = b + 1 + g * (a + 1), h = b + 1 + g * a, k = new THREE.Vector2(b / c, 1 - a / d), l = new THREE.Vector2(b / c, 1 - (a + 1) / d), p = new THREE.Vector2((b + 1) / c, 1 - (a + 1) / d), q = new THREE.Vector2((b + 1) / c, 1 - a / d), n = new THREE.Face3(n, e, h);
+            var n = b + g * a, e = b + g * (a + 1), f = b + 1 + g * (a + 1), h = b + 1 + g * a, l = new THREE.Vector2(b / c, 1 - a / d), k = new THREE.Vector2(b / c, 1 - (a + 1) / d), p = new THREE.Vector2((b + 1) / c, 1 - (a + 1) / d), q = new THREE.Vector2((b + 1) / c, 1 - a / d), n = new THREE.Face3(n, e, h);
             n.normal.copy(m);
             n.vertexNormals.push(m.clone(), m.clone(), m.clone());
             this.faces.push(n);
             this.faceVertexUvs[0].push([
-              k,
               l,
+              k,
               q
             ]);
             n = new THREE.Face3(e, f, h);
@@ -34381,7 +34076,7 @@
             n.vertexNormals.push(m.clone(), m.clone(), m.clone());
             this.faces.push(n);
             this.faceVertexUvs[0].push([
-              l.clone(),
+              k.clone(),
               p,
               q.clone()
             ]);
