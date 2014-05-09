@@ -54,52 +54,14 @@
         <div class="widget stacked">
           <div class="widget-content">
             <ul class="nav nav-tabs" id="myTab">
-              <li><a data-target="#gists" data-toggle="tab">{{i18n.translate("Gist").ifPlural(2, "Gists").fetch()}}</a></li>
-              <li><a data-target="#repos" data-toggle="tab">{{i18n.translate("Repo").ifPlural(2, "Repos").fetch()}}</a></li>
+              <li>
+                <a data-target="#repos" data-toggle="tab">{{i18n.translate("Repo").ifPlural(2, "Repos").fetch()}}</a>
+              </li>
+              <li>
+                <a data-target="#gists" data-toggle="tab">{{i18n.translate("Gist").ifPlural(2, "Gists").fetch()}}</a>
+              </li>
             </ul>
             <div class="tab-content">
-              <div class="tab-pane" id="gists">
-                <div class ="row-fluid">
-                  <table class="table table-condensed">
-                    <tbody>
-                      <tr>
-                        <td nowrap=nowrap>
-                          <!--input type="text" placeHolder="Filter..."></input-->
-                        </td>
-                        <td nowrap=nowrap>
-                          <button ng-click="newGist()" class="btn btn-primary">
-                            <i class="icon-plus-sign-alt"></i> <i class="{{i18n.translate('icon-gist').fetch()}}"></i>
-                            <span>{{i18n.translate("Create a New Gist").fetch()}}</span>
-                          </button>
-                        </td>
-                      </tr>
-                      <tr ng-repeat="gist in gists">
-                        <td nowrap=nowrap>
-                          <h3>
-                            <i class="{{i18n.translate('icon-gist').fetch()}} muted"></i>
-                            <a href="/gists/{{gist.id}}" class="btn btn-link">
-                              <span>{{gist.id}}</span>
-                            </a>
-                          </h3>
-                          <p>{{gist.description}}</p>
-                        </td>
-                        <td nowrap=nowrap>
-                          <a href="{{gist.html_url}}" target="_blank" class="btn btn-secondary">
-                            <i class="icon-github"></i>
-                            <span>GitHub</span>
-                          </a>
-                          <!--
-                          <button ng-click="deleteGist(user.login, gist.id)" class="btn btn-tertiary">
-                            <i class="icon-minus-sign-alt"></i>
-                            <span>Delete</span>
-                          </button>
-                          -->
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
               <div class="tab-pane" id="repos">
                 <div class ="row-fluid">
                   <table class="table table-condensed">
@@ -142,10 +104,52 @@
                   </table>
                 </div>
               </div>
+              <div class="tab-pane" id="gists">
+                <div class ="row-fluid">
+                  <table class="table table-condensed">
+                    <tbody>
+                      <tr>
+                        <td nowrap=nowrap>
+                          <!--input type="text" placeHolder="Filter..."></input-->
+                        </td>
+                        <td nowrap=nowrap>
+                          <button ng-click="newGist()" class="btn btn-primary">
+                            <i class="icon-plus-sign-alt"></i> <i class="{{i18n.translate('icon-gist').fetch()}}"></i>
+                            <span>{{i18n.translate("Create a New Gist").fetch()}}</span>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr ng-repeat="gist in gists">
+                        <td nowrap=nowrap>
+                          <h3>
+                            <i class="{{i18n.translate('icon-gist').fetch()}} muted"></i>
+                            <a href="/gists/{{gist.id}}" class="btn btn-link">
+                              <span>{{gist.id}}</span>
+                            </a>
+                          </h3>
+                          <p>{{gist.description}}</p>
+                        </td>
+                        <td nowrap=nowrap>
+                          <a href="{{gist.html_url}}" target="_blank" class="btn btn-secondary">
+                            <i class="icon-github"></i>
+                            <span>GitHub</span>
+                          </a>
+                          <!--
+                          <button ng-click="deleteGist(user.login, gist.id)" class="btn btn-tertiary">
+                            <i class="icon-minus-sign-alt"></i>
+                            <span>Delete</span>
+                          </button>
+                          -->
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
             <script>
               $(function () {
-                $('#myTab a[data-target="#gists"]').tab('show');
+                $('#myTab a[data-target="#repos"]').tab('show');
               })
             </script>
             <script>

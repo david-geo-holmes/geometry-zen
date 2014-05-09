@@ -14,16 +14,16 @@ angular.module("app").controller 'UserCtrl', ['$rootScope','$scope', '$routePara
       if not err
         $scope.gists = _.filter(_.map(gists, (gist) -> {"id": gist.id, "description": gist.description, "html_url": gist.html_url}), (gist) -> true)
       else
-        alert("Error retrieving user Gists")
-      callback err, gists
+        alert("Error retrieving user Gists.")
+      callback(err, gists)
 
   loadRepos = (callback) ->
     github.getUserRepos token, (err, repos) ->
       if not err
-        $scope.repos = _.filter(repos, (repo) -> repo.language is 'Python')
+        $scope.repos = repos
       else
-        alert("Error retrieving user Repositories")
-      callback err, repos
+        alert("Error retrieving user Repositories.")
+      callback(err, repos)
 
   async.parallel([
     (callback) ->
@@ -65,8 +65,7 @@ angular.module("app").controller 'UserCtrl', ['$rootScope','$scope', '$routePara
       else
         alert("Error deleting gist: #{err}")
 
-  $scope.$on 'createdGist', (e, user, gist) ->
-    $scope.gists.push(gist)
+  $scope.$on('createdGist', (e, user, gist) -> $scope.gists.push(gist))
 
   $scope.newRepo = (owner) ->
     $('#new-repo-dialog').modal show: true, backdrop: true
@@ -78,6 +77,5 @@ angular.module("app").controller 'UserCtrl', ['$rootScope','$scope', '$routePara
       else
         alert("Error deleting repo: #{err}")
 
-  $scope.$on 'createdRepo', (e, user, repo) ->
-    $scope.repos.push(repo)
+  $scope.$on('createdRepo', (e, user, repo) -> $scope.repos.push(repo))
 ]
