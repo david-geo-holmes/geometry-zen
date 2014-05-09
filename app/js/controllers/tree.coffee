@@ -1,4 +1,4 @@
-angular.module("app").controller 'TreeCtrl', ['$rootScope','$scope', '$window', '$routeParams', '$', '_', 'GitHub', 'Base64', 'cookie', ($rootScope, $scope, $window, $routeParams, $, _, github, base64, cookie) ->
+angular.module("app").controller 'TreeCtrl', ['$rootScope','$scope', '$location', '$window', '$routeParams', '$', '_', 'GitHub', 'Base64', 'cookie', ($rootScope, $scope, $location, $window, $routeParams, $, _, github, base64, cookie) ->
 
   EVENT_CATEGORY = "tree"
   ga('create', 'UA-41504069-1', 'geometryzen.org');
@@ -52,8 +52,10 @@ angular.module("app").controller 'TreeCtrl', ['$rootScope','$scope', '$window', 
     else
       alert "Create a New File is not enabled."
 
-  $scope.$on 'createdFile', (e, user, repo, item, commit) ->
+  $scope.$on 'createdFile', (event, user, repo, item, commit) ->
     $scope.contextItem.childItems.push(item)
+    # Navigate to the file that has just been created.
+    $location.path($scope.hrefFromItem(item))
 
   $scope.isDeleteItemEnabled = () ->
     # TODO: Rename so that the context and authenticated user are clearer.

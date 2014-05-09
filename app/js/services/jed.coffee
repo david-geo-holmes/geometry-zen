@@ -56,6 +56,7 @@ angular.module('jed', []).factory 'i18n', ['$window', (w) ->
         "Create file": [null, "Create file"],
         "File": [null, "File", "Files"],
         "File name": [null, "File name"],
+        "Name your file": [null, "Name your file"],
 
         "My Space": [null, "My Universe"],
 
