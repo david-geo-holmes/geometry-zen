@@ -39902,6 +39902,9 @@ Sk.builtinFiles = {
   function isFunction(value) {
     return typeof value == 'function';
   }
+  function isRegExp(value) {
+    return toString.apply(value) == '[object RegExp]';
+  }
   function isWindow(obj) {
     return obj && obj.document && obj.location && obj.alert && obj.setInterval;
   }
@@ -39914,9 +39917,16 @@ Sk.builtinFiles = {
   function isBoolean(value) {
     return typeof value == 'boolean';
   }
-  function trim(value) {
-    return isString(value) ? value.replace(/^\s*/, '').replace(/\s*$/, '') : value;
-  }
+  var trim = function () {
+      if (!String.prototype.trim) {
+        return function (value) {
+          return isString(value) ? value.replace(/^\s*/, '').replace(/\s*$/, '') : value;
+        };
+      }
+      return function (value) {
+        return isString(value) ? value.trim() : value;
+      };
+    }();
   function isElement(node) {
     return node && (node.nodeName || node.bind && node.find);
   }
@@ -39993,6 +40003,8 @@ Sk.builtinFiles = {
           destination = copy(source, []);
         } else if (isDate(source)) {
           destination = new Date(source.getTime());
+        } else if (isRegExp(source)) {
+          destination = new RegExp(source.source);
         } else if (isObject(source)) {
           destination = copy(source, {});
         }
@@ -40038,6 +40050,8 @@ Sk.builtinFiles = {
     if (t1 == t2) {
       if (t1 == 'object') {
         if (isArray(o1)) {
+          if (!isArray(o2))
+            return false;
           if ((length = o1.length) == o2.length) {
             for (key = 0; key < length; key++) {
               if (!equals(o1[key], o2[key]))
@@ -40047,8 +40061,10 @@ Sk.builtinFiles = {
           }
         } else if (isDate(o1)) {
           return isDate(o2) && o1.getTime() == o2.getTime();
+        } else if (isRegExp(o1) && isRegExp(o2)) {
+          return o1.toString() == o2.toString();
         } else {
-          if (isScope(o1) || isScope(o2) || isWindow(o1) || isWindow(o2))
+          if (isScope(o1) || isScope(o2) || isWindow(o1) || isWindow(o2) || isArray(o2))
             return false;
           keySet = {};
           for (key in o1) {
@@ -40100,6 +40116,8 @@ Sk.builtinFiles = {
     return val;
   }
   function toJson(obj, pretty) {
+    if (typeof obj === 'undefined')
+      return undefined;
     return JSON.stringify(obj, toJsonReplacer, pretty ? '  ' : null);
   }
   function fromJson(json) {
@@ -40130,13 +40148,21 @@ Sk.builtinFiles = {
       return lowercase(elemHtml);
     }
   }
+  function tryDecodeURIComponent(value) {
+    try {
+      return decodeURIComponent(value);
+    } catch (e) {
+    }
+  }
   function parseKeyValue(keyValue) {
     var obj = {}, key_value, key;
     forEach((keyValue || '').split('&'), function (keyValue) {
       if (keyValue) {
         key_value = keyValue.split('=');
-        key = decodeURIComponent(key_value[0]);
-        obj[key] = isDefined(key_value[1]) ? decodeURIComponent(key_value[1]) : true;
+        key = tryDecodeURIComponent(key_value[0]);
+        if (isDefined(key)) {
+          obj[key] = isDefined(key_value[1]) ? tryDecodeURIComponent(key_value[1]) : true;
+        }
       }
     });
     return obj;
@@ -40196,7 +40222,7 @@ Sk.builtinFiles = {
     }
   }
   function bootstrap(element, modules) {
-    var resumeBootstrapInternal = function () {
+    var doBootstrap = function () {
       element = jqLite(element);
       modules = modules || [];
       modules.unshift([
@@ -40223,14 +40249,14 @@ Sk.builtinFiles = {
     };
     var NG_DEFER_BOOTSTRAP = /^NG_DEFER_BOOTSTRAP!/;
     if (window && !NG_DEFER_BOOTSTRAP.test(window.name)) {
-      return resumeBootstrapInternal();
+      return doBootstrap();
     }
     window.name = window.name.replace(NG_DEFER_BOOTSTRAP, '');
     angular.resumeBootstrap = function (extraModules) {
       forEach(extraModules, function (module) {
         modules.push(module);
       });
-      resumeBootstrapInternal();
+      doBootstrap();
     };
   }
   var SNAKE_CASE_REGEXP = /[A-Z]/g;
@@ -40250,9 +40276,9 @@ Sk.builtinFiles = {
         injector: JQLitePrototype.injector,
         inheritedData: JQLitePrototype.inheritedData
       });
-      JQLitePatchJQueryRemove('remove', true);
-      JQLitePatchJQueryRemove('empty');
-      JQLitePatchJQueryRemove('html');
+      JQLitePatchJQueryRemove('remove', true, true, false);
+      JQLitePatchJQueryRemove('empty', false, false, false);
+      JQLitePatchJQueryRemove('html', false, false, true);
     } else {
       jqLite = JQLite;
     }
@@ -40270,6 +40296,24 @@ Sk.builtinFiles = {
     }
     assertArg(isFunction(arg), name, 'not a function, got ' + (arg && typeof arg == 'object' ? arg.constructor.name || 'Object' : typeof arg));
     return arg;
+  }
+  function getter(obj, path, bindFnToScope) {
+    if (!path)
+      return obj;
+    var keys = path.split('.');
+    var key;
+    var lastInstance = obj;
+    var len = keys.length;
+    for (var i = 0; i < len; i++) {
+      key = keys[i];
+      if (obj) {
+        obj = (lastInstance = obj)[key];
+      }
+    }
+    if (!bindFnToScope && isFunction(obj)) {
+      return bind(lastInstance, obj);
+    }
+    return obj;
   }
   function setupModuleLoader(window) {
     function ensure(obj, name, factory) {
@@ -40326,11 +40370,11 @@ Sk.builtinFiles = {
     });
   }
   var version = {
-      full: '1.0.7',
+      full: '1.0.8',
       major: 1,
       minor: 0,
-      dot: 7,
-      codeName: 'monochromatic-rainbow'
+      dot: 8,
+      codeName: 'bubble-burst'
     };
   function publishExternalAPI(angular) {
     extend(angular, {
@@ -40395,7 +40439,6 @@ Sk.builtinFiles = {
           ngPluralize: ngPluralizeDirective,
           ngRepeat: ngRepeatDirective,
           ngShow: ngShowDirective,
-          ngSubmit: ngSubmitDirective,
           ngStyle: ngStyleDirective,
           ngSwitch: ngSwitchDirective,
           ngSwitchWhen: ngSwitchWhenDirective,
@@ -40455,24 +40498,26 @@ Sk.builtinFiles = {
       return offset ? letter.toUpperCase() : letter;
     }).replace(MOZ_HACK_REGEXP, 'Moz$1');
   }
-  function JQLitePatchJQueryRemove(name, dispatchThis) {
+  function JQLitePatchJQueryRemove(name, dispatchThis, filterElems, getterIfNoArguments) {
     var originalJqFn = jQuery.fn[name];
     originalJqFn = originalJqFn.$original || originalJqFn;
     removePatch.$original = originalJqFn;
     jQuery.fn[name] = removePatch;
-    function removePatch() {
-      var list = [this], fireEvent = dispatchThis, set, setIndex, setLength, element, childIndex, childLength, children, fns, events;
-      while (list.length) {
-        set = list.shift();
-        for (setIndex = 0, setLength = set.length; setIndex < setLength; setIndex++) {
-          element = jqLite(set[setIndex]);
-          if (fireEvent) {
-            element.triggerHandler('$destroy');
-          } else {
-            fireEvent = !fireEvent;
-          }
-          for (childIndex = 0, childLength = (children = element.children()).length; childIndex < childLength; childIndex++) {
-            list.push(jQuery(children[childIndex]));
+    function removePatch(param) {
+      var list = filterElems && param ? [this.filter(param)] : [this], fireEvent = dispatchThis, set, setIndex, setLength, element, childIndex, childLength, children;
+      if (!getterIfNoArguments || param != null) {
+        while (list.length) {
+          set = list.shift();
+          for (setIndex = 0, setLength = set.length; setIndex < setLength; setIndex++) {
+            element = jqLite(set[setIndex]);
+            if (fireEvent) {
+              element.triggerHandler('$destroy');
+            } else {
+              fireEvent = !fireEvent;
+            }
+            for (childIndex = 0, childLength = (children = element.children()).length; childIndex < childLength; childIndex++) {
+              list.push(jQuery(children[childIndex]));
+            }
           }
         }
       }
@@ -40522,7 +40567,7 @@ Sk.builtinFiles = {
         removeEventListenerFn(element, type, events[type]);
         delete events[type];
       } else {
-        arrayRemove(events[type], fn);
+        arrayRemove(events[type] || [], fn);
       }
     }
   }
@@ -40726,6 +40771,15 @@ Sk.builtinFiles = {
     }, { $dv: '' }),
     val: function (element, value) {
       if (isUndefined(value)) {
+        if (nodeName_(element) === 'SELECT' && element.multiple) {
+          var result = [];
+          forEach(element.options, function (option) {
+            if (option.selected) {
+              result.push(option.value || option.text);
+            }
+          });
+          return result.length === 0 ? null : result;
+        }
         return element.value;
       }
       element.value = value;
@@ -40889,12 +40943,7 @@ Sk.builtinFiles = {
       if (element.nodeType === 1) {
         var index = element.firstChild;
         forEach(new JQLite(node), function (child) {
-          if (index) {
-            element.insertBefore(child, index);
-          } else {
-            element.appendChild(child);
-            index = child;
-          }
+          element.insertBefore(child, index);
         });
       }
     },
@@ -41319,7 +41368,7 @@ Sk.builtinFiles = {
         pollTimeout = setTimeout(check, interval);
       }());
     }
-    var lastBrowserUrl = location.href, baseElement = document.find('base');
+    var lastBrowserUrl = location.href, baseElement = document.find('base'), replacedUrl = null;
     self.url = function (url, replace) {
       if (url) {
         if (lastBrowserUrl == url)
@@ -41333,14 +41382,17 @@ Sk.builtinFiles = {
             baseElement.attr('href', baseElement.attr('href'));
           }
         } else {
-          if (replace)
+          if (replace) {
             location.replace(url);
-          else
+            replacedUrl = url;
+          } else {
             location.href = url;
+            replacedUrl = null;
+          }
         }
         return self;
       } else {
-        return location.href.replace(/%27/g, '\'');
+        return replacedUrl || location.href.replace(/%27/g, '\'');
       }
     };
     var urlChangeListeners = [], urlChangeInit = false;
@@ -41618,7 +41670,7 @@ Sk.builtinFiles = {
             if (nodeName_(this.$$element[0]) === 'A' && key === 'href') {
               urlSanitizationNode.setAttribute('href', value);
               normalizedVal = urlSanitizationNode.href;
-              if (!normalizedVal.match(urlSanitizationWhitelist)) {
+              if (normalizedVal !== '' && !normalizedVal.match(urlSanitizationWhitelist)) {
                 this[key] = value = 'unsafe:' + normalizedVal;
               }
             }
@@ -41742,7 +41794,7 @@ Sk.builtinFiles = {
             addDirective(directives, directiveNormalize(nodeName_(node).toLowerCase()), 'E', maxPriority);
             for (var attr, name, nName, value, nAttrs = node.attributes, j = 0, jj = nAttrs && nAttrs.length; j < jj; j++) {
               attr = nAttrs[j];
-              if (attr.specified) {
+              if (!msie || msie >= 8 || attr.specified) {
                 name = attr.name;
                 nName = directiveNormalize(name.toLowerCase());
                 attrsMap[nName] = name;
@@ -43210,24 +43262,6 @@ Sk.builtinFiles = {
     obj[element.shift()] = setValue;
     return setValue;
   }
-  function getter(obj, path, bindFnToScope) {
-    if (!path)
-      return obj;
-    var keys = path.split('.');
-    var key;
-    var lastInstance = obj;
-    var len = keys.length;
-    for (var i = 0; i < len; i++) {
-      key = keys[i];
-      if (obj) {
-        obj = (lastInstance = obj)[key];
-      }
-    }
-    if (!bindFnToScope && isFunction(obj)) {
-      return bind(lastInstance, obj);
-    }
-    return obj;
-  }
   var getterFnCache = {};
   function cspSafeGetterFn(key0, key1, key2, key3, key4) {
     return function (scope, locals) {
@@ -43388,16 +43422,16 @@ Sk.builtinFiles = {
               try {
                 result.resolve((callback || defaultCallback)(value));
               } catch (e) {
-                exceptionHandler(e);
                 result.reject(e);
+                exceptionHandler(e);
               }
             };
             var wrappedErrback = function (reason) {
               try {
                 result.resolve((errback || defaultErrback)(reason));
               } catch (e) {
-                exceptionHandler(e);
                 result.reject(e);
+                exceptionHandler(e);
               }
             };
             if (pending) {
@@ -43746,7 +43780,7 @@ Sk.builtinFiles = {
                   while (length--) {
                     try {
                       watch = watchers[length];
-                      if ((value = watch.get(current)) !== (last = watch.last) && !(watch.eq ? equals(value, last) : typeof value == 'number' && typeof last == 'number' && isNaN(value) && isNaN(last))) {
+                      if (watch && (value = watch.get(current)) !== (last = watch.last) && !(watch.eq ? equals(value, last) : typeof value == 'number' && typeof last == 'number' && isNaN(value) && isNaN(last))) {
                         dirty = true;
                         watch.last = watch.eq ? copy(value) : value;
                         watch.fn(value, last === initWatchVal ? value : last, current);
@@ -44018,10 +44052,26 @@ Sk.builtinFiles = {
         });
         function $http(config) {
           config.method = uppercase(config.method);
-          var reqTransformFn = config.transformRequest || $config.transformRequest, respTransformFn = config.transformResponse || $config.transformResponse, defHeaders = $config.headers, reqHeaders = extend({ 'X-XSRF-TOKEN': $browser.cookies()['XSRF-TOKEN'] }, defHeaders.common, defHeaders[lowercase(config.method)], config.headers), reqData = transformData(config.data, headersGetter(reqHeaders), reqTransformFn), promise;
+          var reqTransformFn = config.transformRequest || $config.transformRequest, respTransformFn = config.transformResponse || $config.transformResponse, reqHeaders = extend({}, config.headers), defHeaders = extend({ 'X-XSRF-TOKEN': $browser.cookies()['XSRF-TOKEN'] }, $config.headers.common, $config.headers[lowercase(config.method)]), reqData, defHeaderName, lowercaseDefHeaderName, headerName, promise;
+          defaultHeadersIteration:
+            for (defHeaderName in defHeaders) {
+              lowercaseDefHeaderName = lowercase(defHeaderName);
+              for (headerName in config.headers) {
+                if (lowercase(headerName) === lowercaseDefHeaderName) {
+                  continue defaultHeadersIteration;
+                }
+              }
+              reqHeaders[defHeaderName] = defHeaders[defHeaderName];
+            }
           if (isUndefined(config.data)) {
-            delete reqHeaders['Content-Type'];
+            for (var header in reqHeaders) {
+              if (lowercase(header) === 'content-type') {
+                delete reqHeaders[header];
+                break;
+              }
+            }
           }
+          reqData = transformData(config.data, headersGetter(reqHeaders), reqTransformFn);
           promise = sendReq(config, reqData, reqHeaders);
           promise = promise.then(transformResponse, transformResponse);
           forEach(responseInterceptors, function (interceptor) {
@@ -44336,21 +44386,20 @@ Sk.builtinFiles = {
             } catch (e) {
               deferred.reject(e);
               $exceptionHandler(e);
+            } finally {
+              delete deferreds[promise.$$timeoutId];
             }
             if (!skipApply)
               $rootScope.$apply();
           }, delay);
-          cleanup = function () {
-            delete deferreds[promise.$$timeoutId];
-          };
           promise.$$timeoutId = timeoutId;
           deferreds[timeoutId] = deferred;
-          promise.then(cleanup, cleanup);
           return promise;
         }
         timeout.cancel = function (promise) {
           if (promise && promise.$$timeoutId in deferreds) {
             deferreds[promise.$$timeoutId].reject('canceled');
+            delete deferreds[promise.$$timeoutId];
             return $browser.defer.cancel(promise.$$timeoutId);
           }
           return false;
@@ -44533,6 +44582,10 @@ Sk.builtinFiles = {
       }
       if (fractionSize && fractionSize !== '0')
         formatedText += decimalSep + fraction.substr(0, fractionSize);
+    } else {
+      if (fractionSize > 0 && number > -1 && number < 1) {
+        formatedText = number.toFixed(fractionSize);
+      }
     }
     parts.push(isNegative ? pattern.negPre : pattern.posPre);
     parts.push(formatedText);
@@ -44729,10 +44782,10 @@ Sk.builtinFiles = {
         var t1 = typeof v1;
         var t2 = typeof v2;
         if (t1 == t2) {
-          if (t1 == 'string')
+          if (t1 == 'string') {
             v1 = v1.toLowerCase();
-          if (t1 == 'string')
             v2 = v2.toLowerCase();
+          }
           if (v1 === v2)
             return 0;
           return v1 < v2 ? -1 : 1;
@@ -44816,7 +44869,7 @@ Sk.builtinFiles = {
   ];
   function FormController(element, attrs) {
     var form = this, parentForm = element.parent().controller('form') || nullFormCtrl, invalidCount = 0, errors = form.$error = {};
-    form.$name = attrs.name;
+    form.$name = attrs.name || attrs.ngForm;
     form.$dirty = false;
     form.$pristine = true;
     form.$valid = true;
@@ -44929,7 +44982,7 @@ Sk.builtinFiles = {
   var formDirective = formDirectiveFactory();
   var ngFormDirective = formDirectiveFactory(true);
   var URL_REGEXP = /^(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/;
-  var EMAIL_REGEXP = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/;
+  var EMAIL_REGEXP = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$/;
   var NUMBER_REGEXP = /^\s*(\-|\+)?(\d+|(\d*(\.\d*)))\s*$/;
   var inputType = {
       'text': textInputType,
@@ -45348,7 +45401,7 @@ Sk.builtinFiles = {
         } else {
           return function (scope, elm, attr) {
             scope.$watch(attr.ngValue, function valueWatchAction(value) {
-              attr.$set('value', value, false);
+              attr.$set('value', value);
             });
           };
         }
@@ -45460,7 +45513,7 @@ Sk.builtinFiles = {
       }
     ];
   var ngEventDirectives = {};
-  forEach('click dblclick mousedown mouseup mouseover mouseout mousemove mouseenter mouseleave'.split(' '), function (name) {
+  forEach('click dblclick mousedown mouseup mouseover mouseout mousemove mouseenter mouseleave submit'.split(' '), function (name) {
     var directiveName = directiveNormalize('ng-' + name);
     ngEventDirectives[directiveName] = [
       '$parse',
@@ -45476,11 +45529,6 @@ Sk.builtinFiles = {
       }
     ];
   });
-  var ngSubmitDirective = ngDirective(function (scope, element, attrs) {
-      element.bind('submit', function () {
-        scope.$apply(attrs.ngSubmit);
-      });
-    });
   var ngIncludeDirective = [
       '$http',
       '$templateCache',
@@ -46143,7 +46191,7 @@ Sk.builtinFiles = {
     angularInit(document, bootstrap);
   });
 }(window, document));
-angular.element(document).find('head').append('<style type="text/css">@charset "UTF-8";[ng\\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak{display:none;}ng\\:form{display:block;}</style>');
+angular.element(document).find('head').append('<style type="text/css">@charset "UTF-8";[ng\\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak{display:none !important;}ng\\:form{display:block;}</style>');
 (function () {
   var root = this;
   var previousUnderscore = root._;
