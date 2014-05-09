@@ -47,7 +47,9 @@
             <span>{{repo.description}}</span>
           </div>
           <ul class="nav nav-tabs" id="myTab">
-            <li><a data-target="#items" data-toggle="tab">{{i18n.translate('File').ifPlural(2, 'Files').fetch()}}</a></li>
+            <li>
+              <a data-target="#items" data-toggle="tab">{{i18n.translate('File').ifPlural(2, 'Files').fetch()}}</a>
+            </li>
             <!--li><a data-target="#commits" data-toggle="tab">Commits</a></li-->
             <!--li><a data-target="#branches" data-toggle="tab">Branches</a></li-->
           </ul>
@@ -130,14 +132,20 @@
     <form ng-controller="NewFileCtrl">
       <fieldset>
         <div class="modal-body">
-          <label>{{i18n.translate('File name').fetch()}}</label>
-          <input type="text" name="name" ng-model="file.name"></input>
+          <label>{{i18n.translate('File name').fetch()}}:</label>
+          <label class="control-label muted" for="id-file-name">{{repo.name}} /</label>
+          <input type="text" id="id-file-name" name="name" ng-model="file.name" placeholder="{{i18n.translate('Name your file...').fetch()}}">
+          </input>
+          <span class="help-block">You may use forward slashes to create new folders. e.g., folder1/folder2/filename.py</span>
           <label>Commit message:</label>
-          <input type="text" name="message" ng-model="file.message" placeholder="{{i18n.translate('Create file').fetch()}}"></input>
+          <input type="text" name="message" ng-model="file.message" placeholder="{{i18n.translate('Create file').fetch()}}">
+          </input>
         </div>
         <div class="modal-footer">
           <button id="btnCancel" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-          <button type="submit" ng-click="createFile()" id="btnOK" class="btn btn-primary">{{i18n.translate("Create file").fetch()}}</button>
+          <button type="submit" ng-click="createFile()" id="btnOK" class="btn btn-primary">
+            {{i18n.translate("Create file").fetch()}}
+          </button>
         </div>
       </fieldset>
     </form>
