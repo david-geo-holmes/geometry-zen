@@ -7596,9 +7596,6 @@
   Sk.builtin.callable = function () {
     throw new Sk.builtin.NotImplementedError('callable is not yet implemented');
   };
-  Sk.builtin.complex = function () {
-    throw new Sk.builtin.NotImplementedError('complex is not yet implemented');
-  };
   Sk.builtin.delattr = function () {
     throw new Sk.builtin.NotImplementedError('delattr is not yet implemented');
   };
@@ -8585,10 +8582,10 @@
   goog.exportSymbol('Sk.misceval.isTrue', Sk.misceval.isTrue);
   Sk.misceval.softspace_ = !1;
   Sk.misceval.print_ = function (a) {
+    goog.asserts.assertString(a);
     Sk.misceval.softspace_ && ('\n' !== a && Sk.output(' '), Sk.misceval.softspace_ = !1);
-    a = Sk.builtin.stringToPy(a);
-    Sk.output(a.v);
-    if (0 === a.v.length || '\n' !== a.v[a.v.length - 1] && '\t' !== a.v[a.v.length - 1] && '\r' !== a.v[a.v.length - 1] || ' ' === a.v[a.v.length - 1])
+    Sk.output(a);
+    if (0 === a.length || '\n' !== a[a.length - 1] && '\t' !== a[a.length - 1] && '\r' !== a[a.length - 1] || ' ' === a[a.length - 1])
       Sk.misceval.softspace_ = !0;
   };
   goog.exportSymbol('Sk.misceval.print_', Sk.misceval.print_);
@@ -8667,11 +8664,11 @@
       case 'Add':
         return a.nb$add ? a.nb$add : a.__add__;
       case 'Sub':
-        return a.nb$subtract ? a.nb$subtract : a.__sub__;
+        return a.nb$sub ? a.nb$sub : a.__sub__;
       case 'Mult':
-        return a.nb$multiply ? a.nb$multiply : a.__mul__;
+        return a.nb$mul ? a.nb$mul : a.__mul__;
       case 'Div':
-        return a.nb$divide ? a.nb$divide : a.__div__;
+        return a.nb$div ? a.nb$div : a.__div__;
       case 'FloorDiv':
         return a.nb$floor_divide ? a.nb$floor_divide : a.__floordiv__;
       case 'Mod':
@@ -8696,11 +8693,11 @@
       case 'Add':
         return a.nb$add ? a.nb$add : a.__radd__;
       case 'Sub':
-        return a.nb$subtract ? a.nb$subtract : a.__rsub__;
+        return a.nb$sub ? a.nb$sub : a.__rsub__;
       case 'Mult':
-        return a.nb$multiply ? a.nb$multiply : a.__rmul__;
+        return a.nb$mul ? a.nb$mul : a.__rmul__;
       case 'Div':
-        return a.nb$divide ? a.nb$divide : a.__rdiv__;
+        return a.nb$div ? a.nb$div : a.__rdiv__;
       case 'FloorDiv':
         return a.nb$floor_divide ? a.nb$floor_divide : a.__rfloordiv__;
       case 'Mod':
@@ -9196,7 +9193,7 @@
         b.push(this.v[d]);
     return new Sk.builtin.list(b);
   };
-  Sk.builtin.list.prototype.nb$multiply = Sk.builtin.list.prototype.sq$repeat;
+  Sk.builtin.list.prototype.nb$mul = Sk.builtin.list.prototype.sq$repeat;
   Sk.builtin.list.prototype.nb$inplace_multiply = Sk.builtin.list.prototype.sq$repeat;
   Sk.builtin.list.prototype.sq$ass_item = Sk.builtin.list.prototype.list_ass_item_;
   Sk.builtin.list.prototype.sq$del_item = Sk.builtin.list.prototype.list_del_item_;
@@ -9498,7 +9495,7 @@
       b += Sk.ffi.remapToJs(this);
     return Sk.builtin.stringToPy(b);
   };
-  Sk.builtin.StringPy.prototype.nb$multiply = Sk.builtin.StringPy.prototype.sq$repeat;
+  Sk.builtin.StringPy.prototype.nb$mul = Sk.builtin.StringPy.prototype.sq$repeat;
   Sk.builtin.StringPy.prototype.nb$inplace_multiply = Sk.builtin.StringPy.prototype.sq$repeat;
   Sk.builtin.StringPy.prototype.sq$item = function () {
     goog.asserts.fail();
@@ -10002,7 +9999,7 @@
         b.push(this.v[d]);
     return new Sk.builtin.tuple(b);
   };
-  Sk.builtin.tuple.prototype.nb$multiply = Sk.builtin.tuple.prototype.sq$repeat;
+  Sk.builtin.tuple.prototype.nb$mul = Sk.builtin.tuple.prototype.sq$repeat;
   Sk.builtin.tuple.prototype.nb$inplace_multiply = Sk.builtin.tuple.prototype.sq$repeat;
   Sk.builtin.tuple.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('tuple', Sk.builtin.tuple);
   Sk.builtin.tuple.prototype.tp$iter = function () {
@@ -11323,27 +11320,27 @@
     if (Sk.ffi.isLong(a))
       return Sk.ffi.isFloat(this) ? Sk.builtin.numberToPy(b + parseFloat(a.str$(10, !0))) : new Sk.builtin.lng(b).nb$add(a);
   };
-  Sk.builtin.NumberPy.prototype.nb$subtract = function (a) {
+  Sk.builtin.NumberPy.prototype.nb$sub = function (a) {
     var b = Sk.ffi.remapToJs(this);
     'number' === typeof a && (a = Sk.builtin.numberToPy(a));
     if (Sk.ffi.isFloat(a) || Sk.ffi.isInt(a)) {
       var c = Sk.ffi.remapToJs(a), d = b - c;
-      return Sk.ffi.isFloat(this) || Sk.ffi.isFloat(a) ? Sk.builtin.numberToPy(d) : d > Sk.builtin.NumberPy.threshold$ || d < -Sk.builtin.NumberPy.threshold$ ? new Sk.builtin.lng(b).nb$subtract(c) : Sk.ffi.numberToIntPy(d);
+      return Sk.ffi.isFloat(this) || Sk.ffi.isFloat(a) ? Sk.builtin.numberToPy(d) : d > Sk.builtin.NumberPy.threshold$ || d < -Sk.builtin.NumberPy.threshold$ ? new Sk.builtin.lng(b).nb$sub(c) : Sk.ffi.numberToIntPy(d);
     }
     if (Sk.ffi.isLong(a))
-      return Sk.ffi.isFloat(this) ? Sk.builtin.numberToPy(b - parseFloat(a.str$(10, !0))) : new Sk.builtin.lng(b).nb$subtract(a);
+      return Sk.ffi.isFloat(this) ? Sk.builtin.numberToPy(b - parseFloat(a.str$(10, !0))) : new Sk.builtin.lng(b).nb$sub(a);
   };
-  Sk.builtin.NumberPy.prototype.nb$multiply = function (a) {
+  Sk.builtin.NumberPy.prototype.nb$mul = function (a) {
     var b = Sk.ffi.remapToJs(this);
     'number' === typeof a && (a = Sk.builtin.numberToPy(a));
     if (Sk.ffi.isFloat(a) || Sk.ffi.isInt(a)) {
       var c = Sk.ffi.remapToJs(a), b = b * c;
-      return Sk.ffi.isFloat(this) || Sk.ffi.isFloat(a) ? Sk.builtin.numberToPy(b) : b > Sk.builtin.NumberPy.threshold$ || b < -Sk.builtin.NumberPy.threshold$ ? Sk.ffh.multiply(Sk.ffi.promoteIntToLong(this), Sk.ffi.promoteIntToLong(a)) : Sk.ffi.numberToIntPy(b);
+      return Sk.ffi.isFloat(this) || Sk.ffi.isFloat(a) ? Sk.builtin.numberToPy(b) : b > Sk.builtin.NumberPy.threshold$ || b < -Sk.builtin.NumberPy.threshold$ ? Sk.ffh.mul(Sk.ffi.promoteIntToLong(this), Sk.ffi.promoteIntToLong(a)) : Sk.ffi.numberToIntPy(b);
     }
     if (Sk.ffi.isLong(a))
-      return Sk.ffi.isFloat(this) ? Sk.builtin.numberToPy(b * parseFloat(a.str$(10, !0))) : new Sk.builtin.lng(b).nb$multiply(a);
+      return Sk.ffi.isFloat(this) ? Sk.builtin.numberToPy(b * parseFloat(a.str$(10, !0))) : new Sk.builtin.lng(b).nb$mul(a);
   };
-  Sk.builtin.NumberPy.prototype.nb$divide = function (a) {
+  Sk.builtin.NumberPy.prototype.nb$div = function (a) {
     var b = Sk.ffi.remapToJs(this);
     'number' === typeof a && (a = Sk.builtin.numberToPy(a));
     if (Sk.ffi.isFloat(a) || Sk.ffi.isInt(a)) {
@@ -11358,12 +11355,12 @@
       if (Sk.ffi.isFloat(this) || Sk.ffi.isFloat(a) || Sk.python3)
         return Sk.builtin.numberToPy(d);
       a = Math.floor(d);
-      return a > Sk.builtin.NumberPy.threshold$ || a < -Sk.builtin.NumberPy.threshold$ ? new Sk.builtin.lng(b).nb$divide(c) : Sk.ffi.numberToIntPy(a);
+      return a > Sk.builtin.NumberPy.threshold$ || a < -Sk.builtin.NumberPy.threshold$ ? new Sk.builtin.lng(b).nb$div(c) : Sk.ffi.numberToIntPy(a);
     }
     if (Sk.ffi.isLong(a)) {
       if (0 === a.longCompare(Sk.builtin.biginteger.ZERO))
         throw new Sk.builtin.ZeroDivisionError('integer division or modulo by zero');
-      return Infinity === b ? a.nb$isnegative() ? Sk.builtin.numberToPy(-Infinity) : Sk.builtin.numberToPy(Infinity) : -Infinity === b ? a.nb$isnegative() ? Sk.builtin.numberToPy(Infinity) : Sk.builtin.numberToPy(-Infinity) : Sk.ffi.isFloat(this) ? Sk.builtin.numberToPy(b / parseFloat(a.str$(10, !0))) : new Sk.builtin.lng(b).nb$divide(a);
+      return Infinity === b ? a.nb$isnegative() ? Sk.builtin.numberToPy(-Infinity) : Sk.builtin.numberToPy(Infinity) : -Infinity === b ? a.nb$isnegative() ? Sk.builtin.numberToPy(Infinity) : Sk.builtin.numberToPy(-Infinity) : Sk.ffi.isFloat(this) ? Sk.builtin.numberToPy(b / parseFloat(a.str$(10, !0))) : new Sk.builtin.lng(b).nb$div(a);
     }
   };
   Sk.builtin.NumberPy.prototype.nb$floor_divide = function (a) {
@@ -11480,9 +11477,9 @@
     }
   };
   Sk.builtin.NumberPy.prototype.nb$inplace_add = Sk.builtin.NumberPy.prototype.nb$add;
-  Sk.builtin.NumberPy.prototype.nb$inplace_subtract = Sk.builtin.NumberPy.prototype.nb$subtract;
-  Sk.builtin.NumberPy.prototype.nb$inplace_multiply = Sk.builtin.NumberPy.prototype.nb$multiply;
-  Sk.builtin.NumberPy.prototype.nb$inplace_divide = Sk.builtin.NumberPy.prototype.nb$divide;
+  Sk.builtin.NumberPy.prototype.nb$inplace_subtract = Sk.builtin.NumberPy.prototype.nb$sub;
+  Sk.builtin.NumberPy.prototype.nb$inplace_multiply = Sk.builtin.NumberPy.prototype.nb$mul;
+  Sk.builtin.NumberPy.prototype.nb$inplace_divide = Sk.builtin.NumberPy.prototype.nb$div;
   Sk.builtin.NumberPy.prototype.nb$inplace_remainder = Sk.builtin.NumberPy.prototype.nb$remainder;
   Sk.builtin.NumberPy.prototype.nb$inplace_floor_divide = Sk.builtin.NumberPy.prototype.nb$floor_divide;
   Sk.builtin.NumberPy.prototype.nb$inplace_power = Sk.builtin.NumberPy.prototype.nb$power;
@@ -11549,7 +11546,7 @@
     if (a instanceof Sk.builtin.lng) {
       if (this.skType === Sk.builtin.NumberPy.int$ || 0 == this.v % 1)
         return new Sk.builtin.lng(this.v).longCompare(a);
-      a = this.nb$subtract(a);
+      a = this.nb$sub(a);
       if (a instanceof Sk.builtin.NumberPy)
         return a.v;
       if (a instanceof Sk.builtin.lng)
@@ -11585,43 +11582,13 @@
     goog.asserts.assertNumber(a);
     goog.asserts.assertBoolean(b);
     var c = Sk.ffi.remapToJs(this);
-    if (Sk.ffi.isFloat(this))
-      return Sk.builtin.numberToFloatStringJs(c, a, b);
-    if (isNaN(c))
-      return 'nan';
-    void 0 === b && (b = !0);
-    if (Infinity == c)
-      return 'inf';
-    if (-Infinity == c && b)
-      return '-inf';
-    if (-Infinity == c && !b)
-      return 'inf';
-    var c = b ? c : Math.abs(c), d;
-    if (void 0 === a || 10 === a)
-      if (Sk.ffi.isFloat(this)) {
-        d = c.toPrecision(12);
-        var e = d.indexOf('.'), f = c.toString().slice(0, e), e = c.toString().slice(e);
-        for (f.match(/^-?0$/) && e.slice(1).match(/^0{4,}/) && (d = 12 > d.length ? c.toExponential() : c.toExponential(11)); '0' == d.charAt(d.length - 1) && 0 > d.indexOf('e');)
-          d = d.substring(0, d.length - 1);
-        '.' == d.charAt(d.length - 1) && (d += '0');
-        d = d.replace(/\.0+e/, 'e', 'i');
-        d = d.replace(/(e[-+])([1-9])$/, '$10$2');
-        d = d.replace(/0+(e.*)/, '$1');
-      } else
-        d = c.toString();
-    else
-      d = c.toString(a);
-    if (!Sk.ffi.isFloat(this))
-      return d;
-    0 > d.indexOf('.') && (0 > d.indexOf('E') && 0 > d.indexOf('e')) && (d += '.0');
-    return d;
+    return Sk.ffi.isFloat(this) ? Sk.builtin.numberToFloatStringJs(c, a, b) : Sk.builtin.numberToIntStringJs(c, a, b);
   };
   Sk.builtin.numberToFloatStringJs = function (a, b, c) {
     goog.asserts.assertNumber(b);
     goog.asserts.assertBoolean(c);
     if (isNaN(a))
       return 'nan';
-    void 0 === c && (c = !0);
     if (Infinity == a)
       return 'inf';
     if (-Infinity == a && c)
@@ -11629,14 +11596,19 @@
     if (-Infinity == a && !c)
       return 'inf';
     a = c ? a : Math.abs(a);
-    if (void 0 === b || 10 === b) {
+    if (10 === b) {
       b = a.toPrecision(12);
       var d = b.indexOf('.');
-      c = a.toString().slice(0, d);
-      d = a.toString().slice(d);
-      for (c.match(/^-?0$/) && d.slice(1).match(/^0{4,}/) && (b = 12 > b.length ? a.toExponential() : a.toExponential(11)); '0' == b.charAt(b.length - 1) && 0 > b.indexOf('e');)
-        b = b.substring(0, b.length - 1);
-      '.' == b.charAt(b.length - 1) && (b += '0');
+      if (0 <= d)
+        if (c = a.toString().slice(0, d), d = a.toString().slice(d), c.match(/^-?0$/) && d.slice(1).match(/^0{4,}/))
+          b = 12 > b.length ? a.toExponential() : a.toExponential(11);
+        else {
+          for (; '0' === b.charAt(b.length - 1) && 0 > b.indexOf('e');)
+            b = b.substring(0, b.length - 1);
+          '.' == b.charAt(b.length - 1) && (b += '0');
+        }
+      else
+        b = a.toExponential(11);
       b = b.replace(/\.0+e/, 'e', 'i');
       b = b.replace(/(e[-+])([1-9])$/, '$10$2');
       b = b.replace(/0+(e.*)/, '$1');
@@ -11646,6 +11618,12 @@
     return b;
   };
   goog.exportSymbol('Sk.builtin.numberToFloatStringJs', Sk.builtin.numberToFloatStringJs);
+  Sk.builtin.numberToIntStringJs = function (a, b, c) {
+    goog.asserts.assertNumber(b);
+    goog.asserts.assertBoolean(c);
+    return isNaN(a) ? 'nan' : Infinity === a ? 'inf' : -Infinity === a ? c ? '-inf' : 'inf' : (c ? a : Math.abs(a)).toString(b);
+  };
+  goog.exportSymbol('Sk.builtin.numberToIntStringJs', Sk.builtin.numberToIntStringJs);
   goog.exportSymbol('Sk.builtin.NumberPy', Sk.builtin.NumberPy);
   Sk.builtin.lng = function (a, b) {
     b = Sk.builtin.asnum$(b);
@@ -11704,28 +11682,28 @@
     return Sk.ffi.isLong(a) ? new Sk.builtin.lng(this.biginteger.add(a.biginteger)) : a instanceof Sk.builtin.biginteger ? new Sk.builtin.lng(this.biginteger.add(a)) : new Sk.builtin.lng(this.biginteger.add(new Sk.builtin.biginteger(a)));
   };
   Sk.builtin.lng.prototype.nb$inplace_add = Sk.builtin.lng.prototype.nb$add;
-  Sk.builtin.lng.prototype.nb$subtract = function (a) {
+  Sk.builtin.lng.prototype.nb$sub = function (a) {
     if (Sk.ffi.isFloat(a) || Sk.ffi.isInt(a)) {
       if (Sk.ffi.isFloat(a))
-        return Sk.builtin.numberToPy(parseFloat(this.str$(10, !0))).nb$subtract(a);
+        return Sk.builtin.numberToPy(parseFloat(this.str$(10, !0))).nb$sub(a);
       a = Sk.ffi.promoteIntToLong(a);
     }
     return a instanceof Sk.builtin.lng ? new Sk.builtin.lng(this.biginteger.subtract(a.biginteger)) : a instanceof Sk.builtin.biginteger ? new Sk.builtin.lng(this.biginteger.subtract(a)) : new Sk.builtin.lng(this.biginteger.subtract(new Sk.builtin.biginteger(a)));
   };
-  Sk.builtin.lng.prototype.nb$inplace_subtract = Sk.builtin.lng.prototype.nb$subtract;
-  Sk.builtin.lng.prototype.nb$multiply = function (a) {
+  Sk.builtin.lng.prototype.nb$inplace_subtract = Sk.builtin.lng.prototype.nb$sub;
+  Sk.builtin.lng.prototype.nb$mul = function (a) {
     if (Sk.ffi.isFloat(a) || Sk.ffi.isInt(a)) {
       if (Sk.ffi.isFloat(a))
-        return Sk.ffh.multiply(Sk.ffh.promoteLongToFloat(this), a);
+        return Sk.ffh.mul(Sk.ffh.promoteLongToFloat(this), a);
       a = Sk.ffi.promoteIntToLong(a);
     }
     return a instanceof Sk.builtin.lng ? new Sk.builtin.lng(this.biginteger.multiply(a.biginteger)) : a instanceof Sk.builtin.biginteger ? new Sk.builtin.lng(this.biginteger.multiply(a)) : new Sk.builtin.lng(this.biginteger.multiply(new Sk.builtin.biginteger(a)));
   };
-  Sk.builtin.lng.prototype.nb$inplace_multiply = Sk.builtin.lng.prototype.nb$multiply;
-  Sk.builtin.lng.prototype.nb$divide = function (a) {
+  Sk.builtin.lng.prototype.nb$inplace_multiply = Sk.builtin.lng.prototype.nb$mul;
+  Sk.builtin.lng.prototype.nb$div = function (a) {
     if (Sk.ffi.isFloat(a) || Sk.ffi.isInt(a)) {
       if (Sk.ffi.isFloat(a))
-        return Sk.builtin.numberToPy(parseFloat(this.str$(10, !0))).nb$divide(a);
+        return Sk.builtin.numberToPy(parseFloat(this.str$(10, !0))).nb$div(a);
       a = Sk.ffi.promoteIntToLong(a);
     }
     a instanceof Sk.builtin.lng || (a = new Sk.builtin.lng(a));
@@ -11739,9 +11717,9 @@
     }
     return new Sk.builtin.lng(this.biginteger.divide(a.biginteger));
   };
-  Sk.builtin.lng.prototype.nb$inplace_divide = Sk.builtin.lng.prototype.nb$divide;
+  Sk.builtin.lng.prototype.nb$inplace_divide = Sk.builtin.lng.prototype.nb$div;
   Sk.builtin.lng.prototype.nb$floor_divide = function (a) {
-    return Sk.ffi.isFloat(a) ? Sk.builtin.numberToPy(parseFloat(this.str$(10, !0))).nb$floor_divide(a) : this.nb$divide(a);
+    return Sk.ffi.isFloat(a) ? Sk.builtin.numberToPy(parseFloat(this.str$(10, !0))).nb$floor_divide(a) : this.nb$div(a);
   };
   Sk.builtin.lng.prototype.nb$inplace_floor_divide = Sk.builtin.lng.prototype.nb$floor_divide;
   Sk.builtin.lng.prototype.nb$remainder = function (a) {
@@ -11969,6 +11947,75 @@
   };
   Sk.builtin.float_.prototype.tp$name = 'float';
   Sk.builtin.float_.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('float', Sk.builtin.float_);
+  Sk.builtin.complex = function (a, b) {
+    Sk.ffi.checkFunctionArgs('complex(x,y)', arguments, 2, 2);
+    return new Sk.builtin.ComplexPy(a, b);
+  };
+  Sk.builtin.ComplexPy = function (a, b) {
+    this.xPy = a;
+    this.yPy = b;
+  };
+  Sk.builtin.ComplexPy.prototype.tp$name = 'complex';
+  Sk.builtin.ComplexPy.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('complex', Sk.builtin.ComplexPy);
+  Sk.builtin.ComplexPy.prototype.tp$getattr = function (a) {
+    goog.asserts.assertString(a);
+    var b = this.xPy, c = this.yPy;
+    switch (a) {
+    case 'real':
+      return this.xPy;
+    case 'imag':
+      return this.yPy;
+    case 'conjugate':
+      return new Sk.builtin.func(function (a) {
+        Sk.ffi.checkMethodArgs('conjugate()', arguments, 0, 0);
+        return new Sk.builtin.ComplexPy(b, Sk.ffh.negative(c));
+      });
+    }
+  };
+  Sk.builtin.ComplexPy.prototype.tp$str = function () {
+    if (Sk.ffh.nonzero(this.xPy)) {
+      if (Sk.ffh.nonzero(this.yPy)) {
+        var a = Sk.builtin.stringToJs(Sk.ffh.str(this.xPy)), b = Sk.builtin.stringToJs(Sk.ffh.str(this.yPy));
+        return Sk.builtin.stringToPy('(' + a + '+' + b + 'j)');
+      }
+    } else
+      Sk.ffh.nonzero(this.yPy);
+    Sk.builtin.stringToJs(Sk.ffh.str(this.xPy));
+    Sk.builtin.stringToJs(Sk.ffh.str(this.yPy));
+    return Sk.builtin.stringToPy('Hello, I\'m very complex!');
+  };
+  Sk.builtin.ComplexPy.prototype.nb$add = function (a) {
+    if (a instanceof Sk.builtin.ComplexPy) {
+      var b = this.yPy, c = a.yPy;
+      a = Sk.ffh.add(this.xPy, a.xPy);
+      b = Sk.ffh.add(b, c);
+      return Sk.builtin.complex(a, b);
+    }
+  };
+  Sk.builtin.ComplexPy.prototype.nb$sub = function (a) {
+    if (a instanceof Sk.builtin.ComplexPy) {
+      var b = this.yPy, c = a.yPy;
+      a = Sk.ffh.sub(this.xPy, a.xPy);
+      b = Sk.ffh.sub(b, c);
+      return Sk.builtin.complex(a, b);
+    }
+  };
+  Sk.builtin.ComplexPy.prototype.nb$mul = function (a) {
+    if (a instanceof Sk.builtin.ComplexPy) {
+      var b = this.xPy, c = this.yPy, d = a.xPy, e = a.yPy;
+      a = Sk.ffh.sub(Sk.ffh.mul(b, d), Sk.ffh.mul(c, e));
+      b = Sk.ffh.add(Sk.ffh.mul(c, d), Sk.ffh.mul(b, e));
+      return Sk.builtin.complex(a, b);
+    }
+  };
+  Sk.builtin.ComplexPy.prototype.nb$div = function (a) {
+    if (a instanceof Sk.builtin.ComplexPy) {
+      var b = this.xPy, c = this.yPy, d = a.xPy, e = a.yPy, f = Sk.ffh.add(Sk.ffh.mul(d, d), Sk.ffh.mul(e, e));
+      a = Sk.ffh.div(Sk.ffh.add(Sk.ffh.mul(b, d), Sk.ffh.mul(c, e)), f);
+      b = Sk.ffh.div(Sk.ffh.sub(Sk.ffh.mul(c, d), Sk.ffh.mul(b, e)), f);
+      return Sk.builtin.complex(a, b);
+    }
+  };
   Sk.builtin.slice = function (a, b, c) {
     a = Sk.builtin.asnum$(a);
     b = Sk.builtin.asnum$(b);
@@ -12987,13 +13034,13 @@
   Sk.ffi.ObjectPy.prototype.nb$add = function (a) {
     return Sk.ffi.remapToPy(this.v.add(Sk.ffi.remapToJs(a)));
   };
-  Sk.ffi.ObjectPy.prototype.nb$subtract = function (a) {
+  Sk.ffi.ObjectPy.prototype.nb$sub = function (a) {
     return Sk.ffi.remapToPy(this.v.sub(Sk.ffi.remapToJs(a)));
   };
-  Sk.ffi.ObjectPy.prototype.nb$multiply = function (a) {
+  Sk.ffi.ObjectPy.prototype.nb$mul = function (a) {
     return Sk.ffi.remapToPy(this.v.mul(Sk.ffi.remapToJs(a)));
   };
-  Sk.ffi.ObjectPy.prototype.nb$divide = function (a) {
+  Sk.ffi.ObjectPy.prototype.nb$div = function (a) {
     return Sk.ffi.remapToPy(this.v.div(Sk.ffi.remapToJs(a)));
   };
   goog.exportSymbol('Sk.ffi.ObjectPy', Sk.ffi.ObjectPy);
@@ -13080,18 +13127,18 @@
     return Sk.abstr.numberBinOp(a, b, 'Add');
   };
   goog.exportSymbol('Sk.ffh.add', Sk.ffh.add);
-  Sk.ffh.subtract = function (a, b) {
+  Sk.ffh.sub = function (a, b) {
     return Sk.abstr.numberBinOp(a, b, 'Sub');
   };
-  goog.exportSymbol('Sk.ffh.subtract', Sk.ffh.subtract);
-  Sk.ffh.multiply = function (a, b) {
+  goog.exportSymbol('Sk.ffh.sub', Sk.ffh.sub);
+  Sk.ffh.mul = function (a, b) {
     return Sk.abstr.numberBinOp(a, b, 'Mult');
   };
-  goog.exportSymbol('Sk.ffh.multiply', Sk.ffh.multiply);
-  Sk.ffh.divide = function (a, b) {
+  goog.exportSymbol('Sk.ffh.mul', Sk.ffh.mul);
+  Sk.ffh.div = function (a, b) {
     return Sk.abstr.numberBinOp(a, b, 'Div');
   };
-  goog.exportSymbol('Sk.ffh.divide', Sk.ffh.divide);
+  goog.exportSymbol('Sk.ffh.div', Sk.ffh.div);
   Sk.ffh.mod = function (a, b) {
     return Sk.abstr.numberBinOp(a, b, 'Mod');
   };
@@ -25636,21 +25683,21 @@
           return Sk.ffi.callsim(a[Sk.matrix.MATRIX_2x1], h, f);
         });
         c.__sub__ = Sk.ffi.functionPy(function (b, c) {
-          var f = Sk.ffi.remapToJs(b).elements, g = Sk.ffi.remapToJs(c).elements, h = Sk.ffh.subtract(f[0], g[0]), f = Sk.ffh.subtract(f[1], g[1]);
+          var f = Sk.ffi.remapToJs(b).elements, g = Sk.ffi.remapToJs(c).elements, h = Sk.ffh.sub(f[0], g[0]), f = Sk.ffh.sub(f[1], g[1]);
           return Sk.ffi.callsim(a[Sk.matrix.MATRIX_2x1], h, f);
         });
         c.__mul__ = Sk.ffi.functionPy(function (b, c) {
           if (Sk.ffi.isInstance(c, Sk.matrix.MATRIX_2x1))
             throw Sk.ffi.assertionError('multiplication with 2x1 is not supported.');
-          var f = Sk.ffi.remapToJs(b).elements, g = Sk.ffh.multiply(f[0], c), f = Sk.ffh.multiply(f[1], c);
+          var f = Sk.ffi.remapToJs(b).elements, g = Sk.ffh.mul(f[0], c), f = Sk.ffh.mul(f[1], c);
           return Sk.ffi.callsim(a[Sk.matrix.MATRIX_2x1], g, f);
         });
         c.__rmul__ = Sk.ffi.functionPy(function (b, c) {
-          var f = Sk.ffi.remapToJs(b).elements, g = Sk.ffh.multiply(c, f[0]), f = Sk.ffh.multiply(c, f[1]);
+          var f = Sk.ffi.remapToJs(b).elements, g = Sk.ffh.mul(c, f[0]), f = Sk.ffh.mul(c, f[1]);
           return Sk.ffi.callsim(a[Sk.matrix.MATRIX_2x1], g, f);
         });
         c.__div__ = Sk.ffi.functionPy(function (b, c) {
-          var f = Sk.ffi.remapToJs(b).elements, g = Sk.ffh.divide(f[0], c), f = Sk.ffh.divide(f[1], c);
+          var f = Sk.ffi.remapToJs(b).elements, g = Sk.ffh.div(f[0], c), f = Sk.ffh.div(f[1], c);
           return Sk.ffi.callsim(a[Sk.matrix.MATRIX_2x1], g, f);
         });
         c.__conjugate__ = Sk.ffi.functionPy(function (b) {
@@ -25722,23 +25769,23 @@
           return Sk.ffi.callsim(a[Sk.matrix.MATRIX_1x2], h, f);
         });
         c.__sub__ = Sk.ffi.functionPy(function (b, c) {
-          var f = Sk.ffi.remapToJs(b).elements, g = Sk.ffi.remapToJs(c).elements, h = Sk.ffh.subtract(f[0], g[0]), f = Sk.ffh.subtract(f[1], g[1]);
+          var f = Sk.ffi.remapToJs(b).elements, g = Sk.ffi.remapToJs(c).elements, h = Sk.ffh.sub(f[0], g[0]), f = Sk.ffh.sub(f[1], g[1]);
           return Sk.ffi.callsim(a[Sk.matrix.MATRIX_1x2], h, f);
         });
         c.__mul__ = Sk.ffi.functionPy(function (b, c) {
           if (Sk.ffi.isInstance(c, Sk.matrix.MATRIX_2x1))
-            return Sk.ffh.add(Sk.ffh.multiply(Sk.ffh.getitem(b, 0), Sk.ffh.getitem(c, 0)), Sk.ffh.multiply(Sk.ffh.getitem(b, 1), Sk.ffh.getitem(c, 1)));
+            return Sk.ffh.add(Sk.ffh.mul(Sk.ffh.getitem(b, 0), Sk.ffh.getitem(c, 0)), Sk.ffh.mul(Sk.ffh.getitem(b, 1), Sk.ffh.getitem(c, 1)));
           if (Sk.ffi.isInstance(c, Sk.matrix.MATRIX_1x2))
             throw Sk.ffi.assertionError('multiplication with 2x1 is not supported.');
-          var f = Sk.ffi.remapToJs(b).elements, g = Sk.ffh.multiply(f[0], c), f = Sk.ffh.multiply(f[1], c);
+          var f = Sk.ffi.remapToJs(b).elements, g = Sk.ffh.mul(f[0], c), f = Sk.ffh.mul(f[1], c);
           return Sk.ffi.callsim(a[Sk.matrix.MATRIX_1x2], g, f);
         });
         c.__rmul__ = Sk.ffi.functionPy(function (b, c) {
-          var f = Sk.ffi.remapToJs(b).elements, g = Sk.ffh.multiply(c, f[0]), f = Sk.ffh.multiply(c, f[1]);
+          var f = Sk.ffi.remapToJs(b).elements, g = Sk.ffh.mul(c, f[0]), f = Sk.ffh.mul(c, f[1]);
           return Sk.ffi.callsim(a[Sk.matrix.MATRIX_1x2], g, f);
         });
         c.__div__ = Sk.ffi.functionPy(function (b, c) {
-          var f = Sk.ffi.remapToJs(b).elements, g = Sk.ffh.divide(f[0], c), f = Sk.ffh.divide(f[1], c);
+          var f = Sk.ffi.remapToJs(b).elements, g = Sk.ffh.div(f[0], c), f = Sk.ffh.div(f[1], c);
           return Sk.ffi.callsim(a[Sk.matrix.MATRIX_1x2], g, f);
         });
         c.__conjugate__ = Sk.ffi.functionPy(function (b) {
@@ -25810,21 +25857,21 @@
           return Sk.ffi.callsim(a[Sk.matrix.MATRIX_2x2], h, f);
         });
         c.__sub__ = Sk.ffi.functionPy(function (b, c) {
-          var f = Sk.ffi.remapToJs(b).elements, g = Sk.ffi.remapToJs(c).elements, h = Sk.ffh.subtract(f[0], g[0]), f = Sk.ffh.subtract(f[1], g[1]);
+          var f = Sk.ffi.remapToJs(b).elements, g = Sk.ffi.remapToJs(c).elements, h = Sk.ffh.sub(f[0], g[0]), f = Sk.ffh.sub(f[1], g[1]);
           return Sk.ffi.callsim(a[Sk.matrix.MATRIX_2x2], h, f);
         });
         c.__mul__ = Sk.ffi.functionPy(function (b, c) {
           var f = Sk.ffh.getitem(Sk.ffh.getitem(b, 0), 0), g = Sk.ffh.getitem(Sk.ffh.getitem(b, 0), 1), h = Sk.ffh.getitem(Sk.ffh.getitem(b, 1), 0), k = Sk.ffh.getitem(Sk.ffh.getitem(b, 1), 1);
           if (Sk.ffi.isInstance(c, Sk.matrix.MATRIX_2x2)) {
-            var l = Sk.ffh.getitem(Sk.ffh.getitem(c, 0), 0), n = Sk.ffh.getitem(Sk.ffh.getitem(c, 0), 1), m = Sk.ffh.getitem(Sk.ffh.getitem(c, 1), 0), p = Sk.ffh.getitem(Sk.ffh.getitem(c, 1), 1), q = Sk.ffh.add(Sk.ffh.multiply(f, l), Sk.ffh.multiply(h, n)), l = Sk.ffh.add(Sk.ffh.multiply(g, l), Sk.ffh.multiply(k, n)), f = Sk.ffh.add(Sk.ffh.multiply(f, m), Sk.ffh.multiply(h, p)), g = Sk.ffh.add(Sk.ffh.multiply(g, m), Sk.ffh.multiply(k, p)), h = Sk.ffi.callsim(a[Sk.matrix.MATRIX_2x1], q, l), g = Sk.ffi.callsim(a[Sk.matrix.MATRIX_2x1], f, g);
+            var l = Sk.ffh.getitem(Sk.ffh.getitem(c, 0), 0), n = Sk.ffh.getitem(Sk.ffh.getitem(c, 0), 1), m = Sk.ffh.getitem(Sk.ffh.getitem(c, 1), 0), p = Sk.ffh.getitem(Sk.ffh.getitem(c, 1), 1), q = Sk.ffh.add(Sk.ffh.mul(f, l), Sk.ffh.mul(h, n)), l = Sk.ffh.add(Sk.ffh.mul(g, l), Sk.ffh.mul(k, n)), f = Sk.ffh.add(Sk.ffh.mul(f, m), Sk.ffh.mul(h, p)), g = Sk.ffh.add(Sk.ffh.mul(g, m), Sk.ffh.mul(k, p)), h = Sk.ffi.callsim(a[Sk.matrix.MATRIX_2x1], q, l), g = Sk.ffi.callsim(a[Sk.matrix.MATRIX_2x1], f, g);
             return Sk.ffi.callsim(a[Sk.matrix.MATRIX_2x2], h, g);
           }
           if (Sk.ffi.isInstance(c, Sk.matrix.MATRIX_2x1))
-            return q = Sk.ffh.getitem(c, 0), m = Sk.ffh.getitem(c, 1), h = Sk.ffh.add(Sk.ffh.multiply(f, q), Sk.ffh.multiply(h, m)), g = Sk.ffh.add(Sk.ffh.multiply(g, q), Sk.ffh.multiply(k, m)), Sk.ffi.callsim(a[Sk.matrix.MATRIX_2x1], h, g);
-          q = Sk.ffh.multiply(f, c);
-          l = Sk.ffh.multiply(g, c);
-          f = Sk.ffh.multiply(h, c);
-          g = Sk.ffh.multiply(k, c);
+            return q = Sk.ffh.getitem(c, 0), m = Sk.ffh.getitem(c, 1), h = Sk.ffh.add(Sk.ffh.mul(f, q), Sk.ffh.mul(h, m)), g = Sk.ffh.add(Sk.ffh.mul(g, q), Sk.ffh.mul(k, m)), Sk.ffi.callsim(a[Sk.matrix.MATRIX_2x1], h, g);
+          q = Sk.ffh.mul(f, c);
+          l = Sk.ffh.mul(g, c);
+          f = Sk.ffh.mul(h, c);
+          g = Sk.ffh.mul(k, c);
           h = Sk.ffi.callsim(a[Sk.matrix.MATRIX_2x1], q, l);
           g = Sk.ffi.callsim(a[Sk.matrix.MATRIX_2x1], f, g);
           return Sk.ffi.callsim(a[Sk.matrix.MATRIX_2x2], h, g);
@@ -25832,15 +25879,15 @@
         c.__rmul__ = Sk.ffi.functionPy(function (b, c) {
           var f = Sk.ffh.getitem(Sk.ffh.getitem(b, 0), 0), g = Sk.ffh.getitem(Sk.ffh.getitem(b, 0), 1), h = Sk.ffh.getitem(Sk.ffh.getitem(b, 1), 0), k = Sk.ffh.getitem(Sk.ffh.getitem(b, 1), 1);
           if (Sk.ffi.isInstance(c, Sk.matrix.MATRIX_1x2))
-            var l = Sk.ffh.getitem(Sk.ffh.getitem(c, 0), 0), n = Sk.ffh.getitem(Sk.ffh.getitem(c, 0), 1), m = Sk.ffh.getitem(Sk.ffh.getitem(c, 1), 0), p = Sk.ffh.getitem(Sk.ffh.getitem(c, 1), 1), q = Sk.ffh.add(Sk.ffh.multiply(f, l), Sk.ffh.multiply(h, n)), l = Sk.ffh.add(Sk.ffh.multiply(g, l), Sk.ffh.multiply(k, n)), f = Sk.ffh.add(Sk.ffh.multiply(f, m), Sk.ffh.multiply(h, p)), g = Sk.ffh.add(Sk.ffh.multiply(g, m), Sk.ffh.multiply(k, p));
+            var l = Sk.ffh.getitem(Sk.ffh.getitem(c, 0), 0), n = Sk.ffh.getitem(Sk.ffh.getitem(c, 0), 1), m = Sk.ffh.getitem(Sk.ffh.getitem(c, 1), 0), p = Sk.ffh.getitem(Sk.ffh.getitem(c, 1), 1), q = Sk.ffh.add(Sk.ffh.mul(f, l), Sk.ffh.mul(h, n)), l = Sk.ffh.add(Sk.ffh.mul(g, l), Sk.ffh.mul(k, n)), f = Sk.ffh.add(Sk.ffh.mul(f, m), Sk.ffh.mul(h, p)), g = Sk.ffh.add(Sk.ffh.mul(g, m), Sk.ffh.mul(k, p));
           else
-            q = Sk.ffh.multiply(c, f), l = Sk.ffh.multiply(c, g), f = Sk.ffh.multiply(c, h), g = Sk.ffh.multiply(c, k);
+            q = Sk.ffh.mul(c, f), l = Sk.ffh.mul(c, g), f = Sk.ffh.mul(c, h), g = Sk.ffh.mul(c, k);
           q = Sk.ffi.callsim(a[Sk.matrix.MATRIX_2x1], q, l);
           g = Sk.ffi.callsim(a[Sk.matrix.MATRIX_2x1], f, g);
           return Sk.ffi.callsim(a[Sk.matrix.MATRIX_2x2], q, g);
         });
         c.__div__ = Sk.ffi.functionPy(function (b, c) {
-          var f = Sk.ffi.remapToJs(b).elements, g = Sk.ffh.divide(f[0], c), f = Sk.ffh.divide(f[1], c);
+          var f = Sk.ffi.remapToJs(b).elements, g = Sk.ffh.div(f[0], c), f = Sk.ffh.div(f[1], c);
           return Sk.ffi.callsim(a[Sk.matrix.MATRIX_2x2], g, f);
         });
         c.__conjugate__ = Sk.ffi.functionPy(function (b) {
@@ -29413,12 +29460,12 @@
         });
         n.__add__ = Sk.ffi.functionPy(f(Sk.ffh.add));
         n.__radd__ = Sk.ffi.functionPy(g(Sk.ffh.add));
-        n.__sub__ = Sk.ffi.functionPy(f(Sk.ffh.subtract));
-        n.__rsub__ = Sk.ffi.functionPy(g(Sk.ffh.subtract));
-        n.__mul__ = Sk.ffi.functionPy(f(Sk.ffh.multiply));
-        n.__rmul__ = Sk.ffi.functionPy(g(Sk.ffh.multiply));
-        n.__div__ = Sk.ffi.functionPy(f(Sk.ffh.divide));
-        n.__rdiv__ = Sk.ffi.functionPy(g(Sk.ffh.divide));
+        n.__sub__ = Sk.ffi.functionPy(f(Sk.ffh.sub));
+        n.__rsub__ = Sk.ffi.functionPy(g(Sk.ffh.sub));
+        n.__mul__ = Sk.ffi.functionPy(f(Sk.ffh.mul));
+        n.__rmul__ = Sk.ffi.functionPy(g(Sk.ffh.mul));
+        n.__div__ = Sk.ffi.functionPy(f(Sk.ffh.div));
+        n.__rdiv__ = Sk.ffi.functionPy(g(Sk.ffh.div));
         n.__mod__ = Sk.ffi.functionPy(f(Sk.ffh.mod));
         n.__rmod__ = Sk.ffi.functionPy(g(Sk.ffh.mod));
         n.__xor__ = Sk.ffi.functionPy(f(Sk.ffh.xor));
@@ -29471,10 +29518,10 @@
         Sk.ffi.isDefined(e) ? (Sk.ffi.checkArgType('endpoint', [Sk.ffi.PyType.BOOL], Sk.ffi.isBool(e), e), h = Sk.ffi.remapToJs(e)) : h = !0;
         var k;
         Sk.ffi.isDefined(f) ? (Sk.ffi.checkArgType('retstep', [Sk.ffi.PyType.BOOL], Sk.ffi.isBool(f), f), k = Sk.ffi.remapToJs(f)) : k = !1;
-        var x = Sk.ffh.subtract(c, b);
-        h = h ? Sk.ffh.divide(x, Sk.ffh.subtract(d, Sk.ffi.numberToIntPy(1))) : Sk.ffh.divide(x, d);
+        var x = Sk.ffh.sub(c, b);
+        h = h ? Sk.ffh.div(x, Sk.ffh.sub(d, Sk.ffi.numberToIntPy(1))) : Sk.ffh.div(x, d);
         for (var x = [], y = 0; y < g; y++)
-          x[y] = Sk.ffh.add(Sk.ffh.multiply(Sk.ffi.numberToFloatPy(y), h), b);
+          x[y] = Sk.ffh.add(Sk.ffh.mul(Sk.ffi.numberToFloatPy(y), h), b);
         g = [];
         g[0] = d;
         g = Sk.ffi.tuplePy(g);
@@ -30022,7 +30069,7 @@
         });
         l.__tan__ = Sk.ffi.functionPy(function (a) {
           Sk.ffi.checkMethodArgs('tan', arguments, 0, 0);
-          return Sk.ffh.divide(Sk.ffh.sin(a), Sk.ffh.cos(a));
+          return Sk.ffh.div(Sk.ffh.sin(a), Sk.ffh.cos(a));
         });
         l.__acos__ = Sk.ffi.functionPy(function (a) {
           Sk.ffi.checkMethodArgs('acos', arguments, 0, 0);
@@ -31171,7 +31218,7 @@
         });
         s.__tan__ = Sk.ffi.functionPy(function (a) {
           Sk.ffi.checkMethodArgs('tan', arguments, 0, 0);
-          return Sk.ffh.divide(Sk.ffh.sin(a), Sk.ffh.cos(a));
+          return Sk.ffh.div(Sk.ffh.sin(a), Sk.ffh.cos(a));
         });
         s.__acos__ = Sk.ffi.functionPy(function (a) {
           Sk.ffi.checkMethodArgs('acos', arguments, 0, 0);
@@ -31438,7 +31485,7 @@
           function e(a) {
             return a.map(function (a) {
               var b = a[0];
-              a = Sk.ffh.multiply(f[a[1]], g[a[2]]);
+              a = Sk.ffh.mul(f[a[1]], g[a[2]]);
               return 0 < b ? a : Sk.ffh.negative(a);
             });
           }
@@ -31987,11 +32034,11 @@
             }, 'magnitude', []));
           case 'quadrance':
             return Sk.ffi.callableToPy(a, c, function (a) {
-              a = Sk.ffh.multiply(e[0], e[0]);
-              a = Sk.ffh.add(a, Sk.ffh.multiply(e[1], e[1]));
-              a = Sk.ffh.add(a, Sk.ffh.multiply(e[2], e[2]));
-              a = Sk.ffh.add(a, Sk.ffh.multiply(e[4], e[4]));
-              return a = Sk.ffh.subtract(a, Sk.ffh.multiply(e[8], e[8]));
+              a = Sk.ffh.mul(e[0], e[0]);
+              a = Sk.ffh.add(a, Sk.ffh.mul(e[1], e[1]));
+              a = Sk.ffh.add(a, Sk.ffh.mul(e[2], e[2]));
+              a = Sk.ffh.add(a, Sk.ffh.mul(e[4], e[4]));
+              return a = Sk.ffh.sub(a, Sk.ffh.mul(e[8], e[8]));
             });
           default:
             throw Sk.ffi.err.attribute(c).isNotGetableOnType('Lorentzian');
@@ -32308,7 +32355,7 @@
               Sk.ffi.checkMethodArgs('evaluate', arguments, 1, 1);
               Sk.ffi.checkArgType('env', 'Environment', Sk.ffi.isInstance(b, 'Environment'), b);
               var c = Sk.ffh.evaluate(d.lhs, b), e = Sk.ffh.evaluate(d.rhs, b);
-              return Sk.ffh.subtract(c, e);
+              return Sk.ffh.sub(c, e);
             });
           default:
             return Sk.symbolic.treeGetAttr('Subtract', b, c);
@@ -32369,7 +32416,7 @@
               Sk.ffi.checkMethodArgs('evaluate', arguments, 1, 1);
               Sk.ffi.checkArgType('env', 'Environment', Sk.ffi.isInstance(b, 'Environment'), b);
               var c = Sk.ffh.evaluate(d.lhs, b), e = Sk.ffh.evaluate(d.rhs, b);
-              return Sk.ffh.multiply(c, e);
+              return Sk.ffh.mul(c, e);
             });
           default:
             return Sk.symbolic.treeGetAttr('Multiply', b, c);
@@ -32812,7 +32859,7 @@
           var f = Sk.ffi.remapToJs(b);
           if (d(c)) {
             var f = Sk.ffi.gattr(c, 'quantity'), g = Sk.ffi.gattr(c, 'uom');
-            return Sk.ffi.callsim(a.Measure, f, Sk.ffh.multiply(b, g));
+            return Sk.ffi.callsim(a.Measure, f, Sk.ffh.mul(b, g));
           }
           return Sk.ffi.isNum(c) || e(c) ? Sk.ffi.callsim(a.Unit, Sk.ffi.referenceToPy(f.mul(Sk.ffi.remapToJs(c)), 'Unit')) : Sk.ffi.callsim(a.Measure, c, b);
         });
@@ -32823,7 +32870,7 @@
           var f = Sk.ffi.remapToJs(b);
           if (d(c)) {
             var f = Sk.ffi.gattr(c, 'quantity'), g = Sk.ffi.gattr(c, 'uom');
-            return Sk.ffi.callsim(a.Measure, f, Sk.ffh.multiply(b, g));
+            return Sk.ffi.callsim(a.Measure, f, Sk.ffh.mul(b, g));
           }
           return Sk.ffi.isNum(c) || e(c) ? Sk.ffi.callsim(a.Unit, Sk.ffi.referenceToPy(f.mul(Sk.ffi.remapToJs(c)), 'Unit')) : Sk.ffi.callsim(a.Measure, c, b);
         });
@@ -32836,7 +32883,7 @@
           var f = Sk.ffi.remapToJs(b);
           if (d(c)) {
             var f = Sk.ffi.gattr(c, 'quantity'), g = Sk.ffi.gattr(c, 'uom');
-            return Sk.ffi.callsim(a.Measure, Sk.ffh.divide(Sk.ffi.numberToFloatPy(1), f), Sk.ffh.divide(b, g));
+            return Sk.ffi.callsim(a.Measure, Sk.ffh.div(Sk.ffi.numberToFloatPy(1), f), Sk.ffh.div(b, g));
           }
           return Sk.ffi.isNum(c) || e(c) ? Sk.ffi.callsim(a.Unit, Sk.ffi.referenceToPy(f.div(Sk.ffi.remapToJs(c)), 'Unit')) : Sk.ffi.callsim(a.Measure, c, b);
         });
@@ -33491,7 +33538,7 @@
               var g = Sk.ffi.remapToJs(c);
               if (d(e)) {
                 var h = Sk.ffi.remapToJs(e);
-                return Sk.ffi.callsim(a.Measure, b(g.qtyPy, h.qtyPy), Sk.ffh.multiply(g.uomPy, h.uomPy));
+                return Sk.ffi.callsim(a.Measure, b(g.qtyPy, h.qtyPy), Sk.ffh.mul(g.uomPy, h.uomPy));
               }
               if (f(e) && (h = b(g.qtyPy, e), 'undefined' !== typeof h))
                 return Sk.ffi.callsim(a.Measure, h, g.uomPy);
@@ -33516,7 +33563,7 @@
               f.qtyPy = c;
               f.uomPy = d;
             } else
-              f = {}, f.qtyPy = Sk.ffh.multiply(c, e), f.uomPy = Sk.ffi.callsim(a.Unit, Sk.ffi.numberToFloatPy(1), Sk.ffi.gattr(d, 'dimensions'), Sk.ffi.gattr(d, 'labels'), Sk.ffi.gattr(d, 'name'));
+              f = {}, f.qtyPy = Sk.ffh.mul(c, e), f.uomPy = Sk.ffi.callsim(a.Unit, Sk.ffi.numberToFloatPy(1), Sk.ffi.gattr(d, 'dimensions'), Sk.ffi.gattr(d, 'labels'), Sk.ffi.gattr(d, 'name'));
             Sk.ffi.referenceToPy(f, 'Measure', void 0, b);
           }
         });
@@ -33542,7 +33589,7 @@
               Sk.ffi.checkMethodArgs('cross', arguments, 1, 1);
               if (d(c)) {
                 var f = Sk.ffi.remapToJs(c), g = Sk.ffi.callsim(Sk.ffi.gattr(e.qtyPy, 'cross'), f.qtyPy);
-                return Sk.ffi.callsim(a.Measure, g, Sk.ffh.multiply(e.uomPy, f.uomPy));
+                return Sk.ffi.callsim(a.Measure, g, Sk.ffh.mul(e.uomPy, f.uomPy));
               }
               g = Sk.ffi.callsim(Sk.ffi.gattr(e.qtyPy, 'cross'), c);
               return Sk.ffi.callsim(a.Measure, g, e.uomPy);
@@ -33552,7 +33599,7 @@
               Sk.ffi.checkMethodArgs('dot', arguments, 1, 1);
               if (d(c)) {
                 var f = Sk.ffi.remapToJs(c), g = Sk.ffi.callsim(Sk.ffi.gattr(e.qtyPy, 'dot'), f.qtyPy);
-                return Sk.ffi.callsim(a.Measure, g, Sk.ffh.multiply(e.uomPy, f.uomPy));
+                return Sk.ffi.callsim(a.Measure, g, Sk.ffh.mul(e.uomPy, f.uomPy));
               }
               g = Sk.ffi.callsim(Sk.ffi.gattr(e.qtyPy, 'dot'), c);
               return Sk.ffi.callsim(a.Measure, g, e.uomPy);
@@ -33567,23 +33614,23 @@
         k.__sub__ = Sk.ffi.functionPy(function (b, c) {
           Sk.ffi.checkArgType('other', 'Measure', d(c), c);
           var e = Sk.ffi.remapToJs(b), f = Sk.ffi.remapToJs(c);
-          return Sk.ffi.callsim(a.Measure, Sk.ffh.subtract(e.qtyPy, f.qtyPy), Sk.ffi.callsim(Sk.ffi.gattr(e.uomPy, 'compatible'), f.uomPy));
+          return Sk.ffi.callsim(a.Measure, Sk.ffh.sub(e.qtyPy, f.qtyPy), Sk.ffi.callsim(Sk.ffi.gattr(e.uomPy, 'compatible'), f.uomPy));
         });
         k.__mod__ = Sk.ffi.functionPy(l(Sk.ffh.mod));
         k.__rmod__ = Sk.ffi.functionPy(n(Sk.ffh.mod));
-        k.__mul__ = Sk.ffi.functionPy(l(Sk.ffh.multiply));
-        k.__rmul__ = Sk.ffi.functionPy(n(Sk.ffh.multiply));
+        k.__mul__ = Sk.ffi.functionPy(l(Sk.ffh.mul));
+        k.__rmul__ = Sk.ffi.functionPy(n(Sk.ffh.mul));
         k.__div__ = Sk.ffi.functionPy(function (b, c) {
           var f = Sk.ffi.remapToJs(b);
           if (d(c)) {
             var g = Sk.ffi.remapToJs(c);
-            return Sk.ffi.callsim(a.Measure, Sk.ffh.divide(f.qtyPy, g.qtyPy), Sk.ffh.divide(f.uomPy, g.uomPy));
+            return Sk.ffi.callsim(a.Measure, Sk.ffh.div(f.qtyPy, g.qtyPy), Sk.ffh.div(f.uomPy, g.uomPy));
           }
-          return e(c) ? Sk.ffi.callsim(a.Measure, f.qtyPy, Sk.ffh.divide(f.uomPy, c)) : Sk.ffi.callsim(a.Measure, Sk.ffh.divide(f.qtyPy, c), f.uomPy);
+          return e(c) ? Sk.ffi.callsim(a.Measure, f.qtyPy, Sk.ffh.div(f.uomPy, c)) : Sk.ffi.callsim(a.Measure, Sk.ffh.div(f.qtyPy, c), f.uomPy);
         });
         k.__rdiv__ = Sk.ffi.functionPy(function (b, c) {
           var d = Sk.ffi.remapToJs(b);
-          return Sk.ffi.callsim(a.Measure, Sk.ffh.divide(c, d.qtyPy), Sk.ffh.divide(Sk.ffi.numberToFloatPy(1), d.uomPy));
+          return Sk.ffi.callsim(a.Measure, Sk.ffh.div(c, d.qtyPy), Sk.ffh.div(Sk.ffi.numberToFloatPy(1), d.uomPy));
         });
         k.__xor__ = Sk.ffi.functionPy(l(Sk.ffh.xor));
         k.__rxor__ = Sk.ffi.functionPy(n(Sk.ffh.xor));
@@ -33707,14 +33754,14 @@
         a.mole = c(b.UNIT_MOLE);
         a.candela = c(b.UNIT_CANDELA);
         a.coulomb = c(b.UNIT_COULOMB);
-        a.gram = Sk.ffh.multiply(a.milli, a.kilogram);
-        a.cm = Sk.ffh.multiply(a.centi, a.meter);
-        a.newton = Sk.ffh.divide(Sk.ffh.multiply(a.kilogram, a.meter), Sk.ffh.multiply(a.second, a.second));
-        a.joule = Sk.ffh.multiply(a.newton, a.meter);
-        a.swirl = Sk.ffh.multiply(a.joule, a.second);
-        a.watt = Sk.ffh.divide(a.joule, a.second);
-        a.volt = Sk.ffh.divide(a.joule, a.coulomb);
-        a.tesla = Sk.ffh.divide(a.swirl, Sk.ffh.multiply(a.coulomb, Sk.ffh.multiply(a.meter, a.meter)));
+        a.gram = Sk.ffh.mul(a.milli, a.kilogram);
+        a.cm = Sk.ffh.mul(a.centi, a.meter);
+        a.newton = Sk.ffh.div(Sk.ffh.mul(a.kilogram, a.meter), Sk.ffh.mul(a.second, a.second));
+        a.joule = Sk.ffh.mul(a.newton, a.meter);
+        a.swirl = Sk.ffh.mul(a.joule, a.second);
+        a.watt = Sk.ffh.div(a.joule, a.second);
+        a.volt = Sk.ffh.div(a.joule, a.coulomb);
+        a.tesla = Sk.ffh.div(a.swirl, Sk.ffh.mul(a.coulomb, Sk.ffh.mul(a.meter, a.meter)));
         a.radian = c(b.UNIT_RADIAN);
         a.tau = c(b.UNIT_TAU);
         a.degree = c(b.UNIT_DEGREE);
