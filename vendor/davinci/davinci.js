@@ -39268,7 +39268,7 @@ var isQuantityPy = function(valuePy)
  */
 var isAngle = function(uomJs, numer, denom)
 {
-  return uomJs.dimensions.dimensionless() && uomJs.dimensions.angle.numer === numer && uomJs.dimensions.angle.denom === denom;
+  return uomJs.dimensions.dimensionless();
 };
 
 Sk.builtin.defineFractions(mod, RATIONAL, function(n, d) {return new BLADE.Rational(n, d)});
@@ -39531,27 +39531,15 @@ mod[UNIT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       return Sk.ffi.callsim(mod[MEASURE], otherPy, selfPy);
     }
   });
-  $loc.__rdiv__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+  $loc.__rdiv__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
     Sk.ffi.checkLhsOperandType(OP_MUL, NUMBER, Sk.ffi.isNum(otherPy), otherPy);
-    var other = Sk.ffi.remapToJs(otherPy);
-    var rhs = Sk.ffi.remapToJs(selfPy);
-    var scale = other / rhs.scale;
-    // FIXME: This will break when BLADE changes. Push down into BLADE.
-    // TODO: Unary minus or negate() for Rational.
-    // TODO: Reciprocal or inverse() for Dimensions.
-    var M = new BLADE[RATIONAL](-rhs.dimensions.M.numer, rhs.dimensions.M.denom);
-    var L = new BLADE[RATIONAL](-rhs.dimensions.L.numer, rhs.dimensions.L.denom);
-    var T = new BLADE[RATIONAL](-rhs.dimensions.T.numer, rhs.dimensions.T.denom);
-    var Q = new BLADE[RATIONAL](-rhs.dimensions.Q.numer, rhs.dimensions.Q.denom);
-    var temperature = new BLADE[RATIONAL](-rhs.dimensions.temperature.numer, rhs.dimensions.temperature.denom);
-    var amount = new BLADE[RATIONAL](-rhs.dimensions.amount.numer, rhs.dimensions.amount.denom);
-    var intensity = new BLADE[RATIONAL](-rhs.dimensions.intensity.numer, rhs.dimensions.intensity.denom);
-    var angle     = new BLADE[RATIONAL](-rhs.dimensions.angle.numer, rhs.dimensions.angle.denom);
-    var dimensions = new BLADE[DIMENSIONS](M, L, T, Q, temperature, amount, intensity, angle);
-    var labels = rhs.labels;
-    return Sk.ffi.callsim(mod[UNIT], Sk.ffi.numberToFloatPy(scale), Sk.ffi.referenceToPy(dimensions, DIMENSIONS), Sk.ffi.remapToPy(labels));
+    var numberJs = Sk.ffi.remapToJs(otherPy);
+    var unitJs   = Sk.ffi.remapToJs(selfPy);
+    return Sk.ffi.callsim(mod[UNIT], Sk.ffi.referenceToPy(unitJs.inverse().mul(numberJs), UNIT));
   });
-  $loc.__pow__ = Sk.ffi.functionPy(function(lhsPy, rhsPy) {
+  $loc.__pow__ = Sk.ffi.functionPy(function(lhsPy, rhsPy)
+  {
     var lhs = Sk.ffi.remapToJs(lhsPy);
     var rhs = Sk.ffi.remapToJs(rhsPy);
     var c = lhs.pow(rhs);
@@ -39577,37 +39565,35 @@ mod[UNIT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var unitJs = Sk.ffi.remapToJs(unitPy);
     var patterns =
     [
-      [-1,1,-3,1, 2,1, 2,1, 0,1, 0,1, 0,1, 0,1, "F/m"],
-      [-1,1,-2,1, 1,1, 2,1, 0,1, 0,1, 0,1, 0,1, "S"],
-      [-1,1,-2,1, 2,1, 2,1, 0,1, 0,1, 0,1, 0,1, "F"],
-      [-1,1, 3,1,-2,1, 0,1, 0,1, 0,1, 0,1, 0,1, "N·m ** 2/kg ** 2"],
-      [ 0,1, 0,1,-2,1, 0,1, 0,1, 0,1, 0,1, 1,1, "rad/s/s"],
-      [ 0,1, 0,1,-1,1, 0,1, 0,1, 0,1, 0,1, 1,1, "rad/s"],
-      [ 0,1, 0,1,-1,1, 0,1, 0,1, 0,1, 0,1, 0,1, "Hz"],
-      [ 0,1, 0,1,-1,1, 1,1, 0,1, 0,1, 0,1, 0,1, "A"],
-      [ 0,1, 1,1,-2,1, 0,1, 0,1, 0,1, 0,1, 0,1, "m/s ** 2"],
-      [ 0,1, 1,1,-1,1, 0,1, 0,1, 0,1, 0,1, 0,1, "m/s"],
-      [ 1,1, 1,1,-1,1, 0,1, 0,1, 0,1, 0,1, 0,1, "kg·m/s"],
-      [ 1,1,-1,1,-2,1, 0,1, 0,1, 0,1, 0,1, 0,1, "Pa"],
-      [ 1,1,-1,1,-1,1, 0,1, 0,1, 0,1, 0,1, 0,1, "Pa·s"],
-      [ 1,1, 0,1,-3,1, 0,1, 0,1, 0,1, 0,1, 0,1, "W/m ** 2"],
-      [ 1,1, 0,1,-2,1, 0,1, 0,1, 0,1, 0,1, 0,1, "N/m"],
-      [ 1,1, 0,1,-1,1,-1,1, 0,1, 0,1, 0,1, 0,1, "T"],
-      [ 1,1, 1,1,-3,1, 0,1,-1,1, 0,1, 0,1, 0,1, "W/(m·K)"],
-      [ 1,1, 1,1,-2,1,-1,1, 0,1, 0,1, 0,1, 0,1, "V/m"],
-      [ 1,1, 1,1,-2,1, 0,1, 0,1, 0,1, 0,1, 0,1, "N"],
-      [ 1,1, 1,1, 0,1,-2,1, 0,1, 0,1, 0,1, 0,1, "H/m"],
-      [ 1,1, 2,1,-2,1, 0,1,-1,1, 0,1, 0,1, 0,1, "J/K"],
-      [ 0,1, 2,1,-2,1, 0,1,-1,1, 0,1, 0,1, 0,1, "J/(kg·K)"],
-      [ 1,1, 2,1,-2,1, 0,1,-1,1,-1,1, 0,1, 0,1, "J/(mol·K)"],
-      [ 1,1, 2,1,-2,1, 0,1, 0,1,-1,1, 0,1, 0,1, "J/mol"],
-      [ 1,1, 2,1,-2,1, 0,1, 0,1, 0,1, 0,1, 0,1, "J"],
-      [ 1,1, 2,1,-1,1, 0,1, 0,1, 0,1, 0,1, 0,1, "J·s"],
-      [ 1,1, 2,1,-3,1, 0,1, 0,1, 0,1, 0,1, 0,1, "W"],
-      [ 1,1, 2,1,-2,1,-1,1, 0,1, 0,1, 0,1, 0,1, "V"],
-      [ 1,1, 2,1,-1,1,-2,1, 0,1, 0,1, 0,1, 0,1, "Ω"],
-      [ 1,1, 2,1, 0,1,-2,1, 0,1, 0,1, 0,1, 0,1, "H"],
-      [ 1,1, 2,1,-1,1,-1,1, 0,1, 0,1, 0,1, 0,1, "Wb"]
+      [-1,1,-3,1, 2,1, 2,1, 0,1, 0,1, 0,1, "F/m"],
+      [-1,1,-2,1, 1,1, 2,1, 0,1, 0,1, 0,1, "S"],
+      [-1,1,-2,1, 2,1, 2,1, 0,1, 0,1, 0,1, "F"],
+      [-1,1, 3,1,-2,1, 0,1, 0,1, 0,1, 0,1, "N·m ** 2/kg ** 2"],
+      [ 0,1, 0,1,-1,1, 0,1, 0,1, 0,1, 0,1, "Hz"],
+      [ 0,1, 0,1,-1,1, 1,1, 0,1, 0,1, 0,1, "A"],
+      [ 0,1, 1,1,-2,1, 0,1, 0,1, 0,1, 0,1, "m/s ** 2"],
+      [ 0,1, 1,1,-1,1, 0,1, 0,1, 0,1, 0,1, "m/s"],
+      [ 1,1, 1,1,-1,1, 0,1, 0,1, 0,1, 0,1, "kg·m/s"],
+      [ 1,1,-1,1,-2,1, 0,1, 0,1, 0,1, 0,1, "Pa"],
+      [ 1,1,-1,1,-1,1, 0,1, 0,1, 0,1, 0,1, "Pa·s"],
+      [ 1,1, 0,1,-3,1, 0,1, 0,1, 0,1, 0,1, "W/m ** 2"],
+      [ 1,1, 0,1,-2,1, 0,1, 0,1, 0,1, 0,1, "N/m"],
+      [ 1,1, 0,1,-1,1,-1,1, 0,1, 0,1, 0,1, "T"],
+      [ 1,1, 1,1,-3,1, 0,1,-1,1, 0,1, 0,1, "W/(m·K)"],
+      [ 1,1, 1,1,-2,1,-1,1, 0,1, 0,1, 0,1, "V/m"],
+      [ 1,1, 1,1,-2,1, 0,1, 0,1, 0,1, 0,1, "N"],
+      [ 1,1, 1,1, 0,1,-2,1, 0,1, 0,1, 0,1, "H/m"],
+      [ 1,1, 2,1,-2,1, 0,1,-1,1, 0,1, 0,1, "J/K"],
+      [ 0,1, 2,1,-2,1, 0,1,-1,1, 0,1, 0,1, "J/(kg·K)"],
+      [ 1,1, 2,1,-2,1, 0,1,-1,1,-1,1, 0,1, "J/(mol·K)"],
+      [ 1,1, 2,1,-2,1, 0,1, 0,1,-1,1, 0,1, "J/mol"],
+      [ 1,1, 2,1,-2,1, 0,1, 0,1, 0,1, 0,1, "J"],
+      [ 1,1, 2,1,-1,1, 0,1, 0,1, 0,1, 0,1, "J·s"],
+      [ 1,1, 2,1,-3,1, 0,1, 0,1, 0,1, 0,1, "W"],
+      [ 1,1, 2,1,-2,1,-1,1, 0,1, 0,1, 0,1, "V"],
+      [ 1,1, 2,1,-1,1,-2,1, 0,1, 0,1, 0,1, "Ω"],
+      [ 1,1, 2,1, 0,1,-2,1, 0,1, 0,1, 0,1, "H"],
+      [ 1,1, 2,1,-1,1,-1,1, 0,1, 0,1, 0,1, "Wb"]
     ];
     var M           = unitJs.dimensions.M;
     var L           = unitJs.dimensions.L;
@@ -39616,7 +39602,6 @@ mod[UNIT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var temperature = unitJs.dimensions.temperature;
     var amount      = unitJs.dimensions.amount;
     var intensity   = unitJs.dimensions.intensity;
-    var angle       = unitJs.dimensions.angle;
     for (var i = 0, len = patterns.length; i < len; i++)
     {
       var pattern = patterns[i];
@@ -39626,16 +39611,15 @@ mod[UNIT] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           Q.numer           === pattern[6]  && Q.denom           === pattern[7]  &&
           temperature.numer === pattern[8]  && temperature.denom === pattern[9]  &&
           amount.numer      === pattern[10] && amount.denom      === pattern[11] &&
-          intensity.numer   === pattern[12] && intensity.denom   === pattern[13] &&
-          angle.numer       === pattern[14] && angle.denom       === pattern[15])
+          intensity.numer   === pattern[12] && intensity.denom   === pattern[13])
       {
         if (unitJs.scale !== 1)
         {
-          return Sk.builtin.stringToPy(unitJs.scale + " * " + pattern[16]);
+          return Sk.builtin.stringToPy(unitJs.scale + " * " + pattern[14]);
         }
         else
         {
-          return Sk.builtin.stringToPy(pattern[16]);
+          return Sk.builtin.stringToPy(pattern[14]);
         }
       }
     }
@@ -40028,10 +40012,6 @@ mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc)
   mod[WATT]     = Sk.ffh.div(mod[JOULE], mod[SECOND]);
   mod[VOLT]     = Sk.ffh.div(mod[JOULE], mod[COULOMB]);
   mod[TESLA]    = Sk.ffh.div(mod[SWIRL], Sk.ffh.mul(mod[COULOMB], Sk.ffh.mul(mod[METER], mod[METER])));
-
-  mod[RADIAN]   = makeUnitPy(BLADE.UNIT_RADIAN);
-  mod[TAU]      = makeUnitPy(BLADE.UNIT_TAU);
-  mod[DEGREE]   = makeUnitPy(BLADE.UNIT_DEGREE);
 })();
 
 };
@@ -46602,7 +46582,7 @@ mod[WORKBENCH] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
 
 };
 }).call(this);
-/* bladejs - 0.9.69
+/* bladejs - 0.9.71
  * JavaScript Geometric Algebra library.
  * 
  */
@@ -46634,7 +46614,13 @@ mod[WORKBENCH] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   };
 
   Dimensions = (function() {
-    function Dimensions(mass, length, time, charge, temperature, amount, intensity, angle) {
+    function Dimensions(mass, length, time, charge, temperature, amount, intensity, unknown) {
+      if (arguments.length !== 7) {
+        throw {
+          name: "DimensionError",
+          message: "Expecting 7 arguments"
+        };
+      }
       if (typeof mass === 'number') {
         this.M = new BLADE.Rational(mass, 1);
       } else if (mass instanceof BLADE.Rational) {
@@ -46705,20 +46691,10 @@ mod[WORKBENCH] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
           message: "(luminous) intensity must be a Rational or number"
         };
       }
-      if (typeof angle === 'number') {
-        this.angle = new BLADE.Rational(angle, 1);
-      } else if (angle instanceof BLADE.Rational) {
-        this.angle = angle;
-      } else {
-        throw {
-          name: "DimensionError",
-          message: "angle must be a Rational or number"
-        };
-      }
     }
 
     Dimensions.prototype.compatible = function(rhs) {
-      if (this.M.equals(rhs.M) && this.L.equals(rhs.L) && this.T.equals(rhs.T) && this.Q.equals(rhs.Q) && this.temperature.equals(rhs.temperature) && this.amount.equals(rhs.amount) && this.intensity.equals(rhs.intensity) && this.angle.equals(rhs.angle)) {
+      if (this.M.equals(rhs.M) && this.L.equals(rhs.L) && this.T.equals(rhs.T) && this.Q.equals(rhs.Q) && this.temperature.equals(rhs.temperature) && this.amount.equals(rhs.amount) && this.intensity.equals(rhs.intensity)) {
         return this;
       } else {
         throw {
@@ -46729,15 +46705,15 @@ mod[WORKBENCH] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     };
 
     Dimensions.prototype.mul = function(rhs) {
-      return new BLADE.Dimensions(this.M.add(rhs.M), this.L.add(rhs.L), this.T.add(rhs.T), this.Q.add(rhs.Q), this.temperature.add(rhs.temperature), this.amount.add(rhs.amount), this.intensity.add(rhs.intensity), this.angle.add(rhs.angle));
+      return new BLADE.Dimensions(this.M.add(rhs.M), this.L.add(rhs.L), this.T.add(rhs.T), this.Q.add(rhs.Q), this.temperature.add(rhs.temperature), this.amount.add(rhs.amount), this.intensity.add(rhs.intensity));
     };
 
     Dimensions.prototype.div = function(rhs) {
-      return new BLADE.Dimensions(this.M.sub(rhs.M), this.L.sub(rhs.L), this.T.sub(rhs.T), this.Q.sub(rhs.Q), this.temperature.sub(rhs.temperature), this.amount.sub(rhs.amount), this.intensity.sub(rhs.intensity), this.angle.sub(rhs.angle));
+      return new BLADE.Dimensions(this.M.sub(rhs.M), this.L.sub(rhs.L), this.T.sub(rhs.T), this.Q.sub(rhs.Q), this.temperature.sub(rhs.temperature), this.amount.sub(rhs.amount), this.intensity.sub(rhs.intensity));
     };
 
     Dimensions.prototype.pow = function(exponent) {
-      return new BLADE.Dimensions(this.M.mul(exponent), this.L.mul(exponent), this.T.mul(exponent), this.Q.mul(exponent), this.temperature.mul(exponent), this.amount.mul(exponent), this.intensity.mul(exponent), this.angle.mul(exponent));
+      return new BLADE.Dimensions(this.M.mul(exponent), this.L.mul(exponent), this.T.mul(exponent), this.Q.mul(exponent), this.temperature.mul(exponent), this.amount.mul(exponent), this.intensity.mul(exponent));
     };
 
     Dimensions.prototype.dimensionless = function() {
@@ -46745,11 +46721,15 @@ mod[WORKBENCH] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     };
 
     Dimensions.prototype.isZero = function() {
-      return this.M.isZero() && this.L.isZero() && this.T.isZero() && this.Q.isZero() && this.temperature.isZero() && this.amount.isZero() && this.intensity.isZero() && this.angle.isZero();
+      return this.M.isZero() && this.L.isZero() && this.T.isZero() && this.Q.isZero() && this.temperature.isZero() && this.amount.isZero() && this.intensity.isZero();
+    };
+
+    Dimensions.prototype.negative = function() {
+      return new BLADE.Dimensions(this.M.negative(), this.L.negative(), this.T.negative(), this.Q.negative(), this.temperature.negative(), this.amount.negative(), this.intensity.negative());
     };
 
     Dimensions.prototype.toString = function() {
-      return [stringify(this.M, 'mass'), stringify(this.L, 'length'), stringify(this.T, 'time'), stringify(this.Q, 'charge'), stringify(this.temperature, 'thermodynamic temperature'), stringify(this.amount, 'amount of substance'), stringify(this.intensity, 'luminous intensity'), stringify(this.angle, 'angle')].filter(function(x) {
+      return [stringify(this.M, 'mass'), stringify(this.L, 'length'), stringify(this.T, 'time'), stringify(this.Q, 'charge'), stringify(this.temperature, 'thermodynamic temperature'), stringify(this.amount, 'amount of substance'), stringify(this.intensity, 'luminous intensity')].filter(function(x) {
         return typeof x === 'string';
       }).join(" * ");
     };
@@ -47687,16 +47667,24 @@ mod[WORKBENCH] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     };
 
     Rational.prototype.div = function(rhs) {
-      return new BLADE.Rational(this.numer * rhs.denom, this.denom * rhs.numer);
+      if (typeof rhs === 'number') {
+        return new BLADE.Rational(this.numer, this.denom * rhs);
+      } else {
+        return new BLADE.Rational(this.numer * rhs.denom, this.denom * rhs.numer);
+      }
     };
 
     Rational.prototype.isZero = function() {
       return this.numer === 0;
     };
 
+    Rational.prototype.negative = function() {
+      return new BLADE.Rational(-this.numer, this.denom);
+    };
+
     Rational.prototype.equals = function(other) {
       if (other instanceof BLADE.Rational) {
-        return (this.numer * other.denom) === (this.denom * other.numer);
+        return this.numer * other.denom === this.denom * other.numer;
       } else {
         return false;
       }
@@ -47738,8 +47726,8 @@ mod[WORKBENCH] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
 
   Unit = (function() {
     function Unit(scale, dimensions, labels) {
-      if (labels.length !== 8) {
-        throw new Error("Expecting 8 elements in the labels array.");
+      if (labels.length !== 7) {
+        throw new Error("Expecting 7 elements in the labels array.");
       }
       this.scale = scale;
       this.dimensions = dimensions;
@@ -47801,12 +47789,16 @@ mod[WORKBENCH] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       }
     };
 
+    Unit.prototype.inverse = function() {
+      return new BLADE.Unit(1 / this.scale, this.dimensions.negative(), this.labels);
+    };
+
     Unit.prototype.toString = function() {
       var operatorStr, scaleString, unitsString;
 
       operatorStr = this.scale === 1 || this.dimensions.isZero() ? "" : " ";
       scaleString = this.scale === 1 ? "" : "" + this.scale;
-      unitsString = [stringify(this.dimensions.M, this.labels[0]), stringify(this.dimensions.L, this.labels[1]), stringify(this.dimensions.T, this.labels[2]), stringify(this.dimensions.Q, this.labels[3]), stringify(this.dimensions.temperature, this.labels[4]), stringify(this.dimensions.amount, this.labels[5]), stringify(this.dimensions.intensity, this.labels[6]), stringify(this.dimensions.angle, this.labels[7])].filter(function(x) {
+      unitsString = [stringify(this.dimensions.M, this.labels[0]), stringify(this.dimensions.L, this.labels[1]), stringify(this.dimensions.T, this.labels[2]), stringify(this.dimensions.Q, this.labels[3]), stringify(this.dimensions.temperature, this.labels[4]), stringify(this.dimensions.amount, this.labels[5]), stringify(this.dimensions.intensity, this.labels[6])].filter(function(x) {
         return typeof x === 'string';
       }).join(" ");
       return "" + scaleString + operatorStr + unitsString;
@@ -47818,31 +47810,35 @@ mod[WORKBENCH] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
 
   this.BLADE.Unit = Unit;
 
-  this.BLADE.UNIT_SYMBOLS = ["kg", "m", "s", "C", "K", "mol", "cd", "rad"];
+  this.BLADE.UNIT_SYMBOLS = ["kg", "m", "s", "C", "K", "mol", "cd"];
 
-  this.BLADE.UNIT_DIMLESS = new Unit(1, new this.BLADE.Dimensions(0, 0, 0, 0, 0, 0, 0, 0), this.BLADE.UNIT_SYMBOLS);
+  this.BLADE.UNIT_DIMLESS = new Unit(1, new this.BLADE.Dimensions(0, 0, 0, 0, 0, 0, 0), this.BLADE.UNIT_SYMBOLS);
 
-  this.BLADE.UNIT_KILOGRAM = new Unit(1, new this.BLADE.Dimensions(1, 0, 0, 0, 0, 0, 0, 0), this.BLADE.UNIT_SYMBOLS);
+  this.BLADE.UNIT_KILOGRAM = new Unit(1, new this.BLADE.Dimensions(1, 0, 0, 0, 0, 0, 0), this.BLADE.UNIT_SYMBOLS);
 
-  this.BLADE.UNIT_METER = new Unit(1, new this.BLADE.Dimensions(0, 1, 0, 0, 0, 0, 0, 0), this.BLADE.UNIT_SYMBOLS);
+  this.BLADE.UNIT_METER = new Unit(1, new this.BLADE.Dimensions(0, 1, 0, 0, 0, 0, 0), this.BLADE.UNIT_SYMBOLS);
 
-  this.BLADE.UNIT_SECOND = new Unit(1, new this.BLADE.Dimensions(0, 0, 1, 0, 0, 0, 0, 0), this.BLADE.UNIT_SYMBOLS);
+  this.BLADE.UNIT_SECOND = new Unit(1, new this.BLADE.Dimensions(0, 0, 1, 0, 0, 0, 0), this.BLADE.UNIT_SYMBOLS);
 
-  this.BLADE.UNIT_AMPERE = new Unit(1, new this.BLADE.Dimensions(0, 0, -1, 1, 0, 0, 0, 0), this.BLADE.UNIT_SYMBOLS);
+  this.BLADE.UNIT_AMPERE = new Unit(1, new this.BLADE.Dimensions(0, 0, -1, 1, 0, 0, 0), this.BLADE.UNIT_SYMBOLS);
 
-  this.BLADE.UNIT_KELVIN = new Unit(1, new this.BLADE.Dimensions(0, 0, 0, 0, 1, 0, 0, 0), this.BLADE.UNIT_SYMBOLS);
+  this.BLADE.UNIT_KELVIN = new Unit(1, new this.BLADE.Dimensions(0, 0, 0, 0, 1, 0, 0), this.BLADE.UNIT_SYMBOLS);
 
-  this.BLADE.UNIT_MOLE = new Unit(1, new this.BLADE.Dimensions(0, 0, 0, 0, 0, 1, 0, 0), this.BLADE.UNIT_SYMBOLS);
+  this.BLADE.UNIT_MOLE = new Unit(1, new this.BLADE.Dimensions(0, 0, 0, 0, 0, 1, 0), this.BLADE.UNIT_SYMBOLS);
 
-  this.BLADE.UNIT_CANDELA = new Unit(1, new this.BLADE.Dimensions(0, 0, 0, 0, 0, 0, 1, 0), this.BLADE.UNIT_SYMBOLS);
+  this.BLADE.UNIT_CANDELA = new Unit(1, new this.BLADE.Dimensions(0, 0, 0, 0, 0, 0, 1), this.BLADE.UNIT_SYMBOLS);
 
-  this.BLADE.UNIT_COULOMB = new Unit(1, new this.BLADE.Dimensions(0, 0, 0, 1, 0, 0, 0, 0), this.BLADE.UNIT_SYMBOLS);
+  this.BLADE.UNIT_COULOMB = new Unit(1, new this.BLADE.Dimensions(0, 0, 0, 1, 0, 0, 0), this.BLADE.UNIT_SYMBOLS);
 
-  this.BLADE.UNIT_RADIAN = new Unit(1, new this.BLADE.Dimensions(0, 0, 0, 0, 0, 0, 0, 1), this.BLADE.UNIT_SYMBOLS);
+  this.BLADE.UNIT_INCH = new Unit(0.0254, new this.BLADE.Dimensions(0, 1, 0, 0, 0, 0, 0), this.BLADE.UNIT_SYMBOLS);
 
-  this.BLADE.UNIT_TAU = new Unit(2 * Math.PI, new this.BLADE.Dimensions(0, 0, 0, 0, 0, 0, 0, 1), this.BLADE.UNIT_SYMBOLS);
+  this.BLADE.UNIT_FOOT = new Unit(0.3048, new this.BLADE.Dimensions(0, 1, 0, 0, 0, 0, 0), this.BLADE.UNIT_SYMBOLS);
 
-  this.BLADE.UNIT_DEGREE = new Unit(Math.PI / 180, new this.BLADE.Dimensions(0, 0, 0, 0, 0, 0, 0, 1), this.BLADE.UNIT_SYMBOLS);
+  this.BLADE.UNIT_YARD = new Unit(0.9144, new this.BLADE.Dimensions(0, 1, 0, 0, 0, 0, 0), this.BLADE.UNIT_SYMBOLS);
+
+  this.BLADE.UNIT_MILE = new Unit(1609.344, new this.BLADE.Dimensions(0, 1, 0, 0, 0, 0, 0), this.BLADE.UNIT_SYMBOLS);
+
+  this.BLADE.UNIT_POUND = new Unit(0.45359237, new this.BLADE.Dimensions(1, 0, 0, 0, 0, 0, 0), this.BLADE.UNIT_SYMBOLS);
 
 }).call(this);
 
