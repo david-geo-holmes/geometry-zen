@@ -14099,9 +14099,13 @@ Sk.builtin.int_ = function(x, base)
     if (x instanceof Sk.builtin.lng)
     {
         if (x.cantBeInt())
+        {
             return new Sk.builtin.lng(x);
+        }
         else
+        {
             return Sk.ffi.numberToIntPy(x.toInt$());
+        }
     }
 
     // sneaky way to do truncate, floor doesn't work < 0, round doesn't work on the .5> side
@@ -22074,11 +22078,13 @@ function parsestr(c, s)
 
     var quote = s.charAt(0);
     var rawmode = false;
+    var unicode = false;
 
     if (quote === 'u' || quote === 'U')
     {
         s = s.substr(1);
         quote = s.charAt(0);
+        unicode = true;
     }
     else if (quote === 'r' || quote === 'R')
     {
@@ -22090,6 +22096,10 @@ function parsestr(c, s)
 
     goog.asserts.assert(quote === "'" || quote === '"' && s.charAt(s.length - 1) === quote);
     s = s.substr(1, s.length - 2);
+    if (unicode)
+    {
+        s = encodeUtf8(s);
+    }
 
     if (s.length >= 4 && s.charAt(0) === quote && s.charAt(1) === quote)
     {
@@ -30444,8 +30454,8 @@ var MATERIAL_GRID_MINOR = new THREE[LINE_BASIC_MATERIAL]({"color": COLOR_GRID,"o
 var e1 = new THREE[VECTOR_3](1, 0, 0);
 var e2 = new THREE[VECTOR_3](0, 1, 0);
 var e3 = new THREE[VECTOR_3](0, 0, 1);
-var E3  = new THREE[EUCLIDEAN_3](new THREE[VECTOR_3](0, 0, 1), new THREE[QUATERNION](0, 0, 0, 0), 0, false);
-var one = new THREE[EUCLIDEAN_3](new THREE[VECTOR_3](0, 0, 0), new THREE[QUATERNION](0, 0, 0, 1), 0, false);
+var E3  = new THREE[EUCLIDEAN_3](false, new THREE[VECTOR_3](0, 0, 1), new THREE[QUATERNION](0, 0, 0, 0), 0, false);
+var one = new THREE[EUCLIDEAN_3](false, new THREE[VECTOR_3](0, 0, 0), new THREE[QUATERNION](0, 0, 0, 1), 0, false);
 
 function isEuclidean3Py(valuePy) {return Sk.ffi.isInstance(valuePy, EUCLIDEAN_3);}
 function isVector3Py(valuePy) {return Sk.ffi.isInstance(valuePy, VECTOR_3);}
@@ -35193,17 +35203,28 @@ var UNIT_BIVECTOR_NAME_E23    = "e23";
 var UNIT_BIVECTOR_NAME_E31    = "e31";
 /**
  * @constructor
+ * @param {boolean} pseudo Indicates whether the numeric components are scalars or pseudoscalars.
+ * @param {Object} vector The vector components.
+ * @param {Object} quaternion The bivector and scalar components.
+ * @param {number} xyz The pseudoscalar component.
+ * @param {boolean} mutable Determines whether this quantity can be changed.
  */
-THREE.Euclidean3 = function(vector, quaternion, xyz, mutable) {
+THREE.Euclidean3 = function(pseudo, vector, quaternion, xyz, mutable)
+{
+  goog.asserts.assertBoolean(pseudo, "pseudo must be a boolean");
   if (typeof vector !== 'object') {throw new Error("43a75b65-8614-4836-9829-377eaeee7cfe");}
   if (typeof quaternion !== 'object') {throw new Error("89fb1d18-dc26-4149-913d-58f192c161d7");}
-  if (typeof xyz !== 'number') {throw new Error("09e5e46b-fdf4-4720-9262-5c2503c84dc6");}
+  goog.asserts.assertNumber(xyz, "xyz must be a number");
+
   this.vector     = vector;
   this.quaternion = quaternion;
-  this._pseudo    = xyz;
+  // The underscore in the properties is to deconflict with the use of get/set.
+  this._xyz       = xyz;
+  this._pseudo    = pseudo;
   this._mutable   = (typeof mutable === 'boolean') ? mutable : true;
 };
-THREE.Euclidean3.prototype = {
+THREE.Euclidean3.prototype =
+{
   constructor: THREE.Euclidean3,
   get w () {return this.quaternion.w;},
   set w (value) {this.checkMutable(); this.quaternion.w = value;},
@@ -35219,12 +35240,20 @@ THREE.Euclidean3.prototype = {
   set yz (value) {this.checkMutable(); this.quaternion.x = -value;},
   get zx () {return -this.quaternion.y;},
   set zx (value) {this.checkMutable(); this.quaternion.y = -value;},
-  get xyz () {return this._pseudo;},
-  set xyz (value) {this.checkMutable(); this._pseudo = value;},
+
+  get xyz () {return this._xyz;},
+  set xyz (value) {this.checkMutable(); this._xyz = value;},
+
+  get pseudo () {return this._pseudo;},
+  set pseudo (value) {this.checkMutable(); this._pseudo = value;},
+
   get mutable () {return this._mutable;},
   set mutable (value) {this._mutable = value;},
-  checkMutable: function() {
-    if (!this._mutable) {
+
+  checkMutable: function()
+  {
+    if (!this._mutable)
+    {
       throw Sk.ffi.assertionError("Quantity is not mutable");
     }
   }
@@ -35233,6 +35262,7 @@ THREE.Euclidean3.prototype = {
 function isNumber(x)    {return typeof x === 'number';}
 function isEuclidean3Py(valuePy) {return Sk.ffi.isInstance(valuePy, Sk.e3ga.EUCLIDEAN_3);}
 /**
+ * @param {boolean} pseudo
  * @param {number} w
  * @param {number} x
  * @param {number} y
@@ -35243,7 +35273,8 @@ function isEuclidean3Py(valuePy) {return Sk.ffi.isInstance(valuePy, Sk.e3ga.EUCL
  * @param {number} xyz
  * @param {boolean=} mutable
  */
-function coordsJsToE3Py(w, x, y, z, xy, yz, zx, xyz, mutable) {
+function coordsJsToE3Py(pseudo, w, x, y, z, xy, yz, zx, xyz, mutable) {
+  goog.asserts.assertBoolean(pseudo, "coordsJsToE3Py(...), pseudo must be a boolean.");
   var wPy   = Sk.ffi.numberToFloatPy(w);
   var xPy   = Sk.ffi.numberToFloatPy(x);
   var yPy   = Sk.ffi.numberToFloatPy(y);
@@ -35310,239 +35341,28 @@ function stringFromCoordinates(coordinates, labels)
   }
 }
 
-function mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, index) {
-  a0 = +a0;
-  a1 = +a1;
-  a2 = +a2;
-  a3 = +a3;
-  a4 = +a4;
-  a5 = +a5;
-  a6 = +a6;
-  a7 = +a7;
-  b0 = +b0;
-  b1 = +b1;
-  b2 = +b2;
-  b3 = +b3;
-  b4 = +b4;
-  b5 = +b5;
-  b6 = +b6;
-  b7 = +b7;
-  index = index|0;
-  var x = 0.0;
-  switch(~(~index)) {
-    case 0: {
-      x = +(a0 * b0 + a1 * b1 + a2 * b2 + a3 * b3 - a4 * b4 - a5 * b5 - a6 * b6 - a7 * b7);
-    }
-    break;
-    case 1: {
-      x = +(a0 * b1 + a1 * b0 - a2 * b4 + a3 * b6 + a4 * b2 - a5 * b7 - a6 * b3 - a7 * b5);
-    }
-    break;
-    case 2: {
-      x = +(a0 * b2 + a1 * b4 + a2 * b0 - a3 * b5 - a4 * b1 + a5 * b3 - a6 * b7 - a7 * b6);
-    }
-    break;
-    case 3: {
-      x = +(a0 * b3 - a1 * b6 + a2 * b5 + a3 * b0 - a4 * b7 - a5 * b2 + a6 * b1 - a7 * b4);
-    }
-    break;
-    case 4: {
-      x = +(a0 * b4 + a1 * b2 - a2 * b1 + a3 * b7 + a4 * b0 - a5 * b6 + a6 * b5 + a7 * b3);
-    }
-    break;
-    case 5: {
-      x = +(a0 * b5 + a1 * b7 + a2 * b3 - a3 * b2 + a4 * b6 + a5 * b0 - a6 * b4 + a7 * b1);
-    }
-    break;
-    case 6: {
-      x = +(a0 * b6 - a1 * b3 + a2 * b7 + a3 * b1 - a4 * b5 + a5 * b4 + a6 * b0 + a7 * b2);
-    }
-    break;
-    case 7: {
-      x = +(a0 * b7 + a1 * b5 + a2 * b6 + a3 * b4 + a4 * b3 + a5 * b1 + a6 * b2 + a7 * b0);
-    }
-    break;
-    default: {
-    }
-  }
-  return +x;
-}
-
-function extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, index) {
-  a0 = +a0;
-  a1 = +a1;
-  a2 = +a2;
-  a3 = +a3;
-  a4 = +a4;
-  a5 = +a5;
-  a6 = +a6;
-  a7 = +a7;
-  b0 = +b0;
-  b1 = +b1;
-  b2 = +b2;
-  b3 = +b3;
-  b4 = +b4;
-  b5 = +b5;
-  b6 = +b6;
-  b7 = +b7;
-  index = index|0;
-  var x = 0.0;
-  switch(~(~index)) {
-    case 0: {
-      x = +(a0 * b0);
-    }
-    break;
-    case 1: {
-      x = +(a0 * b1 + a1 * b0);
-    }
-    break;
-    case 2: {
-      x = +(a0 * b2           + a2 * b0);
-    }
-    break;
-    case 3: {
-      x = +(a0 * b3                     + a3 * b0);
-    }
-    break;
-    case 4: {
-      x = +(a0 * b4 + a1 * b2 - a2 * b1           + a4* b0);
-    }
-    break;
-    case 5: {
-      x = +(a0 * b5           + a2 * b3 - a3 * b2           + a5 * b0);
-    }
-    break;
-    case 6: {
-      x = +(a0 * b6 - a1 * b3           + a3 * b1                     + a6 * b0);
-    }
-    break;
-    case 7: {
-      x = +(a0 * b7 + a1 * b5 + a2 * b6 + a3 * b4 + a4 * b3 + a5 * b1 + a6 * b2 + a7 * b0);
-    }
-    break;
-    default: {
-    }
-  }
-  return +x;
-}
-
-function lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, index) {
-  a0 = +a0;
-  a1 = +a1;
-  a2 = +a2;
-  a3 = +a3;
-  a4 = +a4;
-  a5 = +a5;
-  a6 = +a6;
-  a7 = +a7;
-  b0 = +b0;
-  b1 = +b1;
-  b2 = +b2;
-  b3 = +b3;
-  b4 = +b4;
-  b5 = +b5;
-  b6 = +b6;
-  b7 = +b7;
-  index = index|0;
-  var x = 0.0;
-  switch(~(~index)) {
-    case 0: {
-      x = +(a0 * b0 + a1 * b1 + a2 * b2 + a3 * b3 - a4 * b4 - a5 * b5 - a6 * b6 - a7 * b7);
-    }
-    break;
-    case 1: {
-      x = +(a0 * b1           - a2 * b4 + a3 * b6           - a5 * b7);
-    }
-    break;
-    case 2: {
-      x = +(a0 * b2 + a1 * b4           - a3 * b5                     - a6 * b7);
-    }
-    break;
-    case 3: {
-      x = +(a0 * b3 - a1 * b6 + a2 * b5           - a4 * b7);
-    }
-    break;
-    case 4: {
-      x = +(a0 * b4                     + a3 * b7);
-    }
-    break;
-    case 5: {
-      x = +(a0 * b5 + a1 * b7);
-    }
-    break;
-    case 6: {
-      x = +(a0 * b6           + a2 * b7);
-    }
-    break;
-    case 7: {
-      x = +(a0 * b7);
-    }
-    break;
-    default: {
-    }
-  }
-  return +x;
-}
-
-function rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, index) {
-  a0 = +a0;
-  a1 = +a1;
-  a2 = +a2;
-  a3 = +a3;
-  a4 = +a4;
-  a5 = +a5;
-  a6 = +a6;
-  a7 = +a7;
-  b0 = +b0;
-  b1 = +b1;
-  b2 = +b2;
-  b3 = +b3;
-  b4 = +b4;
-  b5 = +b5;
-  b6 = +b6;
-  b7 = +b7;
-  index = index|0;
-  var x = 0.0;
-  switch(~(~index)) {
-    case 0: {
-      x = +(a0 * b0 + a1 * b1 + a2 * b2 + a3 * b3 - a4 * b4 - a5 * b5 - a6 * b6 - a7 * b7);
-    }
-    break;
-    case 1: {
-      x = +(        + a1 * b0                     + a4 * b2           - a6 * b3 - a7 * b5);
-    }
-    break;
-    case 2: {
-      x = +(                  + a2 * b0           - a4 * b1 + a5 * b3           - a7 * b6);
-    }
-    break;
-    case 3: {
-      x = +(                            + a3 * b0           - a5 * b2 + a6 * b1 - a7 * b4);
-    }
-    break;
-    case 4: {
-      x = +(                                      + a4 * b0                     + a7 * b3);
-    }
-    break;
-    case 5: {
-      x = +(                                                + a5 * b0           + a7 * b1);
-    }
-    break;
-    case 6: {
-      x = +(                                                          + a6 * b0 + a7 * b2);
-    }
-    break;
-    case 7: {
-      x = +(                                                                    + a7 * b0);
-    }
-    break;
-    default: {
-    }
-  }
-  return +x;
-}
-
-function divide(a000, a001, a010, a011, a100, a101, a110, a111, b000, b001, b010, b011, b100, b101, b110, b111, dst) {
+/**
+ * @param {number} a000
+ * @param {number} a001
+ * @param {number} a010
+ * @param {number} a011
+ * @param {number} a100
+ * @param {number} a101
+ * @param {number} a110
+ * @param {number} a111
+ * @param {number} b000
+ * @param {number} b001
+ * @param {number} b010
+ * @param {number} b011
+ * @param {number} b100
+ * @param {number} b101
+ * @param {number} b110
+ * @param {number} b111
+ * @param {*} dst
+ * @param {function(boolean, number, number, number, number, number, number, number, number, boolean=):*} pack
+ */
+function divide(a000, a001, a010, a011, a100, a101, a110, a111, b000, b001, b010, b011, b100, b101, b110, b111, dst, pack)
+{
   // WARNING! mulE2 uses w,x,y,z,xy,yz,zx,xyz representation. Notice the ordering and sign change.
   // TODO: Move everything to the more systematic bitmap representation.
   // r = ~b = reverse(b)
@@ -35556,14 +35376,14 @@ function divide(a000, a001, a010, a011, a100, a101, a110, a111, b000, b001, b010
   var r111 = -b111; // xyz, grade 3(-)
   // m = b * r = b * (~b)
   // The grade 2 and grade 3 components evaluate to zero.
-  var m000 =  mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 0);
-  var m001 =  mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 1);
-  var m010 =  mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 2);
-  var m011 =  0;//mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 4);
-  var m100 =  mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 3);
-  var m101 =  0;//-mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 6);
-  var m110 =  0;//mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 5);
-  var m111 =  0;//mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 7);
+  var m000 =  BLADE.bladeASM.mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 0);
+  var m001 =  BLADE.bladeASM.mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 1);
+  var m010 =  BLADE.bladeASM.mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 2);
+  var m011 =  0;
+  var m100 =  BLADE.bladeASM.mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, r000, r001, r010, r100, r011, r110, -r101, r111, 3);
+  var m101 =  0;
+  var m110 =  0;
+  var m111 =  0;
   // c = cliffordConjugate(m)
   var c000 = +m000; // w,   grade 0(+)
   var c001 = -m001; // x,   grade 1(-)
@@ -35575,16 +35395,16 @@ function divide(a000, a001, a010, a011, a100, a101, a110, a111, b000, b001, b010
   var c111 = +m111; // xyz, grade 3(+)
   // s = r * c
   // TODO: Presumably there is some simplified computation on account of the c's being sparse.
-  var s000 =  mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 0);
-  var s001 =  mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 1);
-  var s010 =  mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 2);
-  var s011 =  mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 4);
-  var s100 =  mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 3);
-  var s101 = -mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 6);
-  var s110 =  mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 5);
-  var s111 =  mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 7);
+  var s000 =  BLADE.bladeASM.mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 0);
+  var s001 =  BLADE.bladeASM.mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 1);
+  var s010 =  BLADE.bladeASM.mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 2);
+  var s011 =  BLADE.bladeASM.mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 4);
+  var s100 =  BLADE.bladeASM.mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 3);
+  var s101 = -BLADE.bladeASM.mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 6);
+  var s110 =  BLADE.bladeASM.mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 5);
+  var s111 =  BLADE.bladeASM.mulE3(r000, r001, r010, r100, r011, r110, -r101, r111, c000, c001, c010, c100, c011, c110, -c101, c111, 7);
   // k = b * s
-  var k000 =  mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, s000, s001, s010, s100, s011, s110, -s101, s111, 0);
+  var k000 =  BLADE.bladeASM.mulE3(b000, b001, b010, b100, b011, b110, -b101, b111, s000, s001, s010, s100, s011, s110, -s101, s111, 0);
   // i = inverse(b)
   var i000 = s000/k000;
   var i001 = s001/k000;
@@ -35595,14 +35415,14 @@ function divide(a000, a001, a010, a011, a100, a101, a110, a111, b000, b001, b010
   var i110 = s110/k000;
   var i111 = s111/k000;
   // x = a * inverse(b)
-  var x000 =  mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 0);
-  var x001 =  mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 1);
-  var x010 =  mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 2);
-  var x011 =  mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 4);
-  var x100 =  mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 3);
-  var x101 = -mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 6);
-  var x110 =  mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 5);
-  var x111 =  mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 7);
+  var x000 =  BLADE.bladeASM.mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 0);
+  var x001 =  BLADE.bladeASM.mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 1);
+  var x010 =  BLADE.bladeASM.mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 2);
+  var x011 =  BLADE.bladeASM.mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 4);
+  var x100 =  BLADE.bladeASM.mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 3);
+  var x101 = -BLADE.bladeASM.mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 6);
+  var x110 =  BLADE.bladeASM.mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 5);
+  var x111 =  BLADE.bladeASM.mulE3(a000, a001, a010, a100, a011, a110, -a101, a111, i000, i001, i010, i100, i011, i110, -i101, i111, 7);
   // translate bitmap representation to Cartesian.
   var w   =  x000;
   var x   =  x001;
@@ -35613,7 +35433,8 @@ function divide(a000, a001, a010, a011, a100, a101, a110, a111, b000, b001, b010
   var zx  = -x101;
   var xyz =  x111;
   // return or populate the optional dst parameter.
-  if (typeof dst !== 'undefined') {
+  if (typeof dst !== 'undefined')
+  {
     dst.w   = w;
     dst.x   = x;
     dst.y   = y;
@@ -35623,44 +35444,68 @@ function divide(a000, a001, a010, a011, a100, a101, a110, a111, b000, b001, b010
     dst.zx  = zx;
     dst.xyz = xyz;
   }
-  else {
-    return coordsJsToE3Py(w, x, y, z, xy, yz, zx, xyz);
+  else
+  {
+    return pack(false, w, x, y, z, xy, yz, zx, xyz);
   }
 }
 
-function coord(mv, index) {
-  switch(index) {
-    case 0: {
+/**
+ * @param {{w:number, x:number, y:number, z:number, xy:number, yz:number, zx:number, xyz:number}} mv
+ * @param {number} index
+ * @return {number}
+ */
+function coord(mv, index)
+{
+  switch(index)
+  {
+    case 0:
+    {
       return mv.w;
     }
-    case 1: {
+    case 1:
+    {
       return mv.x;
     }
-    case 2: {
+    case 2:
+    {
       return mv.y;
     }
-    case 3: {
+    case 3:
+    {
       return mv.z;
     }
-    case 4: {
+    case 4:
+    {
       return mv.xy;
     }
-    case 5: {
+    case 5:
+    {
       return mv.yz;
     }
-    case 6: {
+    case 6:
+    {
       return mv.zx;
     }
-    case 7: {
+    case 7:
+    {
       return mv.xyz;
     }
-    default: {
+    default:
+    {
       throw Sk.ffi.assertionError("" + index + " is not a valid multivector coordinate index");
     }
   }
 }
 
-function compute(f, a, b, coord, pack) {
+/**
+ * @param {function(number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number):number} f
+ * @param {{w:number, x:number, y:number, z:number, xy:number, yz:number, zx:number, xyz:number}} a
+ * @param {{w:number, x:number, y:number, z:number, xy:number, yz:number, zx:number, xyz:number}} b
+ * @param {function(boolean, number, number, number, number, number, number, number, number, boolean=):*} pack
+ */
+function compute(f, a, b, coord, pack)
+{
   var a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, x0, x1, x2, x3, x4, x5, x6, x7;
   a0 = a.quaternion.w;
   a1 = a.vector.x;
@@ -35686,7 +35531,7 @@ function compute(f, a, b, coord, pack) {
   x5 = f(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 5);
   x6 = f(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 6);
   x7 = f(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 7);
-  return pack(x0, x1, x2, x3, x4, x5, x6, x7);
+  return pack(false, x0, x1, x2, x3, x4, x5, x6, x7);
 }
 
 mod[Sk.e3ga.SCALAR_E3] = Sk.ffi.functionPy(function(wPy, mutablePy)
@@ -35697,7 +35542,7 @@ mod[Sk.e3ga.SCALAR_E3] = Sk.ffi.functionPy(function(wPy, mutablePy)
   {
     Sk.ffi.checkArgType(PROP_MUTABLE, Sk.ffi.PyType.BOOL, Sk.ffi.isBool(mutablePy), mutablePy);
   }
-  return coordsJsToE3Py(Sk.ffi.numberToJs(wPy), 0, 0, 0, 0, 0, 0, 0, Sk.ffi.remapToJs(mutablePy));
+  return coordsJsToE3Py(false, Sk.ffi.numberToJs(wPy), 0, 0, 0, 0, 0, 0, 0, Sk.ffi.remapToJs(mutablePy));
 });
 
 mod[Sk.e3ga.VECTOR_E3] = Sk.ffi.functionPy(function(xPy, yPy, zPy, mutablePy)
@@ -35713,7 +35558,7 @@ mod[Sk.e3ga.VECTOR_E3] = Sk.ffi.functionPy(function(xPy, yPy, zPy, mutablePy)
   var x = Sk.ffi.numberToJs(xPy);
   var y = Sk.ffi.numberToJs(yPy);
   var z = Sk.ffi.numberToJs(zPy);
-  return coordsJsToE3Py(0, x, y, z, 0, 0, 0, 0, Sk.ffi.remapToJs(mutablePy));
+  return coordsJsToE3Py(false, 0, x, y, z, 0, 0, 0, 0, Sk.ffi.remapToJs(mutablePy));
 });
 
 mod[Sk.e3ga.BIVECTOR_E3] = Sk.ffi.functionPy(function(xy, yz, zx, mutablePy)
@@ -35729,7 +35574,7 @@ mod[Sk.e3ga.BIVECTOR_E3] = Sk.ffi.functionPy(function(xy, yz, zx, mutablePy)
   xy = Sk.ffi.numberToJs(xy);
   yz = Sk.ffi.numberToJs(yz);
   zx = Sk.ffi.numberToJs(zx);
-  return coordsJsToE3Py(0, 0, 0, 0, xy, yz, zx, 0, Sk.ffi.remapToJs(mutablePy));
+  return coordsJsToE3Py(false, 0, 0, 0, 0, xy, yz, zx, 0, Sk.ffi.remapToJs(mutablePy));
 });
 
 mod[Sk.e3ga.PSEUDOSCALAR_E3] = Sk.ffi.functionPy(function(xyz, mutablePy)
@@ -35741,7 +35586,7 @@ mod[Sk.e3ga.PSEUDOSCALAR_E3] = Sk.ffi.functionPy(function(xyz, mutablePy)
     Sk.ffi.checkArgType(PROP_MUTABLE, Sk.ffi.PyType.BOOL, Sk.ffi.isBool(mutablePy), mutablePy);
   }
   xyz = Sk.ffi.numberToJs(xyz);
-  return coordsJsToE3Py(0, 0, 0, 0, 0, 0, 0, xyz, Sk.ffi.remapToJs(mutablePy));
+  return coordsJsToE3Py(false, 0, 0, 0, 0, 0, 0, 0, xyz, Sk.ffi.remapToJs(mutablePy));
 });
 
 mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
@@ -35778,7 +35623,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
         var mutable = Sk.ffi.isDefined(mutablePy) ? Sk.ffi.remapToJs(mutablePy) : true;
         var vector = new THREE[VECTOR_3](x,y,z);
         var quaternion = new THREE.Quaternion(-yz, -zx, -xy, w);
-        Sk.ffi.referenceToPy(new THREE.Euclidean3(vector, quaternion, xyz, mutable), Sk.e3ga.EUCLIDEAN_3, undefined, self);
+        Sk.ffi.referenceToPy(new THREE.Euclidean3(false, vector, quaternion, xyz, mutable), Sk.e3ga.EUCLIDEAN_3, undefined, self);
       }
       break;
       case Sk.ffi.PyType.INSTANCE:
@@ -35801,7 +35646,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
     var b = Sk.ffi.remapToJs(otherPy);
     if (Sk.ffi.isNum(otherPy))
     {
-      return coordsJsToE3Py(quaternion.w + b, vector.x, vector.y, vector.z, -quaternion.z, -quaternion.x, -quaternion.y, self.xyz);
+      return coordsJsToE3Py(false, quaternion.w + b, vector.x, vector.y, vector.z, -quaternion.z, -quaternion.x, -quaternion.y, self.xyz);
     }
     else if (Sk.ffi.isInstance(otherPy, Sk.e3ga.EUCLIDEAN_3))
     {
@@ -35813,7 +35658,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
       var yz = -(quaternion.x + b.quaternion.x);
       var zx = -(quaternion.y + b.quaternion.y);
       var xyz = self.xyz + b.xyz;
-      return coordsJsToE3Py(w, x, y, z, xy, yz, zx, xyz);
+      return coordsJsToE3Py(false, w, x, y, z, xy, yz, zx, xyz);
     }
     else
     {
@@ -35828,7 +35673,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
     var quaternion = self.quaternion;
     if (Sk.ffi.isNum(otherPy))
     {
-      return coordsJsToE3Py(a + quaternion.w, vector.x, vector.y, vector.z, -quaternion.z, -quaternion.x, -quaternion.y, self.xyz);
+      return coordsJsToE3Py(false, a + quaternion.w, vector.x, vector.y, vector.z, -quaternion.z, -quaternion.x, -quaternion.y, self.xyz);
     }
     else
     {
@@ -35872,7 +35717,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
     var other = Sk.ffi.remapToJs(otherPy);
     if (Sk.ffi.isNum(otherPy))
     {
-      return coordsJsToE3Py(qs.w - other, vs.x, vs.y, vs.z, -qs.z, -qs.x, -qs.y, self.xyz);
+      return coordsJsToE3Py(false, qs.w - other, vs.x, vs.y, vs.z, -qs.z, -qs.x, -qs.y, self.xyz);
     }
     else if (Sk.ffi.isInstance(otherPy, Sk.e3ga.EUCLIDEAN_3))
     {
@@ -35886,7 +35731,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
       var yz = -(qs.x - qo.x);
       var zx = -(qs.y - qo.y);
       var xyz = self.xyz - other.xyz;
-      return coordsJsToE3Py(w, x, y, z, xy, yz, zx, xyz);
+      return coordsJsToE3Py(false, w, x, y, z, xy, yz, zx, xyz);
     }
     else
     {
@@ -35899,7 +35744,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
     var vs = self.vector;
     var qs = self.quaternion;
     if (Sk.ffi.isNum(otherPy)) {
-      return coordsJsToE3Py(other - qs.w, -vs.x, -vs.y, -vs.z, qs.z, qs.x, qs.y, -self.xyz);
+      return coordsJsToE3Py(false, other - qs.w, -vs.x, -vs.y, -vs.z, qs.z, qs.x, qs.y, -self.xyz);
     }
     else {
       throw Sk.ffi.err.operand(ARG_OTHER).toOperation(OP_SUB).mustHaveType([Sk.ffi.PyType.FLOAT, Sk.e3ga.EUCLIDEAN_3]);
@@ -35942,7 +35787,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
           {
             var lhs = Sk.ffi.remapToJs(selfPy);
             var rhs = Sk.ffi.remapToJs(otherPy);
-            return compute(mulE3, lhs, rhs, coord, coordsJsToE3Py);
+            return compute(BLADE.bladeASM.mulE3, lhs, rhs, coord, coordsJsToE3Py);
           }
           default:
           {
@@ -35957,7 +35802,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
         var vector = self.vector;
         var quaternion = self.quaternion;
         var b = Sk.ffi.remapToJs(otherPy);
-        return coordsJsToE3Py(quaternion.w * b, vector.x * b, vector.y * b, vector.z * b, -quaternion.z * b, -quaternion.x * b, -quaternion.y * b, self.xyz * b);
+        return coordsJsToE3Py(false, quaternion.w * b, vector.x * b, vector.y * b, vector.z * b, -quaternion.z * b, -quaternion.x * b, -quaternion.y * b, self.xyz * b);
       }
       default:
       {
@@ -35973,7 +35818,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
     if (Sk.ffi.isNum(otherPy))
     {
       var a = Sk.ffi.remapToJs(otherPy);
-      return coordsJsToE3Py(a * quaternion.w, a * vector.x, a * vector.y, a * vector.z, -a * quaternion.z, -a * quaternion.x, -a * quaternion.y, a * self.xyz);
+      return coordsJsToE3Py(false, a * quaternion.w, a * vector.x, a * vector.y, a * vector.z, -a * quaternion.z, -a * quaternion.x, -a * quaternion.y, a * self.xyz);
     }
     else
     {
@@ -36012,14 +35857,14 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
       b6 = b.zx;
       b7 = b.xyz;
     }
-    a.w   = mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 0);
-    a.x   = mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 1);
-    a.y   = mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 2);
-    a.z   = mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 3);
-    a.xy  = mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 4);
-    a.yz  = mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 5);
-    a.zx  = mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 6);
-    a.xyz = mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 7);
+    a.w   = BLADE.bladeASM.mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 0);
+    a.x   = BLADE.bladeASM.mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 1);
+    a.y   = BLADE.bladeASM.mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 2);
+    a.z   = BLADE.bladeASM.mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 3);
+    a.xy  = BLADE.bladeASM.mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 4);
+    a.yz  = BLADE.bladeASM.mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 5);
+    a.zx  = BLADE.bladeASM.mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 6);
+    a.xyz = BLADE.bladeASM.mulE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 7);
     return selfPy;
   });
   $loc.__div__ = Sk.ffi.functionPy(function(selfPy, otherPy)
@@ -36038,7 +35883,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
             var other = Sk.ffi.remapToJs(otherPy);
             var vo = other.vector;
             var qo = other.quaternion;
-            return divide(qs.w, vs.x, vs.y, -qs.z, vs.z, qs.y, -qs.x, self.xyz, qo.w, vo.x, vo.y, -qo.z, vo.z, qo.y, -qo.x, other.xyz, undefined);
+            return divide(qs.w, vs.x, vs.y, -qs.z, vs.z, qs.y, -qs.x, self.xyz, qo.w, vo.x, vo.y, -qo.z, vo.z, qo.y, -qo.x, other.xyz, undefined, coordsJsToE3Py);
           }
           default:
           {
@@ -36053,7 +35898,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
         var vs = self.vector;
         var qs = self.quaternion;
         var other = Sk.ffi.remapToJs(otherPy);
-        return divide(qs.w, vs.x, vs.y, -qs.z, vs.z, qs.y, -qs.x, self.xyz, other, 0, 0, 0, 0, 0, 0, 0, undefined);
+        return divide(qs.w, vs.x, vs.y, -qs.z, vs.z, qs.y, -qs.x, self.xyz, other, 0, 0, 0, 0, 0, 0, 0, undefined, coordsJsToE3Py);
       }
       default:
       {
@@ -36061,25 +35906,31 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
       }
     }
   });
-  $loc.__rdiv__ = Sk.ffi.functionPy(function(rhs, lhs) {
+  $loc.__rdiv__ = Sk.ffi.functionPy(function(rhs, lhs)
+  {
     lhs = Sk.ffi.remapToJs(lhs);
     rhs = Sk.ffi.remapToJs(rhs);
-    if (isNumber(lhs)) {
-      return divide(lhs, 0, 0, 0, 0, 0, 0, 0, rhs.w, rhs.x, rhs.y, rhs.xy, rhs.z, -rhs.zx, rhs.yz, rhs.xyz, undefined);
+    if (isNumber(lhs))
+    {
+      return divide(lhs, 0, 0, 0, 0, 0, 0, 0, rhs.w, rhs.x, rhs.y, rhs.xy, rhs.z, -rhs.zx, rhs.yz, rhs.xyz, undefined, coordsJsToE3Py);
     }
-    else {
+    else
+    {
       throw new Sk.builtin.AssertionError("" + JSON.stringify(lhs, null, 2) + " / " + JSON.stringify(rhs, null, 2));
     }
   });
-  $loc.__idiv__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
+  $loc.__idiv__ = Sk.ffi.functionPy(function(selfPy, otherPy)
+  {
     var a = Sk.ffi.remapToJs(selfPy);
     var b = Sk.ffi.remapToJs(otherPy);
-    if (isNumber(b)) {
-      divide(a.w, a.x, a.y, a.xy, a.z, -a.zx, a.yz, a.xyz, b, 0, 0, 0, 0, 0, 0, 0, a);
+    if (isNumber(b))
+    {
+      divide(a.w, a.x, a.y, a.xy, a.z, -a.zx, a.yz, a.xyz, b, 0, 0, 0, 0, 0, 0, 0, a, coordsJsToE3Py);
       return selfPy;
     }
-    else {
-      divide(a.w, a.x, a.y, a.xy, a.z, -a.zx, a.yz, a.xyz, b.w, b.x, b.y, b.xy, b.z, -b.zx, b.yz, b.xyz, a);
+    else
+    {
+      divide(a.w, a.x, a.y, a.xy, a.z, -a.zx, a.yz, a.xyz, b.w, b.x, b.y, b.xy, b.z, -b.zx, b.yz, b.xyz, a, coordsJsToE3Py);
       return selfPy;
     }
   });
@@ -36095,7 +35946,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
             var s  = Sk.ffi.remapToJs(selfPy);
             var o = Sk.ffi.remapToJs(otherPy);
             // FIXME: This should be generalized to the full scalar product between multivectors.
-            return coordsJsToE3Py(s.x * o.x + s.y * o.y + s.z * o.z, 0, 0, 0, 0, 0, 0, 0);
+            return coordsJsToE3Py(false, s.x * o.x + s.y * o.y + s.z * o.z, 0, 0, 0, 0, 0, 0, 0);
           }
           default:
           {
@@ -36110,7 +35961,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
         var vector = self.vector;
         var quaternion = self.quaternion;
         var b = Sk.ffi.remapToJs(otherPy);
-        return coordsJsToE3Py(quaternion.w * b, vector.x * b, vector.y * b, vector.z * b, -quaternion.z * b, -quaternion.x * b, -quaternion.y * b, self.xyz * b);
+        return coordsJsToE3Py(false, quaternion.w * b, vector.x * b, vector.y * b, vector.z * b, -quaternion.z * b, -quaternion.x * b, -quaternion.y * b, self.xyz * b);
       }
       default:
       {
@@ -36129,7 +35980,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
           {
             var a = Sk.ffi.remapToJs(selfPy);
             var b = Sk.ffi.remapToJs(otherPy);
-            return compute(extE3, a, b, coord, coordsJsToE3Py);
+            return compute(BLADE.bladeASM.extE3, a, b, coord, coordsJsToE3Py);
           }
           default:
           {
@@ -36142,7 +35993,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
       {
         var a = Sk.ffi.remapToJs(selfPy);
         var b = Sk.ffi.remapToJs(otherPy);
-        return coordsJsToE3Py(a.w * b, a.x * b, a.y * b, a.z * b, a.xy * b, a.yz * b, a.zx * b, a.xyz * b);
+        return coordsJsToE3Py(false, a.w * b, a.x * b, a.y * b, a.z * b, a.xy * b, a.yz * b, a.zx * b, a.xyz * b);
       }
       default:
       {
@@ -36156,7 +36007,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
     {
       var a = Sk.ffi.remapToJs(otherPy);
       var b = Sk.ffi.remapToJs(selfPy);
-      return coordsJsToE3Py(a * b.w, a * b.x, a * b.y, a * b.z, a * b.xy, a * b.yz, a * b.zx, a * b.xyz);
+      return coordsJsToE3Py(false, a * b.w, a * b.x, a * b.y, a * b.z, a * b.xy, a * b.yz, a * b.zx, a * b.xyz);
     }
     else
     {
@@ -36195,14 +36046,14 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
       b6 = b.zx;
       b7 = b.xyz;
     }
-    a.w   = extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 0);
-    a.x   = extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 1);
-    a.y   = extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 2);
-    a.z   = extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 3);
-    a.xy  = extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 4);
-    a.yz  = extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 5);
-    a.zx  = extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 6);
-    a.xyz = extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 7);
+    a.w   = BLADE.bladeASM.extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 0);
+    a.x   = BLADE.bladeASM.extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 1);
+    a.y   = BLADE.bladeASM.extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 2);
+    a.z   = BLADE.bladeASM.extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 3);
+    a.xy  = BLADE.bladeASM.extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 4);
+    a.yz  = BLADE.bladeASM.extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 5);
+    a.zx  = BLADE.bladeASM.extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 6);
+    a.xyz = BLADE.bladeASM.extE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 7);
     return selfPy;
   });
   $loc.__lshift__ = Sk.ffi.functionPy(function(selfPy, otherPy)
@@ -36216,7 +36067,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
           {
             var a = Sk.ffi.remapToJs(selfPy);
             var b = Sk.ffi.remapToJs(otherPy);
-            return compute(lcoE3, a, b, coord, coordsJsToE3Py);
+            return compute(BLADE.bladeASM.lcoE3, a, b, coord, coordsJsToE3Py);
           }
           default:
           {
@@ -36229,7 +36080,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
       {
         var a = Sk.ffi.remapToJs(selfPy);
         var b = Sk.ffi.remapToJs(otherPy);
-        return coordsJsToE3Py(a.w * b, 0, 0, 0, 0, 0, 0, 0);
+        return coordsJsToE3Py(false, a.w * b, 0, 0, 0, 0, 0, 0, 0);
       }
       default:
       {
@@ -36243,7 +36094,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
     b = Sk.ffi.remapToJs(b);
     if (isNumber(a))
     {
-      return coordsJsToE3Py(a * b.w, a * b.x, a * b.y, a * b.z, a * b.xy, a * b.yz, a * b.zx, a * b.xyz);
+      return coordsJsToE3Py(false, a * b.w, a * b.x, a * b.y, a * b.z, a * b.xy, a * b.yz, a * b.zx, a * b.xyz);
     }
     else
     {
@@ -36282,14 +36133,14 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
       b6 = b.zx;
       b7 = b.xyz;
     }
-    a.w   = lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 0);
-    a.x   = lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 1);
-    a.y   = lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 2);
-    a.z   = lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 3);
-    a.xy  = lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 4);
-    a.yz  = lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 5);
-    a.zx  = lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 6);
-    a.xyz = lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 7);
+    a.w   = BLADE.bladeASM.lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 0);
+    a.x   = BLADE.bladeASM.lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 1);
+    a.y   = BLADE.bladeASM.lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 2);
+    a.z   = BLADE.bladeASM.lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 3);
+    a.xy  = BLADE.bladeASM.lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 4);
+    a.yz  = BLADE.bladeASM.lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 5);
+    a.zx  = BLADE.bladeASM.lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 6);
+    a.xyz = BLADE.bladeASM.lcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 7);
     return selfPy;
   });
   $loc.__rshift__ = Sk.ffi.functionPy(function(selfPy, otherPy)
@@ -36303,7 +36154,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
           {
             var a = Sk.ffi.remapToJs(selfPy);
             var b = Sk.ffi.remapToJs(otherPy);
-            return compute(rcoE3, a, b, coord, coordsJsToE3Py);
+            return compute(BLADE.bladeASM.rcoE3, a, b, coord, coordsJsToE3Py);
           }
           default:
           {
@@ -36316,7 +36167,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
       {
         var a = Sk.ffi.remapToJs(selfPy);
         var b = Sk.ffi.remapToJs(otherPy);
-        return coordsJsToE3Py(a.w * b, a.x * b, a.y * b, a.z * b, a.xy * b, a.yz * b, a.zx * b, a.xyz * b);
+        return coordsJsToE3Py(false, a.w * b, a.x * b, a.y * b, a.z * b, a.xy * b, a.yz * b, a.zx * b, a.xyz * b);
       }
       default:
       {
@@ -36330,7 +36181,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
     b = Sk.ffi.remapToJs(b);
     if (isNumber(a))
     {
-      return coordsJsToE3Py(a * b.w, 0, 0, 0, 0, 0, 0, 0);
+      return coordsJsToE3Py(false, a * b.w, 0, 0, 0, 0, 0, 0, 0);
     }
     else
     {
@@ -36369,14 +36220,14 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
       b6 = b.zx;
       b7 = b.xyz;
     }
-    a.w   = rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 0);
-    a.x   = rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 1);
-    a.y   = rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 2);
-    a.z   = rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 3);
-    a.xy  = rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 4);
-    a.yz  = rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 5);
-    a.zx  = rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 6);
-    a.xyz = rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 7);
+    a.w   = BLADE.bladeASM.rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 0);
+    a.x   = BLADE.bladeASM.rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 1);
+    a.y   = BLADE.bladeASM.rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 2);
+    a.z   = BLADE.bladeASM.rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 3);
+    a.xy  = BLADE.bladeASM.rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 4);
+    a.yz  = BLADE.bladeASM.rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 5);
+    a.zx  = BLADE.bladeASM.rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 6);
+    a.xyz = BLADE.bladeASM.rcoE3(a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7, 7);
     return selfPy;
   });
   $loc.__pow__ = Sk.ffi.functionPy(function(selfPy, otherPy)
@@ -36391,7 +36242,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
             var a = Sk.ffi.remapToJs(selfPy);
             var b = Sk.ffi.remapToJs(otherPy);
             // TODO: generalize.
-            return coordsJsToE3Py(Math.pow(a.w, b.w), 0, 0, 0, 0, 0, 0, 0);
+            return coordsJsToE3Py(false, Math.pow(a.w, b.w), 0, 0, 0, 0, 0, 0, 0);
           }
           default:
           {
@@ -36405,7 +36256,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
         var a = Sk.ffi.remapToJs(selfPy);
         var b = Sk.ffi.remapToJs(otherPy);
         // TODO: generalize.
-        return coordsJsToE3Py(Math.pow(a.w, b), 0, 0, 0, 0, 0, 0, 0);
+        return coordsJsToE3Py(false, Math.pow(a.w, b), 0, 0, 0, 0, 0, 0, 0);
       }
       default:
       {
@@ -36423,13 +36274,13 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
     var self = Sk.ffi.remapToJs(selfPy);
     var vector = self.vector;
     var quaternion = self.quaternion;
-    return coordsJsToE3Py(-quaternion.w, -vector.x, -vector.y, -vector.z, quaternion.z, quaternion.x, quaternion.y, -self.xyz);
+    return coordsJsToE3Py(false, -quaternion.w, -vector.x, -vector.y, -vector.z, quaternion.z, quaternion.x, quaternion.y, -self.xyz);
   });
   $loc.__invert__ = Sk.ffi.functionPy(function(selfPy) {
     var self = Sk.ffi.remapToJs(selfPy);
     var vector = self.vector;
     var quaternion = self.quaternion;
-    return coordsJsToE3Py(quaternion.w,vector.x,vector.y,vector.z,quaternion.z,quaternion.x,quaternion.y,-self.xyz);
+    return coordsJsToE3Py(false, quaternion.w,vector.x,vector.y,vector.z,quaternion.z,quaternion.x,quaternion.y,-self.xyz);
   });
   $loc.__eq__ = Sk.ffi.functionPy(function(selfPy, otherPy) {
     if (Sk.ffi.isInstance(otherPy, Sk.e3ga.EUCLIDEAN_3)) {
@@ -36468,16 +36319,16 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
     var quaternion = self.quaternion;
     switch(index) {
       case 0: {
-        return coordsJsToE3Py(quaternion.w, 0, 0, 0, 0, 0, 0, 0);
+        return coordsJsToE3Py(false, quaternion.w, 0, 0, 0, 0, 0, 0, 0);
       }
       case 1: {
-        return coordsJsToE3Py(0, vector.x, vector.y, vector.z, 0, 0, 0, 0);
+        return coordsJsToE3Py(false, 0, vector.x, vector.y, vector.z, 0, 0, 0, 0);
       }
       case 2: {
-        return coordsJsToE3Py(0, 0, 0, 0, -quaternion.z, -quaternion.x, -quaternion.y, 0);
+        return coordsJsToE3Py(false, 0, 0, 0, 0, -quaternion.z, -quaternion.x, -quaternion.y, 0);
       }
       case 3: {
-        return coordsJsToE3Py(0, 0, 0, 0, 0, 0, 0, self.xyz);
+        return coordsJsToE3Py(false, 0, 0, 0, 0, 0, 0, 0, self.xyz);
       }
     }
   });
@@ -36622,7 +36473,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
           var Cyz  = Aw * Byz + Ayz * Bw;
           var Czx  = Aw * Bzx + Azx * Bw;
           var Cxyz = Aw * Bxyz + Axyz * Bw;
-          return coordsJsToE3Py(Cw, Cx, Cy, Cz, Cxy, Cyz, Czx, Cxyz);
+          return coordsJsToE3Py(true, Cw, Cx, Cy, Cz, Cxy, Cyz, Czx, Cxyz);
         });
       }
       case METHOD_DISTANCE_TO: {
@@ -36682,15 +36533,15 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
           var Byz  = other.yz;
           var Bzx  = other.zx;
           var Bxyz = other.xyz;
-          var Cw   = Ax * Bx + Ay * By + Az * Bz;
-          var Cx   = 0;
-          var Cy   = 0;
-          var Cz   = 0;
-          var Cxy  = 0;
-          var Cyz  = 0;
-          var Czx  = 0;
-          var Cxyz = 0;
-          return coordsJsToE3Py(Cw, Cx, Cy, Cz, Cxy, Cyz, Czx, Cxyz);
+          var Cw   = Aw * Bw + Ax * Bx + Ay * By + Az * Bz - Axy * Bxy - Ayz * Byz - Azx * Bzx - Axyz * Bxyz;
+          var Cx   = Az * Bzx - Ay * Bxy - Bz * Azx + By * Axy;
+          var Cy   = Ax * Bxy - Az * Byz - Bx * Axy + Bz * Ayz;
+          var Cz   = Ay * Byz - Ax * Bzx - By * Ayz + Bx * Azx;
+          var Cxy  = Az * Bxyz + Bz * Axyz;
+          var Cyz  = Ax * Bxyz + Bx * Axyz;
+          var Czx  = Ay * Bxyz + By * Axyz;
+          var Cxyz = Axyz * Bw + Bxyz * Aw;
+          return coordsJsToE3Py(false, Cw, Cx, Cy, Cz, Cxy, Cyz, Czx, Cxyz);
         });
       }
       case METHOD_MULTIPLY_SCALAR: {
@@ -36768,7 +36619,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
       case METHOD_CLONE: {
         return Sk.ffi.callableToPy(mod, METHOD_CLONE, function(methodPy) {
           Sk.ffi.checkMethodArgs(METHOD_CLONE, arguments, 0, 0);
-          return coordsJsToE3Py(quaternion.w, vector.x, vector.y, vector.z, -quaternion.z, -quaternion.x, -quaternion.y, self.xyz);
+          return coordsJsToE3Py(false, quaternion.w, vector.x, vector.y, vector.z, -quaternion.z, -quaternion.x, -quaternion.y, self.xyz);
         });
       }
       case METHOD_MAGNITUDE: {
@@ -36821,19 +36672,19 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
   {
     Sk.ffi.checkMethodArgs(METHOD_CLIFFORD_CONJUGATE, arguments, 0, 0);
     var self = Sk.ffi.remapToJs(selfPy);
-    return coordsJsToE3Py(self.w, -self.x, -self.y, -self.z, -self.xy, -self.yz, -self.zx, self.xyz);
+    return coordsJsToE3Py(false, self.w, -self.x, -self.y, -self.z, -self.xy, -self.yz, -self.zx, self.xyz);
   });
   $loc.__cos__ = Sk.ffi.functionPy(function(selfPy)
   {
     Sk.ffi.checkMethodArgs("cos", arguments, 0, 0);
     var self = Sk.ffi.remapToJs(selfPy);
-    return coordsJsToE3Py(Sk.math.cos(self.w), 0, 0, 0, 0, 0, 0, 0);
+    return coordsJsToE3Py(false, Sk.math.cos(self.w), 0, 0, 0, 0, 0, 0, 0);
   });
   $loc.__sin__ = Sk.ffi.functionPy(function(selfPy)
   {
     Sk.ffi.checkMethodArgs("sin", arguments, 0, 0);
     var self = Sk.ffi.remapToJs(selfPy);
-    return coordsJsToE3Py(Sk.math.sin(self.w), 0, 0, 0, 0, 0, 0, 0);
+    return coordsJsToE3Py(false, Sk.math.sin(self.w), 0, 0, 0, 0, 0, 0, 0);
   });
   $loc.__tan__ = Sk.ffi.functionPy(function(selfPy)
   {
@@ -36844,19 +36695,19 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
   {
     Sk.ffi.checkMethodArgs("acos", arguments, 0, 0);
     var self = Sk.ffi.remapToJs(selfPy);
-    return coordsJsToE3Py(Math.acos(self.w), 0, 0, 0, 0, 0, 0, 0);
+    return coordsJsToE3Py(false, Math.acos(self.w), 0, 0, 0, 0, 0, 0, 0);
   });
   $loc.__asin__ = Sk.ffi.functionPy(function(selfPy)
   {
     Sk.ffi.checkMethodArgs("asin", arguments, 0, 0);
     var self = Sk.ffi.remapToJs(selfPy);
-    return coordsJsToE3Py(Math.asin(self.w), 0, 0, 0, 0, 0, 0, 0);
+    return coordsJsToE3Py(false, Math.asin(self.w), 0, 0, 0, 0, 0, 0, 0);
   });
   $loc.__atan__ = Sk.ffi.functionPy(function(selfPy)
   {
     Sk.ffi.checkMethodArgs("atan", arguments, 0, 0);
     var self = Sk.ffi.remapToJs(selfPy);
-    return coordsJsToE3Py(Math.atan(self.w), 0, 0, 0, 0, 0, 0, 0);
+    return coordsJsToE3Py(false, Math.atan(self.w), 0, 0, 0, 0, 0, 0, 0);
   });
   $loc.__exp__ = Sk.ffi.functionPy(function(selfPy)
   {
@@ -36870,19 +36721,19 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
     {
       var c = Sk.math.cos(zx);
       var s = Sk.math.sin(zx);
-      return coordsJsToE3Py(c, 0, 0, 0, 0, 0, s, 0);
+      return coordsJsToE3Py(false, c, 0, 0, 0, 0, 0, s, 0);
     }
     else if (yz === 0 && zx === 0)
     {
       var c = Sk.math.cos(xy);
       var s = Sk.math.sin(xy);
-      return coordsJsToE3Py(c, 0, 0, 0, s, 0, 0, 0);
+      return coordsJsToE3Py(false, c, 0, 0, 0, s, 0, 0, 0);
     }
     else if (zx === 0 && xy === 0)
     {
       var c = Sk.math.cos(yz);
       var s = Sk.math.sin(yz);
-      return coordsJsToE3Py(c, 0, 0, 0, 0, s, 0, 0);
+      return coordsJsToE3Py(false, c, 0, 0, 0, 0, s, 0, 0);
     }
     else
     {
@@ -36890,7 +36741,7 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
       var c = Sk.math.cos(angle);
       var s = Sk.math.sin(angle);
       var k = s / angle;
-      return coordsJsToE3Py(c, 0, 0, 0, k * xy, k * yz, k * zx, 0);
+      return coordsJsToE3Py(false, c, 0, 0, 0, k * xy, k * yz, k * zx, 0);
     }
   });
   $loc.__abs__ = Sk.ffi.functionPy(function(selfPy) {
@@ -36909,12 +36760,12 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
     var yz  = s.yz;
     var zx  = s.zx;
     var xyz = s.xyz;
-    return coordsJsToE3Py(w * w + x * x + y * y + z * z + xy * xy + yz * yz + zx * zx + xyz * xyz, 0, 0, 0, 0, 0, 0, 0);
+    return coordsJsToE3Py(false, w * w + x * x + y * y + z * z + xy * xy + yz * yz + zx * zx + xyz * xyz, 0, 0, 0, 0, 0, 0, 0);
   });
   $loc.__sqrt__ = Sk.ffi.functionPy(function(selfPy) {
     Sk.ffi.checkMethodArgs(METHOD_SQRT, arguments, 0, 0);
     var self = Sk.ffi.remapToJs(selfPy);
-    return coordsJsToE3Py(Math.sqrt(self.w), 0, 0, 0, 0, 0, 0, 0);
+    return coordsJsToE3Py(false, Math.sqrt(self.w), 0, 0, 0, 0, 0, 0, 0);
   });
   $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
     var self = Sk.ffi.remapToJs(selfPy);
@@ -41792,7 +41643,7 @@ function isGeometryPy(valuePy) {
 }
 
 function quaternionToEuclidean3Py(quaternion) {
-  var euclidean = new THREE[EUCLIDEAN_3](new THREE.Vector3(0, 0, 0), quaternion, 0);
+  var euclidean = new THREE[EUCLIDEAN_3](false, new THREE.Vector3(0, 0, 0), quaternion, 0);
   return Sk.ffi.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(euclidean, EUCLIDEAN_3));
 }
 /**
@@ -41814,7 +41665,7 @@ function setQuaternionProperty(className, targetPy, name, valuePy, aliasName) {
  *
  */
 function vectorToEuclidean3Py(vector) {
-  var euclidean = new THREE[EUCLIDEAN_3](vector, new THREE.Quaternion(0,0,0,0), 0);
+  var euclidean = new THREE[EUCLIDEAN_3](false, vector, new THREE.Quaternion(0,0,0,0), 0);
   return Sk.ffi.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(euclidean, EUCLIDEAN_3));
 }
 /**

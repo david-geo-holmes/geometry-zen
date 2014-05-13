@@ -27529,7 +27529,7 @@
           transparent: !0
         }), n = new b.Vector3(1, 0, 0), q = new b.Vector3(0, 1, 0);
       new b.Vector3(0, 0, 1);
-      var s = new b.Euclidean3(new b.Vector3(0, 0, 1), new b.Quaternion(0, 0, 0, 0), 0, !1), r = new b.Euclidean3(new b.Vector3(0, 0, 0), new b.Quaternion(0, 0, 0, 1), 0, !1);
+      var s = new b.Euclidean3(!1, new b.Vector3(0, 0, 1), new b.Quaternion(0, 0, 0, 0), 0, !1), r = new b.Euclidean3(!1, new b.Vector3(0, 0, 0), new b.Quaternion(0, 0, 0, 1), 0, !1);
       a.world = Sk.ffi.functionPy(function () {
         Sk.ffi.checkFunctionArgs('world', arguments, 0, 0);
         var c = Sk.ffi.callsim(a.Scene), d = Sk.ffi.remapToJs(c), e = new b.PointLight(16777215);
@@ -33557,7 +33557,7 @@
         return Sk.ffi.isInstance(a, 'Euclidean3');
       }
       function k(b) {
-        b = new THREE.Euclidean3(new THREE.Vector3(0, 0, 0), b, 0);
+        b = new THREE.Euclidean3(!1, new THREE.Vector3(0, 0, 0), b, 0);
         return Sk.ffi.callsim(a.Euclidean3, Sk.ffi.referenceToPy(b, 'Euclidean3'));
       }
       function m(a, b, c, d, e) {
@@ -33569,7 +33569,7 @@
         Sk.ffi.remapToJs(b)[c] = Sk.ffi.remapToJs(a);
       }
       function p(b) {
-        b = new THREE.Euclidean3(b, new THREE.Quaternion(0, 0, 0, 0), 0);
+        b = new THREE.Euclidean3(!1, b, new THREE.Quaternion(0, 0, 0, 0), 0);
         return Sk.ffi.callsim(a.Euclidean3, Sk.ffi.referenceToPy(b, 'Euclidean3'));
       }
       function n(a, b) {
