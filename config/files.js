@@ -22,6 +22,8 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
     vendor: [
       "vendor/async/lib/async.js",
       "vendor/jquery/jquery.js",
+      "vendor/jquery-ui/ui/jquery-ui.js",
+      "vendor/jquery.layout/dist/jquery.layout-latest.js",
       "../davinci-dev/dist/davinci.min.js",
       "../davinci-dev/dist/davinci-stdlib.js",
       "vendor/bootstrap/js/bootstrap-carousel.js",
@@ -33,8 +35,10 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
       "vendor/angular/angular.js",
       "vendor/underscore/underscore.js",
       "vendor/jed/jed.js",
-      "vendor/js/codemirror.js",
-      "vendor/codemirror/mode/python/python.js",
+      "vendor/ace-builds/src-noconflict/ace.js",
+      "vendor/ace-builds/src-noconflict/mode-python.js",
+      "vendor/ace-builds/src-noconflict/theme-monokai.js",
+      "vendor/ace-builds/src-noconflict/theme-twilight.js",
       "vendor/d3/d3.min.js",
       "vendor/EaselJS/lib/easeljs-0.6.1.min.js",
       "vendor/TweenJS/lib/tweenjs-0.4.1.min.js",
@@ -53,7 +57,8 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
     compile: {
       options: {
         paths: [
-          "app/css/**/*.less"
+          "app/css/**/*.less",
+          "vendor/base-admin-2/*.less"
         ]
       }
     }
