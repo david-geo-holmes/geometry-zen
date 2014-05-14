@@ -46361,7 +46361,7 @@ mod[WORKBENCH_2D] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
  */
 mod[WORKBENCH_3D] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   $loc.__init__ = Sk.ffi.functionPy(function(selfPy, canvasPy, rendererPy, cameraPy) {
-    Sk.ffi.checkMethodArgs(WORKBENCH_3D, arguments, 3, 3);
+    Sk.ffi.checkMethodArgs(WORKBENCH_3D + "(canvas, renderer, camera)", arguments, 3, 3);
     Sk.ffi.checkArgType(PROP_CANVAS, "Element", Sk.ffi.isInstance(canvasPy), canvasPy);
     var canvas   = Sk.ffi.remapToJs(canvasPy);
     var renderer = Sk.ffi.remapToJs(rendererPy);

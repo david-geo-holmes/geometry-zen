@@ -57,14 +57,14 @@
   </div>
   <div class="embed-layout">
     <div class="pane ui-layout-center ui-layout-code">
+      <div id="editor"></div>
+    </div>
+    <div class="pane ui-layout-east ui-layout-printer">
       <div class="alert alert-block alert-{{message.severity}}" ng-repeat="message in messages" ng-show="messages.length &gt; 0">
         <button type="button" class="close" data-dismiss="alert">&times;</button>
         <h4>{{message.name}}</h4>
         {{message.text}}
       </div>
-      <div id="editor"></div>
-    </div>
-    <div class="pane ui-layout-east ui-layout-printer">
       <div id="printer-container">
         <printer></printer>
       </div>
