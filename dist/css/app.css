@@ -8527,6 +8527,15 @@ canvas {
   margin: 0 auto;
   width: 100%;
 }
+#embed-subnavbar {
+  margin-bottom: 0em;
+}
+.embed-layout {
+  background: transparent;
+  height: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
 .pane {
   display: none;
   /* will appear when layout inits */
@@ -8822,6 +8831,15 @@ canvas {
   margin-bottom: 0em;
 }
 .work-layout {
+  background: transparent;
+  height: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+#embed-subnavbar {
+  margin-bottom: 0em;
+}
+.embed-layout {
   background: transparent;
   height: 800px;
   margin: 0 auto;

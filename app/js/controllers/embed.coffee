@@ -9,6 +9,13 @@ angular.module("app").controller 'EmbedCtrl', ['$rootScope','$scope', '$location
     if err
       $window.alert err.message
 
+  editor = ace.edit("editor")
+  editor.setTheme("ace/theme/twilight")
+  editor.getSession().setMode("ace/mode/python")
+  editor.setShowInvisibles(true)
+  editor.setFontSize(15)
+  editor.setShowPrintMargin false
+
   GITHUB_TOKEN_COOKIE_NAME = 'github-token'
   token = cookie.getItem(GITHUB_TOKEN_COOKIE_NAME)
 
@@ -34,6 +41,11 @@ angular.module("app").controller 'EmbedCtrl', ['$rootScope','$scope', '$location
         $scope.contextItem = contextItem
         if file.encoding is "base64"
           editor.setValue base64.decode(file.content)
+          editor.focus()
+          #session = editor.getSession()
+          #count = session.getLength()
+          #editor.gotoLine(count, session.getLine(count-1).length)
+          editor.gotoLine 0, 0
         else
           alert "Unknown encoding: #{file.encoding}"
       else
@@ -44,47 +56,13 @@ angular.module("app").controller 'EmbedCtrl', ['$rootScope','$scope', '$location
         $scope.contextGist = gist
         $scope.contextItem.name = "main.py"
         editor.setValue gist.files["main.py"].content
+        editor.focus()
+        editor.gotoLine 0, 0
       else
         alert "Error retrieving the Gist."
   else
     $scope.contextItem.name = "Untitled"
     $scope.contextItem.type = undefined
-
-  winHeight = () -> $window.innerHeight || ($window.document.documentElement || $window.document.body).clientHeight
-  winWidth  = () -> $window.innerWidth  || ($window.document.documentElement || $window.document.body).clientWidth
-
-  isFullScreen = (cm) -> return /\bCodeMirror-fullscreen\b/.test(cm.getWrapperElement().className)
-
-  setFullScreen = (cm, full) ->
-    wrapperElement = cm.getWrapperElement()
-    if (full)
-      wrapperElement.className += " CodeMirror-fullscreen"
-      wrapperElement.style.height = winHeight() + "px"
-      document.documentElement.style.overflow = "hidden"
-    else
-      wrapperElement.className = wrapperElement.className.replace(" CodeMirror-fullscreen", "")
-      wrapperElement.style.height = "600px"
-      document.documentElement.style.overflow = ""
-    cm.refresh()
-
-  code = document.getElementById("code")
-  if code
-    editor = CodeMirror.fromTextArea(code,
-      "autofocus": false,
-      "indentUnit": 4, # Python guys like to use 4 spaces
-      "lineNumbers": true,
-      "lineWrapping": true,
-      "autoMatchParens": true,
-      "parserConfig": {"pythonVersion": 2, "strictErrors": true},
-      "theme": "twilight",
-      "extraKeys":
-        "Tab": (cm) ->
-          spaces = Array(cm.getOption("indentUnit") + 1).join(" ")
-          cm.replaceSelection(spaces, "end", "+input")
-        "Ctrl-Enter": (cm) -> $scope.run()
-    )
-  else
-    alert "The code element could not be found"
 
   $scope.run = () ->
 
@@ -96,7 +74,7 @@ angular.module("app").controller 'EmbedCtrl', ['$rootScope','$scope', '$location
     prog = editor.getValue()
     Sk.canvas = "canvas"
 
-    Sk.python3 = true
+    Sk.python3 = false
     Sk.configure
       "output": (text) ->
         $rootScope.$broadcast('print', text)
@@ -110,6 +88,9 @@ angular.module("app").controller 'EmbedCtrl', ['$rootScope','$scope', '$location
 
     if prog.trim().length > 0
       try
+        # I think this first parameter is a convention. It could be anything?
+        # As a file, the DaVinci library uses it as <stdin>.py
+        # debugger
         eval(Sk.importMainWithBody("<stdin>", false, prog.trim()))
       catch e
         # Unfortunately, we have to parse the string representation of the message.
@@ -147,7 +128,7 @@ angular.module("app").controller 'EmbedCtrl', ['$rootScope','$scope', '$location
       else
         files = {"main.py":{content:editor.getValue()}}
         data = {}
-        data.description = "GeometryZen Gist"
+        data.description = "Geometric Physics Gist"
         data.public = true
         data.files = files
         github.postGist token, data, (err, response, status, headers, config) ->
@@ -183,9 +164,6 @@ angular.module("app").controller 'EmbedCtrl', ['$rootScope','$scope', '$location
   $scope.runEnabled = () ->
     return $scope.workEnabled()
 
-  $rootScope.headerEnabled = () ->
-    return false
-
   # convert from the GitHub content.type ("file" or "dir") to the locale-independent icon.
   # i18n will then take care of localization.
   # TODO: DRY This is the same as in tree.coffee
@@ -197,16 +175,6 @@ angular.module("app").controller 'EmbedCtrl', ['$rootScope','$scope', '$location
         return "icon-dir"
       else
         return "icon-question"
-
-  if editor
-    setFullScreen(editor, false)
-
-  CodeMirror.on $window, "resize", () ->
-    showing = $window.document.body.getElementsByClassName("CodeMirror-fullscreen")[0]
-    if (showing)
-      showing.CodeMirror.getWrapperElement().style.height = winHeight() + "px"
-    else
-      # We seem to end up down here.
 
   return
 ]

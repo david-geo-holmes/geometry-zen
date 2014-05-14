@@ -1,5 +1,5 @@
 <div id="embed-view">
-  <div class="subnavbar">
+  <div class="subnavbar" id="embed-subnavbar">
     <div class="subnavbar-inner">
       <div class="container">
         <a class="btn-subnavbar collapsed" data-toggle="collapse" data-target=".subnav-collapse">
@@ -55,31 +55,24 @@
       </div>
     </div>
   </div>
-  
-  <div id="embed-layout" class="container-fluid">
-
-    <div class="row-fluid">
-      <div class="span7">
-        <div class="alert alert-block alert-{{message.severity}}" ng-repeat="message in messages"  ng-show="messages.length &gt; 0">
-          <button type="button" class="close" data-dismiss="alert">&times;</button>
-          <h4>{{message.name}}</h4>
-          {{message.text}}
-        </div>
-        <div id="textarea-container">
-          <textarea id="code"></textarea>
-        </div>
+  <div class="embed-layout">
+    <div class="pane ui-layout-center ui-layout-code">
+      <div class="alert alert-block alert-{{message.severity}}" ng-repeat="message in messages" ng-show="messages.length &gt; 0">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <h4>{{message.name}}</h4>
+        {{message.text}}
       </div>
-      <div class="span5">
-        <div id="printer-container">
-          <printer></printer>
-        </div>
-        <div id="graph-container">
-          <div id="box" class="jxgbox" style="width:600px; height:600px;"></div>
-        </div>
-        <div id="canvas-container">
-        </div>
+      <div id="editor"></div>
+    </div>
+    <div class="pane ui-layout-east ui-layout-printer">
+      <div id="printer-container">
+        <printer></printer>
+      </div>
+      <div id="graph-container">
+        <div id="box" class="jxgbox" style="width:600px; height:600px;"></div>
+      </div>
+      <div id="canvas-container">
       </div>
     </div>
-
   </div>
 </div>
