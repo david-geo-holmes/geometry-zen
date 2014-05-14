@@ -161,8 +161,9 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
       # We will be able to save the code as a GitHub Gist
       return true
 
-  $scope.runEnabled = () ->
-    return $scope.workEnabled()
+  $scope.runEnabled = -> $scope.workEnabled()
+
+  $rootScope.headerEnabled = -> true
 
   # convert from the GitHub content.type ("file" or "dir") to the locale-independent icon.
   # i18n will then take care of localization.

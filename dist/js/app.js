@@ -104540,6 +104540,9 @@ var Stats = function () {
       $scope.runEnabled = function () {
         return $scope.workEnabled();
       };
+      $rootScope.headerEnabled = function () {
+        return false;
+      };
       $scope.iconFromItem = function (item) {
         switch (item.type) {
         case 'file':
@@ -105235,6 +105238,9 @@ var Stats = function () {
       };
       $scope.runEnabled = function () {
         return $scope.workEnabled();
+      };
+      $rootScope.headerEnabled = function () {
+        return true;
       };
       $scope.iconFromItem = function (item) {
         switch (item.type) {
