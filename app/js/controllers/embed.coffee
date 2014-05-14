@@ -49,7 +49,8 @@ angular.module("app").controller 'EmbedCtrl', ['$rootScope','$scope', '$location
         else
           alert "Unknown encoding: #{file.encoding}"
       else
-        alert("Error retrieving the page")
+        console.log err
+        return
   else if ($routeParams.gistId)
     github.getGist token, $routeParams.gistId, (err, gist) ->
       if not err
@@ -59,7 +60,8 @@ angular.module("app").controller 'EmbedCtrl', ['$rootScope','$scope', '$location
         editor.focus()
         editor.gotoLine 0, 0
       else
-        alert "Error retrieving the Gist."
+        console.log err
+        return
   else
     $scope.contextItem.name = "Untitled"
     $scope.contextItem.type = undefined

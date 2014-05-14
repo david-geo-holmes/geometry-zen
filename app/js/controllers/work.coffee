@@ -42,14 +42,12 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
         if file.encoding is "base64"
           editor.setValue base64.decode(file.content)
           editor.focus()
-          #session = editor.getSession()
-          #count = session.getLength()
-          #editor.gotoLine(count, session.getLine(count-1).length)
           editor.gotoLine 0, 0
         else
           alert "Unknown encoding: #{file.encoding}"
       else
-        alert("Error retrieving the page")
+        console.log err
+        return
   else if ($routeParams.gistId)
     github.getGist token, $routeParams.gistId, (err, gist) ->
       if not err
@@ -58,8 +56,10 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
         editor.setValue gist.files["main.py"].content
         editor.focus()
         editor.gotoLine 0, 0
+        return
       else
-        alert "Error retrieving the Gist."
+        console.log(err)
+        return
   else
     $scope.contextItem.name = "Untitled"
     $scope.contextItem.type = undefined
