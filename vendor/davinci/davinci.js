@@ -46454,6 +46454,11 @@ var PROP_CANVAS                     = "canvas";
  * @const
  * @type {string}
  */
+var PROP_WINDOW                     = "window";
+/**
+ * @const
+ * @type {string}
+ */
 var METHOD_SET_UP                   = "setUp";
 /**
  * @const
@@ -46478,6 +46483,56 @@ function removeElementsByTagName(tagName) {
     e.parentNode.removeChild(e);
   }
 }
+
+/**
+ * @param {*} arg
+ * @return {boolean}
+ */
+var isWindow = (function () {
+    "use strict";
+    var wStr;
+    wStr = Object.prototype.toString.call(window);
+    return function(arg) {
+        var e,
+            str,
+            self,
+            hasSelf;
+        //Safari returns DOMWindow
+        //Chrome returns global
+        //Firefox, Opera & IE9 return Window
+        str = Object.prototype.toString.call(arg);
+        switch (wStr) {
+        case '[object DOMWindow]':
+        case '[object Window]':
+        case '[object global]':
+            return str === wStr;
+        }
+        ///window objects always have a `self` property;
+        ///however, `arg.self == arg` could be fooled by:
+        ///var o = {};
+        ///o.self = o;
+        if ('self' in arg) {
+            //`'self' in arg` is true if
+            //the property exists on the object _or_ the prototype
+            //`arg.hasOwnProperty('self')` is true only if
+            //the property exists on the object
+            hasSelf = arg.hasOwnProperty('self');
+            try {
+                if (hasSelf) {
+                    self = arg.self;
+                }
+                delete arg.self;
+                if (hasSelf) {
+                    arg.self = self;
+                }
+            } catch (e) {
+                //IE 7&8 throw an error when window.self is deleted
+                return true;
+            }
+        }
+        return false;
+    };
+}());
 /**
  * Workbench2D
  */
@@ -46519,31 +46574,47 @@ mod[WORKBENCH_2D] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
  */
 mod[WORKBENCH_3D] = Sk.ffi.buildClass(mod, function($gbl, $loc)
 {
-  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, canvasPy, rendererPy, cameraPy)
+  var windowFromPy = function(windowPy)
   {
-    Sk.ffi.checkMethodArgs(WORKBENCH_3D + "(canvas, renderer, camera)", arguments, 3, 3);
+    if (typeof windowPy !== 'undefined' && !Sk.ffi.isNone(windowPy))
+    {
+      var windowJs = Sk.ffi.remapToJs(windowPy);
+      Sk.ffi.checkArgType(PROP_WINDOW, "Window", isWindow(windowJs), windowPy);
+      return windowJs;
+    }
+    else
+    {
+      return window;
+    }
+  };
+  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, canvasPy, rendererPy, cameraPy, windowPy)
+  {
+    Sk.ffi.checkMethodArgs(WORKBENCH_3D + "(canvas, renderer, camera[, window])", arguments, 3, 4);
     var canvas   = Sk.ffi.remapToJs(canvasPy);
     var renderer = Sk.ffi.remapToJs(rendererPy);
     var camera   = Sk.ffi.remapToJs(cameraPy);
+    var windowJs = windowFromPy(windowPy);
     function onWindowResize(event)
     {
-      var width  = window.innerWidth;
-      var height = window.innerHeight;
+      var width  = windowJs.innerWidth;
+      var height = windowJs.innerHeight;
       renderer.setSize(width, height);
       camera.aspect = width / height;
       camera[METHOD_UPDATE_PROJECTION_MATRIX]();
     }
-    Sk.ffi.referenceToPy({"canvas": canvas, "renderer": renderer, "camera": camera, "onWindowResize": onWindowResize}, WORKBENCH_3D, undefined, selfPy);
+    Sk.ffi.referenceToPy({"canvas": canvas, "renderer": renderer, "camera": camera, "window": windowJs, "onWindowResize": onWindowResize}, WORKBENCH_3D, undefined, selfPy);
   });
   $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name)
   {
     var workbench = Sk.ffi.remapToJs(selfPy);
+    var windowJs = workbench.window;
+    var documentJs = windowJs.document;
     switch(name) {
       case METHOD_SET_UP: {
         return Sk.ffi.callableToPy(mod, METHOD_SET_UP, function(methodPy)
         {
-          document.body.insertBefore(workbench.canvas, document.body.firstChild);
-          window.addEventListener('resize', workbench.onWindowResize, false);
+          documentJs.body.insertBefore(workbench.canvas, documentJs.body.firstChild);
+          windowJs.addEventListener('resize', workbench.onWindowResize, false);
           workbench.onWindowResize(null);
         });
       }
@@ -46551,7 +46622,7 @@ mod[WORKBENCH_3D] = Sk.ffi.buildClass(mod, function($gbl, $loc)
       {
         return Sk.ffi.callableToPy(mod, METHOD_TEAR_DOWN, function(methodPy)
         {
-          window.removeEventListener('resize', workbench.onWindowResize, false);
+          windowJs.removeEventListener('resize', workbench.onWindowResize, false);
           removeElementsByTagName(TAG_NAME_CANVAS);
         });
       }

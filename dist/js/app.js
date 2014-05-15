@@ -45561,11 +45561,11 @@
         n.__repr__ = Sk.ffi.functionPy(function (a) {
           var b = Sk.ffi.remapToJs(a), c = b.vector, d = b.quaternion;
           a = d.w;
-          var e = c.x, f = c.y, c = c.z, g = -d.z, h = -d.x, d = -d.y, b = b.xyz, k = 0 !== a, l = 0 !== e || 0 != f || 0 !== c, m = 0 !== g || 0 !== h || 0 !== d, n = 0 !== b;
-          if (!k || l || m || n) {
-            if (k || !l || m || n) {
-              if (k || l || !m || n) {
-                if (k || l || m || !n)
+          var e = c.x, f = c.y, c = c.z, g = -d.z, h = -d.x, d = -d.y, b = b.xyz, k = 0 !== a, l = 0 !== e || 0 != f || 0 !== c, m = 0 !== g || 0 !== h || 0 !== d, p = 0 !== b;
+          if (!k || l || m || p) {
+            if (k || !l || m || p) {
+              if (k || l || !m || p) {
+                if (k || l || m || !p)
                   return a = [
                     a,
                     e,
@@ -45737,7 +45737,7 @@
           var d = Sk.ffi.remapToJs(c), e = Sk.ffi.remapToJs(b), f = Sk.ffi.numberToFloatPy(0), g;
           try {
             g = Sk.ffh.add(d, e[0]);
-          } catch (k) {
+          } catch (l) {
             g = Sk.ffh.add(e[0], d);
           }
           return Sk.ffi.callsim(a.Lorentzian, g, e[1], e[2], f, e[4], f, f, f, e[8], f, f, f, f, f, f, f);
@@ -46143,8 +46143,8 @@
           b = Sk.ffi.remapToJs(b);
           if (c(b))
             return d(a.w * b, 0, 0, 0);
-          var e = a.w, f = a.x, g = a.y, h = b.x, k = b.y, l = b.xy;
-          return d(e * b.w + f * h + g * k - a.xy * l, e * h - g * l, e * k + f * l, e * l);
+          var e = a.w, f = a.x, g = a.y, h = b.x, l = b.y, k = b.xy;
+          return d(e * b.w + f * h + g * l - a.xy * k, e * h - g * k, e * l + f * k, e * k);
         });
         g.__rlshift__ = Sk.ffi.functionPy(function (a, b) {
           b = Sk.ffi.remapToJs(b);
@@ -51839,13 +51839,36 @@
       function b(a) {
         a = document.getElementsByTagName(a);
         for (var b = a.length - 1; 0 <= b; b--) {
-          var e = a[b];
-          e.parentNode.removeChild(e);
+          var c = a[b];
+          c.parentNode.removeChild(c);
         }
       }
       Sk.ffi.checkFunctionArgs('defineWorkbench', arguments, 1, 1);
-      a.Workbench2D = Sk.ffi.buildClass(a, function (c, d) {
-        d.__init__ = Sk.ffi.functionPy(function (a, b) {
+      var c = function () {
+          var a;
+          a = Object.prototype.toString.call(window);
+          return function (b) {
+            var c, g;
+            c = Object.prototype.toString.call(b);
+            switch (a) {
+            case '[object DOMWindow]':
+            case '[object Window]':
+            case '[object global]':
+              return c === a;
+            }
+            if ('self' in b) {
+              c = b.hasOwnProperty('self');
+              try {
+                c && (g = b.self), delete b.self, c && (b.self = g);
+              } catch (h) {
+                return !0;
+              }
+            }
+            return !1;
+          };
+        }();
+      a.Workbench2D = Sk.ffi.buildClass(a, function (c, e) {
+        e.__init__ = Sk.ffi.functionPy(function (a, b) {
           Sk.ffi.checkMethodArgs('Workbench2D', arguments, 1, 1);
           Sk.ffi.checkArgType('canvas', [Sk.ffi.PyType.OBJECT], Sk.ffi.isObject(b) || Sk.ffi.isInstance(b), b);
           var c = Sk.ffi.remapToJs(b);
@@ -51858,86 +51881,94 @@
             }
           }, 'Workbench2D', void 0, a);
         });
-        d.__getattr__ = Sk.ffi.functionPy(function (c, d) {
-          var g = Sk.ffi.remapToJs(c);
+        e.__getattr__ = Sk.ffi.functionPy(function (c, d) {
+          var e = Sk.ffi.remapToJs(c);
           switch (d) {
           case 'setUp':
             return Sk.ffi.callableToPy(a, 'setUp', function (a) {
               Sk.ffi.checkMethodArgs('setUp', arguments, 0, 0);
-              document.body.insertBefore(g.canvas, document.body.firstChild);
-              window.addEventListener('resize', g.onWindowResize, !1);
-              g.onWindowResize(null);
+              document.body.insertBefore(e.canvas, document.body.firstChild);
+              window.addEventListener('resize', e.onWindowResize, !1);
+              e.onWindowResize(null);
             });
           case 'tearDown':
             return Sk.ffi.callableToPy(a, 'tearDown', function (a) {
-              window.removeEventListener('resize', g.onWindowResize, !1);
+              window.removeEventListener('resize', e.onWindowResize, !1);
               b('canvas');
             });
           }
         });
       }, 'Workbench2D', []);
-      a.Workbench3D = Sk.ffi.buildClass(a, function (c, d) {
-        d.__init__ = Sk.ffi.functionPy(function (a, b, c, d) {
-          Sk.ffi.checkMethodArgs('Workbench3D(canvas, renderer, camera)', arguments, 3, 3);
-          var l = Sk.ffi.remapToJs(b), k = Sk.ffi.remapToJs(c), m = Sk.ffi.remapToJs(d);
+      a.Workbench3D = Sk.ffi.buildClass(a, function (d, e) {
+        var f = function (a) {
+          if ('undefined' === typeof a || Sk.ffi.isNone(a))
+            return window;
+          var b = Sk.ffi.remapToJs(a);
+          Sk.ffi.checkArgType('window', 'Window', c(b), a);
+          return b;
+        };
+        e.__init__ = Sk.ffi.functionPy(function (a, b, c, d, e) {
+          Sk.ffi.checkMethodArgs('Workbench3D(canvas, renderer, camera[, window])', arguments, 3, 4);
+          var p = Sk.ffi.remapToJs(b), n = Sk.ffi.remapToJs(c), q = Sk.ffi.remapToJs(d), s = f(e);
           Sk.ffi.referenceToPy({
-            canvas: l,
-            renderer: k,
-            camera: m,
+            canvas: p,
+            renderer: n,
+            camera: q,
+            window: s,
             onWindowResize: function (a) {
-              a = window.innerWidth;
-              var b = window.innerHeight;
-              k.setSize(a, b);
-              m.aspect = a / b;
-              m.updateProjectionMatrix();
+              a = s.innerWidth;
+              var b = s.innerHeight;
+              n.setSize(a, b);
+              q.aspect = a / b;
+              q.updateProjectionMatrix();
             }
           }, 'Workbench3D', void 0, a);
         });
-        d.__getattr__ = Sk.ffi.functionPy(function (c, d) {
-          var g = Sk.ffi.remapToJs(c);
+        e.__getattr__ = Sk.ffi.functionPy(function (c, d) {
+          var e = Sk.ffi.remapToJs(c), f = e.window, m = f.document;
           switch (d) {
           case 'setUp':
             return Sk.ffi.callableToPy(a, 'setUp', function (a) {
-              document.body.insertBefore(g.canvas, document.body.firstChild);
-              window.addEventListener('resize', g.onWindowResize, !1);
-              g.onWindowResize(null);
+              m.body.insertBefore(e.canvas, m.body.firstChild);
+              f.addEventListener('resize', e.onWindowResize, !1);
+              e.onWindowResize(null);
             });
           case 'tearDown':
             return Sk.ffi.callableToPy(a, 'tearDown', function (a) {
-              window.removeEventListener('resize', g.onWindowResize, !1);
+              f.removeEventListener('resize', e.onWindowResize, !1);
               b('canvas');
             });
           }
         });
       }, 'Workbench3D', []);
-      a.Workbench = Sk.ffi.buildClass(a, function (c, d) {
-        d.__init__ = Sk.ffi.functionPy(function (a, b, c) {
+      a.Workbench = Sk.ffi.buildClass(a, function (c, e) {
+        e.__init__ = Sk.ffi.functionPy(function (a, b, c) {
           Sk.ffi.checkMethodArgs('Workbench', arguments, 2, 2);
-          var d = Sk.ffi.remapToJs(b), l = Sk.ffi.remapToJs(c);
+          var d = Sk.ffi.remapToJs(b), e = Sk.ffi.remapToJs(c);
           Sk.ffi.referenceToPy({
             renderer: d,
-            camera: l,
+            camera: e,
             onWindowResize: function (a) {
               a = window.innerWidth;
               var b = window.innerHeight;
               d.setSize(a, b);
-              l.aspect = a / b;
-              l.updateProjectionMatrix();
+              e.aspect = a / b;
+              e.updateProjectionMatrix();
             }
           }, 'Workbench', void 0, a);
         });
-        d.__getattr__ = Sk.ffi.functionPy(function (c, d) {
-          var g = Sk.ffi.remapToJs(c);
+        e.__getattr__ = Sk.ffi.functionPy(function (c, d) {
+          var e = Sk.ffi.remapToJs(c);
           switch (d) {
           case 'setUp':
             return Sk.ffi.callableToPy(a, 'setUp', function (a) {
-              document.body.insertBefore(g.renderer.domElement, document.body.firstChild);
-              window.addEventListener('resize', g.onWindowResize, !1);
-              g.onWindowResize(null);
+              document.body.insertBefore(e.renderer.domElement, document.body.firstChild);
+              window.addEventListener('resize', e.onWindowResize, !1);
+              e.onWindowResize(null);
             });
           case 'tearDown':
             return Sk.ffi.callableToPy(a, 'tearDown', function (a) {
-              window.removeEventListener('resize', g.onWindowResize, !1);
+              window.removeEventListener('resize', e.onWindowResize, !1);
               b('canvas');
             });
           }
