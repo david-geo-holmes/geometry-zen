@@ -42001,12 +42001,9 @@
         c.__init__ = Sk.ffi.functionPy(function (b, c, d) {
           var e, f;
           Sk.ffi.checkMethodArgs('CartesianSpace', arguments, 0, 2);
-          Sk.ffi.isDefined(c) ? Sk.ffi.checkArgType('scene', 'Scene', Sk.ffi.isInstance(c, 'Scene'), c) : c = Sk.ffi.callsim(a.world);
+          Sk.ffi.isDefined(c) || (c = Sk.ffi.callsim(a.world));
           e = Sk.ffi.remapToJs(c);
-          Sk.ffi.isDefined(d) ? Sk.ffi.checkArgType('renderer', [
-            'CanvasRenderer',
-            'WebGLRenderer'
-          ], Sk.ffi.isInstance(d, 'WebGLRenderer') || Sk.ffi.isInstance(d, 'CanvasRenderer'), d) : d = Sk.ffi.callsim(a.WebGLRenderer, Sk.ffi.remapToPy({ antialias: !0 }));
+          Sk.ffi.isDefined(d) || (d = Sk.ffi.callsim(a.WebGLRenderer, Sk.ffi.remapToPy({ antialias: !0 })));
           f = Sk.ffi.remapToJs(d);
           var p = Sk.ffi.callsim(a.PerspectiveCamera, Sk.ffi.numberToFloatPy(45), Sk.ffi.numberToFloatPy(1), Sk.ffi.numberToFloatPy(0.1), Sk.ffi.numberToFloatPy(10000)), m = Sk.ffi.remapToJs(p);
           m.up.set(0, 0, 1);
@@ -42310,7 +42307,7 @@
               g = Sk.ffi.numberToFloatPy(c.height);
               c = Sk.ffi.numberToFloatPy(c.depth);
               n = Sk.ffi.numberToIntPy(d.segments ? d.segments : 1);
-              e = Sk.ffi.callsim(a.CubeGeometry, e, g, c, n, n, n);
+              e = Sk.ffi.callsim(a.BoxGeometry, e, g, c, n, n, n);
               return f(e, d);
             });
           case 'normalize':
@@ -48406,7 +48403,7 @@
         for (l = 0; l <= e; l++) {
           var p = [], q = [], r = l / e, s = -r * c + h, t = r * (b - a) + a;
           for (g = 0; g < d; g++) {
-            var u = g / d, v = 2 * u * Math.PI, v = Sk.three.vector3Cycle(s, t * Sk.math.cos(v), t * Sk.math.sin(v), k);
+            var u = g / d, v = 2 * u * Math.PI, v = Sk.three.vector3Cycle(s, t * Math.cos(v), t * Math.sin(v), k);
             this.vertices.push(v);
             p.push(this.vertices.length - 1);
             q.push(new THREE.Vector2(u, 1 - r));
@@ -48502,7 +48499,7 @@
         this.computeCentroids();
       };
       Sk.stdlib.PlaneGeometry.prototype = Object.create(THREE.Geometry.prototype);
-      Sk.stdlib.RevolutionGeometry = function (a, b, c, d, e, f) {
+      THREE.RevolutionGeometry = function (a, b, c, d, e, f) {
         THREE.Geometry.call(this);
         c = c || 12;
         d = d || 0;
@@ -48510,7 +48507,7 @@
         var g = 0.0001 > Math.abs(2 * Math.PI - Math.abs(e - d)) ? c : c + 1, h = 1 / c, k = (e - d) * h;
         e = 0;
         for (var l = g; e < l; e++)
-          for (var m = (d + e * k) / 2, n = Sk.math.cos(m), m = Sk.math.sin(m), p = new THREE.Quaternion(b.x * m, b.y * m, b.z * m, n), n = 0, m = a.length; n < m; n++) {
+          for (var m = (d + e * k) / 2, n = Math.cos(m), m = Math.sin(m), p = new THREE.Quaternion(b.x * m, b.y * m, b.z * m, n), n = 0, m = a.length; n < m; n++) {
             var q = a[n], q = new THREE.Vector3(q.x, q.y, q.z);
             q.applyQuaternion(p);
             f && q.applyQuaternion(f);
@@ -48542,7 +48539,59 @@
         this.computeFaceNormals();
         this.computeVertexNormals();
       };
-      Sk.stdlib.RevolutionGeometry.prototype = Object.create(THREE.Geometry.prototype);
+      THREE.RevolutionGeometry.prototype = Object.create(THREE.Geometry.prototype);
+      THREE.ArrowGeometry = function (a, b, c, d, e, f, g, h) {
+        debugger;
+        a = a || 1;
+        b = b || new THREE.Quaternion(0, 0, 0, 1);
+        d = (d || 1) * a;
+        e = (e || 0.01) * a;
+        f = (f || 0.08) * a;
+        g = (g || 0.2) * a;
+        h = h || new THREE.Vector3(0, 0, 1);
+        var k = d - g, l = d / 2;
+        a = function (a) {
+          var b;
+          b = a.x ? 2 : a.y ? 1 : 0;
+          var c = 0 < a.x ? 1 : 0 > a.x ? -1 : 0 < a.y ? 1 : 0 > a.y ? -1 : 0 < a.z ? 1 : 0 > a.z ? -1 : 0, d = (b + 0) % 3, g = (b + 1) % 3, h = (b + 2) % 3;
+          b = [
+            [
+              0,
+              0,
+              l * c
+            ],
+            [
+              f,
+              0,
+              (k - l) * c
+            ],
+            [
+              e,
+              0,
+              (k - l) * c
+            ],
+            [
+              e,
+              0,
+              -l * c
+            ],
+            [
+              0,
+              0,
+              -l * c
+            ]
+          ].map(function (a) {
+            return new THREE.Vector3(a[d], a[g], a[h]);
+          });
+          a = new THREE.Quaternion(a.x, a.y, a.z, 0);
+          return {
+            points: b,
+            generator: a
+          };
+        }(h);
+        THREE.RevolutionGeometry.call(this, a.points, a.generator, c, 0, 2 * Math.PI, b);
+      };
+      THREE.ArrowGeometry.prototype = Object.create(THREE.RevolutionGeometry.prototype);
       Sk.stdlib.TorusGeometry = function (a, b, c, d, e) {
         THREE.Geometry.call(this);
         this.radius = a || 100;
@@ -48556,12 +48605,12 @@
         for (c = 0; c <= this.radialSegments; c++)
           for (d = 0; d <= this.tubularSegments; d++) {
             var f = d / this.tubularSegments * this.arc, g = 2 * c / this.radialSegments * Math.PI;
-            e.x = this.radius * Sk.math.cos(f);
-            e.y = this.radius * Sk.math.sin(f);
+            e.x = this.radius * Math.cos(f);
+            e.y = this.radius * Math.sin(f);
             var h = new THREE.Vector3();
-            h.x = (this.radius + this.tube * Sk.math.cos(g)) * Sk.math.cos(f);
-            h.y = (this.radius + this.tube * Sk.math.cos(g)) * Sk.math.sin(f);
-            h.z = this.tube * Sk.math.sin(g);
+            h.x = (this.radius + this.tube * Math.cos(g)) * Math.cos(f);
+            h.y = (this.radius + this.tube * Math.cos(g)) * Math.sin(f);
+            h.z = this.tube * Math.sin(g);
             this.vertices.push(h);
             a.push(new THREE.Vector2(d / this.tubularSegments, c / this.radialSegments));
             b.push(h.clone().sub(e).normalize());
@@ -48603,7 +48652,7 @@
         this.computeCentroids();
       };
       Sk.stdlib.TorusGeometry.prototype = Object.create(THREE.Geometry.prototype);
-      Sk.stdlib.VortexGeometry = function (a, b, c, d, e, f, g) {
+      THREE.VortexGeometry = function (a, b, c, d, e, f, g) {
         function h(a, b) {
           var c = b % k;
           return c === k - 1 ? h(a, b - 1) : n * ((b - c) / k + c * p);
@@ -48625,9 +48674,9 @@
         var n = g / f, p = this.lengthShaft / (this.lengthCone + this.lengthShaft) / (k - 2);
         for (f = 0; f <= this.radialSegments; f++) {
           e = g * f / this.radialSegments;
-          var q = Sk.math.cos(e), r = Sk.math.sin(e);
+          var q = Math.cos(e), r = Math.sin(e);
           for (e = 0; e <= this.circleSegments; e++) {
-            var s = h(this.circleSegments, e), t = Sk.math.cos(s), s = Sk.math.sin(s);
+            var s = h(this.circleSegments, e), t = Math.cos(s), s = Math.sin(s);
             m.x = l * t;
             m.y = l * s;
             var u = new THREE.Vector3(), v = e % k === k - 1 ? b : c;
@@ -48660,7 +48709,7 @@
             ]);
         this.computeCentroids();
       };
-      Sk.stdlib.VortexGeometry.prototype = Object.create(THREE.Geometry.prototype);
+      THREE.VortexGeometry.prototype = Object.create(THREE.Geometry.prototype);
       Sk.builtin.defineEuclidean3(a, THREE, b);
       a.Scene = Sk.ffi.buildClass(a, function (b, c) {
         c.__init__ = Sk.ffi.functionPy(function (a, b) {
@@ -49354,7 +49403,7 @@
               generator: a
             };
           }(p);
-          Sk.ffi.referenceToPy(new Sk.stdlib.RevolutionGeometry(l.points, l.generator, q, 0, 2 * Math.PI, m), Sk.three.ARROW_GEOMETRY, void 0, a);
+          Sk.ffi.referenceToPy(new THREE.RevolutionGeometry(l.points, l.generator, q, 0, 2 * Math.PI, m), Sk.three.ARROW_GEOMETRY, void 0, a);
         });
         b.__getattr__ = Sk.ffi.functionPy(function (a, b) {
           return x(Sk.three.ARROW_GEOMETRY, a, b);
@@ -49402,9 +49451,9 @@
           }).join(', ') + ')');
         });
       }, 'CircleGeometry', []);
-      a.CubeGeometry = Sk.ffi.buildClass(a, function (a, b) {
+      a.BoxGeometry = Sk.ffi.buildClass(a, function (a, b) {
         b.__init__ = Sk.ffi.functionPy(function (a, b, c, d, e, f, g) {
-          Sk.ffi.checkMethodArgs('CubeGeometry(width, height, depth, widthSegments, heightSegments, depthSegments)', arguments, 3, 6);
+          Sk.ffi.checkMethodArgs('BoxGeometry(width, height, depth, widthSegments, heightSegments, depthSegments)', arguments, 3, 6);
           Sk.ffi.checkArgType('width', Sk.ffi.PyType.FLOAT, Sk.ffi.isNum(b), b);
           Sk.ffi.checkArgType('height', Sk.ffi.PyType.FLOAT, Sk.ffi.isNum(c), c);
           Sk.ffi.checkArgType('depth', Sk.ffi.PyType.FLOAT, Sk.ffi.isNum(d), d);
@@ -49412,7 +49461,7 @@
           Sk.ffi.isDefined(f) && Sk.ffi.checkArgType('heightSegments', A, Sk.ffi.isInt(f), f);
           Sk.ffi.isDefined(g) && Sk.ffi.checkArgType('depthSegments', A, Sk.ffi.isInt(g), g);
           var h = Sk.ffi.remapToJs(b), k = Sk.ffi.remapToJs(c), l = Sk.ffi.remapToJs(d), m = Sk.ffi.remapToJs(e), n = Sk.ffi.remapToJs(f), p = Sk.ffi.remapToJs(g);
-          Sk.ffi.referenceToPy(new THREE.CubeGeometry(h, k, l, m, n, p), 'CubeGeometry', void 0, a);
+          Sk.ffi.referenceToPy(new THREE.BoxGeometry(h, k, l, m, n, p), 'BoxGeometry', void 0, a);
         });
         b.__getattr__ = Sk.ffi.functionPy(function (a, b) {
           var c = Sk.ffi.remapToJs(a);
@@ -49426,11 +49475,11 @@
           case 'depthSegments':
             return Sk.ffi.numberToIntPy(c[b]);
           default:
-            return x('CubeGeometry', a, b);
+            return x('BoxGeometry', a, b);
           }
         });
         b.__setattr__ = Sk.ffi.functionPy(function (a, b, c) {
-          return C('CubeGeometry', a, b, c);
+          return C('BoxGeometry', a, b, c);
         });
         b.__str__ = Sk.ffi.functionPy(function (a) {
           a = Sk.ffi.remapToJs(a);
@@ -49438,11 +49487,11 @@
           b.width = a.width;
           b.height = a.height;
           b.depth = a.depth;
-          return Sk.builtin.stringToPy('CubeGeometry(' + JSON.stringify(b) + ')');
+          return Sk.builtin.stringToPy('BoxGeometry(' + JSON.stringify(b) + ')');
         });
         b.__repr__ = Sk.ffi.functionPy(function (a) {
           a = Sk.ffi.remapToJs(a);
-          return Sk.builtin.stringToPy('CubeGeometry(' + [
+          return Sk.builtin.stringToPy('BoxGeometry(' + [
             a.width,
             a.height,
             a.depth,
@@ -49453,7 +49502,8 @@
             return JSON.stringify(a);
           }).join(', ') + ')');
         });
-      }, 'CubeGeometry', []);
+      }, 'BoxGeometry', []);
+      a.CubeGeometry = a.BoxGeometry;
       a.CylinderGeometry = Sk.ffi.buildClass(a, function (a, b) {
         b.__init__ = Sk.ffi.functionPy(function (a, b, c, d, e, f, g, h) {
           if (Sk.ffi.isInstance(b, 'CylinderGeometry'))
@@ -49522,7 +49572,7 @@
           var f = Sk.ffi.remapToJs(b).map(function (a) {
               return new THREE.Vector3(a.x, a.y, a.z);
             }), g = new THREE.Quaternion(0, 0, 1, 0);
-          Sk.ffi.referenceToPy(new Sk.stdlib.RevolutionGeometry(f, g, Sk.ffi.remapToJs(c), Sk.ffi.remapToJs(d), Sk.ffi.remapToJs(e)), 'LatheGeometry', void 0, a);
+          Sk.ffi.referenceToPy(new THREE.RevolutionGeometry(f, g, Sk.ffi.remapToJs(c), Sk.ffi.remapToJs(d), Sk.ffi.remapToJs(e)), 'LatheGeometry', void 0, a);
         });
         b.__getattr__ = Sk.ffi.functionPy(function (a, b) {
           return x('LatheGeometry', a, b);
@@ -49679,7 +49729,7 @@
           var h = Sk.ffi.remapToJs(b).map(function (a) {
               return new THREE.Vector3(a.x, a.y, a.z);
             }), k = Sk.ffi.remapToJs(g), k = Sk.ffi.remapToJs(g) ? Sk.ffi.remapToJs(g).quaternion : void 0;
-          Sk.ffi.referenceToPy(new Sk.stdlib.RevolutionGeometry(h, Sk.ffi.remapToJs(c).quaternion, Sk.ffi.remapToJs(d), Sk.ffi.remapToJs(e), Sk.ffi.remapToJs(f), k), 'RevolutionGeometry', void 0, a);
+          Sk.ffi.referenceToPy(new THREE.RevolutionGeometry(h, Sk.ffi.remapToJs(c).quaternion, Sk.ffi.remapToJs(d), Sk.ffi.remapToJs(e), Sk.ffi.remapToJs(f), k), 'RevolutionGeometry', void 0, a);
         });
         b.__getattr__ = Sk.ffi.functionPy(function (a, b) {
           Sk.ffi.remapToJs(a);
@@ -49912,7 +49962,7 @@
           var l = Sk.ffi.remapToJs(b), m = Sk.ffi.remapToJs(c), n = Sk.ffi.remapToJs(d), p = Sk.ffi.remapToJs(e), q = Sk.ffi.remapToJs(f);
           g(h) && Sk.ffi.checkArgType('widthSegments', Sk.ffi.PyType.INT, Sk.ffi.isInt(h), h);
           g(k) && Sk.ffi.checkArgType('heightSegments', Sk.ffi.PyType.INT, Sk.ffi.isInt(k), k);
-          var K = Sk.ffi.remapToJs(h), r = Sk.ffi.remapToJs(k), l = new Sk.stdlib.VortexGeometry(l, m, n, p, q, K, r);
+          var K = Sk.ffi.remapToJs(h), r = Sk.ffi.remapToJs(k), l = new THREE.VortexGeometry(l, m, n, p, q, K, r);
           Sk.ffi.referenceToPy(l, Sk.three.VORTEX_GEOMETRY, void 0, a);
         });
         b.__getattr__ = Sk.ffi.functionPy(function (a, b) {
@@ -50076,7 +50126,7 @@
       };
       a[Sk.three.OBJECT_3D] = Sk.ffi.buildClass(a, function (a, b) {
         b.__init__ = Sk.ffi.functionPy(function (a, b) {
-          var c = g(b) ? Sk.ffi.remapToJs(b) : new THREE[Sk.three.OBJECT_3D]();
+          var c = g(b) ? Sk.ffi.remapToJs(b) : new THREE.Object3D();
           Sk.ffi.referenceToPy(c, Sk.three.OBJECT_3D, void 0, a);
         });
         b.__getattr__ = Sk.ffi.functionPy(function (a, b) {
@@ -51829,7 +51879,6 @@
       a.Workbench3D = Sk.ffi.buildClass(a, function (c, d) {
         d.__init__ = Sk.ffi.functionPy(function (a, b, c, d) {
           Sk.ffi.checkMethodArgs('Workbench3D(canvas, renderer, camera)', arguments, 3, 3);
-          Sk.ffi.checkArgType('canvas', 'Element', Sk.ffi.isInstance(b), b);
           var l = Sk.ffi.remapToJs(b), k = Sk.ffi.remapToJs(c), m = Sk.ffi.remapToJs(d);
           Sk.ffi.referenceToPy({
             canvas: l,
