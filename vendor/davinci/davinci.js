@@ -41638,7 +41638,8 @@ function isNull(x)      { return typeof x === 'object' && x === null; }
 function isEuclidean3Py(valuePy) {return Sk.ffi.isInstance(valuePy, EUCLIDEAN_3);}
 function isQuaternionPy(valuePy) {return Sk.ffi.isInstance(valuePy, QUATERNION);}
 function isVector3Py(valuePy) {return Sk.ffi.isInstance(valuePy, VECTOR_3);}
-function isGeometryPy(valuePy) {
+function isGeometryPy(valuePy)
+{
   return Sk.ffi.isInstance(valuePy) && Sk.ffi.typeName(valuePy) === GEOMETRY; // TODO: GEOMETRIES
 }
 
@@ -41653,7 +41654,8 @@ function quaternionToEuclidean3Py(quaternion) {
  * @param {Object} valuePy
  * @param {string=} aliasName
  */
-function setQuaternionProperty(className, targetPy, name, valuePy, aliasName) {
+function setQuaternionProperty(className, targetPy, name, valuePy, aliasName)
+{
   Sk.ffi.checkArgType("target", className, Sk.ffi.isInstance(targetPy, className), targetPy);
   aliasName = aliasName || name;
   Sk.ffi.checkArgType(aliasName, EUCLIDEAN_3, isEuclidean3Py(valuePy), valuePy);
@@ -41664,7 +41666,8 @@ function setQuaternionProperty(className, targetPy, name, valuePy, aliasName) {
 /**
  *
  */
-function vectorToEuclidean3Py(vector) {
+function vectorToEuclidean3Py(vector)
+{
   var euclidean = new THREE[EUCLIDEAN_3](false, vector, new THREE.Quaternion(0,0,0,0), 0);
   return Sk.ffi.callsim(mod[EUCLIDEAN_3], Sk.ffi.referenceToPy(euclidean, EUCLIDEAN_3));
 }
@@ -42856,28 +42859,35 @@ mod[Sk.three.ARROW_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     else {
       scale = 1;
     }
-    if (Sk.ffi.isDefined(attitudePy)) {
+    if (Sk.ffi.isDefined(attitudePy) && !Sk.ffi.isNone(attitudePy))
+    {
       Sk.ffi.checkArgType(PROP_ATTITUDE, EUCLIDEAN_3, Sk.ffi.isInstance(attitudePy, EUCLIDEAN_3), attitudePy);
       attitude = Sk.ffi.remapToJs(attitudePy).quaternion;
     }
-    else {
+    else
+    {
       attitude = new THREE.Quaternion(0, 0, 0, 1);
     }
-    if (Sk.ffi.isDefined(segmentsPy)) {
+    if (Sk.ffi.isDefined(segmentsPy))
+    {
       Sk.ffi.checkArgType(PROP_SEGMENTS, INT, Sk.ffi.isInt(segmentsPy), segmentsPy);
     }
-    if (Sk.ffi.isDefined(lengthPy)) {
+    if (Sk.ffi.isDefined(lengthPy))
+    {
       Sk.ffi.checkArgType(ARG_LENGTH, Sk.ffi.PyType.FLOAT, Sk.ffi.isFloat(lengthPy), lengthPy);
       length = Sk.ffi.remapToJs(lengthPy) * scale;
     }
-    else {
+    else
+    {
       length = scale;
     }
-    if (Sk.ffi.isDefined(axisPy)) {
+    if (Sk.ffi.isDefined(axisPy))
+    {
       Sk.ffi.checkArgType(PROP_AXIS, EUCLIDEAN_3, Sk.ffi.isInstance(axisPy, EUCLIDEAN_3), axisPy);
       axis = Sk.ffi.remapToJs(axisPy).vector;
     }
-    else {
+    else
+    {
       axis = new THREE.Vector3(0, 0, 1);
     }
     var segments = Sk.ffi.remapToJs(segmentsPy);
@@ -42886,17 +42896,20 @@ mod[Sk.three.ARROW_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     lengthCone   = (Sk.ffi.remapToJs(lengthCone)  || 0.20) * scale;
     var lengthShaft = length - lengthCone;
     var halfLength = length / 2;
-    var permutation = function(direction) {
+    var permutation = function(direction)
+    {
       if (direction.x) {
         return 2;
       }
-      else if (direction.y) {
+      else if (direction.y)
+      {
         return 1;
       }
-      else {
+      else
+      {
         return 0;
       }
-    }
+    };
     var orientation = function(direction) {
       if (direction.x > 0) {
         return +1;
@@ -42992,19 +43005,24 @@ mod[Sk.three.ARROW_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   });
 }, CIRCLE_GEOMETRY, []);
 
- mod[CUBE_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
-  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, widthPy, heightPy, depthPy, widthSegmentsPy, heightSegmentsPy, depthSegmentsPy) {
-    Sk.ffi.checkMethodArgs(CUBE_GEOMETRY, arguments, 3, 6);
+ mod[CUBE_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc)
+ {
+  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, widthPy, heightPy, depthPy, widthSegmentsPy, heightSegmentsPy, depthSegmentsPy)
+  {
+    Sk.ffi.checkMethodArgs(CUBE_GEOMETRY + "(width, height, depth, widthSegments, heightSegments, depthSegments)", arguments, 3, 6);
     Sk.ffi.checkArgType(PROP_WIDTH,  Sk.ffi.PyType.FLOAT, Sk.ffi.isNum(widthPy),  widthPy);
     Sk.ffi.checkArgType(PROP_HEIGHT, Sk.ffi.PyType.FLOAT, Sk.ffi.isNum(heightPy), heightPy);
     Sk.ffi.checkArgType(PROP_DEPTH,  Sk.ffi.PyType.FLOAT, Sk.ffi.isNum(depthPy),  depthPy);
-    if (Sk.ffi.isDefined(widthSegmentsPy)) {
+    if (Sk.ffi.isDefined(widthSegmentsPy))
+    {
       Sk.ffi.checkArgType(PROP_WIDTH_SEGMENTS, INT, Sk.ffi.isInt(widthSegmentsPy), widthSegmentsPy);
     }
-    if (Sk.ffi.isDefined(heightSegmentsPy)) {
+    if (Sk.ffi.isDefined(heightSegmentsPy))
+    {
       Sk.ffi.checkArgType(PROP_HEIGHT_SEGMENTS, INT, Sk.ffi.isInt(heightSegmentsPy), heightSegmentsPy);
     }
-    if (Sk.ffi.isDefined(depthSegmentsPy)) {
+    if (Sk.ffi.isDefined(depthSegmentsPy))
+    {
       Sk.ffi.checkArgType(PROP_DEPTH_SEGMENTS, INT, Sk.ffi.isInt(depthSegmentsPy), depthSegmentsPy);
     }
     var width  = Sk.ffi.remapToJs(widthPy);
@@ -43015,7 +43033,8 @@ mod[Sk.three.ARROW_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var depthSegments  = Sk.ffi.remapToJs(depthSegmentsPy);
     Sk.ffi.referenceToPy(new THREE[CUBE_GEOMETRY](width, height, depth, widthSegments, heightSegments, depthSegments), CUBE_GEOMETRY, undefined, selfPy);
   });
-  $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name) {
+  $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name)
+  {
     var cube = Sk.ffi.remapToJs(selfPy);
     switch(name) {
       case PROP_WIDTH:
@@ -43025,18 +43044,22 @@ mod[Sk.three.ARROW_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       }
       case PROP_WIDTH_SEGMENTS:
       case PROP_HEIGHT_SEGMENTS:
-      case PROP_DEPTH_SEGMENTS: {
+      case PROP_DEPTH_SEGMENTS:
+      {
         return Sk.ffi.numberToIntPy(cube[name]);
       }
-      default: {
+      default:
+      {
         return geometryGetAttr(CUBE_GEOMETRY, selfPy, name);
       }
     }
   });
-  $loc.__setattr__ = Sk.ffi.functionPy(function(selfPy, name, valuePy) {
+  $loc.__setattr__ = Sk.ffi.functionPy(function(selfPy, name, valuePy)
+  {
     return geometrySetAttr(CUBE_GEOMETRY, selfPy, name, valuePy);
   });
-  $loc.__str__ = Sk.ffi.functionPy(function(selfPy) {
+  $loc.__str__ = Sk.ffi.functionPy(function(selfPy)
+  {
     var cube = Sk.ffi.remapToJs(selfPy);
     var args = {};
     args[PROP_WIDTH]  = cube[PROP_WIDTH];
@@ -43044,7 +43067,8 @@ mod[Sk.three.ARROW_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     args[PROP_DEPTH]  = cube[PROP_DEPTH];
     return Sk.builtin.stringToPy(CUBE_GEOMETRY + "(" + JSON.stringify(args) + ")");
   });
-  $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
+  $loc.__repr__ = Sk.ffi.functionPy(function(selfPy)
+  {
     var cube = Sk.ffi.remapToJs(selfPy);
     var width          = cube[PROP_WIDTH];
     var height         = cube[PROP_HEIGHT];
@@ -43268,7 +43292,8 @@ mod[OCTAHEDRON_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   });
 }, OCTAHEDRON_GEOMETRY, []);
 
-mod[PLANE_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
+mod[PLANE_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc)
+{
   $loc.__init__ = Sk.ffi.functionPy(function(selfPy, widthPy, depthPy, widthSegmentsPy, heightSegmentsPy) {
     Sk.ffi.checkMethodArgs(PLANE_GEOMETRY, arguments, 2, 4);
     Sk.ffi.checkArgType(ARG_WIDTH, Sk.ffi.PyType.FLOAT, Sk.ffi.isFloat(widthPy), widthPy);
@@ -43363,24 +43388,30 @@ mod[REVOLUTION_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   });
 }, REVOLUTION_GEOMETRY, []);
 
- mod[SPHERE_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
+ mod[SPHERE_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc)
+ {
   var PROP_PHI_START       = "phiStart";
   var PROP_PHI_LENGTH      = "phiLength";
   $loc.__init__ = Sk.ffi.functionPy(function(selfPy, radiusPy, widthSegmentsPy, heightSegmentsPy, phiStart, phiLength, thetaStart, thetaLength) {
-    if (Sk.ffi.isDefined(radiusPy)) {
-      if (Sk.ffi.isInstance(radiusPy, SPHERE_GEOMETRY)) {
+    if (Sk.ffi.isDefined(radiusPy))
+    {
+      if (Sk.ffi.isInstance(radiusPy, SPHERE_GEOMETRY))
+      {
         Sk.ffi.checkMethodArgs(SPHERE_GEOMETRY, arguments, 1, 1);
         Sk.ffi.referenceToPy(Sk.ffi.remapToJs(radiusPy), SPHERE_GEOMETRY, undefined, selfPy);
         return;
       }
-      else {
+      else
+      {
         Sk.ffi.checkArgType(PROP_RADIUS, Sk.ffi.PyType.FLOAT, Sk.ffi.isFloat(radiusPy), radiusPy);
       }
     }
-    if (isDefined(widthSegmentsPy)) {
+    if (isDefined(widthSegmentsPy))
+    {
       Sk.ffi.checkArgType(PROP_WIDTH_SEGMENTS, Sk.ffi.PyType.INT, Sk.ffi.isInt(widthSegmentsPy), widthSegmentsPy);
     }
-    if (isDefined(heightSegmentsPy)) {
+    if (isDefined(heightSegmentsPy))
+    {
       Sk.ffi.checkArgType(PROP_HEIGHT_SEGMENTS, Sk.ffi.PyType.INT, Sk.ffi.isInt(heightSegmentsPy), heightSegmentsPy);
     }
     var radius = Sk.ffi.remapToJs(radiusPy);
@@ -43588,9 +43619,10 @@ mod[TETRAHEDRON_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
   });
 }, TORUS_GEOMETRY, []);
 
-mod[Sk.three.VORTEX_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
+mod[Sk.three.VORTEX_GEOMETRY] = Sk.ffi.buildClass(mod, function($gbl, $loc)
+{
   $loc.__init__ = Sk.ffi.functionPy(function(selfPy, radiusPy, radiusConePy, radiusShaftPy, lengthConePy, lengthShaftPy, arrowSegmentsPy, radialSegmentsPy) {
-    Sk.ffi.checkMethodArgs(Sk.three.VORTEX_GEOMETRY, arguments, 7, 7);
+    Sk.ffi.checkMethodArgs(Sk.three.VORTEX_GEOMETRY + "(radius, radiusCone, radiusShaft, lengthCone, lengthShaft, arrowSegments, radialSegments)", arguments, 7, 7);
     Sk.ffi.checkArgType(ARG_RADIUS, Sk.ffi.PyType.FLOAT, Sk.ffi.isFloat(radiusPy), radiusPy);
     Sk.ffi.checkArgType(ARG_RADIUS_CONE, NUM, Sk.ffi.isNum(radiusConePy), radiusConePy);
     Sk.ffi.checkArgType(ARG_RADIUS_SHAFT, NUM, Sk.ffi.isNum(radiusShaftPy), radiusShaftPy);
@@ -43853,18 +43885,21 @@ Sk.three.object3DGetAttr = function(className, selfPy, name) {
 Sk.three.object3DSetAttr = function(className, selfPy, name, valuePy) {
   var self = Sk.ffi.remapToJs(selfPy);
   switch(name) {
-    case PROP_ATTITUDE: {
+    case PROP_ATTITUDE:
+    {
       setQuaternionProperty(className, selfPy, PROP_QUATERNION, valuePy, name);
     }
     break;
     case PROP_POSITION:
     case PROP_ROTATION:
     case PROP_SCALE:
-    case PROP_UP: {
+    case PROP_UP:
+    {
       setVectorProperty(self, name, valuePy);
     }
     break;
-    case PROP_QUATERNION: {
+    case PROP_QUATERNION:
+    {
       Sk.ffi.checkArgType(name, QUATERNION, Sk.ffi.isInstance(valuePy, QUATERNION), valuePy);
       self[name] = Sk.ffi.remapToJs(valuePy);
     }
@@ -43883,12 +43918,14 @@ Sk.three.object3DSetAttr = function(className, selfPy, name, valuePy) {
     case PROP_CHARGE:
     case PROP_MASS:
     case PROP_MOMENTUM:
-    case PROP_VELOCITY: {
+    case PROP_VELOCITY:
+    {
       Sk.ffi.checkArgType(name, EUCLIDEAN_3, isEuclidean3Py(valuePy), valuePy);
       self[name] = valuePy;
     }
     break;
-    default: {
+    default:
+    {
       throw Sk.ffi.err.attribute(name).isNotSetableOnType(className);
     }
   }
@@ -44324,12 +44361,18 @@ Sk.three.meshSetAttr = function(className, meshPy, name, valuePy) {
   var mesh = Sk.ffi.remapToJs(meshPy);
   var value = Sk.ffi.remapToJs(valuePy);
   switch(name) {
-    case PROP_ATTITUDE: {setQuaternionProperty(Sk.three.MESH, meshPy, PROP_QUATERNION, valuePy, name);} break;
-    case PROP_MATRIX_AUTO_UPDATE: {
+    case PROP_ATTITUDE:
+    {
+      setQuaternionProperty(Sk.three.MESH, meshPy, PROP_QUATERNION, valuePy, name);
+    }
+    break;
+    case PROP_MATRIX_AUTO_UPDATE:
+    {
       mesh[PROP_MATRIX_AUTO_UPDATE] = checkArgBool(PROP_MATRIX_AUTO_UPDATE, valuePy);
     }
     break;
-    case PROP_NAME: {
+    case PROP_NAME:
+    {
       Sk.ffi.checkArgType(PROP_NAME, Sk.ffi.PyType.STR, Sk.builtin.isStringPy(valuePy), valuePy);
       mesh[PROP_NAME] = value;
     }
@@ -44337,28 +44380,35 @@ Sk.three.meshSetAttr = function(className, meshPy, name, valuePy) {
     case PROP_POSITION:
     case PROP_ROTATION:
     case PROP_SCALE:
-    case PROP_UP: {
+    case PROP_UP:
+    {
       setVectorProperty(mesh, name, valuePy);
     }
     break;
-    case PROP_QUATERNION: {
+    case PROP_QUATERNION:
+    {
       mesh[PROP_QUATERNION] = value;
     }
     break;
-    case PROP_EULER_ORDER: {
-      if (isString(value)) {
+    case PROP_EULER_ORDER:
+    {
+      if (isString(value))
+      {
         mesh[PROP_EULER_ORDER] = value;
       }
-      else {
+      else
+      {
         throw new Error(name + " must be a string");
       }
     }
     break;
-    case PROP_USE_QUATERNION: {
+    case PROP_USE_QUATERNION:
+    {
       mesh[PROP_USE_QUATERNION] = value;
     }
     break;
-    default: {
+    default:
+    {
       return Sk.three.object3DSetAttr(className, meshPy, name, valuePy);
     }
   }
