@@ -39381,11 +39381,9 @@
     c = Sk.astFromParse(c, b);
     var d = Sk.symboltable(c, b);
     a = new Compiler(b, d, 0, a);
-    b = a.cmod(c);
-    a = a.result.join('');
     return {
-      funcname: b,
-      code: a
+      funcname: a.cmod(c),
+      code: a.result.join('')
     };
   };
   goog.exportSymbol('Sk.compile', Sk.compile);
@@ -39433,68 +39431,110 @@
     var js_beautify = function (a) {
       return a;
     };
-  Sk.importModuleInternal_ = function (a, b, c, d) {
+  Sk.importModuleInternalFromBody_ = function (a, b, c, d) {
     Sk.importSetUpPath();
-    void 0 === c && (c = a);
-    var e = null, f = c.split('.'), g;
-    try {
-      var h = Sk.sysmodules.mp$subscript(c);
-      return 1 < f.length ? Sk.sysmodules.mp$subscript(f[0]) : h;
-    } catch (l) {
-    }
-    1 < f.length && (g = f.slice(0, f.length - 1).join('.'), e = Sk.importModuleInternal_(g, b));
-    h = new Sk.builtin.module();
-    Sk.sysmodules.mp$ass_subscript(a, h);
-    d ? a = Sk.compile(d, a + '.py', 'exec') : (d = Sk.importSearchPathForName(a, '.js', !0)) ? a = {
-      funcname: '$builtinmodule',
-      code: Sk.read(d)
-    } : (a = Sk.importSearchPathForName(a, '.py'), a = Sk.compile(Sk.read(a), a, 'exec'));
-    d = h.$js = a.code;
-    null != Sk.dateSet && Sk.dateSet || (d = 'Sk.execStart = new Date();\n' + a.code, Sk.dateSet = !0);
-    if (b) {
-      b = js_beautify(a.code).split('\n');
-      for (d = 1; d <= b.length; ++d) {
-        for (var k = '', m = ('' + d).length; 5 > m; ++m)
-          k += ' ';
-        b[d - 1] = '/* ' + k + d + ' */ ' + b[d - 1];
+    c = 'string' === typeof c ? c : a;
+    var e = c.split('.');
+    if (1 < e.length)
+      try {
+        return Sk.sysmodules.mp$subscript(e[0]);
+      } catch (f) {
+        var g = e.slice(0, e.length - 1).join('.'), h = Sk.importModuleInternalNoBody_(g, b, void 0), l = new Sk.builtin.module();
+        Sk.sysmodules.mp$ass_subscript(a, l);
+        a = Sk.compile(d, a + '.py', 'exec');
+        Sk.evaluateModule(l, a, b, c);
+        Sk.storeModuleInParent(l, g, e);
+        return h;
       }
-      d = b.join('\n');
-      Sk.debugout(d);
+    else
+      try {
+        return Sk.sysmodules.mp$subscript(c);
+      } catch (k) {
+        return e = new Sk.builtin.module(), Sk.sysmodules.mp$ass_subscript(a, e), a = Sk.compile(d, a + '.py', 'exec'), Sk.evaluateModule(e, a, b, c), e;
+      }
+  };
+  Sk.importModuleInternalNoBody_ = function (a, b, c) {
+    goog.asserts.assertString(a, 'name must be a string, e.g. \'<stdin>\'');
+    goog.asserts.assertBoolean(b, 'dumpJS must be a boolean');
+    Sk.importSetUpPath();
+    c = 'string' === typeof c ? c : a;
+    var d = c.split('.');
+    if (1 < d.length)
+      try {
+        return Sk.sysmodules.mp$subscript(d[0]);
+      } catch (e) {
+        var f = d.slice(0, d.length - 1).join('.'), g = Sk.importModuleInternalNoBody_(f, b, void 0), h = new Sk.builtin.module();
+        Sk.sysmodules.mp$ass_subscript(a, h);
+        var l = Sk.importSearchPathForName(a, '.js', !0);
+        l ? a = {
+          funcname: '$builtinmodule',
+          code: Sk.read(l)
+        } : (l = Sk.importSearchPathForName(a, '.py', !1), a = Sk.compile(Sk.read(l), l, 'exec'));
+        Sk.evaluateModule(h, a, b, c);
+        Sk.storeModuleInParent(h, f, d);
+        return g;
+      }
+    else
+      try {
+        return Sk.sysmodules.mp$subscript(c);
+      } catch (k) {
+        return d = new Sk.builtin.module(), Sk.sysmodules.mp$ass_subscript(a, d), (l = Sk.importSearchPathForName(a, '.js', !0)) ? a = {
+          funcname: '$builtinmodule',
+          code: Sk.read(l)
+        } : (l = Sk.importSearchPathForName(a, '.py', !1), a = Sk.compile(Sk.read(l), l, 'exec')), Sk.evaluateModule(d, a, b, c), d;
+      }
+  };
+  Sk.evaluateModule = function (a, b, c, d) {
+    var e = a.$js = b.code;
+    null != Sk.dateSet && Sk.dateSet || (e = 'Sk.execStart = new Date();\n' + b.code, Sk.dateSet = !0);
+    if (c) {
+      c = js_beautify(b.code).split('\n');
+      for (e = 1; e <= c.length; ++e) {
+        for (var f = '', g = ('' + e).length; 5 > g; ++g)
+          f += ' ';
+        c[e - 1] = '/* ' + f + e + ' */ ' + c[e - 1];
+      }
+      e = c.join('\n');
+      Sk.debugout(e);
     }
-    d += '\n' + a.funcname + '(' + ('Sk.builtin.stringToPy(\'' + c + '\')') + ');';
-    b = goog.global.eval(d);
-    b.__name__ || (b.__name__ = Sk.builtin.stringToPy(c));
-    h.$d = b;
-    return e ? (Sk.sysmodules.mp$subscript(g).tp$setattr(f[f.length - 1], h), e) : h;
+    e += '\n' + b.funcname + '(' + ('Sk.builtin.stringToPy(\'' + d + '\')') + ');';
+    b = goog.global.eval(e);
+    b.__name__ || (b.__name__ = Sk.builtin.stringToPy(d));
+    a.$d = b;
+  };
+  Sk.storeModuleInParent = function (a, b, c) {
+    Sk.sysmodules.mp$subscript(b).tp$setattr(c[c.length - 1], a);
   };
   Sk.importModule = function (a, b) {
-    return Sk.importModuleInternal_(a, b);
+    goog.asserts.assertString(a, 'name must be a string, e.g. \'<stdin>\'');
+    goog.asserts.assertBoolean(b, 'dumpJS must be a boolean');
+    return Sk.importModuleInternalNoBody_(a, b, void 0);
   };
   Sk.importMain = function (a, b) {
+    goog.asserts.assertString(a, 'name must be a string, e.g. \'<stdin>\'');
     Sk.dateSet = !1;
     Sk.filesLoaded = !1;
     Sk.sysmodules = new Sk.builtin.dict([]);
     Sk.realsyspath = void 0;
     Sk.resetCompiler();
-    return Sk.importModuleInternal_(a, b, '__main__');
+    return Sk.importModuleInternalNoBody_(a, 'boolean' === typeof b ? b : !1, '__main__');
   };
   goog.exportSymbol('Sk.importMain', Sk.importMain);
   Sk.importMainWithBody = function (a, b, c) {
+    goog.asserts.assertString(a, 'name must be a string, e.g. \'<stdin>\'');
+    goog.asserts.assertBoolean(b, 'dumpJS must be a boolean');
+    goog.asserts.assertString(c, 'body must be a string');
     Sk.dateSet = !1;
     Sk.filesLoaded = !1;
     Sk.sysmodules = new Sk.builtin.dict([]);
     Sk.realsyspath = void 0;
     Sk.resetCompiler();
-    return Sk.importModuleInternal_(a, b, '__main__', c);
+    return Sk.importModuleInternalFromBody_(a, b, '__main__', c);
   };
   goog.exportSymbol('Sk.importMainWithBody', Sk.importMainWithBody);
   Sk.builtin.__import__ = function (a, b, c, d) {
-    b = Sk.importModuleInternal_(a);
-    if (!d || 0 === d.length)
-      return b;
-    b = Sk.sysmodules.mp$subscript(a);
-    goog.asserts.assert(b);
-    return b;
+    b = Sk.importModuleInternalNoBody_(a, !1, void 0);
+    return d && 0 !== d.length ? (a = Sk.sysmodules.mp$subscript(a), goog.asserts.assert(a), a) : b;
   };
   goog.exportSymbol('Sk.builtin.__import__', Sk.builtin.__import__);
   Sk.importStar = function (a, b) {

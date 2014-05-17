@@ -4304,14 +4304,18 @@ goog.exportSymbol("Sk.timeoutMsg", Sk.timeoutMsg);
  */
 Sk.output = function(x) {};
 
-/*
+/**
  * Replacable function to load modules with (called via import, etc.)
  * todo; this should be an async api
+ *
+ * @param {string} searchPath
+ * @return {string}
  */
-Sk.read = function(x) { throw "Sk.read has not been implemented"; };
+Sk.read = function(searchPath) { throw "Sk.read has not been implemented"; };
 
-/*
+/**
  * Setable to emulate arguments to the script. Should be array of JS strings.
+ * @type {Array.<string>}
  */
 Sk.sysargv = [];
 
@@ -5557,17 +5561,6 @@ Sk.builtin.apply_ = function apply_() { throw new Sk.builtin.NotImplementedError
 Sk.builtin.buffer = function buffer() { throw new Sk.builtin.NotImplementedError("buffer is not yet implemented")}
 Sk.builtin.coerce = function coerce() { throw new Sk.builtin.NotImplementedError("coerce is not yet implemented")}
 Sk.builtin.intern = function intern() { throw new Sk.builtin.NotImplementedError("intern is not yet implemented")}
-
-
-/*
-Sk.builtinFiles = {};
-Sk.builtin.read = function read(x) {
-    if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
-        throw "File not found: '" + x + "'";
-    return Sk.builtinFiles["files"][x];
-};
-Sk.builtinFiles = undefined;
-*/
 /*
  * The filename, line number, and column number of exceptions are
  * stored within the exception object.  Note that not all exceptions
@@ -25546,6 +25539,8 @@ Compiler.prototype.cmod = function(mod)
  * @param {string} source the code
  * @param {string} filename where it came from
  * @param {string} mode one of 'exec', 'eval', or 'single'
+ *
+ * @return {{funcname: string, code: string}}
  */
 Sk.compile = function(source, filename, mode)
 {
@@ -25554,12 +25549,7 @@ Sk.compile = function(source, filename, mode)
     var ast = Sk.astFromParse(cst, filename);
     var st = Sk.symboltable(ast, filename);
     var c = new Compiler(filename, st, 0, source); // todo; CO_xxx
-    var funcname = c.cmod(ast);
-    var ret = c.result.join('');
-    return {
-        funcname: funcname,
-        code: ret
-    };
+    return {"funcname": c.cmod(ast), "code": c.result.join('')};
 };
 goog.exportSymbol("Sk.compile", Sk.compile);
 
@@ -25575,7 +25565,9 @@ Sk.realsyspath = undefined;
 /**
  * @param {string} name to look for
  * @param {string} ext extension to use (.py or .js)
- * @param {boolean=} failok will throw if not true
+ * @param {boolean} failok will throw if not true
+ *
+ * @return {string}
  */
 Sk.importSearchPathForName = function(name, ext, failok)
 {
@@ -25591,16 +25583,23 @@ Sk.importSearchPathForName = function(name, ext, failok)
         for (var j = 0; j < fns.length; ++j)
         {
             var fn = fns[j];
-            try {
+            try
+            {
                 // TODO: lame, this is the only way we have to test existence right now
                 Sk.read(fn);
                 return fn;
-            } catch (e) {};
+            }
+            catch (e)
+            {
+
+            };
         }
     }
    
     if (!failok)
+    {
         throw new Sk.builtin.ImportError("No module named " + name);
+    }
 };
 
 Sk.doOneTimeInitialization = function()
@@ -25643,79 +25642,182 @@ if (COMPILED)
 
 /**
  * @param {string} name name of module to import
- * @param {boolean=} dumpJS whether to output the generated js code
- * @param {string=} modname what to call the module after it's imported if
- * it's to be renamed (i.e. __main__)
- * @param {string=} suppliedPyBody use as the body of the text for the module
- * rather than Sk.read'ing it.
+ * @param {boolean} dumpJS whether to output the generated js code
+ * @param {string|undefined} overrideName what to call the module after it's imported if it's to be renamed (i.e. __main__)
+ * @param {string} body use as the body of the text for the module rather than Sk.read'ing it.
+ *
+ * @return {!Sk.builtin.module}
  */
-Sk.importModuleInternal_ = function(name, dumpJS, modname, suppliedPyBody)
+Sk.importModuleInternalFromBody_ = function(name, dumpJS, overrideName, body)
 {
-    //dumpJS = true;
     Sk.importSetUpPath();
-
-    // if no module name override, supplied, use default name
-    if (modname === undefined) modname = name;
-
-    var toReturn = null;
-    var modNameSplit = modname.split(".");
-    var parentModName;
-
-    // if leaf is already in sys.modules, early out
-    try
+    /**
+     * @const
+     * @type {string}
+     */
+    var modname = (function()
     {
-        var prev = Sk.sysmodules.mp$subscript(modname);
-        // if we're a dotted module, return the top level, otherwise ourselves
-        if (modNameSplit.length > 1)
-            return Sk.sysmodules.mp$subscript(modNameSplit[0]);
+        if (typeof overrideName === 'string')
+        {
+            return overrideName;
+        }
         else
-            return prev;        
-    }
-    catch (x)
-    {
-        // not in sys.modules, continue
-    }
+        {
+            return name;
+        }
+    })();
+
+    var modNameSplit = modname.split(".");
 
     if (modNameSplit.length > 1)
     {
-        // if we're a module inside a package (i.e. a.b.c), then we'll need to return the
-        // top-level package ('a'). recurse upwards on our parent, importing
-        // all parent packages. so, here we're importing 'a.b', which will in
-        // turn import 'a', and then return 'a' eventually.
-        parentModName = modNameSplit.slice(0, modNameSplit.length - 1).join(".");
-        toReturn = Sk.importModuleInternal_(parentModName, dumpJS);
-    }
-
-    // otherwise:
-    // - create module object
-    // - add module object to sys.modules
-    // - compile source to (function(){...});
-    // - run module and set the module locals returned to the module __dict__
-    var module = new Sk.builtin.module();
-    Sk.sysmodules.mp$ass_subscript(name, module);
-    var filename, co, googClosure;
-
-    if (suppliedPyBody)
-    {
-        filename = name + ".py";
-        co = Sk.compile(suppliedPyBody, filename, "exec");
+        try
+        {
+            return Sk.sysmodules.mp$subscript(modNameSplit[0]);
+        }
+        catch (x)
+        {
+            // not in sys.modules, continue
+            // if we're a module inside a package (i.e. a.b.c), then we'll need to return the
+            // top-level package ('a'). recurse upwards on our parent, importing
+            // all parent packages. so, here we're importing 'a.b', which will in
+            // turn import 'a', and then return 'a' eventually.
+            var parentModName = modNameSplit.slice(0, modNameSplit.length - 1).join(".");
+            var parentModule = Sk.importModuleInternalNoBody_(parentModName, dumpJS, undefined);
+            var childModule = new Sk.builtin.module();
+            Sk.sysmodules.mp$ass_subscript(name, childModule);
+            var co = Sk.compile(body, name + ".py", "exec");
+            Sk.evaluateModule(childModule, co, dumpJS, modname);
+            Sk.storeModuleInParent(childModule, parentModName, modNameSplit);
+            return parentModule;
+        }
     }
     else
     {
-        // if we have it as a builtin (i.e. already in JS) module then load that.
-        var builtinfn = Sk.importSearchPathForName(name, ".js", true);
-        if (builtinfn)
+        try
         {
-            filename = builtinfn;
-            co = { funcname: "$builtinmodule", code: Sk.read(filename) };
+            return Sk.sysmodules.mp$subscript(modname);
+        }
+        catch (x)
+        {
+            // not in sys.modules, continue
+            var module = new Sk.builtin.module();
+            Sk.sysmodules.mp$ass_subscript(name, module);
+            var co = Sk.compile(body, name + ".py", "exec");
+            Sk.evaluateModule(module, co, dumpJS, modname);
+            return module;
+        }
+    }
+};
+
+/**
+ * @param {string} name name of module to import
+ * @param {boolean} dumpJS whether to output the generated js code
+ * @param {string|undefined} overrideName what to call the module after it's imported if it's to be renamed (i.e. __main__)
+ *
+ * @return {!Sk.builtin.module}
+ */
+Sk.importModuleInternalNoBody_ = function(name, dumpJS, overrideName)
+{
+    goog.asserts.assertString(name, "name must be a string, e.g. '<stdin>'");
+    goog.asserts.assertBoolean(dumpJS, "dumpJS must be a boolean");
+
+    Sk.importSetUpPath();
+    /**
+     * @const
+     * @type {string}
+     */
+    var modname = (function()
+    {
+        if (typeof overrideName === 'string')
+        {
+            return overrideName;
         }
         else
         {
-            filename = Sk.importSearchPathForName(name, ".py");
-            co = Sk.compile(Sk.read(filename), filename, "exec");
+            return name;
+        }
+    })();
+
+    var modNameSplit = modname.split(".");
+
+    if (modNameSplit.length > 1)
+    {
+        try
+        {
+            return Sk.sysmodules.mp$subscript(modNameSplit[0]);
+        }
+        catch (x)
+        {
+            // not in sys.modules, continue
+            // if we're a module inside a package (i.e. a.b.c), then we'll need to return the
+            // top-level package ('a'). recurse upwards on our parent, importing
+            // all parent packages. so, here we're importing 'a.b', which will in
+            // turn import 'a', and then return 'a' eventually.
+            var parentModName = modNameSplit.slice(0, modNameSplit.length - 1).join(".");
+            var parentModule = Sk.importModuleInternalNoBody_(parentModName, dumpJS, undefined);
+            var childModule = new Sk.builtin.module();
+            Sk.sysmodules.mp$ass_subscript(name, childModule);
+
+            var filename = Sk.importSearchPathForName(name, ".js", true);
+            if (filename)
+            {
+                var co = { funcname: "$builtinmodule", code: Sk.read(filename) };
+                Sk.evaluateModule(childModule, co, dumpJS, modname);
+                Sk.storeModuleInParent(childModule, parentModName, modNameSplit);
+                return parentModule;
+            }
+            else
+            {
+                filename = Sk.importSearchPathForName(name, ".py", false);
+                var co = Sk.compile(Sk.read(filename), filename, "exec");
+                Sk.evaluateModule(childModule, co, dumpJS, modname);
+                Sk.storeModuleInParent(childModule, parentModName, modNameSplit);
+                return parentModule;
+            }
         }
     }
+    else
+    {
+        try
+        {
+            return Sk.sysmodules.mp$subscript(modname);
+        }
+        catch (x)
+        {
+            // not in sys.modules, continue
+            var module = new Sk.builtin.module();
+            Sk.sysmodules.mp$ass_subscript(name, module);
 
+            // if we have it as a builtin (i.e. already in JS) module then load that.
+            var filename = Sk.importSearchPathForName(name, ".js", true);
+            if (filename)
+            {
+                var co = { funcname: "$builtinmodule", code: Sk.read(filename) };
+                Sk.evaluateModule(module, co, dumpJS, modname);
+                return module;
+            }
+            else
+            {
+                filename = Sk.importSearchPathForName(name, ".py", false);
+                var co = Sk.compile(Sk.read(filename), filename, "exec");
+                Sk.evaluateModule(module, co, dumpJS, modname);
+                return module;
+            }
+        }
+    }
+};
+
+/**
+ * @param {Sk.builtin.module} module
+ * @param {{funcname: string, code: string}} co
+ * @param {boolean} dumpJS
+ * @param {string} modname
+ *
+ * @return {undefined}
+ */
+Sk.evaluateModule = function(module, co, dumpJS, modname)
+{
     module.$js = co.code; // todo; only in DEBUG?
     var finalcode = co.code;
     if (Sk.dateSet == null || !Sk.dateSet)
@@ -25754,45 +25856,62 @@ Sk.importModuleInternal_ = function(name, dumpJS, modname, suppliedPyBody)
     // it), but also set it after we're done so that builtins don't have to
     // remember to do it.
     if (!modlocs['__name__'])
-        modlocs['__name__'] = Sk.builtin.stringToPy(modname);
-
-    module['$d'] = modlocs;
-
-    if (toReturn)
     {
-        // if we were a dotted name, then we want to return the top-most
-        // package. we store ourselves into our parent as an attribute
-        var parentModule = Sk.sysmodules.mp$subscript(parentModName);
-        parentModule.tp$setattr(modNameSplit[modNameSplit.length - 1], module);
-        //print("import returning parent module, modname", modname, "__name__", toReturn.tp$getattr("__name__").v);
-        return toReturn;
+        modlocs['__name__'] = Sk.builtin.stringToPy(modname);
     }
 
-    //print("name", name, "modname", modname, "returning leaf");
-    // otherwise we return the actual module that we just imported
-    return module;
+    module['$d'] = modlocs;
 };
 
 /**
+ * @param {Sk.builtin.module} module
+ * @param {string} parentModName
+ * @param {Array.<string>} modNameSplit
+ *
+ * @return {undefined}
+ */
+Sk.storeModuleInParent = function(module, parentModName, modNameSplit)
+{
+    // if we were a dotted name, then we want to return the top-most
+    // package. we store ourselves into our parent as an attribute
+    var parentModule = Sk.sysmodules.mp$subscript(parentModName);
+    parentModule.tp$setattr(modNameSplit[modNameSplit.length - 1], module);
+}
+
+/**
  * @param {string} name the module name
- * @param {boolean=} dumpJS print out the js code after compilation for debugging
+ * @param {boolean} dumpJS print out the js code after compilation for debugging
+ *
+ * @return {!Sk.builtin.module}
  */
 Sk.importModule = function(name, dumpJS)
 {
-    return Sk.importModuleInternal_(name, dumpJS);
+    goog.asserts.assertString(name, "name must be a string, e.g. '<stdin>'");
+    goog.asserts.assertBoolean(dumpJS, "dumpJS must be a boolean");
+    return Sk.importModuleInternalNoBody_(name, dumpJS, undefined);
 };
 
+/**
+ * This function is called by the conformance test.
+ *
+ * @param {string} name the module name
+ * @param {boolean|undefined} dumpJS print out the js code after compilation for debugging
+ *
+ * @return {!Sk.builtin.module}
+ */
 Sk.importMain = function(name, dumpJS)
 {
+    goog.asserts.assertString(name, "name must be a string, e.g. '<stdin>'");
+
     Sk.dateSet = false;
     Sk.filesLoaded = false
-    //  Added to reset imports
+    // Reset imports.
     Sk.sysmodules = new Sk.builtin.dict([]);
     Sk.realsyspath = undefined;
 
     Sk.resetCompiler();
 
-    return Sk.importModuleInternal_(name, dumpJS, "__main__");
+    return Sk.importModuleInternalNoBody_(name, (typeof dumpJS === 'boolean' ? dumpJS : false), "__main__");
 };
 goog.exportSymbol("Sk.importMain", Sk.importMain);
 
@@ -25800,35 +25919,55 @@ goog.exportSymbol("Sk.importMain", Sk.importMain);
  * @param {string} name The name of module to import.
  * @param {boolean} dumpJS Whether to output (to Sk.debugout) the generated JavaScript code.
  * @param {string} body Use as the body of the text for the module.
+ *
+ * @return {!Sk.builtin.module}
  */
 Sk.importMainWithBody = function(name, dumpJS, body)
 {
+    goog.asserts.assertString(name, "name must be a string, e.g. '<stdin>'");
+    goog.asserts.assertBoolean(dumpJS, "dumpJS must be a boolean");
+    goog.asserts.assertString(body, "body must be a string");
+
     Sk.dateSet = false;
     Sk.filesLoaded = false
-    //  Added to reset imports
+    // Reset imports.
     Sk.sysmodules = new Sk.builtin.dict([]);
     Sk.realsyspath = undefined;
     
     Sk.resetCompiler();
 
-    return Sk.importModuleInternal_(name, dumpJS, "__main__", body);
+    return Sk.importModuleInternalFromBody_(name, dumpJS, "__main__", body);
 };
 goog.exportSymbol("Sk.importMainWithBody", Sk.importMainWithBody);
 
+/**
+ * This is used by the compiler.
+ *
+ * @param {string} name The name of module to import.
+ *
+ * @return {!Sk.builtin.module}
+ */
 Sk.builtin.__import__ = function(name, globals, locals, fromlist)
 {
-    var ret = Sk.importModuleInternal_(name);
+    var top = Sk.importModuleInternalNoBody_(name, false, undefined);
     if (!fromlist || fromlist.length === 0)
+    {
+        return top;
+    }
+    else
+    {
+        // If there's a fromlist we want to return the actual module, not the toplevel namespace.
+        var ret = Sk.sysmodules.mp$subscript(name);
+        goog.asserts.assert(ret);
         return ret;
-    // if there's a fromlist we want to return the actual module, not the
-    // toplevel namespace
-    ret = Sk.sysmodules.mp$subscript(name);
-    goog.asserts.assert(ret);
-    return ret;
+    }
 };
 goog.exportSymbol("Sk.builtin.__import__", Sk.builtin.__import__);
 
-Sk.importStar = function(module,loc)
+/**
+ * This is used by the compiler.
+ */
+Sk.importStar = function(module, loc)
 {
     var props = Object['getOwnPropertyNames'](module['$d'])
     for(var i in props)
