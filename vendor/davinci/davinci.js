@@ -4228,7 +4228,8 @@ goog.asserts.assertObjectPrototypeIsIntact = function() {
  * below.
  */
 
-var Sk = Sk || {};
+goog.provide('Sk');
+
 
 /**
  *
@@ -4242,67 +4243,72 @@ var Sk = Sk || {};
  * modules). Should be an array of JS strings.
  *
  * Any variables that aren't set will be left alone.
+ *
+ * @param {*} options
  */
-Sk.configure = function(options)
-{
-    Sk.output = options["output"] || Sk.output;
-    goog.asserts.assert(typeof Sk.output === "function");
+Sk.configure = function(options) {
 
-    Sk.debugout = options["debugout"] || Sk.debugout;
-    goog.asserts.assert(typeof Sk.debugout === "function");
+  Sk.output = options['output'] || Sk.output;
+  goog.asserts.assert(typeof Sk.output === 'function');
 
-    Sk.read = options["read"] || Sk.read;
-    goog.asserts.assert(typeof Sk.read === "function");
+  Sk.debugout = options['debugout'] || Sk.debugout;
+  goog.asserts.assert(typeof Sk.debugout === 'function');
 
-    Sk.timeoutMsg = options["timeoutMsg"] || Sk.timeoutMsg;
-    goog.asserts.assert(typeof Sk.timeoutMsg === "function");
-    goog.exportSymbol("Sk.timeoutMsg", Sk.timeoutMsg);
+  Sk.read = options['read'] || Sk.read;
+  goog.asserts.assert(typeof Sk.read === 'function');
 
-    Sk.sysargv = options["sysargv"] || Sk.sysargv;
-    goog.asserts.assert(goog.isArrayLike(Sk.sysargv));
+  Sk.timeoutMsg = options['timeoutMsg'] || Sk.timeoutMsg;
+  goog.asserts.assert(typeof Sk.timeoutMsg === 'function');
+  goog.exportSymbol('Sk.timeoutMsg', Sk.timeoutMsg);
 
-    Sk.snapToAngle = options["snapToAngle"] || Sk.snapToAngle;
-    goog.asserts.assertBoolean(Sk.snapToAngle, "Sk.snapToAngle must be set to a JavaScript boolean value.");
+  Sk.sysargv = options['sysargv'] || Sk.sysargv;
+  goog.asserts.assert(goog.isArrayLike(Sk.sysargv));
 
-    Sk.physics = options["physics"] || Sk.physics;
-    goog.asserts.assertBoolean(Sk.physics, "Sk.physics must be set to a JavaScript boolean value.");
+  Sk.snapToAngle = options['snapToAngle'] || Sk.snapToAngle;
+  goog.asserts.assertBoolean(Sk.snapToAngle, 'Sk.snapToAngle');
 
-    Sk.flyweight = options["flyweight"] || Sk.flyweight;
-    goog.asserts.assertBoolean(Sk.flyweight, "Sk.flyweight must be set to a JavaScript boolean value.");
+  Sk.physics = options['physics'] || Sk.physics;
+  goog.asserts.assertBoolean(Sk.physics, 'Sk.physics');
 
-    Sk.python3 = options["python3"] || Sk.python3;
-    goog.asserts.assertBoolean(Sk.python3);
+  Sk.flyweight = options['flyweight'] || Sk.flyweight;
+  goog.asserts.assertBoolean(Sk.flyweight, 'Sk.flyweight');
 
-    Sk.inputfun = options["inputfun"] || Sk.inputfun;
-    goog.asserts.assert(typeof Sk.inputfun === "function")
+  Sk.python3 = options['python3'] || Sk.python3;
+  goog.asserts.assertBoolean(Sk.python3);
 
-    Sk.throwSystemExit = options["systemexit"] || false;
-    goog.asserts.assert(typeof Sk.throwSystemExit === "boolean")
+  Sk.inputfun = options['inputfun'] || Sk.inputfun;
+  goog.asserts.assert(typeof Sk.inputfun === 'function');
 
-    if (options["syspath"])
-    {
-        Sk.syspath = options["syspath"];
-        goog.asserts.assert(goog.isArrayLike(Sk.syspath));
-        // assume that if we're changing syspath we want to force reimports.
-        // not sure how valid this is, perhaps a separate api for that.
-        Sk.realsyspath = undefined;
-        Sk.sysmodules = new Sk.builtin.dict([]);
-    }
+  Sk.throwSystemExit = options['systemexit'] || false;
+  goog.asserts.assert(typeof Sk.throwSystemExit === 'boolean');
 
-    Sk.misceval.softspace_ = false;
+  if (options['syspath'])
+  {
+    Sk.syspath = options['syspath'];
+    goog.asserts.assert(goog.isArrayLike(Sk.syspath));
+    // assume that if we're changing syspath we want to force reimports.
+    // not sure how valid this is, perhaps a separate api for that.
+    Sk.realsyspath = undefined;
+    // Sk.sysmodules = new Sk.builtin.dict([]);
+  }
 };
-goog.exportSymbol("Sk.configure", Sk.configure);
+goog.exportSymbol('Sk.configure', Sk.configure);
 
-/*
-*   Replaceable message for message timeouts
-*/
-Sk.timeoutMsg=function() { return "Program exceeded run time limit."; }
-goog.exportSymbol("Sk.timeoutMsg", Sk.timeoutMsg);
 
-/*
+/**
+ * Replaceable message for message timeouts
+ * @return {string}
+ */
+Sk.timeoutMsg = function() { return 'Program exceeded run time limit.'; };
+goog.exportSymbol('Sk.timeoutMsg', Sk.timeoutMsg);
+
+
+/**
  * Replacable output redirection (called from print, etc).
+ * @param {string} x
  */
 Sk.output = function(x) {};
+
 
 /**
  * Replacable function to load modules with (called via import, etc.)
@@ -4311,7 +4317,8 @@ Sk.output = function(x) {};
  * @param {string} searchPath
  * @return {string}
  */
-Sk.read = function(searchPath) { throw "Sk.read has not been implemented"; };
+Sk.read = function(searchPath) { throw 'Sk.read has not been implemented'; };
+
 
 /**
  * Setable to emulate arguments to the script. Should be array of JS strings.
@@ -4319,12 +4326,15 @@ Sk.read = function(searchPath) { throw "Sk.read has not been implemented"; };
  */
 Sk.sysargv = [];
 
-// lame function for sys module
-Sk.getSysArgv = function()
-{
-    return Sk.sysargv;
+
+/**
+ * lame function for sys module
+ * @return {Array.<string>}
+ */
+Sk.getSysArgv = function() {
+  return Sk.sysargv;
 };
-goog.exportSymbol("Sk.getSysArgv", Sk.getSysArgv);
+goog.exportSymbol('Sk.getSysArgv', Sk.getSysArgv);
 
 
 /**
@@ -4333,32 +4343,57 @@ goog.exportSymbol("Sk.getSysArgv", Sk.getSysArgv);
  */
 Sk.syspath = [];
 
+
+/**
+ *
+ */
 Sk.inBrowser = goog.global['document'] !== undefined;
+
 
 /**
  * Internal function used for debug output.
- * @param {...} args
+ * @param {...} var_args
  */
-Sk.debugout = function(args) {};
+Sk.debugout = function(var_args) {};
 
 (function() {
-    // set up some sane defaults based on availability
-    if (goog.global['write'] !== undefined) Sk.output = goog.global['write'];
-    else if (goog.global['console'] !== undefined && goog.global['console']['log'] !== undefined) Sk.output = function (x) {goog.global['console']['log'](x);};
-    else if (goog.global['print'] !== undefined) Sk.output = goog.global['print'];
+  // set up some sane defaults based on availability
+  if (goog.global['write'] !== undefined)
+  {
+    Sk.output = goog.global['write'];
+  }
+  else if (goog.global['console'] !== undefined &&
+      goog.global['console']['log'] !== undefined)
+  {
+    Sk.output = function(x) {goog.global['console']['log'](x);};
+  }
+  else if (goog.global['print'] !== undefined)
+  {
+    Sk.output = goog.global['print'];
+  }
 
-    if (goog.global['print'] !== undefined) Sk.debugout = goog.global['print'];
+  if (goog.global['print'] !== undefined) Sk.debugout = goog.global['print'];
 }());
 
 // override for closure to load stuff from the command line.
 if (!Sk.inBrowser)
 {
-    goog.global.CLOSURE_IMPORT_SCRIPT = function(src)
-    {
-        goog.global['eval'](goog.global['read']("support/closure-library/closure/goog/" + src));
-        return true;
-    };
+  /**
+   * @param {string} src
+   * @return {boolean}
+   */
+  var importScript = function(src) {
+    var path = 'support/closure-library/closure/goog/' + src;
+    var script = goog.global['read'](path);
+    goog.global['eval'](script);
+    return true;
+  };
+  /**
+   * @type {(function(string): boolean)|undefined}
+   */
+  goog.global.CLOSURE_IMPORT_SCRIPT = importScript;
 }
+
 
 /**
  * Determines whether trigonometric functions make approximations.
@@ -4366,21 +4401,31 @@ if (!Sk.inBrowser)
  * @type {boolean}
  */
 Sk.snapToAngle = true;
-goog.exportSymbol("Sk.snapToAngle", Sk.snapToAngle);
+goog.exportSymbol('Sk.snapToAngle', Sk.snapToAngle);
+
 
 /**
  * The physics mode.
  * @type {boolean}
  */
 Sk.physics = false;
-goog.exportSymbol("Sk.physics", Sk.physics);
+goog.exportSymbol('Sk.physics', Sk.physics);
+
 
 /**
  * The flyweight mode.
  * @type {boolean}
  */
 Sk.flyweight = false;
-goog.exportSymbol("Sk.flyweight", Sk.flyweight);
+goog.exportSymbol('Sk.flyweight', Sk.flyweight);
+
+
+/**
+ * @type {boolean}
+ */
+Sk.softSpace = false;
+
+
 /**
  * The flyweight mode for strings (in development).
  * This is not quite production-ready.
@@ -4388,21 +4433,26 @@ goog.exportSymbol("Sk.flyweight", Sk.flyweight);
  * @type {boolean}
  */
 Sk.flyString = true;
-goog.exportSymbol("Sk.flyString", Sk.flyString);
+goog.exportSymbol('Sk.flyString', Sk.flyString);
 
+
+/**
+ *
+ */
 Sk.python3 = false;
-goog.exportSymbol("Sk.python3", Sk.python3);
+goog.exportSymbol('Sk.python3', Sk.python3);
+
 
 /**
  * @param {string} args
+ * @return {?string}
  */
-Sk.inputfun = function(args)
-{
-    return window.prompt(args);
+Sk.inputfun = function(args) {
+  return window.prompt(args);
 };
-goog.exportSymbol("Sk.inputfun", Sk.inputfun);
+goog.exportSymbol('Sk.inputfun', Sk.inputfun);
 
-goog.require("goog.asserts");
+goog.require('goog.asserts');
 // builtins are supposed to come from the __builtin__ module, but we don't do
 // that yet.
 Sk.builtin = {};
@@ -7381,7 +7431,6 @@ Sk.misceval.isTrue = function(x)
 };
 goog.exportSymbol("Sk.misceval.isTrue", Sk.misceval.isTrue);
 
-Sk.misceval.softspace_ = false;
 /**
  * @param {string} x
  */
@@ -7389,10 +7438,10 @@ Sk.misceval.print_ = function(x)
 {
     goog.asserts.assertString(x);
 
-    if (Sk.misceval.softspace_)
+    if (Sk.softSpace)
     {
         if (x !== "\n") Sk.output(' ');
-        Sk.misceval.softspace_ = false;
+        Sk.softSpace = false;
     }
     Sk.output(x);
     var isspace = function(c)
@@ -7401,7 +7450,7 @@ Sk.misceval.print_ = function(x)
     };
     if (x.length === 0 || !isspace(x[x.length - 1]) || x[x.length - 1] === ' ')
     {
-        Sk.misceval.softspace_ = true;
+        Sk.softSpace = true;
     }
 };
 goog.exportSymbol("Sk.misceval.print_", Sk.misceval.print_);
@@ -25571,7 +25620,10 @@ Sk.realsyspath = undefined;
  */
 Sk.importSearchPathForName = function(name, ext, failok)
 {
-    var L = Sk.realsyspath;
+    /**
+     * @type {Sk.builtin.list}
+     */
+    var L = Sk.realsyspath ? Sk.realsyspath : new Sk.builtin.list([]);
     for (var it = L.tp$iter(), i = it.tp$iternext(); i !== undefined; i = it.tp$iternext())
     {
         var nameAsPath = name.replace(/\./g, "/");
