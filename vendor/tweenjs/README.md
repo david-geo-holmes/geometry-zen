@@ -1,7 +1,6 @@
-tween.js
-========
+# tween.js (r13)
 
-#### Javascript Tweening Engine ####
+**Javascript Tweening Engine**
 
 [![Flattr this](https://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/thing/45014/tween-js)
 
@@ -9,8 +8,9 @@ Super simple, fast and easy to use tweening engine which incorporates optimised 
 
 [Contributors](http://github.com/sole/tween.js/contributors)
 
-### Examples ###
+## Examples
 
+[![Custom functions](./assets/examples/03_graphs.png)](./examples/12_graphs_custom_functions.html)
 [![Stop all chained tweens](./assets/examples/11_stop_all_chained_tweens.png)](./examples/11_stop_all_chained_tweens.html)
 [![Yoyo](./assets/examples/10_yoyo.png)](./examples/10_yoyo.html)
 [![Relative values](./assets/examples/09_relative.png)](./examples/09_relative_values.html)
@@ -24,7 +24,7 @@ Super simple, fast and easy to use tweening engine which incorporates optimised 
 [![Bars](./assets/examples/01_bars.png)](./examples/01_bars.html)
 [![hello world](./assets/examples/00_hello_world.png)](./examples/00_hello_world.html)
 
-### Projects using tween.js ###
+## Projects using tween.js
 
 [![MOMA Inventing Abstraction 1910-1925](./assets/projects/09_moma.png)](http://www.moma.org/interactives/exhibitions/2012/inventingabstraction/)
 [![Web Lab](./assets/projects/08_web_lab.png)](http://www.chromeweblab.com/)
@@ -36,7 +36,7 @@ Super simple, fast and easy to use tweening engine which incorporates optimised 
 [![The Wilderness Downtown](./assets/projects/01_wilderness.png)](http://thewildernessdowntown.com/)
 [![Linechart](./assets/projects/00_linechart.png)](http://dejavis.org/linechart)
 
-### Usage ###
+## Usage
 
 Download the [minified library](https://github.com/sole/tween.js/raw/master/build/tween.min.js) and include it in your html.
 
@@ -81,29 +81,25 @@ The following code creates a Tween which will change the `x` attribute in a posi
 
 Note: this corresponds to the example [04_simplest.html](./examples/04_simplest.html) that you can find in the ```examples``` folder.
 
-Have a look at that folder to discover more functionalities of the library!
+Have a look at that folder to discover more functionalities of the library, or read the [user guide](./docs/user_guide.md)!
 
 Also, Jerome Etienne has written a [tutorial](http://learningthreejs.com/blog/2011/08/17/tweenjs-for-smooth-animation/) demonstrating how to use tween.js with three.js, and it's also great for understanding how tweens work!
 
 Finally, if you need to use tweens in C/C++ code, you now have an option! Check out [libtween](https://github.com/jsm174/libtween) which is a port of tween.js to C by [jsm174](https://github.com/jsm174)!
 
-### FAQ ###
+## Change log
 
-**How do you set a tween to start after a while?**
+2014 05 05 - **r13** (5,765 KB, gzip: 2,149 KB)
 
-Use the `delay()` method: `var t = new TWEEN.Tween({...}).delay(1000);`
-
-**Is there a jQuery plug-in?**
-
-No, we like to keep it simple and free of dependencies. Feel free to make one yourself, though! :-)
-
-### Change log ###
+* Add ```Tween.onStop``` ([colinsullivan](https://github.com/colinsullivan))
+* Fix `_reversed` yoyo flag bug ([deanm](https://github.com/deanm))
+* Initial version of [docs/user guide](./docs/user_guide.md) ([sole](https://github.com/sole))
 
 2013 11 03 - **r12** (5,697 KB, gzip: 2,131 KB)
 
 * Fix bug with cached ```tweens.length``` value inside ```update()``` loop ([freestlr](https://github.com/freestlr))
 * Move assets and all examples and stuff to use the ```gh-pages``` branch, so things are always properly updated ([sole](https://github.com/sole)).
-* Fix bug where chained tweens were not stopped if the previous tween had been stopped, under certain circumstances, by [cfddream](https://github.com/cfddream)
+* Fix bug where chained tweens were not stopped if the previous tween had been stopped, under certain circumstances, by [fundon](https://github.com/fundon)
 * Use tweens in C/C++ with [libtween](https://github.com/jsm174/libtween) by [jsm174](https://github.com/jsm174)!
 
 2013 08 10 - **r11**
@@ -179,3 +175,14 @@ No, we like to keep it simple and free of dependencies. Feel free to make one yo
 
 * Started using revision numbers in the build file
 * Consider this kind of an stable revision :-)
+
+## FAQ
+
+**How do you set a tween to start after a while?**
+
+Use the `delay()` method: `var t = new TWEEN.Tween({...}).delay(1000);`
+
+**Is there a jQuery plug-in?**
+
+No, we like to keep it simple and free of dependencies. Feel free to make one yourself, though! :-)
+

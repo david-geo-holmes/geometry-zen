@@ -43,6 +43,7 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
       "vendor/EaselJS/lib/easeljs-0.6.1.min.js",
       "vendor/TweenJS/lib/tweenjs-0.4.1.min.js",
       "vendor/EaselJS/lib/movieclip-0.6.1.min.js",
+      "vendor/bladejs/dist/bladejs.min.js",
       "vendor/threejs/build/three.min.js",
       "vendor/tweenjs/build/tween.min.js",
       "vendor/google-analytics/tracking-code.js",
