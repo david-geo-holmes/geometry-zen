@@ -27,7 +27,9 @@ app.run(['$rootScope', '$window' , '$location', 'cookie', 'i18n', ($rootScope, $
     cookie.removeItem(GITHUB_LOGIN_COOKIE_NAME)
 
   $rootScope.login = () ->
-    # console.log "login"
+    # This is the beginning of the Web Application Flow for GitHub OAuth2.
+    # TODO: The API now allows us to specify an unguessable random string called 'state'.
+    # This 'state' string is used to protect against cross-site request forgery attacks.
     clientId = cookie.getItem(GITHUB_APPLICATION_CLIENT_ID_COOKIE_NAME)
     $window.location.href = "https://github.com/login/oauth/authorize?client_id=#{clientId}&amp;scope=repo,user,gist"
 

@@ -44397,20 +44397,20 @@
             switch (Sk.ffi.typeName(b)) {
             case 'Euclidean2':
               var c = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(b);
-              return d(c.w * e.w + c.x * e.x + c.y * e.y + c.xy * e.xy, 0, 0, 0);
+              return d(c.w * e.w + c.x * e.x + c.y * e.y - c.xy * e.xy, 0, 0, 0);
             default:
               return;
             }
           case Sk.ffi.PyType.FLOAT:
           case Sk.ffi.PyType.INT:
           case Sk.ffi.PyType.LONG:
-            return c = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(b), d(c.w * e, c.x * e, c.y * e, c.xy * e);
+            return c = Sk.ffi.remapToJs(a), e = Sk.ffi.remapToJs(b), d(c.w * e, 0, 0, 0);
           }
         });
         k.__rmod__ = Sk.ffi.functionPy(function (a, b) {
           var e = Sk.ffi.remapToJs(a), f = Sk.ffi.remapToJs(b);
           if (c(f))
-            return d(f * e.w, f * e.x, f * e.y, f * e.xy);
+            return d(f * e.w, 0, 0, 0);
         });
         k.__xor__ = Sk.ffi.functionPy(function (a, b) {
           switch (Sk.ffi.getType(b)) {
@@ -45113,14 +45113,13 @@
             switch (Sk.ffi.typeName(b)) {
             case Sk.e3ga.EUCLIDEAN_3:
               var c = Sk.ffi.remapToJs(a), d = Sk.ffi.remapToJs(b);
-              return f(!1, c.x * d.x + c.y * d.y + c.z * d.z, 0, 0, 0, 0, 0, 0, 0);
+              return f(!1, c.w * d.w + c.x * d.x + c.y * d.y + c.z * d.z - c.xy * d.xy - c.yz * d.yz - c.zx * d.zx - c.xyz * d.xyz, 0, 0, 0, 0, 0, 0, 0);
             default:
               return;
             }
           case Sk.ffi.PyType.INT:
           case Sk.ffi.PyType.FLOAT:
-            var c = Sk.ffi.remapToJs(a), d = c.vector, e = c.quaternion, g = Sk.ffi.remapToJs(b);
-            return f(!1, e.w * g, d.x * g, d.y * g, d.z * g, -e.z * g, -e.x * g, -e.y * g, c.xyz * g);
+            return c = Sk.ffi.remapToJs(a), d = Sk.ffi.remapToJs(b), f(!1, c.w * d, 0, 0, 0, 0, 0, 0, 0);
           }
         });
         n.__xor__ = Sk.ffi.functionPy(function (a, b) {
@@ -103643,318 +103642,6 @@ THREE.ShaderFlares = {
   lensFlare: {
     vertexShader: 'uniform lowp int renderType;\nuniform vec3 screenPosition;\nuniform vec2 scale;\nuniform float rotation;\nattribute vec2 position;\nattribute vec2 uv;\nvarying vec2 vUV;\nvoid main() {\nvUV = uv;\nvec2 pos = position;\nif( renderType == 2 ) {\npos.x = cos( rotation ) * position.x - sin( rotation ) * position.y;\npos.y = sin( rotation ) * position.x + cos( rotation ) * position.y;\n}\ngl_Position = vec4( ( pos * scale + screenPosition.xy ).xy, screenPosition.z, 1.0 );\n}',
     fragmentShader: 'precision mediump float;\nuniform lowp int renderType;\nuniform sampler2D map;\nuniform sampler2D occlusionMap;\nuniform float opacity;\nuniform vec3 color;\nvarying vec2 vUV;\nvoid main() {\nif( renderType == 0 ) {\ngl_FragColor = vec4( texture2D( map, vUV ).rgb, 0.0 );\n} else if( renderType == 1 ) {\ngl_FragColor = texture2D( map, vUV );\n} else {\nfloat visibility = texture2D( occlusionMap, vec2( 0.5, 0.1 ) ).a;\nvisibility += texture2D( occlusionMap, vec2( 0.9, 0.5 ) ).a;\nvisibility += texture2D( occlusionMap, vec2( 0.5, 0.9 ) ).a;\nvisibility += texture2D( occlusionMap, vec2( 0.1, 0.5 ) ).a;\nvisibility = ( 1.0 - visibility / 4.0 );\nvec4 texture = texture2D( map, vUV );\ntexture.a *= opacity * visibility;\ngl_FragColor = texture;\ngl_FragColor.rgb *= color;\n}\n}'
-  }
-};
-'use strict';
-void 0 === Date.now && (Date.now = function () {
-  return new Date().valueOf();
-});
-var TWEEN = TWEEN || function () {
-    var a = [];
-    return {
-      REVISION: '13',
-      getAll: function () {
-        return a;
-      },
-      removeAll: function () {
-        a = [];
-      },
-      add: function (c) {
-        a.push(c);
-      },
-      remove: function (c) {
-        c = a.indexOf(c);
-        -1 !== c && a.splice(c, 1);
-      },
-      update: function (c) {
-        if (0 === a.length)
-          return !1;
-        for (var b = 0, c = void 0 !== c ? c : 'undefined' !== typeof window && void 0 !== window.performance && void 0 !== window.performance.now ? window.performance.now() : Date.now(); b < a.length;)
-          a[b].update(c) ? b++ : a.splice(b, 1);
-        return !0;
-      }
-    };
-  }();
-TWEEN.Tween = function (a) {
-  var c = {}, b = {}, d = {}, e = 1000, g = 0, h = !1, j = !1, q = 0, m = null, w = TWEEN.Easing.Linear.None, x = TWEEN.Interpolation.Linear, n = [], r = null, s = !1, t = null, u = null, k = null, v;
-  for (v in a)
-    c[v] = parseFloat(a[v], 10);
-  this.to = function (a, c) {
-    void 0 !== c && (e = c);
-    b = a;
-    return this;
-  };
-  this.start = function (e) {
-    TWEEN.add(this);
-    j = !0;
-    s = !1;
-    m = void 0 !== e ? e : 'undefined' !== typeof window && void 0 !== window.performance && void 0 !== window.performance.now ? window.performance.now() : Date.now();
-    m += q;
-    for (var f in b) {
-      if (b[f] instanceof Array) {
-        if (0 === b[f].length)
-          continue;
-        b[f] = [a[f]].concat(b[f]);
-      }
-      c[f] = a[f];
-      !1 === c[f] instanceof Array && (c[f] *= 1);
-      d[f] = c[f] || 0;
-    }
-    return this;
-  };
-  this.stop = function () {
-    if (!j)
-      return this;
-    TWEEN.remove(this);
-    j = !1;
-    null !== k && k.call(a);
-    this.stopChainedTweens();
-    return this;
-  };
-  this.stopChainedTweens = function () {
-    for (var a = 0, b = n.length; a < b; a++)
-      n[a].stop();
-  };
-  this.delay = function (a) {
-    q = a;
-    return this;
-  };
-  this.repeat = function (a) {
-    g = a;
-    return this;
-  };
-  this.yoyo = function (a) {
-    h = a;
-    return this;
-  };
-  this.easing = function (a) {
-    w = a;
-    return this;
-  };
-  this.interpolation = function (a) {
-    x = a;
-    return this;
-  };
-  this.chain = function () {
-    n = arguments;
-    return this;
-  };
-  this.onStart = function (a) {
-    r = a;
-    return this;
-  };
-  this.onUpdate = function (a) {
-    t = a;
-    return this;
-  };
-  this.onComplete = function (a) {
-    u = a;
-    return this;
-  };
-  this.onStop = function (a) {
-    k = a;
-    return this;
-  };
-  this.update = function (p) {
-    var f;
-    if (p < m)
-      return !0;
-    !1 === s && (null !== r && r.call(a), s = !0);
-    var i = (p - m) / e, i = 1 < i ? 1 : i, j = w(i);
-    for (f in b) {
-      var k = c[f] || 0, l = b[f];
-      l instanceof Array ? a[f] = x(l, j) : ('string' === typeof l && (l = k + parseFloat(l, 10)), 'number' === typeof l && (a[f] = k + (l - k) * j));
-    }
-    null !== t && t.call(a, j);
-    if (1 == i)
-      if (0 < g) {
-        isFinite(g) && g--;
-        for (f in d)
-          'string' === typeof b[f] && (d[f] += parseFloat(b[f], 10)), h && (i = d[f], d[f] = b[f], b[f] = i), c[f] = d[f];
-        m = p + q;
-      } else {
-        null !== u && u.call(a);
-        f = 0;
-        for (i = n.length; f < i; f++)
-          n[f].start(p);
-        return !1;
-      }
-    return !0;
-  };
-};
-TWEEN.Easing = {
-  Linear: {
-    None: function (a) {
-      return a;
-    }
-  },
-  Quadratic: {
-    In: function (a) {
-      return a * a;
-    },
-    Out: function (a) {
-      return a * (2 - a);
-    },
-    InOut: function (a) {
-      return 1 > (a *= 2) ? 0.5 * a * a : -0.5 * (--a * (a - 2) - 1);
-    }
-  },
-  Cubic: {
-    In: function (a) {
-      return a * a * a;
-    },
-    Out: function (a) {
-      return --a * a * a + 1;
-    },
-    InOut: function (a) {
-      return 1 > (a *= 2) ? 0.5 * a * a * a : 0.5 * ((a -= 2) * a * a + 2);
-    }
-  },
-  Quartic: {
-    In: function (a) {
-      return a * a * a * a;
-    },
-    Out: function (a) {
-      return 1 - --a * a * a * a;
-    },
-    InOut: function (a) {
-      return 1 > (a *= 2) ? 0.5 * a * a * a * a : -0.5 * ((a -= 2) * a * a * a - 2);
-    }
-  },
-  Quintic: {
-    In: function (a) {
-      return a * a * a * a * a;
-    },
-    Out: function (a) {
-      return --a * a * a * a * a + 1;
-    },
-    InOut: function (a) {
-      return 1 > (a *= 2) ? 0.5 * a * a * a * a * a : 0.5 * ((a -= 2) * a * a * a * a + 2);
-    }
-  },
-  Sinusoidal: {
-    In: function (a) {
-      return 1 - Math.cos(a * Math.PI / 2);
-    },
-    Out: function (a) {
-      return Math.sin(a * Math.PI / 2);
-    },
-    InOut: function (a) {
-      return 0.5 * (1 - Math.cos(Math.PI * a));
-    }
-  },
-  Exponential: {
-    In: function (a) {
-      return 0 === a ? 0 : Math.pow(1024, a - 1);
-    },
-    Out: function (a) {
-      return 1 === a ? 1 : 1 - Math.pow(2, -10 * a);
-    },
-    InOut: function (a) {
-      return 0 === a ? 0 : 1 === a ? 1 : 1 > (a *= 2) ? 0.5 * Math.pow(1024, a - 1) : 0.5 * (-Math.pow(2, -10 * (a - 1)) + 2);
-    }
-  },
-  Circular: {
-    In: function (a) {
-      return 1 - Math.sqrt(1 - a * a);
-    },
-    Out: function (a) {
-      return Math.sqrt(1 - --a * a);
-    },
-    InOut: function (a) {
-      return 1 > (a *= 2) ? -0.5 * (Math.sqrt(1 - a * a) - 1) : 0.5 * (Math.sqrt(1 - (a -= 2) * a) + 1);
-    }
-  },
-  Elastic: {
-    In: function (a) {
-      var c, b = 0.1;
-      if (0 === a)
-        return 0;
-      if (1 === a)
-        return 1;
-      !b || 1 > b ? (b = 1, c = 0.1) : c = 0.4 * Math.asin(1 / b) / (2 * Math.PI);
-      return -(b * Math.pow(2, 10 * (a -= 1)) * Math.sin((a - c) * 2 * Math.PI / 0.4));
-    },
-    Out: function (a) {
-      var c, b = 0.1;
-      if (0 === a)
-        return 0;
-      if (1 === a)
-        return 1;
-      !b || 1 > b ? (b = 1, c = 0.1) : c = 0.4 * Math.asin(1 / b) / (2 * Math.PI);
-      return b * Math.pow(2, -10 * a) * Math.sin((a - c) * 2 * Math.PI / 0.4) + 1;
-    },
-    InOut: function (a) {
-      var c, b = 0.1;
-      if (0 === a)
-        return 0;
-      if (1 === a)
-        return 1;
-      !b || 1 > b ? (b = 1, c = 0.1) : c = 0.4 * Math.asin(1 / b) / (2 * Math.PI);
-      return 1 > (a *= 2) ? -0.5 * b * Math.pow(2, 10 * (a -= 1)) * Math.sin((a - c) * 2 * Math.PI / 0.4) : 0.5 * b * Math.pow(2, -10 * (a -= 1)) * Math.sin((a - c) * 2 * Math.PI / 0.4) + 1;
-    }
-  },
-  Back: {
-    In: function (a) {
-      return a * a * (2.70158 * a - 1.70158);
-    },
-    Out: function (a) {
-      return --a * a * (2.70158 * a + 1.70158) + 1;
-    },
-    InOut: function (a) {
-      return 1 > (a *= 2) ? 0.5 * a * a * (3.5949095 * a - 2.5949095) : 0.5 * ((a -= 2) * a * (3.5949095 * a + 2.5949095) + 2);
-    }
-  },
-  Bounce: {
-    In: function (a) {
-      return 1 - TWEEN.Easing.Bounce.Out(1 - a);
-    },
-    Out: function (a) {
-      return a < 1 / 2.75 ? 7.5625 * a * a : a < 2 / 2.75 ? 7.5625 * (a -= 1.5 / 2.75) * a + 0.75 : a < 2.5 / 2.75 ? 7.5625 * (a -= 2.25 / 2.75) * a + 0.9375 : 7.5625 * (a -= 2.625 / 2.75) * a + 0.984375;
-    },
-    InOut: function (a) {
-      return 0.5 > a ? 0.5 * TWEEN.Easing.Bounce.In(2 * a) : 0.5 * TWEEN.Easing.Bounce.Out(2 * a - 1) + 0.5;
-    }
-  }
-};
-TWEEN.Interpolation = {
-  Linear: function (a, c) {
-    var b = a.length - 1, d = b * c, e = Math.floor(d), g = TWEEN.Interpolation.Utils.Linear;
-    return 0 > c ? g(a[0], a[1], d) : 1 < c ? g(a[b], a[b - 1], b - d) : g(a[e], a[e + 1 > b ? b : e + 1], d - e);
-  },
-  Bezier: function (a, c) {
-    var b = 0, d = a.length - 1, e = Math.pow, g = TWEEN.Interpolation.Utils.Bernstein, h;
-    for (h = 0; h <= d; h++)
-      b += e(1 - c, d - h) * e(c, h) * a[h] * g(d, h);
-    return b;
-  },
-  CatmullRom: function (a, c) {
-    var b = a.length - 1, d = b * c, e = Math.floor(d), g = TWEEN.Interpolation.Utils.CatmullRom;
-    return a[0] === a[b] ? (0 > c && (e = Math.floor(d = b * (1 + c))), g(a[(e - 1 + b) % b], a[e], a[(e + 1) % b], a[(e + 2) % b], d - e)) : 0 > c ? a[0] - (g(a[0], a[0], a[1], a[1], -d) - a[0]) : 1 < c ? a[b] - (g(a[b], a[b], a[b - 1], a[b - 1], d - b) - a[b]) : g(a[e ? e - 1 : 0], a[e], a[b < e + 1 ? b : e + 1], a[b < e + 2 ? b : e + 2], d - e);
-  },
-  Utils: {
-    Linear: function (a, c, b) {
-      return (c - a) * b + a;
-    },
-    Bernstein: function (a, c) {
-      var b = TWEEN.Interpolation.Utils.Factorial;
-      return b(a) / b(c) / b(a - c);
-    },
-    Factorial: function () {
-      var a = [1];
-      return function (c) {
-        var b = 1, d;
-        if (a[c])
-          return a[c];
-        for (d = c; 1 < d; d--)
-          b *= d;
-        return a[c] = b;
-      };
-    }(),
-    CatmullRom: function (a, c, b, d, e) {
-      var a = 0.5 * (b - a), d = 0.5 * (d - c), g = e * e;
-      return (2 * c - 2 * b + a + d) * e * g + (-3 * c + 3 * b - 2 * a - d) * g + a * e + c;
-    }
   }
 };
 (function ($window, $document, tagName, url, namespace, a, m) {

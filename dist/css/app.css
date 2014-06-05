@@ -7186,7 +7186,7 @@ a.badge:focus {
 [ Global ]
 */
 body {
-  background: #ffffff url(../img/background.png) repeat 0 0;
+  background: #ffffff;
   font: 13px/1.7em 'Open Sans';
 }
 .clearfix {

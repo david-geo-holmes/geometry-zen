@@ -1,3 +1,5 @@
+# This implementation is based upon ideas in  https://github.com/prose/gatekeeper
+# Gatekeeper is designed to overcome security-related limitations.
 coffee = require("coffee-script")
 express = require("express")
 jade = require("jade")
