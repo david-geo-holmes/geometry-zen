@@ -27555,8 +27555,8 @@
   goog.exportSymbol('Sk.ffi.MIN_INT', Sk.ffi.MIN_INT);
   Sk.ffi.MIN_INT = new Sk.builtin.lng(-Sk.builtin.lng.threshold$);
   goog.exportSymbol('Sk.ffi.MAX_INT', Sk.ffi.MAX_INT);
-  Sk.ffh = Sk.ffh || {};
-  var SPECIAL_METHOD_ADD = '__add__', SPECIAL_METHOD_CLIFFORD_CONJUGATE = '__cliffordConjugate__', SPECIAL_METHOD_CONJUGATE = '__conjugate__', SPECIAL_METHOD_EQ = '__eq__', SPECIAL_METHOD_EXP = '__exp__', SPECIAL_METHOD_GETITEM = '__getitem__', SPECIAL_METHOD_INVERT = '__invert__', SPECIAL_METHOD_LSHIFT = '__lshift__', SPECIAL_METHOD_MUL = '__mul__', SPECIAL_METHOD_NEG = '__neg__', SPECIAL_METHOD_NONZERO = '__nonzero__', SPECIAL_METHOD_POS = '__pos__', SPECIAL_METHOD_REPR = '__repr__', SPECIAL_METHOD_RMUL = '__rmul__', SPECIAL_METHOD_RSHIFT = '__rshift__', SPECIAL_METHOD_STR = '__str__', SPECIAL_METHOD_SUB = '__sub__', SPECIAL_METHOD_XOR = '__xor__';
+  Sk.ffh = {};
+  var SPECIAL_METHOD_ADD = '__add__', SPECIAL_METHOD_CLIFFORD_CONJUGATE = '__cliffordConjugate__', SPECIAL_METHOD_EQ = '__eq__', SPECIAL_METHOD_EXP = '__exp__', SPECIAL_METHOD_GETITEM = '__getitem__', SPECIAL_METHOD_INVERT = '__invert__', SPECIAL_METHOD_LSHIFT = '__lshift__', SPECIAL_METHOD_MUL = '__mul__', SPECIAL_METHOD_NEG = '__neg__', SPECIAL_METHOD_NONZERO = '__nonzero__', SPECIAL_METHOD_POS = '__pos__', SPECIAL_METHOD_REPR = '__repr__', SPECIAL_METHOD_RMUL = '__rmul__', SPECIAL_METHOD_RSHIFT = '__rshift__', SPECIAL_METHOD_STR = '__str__', SPECIAL_METHOD_SUB = '__sub__', SPECIAL_METHOD_XOR = '__xor__';
   Sk.ffh.unaryExec = function (a, b, c, d) {
     if (c[b])
       return Sk.ffi.callsim(c[b], c);
@@ -27636,9 +27636,13 @@
   };
   goog.exportSymbol('Sk.ffh.cliffordConjugate', Sk.ffh.cliffordConjugate);
   Sk.ffh.conjugate = function (a) {
-    return Sk.ffi.isNum(a) ? a : Sk.ffh.unaryExec('', SPECIAL_METHOD_CONJUGATE, a);
+    return Sk.ffi.isNum(a) ? a : Sk.ffh.unaryExec('', '__conjugate__', a);
   };
   goog.exportSymbol('Sk.ffh.conjugate', Sk.ffh.conjugate);
+  Sk.ffh.determinant = function (a) {
+    return Sk.ffi.isNum(a) ? a : Sk.ffh.unaryExec('determinant', '__determinant__', a);
+  };
+  goog.exportSymbol('Sk.ffh.determinant', Sk.ffh.determinant);
   Sk.ffh.cos = function (a) {
     return Sk.ffh.unaryExec('cos', '__cos__', a, 'u$cos');
   };
@@ -27725,7 +27729,7 @@
     return Sk.ffi.isFloat(a) || Sk.ffi.isInt(a) || Sk.ffi.isLong(a) ? a : Sk.ffi.callsim(Sk.ffi.gattr(a, 'evaluate'), b);
   };
   goog.exportSymbol('Sk.ffh.evaluate', Sk.ffh.evaluate);
-  Sk.ffi.promoteLongToFloat = function (a) {
+  Sk.ffh.promoteLongToFloat = function (a) {
     goog.asserts.assert(Sk.ffi.isLong(a));
     a = Sk.ffh.str(a);
     a = Sk.ffi.remapToJs(a);
@@ -27734,7 +27738,7 @@
     goog.asserts.assertNumber(a);
     return Sk.builtin.numberToPy(a);
   };
-  goog.exportSymbol('Sk.ffi.promoteLongToFloat', Sk.ffi.promoteLongToFloat);
+  goog.exportSymbol('Sk.ffh.promoteLongToFloat', Sk.ffh.promoteLongToFloat);
   Sk.builtin.enumerate = function (a, b) {
     if (!(this instanceof Sk.builtin.enumerate))
       return new Sk.builtin.enumerate(a, b);
@@ -39957,7 +39961,7 @@
     return 0 < a ? 1 : 0 > a ? -1 : 0 < b ? 1 : 0 > b ? -1 : 0 < c ? 1 : 0 > c ? -1 : 2;
   };
   goog.exportSymbol('Sk.stdlib.orientation', Sk.stdlib.orientation);
-  Sk.math = Sk.math || {};
+  Sk.math = {};
   Sk.math.PI_TIMES_1_OVER_4 = Math.PI / 4;
   Sk.math.PI_TIMES_2_OVER_4 = Math.PI / 2;
   Sk.math.PI_TIMES_3_OVER_4 = 3 * Math.PI / 4;
@@ -40139,6 +40143,10 @@
       a.conjugate = Sk.ffi.functionPy(function (a) {
         Sk.ffi.checkFunctionArgs('conjugate', arguments, 1, 1);
         return Sk.ffi.isNum(a) ? a : Sk.ffh.conjugate(a);
+      });
+      a.det = Sk.ffi.functionPy(function (a) {
+        Sk.ffi.checkFunctionArgs('det', arguments, 1, 1);
+        return Sk.ffh.determinant(a);
       });
       a.magnitude = Sk.ffi.functionPy(function (a) {
         Sk.ffi.checkFunctionArgs('magnitude', arguments, 1, 1);
@@ -40382,6 +40390,11 @@
         c.__conjugate__ = Sk.ffi.functionPy(function (b) {
           Sk.ffi.checkMethodArgs('conjugate', arguments, 0, 0);
           return Sk.ffi.callsim(a[Sk.matrix.MATRIX_2x2], Sk.ffh.conjugate(Sk.ffh.getitem(b, 0)), Sk.ffh.conjugate(Sk.ffh.getitem(b, 1)));
+        });
+        c.__determinant__ = Sk.ffi.functionPy(function (a) {
+          Sk.ffi.checkMethodArgs('determinant', arguments, 0, 0);
+          var b = Sk.ffh.getitem(Sk.ffh.getitem(a, 0), 0), c = Sk.ffh.getitem(Sk.ffh.getitem(a, 0), 1), g = Sk.ffh.getitem(Sk.ffh.getitem(a, 1), 0), h = Sk.ffh.getitem(Sk.ffh.getitem(a, 1), 1);
+          return Sk.ffh.sub(Sk.ffh.mul(b, h), Sk.ffh.mul(c, g));
         });
         c.__getattr__ = Sk.ffi.functionPy(function (b, c) {
           Sk.ffi.remapToJs(b);
