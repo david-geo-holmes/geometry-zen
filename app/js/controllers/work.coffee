@@ -63,7 +63,6 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
         contextItem = name: file.name, path: file.path, sha: file.sha, type: file.type, parentItem: $scope.contextItem, childItems: []
         $scope.contextItem = contextItem
         if file.encoding is "base64"
-          console.log file.type
           if isJavaScript(file.path)
             editor.getSession().setMode("ace/mode/javascript")
           else if isCoffeeScript(file.path)
@@ -128,6 +127,8 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
       try
         if isJavaScript($scope.contextItem.path)
           eval(prog)
+        else if isCoffeeScript($scope.contextItem.path)
+          CoffeeScript.eval(prog)
         else if isPythonScript($scope.contextItem.path)
           Sk.importMainWithBody "<stdin>", false, prog
         else
@@ -201,7 +202,7 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
       # We will be able to save the code as a GitHub Gist
       return true
 
-  $scope.runEnabled = -> $scope.workEnabled() and $scope.contextItem and (isJavaScript($scope.contextItem.path) or isPythonScript($scope.contextItem.path))
+  $scope.runEnabled = -> $scope.workEnabled() and $scope.contextItem and (isCoffeeScript($scope.contextItem.path) or isJavaScript($scope.contextItem.path) or isPythonScript($scope.contextItem.path))
 
   $rootScope.headerEnabled = -> true
 

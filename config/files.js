@@ -56,6 +56,7 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
       "vendor/ace-builds/src-noconflict/worker-html.js",
       "vendor/ace-builds/src-noconflict/worker-javascript.js",
       "vendor/ace-builds/src-noconflict/worker-json.js",
+      "vendor/coffee-script/extras/coffee-script.js",
       "vendor/d3/d3.min.js",
       "vendor/EaselJS/lib/easeljs-0.7.1.min.js",
       "vendor/TweenJS/lib/tweenjs-0.5.1.min.js",
