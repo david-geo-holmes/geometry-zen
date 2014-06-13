@@ -35,10 +35,11 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
 
   editor = ace.edit("editor")
   editor.setTheme("ace/theme/twilight")
+  editor.getSession().setMode "ace/mode/python"
+  editor.getSession().setTabSize 4
   editor.setShowInvisibles(true)
   editor.setFontSize(15)
   editor.setShowPrintMargin false
-  editor.getSession().setTabSize 2
 
   GITHUB_TOKEN_COOKIE_NAME = 'github-token'
   token = cookie.getItem(GITHUB_TOKEN_COOKIE_NAME)
@@ -141,7 +142,7 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
         else if isPython($scope.contextItem.path)
           Sk.importMainWithBody "<stdin>", false, prog
         else
-          throw new Error("#{$scope.contextItem.path} is not an executable script.");
+          Sk.importMainWithBody "<stdin>", false, prog
       catch e
         # Unfortunately, we have to parse the string representation of the message.
         # It would be nice if exceptions had the standard name and message.
@@ -211,7 +212,7 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
       # We will be able to save the code as a GitHub Gist
       return true
 
-  $scope.runEnabled = -> $scope.workEnabled() and $scope.contextItem and (isCoffee($scope.contextItem.path) or isJS($scope.contextItem.path) or isPython($scope.contextItem.path))
+  $scope.runEnabled = -> $scope.workEnabled()
 
   $rootScope.headerEnabled = -> true
 

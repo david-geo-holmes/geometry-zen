@@ -40227,6 +40227,14 @@ mod[MEASURE] = Sk.ffi.buildClass(mod, function($gbl, $loc)
 
 };
 }).call(this);
+(function()
+{
+  Sk.stdlib.defineEight = function(mod, BLADE)
+  {
+    Sk.ffi.checkFunctionArgs("defineEight", arguments, 2, 2);
+    Sk.builtin.defineNode(mod);
+  }
+}).call(this);
 Sk.three = Sk.three || {};
 /**
 * @const

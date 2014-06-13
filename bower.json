@@ -1,13 +1,21 @@
 {
   "name": "geometryzen",
-  "version": "0.9.235",
+  "version": "0.9.236",
   "main": "./app/js/main.js",
   "description": "Geometric Physics is a free, online, open-source, and collaborative tool for Computational Modeling combining programming languages, 3D visualization, Physical Units, and Geometric Algebra - the Unified Mathematical Language for Physics and Engineering in the 21st Century.",
   "author": {
     "name": "David Holmes",
     "email": "david.geo.holmes@gmail.com"
   },
-  "keywords": ["geometric", "algebra", "geometry", "physics", "programming", "modeling", "3D"],
+  "keywords": [
+    "geometric",
+    "algebra",
+    "geometry",
+    "physics",
+    "programming",
+    "modeling",
+    "3D"
+  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/geometryzen/geometryzen.git"
@@ -28,15 +36,15 @@
     "async": "~0.2.5",
     "coffee-script": "~1.7.1",
     "bootstrap": "~2.3.2",
-    "davinci": "~0.9.231",
+    "davinci": "~0.9.236",
     "d3": "~3.4.6",
     "EaselJS": "latest",
-    "eightjs": "~0.0.4",
+    "eightjs": "~0.0.5",
     "font-awesome": "~3.2.1",
     "jed": "~0.5.4",
     "jquery": "~2.0.3",
     "jquery.layout": "latest",
-    "MathJax": "latest",
+    "MathJax": "~2.4.0",
     "stats.js": "latest",
     "threejs": "latest",
     "TweenJS": "latest",
