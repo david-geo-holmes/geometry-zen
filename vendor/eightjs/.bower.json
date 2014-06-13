@@ -1,7 +1,7 @@
 {
   "name": "eight.js",
   "description": "JavaScript 3D library using Geometric Algebra",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "homepage": "https://github.com/geometryzen/eight.js",
   "author": "David Geo Holmes",
   "licenses": [
@@ -48,13 +48,13 @@
     "almond": "~0.2.9",
     "stats.js": "latest"
   },
-  "_release": "0.0.3",
+  "_release": "0.0.4",
   "_resolution": {
     "type": "version",
-    "tag": "0.0.3",
-    "commit": "0882d4843cd9fe09a5523a037a0bc461345f086c"
+    "tag": "0.0.4",
+    "commit": "ea0bb30612114a2d4b354eb9921b2b95eff1bb22"
   },
   "_source": "git://github.com/geometryzen/eight.js.git",
-  "_target": "~0.0.3",
+  "_target": "~0.0.4",
   "_originalSource": "eightjs"
 }

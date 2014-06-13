@@ -12,7 +12,7 @@ angular.module("app").controller 'EmbedCtrl', ['$rootScope','$scope', '$location
   editor = ace.edit("editor")
   editor.setTheme("ace/theme/twilight")
   editor.getSession().setMode("ace/mode/python")
-  editor.setShowInvisibles(true)
+  editor.setShowInvisibles(false)
   editor.setFontSize(15)
   editor.setShowPrintMargin false
 
@@ -90,10 +90,7 @@ angular.module("app").controller 'EmbedCtrl', ['$rootScope','$scope', '$location
 
     if prog.trim().length > 0
       try
-        # I think this first parameter is a convention. It could be anything?
-        # As a file, the DaVinci library uses it as <stdin>.py
-        # debugger
-        eval(Sk.importMainWithBody("<stdin>", false, prog.trim()))
+        Sk.importMainWithBody "<stdin>", false, prog
       catch e
         # Unfortunately, we have to parse the string representation of the message.
         # It would be nice if exceptions had the standard name and message.

@@ -1,5 +1,29 @@
 angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location', '$window', '$routeParams', '$', '_', 'GitHub', 'Base64', 'cookie', 'GitHubAuthManager', ($rootScope, $scope, $location, $window, $routeParams, $, _, github, base64, cookie, authManager) ->
 
+  endsWith = (str, suffix) ->
+    if str and suffix
+      return str.length > 0 and str.substring(str.length-suffix.length, str.length) is suffix
+    else
+      return false
+
+  isCoffeeScript = (path) ->
+    return endsWith(path, '.coffee')
+
+  isHTML = (path) ->
+    return endsWith(path, '.html')
+
+  isJavaScript = (path) ->
+    return endsWith(path, '.js')
+
+  isJSON = (path) ->
+    return endsWith(path, '.json')
+
+  isMarkDown = (path) ->
+    return endsWith(path, '.md')
+
+  isPythonScript = (path) ->
+    return endsWith(path, '.py')
+
   EVENT_CATEGORY = "work"
   ga('create', 'UA-41504069-1', 'geometryzen.org');
   ga('set', 'page', '/work')
@@ -11,7 +35,6 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
 
   editor = ace.edit("editor")
   editor.setTheme("ace/theme/twilight")
-  editor.getSession().setMode("ace/mode/python")
   editor.setShowInvisibles(true)
   editor.setFontSize(15)
   editor.setShowPrintMargin false
@@ -40,6 +63,21 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
         contextItem = name: file.name, path: file.path, sha: file.sha, type: file.type, parentItem: $scope.contextItem, childItems: []
         $scope.contextItem = contextItem
         if file.encoding is "base64"
+          console.log file.type
+          if isJavaScript(file.path)
+            editor.getSession().setMode("ace/mode/javascript")
+          else if isCoffeeScript(file.path)
+            editor.getSession().setMode("ace/mode/coffee")
+          else if isPythonScript(file.path)
+            editor.getSession().setMode("ace/mode/python")
+          else if isHTML(file.path)
+            editor.getSession().setMode("ace/mode/html")
+          else if isJSON(file.path)
+            editor.getSession().setMode("ace/mode/json")
+          else if isMarkDown(file.path)
+            editor.getSession().setMode("ace/mode/markdown")
+          else
+            editor.getSession().setMode("ace/mode/text")
           editor.setValue base64.decode(file.content)
           editor.focus()
           editor.gotoLine 0, 0
@@ -88,10 +126,12 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
 
     if prog.trim().length > 0
       try
-        # I think this first parameter is a convention. It could be anything?
-        # As a file, the DaVinci library uses it as <stdin>.py
-        # debugger
-        eval(Sk.importMainWithBody("<stdin>", false, prog.trim()))
+        if isJavaScript($scope.contextItem.path)
+          eval(prog)
+        else if isPythonScript($scope.contextItem.path)
+          Sk.importMainWithBody "<stdin>", false, prog
+        else
+          throw new Error("#{$scope.contextItem.path} is not an executable script.");
       catch e
         # Unfortunately, we have to parse the string representation of the message.
         # It would be nice if exceptions had the standard name and message.
@@ -161,7 +201,7 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
       # We will be able to save the code as a GitHub Gist
       return true
 
-  $scope.runEnabled = -> $scope.workEnabled()
+  $scope.runEnabled = -> $scope.workEnabled() and $scope.contextItem and (isJavaScript($scope.contextItem.path) or isPythonScript($scope.contextItem.path))
 
   $rootScope.headerEnabled = -> true
 
