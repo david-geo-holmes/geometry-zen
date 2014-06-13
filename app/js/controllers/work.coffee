@@ -6,13 +6,13 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
     else
       return false
 
-  isCoffeeScript = (path) ->
+  isCoffee = (path) ->
     return endsWith(path, '.coffee')
 
   isHTML = (path) ->
     return endsWith(path, '.html')
 
-  isJavaScript = (path) ->
+  isJS = (path) ->
     return endsWith(path, '.js')
 
   isJSON = (path) ->
@@ -21,7 +21,7 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
   isMarkDown = (path) ->
     return endsWith(path, '.md')
 
-  isPythonScript = (path) ->
+  isPython = (path) ->
     return endsWith(path, '.py')
 
   EVENT_CATEGORY = "work"
@@ -38,6 +38,7 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
   editor.setShowInvisibles(true)
   editor.setFontSize(15)
   editor.setShowPrintMargin false
+  editor.getSession().setTabSize 2
 
   GITHUB_TOKEN_COOKIE_NAME = 'github-token'
   token = cookie.getItem(GITHUB_TOKEN_COOKIE_NAME)
@@ -63,20 +64,28 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
         contextItem = name: file.name, path: file.path, sha: file.sha, type: file.type, parentItem: $scope.contextItem, childItems: []
         $scope.contextItem = contextItem
         if file.encoding is "base64"
-          if isJavaScript(file.path)
-            editor.getSession().setMode("ace/mode/javascript")
-          else if isCoffeeScript(file.path)
-            editor.getSession().setMode("ace/mode/coffee")
-          else if isPythonScript(file.path)
-            editor.getSession().setMode("ace/mode/python")
+          if isJS(file.path)
+            editor.getSession().setMode "ace/mode/javascript"
+            editor.getSession().setTabSize 2
+          else if isCoffee(file.path)
+            editor.getSession().setMode "ace/mode/coffee"
+            editor.getSession().setTabSize 2
+          else if isPython(file.path)
+            editor.getSession().setMode "ace/mode/python"
+            editor.getSession().setTabSize 4
           else if isHTML(file.path)
-            editor.getSession().setMode("ace/mode/html")
+            editor.getSession().setMode "ace/mode/html"
+            editor.getSession().setTabSize 2
           else if isJSON(file.path)
-            editor.getSession().setMode("ace/mode/json")
+            editor.getSession().setMode "ace/mode/json"
+            editor.getSession().setTabSize 2
           else if isMarkDown(file.path)
-            editor.getSession().setMode("ace/mode/markdown")
+            editor.getSession().setMode "ace/mode/markdown"
+            editor.getSession().setTabSize 2
           else
-            editor.getSession().setMode("ace/mode/text")
+            editor.getSession().setMode "ace/mode/text"
+            editor.getSession().setTabSize 2
+
           editor.setValue base64.decode(file.content)
           editor.focus()
           editor.gotoLine 0, 0
@@ -125,11 +134,11 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
 
     if prog.trim().length > 0
       try
-        if isJavaScript($scope.contextItem.path)
+        if isJS($scope.contextItem.path)
           eval(prog)
-        else if isCoffeeScript($scope.contextItem.path)
+        else if isCoffee($scope.contextItem.path)
           CoffeeScript.eval(prog)
-        else if isPythonScript($scope.contextItem.path)
+        else if isPython($scope.contextItem.path)
           Sk.importMainWithBody "<stdin>", false, prog
         else
           throw new Error("#{$scope.contextItem.path} is not an executable script.");
@@ -202,7 +211,7 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
       # We will be able to save the code as a GitHub Gist
       return true
 
-  $scope.runEnabled = -> $scope.workEnabled() and $scope.contextItem and (isCoffeeScript($scope.contextItem.path) or isJavaScript($scope.contextItem.path) or isPythonScript($scope.contextItem.path))
+  $scope.runEnabled = -> $scope.workEnabled() and $scope.contextItem and (isCoffee($scope.contextItem.path) or isJS($scope.contextItem.path) or isPython($scope.contextItem.path))
 
   $rootScope.headerEnabled = -> true
 

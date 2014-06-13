@@ -1,7 +1,7 @@
 {
   "name": "geometryzen",
-  "description": "Geometric Physics is a free, online, open-source, and collaborative tool for Computational Modeling combining the Python programming language, 3D visualization (WebGL), Physical Units, and Geometric Algebra, the Unified Mathematical Language for Physics and Engineering in the 21st Century.",
-  "version": "0.9.234",
+  "description": "Geometric Physics is a free, online, open-source, and collaborative tool for Computational Modeling combining programming languages, 3D visualization, Physical Units, and Geometric Algebra - the Unified Mathematical Language for Physics and Engineering in the 21st Century.",
+  "version": "0.9.235",
   "title": "Geometric Physics",
   "private": false,
   "author":
@@ -17,7 +17,7 @@
     }
   ],
   "url": "http://github.com/geometryzen/geometryzen",
-  "keywords": ["geometric", "algebra", "geometry", "zen"],
+  "keywords": ["geometric", "algebra", "geometry", "physics", "programming", "modeling", "3D"],
   "scripts": {
     "start": "NODE_ENV=local nodemon web.js",
     "test": "echo \"Error: no test specified\" && exit 1"
