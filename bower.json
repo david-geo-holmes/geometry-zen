@@ -1,6 +1,6 @@
 {
   "name": "geometryzen",
-  "version": "0.9.240",
+  "version": "0.9.241",
   "main": "./app/js/main.js",
   "description": "Geometric Physics is a free, online, open-source, and collaborative tool for Computational Modeling combining programming languages, 3D visualization, Physical Units, and Geometric Algebra - the Unified Mathematical Language for Physics and Engineering in the 21st Century.",
   "author": {
@@ -36,7 +36,7 @@
     "async": "~0.2.5",
     "coffee-script": "~1.7.1",
     "bootstrap": "~2.3.2",
-    "davinci": "~0.9.240",
+    "davinci": "~0.9.241",
     "d3": "~3.4.6",
     "EaselJS": "latest",
     "eightjs": "~0.0.5",
@@ -49,5 +49,8 @@
     "threejs": "latest",
     "TweenJS": "latest",
     "underscore": "~1.6.0"
+  },
+  "resolutions": {
+    "davinci-py": "~0.9.241"
   }
 }

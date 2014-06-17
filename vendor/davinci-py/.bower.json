@@ -1,6 +1,6 @@
 {
   "name": "davinci-py",
-  "version": "0.0.9",
+  "version": "0.9.241",
   "author": {
     "name": "David Holmes",
     "email": "david.geo.holmes@gmail.com"
@@ -43,13 +43,13 @@
     "package.json"
   ],
   "homepage": "https://github.com/geometryzen/davinci-py",
-  "_release": "0.0.9",
+  "_release": "0.9.241",
   "_resolution": {
     "type": "version",
-    "tag": "0.0.9",
-    "commit": "919a630f13f6a46a8e6d602ad76741f915b09358"
+    "tag": "0.9.241",
+    "commit": "c88fa57d7c601c98235dcac861c0138be54bd94b"
   },
   "_source": "git://github.com/geometryzen/davinci-py.git",
-  "_target": "~0.0.9",
+  "_target": "~0.9.241",
   "_originalSource": "davinci-py"
 }
