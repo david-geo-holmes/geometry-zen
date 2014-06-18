@@ -126,35 +126,35 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
       "output": (text) ->
         $rootScope.$broadcast('print', text)
       "debugout": (arg) ->
-        console.log "#{JSON.stringify(arg, null, 2)}"
+        console.log(arg)
       "read": (searchPath) ->
         if Sk.builtinFiles is undefined or Sk.builtinFiles["files"][searchPath] is undefined
           throw new Error("File not found: '#{searchPath}'")
         else
           return Sk.builtinFiles["files"][searchPath]
 
-    if prog.trim().length > 0
-      try
-        if isJS($scope.contextItem.path)
-          eval(prog)
-        else if isCoffee($scope.contextItem.path)
-          CoffeeScript.eval(prog)
-        else if isPython($scope.contextItem.path)
-          Sk.importMainWithBody "<stdin>", false, prog
+    try
+      if isJS($scope.contextItem.path)
+        eval(prog)
+      else if isCoffee($scope.contextItem.path)
+        CoffeeScript.eval(prog)
+      else if isPython($scope.contextItem.path)
+        dumpJS = true
+        Sk.importMainWithBody "<stdin>", dumpJS, prog
+      else
+        Sk.importMainWithBody "<stdin>", false, prog
+    catch e
+      # Unfortunately, we have to parse the string representation of the message.
+      # It would be nice if exceptions had the standard name and message.
+      if typeof e isnt 'undefined'
+        if typeof e.toString is 'function'
+          message = e.toString()
+          name = message.substring(0, message.indexOf(":"))
+          text = message.substring(message.indexOf(":") + 1)
+          $scope.messages.push name: name, text: text, severity: 'error'
         else
-          Sk.importMainWithBody "<stdin>", false, prog
-      catch e
-        # Unfortunately, we have to parse the string representation of the message.
-        # It would be nice if exceptions had the standard name and message.
-        if typeof e isnt 'undefined'
-          if typeof e.toString is 'function'
-            message = e.toString()
-            name = message.substring(0, message.indexOf(":"))
-            text = message.substring(message.indexOf(":") + 1)
-            $scope.messages.push name: name, text: text, severity: 'error'
-          else
-            # Messages raised don't all support toString
-            console.log JSON.stringify(e, null, 2)
+          # Messages raised don't all support toString
+          console.log JSON.stringify(e, null, 2)
 
   # This is the save event handler for an existing page, as evident by the provision of the SHA.
   $scope.saveFile = () ->

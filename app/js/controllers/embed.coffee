@@ -81,7 +81,7 @@ angular.module("app").controller 'EmbedCtrl', ['$rootScope','$scope', '$location
       "output": (text) ->
         $rootScope.$broadcast('print', text)
       "debugout": (arg) ->
-        console.log "#{JSON.stringify(arg, null, 2)}"
+        console.log(arg)
       "read": (searchPath) ->
         if Sk.builtinFiles is undefined or Sk.builtinFiles["files"][searchPath] is undefined
           throw new Error("File not found: '#{searchPath}'")
