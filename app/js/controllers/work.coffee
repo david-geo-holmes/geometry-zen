@@ -144,10 +144,19 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
       else
         Sk.importMainWithBody "<stdin>", false, prog
     catch e
-      # Unfortunately, we have to parse the string representation of the message.
-      # It would be nice if exceptions had the standard name and message.
       if typeof e isnt 'undefined'
-        if typeof e.toString is 'function'
+        if typeof e.name is 'string' and typeof e.message is 'string'
+          if typeof e.lineNumber is 'number'
+            editor.focus()
+            if typeof e.columnNumber is 'number'
+              $scope.messages.push name: e.name, text: "[#{e.lineNumber}, #{e.columnNumber}]: #{e.message}", severity: 'error'
+              editor.gotoLine(e.lineNumber, e.columnNumber)
+            else
+              $scope.messages.push name: e.name, text: "[#{e.lineNumber}]: #{e.message}", severity: 'error'
+              editor.gotoLine(e.lineNumber, 0)
+        else if typeof e.toString is 'function'
+          # Unfortunately, we have to parse the string representation of the message.
+          # It would be nice if exceptions had the standard name and message.
           message = e.toString()
           name = message.substring(0, message.indexOf(":"))
           text = message.substring(message.indexOf(":") + 1)
