@@ -188,7 +188,7 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
       else
         files = {"main.py":{content:editor.getValue()}}
         data = {}
-        data.description = "Geometric Physics Gist"
+        data.description = "Geometry Zen Gist"
         data.public = true
         data.files = files
         github.postGist token, data, (err, response, status, headers, config) ->

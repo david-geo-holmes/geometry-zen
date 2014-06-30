@@ -1,8 +1,8 @@
 {
   "name": "geometryzen",
-  "version": "0.9.245",
+  "version": "0.9.246",
   "main": "./app/js/main.js",
-  "description": "Geometric Physics is a free, online, open-source, and collaborative tool for Computational Modeling combining programming languages, 3D visualization, Physical Units, and Geometric Algebra - the Unified Mathematical Language for Physics and Engineering in the 21st Century.",
+  "description": "Geometry Zen is a free, online, open-source, and collaborative tool for Computational Modeling combining programming languages, 3D visualization, Physical Units, and Geometric Algebra - the Unified Mathematical Language for Physics and Engineering in the 21st Century.",
   "author": {
     "name": "David Holmes",
     "email": "david.geo.holmes@gmail.com"
