@@ -21,18 +21,63 @@
 </head>
 <body>
 
-<pre id="editor">function foo(items) {
-    var i;
+<pre id="editor">function foo(items: string[]): void {
+    var i: number;
     for (i = 0; i &lt; items.length; i++) {
-        alert("Ace Rocks " + items[i]);
+        var item = items[i];
+        console.log(item);
     }
+    foo(['Hello', 'World', '!']);
 }</pre>
     
+<script src="../vendor/jquery/dist/jquery.js"></script>
 <script src="src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
 <script>
-    var editor = ace.edit("editor");
-    editor.setTheme("ace/theme/twilight");
-    editor.getSession().setMode("ace/mode/javascript");
+    function readFile(url, callback) {
+        $.ajax({
+            type: "GET",
+            url: url,
+            success: callback,
+            error: (function (jqXHR, textStatus)
+            {
+                return console.log(textStatus);
+            })
+        });
+    }
+    
+    function prepareWorkspace(ws)
+    {
+        var libnames =
+        [
+            "mode/typescript/lib.d.ts"
+        ];
+    
+        libnames.forEach(function(fileName)
+        {
+            readFile(fileName, function(content)
+            {
+                if (ws) {
+                    ws.ensureScript(fileName, content.replace(/\r\n?/g, '\n'), true);
+                }
+            });
+        });
+    }
+
+$(function() {
+    var workspace = ace.workspace();
+    
+    prepareWorkspace(workspace);
+    
+    var editor = ace.edit('editor', workspace);
+    editor.setTheme('ace/theme/textmate');
+    editor.getSession().setMode('ace/mode/typescript');
+    editor.getSession().setTabSize(4);
+    editor.changeFile(editor.getValue(), 'abc.ts');
+    editor.focus();
+    editor.gotoLine(0, 0);
+    editor.setShowInvisibles(true)
+    editor.setFontSize("15px")
+});
 </script>
 
 </body>

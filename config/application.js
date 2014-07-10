@@ -78,22 +78,53 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('application
   copy: {
     dev: {
       files: [
-        {src: "vendor/font-awesome/font/FontAwesome.otf",          dest: "generated/img/FontAwesome.otf"},
-        {src: "vendor/font-awesome/font/fontawesome-webfont.eot",  dest: "generated/img/fontawesome-webfont.eot"},
-        {src: "vendor/font-awesome/font/fontawesome-webfont.svg",  dest: "generated/img/fontawesome-webfont.svg"},
-        {src: "vendor/font-awesome/font/fontawesome-webfont.ttf",  dest: "generated/img/fontawesome-webfont.ttf"},
-        {src: "vendor/font-awesome/font/fontawesome-webfont.woff", dest: "generated/img/fontawesome-webfont.woff"}
+        {src: "vendor/ace-builds/src-min-noconflict/worker-coffee.js",     dest: "generated/js/worker-coffee.js"},
+        {src: "vendor/ace-builds/src-min-noconflict/worker-css.js",        dest: "generated/js/worker-css.js"},
+        {src: "vendor/ace-builds/src-min-noconflict/worker-html.js",       dest: "generated/js/worker-html.js"},
+        {src: "vendor/ace-builds/src-min-noconflict/worker-javascript.js", dest: "generated/js/worker-javascript.js"},
+        {src: "vendor/ace-builds/src-min-noconflict/worker-json.js",       dest: "generated/js/worker-json.js"},
+        {src: "vendor/ace-builds/src-min-noconflict/worker-lua.js",        dest: "generated/js/worker-lua.js"},
+        {src: "vendor/ace-builds/src-min-noconflict/worker-php.js",        dest: "generated/js/worker-php.js"},
+        {src: "vendor/ace-builds/src-min-noconflict/worker-typescript.js", dest: "generated/js/worker-typescript.js"},
+        {src: "vendor/ace-builds/src-min-noconflict/worker-workspace.js",  dest: "generated/js/worker-workspace.js"},
+        {src: "vendor/ace-builds/src-min-noconflict/worker-xquery.js",     dest: "generated/js/worker-xquery.js"},
+
+        {src: "node_modules/typescript/bin/lib.d.ts",                      dest: "generated/ts/lib.d.ts"},
+        {src: "vendor/davinci-blade/dist/davinci-blade.d.ts",              dest: "generated/ts/davinci-blade.d.ts"},
+        {src: "vendor/davinci-eight/dist/davinci-eight.d.ts",              dest: "generated/ts/davinci-eight.d.ts"},
+
+        {src: "vendor/font-awesome/font/FontAwesome.otf",                  dest: "generated/img/FontAwesome.otf"},
+        {src: "vendor/font-awesome/font/fontawesome-webfont.eot",          dest: "generated/img/fontawesome-webfont.eot"},
+        {src: "vendor/font-awesome/font/fontawesome-webfont.svg",          dest: "generated/img/fontawesome-webfont.svg"},
+        {src: "vendor/font-awesome/font/fontawesome-webfont.ttf",          dest: "generated/img/fontawesome-webfont.ttf"},
+        {src: "vendor/font-awesome/font/fontawesome-webfont.woff",         dest: "generated/img/fontawesome-webfont.woff"}
       ]
     },
     dist: {
       files: [
-        {src: "generated/css/app.css",                             dest: "dist/css/app.css"},
-        {src: "generated/js/app.js",                               dest: "dist/js/app.js"},
-        {src: "vendor/font-awesome/font/FontAwesome.otf",          dest: "dist/img/FontAwesome.otf"},
-        {src: "vendor/font-awesome/font/fontawesome-webfont.eot",  dest: "dist/img/fontawesome-webfont.eot"},
-        {src: "vendor/font-awesome/font/fontawesome-webfont.svg",  dest: "dist/img/fontawesome-webfont.svg"},
-        {src: "vendor/font-awesome/font/fontawesome-webfont.ttf",  dest: "dist/img/fontawesome-webfont.ttf"},
-        {src: "vendor/font-awesome/font/fontawesome-webfont.woff", dest: "dist/img/fontawesome-webfont.woff"}
+        {src: "generated/css/app.css",                                     dest: "dist/css/app.css"},
+        {src: "generated/js/app.js",                                       dest: "dist/js/app.js"},
+
+        {src: "vendor/ace-builds/src-min-noconflict/worker-coffee.js",     dest: "dist/js/worker-coffee.js"},
+        {src: "vendor/ace-builds/src-min-noconflict/worker-css.js",        dest: "dist/js/worker-css.js"},
+        {src: "vendor/ace-builds/src-min-noconflict/worker-html.js",       dest: "dist/js/worker-html.js"},
+        {src: "vendor/ace-builds/src-min-noconflict/worker-javascript.js", dest: "dist/js/worker-javascript.js"},
+        {src: "vendor/ace-builds/src-min-noconflict/worker-json.js",       dest: "dist/js/worker-json.js"},
+        {src: "vendor/ace-builds/src-min-noconflict/worker-lua.js",        dest: "dist/js/worker-lua.js"},
+        {src: "vendor/ace-builds/src-min-noconflict/worker-php.js",        dest: "dist/js/worker-php.js"},
+        {src: "vendor/ace-builds/src-min-noconflict/worker-typescript.js", dest: "dist/js/worker-typescript.js"},
+        {src: "vendor/ace-builds/src-min-noconflict/worker-workspace.js",  dest: "dist/js/worker-workspace.js"},
+        {src: "vendor/ace-builds/src-min-noconflict/worker-xquery.js",     dest: "dist/js/worker-xquery.js"},
+
+        {src: "node_modules/typescript/bin/lib.d.ts",                      dest: "dist/ts/lib.d.ts"},
+        {src: "vendor/davinci-blade/dist/davinci-blade.d.ts",              dest: "dist/ts/davinci-blade.d.ts"},
+        {src: "vendor/davinci-eight/dist/davinci-eight.d.ts",              dest: "dist/ts/davinci-eight.d.ts"},
+
+        {src: "vendor/font-awesome/font/FontAwesome.otf",                  dest: "dist/img/FontAwesome.otf"},
+        {src: "vendor/font-awesome/font/fontawesome-webfont.eot",          dest: "dist/img/fontawesome-webfont.eot"},
+        {src: "vendor/font-awesome/font/fontawesome-webfont.svg",          dest: "dist/img/fontawesome-webfont.svg"},
+        {src: "vendor/font-awesome/font/fontawesome-webfont.ttf",          dest: "dist/img/fontawesome-webfont.ttf"},
+        {src: "vendor/font-awesome/font/fontawesome-webfont.woff",         dest: "dist/img/fontawesome-webfont.woff"}
       ]
     }
   },

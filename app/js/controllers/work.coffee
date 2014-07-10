@@ -1,4 +1,6 @@
-angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location', '$window', '$routeParams', '$', '_', 'GitHub', 'Base64', 'cookie', 'GitHubAuthManager', ($rootScope, $scope, $location, $window, $routeParams, $, _, github, base64, cookie, authManager) ->
+angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$location', '$window', '$routeParams', '$', '_', 'GitHub', 'Base64', 'cookie', 'GitHubAuthManager', ($rootScope, $scope, $http, $location, $window, $routeParams, $, _, github, base64, cookie, authManager) ->
+  
+  DOMAIN = "#{$location.protocol()}://#{$location.host()}:#{$location.port()}"
 
   endsWith = (str, suffix) ->
     if str and suffix
@@ -24,6 +26,9 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
   isPython = (path) ->
     return endsWith(path, '.py')
 
+  isTypeScript = (path) ->
+    return endsWith(path, '.ts')
+
   EVENT_CATEGORY = "work"
   ga('create', 'UA-41504069-1', 'geometryzen.org');
   ga('set', 'page', '/work')
@@ -33,13 +38,54 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
     if err
       $window.alert err.message
 
-  editor = ace.edit("editor")
-  editor.setTheme("ace/theme/twilight")
-  editor.getSession().setMode "ace/mode/python"
-  editor.getSession().setTabSize 4
+  ace.config.set('workerPath', '/js')
+
+  workspace = ace.workspace()
+
+  fileNames = ['lib.d.ts', 'davinci-eight.d.ts', 'davinci-blade.d.ts'] #TODO: This is only needed for TypeScript.
+
+  readFile = (fileName, callback) =>
+    url = "#{DOMAIN}/ts/#{fileName}"
+    $http.get(url)
+      .success (data, status, headers, config) ->
+        callback(null, data)
+      .error (data, status, headers, config) ->
+        callback new Error "Unable to wrangle #{fileName}."
+
+  fileNames.forEach (fileName) =>
+    readFile fileName, (err, content) =>
+      if not err
+        if workspace
+          workspace.ensureScript fileName, content.replace(/\r\n?/g, '\n'), true
+      else
+        console.log "#{err}"
+
+  editor = ace.edit("editor", workspace)
+  editor.setTheme("ace/theme/textmate")
+  editor.getSession().setMode("ace/mode/python")
+  editor.getSession().setTabSize(4)
   editor.setShowInvisibles(true)
-  editor.setFontSize(15)
-  editor.setShowPrintMargin false
+  editor.setFontSize('15px')
+# editor.setShowPrintMargin false
+
+  editor.getSession().on "initAfter", (event) =>
+    # Not sure how knowledge of worker being ready might be used.
+
+  editor.getSession().on "syntaxErrors", (event) =>
+    console.log "#{event}"
+    $scope.outputFile = null
+
+  editor.getSession().on "change", (event) =>
+    $scope.outputFile = null
+
+  editor.getSession().on "outputFiles", (event) =>
+    try
+      outputFiles = event.data
+      outputFiles.forEach (file) =>
+        text = file.text
+        $scope.outputFile = file
+    catch e
+      console.log "#{e}"
 
   GITHUB_TOKEN_COOKIE_NAME = 'github-token'
   token = cookie.getItem(GITHUB_TOKEN_COOKIE_NAME)
@@ -65,7 +111,10 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
         contextItem = name: file.name, path: file.path, sha: file.sha, type: file.type, parentItem: $scope.contextItem, childItems: []
         $scope.contextItem = contextItem
         if file.encoding is "base64"
-          if isJS(file.path)
+          if isTypeScript(file.path)
+            editor.getSession().setMode "ace/mode/typescript"
+            editor.getSession().setTabSize 2
+          else if isJS(file.path)
             editor.getSession().setMode "ace/mode/javascript"
             editor.getSession().setTabSize 2
           else if isCoffee(file.path)
@@ -87,9 +136,12 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
             editor.getSession().setMode "ace/mode/text"
             editor.getSession().setTabSize 2
 
-          editor.setValue base64.decode(file.content)
+          if editor['changeFile']
+            editor.changeFile(base64.decode(file.content), file.name)
+          else
+            editor.setValue(base64.decode(file.content))
           editor.focus()
-          editor.gotoLine 0, 0
+          editor.gotoLine(0, 0)
         else
           alert "Unknown encoding: #{file.encoding}"
       else
@@ -100,9 +152,10 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
       if not err
         $scope.contextGist = gist
         $scope.contextItem.name = "main.py"
+        # TODO: Workspace support...
         editor.setValue gist.files["main.py"].content
         editor.focus()
-        editor.gotoLine 0, 0
+        editor.gotoLine(0, 0)
         return
       else
         console.log(err)
@@ -119,31 +172,40 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
     $scope.messages.length = 0
 
     prog = editor.getValue()
-    Sk.canvas = "canvas"
-
-    Sk.python3 = false
-    Sk.configure
-      "output": (text) ->
-        $rootScope.$broadcast('print', text)
-      "debugout": (arg) ->
-        console.log(arg)
-      "read": (searchPath) ->
-        if Sk.builtinFiles is undefined or Sk.builtinFiles["files"][searchPath] is undefined
-          throw new Error("File not found: '#{searchPath}'")
-        else
-          return Sk.builtinFiles["files"][searchPath]
 
     try
-      if isJS($scope.contextItem.path)
+      if isTypeScript($scope.contextItem.path)
+
+        if $scope.outputFile
+          eval($scope.outputFile.text)
+        else
+          alert "The program is not ready to be executed."
+
+      else if isJS($scope.contextItem.path)
+
         eval(prog)
+
       else if isCoffee($scope.contextItem.path)
         CoffeeScript.eval(prog)
       else if isPython($scope.contextItem.path)
+        Sk.canvas = "canvas"
+        Sk.python3 = false
+        Sk.configure
+          "output": (text) ->
+            $rootScope.$broadcast('print', text)
+          "debugout": (arg) ->
+            console.log(arg)
+          "read": (searchPath) ->
+            if Sk.builtinFiles is undefined or Sk.builtinFiles["files"][searchPath] is undefined
+              throw new Error("File not found: '#{searchPath}'")
+            else
+              return Sk.builtinFiles["files"][searchPath]
         dumpJS = true
         Sk.importMainWithBody "<stdin>", dumpJS, prog
       else
         Sk.importMainWithBody "<stdin>", false, prog
     catch e
+      console.log "#{e}"
       if typeof e isnt 'undefined'
         if typeof e.name is 'string' and typeof e.message is 'string'
           if typeof e.lineNumber is 'number'
@@ -221,7 +283,11 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope', '$location'
       # We will be able to save the code as a GitHub Gist
       return true
 
-  $scope.runEnabled = -> $scope.workEnabled()
+  $scope.runEnabled = ->
+    return $scope.workEnabled()
+
+  $scope.runVisible = ->
+    return $scope.workEnabled()
 
   $rootScope.headerEnabled = -> true
 

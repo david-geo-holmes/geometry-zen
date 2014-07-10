@@ -1,0 +1,58 @@
+{
+  "name": "davinci-blade",
+  "version": "0.9.0",
+  "description": "TypeScript Geometric Physics library.",
+  "author": {
+    "name": "David Holmes",
+    "email": "david.geo.holmes@gmail.com"
+  },
+  "main": "./dist/davinci-blade.min.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/geometryzen/davinci-blade.git"
+  },
+  "bugs": {
+    "url": "https://github.com/geometryzen/davinci-blade/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/geometryzen/davinci-blade/blob/master/LICENSE"
+    }
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "r.js": "~2.1.14",
+    "requirejs": "~2.1.14",
+    "almond": "~0.2.9"
+  },
+  "ignore": [
+    ".settings",
+    "node_modules",
+    "src",
+    "test",
+    "typings",
+    "vendor",
+    ".bowerrc",
+    ".gitignore",
+    ".npmignore",
+    ".travis.yml",
+    "Jakefile.js",
+    "README.md",
+    "bower.json",
+    "build.js",
+    "grunt.js",
+    "package.json",
+    "tsd.json"
+  ],
+  "homepage": "https://github.com/geometryzen/davinci-blade",
+  "_release": "0.9.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "0.9.0",
+    "commit": "ed13ad9cf671a8f0560c0b49b1d9c8a100e9ca12"
+  },
+  "_source": "git://github.com/geometryzen/davinci-blade.git",
+  "_target": "0.9.0",
+  "_originalSource": "davinci-blade"
+}

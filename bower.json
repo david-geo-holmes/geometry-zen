@@ -1,6 +1,6 @@
 {
   "name": "geometryzen",
-  "version": "0.9.246",
+  "version": "0.9.247",
   "main": "./app/js/main.js",
   "description": "Geometry Zen is a free, online, open-source, and collaborative tool for Computational Modeling combining programming languages, 3D visualization, Physical Units, and Geometric Algebra - the Unified Mathematical Language for Physics and Engineering in the 21st Century.",
   "author": {
@@ -30,25 +30,27 @@
     }
   ],
   "dependencies": {
-    "ace-builds": "~1.1.3",
-    "angular-bootstrap": "~0.5.0",
-    "angular": "~1.0.8",
-    "async": "~0.2.5",
-    "coffee-script": "~1.7.1",
-    "bootstrap": "~2.3.2",
-    "davinci": "~0.9.245",
-    "d3": "~3.4.6",
-    "EaselJS": "latest",
-    "eightjs": "~0.0.5",
-    "font-awesome": "~3.2.1",
-    "jed": "~0.5.4",
-    "jquery": "~2.0.3",
+    "ace-builds": "1.1.5",
+    "angular-bootstrap": "0.5.0",
+    "angular": "1.0.8",
+    "async": "0.2.5",
+    "coffee-script": "1.7.1",
+    "bootstrap": "2.3.2",
+    "davinci": "0.9.245",
+    "davinci-blade": "0.9.0",
+    "d3": "3.4.9",
+    "EaselJS": "14eb78900b",
+    "eightjs": "0.0.5",
+    "davinci-eight": "0.9.3",
+    "font-awesome": "3.2.1",
+    "jed": "0.5.4",
+    "jquery": "2.0.3",
     "jquery.layout": "latest",
-    "js-beautify": "latest",
-    "MathJax": "~2.4.0",
+    "js-beautify": "1.5.1",
+    "MathJax": "2.4.0",
     "stats.js": "latest",
-    "threejs": "latest",
-    "TweenJS": "latest",
-    "underscore": "~1.6.0"
+    "threejs": "d3cb4e7cfb",
+    "TweenJS": "d74df45017",
+    "underscore": "1.6.0"
   }
 }

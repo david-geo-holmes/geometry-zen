@@ -9,7 +9,6 @@
     "commit": "1cb0e846738f4ebb245ba245b2039dfc0133173e"
   },
   "_source": "git://github.com/jashkenas/coffee-script.git",
-  "_target": "~1.7.1",
-  "_originalSource": "coffee-script",
-  "_direct": true
+  "_target": "1.7.1",
+  "_originalSource": "coffee-script"
 }
