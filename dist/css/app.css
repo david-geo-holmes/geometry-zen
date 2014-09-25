@@ -8506,6 +8506,61 @@ canvas {
     bottom: 0;
     left: 0;
   }
+  .ace_autocomplete {
+    height: 226px;
+    background: #ffffff;
+    overflow: hidden;
+    border: 1px solid #999999;
+  }
+  .ace_autocomplete ul {
+    width: 400px;
+    margin: 0;
+    padding: 2px;
+  }
+  .ace_autocomplete li {
+    padding: 1px;
+    line-height: 1.2em;
+    height: 1.2em;
+    overflow: hidden;
+  }
+  .ace_autocomplete_selected {
+    background: #eeeeee;
+  }
+  .ace_autocomplete_selected .label-name {
+    font-weight: bold;
+  }
+  .label-kind {
+    background: #999999;
+    color: #ffffff;
+    padding: 0px 3px;
+    margin-right: 3px;
+  }
+  .label-kind-class {
+    background: #0091ff;
+  }
+  .label-kind-interface {
+    background: #7014cc;
+  }
+  .label-kind-method {
+    background: #0064cd;
+  }
+  .label-kind-function {
+    background: #555555;
+  }
+  .label-kind-property {
+    background: #46a546;
+  }
+  .label-kind-method {
+    background: #0064cd;
+  }
+  .label-type {
+    padding-left: 10px;
+    color: blue;
+    visibility: hidden;
+  }
+  .ace_autocomplete_selected .label-type {
+    visibility: visible;
+  }
 }
 
 canvas {
@@ -8528,6 +8583,61 @@ canvas {
     right: 0;
     bottom: 0;
     left: 0;
+  }
+  .ace_autocomplete {
+    height: 226px;
+    background: #ffffff;
+    overflow: hidden;
+    border: 1px solid #999999;
+  }
+  .ace_autocomplete ul {
+    width: 400px;
+    margin: 0;
+    padding: 2px;
+  }
+  .ace_autocomplete li {
+    padding: 1px;
+    line-height: 1.2em;
+    height: 1.2em;
+    overflow: hidden;
+  }
+  .ace_autocomplete_selected {
+    background: #eeeeee;
+  }
+  .ace_autocomplete_selected .label-name {
+    font-weight: bold;
+  }
+  .label-kind {
+    background: #999999;
+    color: #ffffff;
+    padding: 0px 3px;
+    margin-right: 3px;
+  }
+  .label-kind-class {
+    background: #0091ff;
+  }
+  .label-kind-interface {
+    background: #7014cc;
+  }
+  .label-kind-method {
+    background: #0064cd;
+  }
+  .label-kind-function {
+    background: #555555;
+  }
+  .label-kind-property {
+    background: #46a546;
+  }
+  .label-kind-method {
+    background: #0064cd;
+  }
+  .label-type {
+    padding-left: 10px;
+    color: blue;
+    visibility: hidden;
+  }
+  .ace_autocomplete_selected .label-type {
+    visibility: visible;
   }
 }
 
