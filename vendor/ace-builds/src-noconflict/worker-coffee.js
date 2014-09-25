@@ -1354,8 +1354,10 @@ var dcm = require("../document");
 var lang = require("../lib/lang");
 
 var Mirror = (function () {
-    function Mirror(sender) {
+    function Mirror(sender, timeout) {
         this.sender = sender;
+        this.$timeout = timeout;
+
         var doc = this.doc = new dcm.Document("");
 
         var deferredUpdate = this.deferredUpdate = lang.delayedCall(this.onUpdate.bind(this));

@@ -1354,8 +1354,10 @@ var dcm = require("../document");
 var lang = require("../lib/lang");
 
 var Mirror = (function () {
-    function Mirror(sender) {
+    function Mirror(sender, timeout) {
         this.sender = sender;
+        this.$timeout = timeout;
+
         var doc = this.doc = new dcm.Document("");
 
         var deferredUpdate = this.deferredUpdate = lang.delayedCall(this.onUpdate.bind(this));
@@ -1400,28 +1402,14 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-ace.define("ace/mode/typescript_worker",["require","exports","module","ace/lib/oop","ace/worker/mirror","ace/lib/lang","ace/document"], function(require, exports, module) {
+ace.define("ace/mode/typescript_worker",["require","exports","module","ace/lib/oop","ace/worker/mirror"], function(require, exports, module) {
 "no use strict";
 var oop = require('../lib/oop');
 var mir = require('../worker/mirror');
-var lang = require('../lib/lang');
-var dcm = require('../document');
 var TypeScriptWorker = (function (_super) {
     __extends(TypeScriptWorker, _super);
     function TypeScriptWorker(sender) {
-        _super.call(this, sender);
-        this.callbacks = {};
-        this.callbackId = 1;
-        var doc = this.doc = new dcm.Document("");
-
-        var deferredUpdate = this.deferredUpdate = lang.deferredCall(this.onUpdate.bind(this));
-
-        var self = this;
-
-        sender.on('change', function (e) {
-            doc.applyDeltas(e.data);
-            deferredUpdate.schedule(self.$timeout);
-        });
+        _super.call(this, sender, 500);
 
         this.setOptions();
 
