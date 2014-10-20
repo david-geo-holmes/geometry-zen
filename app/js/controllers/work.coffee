@@ -42,7 +42,7 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
 
   workspace = ace.workspace()
 
-  fileNames = ['lib.d.ts', 'davinci-eight.d.ts', 'davinci-blade.d.ts'] #TODO: This is only needed for TypeScript.
+  fileNames = ['lib.d.ts', 'davinci-eight.d.ts', 'davinci-blade.d.ts']
 
   readFile = (fileName, callback) =>
     url = "#{DOMAIN}/ts/#{fileName}"
@@ -52,14 +52,6 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
       .error (data, status, headers, config) ->
         callback new Error "Unable to wrangle #{fileName}."
 
-  fileNames.forEach (fileName) =>
-    readFile fileName, (err, content) =>
-      if not err
-        if workspace
-          workspace.ensureScript fileName, content.replace(/\r\n?/g, '\n'), true
-      else
-        console.log "#{err}"
-
   editor = ace.edit("editor", workspace)
   editor.setTheme("ace/theme/textmate")
   editor.getSession().setMode("ace/mode/python")
@@ -67,6 +59,14 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
   editor.setShowInvisibles(true)
   editor.setFontSize('15px')
 # editor.setShowPrintMargin false
+
+  fileNames.forEach (fileName) =>
+    readFile fileName, (err, content) =>
+      if not err
+        if workspace
+          workspace.ensureScript fileName, content.replace(/\r\n?/g, '\n'), true
+      else
+        console.log "#{err}"
 
   editor.getSession().on "initAfter", (event) =>
     # Not sure how knowledge of worker being ready might be used.

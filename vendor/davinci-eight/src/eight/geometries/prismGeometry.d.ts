@@ -1,7 +1,5 @@
-declare var prismGeometry: (spec?: any) => {
-    triangles: number[][];
-    vertices: any[];
-    normals: any[];
-    colors: any[];
-};
+/**
+* Constructs and returns a Prism geometry object.
+*/
+declare var prismGeometry: (spec?: any) => eight.Geometry;
 export = prismGeometry;

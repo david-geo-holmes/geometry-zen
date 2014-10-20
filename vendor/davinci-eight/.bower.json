@@ -1,6 +1,6 @@
 {
   "name": "davinci-eight",
-  "version": "0.9.3",
+  "version": "0.9.7",
   "description": "TypeScript 3D library using Geometric Algebra",
   "author": {
     "name": "David Holmes",
@@ -48,13 +48,13 @@
     "tsd.json"
   ],
   "homepage": "https://github.com/geometryzen/davinci-eight",
-  "_release": "0.9.3",
+  "_release": "0.9.7",
   "_resolution": {
     "type": "version",
-    "tag": "0.9.3",
-    "commit": "defb7c2ec9fa0777e64b8424a89f5a5bc7cf6234"
+    "tag": "0.9.7",
+    "commit": "61e62272f656d3ff60ec8a50b4239179a23ecc28"
   },
   "_source": "git://github.com/geometryzen/davinci-eight.git",
-  "_target": "0.9.3",
+  "_target": "0.9.7",
   "_originalSource": "davinci-eight"
 }

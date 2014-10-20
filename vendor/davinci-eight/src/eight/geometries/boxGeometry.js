@@ -29,15 +29,17 @@ define(["require", "exports", 'eight/core/geometry', 'eight/math/e3ga/vectorE3']
         var base = geometry(spec);
 
         var api = {
-            triangles: triangles,
+            primitives: triangles,
             vertices: [],
             normals: [],
-            colors: []
+            colors: [],
+            primitiveMode: base.primitiveMode
         };
 
         for (var t = 0; t < triangles.length; t++) {
             var triangle = triangles[t];
 
+            // Normals will be the same for each vertex of a triangle.
             var v0 = vertexList[triangle[0]];
             var v1 = vertexList[triangle[1]];
             var v2 = vertexList[triangle[2]];

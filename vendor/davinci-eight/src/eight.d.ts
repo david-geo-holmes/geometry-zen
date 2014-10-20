@@ -61,7 +61,7 @@ declare var eight: {
         start: () => void;
         stop: () => void;
     };
-    mesh: (geometry?: any, material?: any) => {
+    mesh: (geometry?: x.Geometry, material?: any) => {
         position: Euclidean3;
         attitude: Euclidean3;
         projectionMatrix: number[];
@@ -69,21 +69,11 @@ declare var eight: {
         onContextLoss: () => void;
         tearDown: () => void;
         updateMatrix: () => void;
-        draw: (projectionMatrix: any) => void;
+        draw: (projectionMatrix: number[]) => void;
     };
     geometry: (spec?: any) => x.Geometry;
-    box: (spec?: any) => {
-        triangles: number[][];
-        vertices: any[];
-        normals: any[];
-        colors: any[];
-    };
-    prism: (spec?: any) => {
-        triangles: number[][];
-        vertices: any[];
-        normals: any[];
-        colors: any[];
-    };
+    box: (spec?: any) => x.Geometry;
+    prism: (spec?: any) => x.Geometry;
     material: (spec?: any) => Material;
     meshBasicMaterial: (spec: any) => Material;
     meshNormalMaterial: (spec: any) => Material;

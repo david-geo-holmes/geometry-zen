@@ -69954,11 +69954,15 @@ var WorkspaceWorker = (function () {
             var data = request.data;
             var fileName = data.fileName;
             var callbackId = data.callbackId;
-            var errors = self.ls.getSemanticDiagnostics(fileName).map(function (error) {
-                return { message: error.message(), start: error.start(), length: error.length() };
-            });
-            var response = { errors: errors, callbackId: callbackId };
-            sender.emit("semanticErrors", response);
+            try  {
+                var errors = self.ls.getSemanticDiagnostics(fileName).map(function (error) {
+                    return { message: error.message(), start: error.start(), length: error.length() };
+                });
+                var response = { errors: errors, callbackId: callbackId };
+                sender.emit("semanticErrors", response);
+            } catch (e) {
+                console.log("getSemanticDiagnostics() raised exception.");
+            }
         });
 
         sender.on('getCompletionsAtPosition', function (request) {
@@ -70017,10 +70021,14 @@ var WorkspaceWorker = (function () {
             var data = request.data;
             var fileName = data.fileName;
             var callbackId = data.callbackId;
-            var emitOutput = self.ls.getEmitOutput(fileName);
-            var outputFiles = emitOutput.outputFiles;
-            var response = { results: outputFiles, callbackId: callbackId };
-            sender.emit("outputFiles", response);
+            try  {
+                var emitOutput = self.ls.getEmitOutput(fileName);
+                var outputFiles = emitOutput.outputFiles;
+                var response = { results: outputFiles, callbackId: callbackId };
+                sender.emit("outputFiles", response);
+            } catch (e) {
+                console.log("getEmitOutput() raised exception.");
+            }
         });
 
         sender.emit('initAfter');
