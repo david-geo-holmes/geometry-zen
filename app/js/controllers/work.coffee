@@ -14,7 +14,7 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
   isHTML = (path) ->
     return endsWith(path, '.html')
 
-  isJS = (path) ->
+  isJavaScript = (path) ->
     return endsWith(path, '.js')
 
   isJSON = (path) ->
@@ -114,7 +114,7 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
           if isTypeScript(file.path)
             editor.getSession().setMode "ace/mode/typescript"
             editor.getSession().setTabSize 2
-          else if isJS(file.path)
+          else if isJavaScript(file.path)
             editor.getSession().setMode "ace/mode/javascript"
             editor.getSession().setTabSize 2
           else if isCoffee(file.path)
@@ -174,33 +174,31 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
     prog = editor.getValue()
 
     try
-      if isTypeScript($scope.contextItem.path)
+      # Initialize the global Sk so that we can hijack the output.
+      Sk.canvas = "canvas"
+      Sk.python3 = false
+      Sk.configure
+        "output": (text) ->
+          $rootScope.$broadcast('print', text)
+        "debugout": (arg) ->
+          console.log(arg)
+        "read": (searchPath) ->
+          if Sk.builtinFiles is undefined or Sk.builtinFiles["files"][searchPath] is undefined
+            throw new Error("File not found: '#{searchPath}'")
+          else
+            return Sk.builtinFiles["files"][searchPath]
+      dumpJS = true
 
+      if isTypeScript($scope.contextItem.path)
         if $scope.outputFile
           eval($scope.outputFile.text)
         else
           alert "The program is not ready to be executed."
-
-      else if isJS($scope.contextItem.path)
-
+      else if isJavaScript($scope.contextItem.path)
         eval(prog)
-
       else if isCoffee($scope.contextItem.path)
         CoffeeScript.eval(prog)
       else if isPython($scope.contextItem.path)
-        Sk.canvas = "canvas"
-        Sk.python3 = false
-        Sk.configure
-          "output": (text) ->
-            $rootScope.$broadcast('print', text)
-          "debugout": (arg) ->
-            console.log(arg)
-          "read": (searchPath) ->
-            if Sk.builtinFiles is undefined or Sk.builtinFiles["files"][searchPath] is undefined
-              throw new Error("File not found: '#{searchPath}'")
-            else
-              return Sk.builtinFiles["files"][searchPath]
-        dumpJS = true
         Sk.importMainWithBody "<stdin>", dumpJS, prog
       else
         Sk.importMainWithBody "<stdin>", false, prog
@@ -283,11 +281,12 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
       # We will be able to save the code as a GitHub Gist
       return true
 
-  $scope.runEnabled = ->
-    return $scope.workEnabled()
+  # TODO: The UI does not seem to be truly dynamic!
+  $scope.runEnabled = () ->
+    return $scope.workEnabled()# and (if isTypeScript($scope.contextItem.path) then $scope.outputFile else true)
 
-  $scope.runVisible = ->
-    return $scope.workEnabled()
+  $scope.runVisible = () ->
+    return $scope.runEnabled()
 
   $rootScope.headerEnabled = -> true
 
