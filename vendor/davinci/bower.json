@@ -1,6 +1,6 @@
 {
   "name": "davinci",
-  "version": "0.9.246",
+  "version": "0.9.247",
   "description": "Python to JavaScript cross compiler",
   "author":
   {
@@ -26,12 +26,12 @@
   ],
   "dependencies":
   {
-    "davinci-py": "~0.9.245",
+    "davinci-py": "~0.9.247",
     "bladejs": "~0.9.72",
-    "EaselJS": "latest",
+    "EaselJS": "0.8.0",
     "threejs": "latest",
-    "TweenJS": "latest",
-    "js-beautify": "~1.5.1"
+    "TweenJS": "0.6.0",
+    "js-beautify": "~1.5.5"
   },
   "devDependencies":
   {

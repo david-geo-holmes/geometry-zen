@@ -61,9 +61,9 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
       "vendor/ace-builds/src-min-noconflict/theme-twilight.js",
 
       "vendor/d3/d3.min.js",
-      "vendor/EaselJS/lib/easeljs-0.7.1.min.js",
-      "vendor/TweenJS/lib/tweenjs-0.5.1.min.js",
-      "vendor/EaselJS/lib/movieclip-0.7.1.min.js",
+      "vendor/EaselJS/lib/easeljs-0.8.0.min.js",
+      "vendor/TweenJS/lib/tweenjs-0.6.0.min.js",
+      "vendor/EaselJS/lib/movieclip-0.8.0.min.js",
       "vendor/bladejs/dist/bladejs.min.js",
       "vendor/eightjs/dist/eight.min.js",
       "vendor/davinci-blade/dist/davinci-blade.min.js",
@@ -72,7 +72,7 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
       "vendor/threejs/build/three.min.js",
       "vendor/tweenjs/build/tween.min.js",
       "vendor/google-analytics/tracking-code.js",
-      "vendor/stats.js/src/Stats.js"
+      "vendor/stats.js/build/stats.min.js"
     ],
     app: [
       "app/js/app.js",

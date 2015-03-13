@@ -1,5 +1,5 @@
-/*
-* Event
+/*!
+* TweenJS
 * Visit http://createjs.com/ for documentation, updates and examples.
 *
 * Copyright (c) 2010 gskinner.com, inc.
@@ -26,177 +26,248 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
+
+//##############################################################################
+// extend.js
+//##############################################################################
+
+this.createjs = this.createjs||{};
+
 /**
- * A collection of Classes that are shared across all the CreateJS libraries.  The classes are included in the minified
- * files of each library and are available on the createsjs namespace directly.
- *
- * <h4>Example</h4>
- *      myObject.addEventListener("change", createjs.proxy(myMethod, scope));
- *
- * @module CreateJS
- * @main CreateJS
+ * @class Utility Methods
  */
 
-// namespace:
+/**
+ * Sets up the prototype chain and constructor property for a new class.
+ *
+ * This should be called right after creating the class constructor.
+ *
+ * 	function MySubClass() {}
+ * 	createjs.extend(MySubClass, MySuperClass);
+ * 	ClassB.prototype.doSomething = function() { }
+ *
+ * 	var foo = new MySubClass();
+ * 	console.log(foo instanceof MySuperClass); // true
+ * 	console.log(foo.prototype.constructor === MySubClass); // true
+ *
+ * @method extends
+ * @param {Function} subclass The subclass.
+ * @param {Function} superclass The superclass to extend.
+ * @return {Function} Returns the subclass's new prototype.
+ */
+createjs.extend = function(subclass, superclass) {
+	"use strict";
+
+	function o() { this.constructor = subclass; }
+	o.prototype = superclass.prototype;
+	return (subclass.prototype = new o());
+};
+
+//##############################################################################
+// promote.js
+//##############################################################################
+
+this.createjs = this.createjs||{};
+
+/**
+ * @class Utility Methods
+ */
+
+/**
+ * Promotes any methods on the super class that were overridden, by creating an alias in the format `prefix_methodName`.
+ * It is recommended to use the super class's name as the prefix.
+ * An alias to the super class's constructor is always added in the format `prefix_constructor`.
+ * This allows the subclass to call super class methods without using `function.call`, providing better performance.
+ *
+ * For example, if `MySubClass` extends `MySuperClass`, and both define a `draw` method, then calling `promote(MySubClass, "MySuperClass")`
+ * would add a `MySuperClass_constructor` method to MySubClass and promote the `draw` method on `MySuperClass` to the
+ * prototype of `MySubClass` as `MySuperClass_draw`.
+ *
+ * This should be called after the class's prototype is fully defined.
+ *
+ * 	function ClassA(name) {
+ * 		this.name = name;
+ * 	}
+ * 	ClassA.prototype.greet = function() {
+ * 		return "Hello "+this.name;
+ * 	}
+ *
+ * 	function ClassB(name, punctuation) {
+ * 		this.ClassA_constructor(name);
+ * 		this.punctuation = punctuation;
+ * 	}
+ * 	createjs.extend(ClassB, ClassA);
+ * 	ClassB.prototype.greet = function() {
+ * 		return this.ClassA_greet()+this.punctuation;
+ * 	}
+ * 	createjs.promote(ClassB, "ClassA");
+ *
+ * 	var foo = new ClassB("World", "!?!");
+ * 	console.log(foo.greet()); // Hello World!?!
+ *
+ * @method promote
+ * @param {Function} subclass The class to promote super class methods on.
+ * @param {String} prefix The prefix to add to the promoted method names. Usually the name of the superclass.
+ * @return {Function} Returns the subclass.
+ */
+createjs.promote = function(subclass, prefix) {
+	"use strict";
+
+	var subP = subclass.prototype, supP = (Object.getPrototypeOf&&Object.getPrototypeOf(subP))||subP.__proto__;
+	if (supP) {
+		subP[(prefix+="_") + "constructor"] = supP.constructor; // constructor is not always innumerable
+		for (var n in supP) {
+			if (subP.hasOwnProperty(n) && (typeof supP[n] == "function")) { subP[prefix + n] = supP[n]; }
+		}
+	}
+	return subclass;
+};
+
+//##############################################################################
+// Event.js
+//##############################################################################
+
 this.createjs = this.createjs||{};
 
 (function() {
 	"use strict";
 
-/**
- * Contains properties and methods shared by all events for use with
- * {{#crossLink "EventDispatcher"}}{{/crossLink}}.
- * 
- * Note that Event objects are often reused, so you should never
- * rely on an event object's state outside of the call stack it was received in.
- * @class Event
- * @param {String} type The event type.
- * @param {Boolean} bubbles Indicates whether the event will bubble through the display list.
- * @param {Boolean} cancelable Indicates whether the default behaviour of this event can be cancelled.
- * @constructor
- **/
-var Event = function(type, bubbles, cancelable) {
-  this.initialize(type, bubbles, cancelable);
-};
-var p = Event.prototype;
-
-// events:
-
-// public properties:
-
-	/**
-	 * The type of event.
-	 * @property type
-	 * @type String
-	 **/
-	p.type = null;
-
-	/**
-	 * The object that generated an event.
-	 * @property target
-	 * @type Object
-	 * @default null
-	 * @readonly
-	*/
-	p.target = null;
-
-	/**
-	 * The current target that a bubbling event is being dispatched from. For non-bubbling events, this will
-	 * always be the same as target. For example, if childObj.parent = parentObj, and a bubbling event
-	 * is generated from childObj, then a listener on parentObj would receive the event with
-	 * target=childObj (the original target) and currentTarget=parentObj (where the listener was added).
-	 * @property currentTarget
-	 * @type Object
-	 * @default null
-	 * @readonly
-	*/
-	p.currentTarget = null;
-
-	/**
-	 * For bubbling events, this indicates the current event phase:<OL>
-	 * 	<LI> capture phase: starting from the top parent to the target</LI>
-	 * 	<LI> at target phase: currently being dispatched from the target</LI>
-	 * 	<LI> bubbling phase: from the target to the top parent</LI>
-	 * </OL>
-	 * @property eventPhase
-	 * @type Number
-	 * @default 0
-	 * @readonly
-	*/
-	p.eventPhase = 0;
-
-	/**
-	 * Indicates whether the event will bubble through the display list.
-	 * @property bubbles
-	 * @type Boolean
-	 * @default false
-	 * @readonly
-	*/
-	p.bubbles = false;
-
-	/**
-	 * Indicates whether the default behaviour of this event can be cancelled via
-	 * {{#crossLink "Event/preventDefault"}}{{/crossLink}}. This is set via the Event constructor.
-	 * @property cancelable
-	 * @type Boolean
-	 * @default false
-	 * @readonly
-	*/
-	p.cancelable = false;
-
-	/**
-	 * The epoch time at which this event was created.
-	 * @property timeStamp
-	 * @type Number
-	 * @default 0
-	 * @readonly
-	*/
-	p.timeStamp = 0;
-
-	/**
-	 * Indicates if {{#crossLink "Event/preventDefault"}}{{/crossLink}} has been called
-	 * on this event.
-	 * @property defaultPrevented
-	 * @type Boolean
-	 * @default false
-	 * @readonly
-	*/
-	p.defaultPrevented = false;
-
-	/**
-	 * Indicates if {{#crossLink "Event/stopPropagation"}}{{/crossLink}} or
-	 * {{#crossLink "Event/stopImmediatePropagation"}}{{/crossLink}} has been called on this event.
-	 * @property propagationStopped
-	 * @type Boolean
-	 * @default false
-	 * @readonly
-	*/
-	p.propagationStopped = false;
-
-	/**
-	 * Indicates if {{#crossLink "Event/stopImmediatePropagation"}}{{/crossLink}} has been called
-	 * on this event.
-	 * @property immediatePropagationStopped
-	 * @type Boolean
-	 * @default false
-	 * @readonly
-	*/
-	p.immediatePropagationStopped = false;
-	
-	/**
-	 * Indicates if {{#crossLink "Event/remove"}}{{/crossLink}} has been called on this event.
-	 * @property removed
-	 * @type Boolean
-	 * @default false
-	 * @readonly
-	*/
-	p.removed = false;
-
 // constructor:
 	/**
-	 * Initialization method.
-	 * @method initialize
+	 * Contains properties and methods shared by all events for use with
+	 * {{#crossLink "EventDispatcher"}}{{/crossLink}}.
+	 * 
+	 * Note that Event objects are often reused, so you should never
+	 * rely on an event object's state outside of the call stack it was received in.
+	 * @class Event
 	 * @param {String} type The event type.
 	 * @param {Boolean} bubbles Indicates whether the event will bubble through the display list.
 	 * @param {Boolean} cancelable Indicates whether the default behaviour of this event can be cancelled.
-	 * @protected
+	 * @constructor
 	 **/
-	p.initialize = function(type, bubbles, cancelable) {
+	function Event(type, bubbles, cancelable) {
+		
+	
+	// public properties:
+		/**
+		 * The type of event.
+		 * @property type
+		 * @type String
+		 **/
 		this.type = type;
-		this.bubbles = bubbles;
-		this.cancelable = cancelable;
+	
+		/**
+		 * The object that generated an event.
+		 * @property target
+		 * @type Object
+		 * @default null
+		 * @readonly
+		*/
+		this.target = null;
+	
+		/**
+		 * The current target that a bubbling event is being dispatched from. For non-bubbling events, this will
+		 * always be the same as target. For example, if childObj.parent = parentObj, and a bubbling event
+		 * is generated from childObj, then a listener on parentObj would receive the event with
+		 * target=childObj (the original target) and currentTarget=parentObj (where the listener was added).
+		 * @property currentTarget
+		 * @type Object
+		 * @default null
+		 * @readonly
+		*/
+		this.currentTarget = null;
+	
+		/**
+		 * For bubbling events, this indicates the current event phase:<OL>
+		 * 	<LI> capture phase: starting from the top parent to the target</LI>
+		 * 	<LI> at target phase: currently being dispatched from the target</LI>
+		 * 	<LI> bubbling phase: from the target to the top parent</LI>
+		 * </OL>
+		 * @property eventPhase
+		 * @type Number
+		 * @default 0
+		 * @readonly
+		*/
+		this.eventPhase = 0;
+	
+		/**
+		 * Indicates whether the event will bubble through the display list.
+		 * @property bubbles
+		 * @type Boolean
+		 * @default false
+		 * @readonly
+		*/
+		this.bubbles = !!bubbles;
+	
+		/**
+		 * Indicates whether the default behaviour of this event can be cancelled via
+		 * {{#crossLink "Event/preventDefault"}}{{/crossLink}}. This is set via the Event constructor.
+		 * @property cancelable
+		 * @type Boolean
+		 * @default false
+		 * @readonly
+		*/
+		this.cancelable = !!cancelable;
+	
+		/**
+		 * The epoch time at which this event was created.
+		 * @property timeStamp
+		 * @type Number
+		 * @default 0
+		 * @readonly
+		*/
 		this.timeStamp = (new Date()).getTime();
-	};
+	
+		/**
+		 * Indicates if {{#crossLink "Event/preventDefault"}}{{/crossLink}} has been called
+		 * on this event.
+		 * @property defaultPrevented
+		 * @type Boolean
+		 * @default false
+		 * @readonly
+		*/
+		this.defaultPrevented = false;
+	
+		/**
+		 * Indicates if {{#crossLink "Event/stopPropagation"}}{{/crossLink}} or
+		 * {{#crossLink "Event/stopImmediatePropagation"}}{{/crossLink}} has been called on this event.
+		 * @property propagationStopped
+		 * @type Boolean
+		 * @default false
+		 * @readonly
+		*/
+		this.propagationStopped = false;
+	
+		/**
+		 * Indicates if {{#crossLink "Event/stopImmediatePropagation"}}{{/crossLink}} has been called
+		 * on this event.
+		 * @property immediatePropagationStopped
+		 * @type Boolean
+		 * @default false
+		 * @readonly
+		*/
+		this.immediatePropagationStopped = false;
+		
+		/**
+		 * Indicates if {{#crossLink "Event/remove"}}{{/crossLink}} has been called on this event.
+		 * @property removed
+		 * @type Boolean
+		 * @default false
+		 * @readonly
+		*/
+		this.removed = false;
+	}
+	var p = Event.prototype;
+	
 
 // public methods:
-
 	/**
 	 * Sets {{#crossLink "Event/defaultPrevented"}}{{/crossLink}} to true.
 	 * Mirrors the DOM event standard.
 	 * @method preventDefault
 	 **/
 	p.preventDefault = function() {
-		this.defaultPrevented = true;
+		this.defaultPrevented = this.cancelable&&true;
 	};
 
 	/**
@@ -240,6 +311,19 @@ var p = Event.prototype;
 	p.clone = function() {
 		return new Event(this.type, this.bubbles, this.cancelable);
 	};
+	
+	/**
+	 * Provides a chainable shortcut method for setting a number of properties on the instance.
+	 *
+	 * @method set
+	 * @param {Object} props A generic object containing properties to copy to the instance.
+	 * @return {Event} Returns the instance the method is called on (useful for chaining calls.)
+	 * @chainable
+	*/
+	p.set = function(props) {
+		for (var n in props) { this[n] = props[n]; }
+		return this;
+	};
 
 	/**
 	 * Returns a string representation of this object.
@@ -250,101 +334,91 @@ var p = Event.prototype;
 		return "[Event (type="+this.type+")]";
 	};
 
-createjs.Event = Event;
+	createjs.Event = Event;
 }());
-/*
-* EventDispatcher
-* Visit http://createjs.com/ for documentation, updates and examples.
-*
-* Copyright (c) 2010 gskinner.com, inc.
-*
-* Permission is hereby granted, free of charge, to any person
-* obtaining a copy of this software and associated documentation
-* files (the "Software"), to deal in the Software without
-* restriction, including without limitation the rights to use,
-* copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the
-* Software is furnished to do so, subject to the following
-* conditions:
-*
-* The above copyright notice and this permission notice shall be
-* included in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-* OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-* OTHER DEALINGS IN THE SOFTWARE.
-*/
 
-/**
- * @module CreateJS
- */
+//##############################################################################
+// EventDispatcher.js
+//##############################################################################
 
-// namespace:
 this.createjs = this.createjs||{};
 
 (function() {
 	"use strict";
 
-/**
- * EventDispatcher provides methods for managing queues of event listeners and dispatching events.
- *
- * You can either extend EventDispatcher or mix its methods into an existing prototype or instance by using the
- * EventDispatcher {{#crossLink "EventDispatcher/initialize"}}{{/crossLink}} method.
- * 
- * Together with the CreateJS Event class, EventDispatcher provides an extended event model that is based on the
- * DOM Level 2 event model, including addEventListener, removeEventListener, and dispatchEvent. It supports
- * bubbling / capture, preventDefault, stopPropagation, stopImmediatePropagation, and handleEvent.
- * 
- * EventDispatcher also exposes a {{#crossLink "EventDispatcher/on"}}{{/crossLink}} method, which makes it easier
- * to create scoped listeners, listeners that only run once, and listeners with associated arbitrary data. The 
- * {{#crossLink "EventDispatcher/off"}}{{/crossLink}} method is merely an alias to
- * {{#crossLink "EventDispatcher/removeEventListener"}}{{/crossLink}}.
- * 
- * Another addition to the DOM Level 2 model is the {{#crossLink "EventDispatcher/removeAllEventListeners"}}{{/crossLink}}
- * method, which can be used to listeners for all events, or listeners for a specific event. The Event object also 
- * includes a {{#crossLink "Event/remove"}}{{/crossLink}} method which removes the active listener.
- *
- * <h4>Example</h4>
- * Add EventDispatcher capabilities to the "MyClass" class.
- *
- *      EventDispatcher.initialize(MyClass.prototype);
- *
- * Add an event (see {{#crossLink "EventDispatcher/addEventListener"}}{{/crossLink}}).
- *
- *      instance.addEventListener("eventName", handlerMethod);
- *      function handlerMethod(event) {
- *          console.log(event.target + " Was Clicked");
- *      }
- *
- * <b>Maintaining proper scope</b><br />
- * Scope (ie. "this") can be be a challenge with events. Using the {{#crossLink "EventDispatcher/on"}}{{/crossLink}}
- * method to subscribe to events simplifies this.
- *
- *      instance.addEventListener("click", function(event) {
- *          console.log(instance == this); // false, scope is ambiguous.
- *      });
- *      
- *      instance.on("click", function(event) {
- *          console.log(instance == this); // true, "on" uses dispatcher scope by default.
- *      });
- * 
- * If you want to use addEventListener instead, you may want to use function.bind() or a similar proxy to manage scope.
- *      
- *
- * @class EventDispatcher
- * @constructor
- **/
-var EventDispatcher = function() {
-/*	this.initialize(); */ // not needed.
-};
-var p = EventDispatcher.prototype;
+
+// constructor:
+	/**
+	 * EventDispatcher provides methods for managing queues of event listeners and dispatching events.
+	 *
+	 * You can either extend EventDispatcher or mix its methods into an existing prototype or instance by using the
+	 * EventDispatcher {{#crossLink "EventDispatcher/initialize"}}{{/crossLink}} method.
+	 * 
+	 * Together with the CreateJS Event class, EventDispatcher provides an extended event model that is based on the
+	 * DOM Level 2 event model, including addEventListener, removeEventListener, and dispatchEvent. It supports
+	 * bubbling / capture, preventDefault, stopPropagation, stopImmediatePropagation, and handleEvent.
+	 * 
+	 * EventDispatcher also exposes a {{#crossLink "EventDispatcher/on"}}{{/crossLink}} method, which makes it easier
+	 * to create scoped listeners, listeners that only run once, and listeners with associated arbitrary data. The 
+	 * {{#crossLink "EventDispatcher/off"}}{{/crossLink}} method is merely an alias to
+	 * {{#crossLink "EventDispatcher/removeEventListener"}}{{/crossLink}}.
+	 * 
+	 * Another addition to the DOM Level 2 model is the {{#crossLink "EventDispatcher/removeAllEventListeners"}}{{/crossLink}}
+	 * method, which can be used to listeners for all events, or listeners for a specific event. The Event object also 
+	 * includes a {{#crossLink "Event/remove"}}{{/crossLink}} method which removes the active listener.
+	 *
+	 * <h4>Example</h4>
+	 * Add EventDispatcher capabilities to the "MyClass" class.
+	 *
+	 *      EventDispatcher.initialize(MyClass.prototype);
+	 *
+	 * Add an event (see {{#crossLink "EventDispatcher/addEventListener"}}{{/crossLink}}).
+	 *
+	 *      instance.addEventListener("eventName", handlerMethod);
+	 *      function handlerMethod(event) {
+	 *          console.log(event.target + " Was Clicked");
+	 *      }
+	 *
+	 * <b>Maintaining proper scope</b><br />
+	 * Scope (ie. "this") can be be a challenge with events. Using the {{#crossLink "EventDispatcher/on"}}{{/crossLink}}
+	 * method to subscribe to events simplifies this.
+	 *
+	 *      instance.addEventListener("click", function(event) {
+	 *          console.log(instance == this); // false, scope is ambiguous.
+	 *      });
+	 *      
+	 *      instance.on("click", function(event) {
+	 *          console.log(instance == this); // true, "on" uses dispatcher scope by default.
+	 *      });
+	 * 
+	 * If you want to use addEventListener instead, you may want to use function.bind() or a similar proxy to manage scope.
+	 *      
+	 *
+	 * @class EventDispatcher
+	 * @constructor
+	 **/
+	function EventDispatcher() {
+	
+	
+	// private properties:
+		/**
+		 * @protected
+		 * @property _listeners
+		 * @type Object
+		 **/
+		this._listeners = null;
+		
+		/**
+		 * @protected
+		 * @property _captureListeners
+		 * @type Object
+		 **/
+		this._captureListeners = null;
+	}
+	var p = EventDispatcher.prototype;
 
 
+// static public methods:
 	/**
 	 * Static initializer to mix EventDispatcher methods into a target object or prototype.
 	 * 
@@ -367,30 +441,6 @@ var p = EventDispatcher.prototype;
 		target.willTrigger = p.willTrigger;
 	};
 	
-// constructor:
-
-// private properties:
-	/**
-	 * @protected
-	 * @property _listeners
-	 * @type Object
-	 **/
-	p._listeners = null;
-
-	/**
-	 * @protected
-	 * @property _captureListeners
-	 * @type Object
-	 **/
-	p._captureListeners = null;
-
-// constructor:
-	/**
-	 * Initialization method.
-	 * @method initialize
-	 * @protected
-	 **/
-	p.initialize = function() {};
 
 // public methods:
 	/**
@@ -547,19 +597,19 @@ var p = EventDispatcher.prototype;
 	 * @param {Object | String | Event} eventObj An object with a "type" property, or a string type.
 	 * While a generic object will work, it is recommended to use a CreateJS Event instance. If a string is used,
 	 * dispatchEvent will construct an Event instance with the specified type.
-	 * @param {Object} [target] The object to use as the target property of the event object. This will default to the
-	 * dispatching object. <b>This parameter is deprecated and will be removed.</b>
 	 * @return {Boolean} Returns the value of eventObj.defaultPrevented.
 	 **/
-	p.dispatchEvent = function(eventObj, target) {
+	p.dispatchEvent = function(eventObj) {
 		if (typeof eventObj == "string") {
 			// won't bubble, so skip everything if there's no listeners:
 			var listeners = this._listeners;
 			if (!listeners || !listeners[eventObj]) { return false; }
 			eventObj = new createjs.Event(eventObj);
+		} else if (eventObj.target && eventObj.clone) {
+			// redispatching an active event object, so clone it:
+			eventObj = eventObj.clone();
 		}
-		// TODO: deprecated. Target param is deprecated, only use case is MouseEvent/mousemove, remove.
-		eventObj.target = target||this;
+		try { eventObj.target = this; } catch (e) {} // try/catch allows redispatching of native events
 
 		if (!eventObj.bubbles || !this.parent) {
 			this._dispatchEvent(eventObj, 2);
@@ -619,6 +669,7 @@ var p = EventDispatcher.prototype;
 		return "[EventDispatcher]";
 	};
 
+
 // private methods:
 	/**
 	 * @method _dispatchEvent
@@ -631,9 +682,10 @@ var p = EventDispatcher.prototype;
 		if (eventObj && listeners) {
 			var arr = listeners[eventObj.type];
 			if (!arr||!(l=arr.length)) { return; }
-			eventObj.currentTarget = this;
-			eventObj.eventPhase = eventPhase;
+			try { eventObj.currentTarget = this; } catch (e) {}
+			try { eventObj.eventPhase = eventPhase; } catch (e) {}
 			eventObj.removed = false;
+			
 			arr = arr.slice(); // to avoid issues with items being removed or added during the dispatch
 			for (var i=0; i<l && !eventObj.immediatePropagationStopped; i++) {
 				var o = arr[i];
@@ -648,139 +700,850 @@ var p = EventDispatcher.prototype;
 	};
 
 
-createjs.EventDispatcher = EventDispatcher;
+	createjs.EventDispatcher = EventDispatcher;
 }());
-/*
-* Tween
-* Visit http://createjs.com/ for documentation, updates and examples.
-*
-* Copyright (c) 2010 gskinner.com, inc.
-*
-* Permission is hereby granted, free of charge, to any person
-* obtaining a copy of this software and associated documentation
-* files (the "Software"), to deal in the Software without
-* restriction, including without limitation the rights to use,
-* copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the
-* Software is furnished to do so, subject to the following
-* conditions:
-*
-* The above copyright notice and this permission notice shall be
-* included in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-* OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-* OTHER DEALINGS IN THE SOFTWARE.
-*/
 
-/**
- * The TweenJS Javascript library provides a simple but powerful tweening interface. It supports tweening of both
- * numeric object properties & CSS style properties, and allows you to chain tweens and actions together to create
- * complex sequences.
- *
- * <h4>Simple Tween</h4>
- * This tween will tween the target's alpha property from 0 to 1 for 1s then call the <code>handleComplete</code> function.
- *
- *	    target.alpha = 0;
- *	    Tween.get(target).to({alpha:1}, 1000).call(handleComplete);
- *	    function handleComplete() {
- *	    	//Tween complete
- *	    }
- *
- * <strong>Arguments and Scope</strong>
- * Tween also supports a `call()` with arguments and/or a scope. If no scope is passed, then the function is called
- * anonymously (normal JavaScript behaviour). The scope is useful for maintaining scope when doing object-oriented
- * style development.
- *
- *      Tween.get(target).to({alpha:0})
- *          .call(handleComplete, [argument1, argument2], this);
- *
- * <h4>Chainable Tween</h4>
- * This tween will wait 0.5s, tween the target's alpha property to 0 over 1s, set it's visible to false, then call the
- * <code>handleComplete</code> function.
- *
- *	    target.alpha = 1;
- *	    Tween.get(target).wait(500).to({alpha:0, visible:false}, 1000).call(handleComplete);
- *	    function handleComplete() {
- *	    	//Tween complete
- *	    }
- *
- * <h4>Required Support<h4>
- * Tweenjs requires a ticker function, which is included in <a href="http://www.easeljs.com">EaselJS</a>.
- * If you are not using EaselJS, you must build your own ticker function that calls {{#crossLink "Tween/tick"}}{{/crossLink}}
- * on the tweens.
- *
- * <h4>Browser Support</h4>
- * TweenJS will work in all browsers.
- *
- * @module TweenJS
- * @main TweenJS
- */
+//##############################################################################
+// Ticker.js
+//##############################################################################
 
-// TODO: possibly add a END actionsMode (only runs actions that == position)?
-// TODO: evaluate a way to decouple paused from tick registration.
-
-// namespace:
 this.createjs = this.createjs||{};
 
 (function() {
 	"use strict";
-/**
- * A Tween instance tweens properties for a single target. Instance methods can be chained for easy construction and sequencing:
- *
- * <h4>Example</h4>
- *
- *      target.alpha = 1;
- *	    Tween.get(target)
- *	         .wait(500)
- *	         .to({alpha:0, visible:false}, 1000)
- *	         .call(handleComplete);
- *	    function handleComplete() {
- *	    	//Tween complete
- *	    }
- *
- * Multiple tweens can point to the same instance, however if they affect the same properties there could be unexpected
- * behaviour. To stop all tweens on an object, use {{#crossLink "Tween/removeTweens"}}{{/crossLink}} or pass <code>override:true</code>
- * in the props argument.
- *
- *      Tween.get(target, {override:true}).to({x:100});
- *
- * Subscribe to the "change" event to get notified when a property of the target is changed.
- *
- *      Tween.get(target, {override:true}).to({x:100}).addEventListener("change", handleChange);
- *      function handleChange(event) {
- *          // The tween changed.
- *      }
- *
- * See the Tween {{#crossLink "Tween/get"}}{{/crossLink}} method for additional param documentation.
- * @class Tween
- * @param {Object} target The target object that will have its properties tweened.
- * @param {Object} [props] The configuration properties to apply to this tween instance (ex. `{loop:true, paused:true}`.
- * All properties default to false. Supported props are:<UL>
- *    <LI> loop: sets the loop property on this tween.</LI>
- *    <LI> useTicks: uses ticks for all durations instead of milliseconds.</LI>
- *    <LI> ignoreGlobalPause: sets the ignoreGlobalPause property on this tween.</LI>
- *    <LI> override: if true, `Tween.removeTweens(target)` will be called to remove any other tweens with the same target.
- *    <LI> paused: indicates whether to start the tween paused.</LI>
- *    <LI> position: indicates the initial position for this tween.</LI>
- *    <LI> onChange: specifies a listener for the "change" event.</LI>
- * </UL>
- * @param {Object} [pluginData] An object containing data for use by installed plugins. See individual
- * plugins' documentation for details.
- * @extends EventDispatcher
- * @constructor
- */
-var Tween = function(target, props, pluginData) {
-  this.initialize(target, props, pluginData);
-};
-var p = Tween.prototype = new createjs.EventDispatcher();
 
-// static interface:
+
+// constructor:
+	/**
+	 * The Ticker provides a centralized tick or heartbeat broadcast at a set interval. Listeners can subscribe to the tick
+	 * event to be notified when a set time interval has elapsed.
+	 *
+	 * Note that the interval that the tick event is called is a target interval, and may be broadcast at a slower interval
+	 * when under high CPU load. The Ticker class uses a static interface (ex. `Ticker.framerate = 30;`) and
+	 * can not be instantiated.
+	 *
+	 * <h4>Example</h4>
+	 *
+	 *      createjs.Ticker.addEventListener("tick", handleTick);
+	 *      function handleTick(event) {
+	 *          // Actions carried out each tick (aka frame)
+	 *          if (!event.paused) {
+	 *              // Actions carried out when the Ticker is not paused.
+	 *          }
+	 *      }
+	 *
+	 * @class Ticker
+	 * @uses EventDispatcher
+	 * @static
+	 **/
+	function Ticker() {
+		throw "Ticker cannot be instantiated.";
+	}
+
+
+// constants:
+	/**
+	 * In this mode, Ticker uses the requestAnimationFrame API, but attempts to synch the ticks to target framerate. It
+	 * uses a simple heuristic that compares the time of the RAF return to the target time for the current frame and
+	 * dispatches the tick when the time is within a certain threshold.
+	 *
+	 * This mode has a higher variance for time between frames than TIMEOUT, but does not require that content be time
+	 * based as with RAF while gaining the benefits of that API (screen synch, background throttling).
+	 *
+	 * Variance is usually lowest for framerates that are a divisor of the RAF frequency. This is usually 60, so
+	 * framerates of 10, 12, 15, 20, and 30 work well.
+	 *
+	 * Falls back on TIMEOUT if the requestAnimationFrame API is not supported.
+	 * @property RAF_SYNCHED
+	 * @static
+	 * @type {String}
+	 * @default "synched"
+	 * @readonly
+	 **/
+	Ticker.RAF_SYNCHED = "synched";
+
+	/**
+	 * In this mode, Ticker passes through the requestAnimationFrame heartbeat, ignoring the target framerate completely.
+	 * Because requestAnimationFrame frequency is not deterministic, any content using this mode should be time based.
+	 * You can leverage {{#crossLink "Ticker/getTime"}}{{/crossLink}} and the tick event object's "delta" properties
+	 * to make this easier.
+	 *
+	 * Falls back on TIMEOUT if the requestAnimationFrame API is not supported.
+	 * @property RAF
+	 * @static
+	 * @type {String}
+	 * @default "raf"
+	 * @readonly
+	 **/
+	Ticker.RAF = "raf";
+
+	/**
+	 * In this mode, Ticker uses the setTimeout API. This provides predictable, adaptive frame timing, but does not
+	 * provide the benefits of requestAnimationFrame (screen synch, background throttling).
+	 * @property TIMEOUT
+	 * @static
+	 * @type {String}
+	 * @default "timer"
+	 * @readonly
+	 **/
+	Ticker.TIMEOUT = "timeout";
+
+
+// static events:
+	/**
+	 * Dispatched each tick. The event will be dispatched to each listener even when the Ticker has been paused using
+	 * {{#crossLink "Ticker/setPaused"}}{{/crossLink}}.
+	 *
+	 * <h4>Example</h4>
+	 *
+	 *      createjs.Ticker.addEventListener("tick", handleTick);
+	 *      function handleTick(event) {
+	 *          console.log("Paused:", event.paused, event.delta);
+	 *      }
+	 *
+	 * @event tick
+	 * @param {Object} target The object that dispatched the event.
+	 * @param {String} type The event type.
+	 * @param {Boolean} paused Indicates whether the ticker is currently paused.
+	 * @param {Number} delta The time elapsed in ms since the last tick.
+	 * @param {Number} time The total time in ms since Ticker was initialized.
+	 * @param {Number} runTime The total time in ms that Ticker was not paused since it was initialized. For example,
+	 * 	you could determine the amount of time that the Ticker has been paused since initialization with time-runTime.
+	 * @since 0.6.0
+	 */
+
+
+// public static properties:
+	/**
+	 * Deprecated in favour of {{#crossLink "Ticker/timingMode"}}{{/crossLink}}, and will be removed in a future version. If true, timingMode will
+	 * use {{#crossLink "Ticker/RAF_SYNCHED"}}{{/crossLink}} by default.
+	 * @deprecated Deprecated in favour of {{#crossLink "Ticker/timingMode"}}{{/crossLink}}.
+	 * @property useRAF
+	 * @static
+	 * @type {Boolean}
+	 * @default false
+	 **/
+	Ticker.useRAF = false;
+
+	/**
+	 * Specifies the timing api (setTimeout or requestAnimationFrame) and mode to use. See
+	 * {{#crossLink "Ticker/TIMEOUT"}}{{/crossLink}}, {{#crossLink "Ticker/RAF"}}{{/crossLink}}, and
+	 * {{#crossLink "Ticker/RAF_SYNCHED"}}{{/crossLink}} for mode details.
+	 * @property timingMode
+	 * @static
+	 * @type {String}
+	 * @default Ticker.TIMEOUT
+	 **/
+	Ticker.timingMode = null;
+
+	/**
+	 * Specifies a maximum value for the delta property in the tick event object. This is useful when building time
+	 * based animations and systems to prevent issues caused by large time gaps caused by background tabs, system sleep,
+	 * alert dialogs, or other blocking routines. Double the expected frame duration is often an effective value
+	 * (ex. maxDelta=50 when running at 40fps).
+	 * 
+	 * This does not impact any other values (ex. time, runTime, etc), so you may experience issues if you enable maxDelta
+	 * when using both delta and other values.
+	 * 
+	 * If 0, there is no maximum.
+	 * @property maxDelta
+	 * @static
+	 * @type {number}
+	 * @default 0
+	 */
+	Ticker.maxDelta = 0;
+	
+	/**
+	 * When the ticker is paused, all listeners will still receive a tick event, but the <code>paused</code> property of the event will be false.
+	 * Also, while paused the `runTime` will not increase. See {{#crossLink "Ticker/tick:event"}}{{/crossLink}},
+	 * {{#crossLink "Ticker/getTime"}}{{/crossLink}}, and {{#crossLink "Ticker/getEventTime"}}{{/crossLink}} for more info.
+	 *
+	 * <h4>Example</h4>
+	 *
+	 *      createjs.Ticker.addEventListener("tick", handleTick);
+	 *      createjs.Ticker.paused = true;
+	 *      function handleTick(event) {
+	 *          console.log(event.paused,
+	 *          	createjs.Ticker.getTime(false),
+	 *          	createjs.Ticker.getTime(true));
+	 *      }
+	 *
+	 * @property paused
+	 * @static
+	 * @type {Boolean}
+	 * @default false
+	 **/
+	Ticker.paused = false;
+
+
+// mix-ins:
+	// EventDispatcher methods:
+	Ticker.removeEventListener = null;
+	Ticker.removeAllEventListeners = null;
+	Ticker.dispatchEvent = null;
+	Ticker.hasEventListener = null;
+	Ticker._listeners = null;
+	createjs.EventDispatcher.initialize(Ticker); // inject EventDispatcher methods.
+	Ticker._addEventListener = Ticker.addEventListener;
+	Ticker.addEventListener = function() {
+		!Ticker._inited&&Ticker.init();
+		return Ticker._addEventListener.apply(Ticker, arguments);
+	};
+
+
+// private static properties:
+	/**
+	 * @property _inited
+	 * @static
+	 * @type {Boolean}
+	 * @protected
+	 **/
+	Ticker._inited = false;
+
+	/**
+	 * @property _startTime
+	 * @static
+	 * @type {Number}
+	 * @protected
+	 **/
+	Ticker._startTime = 0;
+
+	/**
+	 * @property _pausedTime
+	 * @static
+	 * @type {Number}
+	 * @protected
+	 **/
+	Ticker._pausedTime=0;
+
+	/**
+	 * The number of ticks that have passed
+	 * @property _ticks
+	 * @static
+	 * @type {Number}
+	 * @protected
+	 **/
+	Ticker._ticks = 0;
+
+	/**
+	 * The number of ticks that have passed while Ticker has been paused
+	 * @property _pausedTicks
+	 * @static
+	 * @type {Number}
+	 * @protected
+	 **/
+	Ticker._pausedTicks = 0;
+
+	/**
+	 * @property _interval
+	 * @static
+	 * @type {Number}
+	 * @protected
+	 **/
+	Ticker._interval = 50;
+
+	/**
+	 * @property _lastTime
+	 * @static
+	 * @type {Number}
+	 * @protected
+	 **/
+	Ticker._lastTime = 0;
+
+	/**
+	 * @property _times
+	 * @static
+	 * @type {Array}
+	 * @protected
+	 **/
+	Ticker._times = null;
+
+	/**
+	 * @property _tickTimes
+	 * @static
+	 * @type {Array}
+	 * @protected
+	 **/
+	Ticker._tickTimes = null;
+
+	/**
+	 * Stores the timeout or requestAnimationFrame id.
+	 * @property _timerId
+	 * @static
+	 * @type {Number}
+	 * @protected
+	 **/
+	Ticker._timerId = null;
+	
+	/**
+	 * True if currently using requestAnimationFrame, false if using setTimeout. This may be different than timingMode
+	 * if that property changed and a tick hasn't fired.
+	 * @property _raf
+	 * @static
+	 * @type {Boolean}
+	 * @protected
+	 **/
+	Ticker._raf = true;
+	
+
+// static getter / setters:
+	/**
+	 * Use the {{#crossLink "Ticker/interval:property"}}{{/crossLink}} property instead.
+	 * @method setInterval
+	 * @static
+	 * @param {Number} interval
+	 * @deprecated
+	 **/
+	Ticker.setInterval = function(interval) {
+		Ticker._interval = interval;
+		if (!Ticker._inited) { return; }
+		Ticker._setupTick();
+	};
+
+	/**
+	 * Use the {{#crossLink "Ticker/framerate:property"}}{{/crossLink}} property instead.
+	 * @method getInterval
+	 * @static
+	 * @return {Number}
+	 * @deprecated
+	 **/
+	Ticker.getInterval = function() {
+		return Ticker._interval;
+	};
+
+	/**
+	 * Use the {{#crossLink "Ticker/framerate:property"}}{{/crossLink}} property instead.
+	 * @method setFPS
+	 * @static
+	 * @param {Number} value
+	 * @deprecated
+	 **/
+	Ticker.setFPS = function(value) {
+		Ticker.setInterval(1000/value);
+	};
+
+	/**
+	 * Use the {{#crossLink "Ticker/interval:property"}}{{/crossLink}} property instead.
+	 * @method getFPS
+	 * @static
+	 * @return {Number}
+	 * @deprecated
+	 **/
+	Ticker.getFPS = function() {
+		return 1000/Ticker._interval;
+	};
+
+	/**
+	 * Indicates the target time (in milliseconds) between ticks. Default is 50 (20 FPS).
+	 * Note that actual time between ticks may be more than specified depending on CPU load.
+	 * This property is ignored if the ticker is using the `RAF` timing mode.
+	 * @property interval
+	 * @static
+	 * @type {Number}
+	 **/
+	 
+	/**
+	 * Indicates the target frame rate in frames per second (FPS). Effectively just a shortcut to `interval`, where
+	 * `framerate == 1000/interval`.
+	 * @property framerate
+	 * @static
+	 * @type {Number}
+	 **/
+	try {
+		Object.defineProperties(Ticker, {
+			interval: { get: Ticker.getInterval, set: Ticker.setInterval },
+			framerate: { get: Ticker.getFPS, set: Ticker.setFPS }
+		});
+	} catch (e) { console.log(e); }
+
+
+// public static methods:
+	/**
+	 * Starts the tick. This is called automatically when the first listener is added.
+	 * @method init
+	 * @static
+	 **/
+	Ticker.init = function() {
+		if (Ticker._inited) { return; }
+		Ticker._inited = true;
+		Ticker._times = [];
+		Ticker._tickTimes = [];
+		Ticker._startTime = Ticker._getTime();
+		Ticker._times.push(Ticker._lastTime = 0);
+		Ticker.interval = Ticker._interval;
+	};
+	
+	/**
+	 * Stops the Ticker and removes all listeners. Use init() to restart the Ticker.
+	 * @method reset
+	 * @static
+	 **/
+	Ticker.reset = function() {
+		if (Ticker._raf) {
+			var f = window.cancelAnimationFrame || window.webkitCancelAnimationFrame || window.mozCancelAnimationFrame || window.oCancelAnimationFrame || window.msCancelAnimationFrame;
+			f&&f(Ticker._timerId);
+		} else {
+			clearTimeout(Ticker._timerId);
+		}
+		Ticker.removeAllEventListeners("tick");
+		Ticker._timerId = Ticker._times = Ticker._tickTimes = null;
+		Ticker._startTime = Ticker._lastTime = Ticker._ticks = 0;
+		Ticker._inited = false;
+	};
+
+	/**
+	 * Returns the average time spent within a tick. This can vary significantly from the value provided by getMeasuredFPS
+	 * because it only measures the time spent within the tick execution stack. 
+	 * 
+	 * Example 1: With a target FPS of 20, getMeasuredFPS() returns 20fps, which indicates an average of 50ms between 
+	 * the end of one tick and the end of the next. However, getMeasuredTickTime() returns 15ms. This indicates that 
+	 * there may be up to 35ms of "idle" time between the end of one tick and the start of the next.
+	 *
+	 * Example 2: With a target FPS of 30, getFPS() returns 10fps, which indicates an average of 100ms between the end of
+	 * one tick and the end of the next. However, getMeasuredTickTime() returns 20ms. This would indicate that something
+	 * other than the tick is using ~80ms (another script, DOM rendering, etc).
+	 * @method getMeasuredTickTime
+	 * @static
+	 * @param {Number} [ticks] The number of previous ticks over which to measure the average time spent in a tick.
+	 * Defaults to the number of ticks per second. To get only the last tick's time, pass in 1.
+	 * @return {Number} The average time spent in a tick in milliseconds.
+	 **/
+	Ticker.getMeasuredTickTime = function(ticks) {
+		var ttl=0, times=Ticker._tickTimes;
+		if (!times || times.length < 1) { return -1; }
+
+		// by default, calculate average for the past ~1 second:
+		ticks = Math.min(times.length, ticks||(Ticker.getFPS()|0));
+		for (var i=0; i<ticks; i++) { ttl += times[i]; }
+		return ttl/ticks;
+	};
+
+	/**
+	 * Returns the actual frames / ticks per second.
+	 * @method getMeasuredFPS
+	 * @static
+	 * @param {Number} [ticks] The number of previous ticks over which to measure the actual frames / ticks per second.
+	 * Defaults to the number of ticks per second.
+	 * @return {Number} The actual frames / ticks per second. Depending on performance, this may differ
+	 * from the target frames per second.
+	 **/
+	Ticker.getMeasuredFPS = function(ticks) {
+		var times = Ticker._times;
+		if (!times || times.length < 2) { return -1; }
+
+		// by default, calculate fps for the past ~1 second:
+		ticks = Math.min(times.length-1, ticks||(Ticker.getFPS()|0));
+		return 1000/((times[0]-times[ticks])/ticks);
+	};
+
+	/**
+	 * Use the {{#crossLink "Ticker/paused:property"}}{{/crossLink}} property instead.
+	 * @method setPaused
+	 * @static
+	 * @param {Boolean} value
+	 * @deprecated
+	 **/
+	Ticker.setPaused = function(value) {
+		// TODO: deprecated.
+		Ticker.paused = value;
+	};
+
+	/**
+	 * Use the {{#crossLink "Ticker/paused:property"}}{{/crossLink}} property instead.
+	 * @method getPaused
+	 * @static
+	 * @return {Boolean}
+	 * @deprecated
+	 **/
+	Ticker.getPaused = function() {
+		// TODO: deprecated.
+		return Ticker.paused;
+	};
+
+	/**
+	 * Returns the number of milliseconds that have elapsed since Ticker was initialized via {{#crossLink "Ticker/init"}}.
+	 * Returns -1 if Ticker has not been initialized. For example, you could use
+	 * this in a time synchronized animation to determine the exact amount of time that has elapsed.
+	 * @method getTime
+	 * @static
+	 * @param {Boolean} [runTime=false] If true only time elapsed while Ticker was not paused will be returned.
+	 * If false, the value returned will be total time elapsed since the first tick event listener was added.
+	 * @return {Number} Number of milliseconds that have elapsed since Ticker was initialized or -1.
+	 **/
+	Ticker.getTime = function(runTime) {
+		return Ticker._startTime ? Ticker._getTime() - (runTime ? Ticker._pausedTime : 0) : -1;
+	};
+
+	/**
+	 * Similar to getTime(), but returns the time on the most recent tick event object.
+	 * @method getEventTime
+	 * @static
+	 * @param runTime {Boolean} [runTime=false] If true, the runTime property will be returned instead of time.
+	 * @returns {number} The time or runTime property from the most recent tick event or -1.
+	 */
+	Ticker.getEventTime = function(runTime) {
+		return Ticker._startTime ? (Ticker._lastTime || Ticker._startTime) - (runTime ? Ticker._pausedTime : 0) : -1;
+	};
+	
+	/**
+	 * Returns the number of ticks that have been broadcast by Ticker.
+	 * @method getTicks
+	 * @static
+	 * @param {Boolean} pauseable Indicates whether to include ticks that would have been broadcast
+	 * while Ticker was paused. If true only tick events broadcast while Ticker is not paused will be returned.
+	 * If false, tick events that would have been broadcast while Ticker was paused will be included in the return
+	 * value. The default value is false.
+	 * @return {Number} of ticks that have been broadcast.
+	 **/
+	Ticker.getTicks = function(pauseable) {
+		return  Ticker._ticks - (pauseable ? Ticker._pausedTicks : 0);
+	};
+
+
+// private static methods:
+	/**
+	 * @method _handleSynch
+	 * @static
+	 * @protected
+	 **/
+	Ticker._handleSynch = function() {
+		Ticker._timerId = null;
+		Ticker._setupTick();
+
+		// run if enough time has elapsed, with a little bit of flexibility to be early:
+		if (Ticker._getTime() - Ticker._lastTime >= (Ticker._interval-1)*0.97) {
+			Ticker._tick();
+		}
+	};
+
+	/**
+	 * @method _handleRAF
+	 * @static
+	 * @protected
+	 **/
+	Ticker._handleRAF = function() {
+		Ticker._timerId = null;
+		Ticker._setupTick();
+		Ticker._tick();
+	};
+
+	/**
+	 * @method _handleTimeout
+	 * @static
+	 * @protected
+	 **/
+	Ticker._handleTimeout = function() {
+		Ticker._timerId = null;
+		Ticker._setupTick();
+		Ticker._tick();
+	};
+
+	/**
+	 * @method _setupTick
+	 * @static
+	 * @protected
+	 **/
+	Ticker._setupTick = function() {
+		if (Ticker._timerId != null) { return; } // avoid duplicates
+
+		var mode = Ticker.timingMode||(Ticker.useRAF&&Ticker.RAF_SYNCHED);
+		if (mode == Ticker.RAF_SYNCHED || mode == Ticker.RAF) {
+			var f = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame;
+			if (f) {
+				Ticker._timerId = f(mode == Ticker.RAF ? Ticker._handleRAF : Ticker._handleSynch);
+				Ticker._raf = true;
+				return;
+			}
+		}
+		Ticker._raf = false;
+		Ticker._timerId = setTimeout(Ticker._handleTimeout, Ticker._interval);
+	};
+
+	/**
+	 * @method _tick
+	 * @static
+	 * @protected
+	 **/
+	Ticker._tick = function() {
+		var paused = Ticker.paused;
+		var time = Ticker._getTime();
+		var elapsedTime = time-Ticker._lastTime;
+		Ticker._lastTime = time;
+		Ticker._ticks++;
+		
+		if (paused) {
+			Ticker._pausedTicks++;
+			Ticker._pausedTime += elapsedTime;
+		}
+		
+		if (Ticker.hasEventListener("tick")) {
+			var event = new createjs.Event("tick");
+			var maxDelta = Ticker.maxDelta;
+			event.delta = (maxDelta && elapsedTime > maxDelta) ? maxDelta : elapsedTime;
+			event.paused = paused;
+			event.time = time;
+			event.runTime = time-Ticker._pausedTime;
+			Ticker.dispatchEvent(event);
+		}
+		
+		Ticker._tickTimes.unshift(Ticker._getTime()-time);
+		while (Ticker._tickTimes.length > 100) { Ticker._tickTimes.pop(); }
+
+		Ticker._times.unshift(time);
+		while (Ticker._times.length > 100) { Ticker._times.pop(); }
+	};
+
+	/**
+	 * @method _getTime
+	 * @static
+	 * @protected
+	 **/
+	var now = window.performance && (performance.now || performance.mozNow || performance.msNow || performance.oNow || performance.webkitNow);
+	Ticker._getTime = function() {
+		return ((now&&now.call(performance))||(new Date().getTime())) - Ticker._startTime;
+	};
+
+
+	createjs.Ticker = Ticker;
+}());
+
+//##############################################################################
+// Tween.js
+//##############################################################################
+
+// TODO: possibly add a END actionsMode (only runs actions that == position)?
+// TODO: evaluate a way to decouple paused from tick registration.
+
+
+this.createjs = this.createjs||{};
+
+(function() {
+	"use strict";
+
+
+// constructor
+	/**
+	 * A Tween instance tweens properties for a single target. Instance methods can be chained for easy construction and sequencing:
+	 *
+	 * <h4>Example</h4>
+	 *
+	 *      target.alpha = 1;
+	 *	    Tween.get(target)
+	 *	         .wait(500)
+	 *	         .to({alpha:0, visible:false}, 1000)
+	 *	         .call(handleComplete);
+	 *	    function handleComplete() {
+	 *	    	//Tween complete
+	 *	    }
+	 *
+	 * Multiple tweens can point to the same instance, however if they affect the same properties there could be unexpected
+	 * behaviour. To stop all tweens on an object, use {{#crossLink "Tween/removeTweens"}}{{/crossLink}} or pass <code>override:true</code>
+	 * in the props argument.
+	 *
+	 *      Tween.get(target, {override:true}).to({x:100});
+	 *
+	 * Subscribe to the "change" event to get notified when a property of the target is changed.
+	 *
+	 *      Tween.get(target, {override:true}).to({x:100}).addEventListener("change", handleChange);
+	 *      function handleChange(event) {
+	 *          // The tween changed.
+	 *      }
+	 *
+	 * See the Tween {{#crossLink "Tween/get"}}{{/crossLink}} method for additional param documentation.
+	 * @class Tween
+	 * @param {Object} target The target object that will have its properties tweened.
+	 * @param {Object} [props] The configuration properties to apply to this tween instance (ex. `{loop:true, paused:true}`.
+	 * All properties default to false. Supported props are:<UL>
+	 *    <LI> loop: sets the loop property on this tween.</LI>
+	 *    <LI> useTicks: uses ticks for all durations instead of milliseconds.</LI>
+	 *    <LI> ignoreGlobalPause: sets the {{#crossLink "Tween/ignoreGlobalPause:property"}}{{/crossLink}} property on this tween.</LI>
+	 *    <LI> override: if true, `Tween.removeTweens(target)` will be called to remove any other tweens with the same target.
+	 *    <LI> paused: indicates whether to start the tween paused.</LI>
+	 *    <LI> position: indicates the initial position for this tween.</LI>
+	 *    <LI> onChange: specifies a listener for the "change" event.</LI>
+	 * </UL>
+	 * @param {Object} [pluginData] An object containing data for use by installed plugins. See individual
+	 * plugins' documentation for details.
+	 * @extends EventDispatcher
+	 * @constructor
+	 */
+	function Tween(target, props, pluginData) {
+
+	// public properties:
+		/**
+		 * Causes this tween to continue playing when a global pause is active. For example, if TweenJS is using {{#crossLink "Ticker"}}{{/crossLink}},
+		 * then setting this to true (the default) will cause this tween to be paused when <code>Ticker.setPaused(true)</code>
+		 * is called. See the Tween {{#crossLink "Tween/tick"}}{{/crossLink}} method for more info. Can be set via the props
+		 * parameter.
+		 * @property ignoreGlobalPause
+		 * @type Boolean
+		 * @default false
+		 */
+		this.ignoreGlobalPause = false;
+	
+		/**
+		 * If true, the tween will loop when it reaches the end. Can be set via the props param.
+		 * @property loop
+		 * @type {Boolean}
+		 * @default false
+		 */
+		this.loop = false;
+	
+		/**
+		 * Read-only. Specifies the total duration of this tween in milliseconds (or ticks if useTicks is true).
+		 * This value is automatically updated as you modify the tween. Changing it directly could result in unexpected
+		 * behaviour.
+		 * @property duration
+		 * @type {Number}
+		 * @default 0
+		 */
+		this.duration = 0;
+	
+		/**
+		 * Allows you to specify data that will be used by installed plugins. Each plugin uses this differently, but in general
+		 * you specify data by setting it to a property of pluginData with the same name as the plugin class.
+		 * @example
+		 *	myTween.pluginData.PluginClassName = data;
+		 * <br/>
+		 * Also, most plugins support a property to enable or disable them. This is typically the plugin class name followed by "_enabled".<br/>
+		 * @example
+		 *	myTween.pluginData.PluginClassName_enabled = false;<br/>
+		 * <br/>
+		 * Some plugins also store instance data in this object, usually in a property named _PluginClassName.
+		 * See the documentation for individual plugins for more details.
+		 * @property pluginData
+		 * @type {Object}
+		 */
+		this.pluginData = pluginData || {};
+	
+		/**
+		 * Read-only. The target of this tween. This is the object on which the tweened properties will be changed. Changing
+		 * this property after the tween is created will not have any effect.
+		 * @property target
+		 * @type {Object}
+		 */
+		this.target = target;
+	
+		/**
+		 * Read-only. The current normalized position of the tween. This will always be a value between 0 and duration.
+		 * Changing this property directly will have no effect.
+		 * @property position
+		 * @type {Object}
+		 */
+		this.position = null;
+	
+		/**
+		 * Read-only. Indicates the tween's current position is within a passive wait.
+		 * @property passive
+		 * @type {Boolean}
+		 **/
+		this.passive = false;
+	
+	// private properties:	
+		/**
+		 * @property _paused
+		 * @type {Boolean}
+		 * @default false
+		 * @protected
+		 */
+		this._paused = false;
+	
+		/**
+		 * @property _curQueueProps
+		 * @type {Object}
+		 * @protected
+		 */
+		this._curQueueProps = {};
+	
+		/**
+		 * @property _initQueueProps
+		 * @type {Object}
+		 * @protected
+		 */
+		this._initQueueProps = {};
+	
+		/**
+		 * @property _steps
+		 * @type {Array}
+		 * @protected
+		 */
+		this._steps = [];
+	
+		/**
+		 * @property _actions
+		 * @type {Array}
+		 * @protected
+		 */
+		this._actions = [];
+	
+		/**
+		 * Raw position.
+		 * @property _prevPosition
+		 * @type {Number}
+		 * @default 0
+		 * @protected
+		 */
+		this._prevPosition = 0;
+	
+		/**
+		 * The position within the current stethis.
+		 * @property _stepPosition
+		 * @type {Number}
+		 * @default 0
+		 * @protected
+		 */
+		this._stepPosition = 0; // this is needed by MovieClithis.
+	
+		/**
+		 * Normalized position.
+		 * @property _prevPos
+		 * @type {Number}
+		 * @default -1
+		 * @protected
+		 */
+		this._prevPos = -1;
+	
+		/**
+		 * @property _target
+		 * @type {Object}
+		 * @protected
+		 */
+		this._target = target;
+	
+		/**
+		 * @property _useTicks
+		 * @type {Boolean}
+		 * @default false
+		 * @protected
+		 */
+		this._useTicks = false;
+	
+		/**
+		 * @property _inited
+		 * @type {boolean}
+		 * @default false
+		 * @protected
+		 */
+		this._inited = false;
+
+
+		if (props) {
+			this._useTicks = props.useTicks;
+			this.ignoreGlobalPause = props.ignoreGlobalPause;
+			this.loop = props.loop;
+			props.onChange && this.addEventListener("change", props.onChange);
+			if (props.override) { Tween.removeTweens(target); }
+		}
+		if (props&&props.paused) { this._paused=true; }
+		else { createjs.Tween._register(this,true); }
+		if (props&&props.position!=null) { this.setPosition(props.position, Tween.NONE); }
+
+	};
+
+	var p = createjs.extend(Tween, createjs.EventDispatcher);
+	
+
+// static properties
 	/**
 	 * Constant defining the none actionsMode for use with setPosition.
 	 * @property NONE
@@ -832,6 +1595,8 @@ var p = Tween.prototype = new createjs.EventDispatcher();
 	 */
 	Tween._plugins = {};
 
+
+// static methods	
 	/**
 	 * Returns a new tween instance. This is functionally identical to using "new Tween(...)", but looks cleaner
 	 * with the chained syntax of TweenJS.
@@ -843,7 +1608,7 @@ var p = Tween.prototype = new createjs.EventDispatcher();
 	 * All properties default to false. Supported props are:<UL>
 	 *    <LI> loop: sets the loop property on this tween.</LI>
 	 *    <LI> useTicks: uses ticks for all durations instead of milliseconds.</LI>
-	 *    <LI> ignoreGlobalPause: sets the ignoreGlobalPause property on this tween.</LI>
+	 *    <LI> ignoreGlobalPause: sets the {{#crossLink "Tween/ignoreGlobalPause:property"}}{{/crossLink}} property on this tween.</LI>
 	 *    <LI> override: if true, Tween.removeTweens(target) will be called to remove any other tweens with the same target.
 	 *    <LI> paused: indicates whether to start the tween paused.</LI>
 	 *    <LI> position: indicates the initial position for this tween.</LI>
@@ -863,15 +1628,13 @@ var p = Tween.prototype = new createjs.EventDispatcher();
 	};
 
 	/**
-	 * Advances all tweens. This typically uses the Ticker class (available in the EaselJS library), but you can call it
+	 * Advances all tweens. This typically uses the {{#crossLink "Ticker"}}{{/crossLink}} class, but you can call it
 	 * manually if you prefer to use your own "heartbeat" implementation.
-	 *
-	 * Note: Currently, EaselJS must be included <em>before</em> TweenJS to ensure Ticker exists during initialization.
 	 * @method tick
 	 * @param {Number} delta The change in time in milliseconds since the last tick. Required unless all tweens have
 	 * <code>useTicks</code> set to true.
-	 * @param {Boolean} paused Indicates whether a global pause is in effect. Tweens with <code>ignoreGlobalPause</code>
-	 * will ignore this, but all others will pause if this is true.
+	 * @param {Boolean} paused Indicates whether a global pause is in effect. Tweens with {{#crossLink "Tween/ignoreGlobalPause:property"}}{{/crossLink}}
+	 * will ignore this, but all others will pause if this is `true`.
 	 * @static
 	 */
 	Tween.tick = function(delta, paused) {
@@ -887,7 +1650,8 @@ var p = Tween.prototype = new createjs.EventDispatcher();
 	 * Handle events that result from Tween being used as an event handler. This is included to allow Tween to handle
 	 * tick events from <code>createjs.Ticker</code>. No other events are handled in Tween.
 	 * @method handleEvent
-	 * @param {Object} event An event object passed in by the EventDispatcher. Will usually be of type "tick".
+	 * @param {Object} event An event object passed in by the {{#crossLink "EventDispatcher"}}{{/crossLink}}. Will
+	 * usually be of type "tick".
 	 * @private
 	 * @static
 	 * @since 0.4.2
@@ -948,8 +1712,8 @@ var p = Tween.prototype = new createjs.EventDispatcher();
 	};
 
 	/**
-	 * Installs a plugin, which can modify how certain properties are handled when tweened. See the CSSPlugin for an
-	 * example of how to write TweenJS plugins.
+	 * Installs a plugin, which can modify how certain properties are handled when tweened. See the {{#crossLink "CSSPlugin"}}{{/crossLink}}
+	 * for an example of how to write TweenJS plugins.
 	 * @method installPlugin
 	 * @static
 	 * @param {Object} plugin The plugin class to install
@@ -975,7 +1739,7 @@ var p = Tween.prototype = new createjs.EventDispatcher();
 	 * Registers or unregisters a tween with the ticking system.
 	 * @method _register
 	 * @param {Tween} tween The tween instance to register or unregister.
-	 * @param {Boolean} value If true, the tween is registered. If false the tween is unregistered. 
+	 * @param {Boolean} value If true, the tween is registered. If false the tween is unregistered.
 	 * @static
 	 * @protected
 	 */
@@ -999,83 +1763,6 @@ var p = Tween.prototype = new createjs.EventDispatcher();
 		}
 	};
 
-// public properties:
-	/**
-	 * Causes this tween to continue playing when a global pause is active. For example, if TweenJS is using Ticker,
-	 * then setting this to true (the default) will cause this tween to be paused when <code>Ticker.setPaused(true)</code> is called.
-	 * See Tween.tick() for more info. Can be set via the props param.
-	 * @property ignoreGlobalPause
-	 * @type Boolean
-	 * @default false
-	 */
-	p.ignoreGlobalPause = false;
-
-	/**
-	 * If true, the tween will loop when it reaches the end. Can be set via the props param.
-	 * @property loop
-	 * @type {Boolean}
-	 * @default false
-	 */
-	p.loop = false;
-
-	/**
-	 * Read-only. Specifies the total duration of this tween in milliseconds (or ticks if useTicks is true).
-	 * This value is automatically updated as you modify the tween. Changing it directly could result in unexpected
-	 * behaviour.
-	 * @property duration
-	 * @type {Number}
-	 * @default 0
-	 */
-	p.duration = 0;
-
-	/**
-	 * Allows you to specify data that will be used by installed plugins. Each plugin uses this differently, but in general
-	 * you specify data by setting it to a property of pluginData with the same name as the plugin class.
-	 * @example
-	 *	myTween.pluginData.PluginClassName = data;
-	 * <br/>
-	 * Also, most plugins support a property to enable or disable them. This is typically the plugin class name followed by "_enabled".<br/>
-	 * @example
-	 *	myTween.pluginData.PluginClassName_enabled = false;<br/>
-	 * <br/>
-	 * Some plugins also store instance data in this object, usually in a property named _PluginClassName.
-	 * See the documentation for individual plugins for more details.
-	 * @property pluginData
-	 * @type {Object}
-	 */
-	p.pluginData = null;
-
-	// TODO: deprecated.
-	/**
-	 * REMOVED. Use {{#crossLink "EventDispatcher/addEventListener"}}{{/crossLink}} and the {{#crossLink "Tween/change:event"}}{{/crossLink}}
-	 * event.
-	 * @property onChange
-	 * @type {Function}
-	 * @deprecated Use addEventListener and the "change" event.
-	 */
-
-	/**
-	 * Read-only. The target of this tween. This is the object on which the tweened properties will be changed. Changing
-	 * this property after the tween is created will not have any effect.
-	 * @property target
-	 * @type {Object}
-	 */
-	p.target = null;
-
-	/**
-	 * Read-only. The current normalized position of the tween. This will always be a value between 0 and duration.
-	 * Changing this property directly will have no effect.
-	 * @property position
-	 * @type {Object}
-	 */
-	p.position = null;
-
-	/**
-	 * Read-only. Indicates the tween's current position is within a passive wait.
-	 * @property passive
-	 * @type {Boolean}
-	 **/
-	p.passive = false;
 
 // events:
 	/**
@@ -1083,122 +1770,7 @@ var p = Tween.prototype = new createjs.EventDispatcher();
 	 * @event change
 	 * @since 0.4.0
 	 **/
-
-// private properties:
-
-	/**
-	 * @property _paused
-	 * @type {Boolean}
-	 * @default false
-	 * @protected
-	 */
-	p._paused = false;
-
-	/**
-	 * @property _curQueueProps
-	 * @type {Object}
-	 * @protected
-	 */
-	p._curQueueProps = null;
-
-	/**
-	 * @property _initQueueProps
-	 * @type {Object}
-	 * @protected
-	 */
-	p._initQueueProps = null;
-
-	/**
-	 * @property _steps
-	 * @type {Array}
-	 * @protected
-	 */
-	p._steps = null;
-
-	/**
-	 * @property _actions
-	 * @type {Array}
-	 * @protected
-	 */
-	p._actions = null;
-
-	/**
-	 * Raw position.
-	 * @property _prevPosition
-	 * @type {Number}
-	 * @default 0
-	 * @protected
-	 */
-	p._prevPosition = 0;
-
-	/**
-	 * The position within the current step.
-	 * @property _stepPosition
-	 * @type {Number}
-	 * @default 0
-	 * @protected
-	 */
-	p._stepPosition = 0; // this is needed by MovieClip.
-
-	/**
-	 * Normalized position.
-	 * @property _prevPos
-	 * @type {Number}
-	 * @default -1
-	 * @protected
-	 */
-	p._prevPos = -1;
-
-	/**
-	 * @property _target
-	 * @type {Object}
-	 * @protected
-	 */
-	p._target = null;
-
-	/**
-	 * @property _useTicks
-	 * @type {Boolean}
-	 * @default false
-	 * @protected
-	 */
-	p._useTicks = false;
-
-	/**
-	 * @property _inited
-	 * @type {boolean}
-	 * @default false
-	 * @protected
-	 */
-	p._inited = false;
-
-// constructor:
-	/**
-	 * @method initialize
-	 * @param {Object} target
-	 * @param {Object} props
-	 * @param {Object} pluginData
-	 * @protected
-	 */
-	p.initialize = function(target, props, pluginData) {
-		this.target = this._target = target;
-		if (props) {
-			this._useTicks = props.useTicks;
-			this.ignoreGlobalPause = props.ignoreGlobalPause;
-			this.loop = props.loop;
-			props.onChange&&this.addEventListener("change", props.onChange);
-			if (props.override) { Tween.removeTweens(target); }
-		}
-
-		this.pluginData = pluginData || {};
-		this._curQueueProps = {};
-		this._initQueueProps = {};
-		this._steps = [];
-		this._actions = [];
-		if (props&&props.paused) { this._paused=true; }
-		else { Tween._register(this,true); }
-		if (props&&props.position!=null) { this.setPosition(props.position, Tween.NONE); }
-	};
+	
 
 // public methods:
 	/**
@@ -1361,7 +1933,8 @@ var p = Tween.prototype = new createjs.EventDispatcher();
 
 	/**
 	 * Advances this tween by the specified amount of time in milliseconds (or ticks if <code>useTicks</code> is true).
-	 * This is normally called automatically by the Tween engine (via <code>Tween.tick</code>), but is exposed for advanced uses.
+	 * This is normally called automatically by the Tween engine (via <code>Tween.tick</code>), but is exposed for
+	 * advanced uses.
 	 * @method tick
 	 * @param {Number} delta The time to advance in milliseconds (or ticks if <code>useTicks</code> is true).
 	 */
@@ -1568,181 +2141,131 @@ var p = Tween.prototype = new createjs.EventDispatcher();
 		}
 	};
 
-createjs.Tween = Tween;
+
+	createjs.Tween = createjs.promote(Tween, "EventDispatcher");
+
 }());
-/*
-* Timeline
-* Visit http://createjs.com/ for documentation, updates and examples.
-*
-* Copyright (c) 2010 gskinner.com, inc.
-*
-* Permission is hereby granted, free of charge, to any person
-* obtaining a copy of this software and associated documentation
-* files (the "Software"), to deal in the Software without
-* restriction, including without limitation the rights to use,
-* copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the
-* Software is furnished to do so, subject to the following
-* conditions:
-*
-* The above copyright notice and this permission notice shall be
-* included in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-* OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-* OTHER DEALINGS IN THE SOFTWARE.
-*/
 
-/**
- * @module TweenJS
- */
+//##############################################################################
+// Timeline.js
+//##############################################################################
 
-// namespace:
 this.createjs = this.createjs||{};
+
 
 (function() {
 	"use strict";
-
-/**
- * The Timeline class synchronizes multiple tweens and allows them to be controlled as a group. Please note that if a
- * timeline is looping, the tweens on it may appear to loop even if the "loop" property of the tween is false.
- * @class Timeline
- * @param {Array} tweens An array of Tweens to add to this timeline. See addTween for more info.
- * @param {Object} labels An object defining labels for using {{#crossLink "Timeline/gotoAndPlay"}}{{/crossLink}}/{{#crossLink "Timeline/gotoAndStop"}}{{/crossLink}}.
- * See {{#crossLink "Timeline/setLabels"}}{{/crossLink}}
- * for details.
- * @param {Object} props The configuration properties to apply to this tween instance (ex. `{loop:true}`). All properties
- * default to false. Supported props are:<UL>
- *    <LI> loop: sets the loop property on this tween.</LI>
- *    <LI> useTicks: uses ticks for all durations instead of milliseconds.</LI>
- *    <LI> ignoreGlobalPause: sets the ignoreGlobalPause property on this tween.</LI>
- *    <LI> paused: indicates whether to start the tween paused.</LI>
- *    <LI> position: indicates the initial position for this timeline.</LI>
- *    <LI> onChange: specifies a listener to add for the {{#crossLink "Timeline/change:event"}}{{/crossLink}} event.</LI>
- * </UL>
- * @extends EventDispatcher
- * @constructor
- **/
-var Timeline = function(tweens, labels, props) {
-  this.initialize(tweens, labels, props);
-};
-var p = Timeline.prototype = new createjs.EventDispatcher();
-
-// public properties:
-
-	/**
-	 * Causes this timeline to continue playing when a global pause is active.
-	 * @property ignoreGlobalPause
-	 * @type Boolean
-	 **/
-	p.ignoreGlobalPause = false;
-
-	/**
-	 * Read-only property specifying the total duration of this timeline in milliseconds (or ticks if useTicks is true).
-	 * This value is usually automatically updated as you modify the timeline. See updateDuration for more information.
-	 * @property duration
-	 * @type Number
-	 **/
-	p.duration = 0;
-
-	/**
-	 * If true, the timeline will loop when it reaches the end. Can be set via the props param.
-	 * @property loop
-	 * @type Boolean
-	 **/
-	p.loop = false;
-
-	// TODO: deprecated.
-	/**
-	 * REMOVED. Use {{#crossLink "EventDispatcher/addEventListener"}}{{/crossLink}} and the {{#crossLink "Timeline/change:event"}}{{/crossLink}}
-	 * event.
-	 * @property onChange
-	 * @type Function
-	 * @deprecated Use addEventListener and the "change" event.
-	 **/
-
-	/**
-	 * Read-only. The current normalized position of the timeline. This will always be a value between 0 and duration.
-	 * Changing this property directly will have no effect.
-	 * @property position
-	 * @type Object
-	 **/
-	p.position = null;
-
-// events:
-	/**
-	 * Called whenever the timeline's position changes.
-	 * @event change
-	 * @since 0.5.0
-	 **/
-
-// private properties:
-
-	/**
-	 * @property _paused
-	 * @type Boolean
-	 * @protected
-	 **/
-	p._paused = false;
-
-	/**
-	 * @property _tweens
-	 * @type Array[Tween]
-	 * @protected
-	 **/
-	p._tweens = null;
-
-	/**
-	 * @property _labels
-	 * @type Object
-	 * @protected
-	 **/
-	p._labels = null;
 	
-	/**
-	 * @property _labelList
-	 * @type Array[Object]
-	 * @protected
-	 **/
-	p._labelList = null;
 
+// constructor	
 	/**
-	 * @property _prevPosition
-	 * @type Number
-	 * @default 0
-	 * @protected
+	 * The Timeline class synchronizes multiple tweens and allows them to be controlled as a group. Please note that if a
+	 * timeline is looping, the tweens on it may appear to loop even if the "loop" property of the tween is false.
+	 * @class Timeline
+	 * @param {Array} tweens An array of Tweens to add to this timeline. See addTween for more info.
+	 * @param {Object} labels An object defining labels for using {{#crossLink "Timeline/gotoAndPlay"}}{{/crossLink}}/{{#crossLink "Timeline/gotoAndStop"}}{{/crossLink}}.
+	 * See {{#crossLink "Timeline/setLabels"}}{{/crossLink}}
+	 * for details.
+	 * @param {Object} props The configuration properties to apply to this tween instance (ex. `{loop:true}`). All properties
+	 * default to false. Supported props are:<UL>
+	 *    <LI> loop: sets the loop property on this tween.</LI>
+	 *    <LI> useTicks: uses ticks for all durations instead of milliseconds.</LI>
+	 *    <LI> ignoreGlobalPause: sets the ignoreGlobalPause property on this tween.</LI>
+	 *    <LI> paused: indicates whether to start the tween paused.</LI>
+	 *    <LI> position: indicates the initial position for this timeline.</LI>
+	 *    <LI> onChange: specifies a listener to add for the {{#crossLink "Timeline/change:event"}}{{/crossLink}} event.</LI>
+	 * </UL>
+	 * @extends EventDispatcher
+	 * @constructor
 	 **/
-	p._prevPosition = 0;
+	function Timeline(tweens, labels, props) {
+		this.EventDispatcher_constructor();
 
-	/**
-	 * @property _prevPos
-	 * @type Number
-	 * @default -1
-	 * @protected
-	 **/
-	p._prevPos = -1;
+	// public properties:
+		/**
+		 * Causes this timeline to continue playing when a global pause is active.
+		 * @property ignoreGlobalPause
+		 * @type Boolean
+		 **/
+		this.ignoreGlobalPause = false;
 
-	/**
-	 * @property _useTicks
-	 * @type Boolean
-	 * @default false
-	 * @protected
-	 **/
-	p._useTicks = false;
+		/**
+		 * Read-only property specifying the total duration of this timeline in milliseconds (or ticks if useTicks is true).
+		 * This value is usually automatically updated as you modify the timeline. See updateDuration for more information.
+		 * @property duration
+		 * @type Number
+		 **/
+		this.duration = 0;
 
-// constructor:
-	/**
-	* Initialization method.
-	* @method initialize
-	* @protected
-	**/
-	p.initialize = function(tweens, labels, props) {
+		/**
+		 * If true, the timeline will loop when it reaches the end. Can be set via the props param.
+		 * @property loop
+		 * @type Boolean
+		 **/
+		this.loop = false;
+
+		/**
+		 * Read-only. The current normalized position of the timeline. This will always be a value between 0 and duration.
+		 * Changing this property directly will have no effect.
+		 * @property position
+		 * @type Object
+		 **/
+		this.position = null;
+
+		// private properties:
+		/**
+		 * @property _paused
+		 * @type Boolean
+		 * @protected
+		 **/
+		this._paused = false;
+
+		/**
+		 * @property _tweens
+		 * @type Array[Tween]
+		 * @protected
+		 **/
 		this._tweens = [];
+
+		/**
+		 * @property _labels
+		 * @type Object
+		 * @protected
+		 **/
+		this._labels = null;
+
+		/**
+		 * @property _labelList
+		 * @type Array[Object]
+		 * @protected
+		 **/
+		this._labelList = null;
+
+		/**
+		 * @property _prevPosition
+		 * @type Number
+		 * @default 0
+		 * @protected
+		 **/
+		this._prevPosition = 0;
+
+		/**
+		 * @property _prevPos
+		 * @type Number
+		 * @default -1
+		 * @protected
+		 **/
+		this._prevPos = -1;
+
+		/**
+		 * @property _useTicks
+		 * @type Boolean
+		 * @default false
+		 * @protected
+		 **/
+		this._useTicks = false;
+
+
 		if (props) {
 			this._useTicks = props.useTicks;
 			this.loop = props.loop;
@@ -1754,7 +2277,19 @@ var p = Timeline.prototype = new createjs.EventDispatcher();
 		if (props&&props.paused) { this._paused=true; }
 		else { createjs.Tween._register(this,true); }
 		if (props&&props.position!=null) { this.setPosition(props.position, createjs.Tween.NONE); }
+		
 	};
+	
+	var p = createjs.extend(Timeline, createjs.EventDispatcher);
+
+	
+// events:
+	/**
+	 * Called whenever the timeline's position changes.
+	 * @event change
+	 * @since 0.5.0
+	 **/
+
 
 // public methods:
 	/**
@@ -1830,7 +2365,7 @@ var p = Timeline.prototype = new createjs.EventDispatcher();
 	p.setLabels = function(o) {
 		this._labels = o ?  o : {};
 	};
-	
+
 	/**
 	 * Returns a sorted list of the labels defined on this timeline.
 	 * @method getLabels
@@ -1848,7 +2383,7 @@ var p = Timeline.prototype = new createjs.EventDispatcher();
 		}
 		return list;
 	};
-	
+
 	/**
 	 * Returns the name of the label on or immediately before the current position. For example, given a timeline with
 	 * two labels, "first" on frame index 4, and "second" on frame 8, getCurrentLabel would return:<UL>
@@ -1869,7 +2404,7 @@ var p = Timeline.prototype = new createjs.EventDispatcher();
 		}
 		return null;
 	};
-	
+
 	/**
 	 * Unpauses this timeline and jumps to the specified position or label.
 	 * @method gotoAndPlay
@@ -1955,7 +2490,7 @@ var p = Timeline.prototype = new createjs.EventDispatcher();
 	 * @param {String|Number} positionOrLabel A numeric position value or label string.
 	 **/
 	p.resolve = function(positionOrLabel) {
-		var pos = parseFloat(positionOrLabel);
+		var pos = Number(positionOrLabel);
 		if (isNaN(pos)) { pos = this._labels[positionOrLabel]; }
 		return pos;
 	};
@@ -1987,71 +2522,45 @@ var p = Timeline.prototype = new createjs.EventDispatcher();
 		if (pos != null) { this.setPosition(pos); }
 	};
 
-createjs.Timeline = Timeline;
+
+	createjs.Timeline = createjs.promote(Timeline, "EventDispatcher");
+
 }());
-/*
-* Ease
-* Visit http://createjs.com/ for documentation, updates and examples.
-*
-* Copyright (c) 2010 gskinner.com, inc.
-*
-* Permission is hereby granted, free of charge, to any person
-* obtaining a copy of this software and associated documentation
-* files (the "Software"), to deal in the Software without
-* restriction, including without limitation the rights to use,
-* copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the
-* Software is furnished to do so, subject to the following
-* conditions:
-*
-* The above copyright notice and this permission notice shall be
-* included in all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-* OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-* HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-* WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-* FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-* OTHER DEALINGS IN THE SOFTWARE.
-*/
 
-/**
- * @module TweenJS
- */
+//##############################################################################
+// Ease.js
+//##############################################################################
 
-// namespace:
 this.createjs = this.createjs||{};
 
 (function() {
 	"use strict";
 
-// constructor:
-/**
- * The Ease class provides a collection of easing functions for use with TweenJS. It does not use the standard 4 param
- * easing signature. Instead it uses a single param which indicates the current linear ratio (0 to 1) of the tween.
- *
- * Most methods on Ease can be passed directly as easing functions:
- *
- *      Tween.get(target).to({x:100}, 500, Ease.linear);
- *
- * However, methods beginning with "get" will return an easing function based on parameter values:
- *
- *      Tween.get(target).to({y:200}, 500, Ease.getPowIn(2.2));
- *
- * Please see the <a href="http://www.createjs.com/#!/TweenJS/demos/sparkTable">spark table demo</a> for an overview
- * of the different ease types on <a href="http://tweenjs.com">TweenJS.com</a>.
- *
- * <i>Equations derived from work by Robert Penner.</i>
- * @class Ease
- * @static
- **/
-var Ease = function() {
-	throw "Ease cannot be instantiated.";
-}
+	/**
+	 * The Ease class provides a collection of easing functions for use with TweenJS. It does not use the standard 4 param
+	 * easing signature. Instead it uses a single param which indicates the current linear ratio (0 to 1) of the tween.
+	 *
+	 * Most methods on Ease can be passed directly as easing functions:
+	 *
+	 *      Tween.get(target).to({x:100}, 500, Ease.linear);
+	 *
+	 * However, methods beginning with "get" will return an easing function based on parameter values:
+	 *
+	 *      Tween.get(target).to({y:200}, 500, Ease.getPowIn(2.2));
+	 *
+	 * Please see the <a href="http://www.createjs.com/#!/TweenJS/demos/sparkTable">spark table demo</a> for an overview
+	 * of the different ease types on <a href="http://tweenjs.com">TweenJS.com</a>.
+	 *
+	 * <i>Equations derived from work by Robert Penner.</i>
+	 * @class Ease
+	 * @static
+	 **/
+	function Ease() {
+		throw "Ease cannot be instantiated.";
+	};
 
-// public static methods:
+
+// static methods and properties
 	/**
 	 * @method linear
 	 * @static
@@ -2093,7 +2602,6 @@ var Ease = function() {
 		}
 	}
 
-
 	/**
 	 * Configurable exponential ease.
 	 * @method getPowOut
@@ -2105,7 +2613,6 @@ var Ease = function() {
 			return 1-Math.pow(1-t,pow);
 		}
 	}
-
 
 	/**
 	 * Configurable exponential ease.
@@ -2119,7 +2626,6 @@ var Ease = function() {
 			return 1-0.5*Math.abs(Math.pow(2-t,pow));
 		}
 	}
-
 
 	/**
 	 * @method quadIn
@@ -2137,7 +2643,6 @@ var Ease = function() {
 	 **/
 	Ease.quadInOut = Ease.getPowInOut(2);
 
-
 	/**
 	 * @method cubicIn
 	 * @static
@@ -2153,7 +2658,6 @@ var Ease = function() {
 	 * @static
 	 **/
 	Ease.cubicInOut = Ease.getPowInOut(3);
-
 
 	/**
 	 * @method quartIn
@@ -2171,7 +2675,6 @@ var Ease = function() {
 	 **/
 	Ease.quartInOut = Ease.getPowInOut(4);
 
-
 	/**
 	 * @method quintIn
 	 * @static
@@ -2187,7 +2690,6 @@ var Ease = function() {
 	 * @static
 	 **/
 	Ease.quintInOut = Ease.getPowInOut(5);
-
 
 	/**
 	 * @method sineIn
@@ -2212,7 +2714,6 @@ var Ease = function() {
 	Ease.sineInOut = function(t) {
 		return -0.5*(Math.cos(Math.PI*t) - 1)
 	}
-
 
 	/**
 	 * Configurable "back in" ease.
@@ -2266,7 +2767,6 @@ var Ease = function() {
 	 * @static
 	 **/
 	Ease.backInOut = Ease.getBackInOut(1.7);
-
 
 	/**
 	 * @method circIn
@@ -2325,7 +2825,6 @@ var Ease = function() {
 		if (t<0.5) return Ease.bounceIn (t*2) * .5;
 		return Ease.bounceOut(t*2-1)*0.5+0.5;
 	}
-
 
 	/**
 	 * Configurable elastic ease.
@@ -2390,45 +2889,19 @@ var Ease = function() {
 	 **/
 	Ease.elasticInOut = Ease.getElasticInOut(1,0.3*1.5);
 
-createjs.Ease = Ease;
+	createjs.Ease = Ease;
+
 }());
-/*
- * MotionGuidePlugin
- * Visit http://createjs.com/ for documentation, updates and examples.
- *
- * Copyright (c) 2010 gskinner.com, inc.
- *
- * Permission is hereby granted, free of charge, to any person
- * obtaining a copy of this software and associated documentation
- * files (the "Software"), to deal in the Software without
- * restriction, including without limitation the rights to use,
- * copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following
- * conditions:
- *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
- * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
- * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
- * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS IN THE SOFTWARE.
- */
 
-/**
- * @module TweenJS
- */
+//##############################################################################
+// MotionGuidePlugin.js
+//##############################################################################
 
-// namespace:
 this.createjs = this.createjs||{};
 
 (function() {
 	"use strict";
+
 	/**
 	 * A TweenJS plugin for working with motion guides.
 	 *
@@ -2461,11 +2934,12 @@ this.createjs = this.createjs||{};
 	 * @class MotionGuidePlugin
 	 * @constructor
 	 **/
-	var MotionGuidePlugin = function() {
+	function MotionGuidePlugin() {
 		throw("MotionGuidePlugin cannot be instantiated.")
 	};
 
-	// static interface:
+
+// static properties:
 	/**
 	 * @property priority
 	 * @protected
@@ -2498,6 +2972,8 @@ this.createjs = this.createjs||{};
 	 */
 	MotionGuidePlugin._rotNormE;
 
+
+// static methods
 	/**
 	 * Installs this plugin for use with TweenJS. Call this once after TweenJS is loaded to enable this plugin.
 	 * @method install
@@ -2716,21 +3192,14 @@ this.createjs = this.createjs||{};
 		return target;
 	};
 
-	// public properties:
-
-	// private properties:
-
-	// constructor:
-
-	// public methods:
-
-	// private methods:
-
 	createjs.MotionGuidePlugin = MotionGuidePlugin;
+
 }());
-/**
- * @module TweenJS
- */
+
+//##############################################################################
+// version.js
+//##############################################################################
+
 this.createjs = this.createjs || {};
 
 (function() {
@@ -2749,7 +3218,7 @@ this.createjs = this.createjs || {};
 	 * @type String
 	 * @static
 	 **/
-	s.version = /*version*/"NEXT"; // injected by build process
+	s.version = /*=version*/"NEXT"; // injected by build process
 
 	/**
 	 * The build date for this release in UTC format.
@@ -2757,6 +3226,6 @@ this.createjs = this.createjs || {};
 	 * @type String
 	 * @static
 	 **/
-	s.buildDate = /*date*/"Wed, 02 Apr 2014 20:57:09 GMT"; // injected by build process
+	s.buildDate = /*=date*/"Thu, 11 Dec 2014 23:16:15 GMT"; // injected by build process
 
 })();
