@@ -1,6 +1,8 @@
 //
 // davinci-blade.d.ts
 //
+// This file was created manually in order to support the davinci-blade library.
+//
 declare module blade {
     interface Field<T> {
         add(rhs: T): T;
