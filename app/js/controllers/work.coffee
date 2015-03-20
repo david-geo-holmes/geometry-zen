@@ -8,7 +8,7 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
     else
       return false
 
-  isCoffee = (path) ->
+  isCoffeeScript = (path) ->
     return endsWith(path, '.coffee')
 
   isHTML = (path) ->
@@ -22,6 +22,9 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
 
   isMarkDown = (path) ->
     return endsWith(path, '.md')
+
+  isMathScript = (path) ->
+    return endsWith(path, '.ms')
 
   isPython = (path) ->
     return endsWith(path, '.py')
@@ -117,7 +120,7 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
           else if isJavaScript(file.path)
             editor.getSession().setMode "ace/mode/javascript"
             editor.getSession().setTabSize 2
-          else if isCoffee(file.path)
+          else if isCoffeeScript(file.path)
             editor.getSession().setMode "ace/mode/coffee"
             editor.getSession().setTabSize 2
           else if isPython(file.path)
@@ -131,6 +134,9 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
             editor.getSession().setTabSize 2
           else if isMarkDown(file.path)
             editor.getSession().setMode "ace/mode/markdown"
+            editor.getSession().setTabSize 2
+          else if isMathScript(file.path)
+            editor.getSession().setMode "ace/mode/javascript"
             editor.getSession().setTabSize 2
           else
             editor.getSession().setMode "ace/mode/text"
@@ -191,15 +197,29 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
 
       if isTypeScript($scope.contextItem.path)
         if $scope.outputFile
-          eval($scope.outputFile.text)
+          prog = $scope.outputFile.text
+          # console.log "js: #{prog}"
+          prog = Ms.transpile(prog)
+          # console.log "ms: #{prog}"
+          eval(prog)
         else
           alert "The program is not ready to be executed."
       else if isJavaScript($scope.contextItem.path)
+        # console.log "js: #{prog}"
+        prog = Ms.transpile(prog)
+        # console.log "ms: #{prog}"
         eval(prog)
-      else if isCoffee($scope.contextItem.path)
-        CoffeeScript.eval(prog)
+      else if isCoffeeScript($scope.contextItem.path)
+        js = CoffeeScript.compile(prog)
+        # console.log "js: #{js}"
+        ms = Ms.transpile(js)
+        # console.log "ms: #{ms}"
+        eval(ms)
+        #CoffeeScript.eval(prog)
       else if isPython($scope.contextItem.path)
         Sk.importMainWithBody "<stdin>", dumpJS, prog
+      else if isMathScript($scope.contextItem.path)
+        eval(Ms.transpile(prog))
       else
         Sk.importMainWithBody "<stdin>", false, prog
     catch e

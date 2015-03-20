@@ -62,9 +62,6 @@ exports.del = (obj, key) ->
   delete obj[key]
   val
 
-# Gets the last item of an array(-like) object.
-exports.last = last = (array, back) -> array[array.length - (back or 0) - 1]
-
 # Typical Array::some
 exports.some = Array::some ? (fn) ->
   return true for e in this when fn e
@@ -172,7 +169,7 @@ syntaxErrorToString = ->
   start    = first_column
   # Show only the first line on multi-line errors.
   end      = if first_line is last_line then last_column + 1 else codeLine.length
-  marker   = repeat(' ', start) + repeat('^', end - start)
+  marker   = codeLine[...start].replace(/[^\s]/g, ' ') + repeat('^', end - start)
 
   # Check to see if we're running on a color-enabled TTY.
   if process?

@@ -9,9 +9,19 @@ For more info, please visit the docs site at <http://slexaxton.github.com/Jed>.
 I also maintain [messageformat.js](https://github.com/SlexAxton/messageformat.js). If you don't specifically need a gettext implementation, I might suggest using MessageFormat instead, as it has better support for plurals/gender and has built-in locale data.
 
 
-## Current Version
+## Parsing Gettext Files
 
-`v0.5.2`
+Jed doesn't include a Gettext file parser, but several third-party parsers exist that can have their output adapted for Jed.
+
+#### Node
+
+Just search the npm repository, there are several PO and MO file parsers available.
+
+#### Browser
+
+[Jed Gettext Parser](https://github.com/WrinklyNinja/jed-gettext-parser) is the only known browser MO file parser, and it also works in Node, and outputs Jed-compatible data directly.
+
+[gettext.js](https://code.google.com/p/gettext-js) and [Pomo.js](https://github.com/cfv1984/pomo) both include browser-compatible PO file parsers.
 
 ## Todo
 

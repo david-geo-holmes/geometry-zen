@@ -17,6 +17,6 @@
     "commit": "603e90c7033517f1df045ed4558e65b934a80188"
   },
   "_source": "git://github.com/einars/js-beautify.git",
-  "_target": "1.5.5",
+  "_target": "~1.5.5",
   "_originalSource": "js-beautify"
 }

@@ -33,6 +33,6 @@
     "commit": "b026fd3788b812f1147e7976c167d0df4d5ab563"
   },
   "_source": "git://github.com/CreateJS/TweenJS.git",
-  "_target": "0.6.0",
+  "_target": "~0.6.0",
   "_originalSource": "TweenJS"
 }

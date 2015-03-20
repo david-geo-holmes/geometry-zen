@@ -68,6 +68,7 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
       "vendor/eightjs/dist/eight.min.js",
       "vendor/davinci-blade/dist/davinci-blade.min.js",
       "vendor/davinci-eight/dist/davinci-eight.min.js",
+      "vendor/davinci-mathscript/dist/davinci-mathscript.min.js",
       "vendor/gl-matrix/dist/gl-matrix-min.js",
       "vendor/threejs/build/three.min.js",
       "vendor/tweenjs/build/tween.min.js",

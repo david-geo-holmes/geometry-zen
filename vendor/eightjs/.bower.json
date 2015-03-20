@@ -56,6 +56,6 @@
     "commit": "95121185fcb5238f94e7f388817f1ef15e4a6bcf"
   },
   "_source": "git://github.com/geometryzen/eight.js.git",
-  "_target": "0.0.5",
+  "_target": "~0.0.5",
   "_originalSource": "eightjs"
 }

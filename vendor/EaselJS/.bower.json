@@ -43,6 +43,6 @@
     "commit": "ff15fd1af6135335afebd36ac714598c6db33bc9"
   },
   "_source": "git://github.com/CreateJS/EaselJS.git",
-  "_target": "0.8.0",
+  "_target": "~0.8.0",
   "_originalSource": "EaselJS"
 }
