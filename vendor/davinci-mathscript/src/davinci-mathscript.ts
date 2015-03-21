@@ -13,6 +13,8 @@ import esutils = require('davinci-mathscript/esutils');
 // This should match the global namespace (in build.js).
 var MATHSCRIPT_NAMESPACE = "Ms";
 
+// We're not really interested in those operators do do with ordering because most
+// interesting mathematical types don't have an ordering relation.
 var binOp =
 {
   '+':'add',
@@ -23,14 +25,11 @@ var binOp =
   '<<':'lshift',
   '>>':'rshift',
   '===':'eq',
-  '!==':'ne',
-  '<':'lt',
-  '<=':'le',
-  '>':'gt',
-  '>=':'ge'
+  '!==':'ne'
 };
 
-var unaryOp = {'+':'pos','-':'neg','!':'bang','~':'tilde'};
+// The increment and decrement operators are problematic from a timing perspective.
+var unaryOp = {'+':'pos','-':'neg','!':'bang','~':'tilde'/*,'++':'increment','--':'decrement'*/};
 
 function parse(code, options) {
   var tree = esprima.parse(code, options);
@@ -48,9 +47,7 @@ function visit(node) {
   if (node && node.type) {
     switch(node.type) {
       case 'BlockStatement': {
-        node.body.forEach(function(node, index) {
-          visit(node);
-        });
+        node.body.forEach(function(part, index) { visit(part); });
       }
       break;
       case 'FunctionDeclaration': {
@@ -75,6 +72,7 @@ function visit(node) {
       }
       break;
       case 'BinaryExpression':
+      case 'LogicalExpression':
       {
         if (node.operator && binOp[node.operator])
         {
@@ -101,25 +99,29 @@ function visit(node) {
         visit(node.expression);
       }
       break;
+      case 'ForStatement': {
+        visit(node.init);
+        visit(node.test);
+        visit(node.update);
+        visit(node.body);
+      }
+      break;
       case 'IfStatement': {
         visit(node.test);
         visit(node.consequent);
         visit(node.alternate);
       }
       break;
-      case 'AssignmentExpression': {
-        if (node.operator && binOp[node.operator]) {
-            var rightOld = node.right;
-            node.right = {
-                'type': 'BinaryExpression',
-                'operator': node.operator.replace(/=/, '').trim(),
-                'left': node.left,
-                'right': rightOld
-            };
-            node.operator = '=';
+      case 'AssignmentExpression':
+      {
+        if (node.operator && binOp[node.operator])
+        {
             visit(node.left);
             visit(node.right);
-        } else {
+        }
+        else
+        {
+            visit(node.left);
             visit(node.right);
         }
       }
@@ -164,6 +166,35 @@ function visit(node) {
             visit(node.argument);
             node['arguments'] = [node.argument];
         } else {
+            visit(node.argument);
+        }
+      }
+      break;
+      case 'UpdateExpression':
+      {
+        if (node.operator && unaryOp[node.operator])
+        {
+            node.type = 'CallExpression';
+            node.callee =
+            {
+                'type': 'MemberExpression',
+                'computed': false,
+                'object':
+                {
+                    'type': 'Identifier',
+                    'name': MATHSCRIPT_NAMESPACE
+                },
+                'property':
+                {
+                    'type': 'Identifier',
+                    'name': unaryOp[node.operator]
+                }
+            };
+            visit(node.argument);
+            node['arguments'] = [node.argument];
+        }
+        else
+        {
             visit(node.argument);
         }
       }
@@ -221,6 +252,20 @@ function le(p,q) {return binEval(p,q,'__le__','__rle__',function(a,b){return a<=
 function gt(p,q) {return binEval(p,q,'__gt__','__rgt__',function(a,b){return a>b});}
 function ge(p,q) {return binEval(p,q,'__ge__','__rge__',function(a,b){return a>=b});}
 
+function exp<T>(x: T): T
+{
+  if (x['__exp__'])
+  {
+    return x['__exp__']();
+  }
+  else
+  {
+    var s: any = x;
+    var result: any = Math.exp(s);
+    return result;
+  }
+}
+
 function neg(x) {
   if (x['__neg__']) {
     return x['__neg__']();
@@ -268,6 +313,7 @@ var Ms = {
     wedge: wedge,
     lshift: lshift,
     rshift: rshift,
+
     eq: eq,
     ne: ne,
     lt: lt,
@@ -278,6 +324,8 @@ var Ms = {
     neg: neg,
     pos: pos,
     bang: bang,
-    tilde: tilde
+    tilde: tilde,
+
+    exp: exp
 };
 export = Ms;

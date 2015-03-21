@@ -458,7 +458,7 @@ define("../vendor/almond/almond", function(){});
 */
 define('davinci-mathscript/core',["require", "exports"], function (require, exports) {
     var core = {
-        VERSION: '0.9.3'
+        VERSION: '0.9.6'
     };
     return core;
 });
@@ -7223,6 +7223,8 @@ define('davinci-mathscript',["require", "exports", 'davinci-mathscript/core', 'd
      */
     // This should match the global namespace (in build.js).
     var MATHSCRIPT_NAMESPACE = "Ms";
+    // We're not really interested in those operators do do with ordering because most
+    // interesting mathematical types don't have an ordering relation.
     var binOp = {
         '+': 'add',
         '-': 'sub',
@@ -7232,13 +7234,10 @@ define('davinci-mathscript',["require", "exports", 'davinci-mathscript/core', 'd
         '<<': 'lshift',
         '>>': 'rshift',
         '===': 'eq',
-        '!==': 'ne',
-        '<': 'lt',
-        '<=': 'le',
-        '>': 'gt',
-        '>=': 'ge'
+        '!==': 'ne'
     };
-    var unaryOp = { '+': 'pos', '-': 'neg', '!': 'bang', '~': 'tilde' };
+    // The increment and decrement operators are problematic from a timing perspective.
+    var unaryOp = { '+': 'pos', '-': 'neg', '!': 'bang', '~': 'tilde' /*,'++':'increment','--':'decrement'*/ };
     function parse(code, options) {
         var tree = esprima.parse(code, options);
         //console.log(JSON.stringify(tree), null, '\t');
@@ -7254,8 +7253,8 @@ define('davinci-mathscript',["require", "exports", 'davinci-mathscript/core', 'd
             switch (node.type) {
                 case 'BlockStatement':
                     {
-                        node.body.forEach(function (node, index) {
-                            visit(node);
+                        node.body.forEach(function (part, index) {
+                            visit(part);
                         });
                     }
                     break;
@@ -7289,6 +7288,7 @@ define('davinci-mathscript',["require", "exports", 'davinci-mathscript/core', 'd
                     }
                     break;
                 case 'BinaryExpression':
+                case 'LogicalExpression':
                     {
                         if (node.operator && binOp[node.operator]) {
                             node.type = 'CallExpression';
@@ -7313,6 +7313,14 @@ define('davinci-mathscript',["require", "exports", 'davinci-mathscript/core', 'd
                         visit(node.expression);
                     }
                     break;
+                case 'ForStatement':
+                    {
+                        visit(node.init);
+                        visit(node.test);
+                        visit(node.update);
+                        visit(node.body);
+                    }
+                    break;
                 case 'IfStatement':
                     {
                         visit(node.test);
@@ -7323,18 +7331,11 @@ define('davinci-mathscript',["require", "exports", 'davinci-mathscript/core', 'd
                 case 'AssignmentExpression':
                     {
                         if (node.operator && binOp[node.operator]) {
-                            var rightOld = node.right;
-                            node.right = {
-                                'type': 'BinaryExpression',
-                                'operator': node.operator.replace(/=/, '').trim(),
-                                'left': node.left,
-                                'right': rightOld
-                            };
-                            node.operator = '=';
                             visit(node.left);
                             visit(node.right);
                         }
                         else {
+                            visit(node.left);
                             visit(node.right);
                         }
                     }
@@ -7371,6 +7372,30 @@ define('davinci-mathscript',["require", "exports", 'davinci-mathscript/core', 'd
                     }
                     break;
                 case 'UnaryExpression':
+                    {
+                        if (node.operator && unaryOp[node.operator]) {
+                            node.type = 'CallExpression';
+                            node.callee = {
+                                'type': 'MemberExpression',
+                                'computed': false,
+                                'object': {
+                                    'type': 'Identifier',
+                                    'name': MATHSCRIPT_NAMESPACE
+                                },
+                                'property': {
+                                    'type': 'Identifier',
+                                    'name': unaryOp[node.operator]
+                                }
+                            };
+                            visit(node.argument);
+                            node['arguments'] = [node.argument];
+                        }
+                        else {
+                            visit(node.argument);
+                        }
+                    }
+                    break;
+                case 'UpdateExpression':
                     {
                         if (node.operator && unaryOp[node.operator]) {
                             node.type = 'CallExpression';
@@ -7496,6 +7521,16 @@ define('davinci-mathscript',["require", "exports", 'davinci-mathscript/core', 'd
             return a >= b;
         });
     }
+    function exp(x) {
+        if (x['__exp__']) {
+            return x['__exp__']();
+        }
+        else {
+            var s = x;
+            var result = Math.exp(s);
+            return result;
+        }
+    }
     function neg(x) {
         if (x['__neg__']) {
             return x['__neg__']();
@@ -7548,7 +7583,8 @@ define('davinci-mathscript',["require", "exports", 'davinci-mathscript/core', 'd
         neg: neg,
         pos: pos,
         bang: bang,
-        tilde: tilde
+        tilde: tilde,
+        exp: exp
     };
     return Ms;
 });

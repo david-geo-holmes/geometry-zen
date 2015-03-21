@@ -45,7 +45,7 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
 
   workspace = ace.workspace()
 
-  fileNames = ['lib.d.ts', 'davinci-eight.d.ts', 'davinci-blade.d.ts']
+  fileNames = ['lib.d.ts', 'davinci-eight.d.ts', 'davinci-blade.d.ts', 'davinci-mathscript.d.ts']
 
   readFile = (fileName, callback) =>
     url = "#{DOMAIN}/ts/#{fileName}"
