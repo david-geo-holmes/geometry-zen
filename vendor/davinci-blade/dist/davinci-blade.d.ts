@@ -161,6 +161,17 @@ declare module blade {
     }
 }
 declare module blade {
+    class Complex {
+        public x: number;
+        public y: number;
+        constructor(x: number, y: number);
+        public arg(): number;
+        public norm(): number;
+        public quad(): number;
+        public toString(): string;
+    }
+}
+declare module blade {
     var VERSION: string;
     var UNIT_DIMLESS: Unit;
     var UNIT_KILOGRAM: Unit;
