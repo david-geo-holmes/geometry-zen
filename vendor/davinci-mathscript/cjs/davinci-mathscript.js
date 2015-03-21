@@ -97,6 +97,13 @@ function visit(node) {
                 visit(node.expression);
             }
             break;
+        case 'IfStatement':
+            {
+                visit(node.test);
+                visit(node.consequent);
+                visit(node.alternate);
+            }
+            break;
         case 'AssignmentExpression':
             {
                 if (node.operator && binOp[node.operator]) {
@@ -247,6 +254,14 @@ function neg(x) {
         return -x;
     }
 }
+function pos(x) {
+    if (x['__pos__']) {
+        return x['__pos__']();
+    }
+    else {
+        return +x;
+    }
+}
 var Ms = {
     'VERSION': core.VERSION,
     parse: parse,
@@ -258,6 +273,7 @@ var Ms = {
     wedge: wedge,
     lshift: lshift,
     rshift: rshift,
-    neg: neg
+    neg: neg,
+    pos: pos
 };
 module.exports = Ms;

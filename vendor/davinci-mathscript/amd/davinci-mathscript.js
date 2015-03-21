@@ -95,6 +95,13 @@ define(["require", "exports", 'davinci-mathscript/core', 'davinci-mathscript/esp
                     visit(node.expression);
                 }
                 break;
+            case 'IfStatement':
+                {
+                    visit(node.test);
+                    visit(node.consequent);
+                    visit(node.alternate);
+                }
+                break;
             case 'AssignmentExpression':
                 {
                     if (node.operator && binOp[node.operator]) {
@@ -245,6 +252,14 @@ define(["require", "exports", 'davinci-mathscript/core', 'davinci-mathscript/esp
             return -x;
         }
     }
+    function pos(x) {
+        if (x['__pos__']) {
+            return x['__pos__']();
+        }
+        else {
+            return +x;
+        }
+    }
     var Ms = {
         'VERSION': core.VERSION,
         parse: parse,
@@ -256,7 +271,8 @@ define(["require", "exports", 'davinci-mathscript/core', 'davinci-mathscript/esp
         wedge: wedge,
         lshift: lshift,
         rshift: rshift,
-        neg: neg
+        neg: neg,
+        pos: pos
     };
     return Ms;
 });
