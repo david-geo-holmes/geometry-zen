@@ -58,6 +58,6 @@
     "commit": "3730592bb9dc8a4527c58109a4bc4dbb443350c0"
   },
   "_source": "git://github.com/geometryzen/davinci-eight.git",
-  "_target": "~0.9.12",
+  "_target": "^0.9.12",
   "_originalSource": "davinci-eight"
 }

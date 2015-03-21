@@ -1,6 +1,6 @@
 {
   "name": "davinci-mathscript",
-  "version": "0.9.1",
+  "version": "0.9.3",
   "description": "MathScript transcompiler to JavaScript.",
   "author": {
     "name": "David Holmes",
@@ -55,13 +55,13 @@
     "tsd.json"
   ],
   "homepage": "https://github.com/geometryzen/davinci-mathscript",
-  "_release": "0.9.1",
+  "_release": "0.9.3",
   "_resolution": {
     "type": "version",
-    "tag": "0.9.1",
-    "commit": "d1899c05c0c25cd9d7f0059f75424017ef7e837e"
+    "tag": "0.9.3",
+    "commit": "9c5fb8962746c89471df8bb30202936cbed9f0a4"
   },
   "_source": "git://github.com/geometryzen/davinci-mathscript.git",
-  "_target": "~0.9.1",
+  "_target": "^0.9.3",
   "_originalSource": "davinci-mathscript"
 }

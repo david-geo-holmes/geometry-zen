@@ -1,6 +1,6 @@
 {
   "name": "geometryzen",
-  "version": "0.9.263",
+  "version": "0.9.264",
   "main": "./app/js/main.js",
   "description": "Geometry Zen is a free, online, open-source, and collaborative tool for Computational Modeling combining programming languages, 3D visualization, Physical Units, and Geometric Algebra - the Unified Mathematical Language for Physics and Engineering in the 21st Century.",
   "author": {
@@ -35,10 +35,10 @@
     "async": "0.2.5",
     "coffee-script": "~1.9.1",
     "bootstrap": "2.3.2",
-    "davinci": "~0.9.247",
-    "davinci-blade": "~0.9.11",
-    "davinci-eight": "~0.9.12",
-    "davinci-mathscript": "~0.9.1",
+    "davinci": "^0.9.247",
+    "davinci-blade": "^0.9.11",
+    "davinci-eight": "^0.9.12",
+    "davinci-mathscript": "^0.9.3",
     "d3": "~3.5.5",
     "EaselJS": "~0.8.0",
     "eightjs": "~0.0.5",

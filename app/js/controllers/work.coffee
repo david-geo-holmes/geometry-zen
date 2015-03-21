@@ -198,24 +198,23 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
       if isTypeScript($scope.contextItem.path)
         if $scope.outputFile
           prog = $scope.outputFile.text
-          # console.log "js: #{prog}"
+          console.log "js: #{prog}"
           prog = Ms.transpile(prog)
-          # console.log "ms: #{prog}"
+          console.log "ms: #{prog}"
           eval(prog)
         else
           alert "The program is not ready to be executed."
       else if isJavaScript($scope.contextItem.path)
-        # console.log "js: #{prog}"
+        console.log "js: #{prog}"
         prog = Ms.transpile(prog)
-        # console.log "ms: #{prog}"
+        console.log "ms: #{prog}"
         eval(prog)
       else if isCoffeeScript($scope.contextItem.path)
         js = CoffeeScript.compile(prog)
-        # console.log "js: #{js}"
+        console.log "js: #{js}"
         ms = Ms.transpile(js)
-        # console.log "ms: #{ms}"
+        console.log "ms: #{ms}"
         eval(ms)
-        #CoffeeScript.eval(prog)
       else if isPython($scope.contextItem.path)
         Sk.importMainWithBody "<stdin>", dumpJS, prog
       else if isMathScript($scope.contextItem.path)
