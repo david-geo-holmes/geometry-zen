@@ -106,6 +106,21 @@ var unitString = function (scale, dimensions, labels) {
     }
     return dumbString(scale, dimensions, labels);
 };
+function add(lhs, rhs) {
+    return new Unit(lhs.scale + rhs.scale, lhs.dimensions.compatible(rhs.dimensions), lhs.labels);
+}
+function sub(lhs, rhs) {
+    return new Unit(lhs.scale - rhs.scale, lhs.dimensions.compatible(rhs.dimensions), lhs.labels);
+}
+function mul(lhs, rhs) {
+    return new Unit(lhs.scale * rhs.scale, lhs.dimensions.mul(rhs.dimensions), lhs.labels);
+}
+function scalarMultiply(alpha, unit) {
+    return new Unit(alpha * unit.scale, unit.dimensions, unit.labels);
+}
+function div(lhs, rhs) {
+    return new Unit(lhs.scale / rhs.scale, lhs.dimensions.div(rhs.dimensions), lhs.labels);
+}
 var Unit = (function () {
     /**
      * The Unit class represents the units for a measure.
@@ -139,29 +154,83 @@ var Unit = (function () {
     };
     Unit.prototype.add = function (rhs) {
         if (rhs instanceof Unit) {
-            return new Unit(this.scale + rhs.scale, this.dimensions.compatible(rhs.dimensions), this.labels);
+            return add(this, rhs);
         }
         else {
             throw new Error("Illegal Argument for Unit.add: " + rhs);
         }
     };
+    Unit.prototype.__add__ = function (other) {
+        if (other instanceof Unit) {
+            return add(this, other);
+        }
+        else {
+            return;
+        }
+    };
+    Unit.prototype.__radd__ = function (other) {
+        if (other instanceof Unit) {
+            return add(other, this);
+        }
+        else {
+            return;
+        }
+    };
     Unit.prototype.sub = function (rhs) {
         if (rhs instanceof Unit) {
-            return new Unit(this.scale - rhs.scale, this.dimensions.compatible(rhs.dimensions), this.labels);
+            return sub(this, rhs);
         }
         else {
             throw new Error("Illegal Argument for Unit.sub: " + rhs);
         }
     };
+    Unit.prototype.__sub__ = function (other) {
+        if (other instanceof Unit) {
+            return sub(this, other);
+        }
+        else {
+            return;
+        }
+    };
+    Unit.prototype.__rsub__ = function (other) {
+        if (other instanceof Unit) {
+            return sub(other, this);
+        }
+        else {
+            return;
+        }
+    };
     Unit.prototype.mul = function (rhs) {
         if (typeof rhs === 'number') {
-            return new Unit(this.scale * rhs, this.dimensions, this.labels);
+            return scalarMultiply(rhs, this);
         }
         else if (rhs instanceof Unit) {
-            return new Unit(this.scale * rhs.scale, this.dimensions.mul(rhs.dimensions), this.labels);
+            return mul(this, rhs);
         }
         else {
             throw new Error("Illegal Argument for mul: " + rhs);
+        }
+    };
+    Unit.prototype.__mul__ = function (other) {
+        if (other instanceof Unit) {
+            return mul(this, other);
+        }
+        else if (typeof other === 'number') {
+            return scalarMultiply(other, this);
+        }
+        else {
+            return;
+        }
+    };
+    Unit.prototype.__rmul__ = function (other) {
+        if (other instanceof Unit) {
+            return mul(other, this);
+        }
+        else if (typeof other === 'number') {
+            return scalarMultiply(other, this);
+        }
+        else {
+            return;
         }
     };
     Unit.prototype.div = function (rhs) {
@@ -169,10 +238,32 @@ var Unit = (function () {
             return new Unit(this.scale / rhs, this.dimensions, this.labels);
         }
         else if (rhs instanceof Unit) {
-            return new Unit(this.scale / rhs.scale, this.dimensions.div(rhs.dimensions), this.labels);
+            return div(this, rhs);
         }
         else {
             throw new Error("Illegal Argument for div: " + rhs);
+        }
+    };
+    Unit.prototype.__div__ = function (other) {
+        if (other instanceof Unit) {
+            return div(this, other);
+        }
+        else if (typeof other === 'number') {
+            return new Unit(this.scale / other, this.dimensions, this.labels);
+        }
+        else {
+            return;
+        }
+    };
+    Unit.prototype.__rdiv__ = function (other) {
+        if (other instanceof Unit) {
+            return div(other, this);
+        }
+        else if (typeof other === 'number') {
+            return new Unit(other / this.scale, this.dimensions.negative(), this.labels);
+        }
+        else {
+            return;
         }
     };
     Unit.prototype.pow = function (rhs) {

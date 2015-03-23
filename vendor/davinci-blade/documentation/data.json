@@ -2,7 +2,7 @@
     "project": {
         "name": "davinci-blade",
         "description": "TypeScript Geometric Physics library.",
-        "version": "0.9.16",
+        "version": "0.9.24",
         "url": "",
         "logo": "../assets/logo.png"
     },
@@ -94,7 +94,7 @@
             "namespaces": {},
             "tag": "module",
             "file": "amd/davinci-blade/Unit.js",
-            "line": 111,
+            "line": 126,
             "description": "Provides the blade module"
         }
     },
@@ -252,7 +252,7 @@
             "extension_for": [],
             "module": "blade",
             "file": "amd/davinci-blade/Measure.js",
-            "line": 3,
+            "line": 6,
             "description": "A Measure is a composite consisting of a quantity and a unit of measure.",
             "is_constructor": 1,
             "params": [
@@ -305,7 +305,7 @@
             "extension_for": [],
             "module": "blade",
             "file": "amd/davinci-blade/Unit.js",
-            "line": 111,
+            "line": 126,
             "description": "The Unit class represents the units for a measure.",
             "is_constructor": 1,
             "params": [
@@ -362,7 +362,7 @@
         },
         {
             "file": "amd/davinci-blade/Measure.js",
-            "line": 22,
+            "line": 25,
             "description": "The quantity part of the measure.",
             "itemtype": "property",
             "name": "quantity",
@@ -371,7 +371,7 @@
         },
         {
             "file": "amd/davinci-blade/Measure.js",
-            "line": 35,
+            "line": 38,
             "description": "The unit part of the measure.",
             "itemtype": "property",
             "name": "uom",
