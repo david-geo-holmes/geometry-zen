@@ -123,6 +123,8 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('application
         {src: "node_modules/typescript/bin/lib.d.ts",                      dest: "dist/ts/lib.d.ts"},
         {src: "vendor/davinci-blade/dist/davinci-blade.d.ts",              dest: "dist/ts/davinci-blade.d.ts"},
         {src: "vendor/davinci-eight/dist/davinci-eight.d.ts",              dest: "dist/ts/davinci-eight.d.ts"},
+        {src: "vendor/davinci-mathscript/dist/davinci-mathscript.d.ts",    dest: "dist/ts/davinci-mathscript.d.ts"},
+        {src: "typings/threejs/three.d.ts",                                dest: "dist/ts/three.d.ts"},
 
         {src: "vendor/font-awesome/font/FontAwesome.otf",                  dest: "dist/img/FontAwesome.otf"},
         {src: "vendor/font-awesome/font/fontawesome-webfont.eot",          dest: "dist/img/fontawesome-webfont.eot"},
