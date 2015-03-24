@@ -60,13 +60,13 @@
                   <tbody>
                     <tr ng-show="isNewFileEnabled()">
                       <td nowrap=nowrap>
-                        <!--input type="text" placeHolder="Filter..."></input-->
-                      </td>
-                      <td nowrap=nowrap>
                         <button ng-click="newFile()" ng-show="isNewFileEnabled()" class="btn btn-primary">
                           <i class="icon-plus-sign-alt"></i> <i class="{{i18n.translate('icon-file').fetch()}}"></i>
                           <span>{{i18n.translate("Create a New File").fetch()}}</span>
                         </button>
+                      </td>
+                      <td nowrap=nowrap>
+                        <!--input type="text" placeHolder="Filter..."></input-->
                       </td>
                     </tr>
                     <!-- Reminder: An item is a book or a page -->
@@ -136,7 +136,8 @@
           <label class="control-label muted" for="id-file-name">{{path}}/</label>
           <input type="text" id="id-file-name" name="name" ng-model="file.name" placeholder="{{i18n.translate('Name your file').fetch()}}...">
           </input>
-          <span class="help-block">You may use forward slashes to create new folders. e.g., folder1/folder2/filename.py</span>
+          <span class="help-block">You may use forward slashes to create new files in folders.</span>
+          <span class="help-block">e.g., folder1/folder2/filename.[coffee|js|py|ts]</span>
           <label>Commit message:</label>
           <input type="text" name="message" ng-model="file.message" placeholder="{{i18n.translate('Create file').fetch()}}">
           </input>

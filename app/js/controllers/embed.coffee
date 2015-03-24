@@ -149,9 +149,6 @@ angular.module("app").controller 'EmbedCtrl', ['$rootScope','$scope', '$location
   $scope.repoEnabled = () ->
     return $scope.repo and $scope.repo.name
 
-  $scope.workEnabled = () ->
-    return ($scope.contextItem and $scope.contextItem.type is "file") or not ($scope.repo and $scope.repo.name)
-
   $scope.saveEnabled = () ->
     # TODO: Rename so that the context and authenticated user are clearer.
     if $scope.user
@@ -160,7 +157,8 @@ angular.module("app").controller 'EmbedCtrl', ['$rootScope','$scope', '$location
       # We will be able to save the code as a GitHub Gist
       return true
 
-  $scope.runEnabled = -> $scope.workEnabled()
+  $scope.runEnabled = () ->
+    return ($scope.contextItem and $scope.contextItem.type is "file") or not ($scope.repo and $scope.repo.name)
 
   $rootScope.headerEnabled = -> false
 

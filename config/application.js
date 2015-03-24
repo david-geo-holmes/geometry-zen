@@ -94,6 +94,7 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('application
         {src: "vendor/davinci-blade/dist/davinci-blade.d.ts",              dest: "generated/ts/davinci-blade.d.ts"},
         {src: "vendor/davinci-eight/dist/davinci-eight.d.ts",              dest: "generated/ts/davinci-eight.d.ts"},
         {src: "vendor/davinci-mathscript/dist/davinci-mathscript.d.ts",    dest: "generated/ts/davinci-mathscript.d.ts"},
+        {src: "typings/threejs/three.d.ts",                                dest: "generated/ts/three.d.ts"},
 
         {src: "vendor/font-awesome/font/FontAwesome.otf",                  dest: "generated/img/FontAwesome.otf"},
         {src: "vendor/font-awesome/font/fontawesome-webfont.eot",          dest: "generated/img/fontawesome-webfont.eot"},

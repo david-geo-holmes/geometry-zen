@@ -68,13 +68,13 @@
                     <tbody>
                       <tr>
                         <td nowrap=nowrap>
-                          <!--input type="text" placeHolder="Filter..."></input-->
-                        </td>
-                        <td nowrap=nowrap>
                           <button ng-click="newRepo(user.login)" class="btn btn-primary">
                             <i class="icon-plus-sign-alt"></i> <i class="{{i18n.translate('icon-repo').fetch()}}"></i>
                             <span>{{i18n.translate("Create a New Repo").fetch()}}</span>
                           </button>
+                        </td>
+                        <td nowrap=nowrap>
+                          <!--input type="text" placeHolder="Filter..."></input-->
                         </td>
                       </tr>
                       <tr ng-repeat="repo in repos">
@@ -110,13 +110,13 @@
                     <tbody>
                       <tr>
                         <td nowrap=nowrap>
-                          <!--input type="text" placeHolder="Filter..."></input-->
-                        </td>
-                        <td nowrap=nowrap>
                           <button ng-click="newGist()" class="btn btn-primary">
                             <i class="icon-plus-sign-alt"></i> <i class="{{i18n.translate('icon-gist').fetch()}}"></i>
                             <span>{{i18n.translate("Create a New Gist").fetch()}}</span>
                           </button>
+                        </td>
+                        <td nowrap=nowrap>
+                          <!--input type="text" placeHolder="Filter..."></input-->
                         </td>
                       </tr>
                       <tr ng-repeat="gist in gists">

@@ -162,8 +162,9 @@ declare module eight
   function perspective(fov: number, aspect: number, near: number, far: number): Projection;
   /**
    * Constructs and returns a WebGL renderer.
+   * @param parameters Optional parameters for modifying the WebGL context.
    */
-  function renderer(): WebGLRenderer;
+  function renderer(parameters?: any): WebGLRenderer;
   /**
    * Constructs a mesh from the specified geometry and material.
    */
@@ -199,13 +200,18 @@ declare module eight
    */
   function workbench(canvas: HTMLCanvasElement, renderer: WebGLRenderer, camera: Projection, window: Window): Workbench3D;
   /**
-   * Constructs and returns a WindowAnimationRnner.
+   * Constructs and returns a WindowAnimationRunner.
    */
   function animationRunner(tick: {(time: number): void;}, terminate: {(time: number): boolean;}, setUp: {(): void;}, tearDown: {(e: Error): void;}, window: Window): WindowAnimationRunner;
   /**
    * Constructs and returns a WebGLContextMonitor.
    */
   function contextMonitor(canvas: HTMLCanvasElement, contextLoss: {(): void;}, contextGain: {(context: WebGLRenderingContext): void;}): WebGLContextMonitor;
+
+  /**
+   * The version string of the eight module.
+   */
+  var VERSION: string;
 }
 
 declare module 'eight'

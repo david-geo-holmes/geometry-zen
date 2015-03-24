@@ -1,5 +1,5 @@
 angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$location', '$window', '$routeParams', '$', '_', 'GitHub', 'Base64', 'cookie', 'GitHubAuthManager', ($rootScope, $scope, $http, $location, $window, $routeParams, $, _, github, base64, cookie, authManager) ->
-  
+
   DOMAIN = "#{$location.protocol()}://#{$location.host()}:#{$location.port()}"
 
   endsWith = (str, suffix) ->
@@ -8,29 +8,19 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
     else
       return false
 
-  isCoffeeScript = (path) ->
-    return endsWith(path, '.coffee')
+  isCoffeeScript = (path) -> return endsWith(path, '.coffee')
 
-  isHTML = (path) ->
-    return endsWith(path, '.html')
+  isHTML = (path) -> return endsWith(path, '.html')
 
-  isJavaScript = (path) ->
-    return endsWith(path, '.js')
+  isJavaScript = (path) -> return endsWith(path, '.js')
 
-  isJSON = (path) ->
-    return endsWith(path, '.json')
+  isJSON = (path) -> return endsWith(path, '.json')
 
-  isMarkDown = (path) ->
-    return endsWith(path, '.md')
+  isMarkDown = (path) -> return endsWith(path, '.md')
 
-  isMathScript = (path) ->
-    return endsWith(path, '.ms')
+  isPython = (path) -> return endsWith(path, '.py')
 
-  isPython = (path) ->
-    return endsWith(path, '.py')
-
-  isTypeScript = (path) ->
-    return endsWith(path, '.ts')
+  isTypeScript = (path) -> return endsWith(path, '.ts')
 
   EVENT_CATEGORY = "work"
   ga('create', 'UA-41504069-1', 'geometryzen.org');
@@ -45,7 +35,7 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
 
   workspace = ace.workspace()
 
-  fileNames = ['lib.d.ts', 'davinci-eight.d.ts', 'davinci-blade.d.ts', 'davinci-mathscript.d.ts']
+  fileNames = ['lib.d.ts', 'davinci-eight.d.ts', 'davinci-blade.d.ts', 'davinci-mathscript.d.ts', 'three.d.ts']
 
   readFile = (fileName, callback) =>
     url = "#{DOMAIN}/ts/#{fileName}"
@@ -56,9 +46,10 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
         callback new Error "Unable to wrangle #{fileName}."
 
   editor = ace.edit("editor", workspace)
+  # Keep the theme as textmate until the context sensitive popup is integrated.
   editor.setTheme("ace/theme/textmate")
-  editor.getSession().setMode("ace/mode/python")
-  editor.getSession().setTabSize(4)
+  editor.getSession().setMode("ace/mode/typescript")
+  editor.getSession().setTabSize(2)
   editor.setShowInvisibles(true)
   editor.setFontSize('15px')
 # editor.setShowPrintMargin false
@@ -134,9 +125,6 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
             editor.getSession().setTabSize 2
           else if isMarkDown(file.path)
             editor.getSession().setMode "ace/mode/markdown"
-            editor.getSession().setTabSize 2
-          else if isMathScript(file.path)
-            editor.getSession().setMode "ace/mode/javascript"
             editor.getSession().setTabSize 2
           else
             editor.getSession().setMode "ace/mode/text"
@@ -217,8 +205,6 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
         eval(ms)
       else if isPython($scope.contextItem.path)
         Sk.importMainWithBody "<stdin>", dumpJS, prog
-      else if isMathScript($scope.contextItem.path)
-        eval(Ms.transpile(prog))
       else
         Sk.importMainWithBody "<stdin>", false, prog
     catch e
@@ -289,20 +275,17 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
   $scope.repoEnabled = () ->
     return $scope.repo and $scope.repo.name
 
-  $scope.workEnabled = () ->
-    return ($scope.contextItem and $scope.contextItem.type is "file") or not ($scope.repo and $scope.repo.name)
-
   $scope.saveEnabled = () ->
     # TODO: Rename so that the context and authenticated user are clearer.
     if $scope.user
-      return $scope.isLoggedIn() and $scope.userLogin() is $scope.user.login and $scope.contextItem and $scope.contextItem.type is "file"
+      return $scope.isLoggedIn() and ($scope.userLogin() is $scope.user.login) and $scope.contextItem and ($scope.contextItem.type is "file")
     else
       # We will be able to save the code as a GitHub Gist
       return true
 
   # TODO: The UI does not seem to be truly dynamic!
   $scope.runEnabled = () ->
-    return $scope.workEnabled()# and (if isTypeScript($scope.contextItem.path) then $scope.outputFile else true)
+    return ($scope.contextItem and $scope.contextItem.type is "file") or not ($scope.repo and $scope.repo.name)
 
   $scope.runVisible = () ->
     return $scope.runEnabled()
