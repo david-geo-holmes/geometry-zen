@@ -10,6 +10,9 @@
     },
     "d3/d3.d.ts": {
       "commit": "0c2ee8583c9a27873d7c40cc79fdcb79b5868150"
+    },
+    "easeljs/easeljs.d.ts": {
+      "commit": "584c5f593f45baa11ffc8aba2f8f19745d754ffd"
     }
   }
 }

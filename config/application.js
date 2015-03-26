@@ -95,6 +95,7 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('application
         {src: "vendor/davinci-eight/dist/davinci-eight.d.ts",              dest: "generated/ts/davinci-eight.d.ts"},
         {src: "vendor/davinci-mathscript/dist/davinci-mathscript.d.ts",    dest: "generated/ts/davinci-mathscript.d.ts"},
         {src: "typings/d3/d3.d.ts",                                        dest: "generated/ts/d3.d.ts"},
+        {src: "typings/easeljs/easeljs.d.ts",                              dest: "generated/ts/easeljs.d.ts"},
         {src: "typings/threejs/three.d.ts",                                dest: "generated/ts/three.d.ts"},
 
         {src: "vendor/font-awesome/font/FontAwesome.otf",                  dest: "generated/img/FontAwesome.otf"},
@@ -126,6 +127,7 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('application
         {src: "vendor/davinci-eight/dist/davinci-eight.d.ts",              dest: "dist/ts/davinci-eight.d.ts"},
         {src: "vendor/davinci-mathscript/dist/davinci-mathscript.d.ts",    dest: "dist/ts/davinci-mathscript.d.ts"},
         {src: "typings/d3/d3.d.ts",                                        dest: "dist/ts/d3.d.ts"},
+        {src: "typings/easeljs/easeljs.d.ts",                              dest: "dist/ts/easeljs.d.ts"},
         {src: "typings/threejs/three.d.ts",                                dest: "dist/ts/three.d.ts"},
 
         {src: "vendor/font-awesome/font/FontAwesome.otf",                  dest: "dist/img/FontAwesome.otf"},
