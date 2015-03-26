@@ -4222,6 +4222,651 @@ goog.asserts.assertObjectPrototypeIsIntact = function() {
     goog.asserts.fail(key + ' should not be enumerable in Object.prototype.');
   }
 };
+/**
+ * This is a derivation of https://github.com/jakearchibald/es6-promise,
+ * hacked horribly to get it through the Closure compiler.
+ *
+ * @suppress{undefinedVars}
+ */
+(function(self) {
+var define, requireModule, require, requirejs;
+
+(function() {
+  var registry = {}, seen = {};
+
+  define = function(name, deps, callback) {
+    registry[name] = { deps: deps, callback: callback };
+  };
+
+  requirejs = require = requireModule = function(name) {
+  requirejs._eak_seen = registry;
+
+    if (seen[name]) { return seen[name]; }
+    seen[name] = {};
+
+    if (!registry[name]) {
+      throw new Error("Could not find module " + name);
+    }
+
+    var mod = registry[name],
+        deps = mod.deps,
+        callback = mod.callback,
+        reified = [],
+        exports;
+
+    for (var i=0, l=deps.length; i<l; i++) {
+      if (deps[i] === 'exports') {
+        reified.push(exports = {});
+      } else {
+        reified.push(requireModule(resolve(deps[i])));
+      }
+    }
+
+    var value = callback.apply(this, reified);
+    return seen[name] = exports || value;
+
+    function resolve(child) {
+      if (child.charAt(0) !== '.') { return child; }
+      var parts = child.split("/");
+      var parentBase = name.split("/").slice(0, -1);
+
+      for (var i=0, l=parts.length; i<l; i++) {
+        var part = parts[i];
+
+        if (part === '..') { parentBase.pop(); }
+        else if (part === '.') { continue; }
+        else { parentBase.push(part); }
+      }
+
+      return parentBase.join("/");
+    }
+  };
+})();
+
+define("promise/all", 
+  ["./utils","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    /* global toString */
+
+    var isArray = __dependency1__.isArray;
+    var isFunction = __dependency1__.isFunction;
+
+    /**
+      Returns a promise that is fulfilled when all the given promises have been
+      fulfilled, or rejected if any of them become rejected. The return promise
+      is fulfilled with an array that gives all the values in the order they were
+      passed in the `promises` array argument.
+      Example:
+      ```javascript
+      var promise1 = RSVP.resolve(1);
+      var promise2 = RSVP.resolve(2);
+      var promise3 = RSVP.resolve(3);
+      var promises = [ promise1, promise2, promise3 ];
+      RSVP.all(promises).then(function(array){
+        // The array here would be [ 1, 2, 3 ];
+      });
+      ```
+      If any of the `promises` given to `RSVP.all` are rejected, the first promise
+      that is rejected will be given as an argument to the returned promises's
+      rejection handler. For example:
+      Example:
+      ```javascript
+      var promise1 = RSVP.resolve(1);
+      var promise2 = RSVP.reject(new Error("2"));
+      var promise3 = RSVP.reject(new Error("3"));
+      var promises = [ promise1, promise2, promise3 ];
+      RSVP.all(promises).then(function(array){
+        // Code here never runs because there are rejected promises!
+      }, function(error) {
+        // error.message === "2"
+      });
+      ```
+      @method all
+      @param {Array} promises
+      @return {Promise} promise that is fulfilled when all `promises` have been
+      fulfilled, or rejected if any of them become rejected.
+    */
+    function all(promises) {
+      /*jshint validthis:true */
+      var Promise = this;
+
+      if (!isArray(promises)) {
+        throw new TypeError('You must pass an array to all.');
+      }
+
+      return new Promise(function(resolve, reject) {
+        var results = [], remaining = promises.length,
+        promise;
+
+        if (remaining === 0) {
+          resolve([]);
+        }
+
+        function resolver(index) {
+          return function(value) {
+            resolveAll(index, value);
+          };
+        }
+
+        function resolveAll(index, value) {
+          results[index] = value;
+          if (--remaining === 0) {
+            resolve(results);
+          }
+        }
+
+        for (var i = 0; i < promises.length; i++) {
+          promise = promises[i];
+
+          if (promise && isFunction(promise.then)) {
+            promise.then(resolver(i), reject);
+          } else {
+            resolveAll(i, promise);
+          }
+        }
+      });
+    }
+
+    __exports__.all = all;
+  });
+define("promise/asap", 
+  ["exports"],
+  function(__exports__) {
+    "use strict";
+    var browserGlobal = (typeof window !== 'undefined') ? window : {};
+    var local = (typeof global !== 'undefined') ? global : (this === undefined? window:this);
+
+    // node
+    function useNextTick() {
+      return function() {
+        process.nextTick(flush);
+      };
+    }
+
+    function useSetTimeout() {
+      return function() {
+        local.setTimeout(flush, 1);
+      };
+    }
+
+    var queue = [];
+    function flush() {
+      for (var i = 0; i < queue.length; i++) {
+        var tuple = queue[i];
+        var callback = tuple[0], arg = tuple[1];
+        callback(arg);
+      }
+      queue = [];
+    }
+
+    var scheduleFlush;
+
+    // Decide what async method to use to triggering processing of queued callbacks:
+    if (typeof process !== 'undefined' && {}.toString.call(process) === '[object process]') {
+      scheduleFlush = useNextTick();
+    } else {
+      scheduleFlush = useSetTimeout();
+    }
+
+    function asap(callback, arg) {
+      var length = queue.push([callback, arg]);
+      if (length === 1) {
+        // If length is 1, that means that we need to schedule an async flush.
+        // If additional callbacks are queued before the queue is flushed, they
+        // will be processed by this flush that we are scheduling.
+        scheduleFlush();
+      }
+    }
+
+    __exports__.asap = asap;
+  });
+define("promise/config", 
+  ["exports"],
+  function(__exports__) {
+    "use strict";
+    var config = {
+      instrument: false
+    };
+
+    function configure(name, value) {
+      if (arguments.length === 2) {
+        config[name] = value;
+      } else {
+        return config[name];
+      }
+    }
+
+    __exports__.config = config;
+    __exports__.configure = configure;
+  });
+define("promise/polyfill", 
+  ["./promise","./utils","exports"],
+  function(__dependency1__, __dependency2__, __exports__) {
+    "use strict";
+    /*global self*/
+    var RSVPPromise = __dependency1__.Promise;
+    var isFunction = __dependency2__.isFunction;
+
+    function polyfill() {
+      var local;
+
+      if (typeof global !== 'undefined') {
+        local = global;
+      } else if (typeof window !== 'undefined' && window.document) {
+        local = window;
+      } else {
+        local = self;
+      }
+
+      var es6PromiseSupport = 
+        "Promise" in local &&
+        // Some of these methods are missing from
+        // Firefox/Chrome experimental implementations
+        "resolve" in local.Promise &&
+        "reject" in local.Promise &&
+        "all" in local.Promise &&
+        "race" in local.Promise &&
+        // Older version of the spec had a resolver object
+        // as the arg rather than a function
+        (function() {
+          var resolve;
+          new local.Promise(function(r) { resolve = r; });
+          return isFunction(resolve);
+        }());
+
+      if (!es6PromiseSupport) {
+        local.Promise = RSVPPromise;
+      }
+    }
+
+    __exports__.polyfill = polyfill;
+  });
+define("promise/promise", 
+  ["./config","./utils","./all","./race","./resolve","./reject","./asap","exports"],
+  function(__dependency1__, __dependency2__, __dependency3__, __dependency4__, __dependency5__, __dependency6__, __dependency7__, __exports__) {
+    "use strict";
+    var config = __dependency1__.config;
+    var configure = __dependency1__.configure;
+    var objectOrFunction = __dependency2__.objectOrFunction;
+    var isFunction = __dependency2__.isFunction;
+    var now = __dependency2__.now;
+    var all = __dependency3__.all;
+    var race = __dependency4__.race;
+    var staticResolve = __dependency5__.resolve;
+    var staticReject = __dependency6__.reject;
+    var asap = __dependency7__.asap;
+
+    var counter = 0;
+
+    config.async = asap; // default async is asap;
+
+    function Promise(resolver) {
+      if (!isFunction(resolver)) {
+        throw new TypeError('You must pass a resolver function as the first argument to the promise constructor');
+      }
+
+      if (!(this instanceof Promise)) {
+        throw new TypeError("Failed to construct 'Promise': Please use the 'new' operator, this object constructor cannot be called as a function.");
+      }
+
+      this._subscribers = [];
+
+      invokeResolver(resolver, this);
+    }
+
+    function invokeResolver(resolver, promise) {
+      function resolvePromise(value) {
+        resolve(promise, value);
+      }
+
+      function rejectPromise(reason) {
+        reject(promise, reason);
+      }
+
+      try {
+        resolver(resolvePromise, rejectPromise);
+      } catch(e) {
+        rejectPromise(e);
+      }
+    }
+
+    function invokeCallback(settled, promise, callback, detail) {
+      var hasCallback = isFunction(callback),
+          value, error, succeeded, failed;
+
+      if (hasCallback) {
+        try {
+          value = callback(detail);
+          succeeded = true;
+        } catch(e) {
+          failed = true;
+          error = e;
+        }
+      } else {
+        value = detail;
+        succeeded = true;
+      }
+
+      if (handleThenable(promise, value)) {
+        return;
+      } else if (hasCallback && succeeded) {
+        resolve(promise, value);
+      } else if (failed) {
+        reject(promise, error);
+      } else if (settled === FULFILLED) {
+        resolve(promise, value);
+      } else if (settled === REJECTED) {
+        reject(promise, value);
+      }
+    }
+
+    var PENDING   = void 0;
+    var SEALED    = 0;
+    var FULFILLED = 1;
+    var REJECTED  = 2;
+
+    function subscribe(parent, child, onFulfillment, onRejection) {
+      var subscribers = parent._subscribers;
+      var length = subscribers.length;
+
+      subscribers[length] = child;
+      subscribers[length + FULFILLED] = onFulfillment;
+      subscribers[length + REJECTED]  = onRejection;
+    }
+
+    function publish(promise, settled) {
+      var child, callback, subscribers = promise._subscribers, detail = promise._detail;
+
+      for (var i = 0; i < subscribers.length; i += 3) {
+        child = subscribers[i];
+        callback = subscribers[i + settled];
+
+        invokeCallback(settled, child, callback, detail);
+      }
+
+      promise._subscribers = null;
+    }
+
+    Promise.prototype = {
+      constructor: Promise,
+
+      _state: undefined,
+      _detail: undefined,
+      _subscribers: undefined,
+
+      then: function(onFulfillment, onRejection) {
+        var promise = this;
+
+        var thenPromise = new this.constructor(function() {});
+
+        if (this._state) {
+          var callbacks = arguments;
+          config.async(function invokePromiseCallback() {
+            invokeCallback(promise._state, thenPromise, callbacks[promise._state - 1], promise._detail);
+          });
+        } else {
+          subscribe(this, thenPromise, onFulfillment, onRejection);
+        }
+
+        return thenPromise;
+      },
+
+      'catch': function(onRejection) {
+        return this.then(null, onRejection);
+      }
+    };
+
+    Promise.all = all;
+    Promise.race = race;
+    Promise.resolve = staticResolve;
+    Promise.reject = staticReject;
+
+    function handleThenable(promise, value) {
+      var then = null,
+      resolved;
+
+      try {
+        if (promise === value) {
+          throw new TypeError("A promises callback cannot return that same promise.");
+        }
+
+        if (objectOrFunction(value)) {
+          then = value.then;
+
+          if (isFunction(then)) {
+            then.call(value, function(val) {
+              if (resolved) { return true; }
+              resolved = true;
+
+              if (value !== val) {
+                resolve(promise, val);
+              } else {
+                fulfill(promise, val);
+              }
+            }, function(val) {
+              if (resolved) { return true; }
+              resolved = true;
+
+              reject(promise, val);
+            });
+
+            return true;
+          }
+        }
+      } catch (error) {
+        if (resolved) { return true; }
+        reject(promise, error);
+        return true;
+      }
+
+      return false;
+    }
+
+    function resolve(promise, value) {
+      if (promise === value) {
+        fulfill(promise, value);
+      } else if (!handleThenable(promise, value)) {
+        fulfill(promise, value);
+      }
+    }
+
+    function fulfill(promise, value) {
+      if (promise._state !== PENDING) { return; }
+      promise._state = SEALED;
+      promise._detail = value;
+
+      config.async(publishFulfillment, promise);
+    }
+
+    function reject(promise, reason) {
+      if (promise._state !== PENDING) { return; }
+      promise._state = SEALED;
+      promise._detail = reason;
+
+      config.async(publishRejection, promise);
+    }
+
+    function publishFulfillment(promise) {
+      publish(promise, promise._state = FULFILLED);
+    }
+
+    function publishRejection(promise) {
+      publish(promise, promise._state = REJECTED);
+    }
+
+    __exports__.Promise = Promise;
+  });
+define("promise/race", 
+  ["./utils","exports"],
+  function(__dependency1__, __exports__) {
+    "use strict";
+    /* global toString */
+    var isArray = __dependency1__.isArray;
+
+    /**
+      `RSVP.race` allows you to watch a series of promises and act as soon as the
+      first promise given to the `promises` argument fulfills or rejects.
+      Example:
+      ```javascript
+      var promise1 = new RSVP.Promise(function(resolve, reject){
+        setTimeout(function(){
+          resolve("promise 1");
+        }, 200);
+      });
+      var promise2 = new RSVP.Promise(function(resolve, reject){
+        setTimeout(function(){
+          resolve("promise 2");
+        }, 100);
+      });
+      RSVP.race([promise1, promise2]).then(function(result){
+        // result === "promise 2" because it was resolved before promise1
+        // was resolved.
+      });
+      ```
+      `RSVP.race` is deterministic in that only the state of the first completed
+      promise matters. For example, even if other promises given to the `promises`
+      array argument are resolved, but the first completed promise has become
+      rejected before the other promises became fulfilled, the returned promise
+      will become rejected:
+      ```javascript
+      var promise1 = new RSVP.Promise(function(resolve, reject){
+        setTimeout(function(){
+          resolve("promise 1");
+        }, 200);
+      });
+      var promise2 = new RSVP.Promise(function(resolve, reject){
+        setTimeout(function(){
+          reject(new Error("promise 2"));
+        }, 100);
+      });
+      RSVP.race([promise1, promise2]).then(function(result){
+        // Code here never runs because there are rejected promises!
+      }, function(reason){
+        // reason.message === "promise2" because promise 2 became rejected before
+        // promise 1 became fulfilled
+      });
+      ```
+      @method race
+      @param {Array} promises array of promises to observe
+      @return {Promise} a promise that becomes fulfilled with the value the first
+      completed promises is resolved with if the first completed promise was
+      fulfilled, or rejected with the reason that the first completed promise
+      was rejected with.
+    */
+    function race(promises) {
+      /*jshint validthis:true */
+      var Promise = this;
+
+      if (!isArray(promises)) {
+        throw new TypeError('You must pass an array to race.');
+      }
+      return new Promise(function(resolve, reject) {
+        var results = [], promise;
+
+        for (var i = 0; i < promises.length; i++) {
+          promise = promises[i];
+
+          if (promise && typeof promise.then === 'function') {
+            promise.then(resolve, reject);
+          } else {
+            resolve(promise);
+          }
+        }
+      });
+    }
+
+    __exports__.race = race;
+  });
+define("promise/reject", 
+  ["exports"],
+  function(__exports__) {
+    "use strict";
+    /**
+      `RSVP.reject` returns a promise that will become rejected with the passed
+      `reason`. `RSVP.reject` is essentially shorthand for the following:
+      ```javascript
+      var promise = new RSVP.Promise(function(resolve, reject){
+        reject(new Error('WHOOPS'));
+      });
+      promise.then(function(value){
+        // Code here doesn't run because the promise is rejected!
+      }, function(reason){
+        // reason.message === 'WHOOPS'
+      });
+      ```
+      Instead of writing the above, your code now simply becomes the following:
+      ```javascript
+      var promise = RSVP.reject(new Error('WHOOPS'));
+      promise.then(function(value){
+        // Code here doesn't run because the promise is rejected!
+      }, function(reason){
+        // reason.message === 'WHOOPS'
+      });
+      ```
+      @method reject
+      @param {?} reason value that the returned promise will be rejected with.
+      @return {Promise} a promise that will become rejected with the given
+      `reason`.
+    */
+    function reject(reason) {
+      /*jshint validthis:true */
+      var Promise = this;
+
+      return new Promise(function (resolve, reject) {
+        reject(reason);
+      });
+    }
+
+    __exports__.reject = reject;
+  });
+define("promise/resolve", 
+  ["exports"],
+  function(__exports__) {
+    "use strict";
+    function resolve(value) {
+      /*jshint validthis:true */
+      if (value && typeof value === 'object' && value.constructor === this) {
+        return value;
+      }
+
+      var Promise = this;
+
+      return new Promise(function(resolve) {
+        resolve(value);
+      });
+    }
+
+    __exports__.resolve = resolve;
+  });
+define("promise/utils", 
+  ["exports"],
+  function(__exports__) {
+    "use strict";
+    function objectOrFunction(x) {
+      return isFunction(x) || (typeof x === "object" && x !== null);
+    }
+
+    function isFunction(x) {
+      return typeof x === "function";
+    }
+
+    function isArray(x) {
+      return Object.prototype.toString.call(x) === "[object Array]";
+    }
+
+    // Date.now is not available in browsers < IE9
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/now#Compatibility
+    var now = Date.now || function() { return new Date().getTime(); };
+
+
+    __exports__.objectOrFunction = objectOrFunction;
+    __exports__.isFunction = isFunction;
+    __exports__.isArray = isArray;
+    __exports__.now = now;
+  });
+requireModule('promise/polyfill').polyfill();
+}(this));
 //
 //
 //
@@ -14767,7 +15412,7 @@ Sk.builtin.round = function round(number, ndigits)
 
     Sk.builtin.pyCheckArgs("round", arguments, 1, 2);
     if (!Sk.builtin.checkNumber(number)) {
-    throw new Sk.builtin.TypeError("a float is required");
+        throw new Sk.builtin.TypeError("a float is required");
     }
     if ((ndigits !== undefined) && !Sk.misceval.isIndex(ndigits))
     {
@@ -14981,7 +15626,7 @@ Sk.builtin.zip = function zip()
 
 Sk.builtin.abs = function abs(xPy)
 {
-  return Sk.ffh.abs(xPy);
+    return Sk.ffh.abs(xPy);
 };
 
 Sk.builtin.ord = function ord(x)
@@ -15026,26 +15671,26 @@ Sk.builtin.int2str_ = function helper_(x, radix, prefix)
     var str = '';
     if (Sk.ffi.isLong(x))
     {
-    var suffix = '';
-    if (radix !== 2)
-        suffix = 'L';
+        var suffix = '';
+        if (radix !== 2)
+            suffix = 'L';
 
-    str = x.str$(radix, false);
-    if (x.nb$isnegative())
-    {
-        return Sk.builtin.stringToPy('-'+prefix+str+suffix);
-    }
-    return Sk.builtin.stringToPy(prefix+str+suffix);
+        str = x.str$(radix, false);
+        if (x.nb$isnegative())
+        {
+            return Sk.builtin.stringToPy('-'+prefix+str+suffix);
+        }
+        return Sk.builtin.stringToPy(prefix+str+suffix);
     }
     else
     {
-    x = Sk.misceval.asIndex(x);
-    str = x.toString(radix);
-    if (x < 0)
-    {
-        return Sk.builtin.stringToPy('-'+prefix+str.slice(1));
-    }
-    return Sk.builtin.stringToPy(prefix+str);
+        x = Sk.misceval.asIndex(x);
+        str = x.toString(radix);
+        if (x < 0)
+        {
+            return Sk.builtin.stringToPy('-'+prefix+str.slice(1));
+        }
+        return Sk.builtin.stringToPy(prefix+str);
     }
 };
 
@@ -15299,15 +15944,15 @@ Sk.builtin.hash = function hash(value)
     }
     else if (value === null)
     {
-    return 0;  // what should this be?
+        return 0;  // what should this be?
     }
     else if (value === true)
     {
-    return 1;
+        return 1;
     }
     else if (value === false)
     {
-    return 0;
+        return 0;
     }
 
     return (typeof value) + ' ' + String(value);
@@ -15962,6 +16607,25 @@ Sk.builtin.OverflowError.prototype.tp$name = "OverflowError";
  * @extends Sk.builtin.Exception
  * @param {...*} args
  */
+Sk.builtin.SuspensionError = function (args) {
+    var o;
+    if (!(this instanceof Sk.builtin.SuspensionError)) {
+        o = Object.create(Sk.builtin.SuspensionError.prototype);
+        o.constructor.apply(o, arguments);
+        return o;
+    }
+    Sk.builtin.Exception.apply(this, arguments);
+};
+goog.inherits(Sk.builtin.SuspensionError, Sk.builtin.Exception);
+Sk.builtin.SuspensionError.prototype.tp$name = "SuspensionError";
+goog.exportSymbol("Sk.builtin.SuspensionError", Sk.builtin.SuspensionError);
+
+
+/**
+ * @constructor
+ * @extends Sk.builtin.Exception
+ * @param {...*} args
+ */
 Sk.builtin.SystemExit = function(args) {
     if (!(this instanceof Sk.builtin.SystemExit)) {
         var o = Object.create(Sk.builtin.SystemExit.prototype);
@@ -16257,11 +16921,11 @@ Sk.builtin.type = function(name, bases, dict)
             var tname = Sk.ffi.typeName(this);
             if (iterf)
             {
-                 var ret = Sk.misceval.callsim(iterf);
-                 // This check does not work for builtin iterators 
-                 // if (ret.tp$getattr("next") === undefined)
-                 //    throw new Sk.builtin.TypeError("iter() return non-iterator of type '" + tname + "'");
-                 return ret;
+                var ret = Sk.misceval.callsim(iterf);
+                // This check does not work for builtin iterators 
+                // if (ret.tp$getattr("next") === undefined)
+                //    throw new Sk.builtin.TypeError("iter() return non-iterator of type '" + tname + "'");
+                return ret;
             }
             throw new Sk.builtin.TypeError("'" + tname + "' object is not iterable");
         };
@@ -16328,9 +16992,10 @@ Sk.builtin.type.makeIntoTypeObj = function(name, t)
         var mod = t.__module__;
         var cname = "";
         if (mod) cname = mod.v + ".";
-	var ctype = "class";
-	if (!mod && !t.sk$klass)
-	    ctype = "type";
+        var ctype = "class";
+        if (!mod && !t.sk$klass) {
+            ctype = "type";
+        }
         return Sk.builtin.stringToPy("<" + ctype + " '" + cname + t.tp$name + "'>");
     };
     t.tp$str = undefined;
@@ -16497,7 +17162,7 @@ Sk.builtin.type.buildMRO_ = function(klass)
     return Sk.builtin.type.mroMerge_(all);
 };
 
-/*
+/**
  * C3 MRO (aka CPL) linearization. Figures out which order to search through
  * base classes to determine what should override what. C3 does the "right
  * thing", and it's what Python has used since 2.3.
@@ -16512,7 +17177,7 @@ Sk.builtin.type.buildMRO_ = function(klass)
  * This implementation is based on a post by Samuele Pedroni on python-dev
  * (http://mail.python.org/pipermail/python-dev/2002-October/029176.html) when
  * discussing its addition to Python.
- */ 
+ */
 Sk.builtin.type.buildMRO = function(klass)
 {
     return new Sk.builtin.tuple(Sk.builtin.type.buildMRO_(klass));
@@ -16520,16 +17185,18 @@ Sk.builtin.type.buildMRO = function(klass)
 
 Sk.builtin.type.prototype.tp$richcompare = function(other, op)
 {
-	if (other.ob$type != Sk.builtin.type)
-		return undefined;
+    if (other.ob$type != Sk.builtin.type) {
+        return undefined;
+    }
 
-	if (!this.tp$repr || !other.tp$repr)
-		return undefined;
+    if (!this.tp$repr || !other.tp$repr) {
+        return undefined;
+    }
 
-	var r1 = this.tp$repr();
-	var r2 = other.tp$repr();
+    var r1 = this.tp$repr();
+    var r2 = other.tp$repr();
 
-	return r1.tp$richcompare(r2, op);
+    return r1.tp$richcompare(r2, op);
 };
 /**
  * Return a new featureless object. object is a base for all classes.
@@ -16739,7 +17406,7 @@ Sk.builtin.pyCheckArgs = function (name, args, minargs, maxargs, kwargs, free) {
         }
         msg += " (" + nargs + " given)";
         throw new Sk.builtin.TypeError(msg);
-    };
+    }
 };
 goog.exportSymbol("Sk.builtin.pyCheckArgs", Sk.builtin.pyCheckArgs);
 
@@ -16754,7 +17421,7 @@ goog.exportSymbol("Sk.builtin.pyCheckArgs", Sk.builtin.pyCheckArgs);
 Sk.builtin.pyCheckType = function (name, exptype, check) {
     if (!check) {
         throw new Sk.builtin.TypeError(name + " must be a " + exptype);
-    };
+    }
 };
 goog.exportSymbol("Sk.builtin.pyCheckType", Sk.builtin.pyCheckType);
 
@@ -16769,9 +17436,7 @@ Sk.builtin.checkIterable = function (arg) {
 goog.exportSymbol("Sk.builtin.checkIterable", Sk.builtin.checkIterable);
 
 Sk.builtin.checkNumber = function (arg) {
-    return (arg !== null && (typeof arg === "number"
-                 || arg instanceof Sk.builtin.NumberPy
-                 || arg instanceof Sk.builtin.lng));
+    return (arg !== null && (typeof arg === "number" || arg instanceof Sk.builtin.NumberPy || arg instanceof Sk.builtin.lng));
 };
 goog.exportSymbol("Sk.builtin.checkNumber", Sk.builtin.checkNumber);
 
@@ -16860,7 +17525,7 @@ goog.exportSymbol("Sk.builtin.func", Sk.builtin.func);
 Sk.builtin.func.prototype.tp$name = "function";
 Sk.builtin.func.prototype.tp$descr_get = function(obj, objtype)
 {
-    goog.asserts.assert(obj !== undefined && objtype !== undefined)
+    goog.asserts.assert(obj !== undefined && objtype !== undefined);
     if (obj == null) return this;
     return new Sk.builtin.method(this, obj);
 };
@@ -16927,10 +17592,11 @@ Sk.builtin.func.prototype.tp$call = function(args, kw)
 
 Sk.builtin.func.prototype.tp$getattr = function(key) {
     return this[key];
-}
+};
+
 Sk.builtin.func.prototype.tp$setattr = function(key,value) {
     this[key] = value;
-}
+};
 
 //todo; investigate why the other doesn't work
 //Sk.builtin.type.makeIntoTypeObj('function', Sk.builtin.func);
@@ -17034,13 +17700,57 @@ Sk.builtin.method.prototype.tp$call = function(args, kw)
 Sk.builtin.method.prototype.tp$repr = function()
 {
     var name = (this.im_func.func_code && this.im_func.func_code['co_name'] && Sk.ffi.remapToJs(this.im_func.func_code['co_name'])) || '<native JS>';
-    return Sk.builtin.stringToPy("<bound method " + this.im_self.ob$type.tp$name + "." + name
-            + " of " + Sk.ffi.remapToJs(this.im_self.tp$repr()) + ">");
+    return Sk.builtin.stringToPy("<bound method " + this.im_self.ob$type.tp$name + "." + name + " of " + Sk.ffi.remapToJs(this.im_self.tp$repr()) + ">");
 };
 goog.provide('Sk.misceval');
 
 // goog.require('Sk.abstr');
 goog.require('Sk.builtin');
+
+/*
+  Suspension object format:
+  {resume: function() {...}, // the continuation - returns either another suspension or the return value
+   data: <copied down from innermost level>,
+   optional: <if true, can be resumed immediately (eg debug stops)>,
+   child: <Suspension, or null if we are the innermost level>,
+   $blk: <>, $loc: <>, $gbl: <>, $exc: <>, $err: <>, [$cell: <>],
+  }
+*/
+
+/**
+ * @constructor
+ * @param{function(?)=} resume A function to be called on resume. child is resumed first and its return value is passed to this function.
+ * @param{Object=} child A child suspension. 'optional' will be copied from here if supplied.
+ * @param{Object=} data Data attached to this suspension. Will be copied from child if not supplied.
+ */
+Sk.misceval.Suspension = function Suspension(resume, child, data) {
+    if (resume !== undefined && child !== undefined) {
+        this.resume = function() { return resume(child.resume()); };
+    }
+    this.child = child;
+    this.optional = child !== undefined && child.optional;
+    if (data === undefined && child !== undefined) {
+        this.data = child.data;
+    } else {
+        this.data = data;
+    }
+};
+goog.exportSymbol("Sk.misceval.Suspension", Sk.misceval.Suspension);
+
+/**
+ * @param{Sk.misceval.Suspension} susp
+ * @param{string=} message
+ */
+Sk.misceval.retryOptionalSuspensionOrThrow = function (susp, message) {
+    while (susp instanceof Sk.misceval.Suspension) {
+        if (!susp.optional) {
+            throw new Sk.builtin.SuspensionError(message || "Cannot call a function that blocks or suspends here");
+        }
+        susp = susp.resume();
+    }
+    return susp;
+};
+goog.exportSymbol("Sk.misceval.retryOptionalSuspensionOrThrow", Sk.misceval.retryOptionalSuspensionOrThrow);
 
 Sk.misceval.isIndex = function(o)
 {
@@ -17664,11 +18374,11 @@ Sk.misceval.apply = function(func, kwdict, varargseq, kws, args)
         // builtin.js, for example) as they are javascript functions,
         // not Sk.builtin.func objects.
 
-    if (func.sk$klass)
-    {
-        // klass wrapper around __init__ requires special handling
-        return func.apply(null, [kwdict, varargseq, kws, args]);
-    }
+        if (func.sk$klass)
+        {
+            // klass wrapper around __init__ requires special handling
+            return func.apply(null, [kwdict, varargseq, kws, args]);
+        }
 
         if (varargseq)
         {
@@ -17677,7 +18387,7 @@ Sk.misceval.apply = function(func, kwdict, varargseq, kws, args)
                 args.push(i);
             }
         }
-    if (kwdict)
+        if (kwdict)
         {
             goog.asserts.fail("kwdict not implemented;");
         }
@@ -17759,13 +18469,7 @@ goog.require('Sk.misceval');
 // goog.require('Sk.ffi');
 
 //
-//
-//
-//
 // Number
-//
-//
-//
 //
 
 Sk.abstr.binop_type_error = function(lhsPy, rhsPy, name)
@@ -17777,70 +18481,73 @@ Sk.abstr.binop_type_error = function(lhsPy, rhsPy, name)
 };
 
 Sk.abstr.boNameToSlotFuncLhs_ = function(obj, name) {
-  if (obj === null)
-  {
-    return undefined;
-  };
-  switch (name)
-  {
-    case "Add":      return obj.nb$add          ? obj.nb$add :          obj['__add__'];
-    case "Sub":      return obj.nb$sub          ? obj.nb$sub :          obj['__sub__'];
-    case "Mult":     return obj.nb$mul          ? obj.nb$mul :          obj['__mul__'];
-    case "Div":      return obj.nb$div          ? obj.nb$div :          obj['__div__'];
-    case "FloorDiv": return obj.nb$floor_divide ? obj.nb$floor_divide : obj['__floordiv__'];
-    case "Mod":      return obj.nb$remainder    ? obj.nb$remainder :    obj['__mod__'];
-    case "Pow":      return obj.nb$power        ? obj.nb$power :        obj['__pow__'];
-    case "LShift":   return obj.nb$lshift       ? obj.nb$lshift :       obj['__lshift__'];
-    case "RShift":   return obj.nb$rshift       ? obj.nb$rshift :       obj['__rshift__'];
-    case "BitAnd":   return obj.nb$and          ? obj.nb$and :          obj['__and__'];
-    case "BitXor":   return obj.nb$xor          ? obj.nb$xor :          obj['__xor__'];
-    case "BitOr":    return obj.nb$or           ? obj.nb$or :           obj['__or__'];
-  }
+    if (obj === null)
+    {
+        return undefined;
+    }
+
+    switch (name)
+    {
+        case "Add":      return obj.nb$add          ? obj.nb$add :          obj['__add__'];
+        case "Sub":      return obj.nb$sub          ? obj.nb$sub :          obj['__sub__'];
+        case "Mult":     return obj.nb$mul          ? obj.nb$mul :          obj['__mul__'];
+        case "Div":      return obj.nb$div          ? obj.nb$div :          obj['__div__'];
+        case "FloorDiv": return obj.nb$floor_divide ? obj.nb$floor_divide : obj['__floordiv__'];
+        case "Mod":      return obj.nb$remainder    ? obj.nb$remainder :    obj['__mod__'];
+        case "Pow":      return obj.nb$power        ? obj.nb$power :        obj['__pow__'];
+        case "LShift":   return obj.nb$lshift       ? obj.nb$lshift :       obj['__lshift__'];
+        case "RShift":   return obj.nb$rshift       ? obj.nb$rshift :       obj['__rshift__'];
+        case "BitAnd":   return obj.nb$and          ? obj.nb$and :          obj['__and__'];
+        case "BitXor":   return obj.nb$xor          ? obj.nb$xor :          obj['__xor__'];
+        case "BitOr":    return obj.nb$or           ? obj.nb$or :           obj['__or__'];
+    }
 };
 
 Sk.abstr.boNameToSlotFuncRhs_ = function(obj, name) {
-  if (obj === null) {
-    return undefined;
-  };
-  switch (name) {
-    case "Add":      return obj.nb$add          ? obj.nb$add :          obj['__radd__'];
-    case "Sub":      return obj.nb$sub          ? obj.nb$sub :          obj['__rsub__'];
-    case "Mult":     return obj.nb$mul          ? obj.nb$mul :          obj['__rmul__'];
-    case "Div":      return obj.nb$div          ? obj.nb$div :          obj['__rdiv__'];
-    case "FloorDiv": return obj.nb$floor_divide ? obj.nb$floor_divide : obj['__rfloordiv__'];
-    case "Mod":      return obj.nb$remainder    ? obj.nb$remainder :    obj['__rmod__'];
-    case "Pow":      return obj.nb$power        ? obj.nb$power :        obj['__rpow__'];
-    case "LShift":   return obj.nb$lshift       ? obj.nb$lshift :       obj['__rlshift__'];
-    case "RShift":   return obj.nb$rshift       ? obj.nb$rshift :       obj['__rrshift__'];
-    case "BitAnd":   return obj.nb$and          ? obj.nb$and :          obj['__rand__'];
-    case "BitXor":   return obj.nb$xor          ? obj.nb$xor :          obj['__rxor__'];
-    case "BitOr":    return obj.nb$or           ? obj.nb$or :           obj['__ror__'];
-  }
+    if (obj === null) {
+        return undefined;
+    }
+
+    switch (name) {
+        case "Add":      return obj.nb$add          ? obj.nb$add :          obj['__radd__'];
+        case "Sub":      return obj.nb$sub          ? obj.nb$sub :          obj['__rsub__'];
+        case "Mult":     return obj.nb$mul          ? obj.nb$mul :          obj['__rmul__'];
+        case "Div":      return obj.nb$div          ? obj.nb$div :          obj['__rdiv__'];
+        case "FloorDiv": return obj.nb$floor_divide ? obj.nb$floor_divide : obj['__rfloordiv__'];
+        case "Mod":      return obj.nb$remainder    ? obj.nb$remainder :    obj['__rmod__'];
+        case "Pow":      return obj.nb$power        ? obj.nb$power :        obj['__rpow__'];
+        case "LShift":   return obj.nb$lshift       ? obj.nb$lshift :       obj['__rlshift__'];
+        case "RShift":   return obj.nb$rshift       ? obj.nb$rshift :       obj['__rrshift__'];
+        case "BitAnd":   return obj.nb$and          ? obj.nb$and :          obj['__rand__'];
+        case "BitXor":   return obj.nb$xor          ? obj.nb$xor :          obj['__rxor__'];
+        case "BitOr":    return obj.nb$or           ? obj.nb$or :           obj['__ror__'];
+    }
 };
 
 /**
  * In-place operations (+=, -=, *=, /=, //=, %=, **=, <<=, >>=, &=, ^=, |=)
  */
- Sk.abstr.iboNameToSlotFunc_ = function(obj, name)
- {
-  if (obj === null) {
-    return undefined;
-  };
-  switch (name)
-  {
-    case "Add":      return obj.nb$inplace_add          ? obj.nb$inplace_add          : obj['__iadd__'];
-    case "Sub":      return obj.nb$inplace_subtract     ? obj.nb$inplace_subtract     : obj['__isub__'];
-    case "Mult":     return obj.nb$inplace_multiply     ? obj.nb$inplace_multiply     : obj['__imul__'];
-    case "Div":      return obj.nb$inplace_divide       ? obj.nb$inplace_divide       : obj['__idiv__'];
-    case "FloorDiv": return obj.nb$inplace_floor_divide ? obj.nb$inplace_floor_divide : obj['__ifloordiv__'];
-    case "Mod":      return obj.nb$inplace_remainder;
-    case "Pow":      return obj.nb$inplace_power;
-    case "LShift":   return obj.nb$inplace_lshift       ? obj.nb$inplace_lshift       : obj['__ilshift__'];
-    case "RShift":   return obj.nb$inplace_rshift       ? obj.nb$inplace_rshift       : obj['__irshift__'];
-    case "BitAnd":   return obj.nb$inplace_and;
-    case "BitOr":    return obj.nb$inplace_or;
-    case "BitXor":   return obj.nb$inplace_xor          ? obj.nb$inplace_xor          : obj['__ixor__'];
-  }
+Sk.abstr.iboNameToSlotFunc_ = function(obj, name)
+{
+    if (obj === null) {
+        return undefined;
+    }
+
+    switch (name)
+    {
+        case "Add":      return obj.nb$inplace_add          ? obj.nb$inplace_add          : obj['__iadd__'];
+        case "Sub":      return obj.nb$inplace_subtract     ? obj.nb$inplace_subtract     : obj['__isub__'];
+        case "Mult":     return obj.nb$inplace_multiply     ? obj.nb$inplace_multiply     : obj['__imul__'];
+        case "Div":      return obj.nb$inplace_divide       ? obj.nb$inplace_divide       : obj['__idiv__'];
+        case "FloorDiv": return obj.nb$inplace_floor_divide ? obj.nb$inplace_floor_divide : obj['__ifloordiv__'];
+        case "Mod":      return obj.nb$inplace_remainder;
+        case "Pow":      return obj.nb$inplace_power;
+        case "LShift":   return obj.nb$inplace_lshift       ? obj.nb$inplace_lshift       : obj['__ilshift__'];
+        case "RShift":   return obj.nb$inplace_rshift       ? obj.nb$inplace_rshift       : obj['__irshift__'];
+        case "BitAnd":   return obj.nb$inplace_and;
+        case "BitOr":    return obj.nb$inplace_or;
+        case "BitXor":   return obj.nb$inplace_xor          ? obj.nb$inplace_xor          : obj['__ixor__'];
+    }
 };
 
 Sk.abstr.binary_op_ = function(v, w, opname)
@@ -17855,7 +18562,7 @@ Sk.abstr.binary_op_ = function(v, w, opname)
         }
         else
         {
-            ret = Sk.misceval.callsim(vop,v,w)
+            ret = Sk.misceval.callsim(vop,v,w);
         }
         if (ret !== undefined) return ret;
     }
@@ -17957,14 +18664,22 @@ Sk.abstr.boNumPromote_ = {
     "Mult": function(a, b) { return a * b; },
     "Mod": function(a, b) { 
         if (b === 0)
+        {
             throw new Sk.builtin.ZeroDivisionError("division or modulo by zero");
-        var m = a % b; return ((m * b) < 0 ? (m + b) : m); 
+        }
+        var m = a % b;
+        return ((m * b) < 0 ? (m + b) : m); 
     },
-    "Div": function(a, b) {
+    "Div": function(a, b)
+    {
         if (b === 0)
+        {
             throw new Sk.builtin.ZeroDivisionError("division or modulo by zero");
+        }
         else
+        {
             return a / b;
+        }
     },
     "FloorDiv": function(a, b) { 
         if (b === 0)
@@ -17994,25 +18709,31 @@ Sk.abstr.boNumPromote_ = {
         }
         return m;
     },
-    "LShift": function(a, b) { 
-        if (b < 0) {
+    "LShift": function(a, b)
+    { 
+        if (b < 0)
+        {
             throw new Sk.builtin.ValueError("negative shift count");
         }
         var m = a << b;
-        if (m > a) {
+        if (m > a)
+        {
             return m; 
         }
-        else {
-        // Fail, this will get recomputed with longs
-        return a * Math.pow(2, b);
-    }
-},
-"RShift": function(a, b) { 
-    if (b < 0) {
-        throw new Sk.builtin.ValueError("negative shift count");
-    }
-    var m = a >> b;
-    if ((a > 0) && (m < 0)) {
+        else
+        {
+            // Fail, this will get recomputed with longs
+            return a * Math.pow(2, b);
+        }
+    },
+    "RShift": function(a, b)
+    { 
+        if (b < 0)
+        {
+            throw new Sk.builtin.ValueError("negative shift count");
+        }
+        var m = a >> b;
+        if ((a > 0) && (m < 0)) {
             // fix incorrect sign extension
             m = m & (Math.pow(2, 32-b) - 1);
         }
@@ -18089,29 +18810,29 @@ goog.exportSymbol("Sk.abstr.numberInplaceBinOp", Sk.abstr.numberInplaceBinOp);
  */
 Sk.abstr.uoNameToSlotFunc_ = function(obj, name)
 {
-  if (obj === null)
-  {
-    return undefined;
-  }
-  switch (name)
-  {
-    case Sk.abstr.unaryOp.USub:
+    if (obj === null)
     {
-      return obj.u$negative          ? obj.u$negative        : obj['__neg__'];
+        return undefined;
     }
-    case Sk.abstr.unaryOp.UAdd:
+    switch (name)
     {
-      return obj.u$positive          ? obj.u$positive        : obj['__pos__'];
+        case Sk.abstr.unaryOp.USub:
+        {
+            return obj.u$negative          ? obj.u$negative        : obj['__neg__'];
+        }
+        case Sk.abstr.unaryOp.UAdd:
+        {
+            return obj.u$positive          ? obj.u$positive        : obj['__pos__'];
+        }
+        case Sk.abstr.unaryOp.Invert:
+        {
+            return obj.nb$invert           ? obj.nb$invert          : obj['__invert__'];
+        }
+        default:
+        {
+            throw new Sk.builtin.AssertionError("7fb8237f-879b-4192-89ce-13ad6fa3b2d8 " + name);
+        }
     }
-    case Sk.abstr.unaryOp.Invert:
-    {
-      return obj.nb$invert           ? obj.nb$invert          : obj['__invert__'];
-    }
-    default:
-    {
-      throw new Sk.builtin.AssertionError("7fb8237f-879b-4192-89ce-13ad6fa3b2d8 " + name);
-    }
-  }
 };
 
 /**
@@ -18296,16 +19017,8 @@ Sk.abstr.sequenceSetSlice = function(seq, i1, i2, x)
     }
 };
 
-
-
-//
-//
-//
 //
 // Object
-//
-//
-//
 //
 
 Sk.abstr.objectDelItem = function(o, key)
@@ -18336,24 +19049,24 @@ goog.exportSymbol("Sk.abstr.objectDelItem", Sk.abstr.objectDelItem);
 
 Sk.abstr.objectGetItem = function(o, key)
 {
-  if (o !== null) 
-  {
-    if (o.mp$subscript)
+    if (o !== null) 
     {
-      return o.mp$subscript(key);
+        if (o.mp$subscript)
+        {
+            return o.mp$subscript(key);
+        }
+        else if (Sk.misceval.isIndex(key) && o.sq$item)
+        {
+            return Sk.abstr.sequenceGetItem(o, Sk.misceval.asIndex(key));
+        }
+        else if (o.tp$getitem)
+        {
+            return o.tp$getitem(key);
+        }
     }
-    else if (Sk.misceval.isIndex(key) && o.sq$item)
-    {
-      return Sk.abstr.sequenceGetItem(o, Sk.misceval.asIndex(key));
-    }
-    else if (o.tp$getitem)
-    {
-      return o.tp$getitem(key);
-    }
-  }
 
-  var otypename = Sk.ffi.typeName(o);
-  throw new Sk.builtin.TypeError("'" + otypename + "' does not support indexing");
+    var otypename = Sk.ffi.typeName(o);
+    throw new Sk.builtin.TypeError("'" + otypename + "' does not support indexing");
 };
 goog.exportSymbol("Sk.abstr.objectGetItem", Sk.abstr.objectGetItem);
 
@@ -18446,7 +19159,7 @@ goog.exportSymbol("Sk.abstr.iternext", Sk.abstr.iternext);
  */
 Sk.mergeSort = function(arr, cmp, key, reverse) //  Replaced by quicksort
 {
-  Sk.quickSort(arr, cmp, key, reverse)
+    Sk.quickSort(arr, cmp, key, reverse)
 }
 
 Sk.quickSort = function(arr, cmp, key, reverse)
@@ -18459,51 +19172,52 @@ Sk.quickSort = function(arr, cmp, key, reverse)
     }
 
     var partition = function(arr, begin, end, pivot, reverse)
-  {
-    var tmp;
-    var piv=arr[pivot];
-    
-//    swap pivot, end-1
-    tmp=arr[pivot];
-    arr[pivot]=arr[end-1];
-    arr[end-1]=tmp;
+    {
+        var tmp;
+        var piv=arr[pivot];
 
-    var store=begin;
-    var ix;
-    for(ix=begin; ix<end-1; ++ix) {
+        //    swap pivot, end-1
+        tmp=arr[pivot];
+        arr[pivot]=arr[end-1];
+        arr[end-1]=tmp;
+
+        var store=begin;
+        var ix;
+        for(ix=begin; ix<end-1; ++ix) {
             if ( reverse ) {
-        var cmpresult = Sk.misceval.callsim(cmp, piv, arr[ix]);
-            } else {
-        var cmpresult = Sk.misceval.callsim(cmp, arr[ix], piv);
+                var cmpresult = Sk.misceval.callsim(cmp, piv, arr[ix]);
+            }
+            else {
+                var cmpresult = Sk.misceval.callsim(cmp, arr[ix], piv);
             }
             if( Sk.builtin.asnum$(cmpresult) < 0 ) {
-//        swap store, ix
-        tmp=arr[store];
-        arr[store]=arr[ix];
-        arr[ix]=tmp;
-        ++store;
-      }
+                //        swap store, ix
+                tmp=arr[store];
+                arr[store]=arr[ix];
+                arr[ix]=tmp;
+                ++store;
+            }
+        }
+
+        //    swap end-1, store
+        tmp=arr[end-1];
+        arr[end-1]=arr[store];
+        arr[store]=tmp;
+
+        return store;
     }
-    
-//    swap end-1, store
-    tmp=arr[end-1];
-    arr[end-1]=arr[store];
-    arr[store]=tmp;
-  
-    return store;
-  }
-  
-  var qsort = function(arr, begin, end, reverse)
-  {
-    if(end-1>begin) {
-      var pivot=begin+Math.floor(Math.random()*(end-begin));
-  
-      pivot=partition(arr, begin, end, pivot, reverse);
-  
-      qsort(arr, begin, pivot, reverse);
-      qsort(arr, pivot+1, end, reverse);
+
+    var qsort = function(arr, begin, end, reverse)
+    {
+        if(end-1>begin) {
+            var pivot=begin+Math.floor(Math.random()*(end-begin));
+
+            pivot=partition(arr, begin, end, pivot, reverse);
+
+            qsort(arr, begin, pivot, reverse);
+            qsort(arr, pivot+1, end, reverse);
+        }
     }
-  }
 
     qsort(arr, 0, arr.length, reverse);
     return null;
@@ -18605,7 +19319,7 @@ Sk.builtin.list = function(L)
 
     if (L === undefined)
     {
-            this.v = [];
+        this.v = [];
     }
     else if (Object.prototype.toString.apply(L) === '[object Array]')
     {
@@ -18838,10 +19552,9 @@ Sk.builtin.list.prototype.list_subscript_ = function(index)
     else if (index instanceof Sk.builtin.slice)
     {
         var ret = [];
-        index.sssiter$(this, function(i, wrt)
-                {
-                    ret.push(wrt.v[i]);
-                });
+        index.sssiter$(this, function(i, wrt) {
+            ret.push(wrt.v[i]);
+        });
         return new Sk.builtin.list(ret);
     }
 
@@ -18905,11 +19618,10 @@ Sk.builtin.list.prototype.list_del_subscript_ = function(index)
             var dec = 0; // offset of removal for next index (because we'll have removed, but the iterator is giving orig indices)
             var step = index.step === null ? 1 : index.step;
             var offdir = step > 0 ? 1 : 0;
-            index.sssiter$(this, function(i, wrt)
-                           {
-                               self.v.splice(i - dec, 1);
-                               dec += offdir;
-                           });
+            index.sssiter$(this, function(i, wrt) {
+                self.v.splice(i - dec, 1);
+                dec += offdir;
+            });
         }
         return;
     }
@@ -20350,23 +21062,22 @@ Sk.builtin.tuple.prototype.mp$subscript = function(index)
 {
     if (Sk.misceval.isIndex(index))
     {
-    var i = Sk.misceval.asIndex(index);
-    if (i !== undefined)
-    {
+        var i = Sk.misceval.asIndex(index);
+        if (i !== undefined)
+        {
             if (i < 0) i = this.v.length + i;
             if (i < 0 || i >= this.v.length) {
-        throw new Sk.builtin.IndexError("tuple index out of range");
-        }
+                throw new Sk.builtin.IndexError("tuple index out of range");
+            }
             return this.v[i];
-    }
+        }
     }
     else if (index instanceof Sk.builtin.slice)
     {
         var ret = [];
-        index.sssiter$(this, function(i, wrt)
-                {
-                    ret.push(wrt.v[i]);
-                });
+        index.sssiter$(this, function(i, wrt) {
+            ret.push(wrt.v[i]);
+        });
         return new Sk.builtin.tuple(ret);
     }
 
@@ -23027,119 +23738,120 @@ Sk.builtin.NumberPy.prototype.nb$power = function(other)
 
 Sk.builtin.NumberPy.prototype.nb$and = function(other)
 {
-  var tmp;
-        other = Sk.builtin.asnum$(other);
-        tmp = this.v & other;
-        if ((tmp !== undefined) && (tmp < 0)) {
-            tmp = tmp + 4294967296; // convert back to unsigned
-        }
+    var tmp;
+    other = Sk.builtin.asnum$(other);
+    tmp = this.v & other;
+    if ((tmp !== undefined) && (tmp < 0)) {
+        tmp = tmp + 4294967296; // convert back to unsigned
+    }
 
-  if (tmp !== undefined)
-    return Sk.builtin.numberPy(tmp, undefined);
+    if (tmp !== undefined) {
+        return Sk.builtin.numberPy(tmp, undefined);
+    }
 
-  return undefined;
+    return undefined;
 }
 
 Sk.builtin.NumberPy.prototype.nb$or = function(other)
 {
-  var tmp;
-  other = Sk.builtin.asnum$(other);
-  tmp = this.v | other;
-  if ((tmp !== undefined) && (tmp < 0))
-  {
-      tmp = tmp + 4294967296; // convert back to unsigned
-  }
+    var tmp;
+    other = Sk.builtin.asnum$(other);
+    tmp = this.v | other;
+    if ((tmp !== undefined) && (tmp < 0))
+    {
+        tmp = tmp + 4294967296; // convert back to unsigned
+    }
 
-  if (tmp !== undefined)
-  {
-    // Has to be undefined so as not to break tests!
-    return Sk.builtin.numberPy(tmp, undefined);
-  }
-  return undefined;
+    if (tmp !== undefined)
+    {
+        // Has to be undefined so as not to break tests!
+        return Sk.builtin.numberPy(tmp, undefined);
+    }
+    return undefined;
 }
 
 Sk.builtin.NumberPy.prototype.nb$xor = function(other)
 {
-  var tmp;
-  other = Sk.builtin.asnum$(other);
-  tmp = this.v ^ other;
-  if ((tmp !== undefined) && (tmp < 0))
-  {
-      tmp = tmp + 4294967296; // convert back to unsigned
-  }
+    var tmp;
+    other = Sk.builtin.asnum$(other);
+    tmp = this.v ^ other;
+    if ((tmp !== undefined) && (tmp < 0))
+    {
+        tmp = tmp + 4294967296; // convert back to unsigned
+    }
 
-  if (tmp !== undefined)
-  {
-    return Sk.builtin.numberPy(tmp, undefined);
-  }
+    if (tmp !== undefined)
+    {
+        return Sk.builtin.numberPy(tmp, undefined);
+    }
 
-  return undefined;
+    return undefined;
 }
 
 Sk.builtin.NumberPy.prototype.nb$lshift = function(other)
 {
-  var shift = Sk.builtin.asnum$(other);
+    var shift = Sk.builtin.asnum$(other);
 
-  if (shift !== undefined)
-  {
-    if (shift < 0)
+    if (shift !== undefined)
     {
-      throw new Sk.builtin.ValueError("negative shift count");
-    }
-    /**
-     * @const
-     * @type {number}
-     */
-    var tmp = this.v << shift;
-    if (tmp <= this.v)
-    {
-      // Fail, recompute with longs
-      return Sk.builtin.lng.fromInt$(this.v).nb$lshift(shift);
+        if (shift < 0)
+        {
+            throw new Sk.builtin.ValueError("negative shift count");
+        }
+        /**
+         * @const
+         * @type {number}
+         */
+        var tmp = this.v << shift;
+        if (tmp <= this.v)
+        {
+            // Fail, recompute with longs
+            return Sk.builtin.lng.fromInt$(this.v).nb$lshift(shift);
+        }
+        else
+        {
+            return Sk.builtin.numberPy(tmp, this.skType);
+        }
     }
     else
     {
-      return Sk.builtin.numberPy(tmp, this.skType);
+        return undefined;
     }
-  }
-  else
-  {
-    return undefined;
-  }
 };
 
 Sk.builtin.NumberPy.prototype.nb$rshift = function(other)
 {
-  /**
-   * @const
-   * @type {number}
-   */
-  var shift = Sk.builtin.asnum$(other);
-
-  if (shift !== undefined)
-  {
-    if (shift < 0)
-    {
-      throw new Sk.builtin.ValueError("negative shift count");
-    }
     /**
      * @const
      * @type {number}
      */
-    var tmp = this.v >> shift;
-    if ((this.v > 0) && (tmp < 0))
+    var shift = Sk.builtin.asnum$(other);
+
+    if (shift !== undefined)
     {
-      // Fix incorrect sign extension.
-      return Sk.builtin.numberPy(tmp & (Math.pow(2, 32-shift) - 1), this.skType);
+        if (shift < 0)
+        {
+            throw new Sk.builtin.ValueError("negative shift count");
+        }
+        /**
+         * @const
+         * @type {number}
+         */
+        var tmp = this.v >> shift;
+        if ((this.v > 0) && (tmp < 0))
+        {
+            // Fix incorrect sign extension.
+            return Sk.builtin.numberPy(tmp & (Math.pow(2, 32-shift) - 1), this.skType);
+        }
+        else
+        {
+            return Sk.builtin.numberPy(tmp, this.skType);
+        }
     }
     else
     {
-      return Sk.builtin.numberPy(tmp, this.skType);
+        return undefined;
     }
-  }
-  else
-  {
-    return undefined;
-  }
 };
 
 Sk.builtin.NumberPy.prototype.nb$inplace_add = Sk.builtin.NumberPy.prototype.nb$add;
@@ -23233,7 +23945,7 @@ Sk.builtin.NumberPy.prototype.u$sqrt = function()
 
 Sk.builtin.NumberPy.prototype.nb$nonzero = function()
 {
-  return this.v !== 0 ? Sk.builtin.bool.true$ : Sk.builtin.bool.false$;
+    return this.v !== 0 ? Sk.builtin.bool.true$ : Sk.builtin.bool.false$;
 };
 
 Sk.builtin.NumberPy.prototype.nb$isnegative = function() { return this.v < 0 };
@@ -23242,73 +23954,73 @@ Sk.builtin.NumberPy.prototype.nb$ispositive = function() { return this.v >= 0 };
 
 Sk.builtin.NumberPy.prototype.numberCompare = function(other)
 {
-  if (other instanceof Sk.builtin.bool)
-  {
-      other = Sk.builtin.asnum$(other);
-  }
-
-  if (other === Sk.builtin.none.none$)
-  {
-    other = 0;
-  }
-
-  if (typeof other === "number")
-  {
-    return this.v - other;
-  }
-
-  if (other instanceof Sk.builtin.NumberPy)
-  {
-    if (this.v == Infinity && other.v == Infinity) return 0;
-    if (this.v == -Infinity && other.v == -Infinity) return 0;
-    return this.v - other.v;
-  }
-
-  if (other instanceof Sk.builtin.lng)
-  {
-    if (this.skType === Sk.builtin.NumberPy.int$ || this.v % 1 == 0)
+    if (other instanceof Sk.builtin.bool)
     {
-      var thisAsLong = new Sk.builtin.lng(this.v);
-      var tmp = thisAsLong.longCompare(other);
-      return tmp;
+        other = Sk.builtin.asnum$(other);
     }
-    var diff = this.nb$sub(other);
-    if (diff instanceof Sk.builtin.NumberPy)
-    {
-      return diff.v;
-    }
-    else if (diff instanceof Sk.builtin.lng)
-    {
-      return diff.longCompare(Sk.builtin.biginteger.ZERO);
-    }
-  }
 
-  return undefined;
+    if (other === Sk.builtin.none.none$)
+    {
+        other = 0;
+    }
+
+    if (typeof other === "number")
+    {
+        return this.v - other;
+    }
+
+    if (other instanceof Sk.builtin.NumberPy)
+    {
+        if (this.v == Infinity && other.v == Infinity) return 0;
+        if (this.v == -Infinity && other.v == -Infinity) return 0;
+        return this.v - other.v;
+    }
+
+    if (other instanceof Sk.builtin.lng)
+    {
+        if (this.skType === Sk.builtin.NumberPy.int$ || this.v % 1 == 0)
+        {
+            var thisAsLong = new Sk.builtin.lng(this.v);
+            var tmp = thisAsLong.longCompare(other);
+            return tmp;
+        }
+        var diff = this.nb$sub(other);
+        if (diff instanceof Sk.builtin.NumberPy)
+        {
+            return diff.v;
+        }
+        else if (diff instanceof Sk.builtin.lng)
+        {
+            return diff.longCompare(Sk.builtin.biginteger.ZERO);
+        }
+    }
+
+    return undefined;
 }
 
 Sk.builtin.NumberPy.prototype.__eq__ = function(me, other)
 {
-  return (me.numberCompare(other) == 0) && !(other === Sk.builtin.none.none$);
+    return (me.numberCompare(other) == 0) && !(other === Sk.builtin.none.none$);
 };
 
 Sk.builtin.NumberPy.prototype.__ne__ = function(me, other) {
-  return (me.numberCompare(other) != 0) || (other === Sk.builtin.none.none$);
+    return (me.numberCompare(other) != 0) || (other === Sk.builtin.none.none$);
 };
 
 Sk.builtin.NumberPy.prototype.__lt__ = function(me, other) {
-  return me.numberCompare(other) < 0;
+    return me.numberCompare(other) < 0;
 };
 
 Sk.builtin.NumberPy.prototype.__le__ = function(me, other) {
-  return me.numberCompare(other) <= 0;
+    return me.numberCompare(other) <= 0;
 };
 
 Sk.builtin.NumberPy.prototype.__gt__ = function(me, other) {
-  return me.numberCompare(other) > 0;
+    return me.numberCompare(other) > 0;
 };
 
 Sk.builtin.NumberPy.prototype.__ge__ = function(me, other) {
-  return me.numberCompare(other) >= 0;
+    return me.numberCompare(other) >= 0;
 };
 
 Sk.builtin.NumberPy.prototype.tp$getattr = Sk.builtin.object.prototype.GenericGetAttr;
@@ -23330,19 +24042,19 @@ Sk.builtin.NumberPy.prototype.tp$str = function()
  */
 Sk.builtin.NumberPy.prototype.str$ = function(radix, sign)
 {
-  goog.asserts.assertNumber(radix);
-  goog.asserts.assertBoolean(sign);
+    goog.asserts.assertNumber(radix);
+    goog.asserts.assertBoolean(sign);
 
-  var numberJs = Sk.ffi.remapToJs(this);
+    var numberJs = Sk.ffi.remapToJs(this);
 
-  if (Sk.ffi.isFloat(this))
-  {
-    return Sk.builtin.numberToFloatStringJs(numberJs, radix, sign);
-  }
-  else
-  {
-    return Sk.builtin.numberToIntStringJs(numberJs, radix, sign);
-  }
+    if (Sk.ffi.isFloat(this))
+    {
+        return Sk.builtin.numberToFloatStringJs(numberJs, radix, sign);
+    }
+    else
+    {
+        return Sk.builtin.numberToIntStringJs(numberJs, radix, sign);
+    }
 };
 
 /**
@@ -23353,76 +24065,76 @@ Sk.builtin.NumberPy.prototype.str$ = function(radix, sign)
  */
 Sk.builtin.numberToFloatStringJs = function(numberJs, radix, sign)
 {
-  goog.asserts.assertNumber(radix);
-  goog.asserts.assertBoolean(sign);
+    goog.asserts.assertNumber(radix);
+    goog.asserts.assertBoolean(sign);
 
-  if (isNaN(numberJs)) return "nan";
-  if (numberJs == Infinity) return 'inf';
-  if (numberJs == -Infinity && sign) return '-inf';
-  if (numberJs == -Infinity && !sign) return 'inf';
+    if (isNaN(numberJs)) return "nan";
+    if (numberJs == Infinity) return 'inf';
+    if (numberJs == -Infinity && sign) return '-inf';
+    if (numberJs == -Infinity && !sign) return 'inf';
 
-  var work = sign ? numberJs : Math.abs(numberJs);
+    var work = sign ? numberJs : Math.abs(numberJs);
 
-  var tmp;
-  if (radix === 10)
-  {
-    tmp = work.toPrecision(12);
-
-    // transform fractions with 4 or more leading zeroes into exponents
-    var idx = tmp.indexOf('.');
-    if (idx >= 0)
+    var tmp;
+    if (radix === 10)
     {
-      var pre = work.toString().slice(0,idx);
-      var post = work.toString().slice(idx);
-      // The first RegEx mathes, at the beginning of the pre string (^), an optional
-      // minus sign (-?) followed by a zero (0) and then asserts the end of the string.
-      // The second RegEx matches, at the beginning of the post string (^), a zero (0)
-      // between 4 and unlimited times.
-      if (pre.match(/^-?0$/) && post.slice(1).match(/^0{4,}/))
-      {
-        if (tmp.length < 12)
+        tmp = work.toPrecision(12);
+
+        // transform fractions with 4 or more leading zeroes into exponents
+        var idx = tmp.indexOf('.');
+        if (idx >= 0)
         {
-          tmp = work.toExponential();
+            var pre = work.toString().slice(0,idx);
+            var post = work.toString().slice(idx);
+            // The first RegEx mathes, at the beginning of the pre string (^), an optional
+            // minus sign (-?) followed by a zero (0) and then asserts the end of the string.
+            // The second RegEx matches, at the beginning of the post string (^), a zero (0)
+            // between 4 and unlimited times.
+            if (pre.match(/^-?0$/) && post.slice(1).match(/^0{4,}/))
+            {
+                if (tmp.length < 12)
+                {
+                    tmp = work.toExponential();
+                }
+                else
+                {
+                    tmp = work.toExponential(11);
+                }
+            }
+            else
+            {
+                // If we're not in exponential format, cleanup trailing zeros.
+                while (tmp.charAt(tmp.length-1) === "0" && tmp.indexOf('e') < 0)
+                {
+                    tmp = tmp.substring(0, tmp.length-1)
+                }
+                if (tmp.charAt(tmp.length-1) == ".")
+                {
+                    tmp = tmp + "0";
+                }
+            }
         }
         else
         {
-          tmp = work.toExponential(11);
+            tmp = work.toExponential(11);
         }
-      }
-      else
-      {
-        // If we're not in exponential format, cleanup trailing zeros.
-        while (tmp.charAt(tmp.length-1) === "0" && tmp.indexOf('e') < 0)
-        {
-          tmp = tmp.substring(0, tmp.length-1)
-        }
-        if (tmp.charAt(tmp.length-1) == ".")
-        {
-          tmp = tmp + "0";
-        }
-      }
+
+        tmp = tmp.replace(new RegExp('\\.0+e'),'e',"i");
+        // make exponent two digits instead of one (ie e+09 not e+9)
+        tmp = tmp.replace(/(e[-+])([1-9])$/, "$10$2");
+        // remove trailing zeroes before the exponent
+        tmp = tmp.replace(/0+(e.*)/,'$1');
     }
     else
     {
-      tmp = work.toExponential(11);
+        tmp = work.toString(radix);
     }
 
-    tmp = tmp.replace(new RegExp('\\.0+e'),'e',"i");
-    // make exponent two digits instead of one (ie e+09 not e+9)
-    tmp = tmp.replace(/(e[-+])([1-9])$/, "$10$2");
-    // remove trailing zeroes before the exponent
-    tmp = tmp.replace(/0+(e.*)/,'$1');
-  }
-  else
-  {
-    tmp = work.toString(radix);
-  }
-
-  if (tmp.indexOf('.') < 0 && tmp.indexOf('E') < 0 && tmp.indexOf('e') < 0)
-  {
-    tmp = tmp + '.0';
-  }
-  return tmp;
+    if (tmp.indexOf('.') < 0 && tmp.indexOf('E') < 0 && tmp.indexOf('e') < 0)
+    {
+        tmp = tmp + '.0';
+    }
+    return tmp;
 };
 goog.exportSymbol("Sk.builtin.numberToFloatStringJs", Sk.builtin.numberToFloatStringJs);
 
@@ -23434,19 +24146,19 @@ goog.exportSymbol("Sk.builtin.numberToFloatStringJs", Sk.builtin.numberToFloatSt
  */
 Sk.builtin.numberToIntStringJs = function(numberJs, radix, sign)
 {
-  goog.asserts.assertNumber(radix);
-  goog.asserts.assertBoolean(sign);
+    goog.asserts.assertNumber(radix);
+    goog.asserts.assertBoolean(sign);
 
-  if (isNaN(numberJs)) return "nan";
-  if (numberJs ===  Infinity) return 'inf';
-  if (numberJs === -Infinity)
-  {
-    return sign ? "-inf" : "inf";
-  }
-  else
-  {
-    return (sign ? numberJs : Math.abs(numberJs)).toString(radix);
-  }
+    if (isNaN(numberJs)) return "nan";
+    if (numberJs ===  Infinity) return 'inf';
+    if (numberJs === -Infinity)
+    {
+        return sign ? "-inf" : "inf";
+    }
+    else
+    {
+        return (sign ? numberJs : Math.abs(numberJs)).toString(radix);
+    }
 };
 goog.exportSymbol("Sk.builtin.numberToIntStringJs", Sk.builtin.numberToIntStringJs);
 
@@ -24300,8 +25012,8 @@ Sk.builtin.float_.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('float', S
  */
 Sk.builtin.complex = function(xPy, yPy)
 {
-  Sk.ffi.checkFunctionArgs("complex(x,y)", arguments, 2, 2);
-  return new Sk.builtin.ComplexPy(xPy, yPy);
+    Sk.ffi.checkFunctionArgs("complex(x,y)", arguments, 2, 2);
+    return new Sk.builtin.ComplexPy(xPy, yPy);
 };
 
 /**
@@ -24309,8 +25021,8 @@ Sk.builtin.complex = function(xPy, yPy)
  */
 Sk.builtin.ComplexPy = function(xPy, yPy)
 {
-  this.xPy = xPy;
-  this.yPy = yPy;
+    this.xPy = xPy;
+    this.yPy = yPy;
 }
 
 Sk.builtin.ComplexPy.prototype.tp$name = "complex";
@@ -24318,139 +25030,135 @@ Sk.builtin.ComplexPy.prototype.ob$type = Sk.builtin.type.makeIntoTypeObj('comple
 
 Sk.builtin.ComplexPy.prototype.tp$getattr = function(name)
 {
-  goog.asserts.assertString(name);
+    goog.asserts.assertString(name);
 
-  var xPy = this.xPy;
-  var yPy = this.yPy;
+    var xPy = this.xPy;
+    var yPy = this.yPy;
 
-  switch(name)
-  {
-    case "real":
+    switch(name)
     {
-      return this.xPy;
+        case "real":
+        {
+            return this.xPy;
+        }
+        case "imag":
+        {
+            return this.yPy;
+        }
+        case "conjugate":
+        {
+            return new Sk.builtin.func(function(methodPy) {
+                Sk.ffi.checkMethodArgs("conjugate()", arguments, 0, 0);
+                return new Sk.builtin.ComplexPy(xPy, Sk.ffh.negative(yPy));
+            });
+        }
+        default:
+        {
+            return undefined;
+        }
     }
-    case "imag":
-    {
-      return this.yPy;
-    }
-    case "conjugate":
-    {
-      return new Sk.builtin.func(function(methodPy) {
-          Sk.ffi.checkMethodArgs("conjugate()", arguments, 0, 0);
-          return new Sk.builtin.ComplexPy(xPy, Sk.ffh.negative(yPy));
-      });
-    }
-    default:
-    {
-      return undefined;
-    }
-  }
 }
 
 Sk.builtin.ComplexPy.prototype.tp$str = function()
 {
-  if (Sk.ffh.nonzero(this.xPy))
-  {
-    if (Sk.ffh.nonzero(this.yPy))
+    if (Sk.ffh.nonzero(this.xPy))
     {
-      var x = Sk.builtin.stringToJs(Sk.ffh.str(this.xPy));
-      var y = Sk.builtin.stringToJs(Sk.ffh.str(this.yPy));
-      return Sk.builtin.stringToPy("(" + x + "+" + y + "j)");
+        if (Sk.ffh.nonzero(this.yPy))
+        {
+            var x = Sk.builtin.stringToJs(Sk.ffh.str(this.xPy));
+            var y = Sk.builtin.stringToJs(Sk.ffh.str(this.yPy));
+            return Sk.builtin.stringToPy("(" + x + "+" + y + "j)");
+        }
+        else
+        {
+        }
     }
     else
     {
-      
+        if (Sk.ffh.nonzero(this.yPy))
+        {
+        }
+        else
+        {
+        }
     }
-  }
-  else
-  {
-    if (Sk.ffh.nonzero(this.yPy))
-    {
-
-    }
-    else
-    {
-      
-    }
-  }
-  var x = Sk.builtin.stringToJs(Sk.ffh.str(this.xPy));
-  var y = Sk.builtin.stringToJs(Sk.ffh.str(this.yPy));
-  return Sk.builtin.stringToPy("Hello, I'm very complex!");
+    var x = Sk.builtin.stringToJs(Sk.ffh.str(this.xPy));
+    var y = Sk.builtin.stringToJs(Sk.ffh.str(this.yPy));
+    return Sk.builtin.stringToPy("Hello, I'm very complex!");
 };
 
 Sk.builtin.ComplexPy.prototype.nb$add = function(otherPy)
 {
-  if (otherPy instanceof Sk.builtin.ComplexPy)
-  {
-    var a = this.xPy;
-    var b = this.yPy;
-    var c = otherPy.xPy;
-    var d = otherPy.yPy
-    var xPy = Sk.ffh.add(a, c);
-    var yPy = Sk.ffh.add(b, d);
-    return Sk.builtin.complex(xPy, yPy);
-  }
-  else
-  {
-    return undefined;
-  }
+    if (otherPy instanceof Sk.builtin.ComplexPy)
+    {
+        var a = this.xPy;
+        var b = this.yPy;
+        var c = otherPy.xPy;
+        var d = otherPy.yPy
+        var xPy = Sk.ffh.add(a, c);
+        var yPy = Sk.ffh.add(b, d);
+        return Sk.builtin.complex(xPy, yPy);
+    }
+    else
+    {
+        return undefined;
+    }
 };
 
 Sk.builtin.ComplexPy.prototype.nb$sub = function(otherPy)
 {
-  if (otherPy instanceof Sk.builtin.ComplexPy)
-  {
-    var a = this.xPy;
-    var b = this.yPy;
-    var c = otherPy.xPy;
-    var d = otherPy.yPy
-    var xPy = Sk.ffh.sub(a, c);
-    var yPy = Sk.ffh.sub(b, d);
-    return Sk.builtin.complex(xPy, yPy);
-  }
-  else
-  {
-    return undefined;
-  }
+    if (otherPy instanceof Sk.builtin.ComplexPy)
+    {
+        var a = this.xPy;
+        var b = this.yPy;
+        var c = otherPy.xPy;
+        var d = otherPy.yPy
+        var xPy = Sk.ffh.sub(a, c);
+        var yPy = Sk.ffh.sub(b, d);
+        return Sk.builtin.complex(xPy, yPy);
+    }
+    else
+    {
+        return undefined;
+    }
 };
 
 Sk.builtin.ComplexPy.prototype.nb$mul = function(otherPy)
 {
-  if (otherPy instanceof Sk.builtin.ComplexPy)
-  {
-    var a = this.xPy;
-    var b = this.yPy;
-    var c = otherPy.xPy;
-    var d = otherPy.yPy
-    var xPy = Sk.ffh.sub(Sk.ffh.mul(a, c), Sk.ffh.mul(b, d));
-    var yPy = Sk.ffh.add(Sk.ffh.mul(b, c), Sk.ffh.mul(a, d));
-    return Sk.builtin.complex(xPy, yPy);
-  }
-  else
-  {
-    return undefined;
-  }
+    if (otherPy instanceof Sk.builtin.ComplexPy)
+    {
+        var a = this.xPy;
+        var b = this.yPy;
+        var c = otherPy.xPy;
+        var d = otherPy.yPy
+        var xPy = Sk.ffh.sub(Sk.ffh.mul(a, c), Sk.ffh.mul(b, d));
+        var yPy = Sk.ffh.add(Sk.ffh.mul(b, c), Sk.ffh.mul(a, d));
+        return Sk.builtin.complex(xPy, yPy);
+    }
+    else
+    {
+        return undefined;
+    }
 };
 
 Sk.builtin.ComplexPy.prototype.nb$div = function(otherPy)
 {
-  if (otherPy instanceof Sk.builtin.ComplexPy)
-  {
-    var a = this.xPy;
-    var b = this.yPy;
-    var c = otherPy.xPy;
-    var d = otherPy.yPy
-    var e = Sk.ffh.add(Sk.ffh.mul(c, c), Sk.ffh.mul(d, d));
-    var xPy = Sk.ffh.div(Sk.ffh.add(Sk.ffh.mul(a, c), Sk.ffh.mul(b, d)), e);
-    var yPy = Sk.ffh.div(Sk.ffh.sub(Sk.ffh.mul(b, c), Sk.ffh.mul(a, d)), e);
-    return Sk.builtin.complex(xPy, yPy);
-  }
-  else
-  {
-    return undefined;
-  }
+    if (otherPy instanceof Sk.builtin.ComplexPy)
+    {
+        var a = this.xPy;
+        var b = this.yPy;
+        var c = otherPy.xPy;
+        var d = otherPy.yPy
+        var e = Sk.ffh.add(Sk.ffh.mul(c, c), Sk.ffh.mul(d, d));
+        var xPy = Sk.ffh.div(Sk.ffh.add(Sk.ffh.mul(a, c), Sk.ffh.mul(b, d)), e);
+        var yPy = Sk.ffh.div(Sk.ffh.sub(Sk.ffh.mul(b, c), Sk.ffh.mul(a, d)), e);
+        return Sk.builtin.complex(xPy, yPy);
+    }
+    else
+    {
+        return undefined;
+    }
 };
-
 /**
  * @constructor
  * @param {null|number} start
@@ -24963,21 +25671,20 @@ Sk.builtin.generator.prototype['send'] = new Sk.builtin.func(function(self, valu
  */
 Sk.builtin.makeGenerator = function(next, data)
 {
-  var gen = new Sk.builtin.generator(null,null,null);
-  gen.tp$iternext = next;
+    var gen = new Sk.builtin.generator(null,null,null);
+    gen.tp$iternext = next;
 
-  for (var key in data)
-  {
-    if (data.hasOwnProperty(key))
+    for (var key in data)
     {
-      gen[key] = data[key];
+        if (data.hasOwnProperty(key))
+        {
+            gen[key] = data[key];
+        }
     }
-  }
 
-  return gen;
+    return gen;
 };
 goog.exportSymbol("Sk.builtin.makeGenerator", Sk.builtin.makeGenerator);
-
 /**
  * @constructor
  * @param {Sk.builtin.StringPy} name
@@ -24993,15 +25700,17 @@ Sk.builtin.file = function(name, mode, buffering)
         var elem = document.getElementById(name.v);
         if ( elem == null) {
             throw new Sk.builtin.IOError("[Errno 2] No such file or directory: '"+name.v+"'");
-        } else {
-           if( elem.nodeName.toLowerCase() == "textarea") {
-               this.data$ = elem.value;
-           }
-           else {
-               this.data$ = elem.textContent;
-           }
         }
-    } else {
+        else {
+            if( elem.nodeName.toLowerCase() == "textarea") {
+                this.data$ = elem.value;
+            }
+            else {
+                this.data$ = elem.textContent;
+            }
+        }
+    }
+    else {
         this.data$ = Sk.read(name.v);
     }
     this.lineList = this.data$.split("\n");
@@ -25138,7 +25847,7 @@ goog.exportSymbol('Sk.ffi.AssertionError', Sk.ffi.AssertionError);
  * @return {Sk.ffi.AssertionError} The AssertionError.
  */
 Sk.ffi.assertionError = function(message) {
-  return new Sk.builtin.AssertionError(message);
+    return new Sk.builtin.AssertionError(message);
 };
 goog.exportSymbol('Sk.ffi.assertionError', Sk.ffi.assertionError);
 
@@ -25157,7 +25866,7 @@ goog.exportSymbol('Sk.ffi.AttributeError', Sk.ffi.AttributeError);
  * @return {Sk.ffi.AttributeError}
  */
 Sk.ffi.attributeError = function(message) {
-  return new Sk.builtin.AttributeError(message);
+    return new Sk.builtin.AttributeError(message);
 };
 goog.exportSymbol('Sk.ffi.attributeError', Sk.ffi.attributeError);
 
@@ -25176,7 +25885,7 @@ goog.exportSymbol('Sk.ffi.NotImplementedError', Sk.ffi.NotImplementedError);
  * @return {Sk.ffi.NotImplementedError} The NotImplementedError.
  */
 Sk.ffi.notImplementedError = function(message) {
-  return new Sk.builtin.NotImplementedError(message);
+    return new Sk.builtin.NotImplementedError(message);
 };
 goog.exportSymbol('Sk.ffi.notImplementedError', Sk.ffi.notImplementedError);
 
@@ -25194,7 +25903,7 @@ goog.exportSymbol('Sk.ffi.TypeError', Sk.ffi.TypeError);
  * @return {Sk.ffi.TypeError} The TypeError.
  */
 Sk.ffi.typeError = function(message) {
-  return new Sk.builtin.TypeError(message);
+    return new Sk.builtin.TypeError(message);
 };
 goog.exportSymbol('Sk.ffi.typeError', Sk.ffi.typeError);
 
@@ -25207,25 +25916,25 @@ goog.exportSymbol('Sk.ffi.typeError', Sk.ffi.typeError);
  */
 Sk.ffi.type = function(valuePy) {
 
-  if (Sk.flyweight)
-  {
-    if (typeof valuePy === Sk.builtin.JsType.NUMBER)
+    if (Sk.flyweight)
     {
-      return Sk.builtin.float_.prototype.ob$type;
+        if (typeof valuePy === Sk.builtin.JsType.NUMBER)
+        {
+            return Sk.builtin.float_.prototype.ob$type;
+        }
     }
-  }
-  if (valuePy.constructor === Sk.builtin.NumberPy)
-  {
-    if (valuePy.skType === Sk.builtin.NumberPy.int$)
+    if (valuePy.constructor === Sk.builtin.NumberPy)
     {
-      return Sk.builtin.int_.prototype.ob$type;
+        if (valuePy.skType === Sk.builtin.NumberPy.int$)
+        {
+            return Sk.builtin.int_.prototype.ob$type;
+        }
+        else
+        {
+            return Sk.builtin.float_.prototype.ob$type;
+        }
     }
-    else
-    {
-      return Sk.builtin.float_.prototype.ob$type;
-    }
-  }
-  return valuePy.ob$type;
+    return valuePy.ob$type;
 };
 goog.exportSymbol('Sk.ffi.type', Sk.ffi.type);
 
@@ -27419,12 +28128,13 @@ Sk.builtin.enumerate = function(iterable, start)
     if (start !== undefined) {
         if (!Sk.misceval.isIndex(start)) {
             throw new Sk.builtin.TypeError("'" + Sk.ffi.typeName(start) + "' object cannot be interpreted as an index");
-        } else {
-	    start = Sk.misceval.asIndex(start);
-	}
+        }
+        else {
+            start = Sk.misceval.asIndex(start);
+        }
     }
     else {
-	start = 0;
+        start = 0;
     }
 
     var it = iterable.tp$iter();
@@ -27451,12 +28161,12 @@ Sk.builtin.enumerate.prototype.tp$getattr = Sk.builtin.object.prototype.GenericG
 Sk.builtin.enumerate.prototype['__iter__'] = new Sk.builtin.func(function(self)
 {
     return self.tp$iter();
-});								 
+});
 
 Sk.builtin.enumerate.prototype['next'] = new Sk.builtin.func(function(self)
 {
     return self.tp$iternext();
-});								 
+});
 // this is stored into sys specially, rather than created by sys
 Sk.sysmodules = new Sk.builtin.dict([]);
 Sk.realsyspath = undefined;
