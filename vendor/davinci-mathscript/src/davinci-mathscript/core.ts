@@ -23,7 +23,7 @@
 */
 
 var core = {
-    VERSION: '0.9.7'
+    VERSION: '0.9.9'
 };
 
 export = core;
