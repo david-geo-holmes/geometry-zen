@@ -5328,6 +5328,24 @@ declare module THREE {
     }
 
     // Extras / Geomerties /////////////////////////////////////////////////////////////////////
+
+    /**
+     * ArrowGeometry is a cone mounted on a cylinder. It is typically used for representing vectors.
+     */
+    export class ArrowGeometry extends Geometry {
+        /**
+         * @param scale
+         * @param attitude
+         * @param segments
+         * @param length
+         * @param radiusShaft
+         * @param radiusCone
+         * @param lengthCone
+         * @param axis
+         */
+        constructor(scale?: number, attitude?: THREE.Quaternion, segments?: number, length?: number, radiusShaft?: number, radiusCone?: number, lengthCone?: number, axis?: THREE.Vector3);
+    }
+
     /**
      * BoxGeometry is the quadrilateral primitive geometry class. It is typically used for creating a cube or irregular quadrilateral of the dimensions provided within the (optional) 'width', 'height', & 'depth' constructor arguments.
      */
@@ -5590,6 +5608,22 @@ declare module THREE {
         static SinusoidalTaper(u: number): number;
         static FrenetFrames(path: Path, segments: number, closed: boolean): void;
         
+    }
+
+    /**
+     * VortexGeometry is a torus with arrows. It is typically used for representing bivectors.
+     */
+    export class VortexGeometry extends Geometry {
+        /**
+         * @param radius
+         * @param radiusCone
+         * @param radiusShaft
+         * @param lengthCone
+         * @param lengthShaft
+         * @param arrowSegments
+         * @param radialSegments
+         */
+        constructor(radius?: number, radiusCone?: number, radiusShaft?: number, lengthCone?: number, lengthShaft?: number, arrowSegments?: number, radialSegments?: number);
     }
 
     // Extras / Helpers /////////////////////////////////////////////////////////////////////
