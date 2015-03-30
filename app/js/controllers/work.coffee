@@ -181,7 +181,7 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
             throw new Error("File not found: '#{searchPath}'")
           else
             return Sk.builtinFiles["files"][searchPath]
-      dumpJS = true
+      dumpJS = false
 
       if isTypeScript($scope.contextItem.path)
         if $scope.outputFile

@@ -37779,6 +37779,11 @@ var METHOD_ADD                 = "add";
  * @const
  * @type {string}
  */
+var METHOD_APPLY_EULER         = "applyEuler";
+/**
+ * @const
+ * @type {string}
+ */
 var METHOD_APPLY_MATRIX_3      = "applyMatrix3";
 /**
  * @const
@@ -39154,6 +39159,14 @@ mod[Sk.e3ga.EUCLIDEAN_3] = Sk.ffi.buildClass(mod, function($gbl, $loc)
           quaternion.y += other.quaternion.y;
           quaternion.z += other.quaternion.z;
           self.xyz += other.xyz;
+          return selfPy;
+        });
+      }
+      case METHOD_APPLY_EULER: {
+        return Sk.ffi.callableToPy(mod, name, function(methodPy, mPy) {
+          Sk.ffi.checkMethodArgs(name, arguments, 1, 1);
+          Sk.ffi.checkArgType("m", Sk.three.MATRIX_3, Sk.ffi.isInstance(mPy, Sk.three.MATRIX_3), mPy);
+          vector[name](Sk.ffi.remapToJs(mPy));
           return selfPy;
         });
       }
@@ -42895,6 +42908,11 @@ var VECTOR_3                   = "Vector3";
  * @const
  * @type {string}
  */
+var EULER                      = "Euler";
+/**
+ * @const
+ * @type {string}
+ */
 var QUATERNION                 = "Quaternion";
 /**
  * @const
@@ -43567,6 +43585,11 @@ var PROP_ZX                    = "zx";
  * @type {string}
  */
 var PROP_XYZ                   = "xyz";
+/**
+ * @const
+ * @type {string}
+ */
+var PROP_ORDER                 = "order";
 /**
  * @const
  * @type {string}
@@ -44714,7 +44737,8 @@ function remapToVector3(name, euclidean3Py) {
     Sk.ffi.checkArgType(name, EUCLIDEAN_3, isEuclidean3Py(euclidean3Py), euclidean3Py);
     var vectorPy = Sk.ffi.gattr(euclidean3Py, PROP_VECTOR);
     Sk.ffi.checkArgType(name, VECTOR_3, isVector3Py(vectorPy), vectorPy);
-    return Sk.ffi.remapToJs(vectorPy);
+    var vectorJs = Sk.ffi.remapToJs(vectorPy);
+    return vectorJs;
   }
   else {
     return undefined;
@@ -44728,7 +44752,9 @@ function remapToVector3(name, euclidean3Py) {
  */
 function setVectorProperty(obj, name, valuePy, aliasName) {
   aliasName = aliasName || name;
-  obj[name] = remapToVector3(aliasName, valuePy);
+  var vectorJs = remapToVector3(aliasName, valuePy);
+  // The property is not writable so we must set the components instead.
+  obj[name].set(vectorJs.x, vectorJs.y, vectorJs.z);
 }
 
 function methodAdd(target) {
@@ -44951,13 +44977,18 @@ mod[SCENE] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var value = Sk.ffi.remapToJs(valuePy);
     switch(name) {
       case PROP_POSITION:
-      case PROP_ROTATION:
       case PROP_SCALE:
       case PROP_UP: {
         setVectorProperty(scene, name, valuePy);
       }
       break;
+      case PROP_ROTATION: {
+        // FIXME: 'rotation' is now a THREE.Euler.
+        setVectorProperty(scene, name, valuePy);
+      }
+      break;
       case PROP_QUATERNION: {
+        // FIXME: This may not work if 'quaternion' is no longer writeable.
         scene[PROP_QUATERNION] = value;
       }
       break;
@@ -45616,13 +45647,18 @@ mod[PERSPECTIVE_CAMERA] = Sk.ffi.buildClass(mod, function($gbl, $loc)
       }
       break;
       case PROP_POSITION:
-      case PROP_ROTATION:
       case PROP_SCALE:
       case PROP_UP: {
         setVectorProperty(camera, name, valuePy);
       }
       break;
+      case PROP_ROTATION: {
+        // FIXME: 'rotation' is now THREE.Euler.
+        setVectorProperty(camera, name, valuePy);
+      }
+      break;
       case PROP_QUATERNION: {
+        // FIXME: May no longer work if 'quaternion' is not writeable.
         camera[PROP_QUATERNION] = value;
       }
       break;
@@ -45764,10 +45800,12 @@ mod[ORTHOGRAPHIC_CAMERA] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
       case PROP_ROTATION:
       case PROP_SCALE:
       case PROP_UP: {
+        // FIXME: rotation
         setVectorProperty(camera, name, valuePy);
       }
       break;
       case PROP_QUATERNION: {
+        // FIXME
         camera[PROP_QUATERNION] = value;
       }
       break;
@@ -46877,12 +46915,14 @@ Sk.three.object3DSetAttr = function(className, selfPy, name, valuePy) {
     case PROP_SCALE:
     case PROP_UP:
     {
+      // FIXME: 'rotation'
       setVectorProperty(self, name, valuePy);
     }
     break;
     case PROP_QUATERNION:
     {
       Sk.ffi.checkArgType(name, QUATERNION, Sk.ffi.isInstance(valuePy, QUATERNION), valuePy);
+      // FIXME: 'quaternion'
       self[name] = Sk.ffi.remapToJs(valuePy);
     }
     break;
@@ -47364,11 +47404,13 @@ Sk.three.meshSetAttr = function(className, meshPy, name, valuePy) {
     case PROP_SCALE:
     case PROP_UP:
     {
+      // FIXME: rotation
       setVectorProperty(mesh, name, valuePy);
     }
     break;
     case PROP_QUATERNION:
     {
+      // FIXME
       mesh[PROP_QUATERNION] = value;
     }
     break;
@@ -47416,6 +47458,9 @@ mod[Sk.three.MESH] = Sk.ffi.buildClass(mod, function($gbl, $loc) {
     var args = {};
     args[PROP_ID] = mesh[PROP_ID];
     args[PROP_NAME] = mesh[PROP_NAME];
+    args[PROP_POSITION] = mesh[PROP_POSITION];
+    args[PROP_ROTATION] = mesh[PROP_ROTATION];
+    args[PROP_SCALE] = mesh[PROP_SCALE];
     return Sk.builtin.stringToPy(Sk.three.MESH + "(" + JSON.stringify(args) + ")");
   });
   $loc.__repr__ = Sk.ffi.functionPy(function(mesh) {
@@ -47877,6 +47922,100 @@ mod[Sk.three.PARTICLE_SYSTEM_MATERIAL] = Sk.ffi.buildClass(mod, function($gbl, $
     return Sk.builtin.stringToPy(Sk.three.PARTICLE_SYSTEM_MATERIAL + LPAREN + args.join(COMMA + SPACE) + RPAREN);
   });
 }, Sk.three.PARTICLE_SYSTEM_MATERIAL, []);
+
+/**
+ * Euler
+ */
+mod[EULER] = Sk.ffi.buildClass(mod, function($gbl, $loc)
+{
+  $loc.__init__ = Sk.ffi.functionPy(function(selfPy, xPy, yPy, zPy, orderPy)
+  {
+    Sk.ffi.checkMethodArgs(EULER, arguments, 1, 4);
+    if (Sk.ffi.isInstance(xPy, EULER))
+    {
+      Sk.ffi.referenceToPy(Sk.ffi.remapToJs(xPy), EULER, undefined, selfPy);
+    }
+    else
+    {
+      Sk.ffi.checkMethodArgs(EULER, arguments, 4, 4);
+      var x = Sk.ffi.remapToJs(xPy);
+      var y = Sk.ffi.remapToJs(yPy);
+      var z = Sk.ffi.remapToJs(zPy);
+      var order = Sk.ffi.remapToJs(orderPy);
+      Sk.ffi.referenceToPy(new THREE[EULER](x, y, z, order), EULER, undefined, selfPy);
+    }
+  });
+
+  $loc.__getattr__ = Sk.ffi.functionPy(function(selfPy, name)
+  {
+    var euler = Sk.ffi.remapToJs(selfPy);
+    switch(name)
+    {
+      case PROP_X:
+      case PROP_Y:
+      case PROP_Z:
+      {
+        return Sk.ffi.numberToFloatPy(euler[name]);
+      }
+      case PROP_ORDER: {
+        return Sk.builtin.stringToPy(euler[PROP_ORDER]);
+      }
+      case METHOD_SET: {
+        return Sk.ffi.callsim(Sk.ffi.buildClass(mod, function($gbl, $loc) {
+          $loc.__init__ = Sk.ffi.functionPy(function(methodPy) {
+            methodPy.tp$name = METHOD_SET;
+          });
+          $loc.__call__ = Sk.ffi.functionPy(function(methodPy, xPy, yPy, zPy, orderPy) {
+            var x  = Sk.ffi.remapToJs(xPy);
+            var y  = Sk.ffi.remapToJs(yPy);
+            var z  = Sk.ffi.remapToJs(zPy);
+            var order = Sk.ffi.remapToJs(orderPy);
+            euler[METHOD_SET](x, y, z, order);
+            return selfPy;
+          });
+          $loc.__str__ = Sk.ffi.functionPy(function(methodPy) {
+            return Sk.builtin.stringToPy(METHOD_SET);
+          });
+          $loc.__repr__ = Sk.ffi.functionPy(function(methodPy) {
+            return Sk.builtin.stringToPy(METHOD_SET);
+          });
+        }, METHOD_SET, []));
+      }
+      default:
+      {
+        throw Sk.ffi.err.attribute(name).isNotGetableOnType(EULER);
+      }
+    }
+  });
+  $loc.__setattr__ = Sk.ffi.functionPy(function(selfPy, name, valuePy)
+  {
+    var self = Sk.ffi.remapToJs(selfPy);
+    var value = Sk.ffi.remapToJs(valuePy);
+    switch(name)
+    {
+      default:
+      {
+        throw Sk.ffi.err.attribute(name).isNotSetableOnType(EULER);
+      }
+    }
+  });
+  $loc.__str__ = Sk.ffi.functionPy(function(selfPy)
+  {
+    var self = Sk.ffi.remapToJs(selfPy);
+    var names  = [PROP_X, PROP_Y, PROP_Z, PROP_ORDER];
+    var argsPy = names.map(function(name) {return Sk.ffi.gattr(selfPy, name);});
+    var args = argsPy.map(function(valuePy) {return Sk.ffi.remapToJs(Sk.ffh.str(valuePy));});
+    return Sk.builtin.stringToPy(EULER + LPAREN + args.join(COMMA + SPACE) + RPAREN);
+  });
+  $loc.__repr__ = Sk.ffi.functionPy(function(selfPy) {
+    var self = Sk.ffi.remapToJs(selfPy);
+    var names  = [PROP_X, PROP_Y, PROP_Z, PROP_ORDER];
+    var argsPy = names.map(function(name) {return Sk.ffi.gattr(selfPy, name);});
+    var args = argsPy.map(function(valuePy) {return Sk.ffi.remapToJs(Sk.ffh.repr(valuePy));});
+    return Sk.builtin.stringToPy(EULER + LPAREN + args.join(COMMA + SPACE) + RPAREN);
+  });
+}, EULER, []);
+
 /**
  * Matrix3
  */
@@ -48716,7 +48855,17 @@ var INT                        = Sk.ffi.PyType.INT;
  * @const
  * @type {string}
  */
+var EULER                      = "Euler";
+/**
+ * @const
+ * @type {string}
+ */
 var QUATERNION                 = "Quaternion";
+/**
+ * @const
+ * @type {string}
+ */
+var METHOD_APPLY_EULER         = "applyEuler";
 /**
  * @const
  * @type {string}
@@ -48795,6 +48944,11 @@ var OP_EQ                      = "equal";
 
 Sk.builtin.defineVector3 = function(mod, THREE) {
   Sk.ffi.checkFunctionArgs("defineVector3", arguments, 2, 2);
+  /**
+   * @param {Object} valuePy
+   * @return {boolean} true if the thing is an Euler rotation, otherwise false.
+   */
+  var isEulerPy = function(valuePy) {return Sk.ffi.isInstance(valuePy, EULER);};
   /**
    * @param {Object} valuePy
    * @return {boolean} true if the thing is a quaternion, otherwise false.
@@ -48931,7 +49085,17 @@ Sk.builtin.defineVector3 = function(mod, THREE) {
         case PROP_Z: {
           return Sk.ffi.numberToFloatPy(vector[name]);
         }
-        case METHOD_APPLY_QUATERNION: {
+        case METHOD_APPLY_EULER:
+        {
+          return Sk.ffi.callableToPy(mod, METHOD_APPLY_EULER, function(methodPy, eulerPy) {
+            Sk.ffi.checkMethodArgs(METHOD_APPLY_EULER, arguments, 1, 1);
+            Sk.ffi.checkArgType("euler", EULER, isEulerPy(eulerPy), eulerPy);
+            vector[METHOD_APPLY_EULER](Sk.ffi.remapToJs(eulerPy));
+            return vectorPy;
+          });
+        }
+        case METHOD_APPLY_QUATERNION:
+        {
           return Sk.ffi.callableToPy(mod, METHOD_APPLY_QUATERNION, function(methodPy, qPy) {
             Sk.ffi.checkMethodArgs(METHOD_APPLY_QUATERNION, arguments, 1, 1);
             Sk.ffi.checkArgType("q", QUATERNION, isQuaternionPy(qPy), qPy);

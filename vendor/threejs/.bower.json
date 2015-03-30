@@ -16,18 +16,20 @@
     "*.md",
     "docs",
     "editor",
-    "examples",
+    "examples/*",
+    "!examples/js",
     "src",
     "test",
     "utils",
     "LICENSE"
   ],
-  "_release": "74e7d09c26",
+  "_release": "f73593b00e",
   "_resolution": {
-    "type": "commit",
-    "commit": "74e7d09c26"
+    "type": "branch",
+    "branch": "master",
+    "commit": "f73593b00e3b2c927bb1a3236240cea5597166ec"
   },
   "_source": "git://github.com/mrdoob/three.js.git",
-  "_target": "74e7d09c26",
+  "_target": "*",
   "_originalSource": "threejs"
 }

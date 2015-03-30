@@ -62,6 +62,6 @@
     "commit": "80e1f83fcd64ec69b1afbe4170733f524d92c74b"
   },
   "_source": "git://github.com/geometryzen/davinci-blade.git",
-  "_target": "~0.9.24",
+  "_target": "^0.9.25",
   "_originalSource": "davinci-blade"
 }
