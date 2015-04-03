@@ -25,8 +25,6 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
       "vendor/jquery-ui/ui/jquery-ui.js",
       "vendor/jquery.layout/dist/jquery.layout-latest.js",
       "vendor/js-beautify/js/lib/beautify.js",
-//    "../davinci-dev/dist/davinci.min.js",
-//    "../davinci-dev/dist/davinci-stdlib.js",
       "vendor/davinci/davinci.min.js",
       "vendor/davinci/davinci-stdlib.js",
       "vendor/bootstrap/js/bootstrap-carousel.js",
@@ -73,6 +71,7 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
       "vendor/davinci-mathscript/dist/davinci-mathscript.min.js",
       "vendor/gl-matrix/dist/gl-matrix-min.js",
       "vendor/threejs/build/three.min.js",
+      "vendor/davinci-visual/dist/davinci-visual.min.js",
       "vendor/tweenjs/build/tween.min.js",
       "vendor/google-analytics/tracking-code.js",
       "vendor/stats.js/build/stats.min.js"
