@@ -33,6 +33,15 @@ declare module visual
       constructor(scale: number, color: number, opacity: number = 1.0, transparent: boolean = false) {}
     }
     function trackball(object: THREE.Object3D, wnd: Window): TrackBall {}
+    class Visual
+    {
+      constructor(wnd: Window) {};
+      setUp: () => void;
+      tearDown: () => void;
+      update: () => void;
+      scene: THREE.Scene;
+      stage: createjs.Stage;
+    }
 }
 declare module visual {
     var VERSION: string;

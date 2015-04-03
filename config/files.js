@@ -64,6 +64,7 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
       "vendor/EaselJS/lib/easeljs-0.8.0.min.js",
       "vendor/TweenJS/lib/tweenjs-0.6.0.min.js",
       "vendor/EaselJS/lib/movieclip-0.8.0.min.js",
+      "vendor/tweenjs/build/tween.min.js",
       "vendor/bladejs/dist/bladejs.min.js",
       "vendor/eightjs/dist/eight.min.js",
       "vendor/davinci-blade/dist/davinci-blade.min.js",
@@ -72,7 +73,6 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('files', {
       "vendor/gl-matrix/dist/gl-matrix-min.js",
       "vendor/threejs/build/three.min.js",
       "vendor/davinci-visual/dist/davinci-visual.min.js",
-      "vendor/tweenjs/build/tween.min.js",
       "vendor/google-analytics/tracking-code.js",
       "vendor/stats.js/build/stats.min.js"
     ],
