@@ -1,481 +1,12 @@
-(function(global, define)
-{
-  var createjs = global.createjs;
-  var THREE = global.THREE;
-
-/**
- * @license almond 0.3.1 Copyright (c) 2011-2014, The Dojo Foundation All Rights Reserved.
- * Available via the MIT or new BSD license.
- * see: http://github.com/jrburke/almond for details
- */
-//Going sloppy to avoid 'use strict' string cost, but strict practices should
-//be followed.
-/*jslint sloppy: true */
-/*global setTimeout: false */
-
-var requirejs, require, define;
-(function (undef) {
-    var main, req, makeMap, handlers,
-        defined = {},
-        waiting = {},
-        config = {},
-        defining = {},
-        hasOwn = Object.prototype.hasOwnProperty,
-        aps = [].slice,
-        jsSuffixRegExp = /\.js$/;
-
-    function hasProp(obj, prop) {
-        return hasOwn.call(obj, prop);
-    }
-
-    /**
-     * Given a relative module name, like ./something, normalize it to
-     * a real name that can be mapped to a path.
-     * @param {String} name the relative name
-     * @param {String} baseName a real name that the name arg is relative
-     * to.
-     * @returns {String} normalized name
-     */
-    function normalize(name, baseName) {
-        var nameParts, nameSegment, mapValue, foundMap, lastIndex,
-            foundI, foundStarMap, starI, i, j, part,
-            baseParts = baseName && baseName.split("/"),
-            map = config.map,
-            starMap = (map && map['*']) || {};
-
-        //Adjust any relative paths.
-        if (name && name.charAt(0) === ".") {
-            //If have a base name, try to normalize against it,
-            //otherwise, assume it is a top-level require that will
-            //be relative to baseUrl in the end.
-            if (baseName) {
-                name = name.split('/');
-                lastIndex = name.length - 1;
-
-                // Node .js allowance:
-                if (config.nodeIdCompat && jsSuffixRegExp.test(name[lastIndex])) {
-                    name[lastIndex] = name[lastIndex].replace(jsSuffixRegExp, '');
-                }
-
-                //Lop off the last part of baseParts, so that . matches the
-                //"directory" and not name of the baseName's module. For instance,
-                //baseName of "one/two/three", maps to "one/two/three.js", but we
-                //want the directory, "one/two" for this normalization.
-                name = baseParts.slice(0, baseParts.length - 1).concat(name);
-
-                //start trimDots
-                for (i = 0; i < name.length; i += 1) {
-                    part = name[i];
-                    if (part === ".") {
-                        name.splice(i, 1);
-                        i -= 1;
-                    } else if (part === "..") {
-                        if (i === 1 && (name[2] === '..' || name[0] === '..')) {
-                            //End of the line. Keep at least one non-dot
-                            //path segment at the front so it can be mapped
-                            //correctly to disk. Otherwise, there is likely
-                            //no path mapping for a path starting with '..'.
-                            //This can still fail, but catches the most reasonable
-                            //uses of ..
-                            break;
-                        } else if (i > 0) {
-                            name.splice(i - 1, 2);
-                            i -= 2;
-                        }
-                    }
-                }
-                //end trimDots
-
-                name = name.join("/");
-            } else if (name.indexOf('./') === 0) {
-                // No baseName, so this is ID is resolved relative
-                // to baseUrl, pull off the leading dot.
-                name = name.substring(2);
-            }
-        }
-
-        //Apply map config if available.
-        if ((baseParts || starMap) && map) {
-            nameParts = name.split('/');
-
-            for (i = nameParts.length; i > 0; i -= 1) {
-                nameSegment = nameParts.slice(0, i).join("/");
-
-                if (baseParts) {
-                    //Find the longest baseName segment match in the config.
-                    //So, do joins on the biggest to smallest lengths of baseParts.
-                    for (j = baseParts.length; j > 0; j -= 1) {
-                        mapValue = map[baseParts.slice(0, j).join('/')];
-
-                        //baseName segment has  config, find if it has one for
-                        //this name.
-                        if (mapValue) {
-                            mapValue = mapValue[nameSegment];
-                            if (mapValue) {
-                                //Match, update name to the new value.
-                                foundMap = mapValue;
-                                foundI = i;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if (foundMap) {
-                    break;
-                }
-
-                //Check for a star map match, but just hold on to it,
-                //if there is a shorter segment match later in a matching
-                //config, then favor over this star map.
-                if (!foundStarMap && starMap && starMap[nameSegment]) {
-                    foundStarMap = starMap[nameSegment];
-                    starI = i;
-                }
-            }
-
-            if (!foundMap && foundStarMap) {
-                foundMap = foundStarMap;
-                foundI = starI;
-            }
-
-            if (foundMap) {
-                nameParts.splice(0, foundI, foundMap);
-                name = nameParts.join('/');
-            }
-        }
-
-        return name;
-    }
-
-    function makeRequire(relName, forceSync) {
-        return function () {
-            //A version of a require function that passes a moduleName
-            //value for items that may need to
-            //look up paths relative to the moduleName
-            var args = aps.call(arguments, 0);
-
-            //If first arg is not require('string'), and there is only
-            //one arg, it is the array form without a callback. Insert
-            //a null so that the following concat is correct.
-            if (typeof args[0] !== 'string' && args.length === 1) {
-                args.push(null);
-            }
-            return req.apply(undef, args.concat([relName, forceSync]));
-        };
-    }
-
-    function makeNormalize(relName) {
-        return function (name) {
-            return normalize(name, relName);
-        };
-    }
-
-    function makeLoad(depName) {
-        return function (value) {
-            defined[depName] = value;
-        };
-    }
-
-    function callDep(name) {
-        if (hasProp(waiting, name)) {
-            var args = waiting[name];
-            delete waiting[name];
-            defining[name] = true;
-            main.apply(undef, args);
-        }
-
-        if (!hasProp(defined, name) && !hasProp(defining, name)) {
-            throw new Error('No ' + name);
-        }
-        return defined[name];
-    }
-
-    //Turns a plugin!resource to [plugin, resource]
-    //with the plugin being undefined if the name
-    //did not have a plugin prefix.
-    function splitPrefix(name) {
-        var prefix,
-            index = name ? name.indexOf('!') : -1;
-        if (index > -1) {
-            prefix = name.substring(0, index);
-            name = name.substring(index + 1, name.length);
-        }
-        return [prefix, name];
-    }
-
-    /**
-     * Makes a name map, normalizing the name, and using a plugin
-     * for normalization if necessary. Grabs a ref to plugin
-     * too, as an optimization.
-     */
-    makeMap = function (name, relName) {
-        var plugin,
-            parts = splitPrefix(name),
-            prefix = parts[0];
-
-        name = parts[1];
-
-        if (prefix) {
-            prefix = normalize(prefix, relName);
-            plugin = callDep(prefix);
-        }
-
-        //Normalize according
-        if (prefix) {
-            if (plugin && plugin.normalize) {
-                name = plugin.normalize(name, makeNormalize(relName));
-            } else {
-                name = normalize(name, relName);
-            }
-        } else {
-            name = normalize(name, relName);
-            parts = splitPrefix(name);
-            prefix = parts[0];
-            name = parts[1];
-            if (prefix) {
-                plugin = callDep(prefix);
-            }
-        }
-
-        //Using ridiculous property names for space reasons
-        return {
-            f: prefix ? prefix + '!' + name : name, //fullName
-            n: name,
-            pr: prefix,
-            p: plugin
-        };
-    };
-
-    function makeConfig(name) {
-        return function () {
-            return (config && config.config && config.config[name]) || {};
-        };
-    }
-
-    handlers = {
-        require: function (name) {
-            return makeRequire(name);
-        },
-        exports: function (name) {
-            var e = defined[name];
-            if (typeof e !== 'undefined') {
-                return e;
-            } else {
-                return (defined[name] = {});
-            }
-        },
-        module: function (name) {
-            return {
-                id: name,
-                uri: '',
-                exports: defined[name],
-                config: makeConfig(name)
-            };
-        }
-    };
-
-    main = function (name, deps, callback, relName) {
-        var cjsModule, depName, ret, map, i,
-            args = [],
-            callbackType = typeof callback,
-            usingExports;
-
-        //Use name if no relName
-        relName = relName || name;
-
-        //Call the callback to define the module, if necessary.
-        if (callbackType === 'undefined' || callbackType === 'function') {
-            //Pull out the defined dependencies and pass the ordered
-            //values to the callback.
-            //Default to [require, exports, module] if no deps
-            deps = !deps.length && callback.length ? ['require', 'exports', 'module'] : deps;
-            for (i = 0; i < deps.length; i += 1) {
-                map = makeMap(deps[i], relName);
-                depName = map.f;
-
-                //Fast path CommonJS standard dependencies.
-                if (depName === "require") {
-                    args[i] = handlers.require(name);
-                } else if (depName === "exports") {
-                    //CommonJS module spec 1.1
-                    args[i] = handlers.exports(name);
-                    usingExports = true;
-                } else if (depName === "module") {
-                    //CommonJS module spec 1.1
-                    cjsModule = args[i] = handlers.module(name);
-                } else if (hasProp(defined, depName) ||
-                           hasProp(waiting, depName) ||
-                           hasProp(defining, depName)) {
-                    args[i] = callDep(depName);
-                } else if (map.p) {
-                    map.p.load(map.n, makeRequire(relName, true), makeLoad(depName), {});
-                    args[i] = defined[depName];
-                } else {
-                    throw new Error(name + ' missing ' + depName);
-                }
-            }
-
-            ret = callback ? callback.apply(defined[name], args) : undefined;
-
-            if (name) {
-                //If setting exports via "module" is in play,
-                //favor that over return value and exports. After that,
-                //favor a non-undefined return value over exports use.
-                if (cjsModule && cjsModule.exports !== undef &&
-                        cjsModule.exports !== defined[name]) {
-                    defined[name] = cjsModule.exports;
-                } else if (ret !== undef || !usingExports) {
-                    //Use the return value from the function.
-                    defined[name] = ret;
-                }
-            }
-        } else if (name) {
-            //May just be an object definition for the module. Only
-            //worry about defining if have a module name.
-            defined[name] = callback;
-        }
-    };
-
-    requirejs = require = req = function (deps, callback, relName, forceSync, alt) {
-        if (typeof deps === "string") {
-            if (handlers[deps]) {
-                //callback in this case is really relName
-                return handlers[deps](callback);
-            }
-            //Just return the module wanted. In this scenario, the
-            //deps arg is the module name, and second arg (if passed)
-            //is just the relName.
-            //Normalize module name, if it contains . or ..
-            return callDep(makeMap(deps, callback).f);
-        } else if (!deps.splice) {
-            //deps is a config object, not an array.
-            config = deps;
-            if (config.deps) {
-                req(config.deps, config.callback);
-            }
-            if (!callback) {
-                return;
-            }
-
-            if (callback.splice) {
-                //callback is an array, which means it is a dependency list.
-                //Adjust args if there are dependencies
-                deps = callback;
-                callback = relName;
-                relName = null;
-            } else {
-                deps = undef;
-            }
-        }
-
-        //Support require(['a'])
-        callback = callback || function () {};
-
-        //If relName is a function, it is an errback handler,
-        //so remove it.
-        if (typeof relName === 'function') {
-            relName = forceSync;
-            forceSync = alt;
-        }
-
-        //Simulate async callback;
-        if (forceSync) {
-            main(undef, deps, callback, relName);
-        } else {
-            //Using a non-zero value because of concern for what old browsers
-            //do, and latest browsers "upgrade" to 4 if lower value is used:
-            //http://www.whatwg.org/specs/web-apps/current-work/multipage/timers.html#dom-windowtimers-settimeout:
-            //If want a value immediately, use require('id') instead -- something
-            //that works in almond on the global level, but not guaranteed and
-            //unlikely to work in other AMD implementations.
-            setTimeout(function () {
-                main(undef, deps, callback, relName);
-            }, 4);
-        }
-
-        return req;
-    };
-
-    /**
-     * Just drops the config on the floor, but returns req in case
-     * the config return value is used.
-     */
-    req.config = function (cfg) {
-        return req(cfg);
-    };
-
-    /**
-     * Expose module registry for debugging and tooling
-     */
-    requirejs._defined = defined;
-
-    define = function (name, deps, callback) {
-        if (typeof name !== 'string') {
-            throw new Error('See almond README: incorrect module build, no module name');
-        }
-
-        //This module may not have dependencies
-        if (!deps.splice) {
-            //deps is not an array, so probably means
-            //an object literal or factory function for
-            //the value. Adjust args.
-            callback = deps;
-            deps = [];
-        }
-
-        if (!hasProp(defined, name) && !hasProp(waiting, name)) {
-            waiting[name] = [name, deps, callback];
-        }
-    };
-
-    define.amd = {
-        jQuery: true
-    };
-}());
-
-define("../vendor/almond/almond", function(){});
-
-define('davinci-visual/core',["require", "exports"], function (require, exports) {
-    var visual = {
-        VERSION: '0.0.30'
-    };
-    return visual;
-});
-
-///<reference path="../../typings/threejs/three.d.ts"/>
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-define('davinci-visual/VisualElement',["require", "exports"], function (require, exports) {
-    /**
-     * Visual provides the common behavior for all Mesh (Geometry, Material) objects.
-     */
-    var VisualElement = (function (_super) {
-        __extends(VisualElement, _super);
-        function VisualElement(geometry, color, opacity, transparent) {
-            if (opacity === void 0) { opacity = 1.0; }
-            if (transparent === void 0) { transparent = false; }
-            this.geometry = geometry;
-            this.material = new THREE.MeshLambertMaterial({ "color": color, "opacity": opacity, "transparent": transparent });
-            _super.call(this, geometry, this.material);
-        }
-        return VisualElement;
-    })(THREE.Mesh);
-    return VisualElement;
-});
-
-///<reference path="../../typings/threejs/three.d.ts"/>
-var __extends = this.__extends || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
-};
-define('davinci-visual/RevolutionGeometry',["require", "exports"], function (require, exports) {
+/// <reference path="../../typings/threejs/three.d.ts"/>
+var visual;
+(function (visual) {
     var RevolutionGeometry = (function (_super) {
         __extends(RevolutionGeometry, _super);
         function RevolutionGeometry(points, generator, segments, phiStart, phiLength, attitude) {
@@ -545,16 +76,12 @@ define('davinci-visual/RevolutionGeometry',["require", "exports"], function (req
         }
         return RevolutionGeometry;
     })(THREE.Geometry);
-    return RevolutionGeometry;
-});
-
-var __extends = this.__extends || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
-};
-define('davinci-visual/ArrowGeometry',["require", "exports", 'davinci-visual/RevolutionGeometry'], function (require, exports, RevolutionGeometry) {
+    visual.RevolutionGeometry = RevolutionGeometry;
+})(visual || (visual = {}));
+/// <reference path="../../typings/threejs/three.d.ts"/>
+/// <reference path="RevolutionGeometry.ts"/>
+var visual;
+(function (visual) {
     var ArrowGeometry = (function (_super) {
         __extends(ArrowGeometry, _super);
         function ArrowGeometry(scale, attitude, segments, length, radiusShaft, radiusCone, lengthCone, axis) {
@@ -625,36 +152,47 @@ define('davinci-visual/ArrowGeometry',["require", "exports", 'davinci-visual/Rev
             _super.call(this, arrow.points, arrow.generator, segments, 0, 2 * Math.PI, attitude);
         }
         return ArrowGeometry;
-    })(RevolutionGeometry);
-    return ArrowGeometry;
-});
-
-var __extends = this.__extends || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
-};
-define('davinci-visual/Arrow',["require", "exports", 'davinci-visual/VisualElement', 'davinci-visual/ArrowGeometry'], function (require, exports, VisualElement, ArrowGeometry) {
+    })(visual.RevolutionGeometry);
+    visual.ArrowGeometry = ArrowGeometry;
+})(visual || (visual = {}));
+///<reference path="../../typings/threejs/three.d.ts"/>
+var visual;
+(function (visual) {
+    /**
+     * Visual provides the common behavior for all Mesh (Geometry, Material) objects.
+     */
+    var VisualElement = (function (_super) {
+        __extends(VisualElement, _super);
+        function VisualElement(geometry, color, opacity, transparent) {
+            if (opacity === void 0) { opacity = 1.0; }
+            if (transparent === void 0) { transparent = false; }
+            this.geometry = geometry;
+            this.material = new THREE.MeshLambertMaterial({ "color": color, "opacity": opacity, "transparent": transparent });
+            _super.call(this, geometry, this.material);
+        }
+        return VisualElement;
+    })(THREE.Mesh);
+    visual.VisualElement = VisualElement;
+})(visual || (visual = {}));
+/// <reference path="ArrowGeometry.ts"/>
+/// <reference path="VisualElement.ts"/>
+var visual;
+(function (visual) {
     var Arrow = (function (_super) {
         __extends(Arrow, _super);
         function Arrow(scale, color, opacity, transparent) {
             if (opacity === void 0) { opacity = 1.0; }
             if (transparent === void 0) { transparent = false; }
-            _super.call(this, new ArrowGeometry(scale), color, opacity, transparent);
+            _super.call(this, new visual.ArrowGeometry(scale), color, opacity, transparent);
         }
         return Arrow;
-    })(VisualElement);
-    return Arrow;
-});
-
-var __extends = this.__extends || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
-};
-define('davinci-visual/Box',["require", "exports", 'davinci-visual/VisualElement'], function (require, exports, VisualElement) {
+    })(visual.VisualElement);
+    visual.Arrow = Arrow;
+})(visual || (visual = {}));
+/// <reference path="../../typings/threejs/three.d.ts"/>
+/// <reference path="VisualElement.ts"/>
+var visual;
+(function (visual) {
     var Box = (function (_super) {
         __extends(Box, _super);
         function Box(width, height, depth, color, opacity, transparent) {
@@ -663,17 +201,16 @@ define('davinci-visual/Box',["require", "exports", 'davinci-visual/VisualElement
             _super.call(this, new THREE.BoxGeometry(width, height, depth), color, opacity, transparent);
         }
         return Box;
-    })(VisualElement);
-    return Box;
-});
-
-var __extends = this.__extends || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
-};
-define('davinci-visual/Sphere',["require", "exports", 'davinci-visual/VisualElement'], function (require, exports, VisualElement) {
+    })(visual.VisualElement);
+    visual.Box = Box;
+})(visual || (visual = {}));
+/// <reference path="MaterialParameters.ts"/>
+/// <reference path="../../typings/threejs/three.d.ts"/>
+/// <reference path="VisualElement.ts"/>
+/// <reference path="SphereGeometryParameters.ts"/>
+/// <reference path="LambertMaterialParameters.ts"/>
+var visual;
+(function (visual) {
     var Sphere = (function (_super) {
         __extends(Sphere, _super);
         function Sphere(g, m) {
@@ -686,130 +223,84 @@ define('davinci-visual/Sphere',["require", "exports", 'davinci-visual/VisualElem
             _super.call(this, new THREE.SphereGeometry(g.radius, g.widthSegments, g.heightSegments, g.phiStart, g.phiLength, g.thetaStart, g.thetaLength), m.color, m.opacity, m.transparent);
         }
         return Sphere;
-    })(VisualElement);
-    return Sphere;
-});
-
-///<reference path="../../typings/threejs/three.d.ts"/>
-var __extends = this.__extends || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
-};
-define('davinci-visual/VortexGeometry',["require", "exports"], function (require, exports) {
-    var VortexGeometry = (function (_super) {
-        __extends(VortexGeometry, _super);
-        function VortexGeometry(radius, radiusCone, radiusShaft, lengthCone, lengthShaft, arrowSegments, radialSegments) {
-            _super.call(this);
-            var scope = this;
-            var n = 9;
-            radius = radius || 1;
-            radiusCone = radiusCone || 0.08;
-            radiusShaft = radiusShaft || 0.01;
-            lengthCone = lengthCone || 0.2;
-            lengthShaft = lengthShaft || 0.8;
-            arrowSegments = arrowSegments || 6;
-            var circleSegments = arrowSegments * n;
-            radialSegments = radialSegments || 8;
-            var twoPI = Math.PI * 2;
-            var R = radius;
-            var center = new THREE.Vector3();
-            var uvs = [];
-            var normals = [];
-            var alpha = lengthShaft / (lengthCone + lengthShaft);
-            var factor = twoPI / arrowSegments;
-            var theta = alpha / (n - 2);
-            function computeAngle(circleSegments, i) {
-                var m = i % n;
-                if (m === n - 1) {
-                    return computeAngle(circleSegments, i - 1);
-                }
-                else {
-                    var a = (i - m) / n;
-                    return factor * (a + m * theta);
-                }
-            }
-            function computeRadius(i) {
-                var m = i % n;
-                if (m === n - 1) {
-                    return radiusCone;
-                }
-                else {
-                    return radiusShaft;
-                }
-            }
-            for (var j = 0; j <= radialSegments; j++) {
-                // v is the angle inside the vortex tube.
-                var v = twoPI * j / radialSegments;
-                var cosV = Math.cos(v);
-                var sinV = Math.sin(v);
-                for (var i = 0; i <= circleSegments; i++) {
-                    // u is the angle in the xy-plane measured from the x-axis clockwise about the z-axis.
-                    var u = computeAngle(circleSegments, i);
-                    var cosU = Math.cos(u);
-                    var sinU = Math.sin(u);
-                    center.x = R * cosU;
-                    center.y = R * sinU;
-                    var vertex = new THREE.Vector3();
-                    var r = computeRadius(i);
-                    vertex.x = (R + r * cosV) * cosU;
-                    vertex.y = (R + r * cosV) * sinU;
-                    vertex.z = r * sinV;
-                    this['vertices'].push(vertex);
-                    uvs.push(new THREE.Vector2(i / circleSegments, j / radialSegments));
-                    normals.push(vertex.clone().sub(center).normalize());
-                }
-            }
-            for (var j = 1; j <= radialSegments; j++) {
-                for (var i = 1; i <= circleSegments; i++) {
-                    var a = (circleSegments + 1) * j + i - 1;
-                    var b = (circleSegments + 1) * (j - 1) + i - 1;
-                    var c = (circleSegments + 1) * (j - 1) + i;
-                    var d = (circleSegments + 1) * j + i;
-                    var face = new THREE.Face3(a, b, d, [normals[a], normals[b], normals[d]]);
-                    face.normal.add(normals[a]);
-                    face.normal.add(normals[b]);
-                    face.normal.add(normals[d]);
-                    face.normal.normalize();
-                    this.faces.push(face);
-                    this.faceVertexUvs[0].push([uvs[a].clone(), uvs[b].clone(), uvs[d].clone()]);
-                    face = new THREE.Face3(b, c, d, [normals[b], normals[c], normals[d]]);
-                    face.normal.add(normals[b]);
-                    face.normal.add(normals[c]);
-                    face.normal.add(normals[d]);
-                    face.normal.normalize();
-                    this.faces.push(face);
-                    this.faceVertexUvs[0].push([uvs[b].clone(), uvs[c].clone(), uvs[d].clone()]);
-                }
-            }
+    })(visual.VisualElement);
+    visual.Sphere = Sphere;
+})(visual || (visual = {}));
+var visual;
+(function (visual) {
+    function removeElementsByTagName(doc, tagName) {
+        var elements = doc.getElementsByTagName(tagName);
+        for (var i = elements.length - 1; i >= 0; i--) {
+            var e = elements[i];
+            e.parentNode.removeChild(e);
         }
-        return VortexGeometry;
-    })(THREE.Geometry);
-    return VortexGeometry;
-});
-
-var __extends = this.__extends || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
-};
-define('davinci-visual/Vortex',["require", "exports", 'davinci-visual/VisualElement', 'davinci-visual/VortexGeometry'], function (require, exports, VisualElement, VortexGeometry) {
-    var Vortex = (function (_super) {
-        __extends(Vortex, _super);
-        function Vortex(scale, color, opacity, transparent) {
-            if (opacity === void 0) { opacity = 1.0; }
-            if (transparent === void 0) { transparent = false; }
-            _super.call(this, new VortexGeometry(4.0, 0.32, 0.04, 0.08, 0.3, 8, 12), color, opacity, transparent);
+    }
+    var Workbench2D = (function () {
+        function Workbench2D(canvas, wnd) {
+            this.canvas = canvas;
+            this.wnd = wnd;
+            function onWindowResize(event) {
+                var width = wnd.innerWidth;
+                var height = wnd.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+            }
+            this.sizer = onWindowResize;
         }
-        return Vortex;
-    })(VisualElement);
-    return Vortex;
-});
-
-define('davinci-visual/trackball',["require", "exports"], function (require, exports) {
-    var trackball = function (object, wnd) {
+        Workbench2D.prototype.setUp = function () {
+            this.wnd.document.body.insertBefore(this.canvas, this.wnd.document.body.firstChild);
+            this.wnd.addEventListener('resize', this.sizer, false);
+            this.sizer(null);
+        };
+        Workbench2D.prototype.tearDown = function () {
+            this.wnd.removeEventListener('resize', this.sizer, false);
+            removeElementsByTagName(this.wnd.document, "canvas");
+        };
+        return Workbench2D;
+    })();
+    visual.Workbench2D = Workbench2D;
+})(visual || (visual = {}));
+var visual;
+(function (visual) {
+    function removeElementsByTagName(doc, tagName) {
+        var elements = doc.getElementsByTagName(tagName);
+        for (var i = elements.length - 1; i >= 0; i--) {
+            var e = elements[i];
+            e.parentNode.removeChild(e);
+        }
+    }
+    var Workbench3D = (function () {
+        function Workbench3D(canvas, renderer, camera, controls, wnd) {
+            this.canvas = canvas;
+            this.wnd = wnd;
+            function onWindowResize(event) {
+                var width = wnd.innerWidth;
+                var height = wnd.innerHeight;
+                renderer.setSize(width, height);
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                controls.handleResize();
+            }
+            this.sizer = onWindowResize;
+        }
+        Workbench3D.prototype.setUp = function () {
+            this.wnd.document.body.insertBefore(this.canvas, this.wnd.document.body.firstChild);
+            this.wnd.addEventListener('resize', this.sizer, false);
+            this.sizer(null);
+        };
+        Workbench3D.prototype.tearDown = function () {
+            this.wnd.removeEventListener('resize', this.sizer, false);
+            removeElementsByTagName(this.wnd.document, "canvas");
+        };
+        return Workbench3D;
+    })();
+    visual.Workbench3D = Workbench3D;
+})(visual || (visual = {}));
+/// <reference path="../../typings/threejs/three.d.ts"/>
+/// <reference path="TrackBall.ts"/>
+var visual;
+(function (visual) {
+    visual.trackball = function (object, wnd) {
         var document = wnd.document;
         var documentElement = document.documentElement;
         var screen = { left: 0, top: 0, width: 0, height: 0 };
@@ -1156,80 +647,14 @@ define('davinci-visual/trackball',["require", "exports"], function (require, exp
         api.update();
         return api;
     };
-    return trackball;
-});
-
-define('davinci-visual/Workbench2D',["require", "exports"], function (require, exports) {
-    function removeElementsByTagName(doc, tagName) {
-        var elements = doc.getElementsByTagName(tagName);
-        for (var i = elements.length - 1; i >= 0; i--) {
-            var e = elements[i];
-            e.parentNode.removeChild(e);
-        }
-    }
-    var Workbench2D = (function () {
-        function Workbench2D(canvas, wnd) {
-            this.canvas = canvas;
-            this.wnd = wnd;
-            function onWindowResize(event) {
-                var width = wnd.innerWidth;
-                var height = wnd.innerHeight;
-                canvas.width = width;
-                canvas.height = height;
-            }
-            this.sizer = onWindowResize;
-        }
-        Workbench2D.prototype.setUp = function () {
-            this.wnd.document.body.insertBefore(this.canvas, this.wnd.document.body.firstChild);
-            this.wnd.addEventListener('resize', this.sizer, false);
-            this.sizer(null);
-        };
-        Workbench2D.prototype.tearDown = function () {
-            this.wnd.removeEventListener('resize', this.sizer, false);
-            removeElementsByTagName(this.wnd.document, "canvas");
-        };
-        return Workbench2D;
-    })();
-    return Workbench2D;
-});
-
-define('davinci-visual/Workbench3D',["require", "exports"], function (require, exports) {
-    function removeElementsByTagName(doc, tagName) {
-        var elements = doc.getElementsByTagName(tagName);
-        for (var i = elements.length - 1; i >= 0; i--) {
-            var e = elements[i];
-            e.parentNode.removeChild(e);
-        }
-    }
-    var Workbench3D = (function () {
-        function Workbench3D(canvas, renderer, camera, controls, wnd) {
-            this.canvas = canvas;
-            this.wnd = wnd;
-            function onWindowResize(event) {
-                var width = wnd.innerWidth;
-                var height = wnd.innerHeight;
-                renderer.setSize(width, height);
-                camera.aspect = width / height;
-                camera.updateProjectionMatrix();
-                controls.handleResize();
-            }
-            this.sizer = onWindowResize;
-        }
-        Workbench3D.prototype.setUp = function () {
-            this.wnd.document.body.insertBefore(this.canvas, this.wnd.document.body.firstChild);
-            this.wnd.addEventListener('resize', this.sizer, false);
-            this.sizer(null);
-        };
-        Workbench3D.prototype.tearDown = function () {
-            this.wnd.removeEventListener('resize', this.sizer, false);
-            removeElementsByTagName(this.wnd.document, "canvas");
-        };
-        return Workbench3D;
-    })();
-    return Workbench3D;
-});
-
-define('davinci-visual/Visual',["require", "exports", 'davinci-visual/trackball', 'davinci-visual/Workbench2D', 'davinci-visual/Workbench3D'], function (require, exports, trackball, Workbench2D, Workbench3D) {
+})(visual || (visual = {}));
+/// <reference path="../../typings/createjs/createjs.d.ts"/>
+/// <reference path="Workbench2D.ts"/>
+/// <reference path="Workbench3D.ts"/>
+/// <reference path="trackball.ts"/>
+/// <reference path="TrackBall.ts"/>
+var visual;
+(function (visual) {
     var Visual = (function () {
         function Visual(wnd) {
             this.scene = new THREE.Scene();
@@ -1246,14 +671,14 @@ define('davinci-visual/Visual',["require", "exports", 'davinci-visual/trackball'
             this.camera.position.set(10.0, 9.0, 8.0);
             this.camera.up.set(0, 0, 1);
             this.camera.lookAt(this.scene.position);
-            this.controls = trackball(this.camera, wnd);
+            this.controls = visual.trackball(this.camera, wnd);
             this.renderer.setClearColor(new THREE.Color(0x080808), 1.0);
-            this.workbench3D = new Workbench3D(this.renderer.domElement, this.renderer, this.camera, this.controls, wnd);
+            this.workbench3D = new visual.Workbench3D(this.renderer.domElement, this.renderer, this.camera, this.controls, wnd);
             this.canvas2D = wnd.document.createElement("canvas");
             this.canvas2D.style.position = "absolute";
             this.canvas2D.style.top = "0px";
             this.canvas2D.style.left = "0px";
-            this.workbench2D = new Workbench2D(this.canvas2D, wnd);
+            this.workbench2D = new visual.Workbench2D(this.canvas2D, wnd);
             this.stage = new createjs.Stage(this.canvas2D);
             this.stage.autoClear = true;
             this.controls.rotateSpeed = 1.0;
@@ -1286,45 +711,121 @@ define('davinci-visual/Visual',["require", "exports", 'davinci-visual/trackball'
         };
         return Visual;
     })();
-    return Visual;
-});
-
-define('davinci-visual',["require", "exports", 'davinci-visual/core', 'davinci-visual/Arrow', 'davinci-visual/Box', 'davinci-visual/Sphere', 'davinci-visual/Vortex', 'davinci-visual/VisualElement', 'davinci-visual/trackball', 'davinci-visual/Visual', 'davinci-visual/Workbench2D', 'davinci-visual/Workbench3D'], function (require, exports, core, Arrow, Box, Sphere, Vortex, VisualElement, trackball, Visual, Workbench2D, Workbench3D) {
+    visual.Visual = Visual;
+})(visual || (visual = {}));
+/// <reference path="../../typings/threejs/three.d.ts"/>
+var visual;
+(function (visual) {
+    var VortexGeometry = (function (_super) {
+        __extends(VortexGeometry, _super);
+        function VortexGeometry(radius, radiusCone, radiusShaft, lengthCone, lengthShaft, arrowSegments, radialSegments) {
+            _super.call(this);
+            var scope = this;
+            var n = 9;
+            radius = radius || 1;
+            radiusCone = radiusCone || 0.08;
+            radiusShaft = radiusShaft || 0.01;
+            lengthCone = lengthCone || 0.2;
+            lengthShaft = lengthShaft || 0.8;
+            arrowSegments = arrowSegments || 6;
+            var circleSegments = arrowSegments * n;
+            radialSegments = radialSegments || 8;
+            var twoPI = Math.PI * 2;
+            var R = radius;
+            var center = new THREE.Vector3();
+            var uvs = [];
+            var normals = [];
+            var alpha = lengthShaft / (lengthCone + lengthShaft);
+            var factor = twoPI / arrowSegments;
+            var theta = alpha / (n - 2);
+            function computeAngle(circleSegments, i) {
+                var m = i % n;
+                if (m === n - 1) {
+                    return computeAngle(circleSegments, i - 1);
+                }
+                else {
+                    var a = (i - m) / n;
+                    return factor * (a + m * theta);
+                }
+            }
+            function computeRadius(i) {
+                var m = i % n;
+                if (m === n - 1) {
+                    return radiusCone;
+                }
+                else {
+                    return radiusShaft;
+                }
+            }
+            for (var j = 0; j <= radialSegments; j++) {
+                // v is the angle inside the vortex tube.
+                var v = twoPI * j / radialSegments;
+                var cosV = Math.cos(v);
+                var sinV = Math.sin(v);
+                for (var i = 0; i <= circleSegments; i++) {
+                    // u is the angle in the xy-plane measured from the x-axis clockwise about the z-axis.
+                    var u = computeAngle(circleSegments, i);
+                    var cosU = Math.cos(u);
+                    var sinU = Math.sin(u);
+                    center.x = R * cosU;
+                    center.y = R * sinU;
+                    var vertex = new THREE.Vector3();
+                    var r = computeRadius(i);
+                    vertex.x = (R + r * cosV) * cosU;
+                    vertex.y = (R + r * cosV) * sinU;
+                    vertex.z = r * sinV;
+                    this['vertices'].push(vertex);
+                    uvs.push(new THREE.Vector2(i / circleSegments, j / radialSegments));
+                    normals.push(vertex.clone().sub(center).normalize());
+                }
+            }
+            for (var j = 1; j <= radialSegments; j++) {
+                for (var i = 1; i <= circleSegments; i++) {
+                    var a = (circleSegments + 1) * j + i - 1;
+                    var b = (circleSegments + 1) * (j - 1) + i - 1;
+                    var c = (circleSegments + 1) * (j - 1) + i;
+                    var d = (circleSegments + 1) * j + i;
+                    var face = new THREE.Face3(a, b, d, [normals[a], normals[b], normals[d]]);
+                    face.normal.add(normals[a]);
+                    face.normal.add(normals[b]);
+                    face.normal.add(normals[d]);
+                    face.normal.normalize();
+                    this.faces.push(face);
+                    this.faceVertexUvs[0].push([uvs[a].clone(), uvs[b].clone(), uvs[d].clone()]);
+                    face = new THREE.Face3(b, c, d, [normals[b], normals[c], normals[d]]);
+                    face.normal.add(normals[b]);
+                    face.normal.add(normals[c]);
+                    face.normal.add(normals[d]);
+                    face.normal.normalize();
+                    this.faces.push(face);
+                    this.faceVertexUvs[0].push([uvs[b].clone(), uvs[c].clone(), uvs[d].clone()]);
+                }
+            }
+        }
+        return VortexGeometry;
+    })(THREE.Geometry);
+    visual.VortexGeometry = VortexGeometry;
+})(visual || (visual = {}));
+/// <reference path="VortexGeometry.ts"/>
+/// <reference path="VisualElement.ts"/>
+var visual;
+(function (visual) {
     /**
-     * Provides the visual module
-     *
-     * @module visual
+     * Vortex is used to represent geometric objects with a non-zero curl.
      */
-    var visual = {
-        'VERSION': core.VERSION,
-        Arrow: Arrow,
-        Box: Box,
-        Sphere: Sphere,
-        Vortex: Vortex,
-        VisualElement: VisualElement,
-        trackball: trackball,
-        Visual: Visual,
-        Workbench2D: Workbench2D,
-        Workbench3D: Workbench3D
-    };
-    return visual;
-});
-
-var library = require('davinci-visual');
-if (typeof module !== 'undefined' && module.exports)
-{
-  // Export library for CommonJS/Node.
-  module.exports = library;
-}
-else if (global.define)
-{
-  // Define library for global AMD loader that is already present.
-  (function (define) {define(function () { return library; });}(global.define));
-}
-else
-{
-  // Define library on global namespace for inline script loading.
-  global['visual'] = library;
-}
-
-}(this));
+    var Vortex = (function (_super) {
+        __extends(Vortex, _super);
+        function Vortex(scale, color, opacity, transparent) {
+            if (opacity === void 0) { opacity = 1.0; }
+            if (transparent === void 0) { transparent = false; }
+            _super.call(this, new visual.VortexGeometry(4.0, 0.32, 0.04, 0.08, 0.3, 8, 12), color, opacity, transparent);
+        }
+        return Vortex;
+    })(visual.VisualElement);
+    visual.Vortex = Vortex;
+})(visual || (visual = {}));
+var visual;
+(function (visual) {
+    visual.VERSION = '0.0.35';
+})(visual || (visual = {}));
+;

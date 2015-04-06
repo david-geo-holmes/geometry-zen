@@ -1,5 +1,6 @@
-import MaterialParameters = require('davinci-visual/MaterialParameters');
-interface LambertMaterialParameters extends MaterialParameters {
-  color?: number;
+/// <reference path="MaterialParameters.ts"/>
+module visual {
+    export interface LambertMaterialParameters extends MaterialParameters {
+        color?: number;
+    }
 }
-export = LambertMaterialParameters;

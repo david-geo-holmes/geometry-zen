@@ -1,6 +1,8 @@
-import TrackBall = require('davinci-visual/TrackBall');
+/// <reference path="../../typings/threejs/three.d.ts"/>
+/// <reference path="TrackBall.ts"/>
+module visual {
 
-var trackball = function(object: THREE.Object3D, wnd: Window): TrackBall {
+export var trackball = function(object: THREE.Object3D, wnd: Window): TrackBall {
     var document = wnd.document;
     var documentElement = document.documentElement;
     var screen = {left: 0, top: 0, width: 0, height: 0};
@@ -360,4 +362,4 @@ var trackball = function(object: THREE.Object3D, wnd: Window): TrackBall {
 
     return api;
 };
-export = trackball;
+}

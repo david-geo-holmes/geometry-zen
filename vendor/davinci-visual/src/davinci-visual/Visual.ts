@@ -1,10 +1,11 @@
-///<reference path="../../typings/createjs/createjs.d.ts"/>
-import trackball = require('davinci-visual/trackball');
-import TrackBall = require('davinci-visual/TrackBall');
-import Workbench2D = require('davinci-visual/Workbench2D');
-import Workbench3D = require('davinci-visual/Workbench3D');
+/// <reference path="../../typings/createjs/createjs.d.ts"/>
+/// <reference path="Workbench2D.ts"/>
+/// <reference path="Workbench3D.ts"/>
+/// <reference path="trackball.ts"/>
+/// <reference path="TrackBall.ts"/>
+module visual {
 
-class Visual
+export class Visual
 {
   public scene: THREE.Scene = new THREE.Scene();
   public camera: THREE.PerspectiveCamera = new THREE.PerspectiveCamera(45, 1.0, 0.1, 10000);
@@ -87,4 +88,4 @@ class Visual
     this.stage.update();
   }
 }
-export = Visual;
+}

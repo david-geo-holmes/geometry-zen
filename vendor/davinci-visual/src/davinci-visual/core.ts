@@ -1,6 +1,3 @@
-var visual =
-{
-    VERSION: '0.0.30'
+module visual {
+    export var VERSION: string = '0.0.35';
 };
-
-export = visual;

@@ -1,81 +1,133 @@
-//
-// davinci-visual.d.ts
-//
-// This file was created manually in order to support the davinci-visual library.
-//
-declare module visual
-{
+/// <reference path="../typings/threejs/three.d.ts" />
+/// <reference path="../typings/createjs/createjs.d.ts" />
+declare module visual {
+}
+declare module visual {
+    class RevolutionGeometry extends THREE.Geometry {
+        constructor(points: any, generator: any, segments: any, phiStart: any, phiLength: any, attitude: any);
+    }
+}
+declare module visual {
+    class ArrowGeometry extends RevolutionGeometry {
+        constructor(scale: any, attitude?: THREE.Quaternion, segments?: any, length?: number, radiusShaft?: number, radiusCone?: number, lengthCone?: number, axis?: THREE.Vector3);
+    }
+}
+declare module visual {
+    /**
+     * Visual provides the common behavior for all Mesh (Geometry, Material) objects.
+     */
+    class VisualElement<T extends THREE.Geometry> extends THREE.Mesh {
+        geometry: T;
+        material: THREE.MeshLambertMaterial;
+        constructor(geometry: T, color: number, opacity?: number, transparent?: boolean);
+    }
+}
+declare module visual {
+    class Arrow extends VisualElement<ArrowGeometry> {
+        constructor(scale: number, color: number, opacity?: number, transparent?: boolean);
+    }
+}
+declare module visual {
+    class Box extends VisualElement<THREE.BoxGeometry> {
+        constructor(width: number, height: number, depth: number, color: number, opacity?: number, transparent?: boolean);
+    }
+}
+declare module visual {
     interface MaterialParameters {
-      /**
-       * Float in the range of 0.0 - 1.0 indicating how transparent the material is.
-       * A value of 0.0 indicates fully transparent, 1.0 is fully opaque.
-       * If transparent is not set to true for the material, the material will remain fully opaque and this value will only affect its color.
-       */
-      opacity?: number;
-      transparent?: boolean;
+        opacity?: number;
+        transparent?: boolean;
     }
+}
+declare module visual {
     interface LambertMaterialParameters extends MaterialParameters {
-      color?: number;
+        color?: number;
     }
-    class RevolutionGeometry extends THREE.Geometry
-    {
-      constructor(points, generator, segments, phiStart, phiLength, attitude) {}
-    }
-    class ArrowGeometry extends RevolutionGeometry
-    {
-      constructor(scale, attitude?: THREE.Quaternion, segments?, length?: number, radiusShaft?: number, radiusCone?: number, lengthCone?: number, axis?: THREE.Vector3) {}
-    }
-    class VisualElement<T extends THREE.Geometry> extends THREE.Mesh
-    {
-      geometry: T;
-      material: THREE.MeshLambertMaterial;
-      constructor(geometry: T, color: number, opacity: number = 1.0, transparent: boolean = false) {}
-    }
-    class Arrow extends VisualElement<ArrowGeometry>
-    {
-      constructor(scale: number, color: number, opacity: number = 1.0, transparent: boolean = false) {}
-    }
-    /**
-     * The parameters used in constructing the BoxGeometry.
-     */
-    interface BoxGeometryParameters {
-    }
-    class Box extends VisualElement<THREE.BoxGeometry>
-    {
-      constructor(width: number, height: number, depth: number, color: number, opacity: number = 1.0, transparent: boolean = false) {}
-    }
-    /**
-     * The parameters used in constructing the SphereGeometry.
-     */
+}
+declare module visual {
     interface SphereGeometryParameters {
-      radius?: number;
-      widthSegments?: number;
-      heightSegments?: number;
-      phiStart?: number;
-      phiLength?: number;
-      thetaStart?: number;
-      thetaLength?: number;
+        radius?: number;
+        widthSegments?: number;
+        heightSegments?: number;
+        phiStart?: number;
+        phiLength?: number;
+        thetaStart?: number;
+        thetaLength?: number;
     }
-    /**
-     * A class for generating spherical objects.
-     */
+}
+declare module visual {
     class Sphere extends VisualElement<THREE.SphereGeometry> {
-      constructor(geometry?: SphereGeometryParameters, material?: LambertMaterialParameters) {}
+        constructor(g?: SphereGeometryParameters, m?: LambertMaterialParameters);
     }
-    class Vortex extends VisualElement<VortexGeometry> {
-      constructor(scale: number, color: number, opacity: number = 1.0, transparent: boolean = false) {}
-    }
+}
+declare module visual {
     interface TrackBall {
-      
+        enabled: boolean;
+        rotateSpeed: number;
+        zoomSpeed: number;
+        panSpeed: number;
+        noRotate: boolean;
+        noZoom: boolean;
+        noPan: boolean;
+        staticMoving: boolean;
+        dynamicDampingFactor: number;
+        minDistance: number;
+        maxDistance: number;
+        keys: number[];
+        update: () => void;
+        handleResize: () => void;
     }
-    function trackball(object: THREE.Object3D, wnd: Window): TrackBall {}
+}
+declare module visual {
+    class Workbench2D {
+        canvas: HTMLCanvasElement;
+        wnd: Window;
+        private sizer;
+        constructor(canvas: HTMLCanvasElement, wnd: Window);
+        setUp(): void;
+        tearDown(): void;
+    }
+}
+declare module visual {
+    class Workbench3D {
+        canvas: HTMLCanvasElement;
+        wnd: Window;
+        private sizer;
+        constructor(canvas: HTMLCanvasElement, renderer: THREE.WebGLRenderer, camera: THREE.PerspectiveCamera, controls: any, wnd: Window);
+        setUp(): void;
+        tearDown(): void;
+    }
+}
+declare module visual {
+    var trackball: (object: THREE.Object3D, wnd: Window) => TrackBall;
+}
+declare module visual {
     class Visual {
-      constructor(wnd: Window) {};
-      setUp: () => void;
-      tearDown: () => void;
-      update: () => void;
-      scene: THREE.Scene;
-      stage: createjs.Stage;
+        scene: THREE.Scene;
+        camera: THREE.PerspectiveCamera;
+        renderer: THREE.WebGLRenderer;
+        workbench3D: Workbench3D;
+        canvas2D: HTMLCanvasElement;
+        workbench2D: Workbench2D;
+        stage: createjs.Stage;
+        controls: TrackBall;
+        constructor(wnd: Window);
+        add(object: THREE.Object3D): void;
+        setUp(): void;
+        tearDown(): void;
+        update(): void;
+    }
+}
+declare module visual {
+    class VortexGeometry extends THREE.Geometry {
+        constructor(radius: any, radiusCone: any, radiusShaft: any, lengthCone: any, lengthShaft: any, arrowSegments: any, radialSegments: any);
+    }
+}
+declare module visual {
+    /**
+     * Vortex is used to represent geometric objects with a non-zero curl.
+     */
+    class Vortex extends VisualElement<VortexGeometry> {
+        constructor(scale: number, color: number, opacity?: number, transparent?: boolean);
     }
 }
 declare module visual {
