@@ -1,6 +1,6 @@
 {
   "name": "davinci-visual",
-  "version": "0.0.39",
+  "version": "0.0.40",
   "description": "A lightweight WebGL Mathematical visualization library.",
   "author": {
     "name": "David Holmes",
@@ -58,11 +58,11 @@
     "tsd.json"
   ],
   "homepage": "https://github.com/geometryzen/davinci-visual",
-  "_release": "0.0.39",
+  "_release": "0.0.40",
   "_resolution": {
     "type": "version",
-    "tag": "0.0.39",
-    "commit": "17865b6f95ca50615756112c7fee23a3a84eaa36"
+    "tag": "0.0.40",
+    "commit": "1fc7e74f85c53e96dfab4e75f7afd1bdf0b25147"
   },
   "_source": "git://github.com/geometryzen/davinci-visual.git",
   "_target": "*",
