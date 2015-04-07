@@ -2,7 +2,7 @@
     "project": {
         "name": "davinci-visual",
         "description": "A lightweight WebGL Mathematical visualization library.",
-        "version": "0.0.35",
+        "version": "0.0.39",
         "url": "",
         "logo": "../assets/logo.png"
     },
@@ -20,25 +20,68 @@
     "classitems": [
         {
             "file": "dist/davinci-visual.js",
-            "line": 161,
+            "line": 162,
             "description": "Visual provides the common behavior for all Mesh (Geometry, Material) objects.",
             "class": ""
         },
         {
             "file": "dist/davinci-visual.js",
-            "line": 813,
+            "line": 832,
             "description": "Vortex is used to represent geometric objects with a non-zero curl.",
+            "class": ""
+        },
+        {
+            "file": "dist/davinci-visual.js",
+            "line": 847,
+            "class": ""
+        },
+        {
+            "file": "dist/davinci-visual.js",
+            "line": 852,
+            "description": "The version of the visual module.",
+            "class": ""
+        },
+        {
+            "file": "dist/davinci-visual.js",
+            "line": 856,
+            "description": "Returns a vector with the specified Cartesian coordinates.",
+            "params": [
+                {
+                    "name": "x",
+                    "description": "The x-coordinate."
+                },
+                {
+                    "name": "y",
+                    "description": "The y-coordinate."
+                },
+                {
+                    "name": "z",
+                    "description": "The z-coordinate."
+                }
+            ],
             "class": ""
         }
     ],
     "warnings": [
         {
             "message": "Missing item type\nVisual provides the common behavior for all Mesh (Geometry, Material) objects.",
-            "line": " dist/davinci-visual.js:161"
+            "line": " dist/davinci-visual.js:162"
         },
         {
             "message": "Missing item type\nVortex is used to represent geometric objects with a non-zero curl.",
-            "line": " dist/davinci-visual.js:813"
+            "line": " dist/davinci-visual.js:832"
+        },
+        {
+            "message": "Missing item type",
+            "line": " dist/davinci-visual.js:847"
+        },
+        {
+            "message": "Missing item type\nThe version of the visual module.",
+            "line": " dist/davinci-visual.js:852"
+        },
+        {
+            "message": "Missing item type\nReturns a vector with the specified Cartesian coordinates.",
+            "line": " dist/davinci-visual.js:856"
         }
     ]
 }

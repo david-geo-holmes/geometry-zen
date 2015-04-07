@@ -155,7 +155,8 @@ var visual;
     })(visual.RevolutionGeometry);
     visual.ArrowGeometry = ArrowGeometry;
 })(visual || (visual = {}));
-///<reference path="../../typings/threejs/three.d.ts"/>
+/// <reference path="../../typings/threejs/three.d.ts"/>
+/// <reference path="../../vendor/davinci-blade/dist/davinci-blade.d.ts"/>
 var visual;
 (function (visual) {
     /**
@@ -170,6 +171,24 @@ var visual;
             this.material = new THREE.MeshLambertMaterial({ "color": color, "opacity": opacity, "transparent": transparent });
             _super.call(this, geometry, this.material);
         }
+        Object.defineProperty(VisualElement.prototype, "pos", {
+            set: function (position) {
+                this.position.set(position.x, position.y, position.z);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(VisualElement.prototype, "attitude", {
+            get: function () {
+                var q = this.quaternion;
+                return new blade.Euclidean3(q.w, 0, 0, 0, -q.z, -q.x, -q.y, 0);
+            },
+            set: function (rotor) {
+                this.quaternion.set(-rotor.yz, -rotor.zx, -rotor.xy, rotor.w);
+            },
+            enumerable: true,
+            configurable: true
+        });
         return VisualElement;
     })(THREE.Mesh);
     visual.VisualElement = VisualElement;
@@ -824,8 +843,25 @@ var visual;
     })(visual.VisualElement);
     visual.Vortex = Vortex;
 })(visual || (visual = {}));
+/// <reference path="../../vendor/davinci-blade/dist/davinci-blade.d.ts"/>
+/**
+ *
+ */
 var visual;
 (function (visual) {
-    visual.VERSION = '0.0.35';
+    /**
+     * The version of the visual module.
+     */
+    visual.VERSION = '0.0.39';
+    /**
+     * Returns a vector with the specified Cartesian coordinates.
+     * @param x The x-coordinate.
+     * @param y The y-coordinate.
+     * @param z The z-coordinate.
+     */
+    function vector(x, y, z) {
+        return new blade.Euclidean3(0, x, y, z, 0, 0, 0, 0);
+    }
+    visual.vector = vector;
 })(visual || (visual = {}));
 ;
