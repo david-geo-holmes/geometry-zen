@@ -10,56 +10,60 @@ declare module visual {
 }
 declare module visual {
     class ArrowGeometry extends RevolutionGeometry {
-        constructor(scale: any, attitude?: THREE.Quaternion, segments?: any, length?: number, radiusShaft?: number, radiusCone?: number, lengthCone?: number, axis?: THREE.Vector3);
+        constructor(scale: number, attitude: THREE.Quaternion, segments: number, length: number, radiusShaft: number, radiusCone: number, lengthCone: number, axis: {
+            x: number;
+            y: number;
+            z: number;
+        });
     }
 }
 declare module visual {
     /**
      * Visual provides the common behavior for all Mesh (Geometry, Material) objects.
      */
-    class VisualElement<T extends THREE.Geometry> extends THREE.Mesh {
-        geometry: T;
-        material: THREE.MeshLambertMaterial;
-        constructor(geometry: T, color: number, opacity?: number, transparent?: boolean);
+    class Mesh<G extends THREE.Geometry, M extends THREE.Material> extends THREE.Mesh {
+        geometry: G;
+        material: M;
+        constructor(geometry: G, material: M);
         pos: blade.Euclidean3;
         attitude: blade.Euclidean3;
     }
 }
 declare module visual {
-    class Arrow extends VisualElement<ArrowGeometry> {
-        constructor(scale: number, color: number, opacity?: number, transparent?: boolean);
+    class Arrow extends Mesh<ArrowGeometry, THREE.MeshLambertMaterial> {
+        constructor(parameters?: {
+            scale?: number;
+            axis?: {
+                x: number;
+                y: number;
+                z: number;
+            };
+            color?: number;
+            opacity?: number;
+            transparent?: boolean;
+        });
     }
 }
 declare module visual {
-    class Box extends VisualElement<THREE.BoxGeometry> {
-        constructor(width: number, height: number, depth: number, color: number, opacity?: number, transparent?: boolean);
+    class Box extends Mesh<THREE.BoxGeometry, THREE.MeshLambertMaterial> {
+        constructor(parameters?: {
+            width?: number;
+            height?: number;
+            depth?: number;
+            color?: number;
+            opacity?: number;
+            transparent?: boolean;
+        });
     }
 }
 declare module visual {
-    interface MaterialParameters {
-        opacity?: number;
-        transparent?: boolean;
-    }
-}
-declare module visual {
-    interface LambertMaterialParameters extends MaterialParameters {
-        color?: number;
-    }
-}
-declare module visual {
-    interface SphereGeometryParameters {
-        radius?: number;
-        widthSegments?: number;
-        heightSegments?: number;
-        phiStart?: number;
-        phiLength?: number;
-        thetaStart?: number;
-        thetaLength?: number;
-    }
-}
-declare module visual {
-    class Sphere extends VisualElement<THREE.SphereGeometry> {
-        constructor(g?: SphereGeometryParameters, m?: LambertMaterialParameters);
+    class Sphere extends Mesh<THREE.SphereGeometry, THREE.MeshLambertMaterial> {
+        constructor(parameters?: {
+            radius?: number;
+            color?: number;
+            opacity?: number;
+            transparent?: boolean;
+        });
     }
 }
 declare module visual {
@@ -122,15 +126,21 @@ declare module visual {
 }
 declare module visual {
     class VortexGeometry extends THREE.Geometry {
-        constructor(radius: any, radiusCone: any, radiusShaft: any, lengthCone: any, lengthShaft: any, arrowSegments: any, radialSegments: any);
+        constructor(radius: number, radiusCone: number, radiusShaft: number, lengthCone: number, lengthShaft: number, arrowSegments?: number, radialSegments?: number);
     }
 }
 declare module visual {
     /**
      * Vortex is used to represent geometric objects with a non-zero curl.
      */
-    class Vortex extends VisualElement<VortexGeometry> {
-        constructor(scale: number, color: number, opacity?: number, transparent?: boolean);
+    class Vortex extends Mesh<VortexGeometry, THREE.MeshLambertMaterial> {
+        constructor(parameters?: {
+            radius?: number;
+            radiusCone?: number;
+            color?: number;
+            opacity?: number;
+            transparent?: boolean;
+        });
     }
 }
 /**
@@ -142,15 +152,27 @@ declare module visual {
      */
     var VERSION: string;
     /**
-     * Returns a grade zero Euclidean 3D multivector.
+     * Returns a grade zero Euclidean 3D multivector (scalar).
      * @param w The scalar value.
      */
     function scalarE3(w: number): blade.Euclidean3;
     /**
-     * Returns a grade one Euclidean 3D multivector with the specified Cartesian coordinates.
+     * Returns a grade one Euclidean 3D multivector (vector) with the specified Cartesian coordinates.
      * @param x The x-coordinate.
      * @param y The y-coordinate.
      * @param z The z-coordinate.
      */
     function vectorE3(x: number, y: number, z: number): blade.Euclidean3;
+    /**
+     * Returns a grade two Euclidean 3D multivector (bivector) with the specified Cartesian coordinates.
+     * @param xy The xy-coordinate.
+     * @param yz The yz-coordinate.
+     * @param zx The zx-coordinate.
+     */
+    function bivectorE3(xy: number, yz: number, zx: number): blade.Euclidean3;
+    /**
+     * Returns a grade three Euclidean 3D multivector (pseudoscalar).
+     * @param xyz The pseudoscalar value.
+     */
+    function pseudoE3(xyz: number): blade.Euclidean3;
 }
