@@ -1405,7 +1405,7 @@ function assert(condition, message) {
 }
 exports.assert = assert;
 
-function fail(message) {
+function fail(message, unknown, whatever) {
     exports.assert(false, message);
 }
 exports.fail = fail;
@@ -1413,6 +1413,35 @@ exports.fail = fail;
 
 define("ace/mode/python/base",["require","exports","module"], function(require, exports, module) {
 "no use strict";
+function typeOf(value) {
+    var s = typeof value;
+    if (s == 'object') {
+        if (value) {
+            if (value instanceof Array) {
+                return 'array';
+            } else if (value instanceof Object) {
+                return s;
+            }
+            var className = Object.prototype.toString.call((value));
+            if (className == '[object Window]') {
+                return 'object';
+            }
+            if ((className == '[object Array]' || typeof value.length == 'number' && typeof value.splice != 'undefined' && typeof value.propertyIsEnumerable != 'undefined' && !value.propertyIsEnumerable('splice'))) {
+                return 'array';
+            }
+            if ((className == '[object Function]' || typeof value.call != 'undefined' && typeof value.propertyIsEnumerable != 'undefined' && !value.propertyIsEnumerable('call'))) {
+                return 'function';
+            }
+        } else {
+            return 'null';
+        }
+    } else if (s == 'function' && typeof value.call == 'undefined') {
+        return 'object';
+    }
+    return s;
+}
+exports.typeOf = typeOf;
+;
 function isNumber(val) {
     return typeof val === 'number';
 }
@@ -1425,6 +1454,12 @@ function isDef(val) {
     return val !== undefined;
 }
 exports.isDef = isDef;
+function isArrayLike(val) {
+    var type = exports.typeOf(val);
+    return type == 'array' || type == 'object' && typeof val.length == 'number';
+}
+exports.isArrayLike = isArrayLike;
+;
 });
 
 define("ace/mode/python/IndentationError",["require","exports","module"], function(require, exports, module) {
@@ -3342,9 +3377,9 @@ exports.ParseTables = {
         [37, null],
         [44, null],
         [49, null],
-        [40, null],
-        [38, null],
         [45, null],
+        [38, null],
+        [40, null],
         [330, null],
         [29, null],
         [21, null],
@@ -3397,14 +3432,14 @@ exports.ParseTables = {
         [317, null],
         [326, null],
         [13, null],
-        [299, null],
+        [270, null],
         [267, null],
         [265, null],
         [320, null],
-        [270, null],
         [321, null],
         [289, null],
         [297, null],
+        [299, null],
         [279, null],
         [312, null],
         [325, null],
@@ -3489,12 +3524,12 @@ exports.ParseTables = {
         37: 90,
         38: 94,
         39: 85,
-        40: 93,
+        40: 95,
         41: 86,
         42: 88,
         43: 89,
         44: 91,
-        45: 95,
+        45: 93,
         46: 84,
         47: 87,
         48: 62,
@@ -3534,12 +3569,12 @@ function findInDfa(a, obj) {
 }
 
 var Node = (function () {
-    function Node(type, value, lineNumber, columnNumber, children) {
+    function Node(type, value, lineno, col_offset, children) {
         this.used_names = {};
         this.type = type;
         this.value = value;
-        this.lineNumber = lineNumber;
-        this.columnNumber = columnNumber;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
         this.children = children;
     }
     return Node;
@@ -3714,11 +3749,11 @@ function makeParser(fileName, style) {
         return null;
     };
 }
-function parse(fileName, input) {
+function parse(fileName, source) {
     var parseFunc = makeParser(fileName);
-    if (input.substr(input.length - 1, 1) !== "\n")
-        input += "\n";
-    var lines = input.split("\n");
+    if (source.substr(source.length - 1, 1) !== "\n")
+        source += "\n";
+    var lines = source.split("\n");
     var ret;
     for (var i = 0; i < lines.length; ++i) {
         ret = parseFunc(lines[i] + ((i === lines.length - 1) ? "" : "\n"));
@@ -3741,18 +3776,5038 @@ function parseTreeDump(node) {
 exports.parseTreeDump = parseTreeDump;
 });
 
+define("ace/mode/python/astnodes",["require","exports","module"], function(require, exports, module) {
+"no use strict";
+var Load = (function () {
+    function Load() {
+    }
+    return Load;
+})();
+exports.Load = Load;
+var Store = (function () {
+    function Store() {
+    }
+    return Store;
+})();
+exports.Store = Store;
+var Del = (function () {
+    function Del() {
+    }
+    return Del;
+})();
+exports.Del = Del;
+var AugLoad = (function () {
+    function AugLoad() {
+    }
+    return AugLoad;
+})();
+exports.AugLoad = AugLoad;
+var AugStore = (function () {
+    function AugStore() {
+    }
+    return AugStore;
+})();
+exports.AugStore = AugStore;
+var Param = (function () {
+    function Param() {
+    }
+    return Param;
+})();
+exports.Param = Param;
+
+var And = (function () {
+    function And() {
+    }
+    return And;
+})();
+exports.And = And;
+var Or = (function () {
+    function Or() {
+    }
+    return Or;
+})();
+exports.Or = Or;
+
+var Add = (function () {
+    function Add() {
+    }
+    return Add;
+})();
+exports.Add = Add;
+var Sub = (function () {
+    function Sub() {
+    }
+    return Sub;
+})();
+exports.Sub = Sub;
+var Mult = (function () {
+    function Mult() {
+    }
+    return Mult;
+})();
+exports.Mult = Mult;
+var Div = (function () {
+    function Div() {
+    }
+    return Div;
+})();
+exports.Div = Div;
+var Mod = (function () {
+    function Mod() {
+    }
+    return Mod;
+})();
+exports.Mod = Mod;
+var Pow = (function () {
+    function Pow() {
+    }
+    return Pow;
+})();
+exports.Pow = Pow;
+var LShift = (function () {
+    function LShift() {
+    }
+    return LShift;
+})();
+exports.LShift = LShift;
+var RShift = (function () {
+    function RShift() {
+    }
+    return RShift;
+})();
+exports.RShift = RShift;
+var BitOr = (function () {
+    function BitOr() {
+    }
+    return BitOr;
+})();
+exports.BitOr = BitOr;
+var BitXor = (function () {
+    function BitXor() {
+    }
+    return BitXor;
+})();
+exports.BitXor = BitXor;
+var BitAnd = (function () {
+    function BitAnd() {
+    }
+    return BitAnd;
+})();
+exports.BitAnd = BitAnd;
+var FloorDiv = (function () {
+    function FloorDiv() {
+    }
+    return FloorDiv;
+})();
+exports.FloorDiv = FloorDiv;
+
+var Invert = (function () {
+    function Invert() {
+    }
+    return Invert;
+})();
+exports.Invert = Invert;
+var Not = (function () {
+    function Not() {
+    }
+    return Not;
+})();
+exports.Not = Not;
+var UAdd = (function () {
+    function UAdd() {
+    }
+    return UAdd;
+})();
+exports.UAdd = UAdd;
+var USub = (function () {
+    function USub() {
+    }
+    return USub;
+})();
+exports.USub = USub;
+
+var Eq = (function () {
+    function Eq() {
+    }
+    return Eq;
+})();
+exports.Eq = Eq;
+var NotEq = (function () {
+    function NotEq() {
+    }
+    return NotEq;
+})();
+exports.NotEq = NotEq;
+var Lt = (function () {
+    function Lt() {
+    }
+    return Lt;
+})();
+exports.Lt = Lt;
+var LtE = (function () {
+    function LtE() {
+    }
+    return LtE;
+})();
+exports.LtE = LtE;
+var Gt = (function () {
+    function Gt() {
+    }
+    return Gt;
+})();
+exports.Gt = Gt;
+var GtE = (function () {
+    function GtE() {
+    }
+    return GtE;
+})();
+exports.GtE = GtE;
+var Is = (function () {
+    function Is() {
+    }
+    return Is;
+})();
+exports.Is = Is;
+var IsNot = (function () {
+    function IsNot() {
+    }
+    return IsNot;
+})();
+exports.IsNot = IsNot;
+var In_ = (function () {
+    function In_() {
+    }
+    return In_;
+})();
+exports.In_ = In_;
+var NotIn = (function () {
+    function NotIn() {
+    }
+    return NotIn;
+})();
+exports.NotIn = NotIn;
+var Module = (function () {
+    function Module(body) {
+        this.body = body;
+    }
+    return Module;
+})();
+exports.Module = Module;
+
+var Interactive = (function () {
+    function Interactive(body) {
+        this.body = body;
+    }
+    return Interactive;
+})();
+exports.Interactive = Interactive;
+
+var Expression = (function () {
+    function Expression(body) {
+        this.body = body;
+    }
+    return Expression;
+})();
+exports.Expression = Expression;
+
+var Suite = (function () {
+    function Suite(body) {
+        this.body = body;
+    }
+    return Suite;
+})();
+exports.Suite = Suite;
+
+var FunctionDef = (function () {
+    function FunctionDef(name, args, body, decorator_list, lineno, col_offset) {
+        this.name = name;
+        this.args = args;
+        this.body = body;
+        this.decorator_list = decorator_list;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return FunctionDef;
+})();
+exports.FunctionDef = FunctionDef;
+
+var ClassDef = (function () {
+    function ClassDef(name, bases, body, decorator_list, lineno, col_offset) {
+        this.name = name;
+        this.bases = bases;
+        this.body = body;
+        this.decorator_list = decorator_list;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return ClassDef;
+})();
+exports.ClassDef = ClassDef;
+
+var Return_ = (function () {
+    function Return_(value, lineno, col_offset) {
+        this.value = value;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return Return_;
+})();
+exports.Return_ = Return_;
+
+var Delete_ = (function () {
+    function Delete_(targets, lineno, col_offset) {
+        this.targets = targets;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return Delete_;
+})();
+exports.Delete_ = Delete_;
+
+var Assign = (function () {
+    function Assign(targets, value, lineno, col_offset) {
+        this.targets = targets;
+        this.value = value;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return Assign;
+})();
+exports.Assign = Assign;
+
+var AugAssign = (function () {
+    function AugAssign(target, op, value, lineno, col_offset) {
+        this.target = target;
+        this.op = op;
+        this.value = value;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return AugAssign;
+})();
+exports.AugAssign = AugAssign;
+
+var Print = (function () {
+    function Print(dest, values, nl, lineno, col_offset) {
+        this.dest = dest;
+        this.values = values;
+        this.nl = nl;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return Print;
+})();
+exports.Print = Print;
+
+var For_ = (function () {
+    function For_(target, iter, body, orelse, lineno, col_offset) {
+        this.target = target;
+        this.iter = iter;
+        this.body = body;
+        this.orelse = orelse;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return For_;
+})();
+exports.For_ = For_;
+
+var While_ = (function () {
+    function While_(test, body, orelse, lineno, col_offset) {
+        this.test = test;
+        this.body = body;
+        this.orelse = orelse;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return While_;
+})();
+exports.While_ = While_;
+
+var If_ = (function () {
+    function If_(test, body, orelse, lineno, col_offset) {
+        this.test = test;
+        this.body = body;
+        this.orelse = orelse;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return If_;
+})();
+exports.If_ = If_;
+
+var With_ = (function () {
+    function With_(context_expr, optional_vars, body, lineno, col_offset) {
+        this.context_expr = context_expr;
+        this.optional_vars = optional_vars;
+        this.body = body;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return With_;
+})();
+exports.With_ = With_;
+
+var Raise = (function () {
+    function Raise(type, inst, tback, lineno, col_offset) {
+        this.type = type;
+        this.inst = inst;
+        this.tback = tback;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return Raise;
+})();
+exports.Raise = Raise;
+
+var TryExcept = (function () {
+    function TryExcept(body, handlers, orelse, lineno, col_offset) {
+        this.body = body;
+        this.handlers = handlers;
+        this.orelse = orelse;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return TryExcept;
+})();
+exports.TryExcept = TryExcept;
+
+var TryFinally = (function () {
+    function TryFinally(body, finalbody, lineno, col_offset) {
+        this.body = body;
+        this.finalbody = finalbody;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return TryFinally;
+})();
+exports.TryFinally = TryFinally;
+
+var Assert = (function () {
+    function Assert(test, msg, lineno, col_offset) {
+        this.test = test;
+        this.msg = msg;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return Assert;
+})();
+exports.Assert = Assert;
+
+var Import_ = (function () {
+    function Import_(names, lineno, col_offset) {
+        this.names = names;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return Import_;
+})();
+exports.Import_ = Import_;
+
+var ImportFrom = (function () {
+    function ImportFrom(module, names, level, lineno, col_offset) {
+        this.module = module;
+        this.names = names;
+        this.level = level;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return ImportFrom;
+})();
+exports.ImportFrom = ImportFrom;
+
+var Exec = (function () {
+    function Exec(body, globals, locals, lineno, col_offset) {
+        this.body = body;
+        this.globals = globals;
+        this.locals = locals;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return Exec;
+})();
+exports.Exec = Exec;
+
+var Global = (function () {
+    function Global(names, lineno, col_offset) {
+        this.names = names;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return Global;
+})();
+exports.Global = Global;
+
+var NonLocal = (function () {
+    function NonLocal(names, lineno, col_offset) {
+        this.names = names;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return NonLocal;
+})();
+exports.NonLocal = NonLocal;
+
+var Expr = (function () {
+    function Expr(value, lineno, col_offset) {
+        this.value = value;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return Expr;
+})();
+exports.Expr = Expr;
+
+var Pass = (function () {
+    function Pass(lineno, col_offset) {
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return Pass;
+})();
+exports.Pass = Pass;
+
+var Break_ = (function () {
+    function Break_(lineno, col_offset) {
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return Break_;
+})();
+exports.Break_ = Break_;
+
+var Continue_ = (function () {
+    function Continue_(lineno, col_offset) {
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return Continue_;
+})();
+exports.Continue_ = Continue_;
+
+var BoolOp = (function () {
+    function BoolOp(op, values, lineno, col_offset) {
+        this.op = op;
+        this.values = values;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return BoolOp;
+})();
+exports.BoolOp = BoolOp;
+
+var BinOp = (function () {
+    function BinOp(left, op, right, lineno, col_offset) {
+        this.left = left;
+        this.op = op;
+        this.right = right;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return BinOp;
+})();
+exports.BinOp = BinOp;
+
+var UnaryOp = (function () {
+    function UnaryOp(op, operand, lineno, col_offset) {
+        this.op = op;
+        this.operand = operand;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return UnaryOp;
+})();
+exports.UnaryOp = UnaryOp;
+
+var Lambda = (function () {
+    function Lambda(args, body, lineno, col_offset) {
+        this.args = args;
+        this.body = body;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return Lambda;
+})();
+exports.Lambda = Lambda;
+
+var IfExp = (function () {
+    function IfExp(test, body, orelse, lineno, col_offset) {
+        this.test = test;
+        this.body = body;
+        this.orelse = orelse;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return IfExp;
+})();
+exports.IfExp = IfExp;
+
+var Dict = (function () {
+    function Dict(keys, values, lineno, col_offset) {
+        this.keys = keys;
+        this.values = values;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return Dict;
+})();
+exports.Dict = Dict;
+
+var ListComp = (function () {
+    function ListComp(elt, generators, lineno, col_offset) {
+        this.elt = elt;
+        this.generators = generators;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return ListComp;
+})();
+exports.ListComp = ListComp;
+
+var GeneratorExp = (function () {
+    function GeneratorExp(elt, generators, lineno, col_offset) {
+        this.elt = elt;
+        this.generators = generators;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return GeneratorExp;
+})();
+exports.GeneratorExp = GeneratorExp;
+
+var Yield = (function () {
+    function Yield(value, lineno, col_offset) {
+        this.value = value;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return Yield;
+})();
+exports.Yield = Yield;
+
+var Compare = (function () {
+    function Compare(left, ops, comparators, lineno, col_offset) {
+        this.left = left;
+        this.ops = ops;
+        this.comparators = comparators;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return Compare;
+})();
+exports.Compare = Compare;
+
+var Call = (function () {
+    function Call(func, args, keywords, starargs, kwargs, lineno, col_offset) {
+        this.func = func;
+        this.args = args;
+        this.keywords = keywords;
+        this.starargs = starargs;
+        this.kwargs = kwargs;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return Call;
+})();
+exports.Call = Call;
+
+var Num = (function () {
+    function Num(n, lineno, col_offset) {
+        this.n = n;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return Num;
+})();
+exports.Num = Num;
+
+var Str = (function () {
+    function Str(s, lineno, col_offset) {
+        this.s = s;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return Str;
+})();
+exports.Str = Str;
+
+var Attribute = (function () {
+    function Attribute(value, attr, ctx, lineno, col_offset) {
+        this.value = value;
+        this.attr = attr;
+        this.ctx = ctx;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return Attribute;
+})();
+exports.Attribute = Attribute;
+
+var Subscript = (function () {
+    function Subscript(value, slice, ctx, lineno, col_offset) {
+        this.value = value;
+        this.slice = slice;
+        this.ctx = ctx;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return Subscript;
+})();
+exports.Subscript = Subscript;
+
+var Name = (function () {
+    function Name(id, ctx, lineno, col_offset) {
+        this.id = id;
+        this.ctx = ctx;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return Name;
+})();
+exports.Name = Name;
+
+var List = (function () {
+    function List(elts, ctx, lineno, col_offset) {
+        this.elts = elts;
+        this.ctx = ctx;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return List;
+})();
+exports.List = List;
+
+var Tuple = (function () {
+    function Tuple(elts, ctx, lineno, col_offset) {
+        this.elts = elts;
+        this.ctx = ctx;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return Tuple;
+})();
+exports.Tuple = Tuple;
+
+var Ellipsis = (function () {
+    function Ellipsis() {
+    }
+    return Ellipsis;
+})();
+exports.Ellipsis = Ellipsis;
+
+var Slice = (function () {
+    function Slice(lower, upper, step) {
+        this.lower = lower;
+        this.upper = upper;
+        this.step = step;
+    }
+    return Slice;
+})();
+exports.Slice = Slice;
+
+var ExtSlice = (function () {
+    function ExtSlice(dims) {
+        this.dims = dims;
+    }
+    return ExtSlice;
+})();
+exports.ExtSlice = ExtSlice;
+
+var Index = (function () {
+    function Index(value) {
+        this.value = value;
+    }
+    return Index;
+})();
+exports.Index = Index;
+
+var Comprehension = (function () {
+    function Comprehension(target, iter, ifs) {
+        this.target = target;
+        this.iter = iter;
+        this.ifs = ifs;
+    }
+    return Comprehension;
+})();
+exports.Comprehension = Comprehension;
+
+var ExceptHandler = (function () {
+    function ExceptHandler(type, name, body, lineno, col_offset) {
+        this.type = type;
+        this.name = name;
+        this.body = body;
+        this.lineno = lineno;
+        this.col_offset = col_offset;
+    }
+    return ExceptHandler;
+})();
+exports.ExceptHandler = ExceptHandler;
+
+var Arguments = (function () {
+    function Arguments(args, vararg, kwarg, defaults) {
+        this.args = args;
+        this.vararg = vararg;
+        this.kwarg = kwarg;
+        this.defaults = defaults;
+    }
+    return Arguments;
+})();
+exports.Arguments = Arguments;
+
+var Keyword = (function () {
+    function Keyword(arg, value) {
+        this.arg = arg;
+        this.value = value;
+    }
+    return Keyword;
+})();
+exports.Keyword = Keyword;
+
+var Alias = (function () {
+    function Alias(name, asname) {
+        this.name = name;
+        this.asname = asname;
+    }
+    return Alias;
+})();
+exports.Alias = Alias;
+});
+
+define("ace/mode/python/numericLiteral",["require","exports","module"], function(require, exports, module) {
+"no use strict";
+function floatAST(s) {
+    var thing = {
+        text: s,
+        value: parseFloat(s),
+        isFloat: function () {
+            return true;
+        },
+        isInt: function () {
+            return false;
+        },
+        isLong: function () {
+            return false;
+        },
+        toString: function () {
+            return s;
+        }
+    };
+    return thing;
+}
+exports.floatAST = floatAST;
+function intAST(n) {
+    var thing = {
+        value: n,
+        isFloat: function () {
+            return false;
+        },
+        isInt: function () {
+            return true;
+        },
+        isLong: function () {
+            return false;
+        },
+        toString: function () {
+            return '' + n;
+        }
+    };
+    return thing;
+}
+exports.intAST = intAST;
+function longAST(s, radix) {
+    var thing = {
+        text: s,
+        radix: radix,
+        isFloat: function () {
+            return false;
+        },
+        isInt: function () {
+            return false;
+        },
+        isLong: function () {
+            return true;
+        },
+        toString: function () {
+            return s;
+        }
+    };
+    return thing;
+}
+exports.longAST = longAST;
+});
+
+define("ace/mode/python/builder",["require","exports","module","ace/mode/python/asserts","ace/mode/python/astnodes","ace/mode/python/base","ace/mode/python/numericLiteral","ace/mode/python/tables","ace/mode/python/Tokenizer"], function(require, exports, module) {
+"no use strict";
+var asserts = require('./asserts');
+var astnodes = require('./astnodes');
+var base = require('./base');
+var numericLiteral = require('./numericLiteral');
+
+var tables = require('./tables');
+var Tokenizer = require('./Tokenizer');
+var ParseTables = tables.ParseTables;
+var SYM = ParseTables.sym;
+var TOK = Tokenizer.Tokens;
+var LONG_THRESHOLD = Math.pow(2, 53);
+function syntaxError(message, fileName, lineNumber) {
+    asserts.assert(base.isString(message), "message must be a string");
+    asserts.assert(base.isString(fileName), "fileName must be a string");
+    asserts.assert(base.isNumber(lineNumber), "lineNumber must be a number");
+    var e = new SyntaxError(message);
+    e['fileName'] = fileName;
+    e['lineNumber'] = lineNumber;
+    return e;
+}
+
+var Compiling = (function () {
+    function Compiling(encoding, filename) {
+        this.c_encoding = encoding;
+        this.c_filename = filename;
+    }
+    return Compiling;
+})();
+function NCH(n) {
+    asserts.assert(n !== undefined);
+    if (n.children === null)
+        return 0;
+    return n.children.length;
+}
+
+function CHILD(n, i) {
+    asserts.assert(n !== undefined);
+    asserts.assert(i !== undefined);
+    return n.children[i];
+}
+
+function REQ(n, type) {
+    asserts.assert(n.type === type, "node wasn't expected type");
+}
+
+function strobj(s) {
+    asserts.assert(typeof s === "string", "expecting string, got " + (typeof s));
+    return s;
+}
+function numStmts(n) {
+    switch (n.type) {
+        case SYM.single_input:
+            if (CHILD(n, 0).type === TOK.T_NEWLINE)
+                return 0;
+            else
+                return numStmts(CHILD(n, 0));
+        case SYM.file_input:
+            var cnt = 0;
+            for (var i = 0; i < NCH(n); ++i) {
+                var ch = CHILD(n, i);
+                if (ch.type === SYM.stmt)
+                    cnt += numStmts(ch);
+            }
+            return cnt;
+        case SYM.stmt:
+            return numStmts(CHILD(n, 0));
+        case SYM.compound_stmt:
+            return 1;
+        case SYM.simple_stmt:
+            return Math.floor(NCH(n) / 2);
+        case SYM.suite:
+            if (NCH(n) === 1)
+                return numStmts(CHILD(n, 0));
+            else {
+                var cnt = 0;
+                for (var i = 2; i < NCH(n) - 1; ++i)
+                    cnt += numStmts(CHILD(n, i));
+                return cnt;
+            }
+        default:
+            asserts.fail("Non-statement found");
+    }
+    return 0;
+}
+
+function forbiddenCheck(c, n, x, lineno) {
+    if (x === "None")
+        throw syntaxError("assignment to None", c.c_filename, lineno);
+    if (x === "True" || x === "False")
+        throw syntaxError("assignment to True or False is forbidden", c.c_filename, lineno);
+}
+function setContext(c, e, ctx, n) {
+    asserts.assert(ctx !== astnodes.AugStore && ctx !== astnodes.AugLoad);
+    var s = null;
+    var exprName = null;
+
+    switch (e.constructor) {
+        case astnodes.Attribute:
+        case astnodes.Name:
+            if (ctx === astnodes.Store)
+                forbiddenCheck(c, n, e.attr, n.lineno);
+            e.ctx = ctx;
+            break;
+        case astnodes.Subscript:
+            e.ctx = ctx;
+            break;
+        case astnodes.List:
+            e.ctx = ctx;
+            s = e.elts;
+            break;
+        case astnodes.Tuple:
+            if (e.elts.length === 0)
+                throw syntaxError("can't assign to ()", c.c_filename, n.lineno);
+            e.ctx = ctx;
+            s = e.elts;
+            break;
+        case astnodes.Lambda:
+            exprName = "lambda";
+            break;
+        case astnodes.Call:
+            exprName = "function call";
+            break;
+        case astnodes.BoolOp:
+        case astnodes.BinOp:
+        case astnodes.UnaryOp:
+            exprName = "operator";
+            break;
+        case astnodes.GeneratorExp:
+            exprName = "generator expression";
+            break;
+        case astnodes.Yield:
+            exprName = "yield expression";
+            break;
+        case astnodes.ListComp:
+            exprName = "list comprehension";
+            break;
+        case astnodes.Dict:
+        case astnodes.Num:
+        case astnodes.Str:
+            exprName = "literal";
+            break;
+        case astnodes.Compare:
+            exprName = "comparison expression";
+            break;
+        case astnodes.IfExp:
+            exprName = "conditional expression";
+            break;
+        default:
+            asserts.fail("unhandled expression in assignment");
+    }
+    if (exprName) {
+        throw syntaxError("can't " + (ctx === astnodes.Store ? "assign to" : "delete") + " " + exprName, c.c_filename, n.lineno);
+    }
+
+    if (s) {
+        for (var i = 0; i < s.length; ++i) {
+            setContext(c, s[i], ctx, n);
+        }
+    }
+}
+
+var operatorMap = {};
+(function () {
+    operatorMap[TOK.T_VBAR] = astnodes.BitOr;
+    operatorMap[TOK.T_VBAR] = astnodes.BitOr;
+    operatorMap[TOK.T_CIRCUMFLEX] = astnodes.BitXor;
+    operatorMap[TOK.T_AMPER] = astnodes.BitAnd;
+    operatorMap[TOK.T_LEFTSHIFT] = astnodes.LShift;
+    operatorMap[TOK.T_RIGHTSHIFT] = astnodes.RShift;
+    operatorMap[TOK.T_PLUS] = astnodes.Add;
+    operatorMap[TOK.T_MINUS] = astnodes.Sub;
+    operatorMap[TOK.T_STAR] = astnodes.Mult;
+    operatorMap[TOK.T_SLASH] = astnodes.Div;
+    operatorMap[TOK.T_DOUBLESLASH] = astnodes.FloorDiv;
+    operatorMap[TOK.T_PERCENT] = astnodes.Mod;
+}());
+
+function getOperator(n) {
+    asserts.assert(operatorMap[n.type] !== undefined);
+    return operatorMap[n.type];
+}
+
+function astForCompOp(c, n) {
+    REQ(n, SYM.comp_op);
+    if (NCH(n) === 1) {
+        n = CHILD(n, 0);
+        switch (n.type) {
+            case TOK.T_LESS:
+                return astnodes.Lt;
+            case TOK.T_GREATER:
+                return astnodes.Gt;
+            case TOK.T_EQEQUAL:
+                return astnodes.Eq;
+            case TOK.T_LESSEQUAL:
+                return astnodes.LtE;
+            case TOK.T_GREATEREQUAL:
+                return astnodes.GtE;
+            case TOK.T_NOTEQUAL:
+                return astnodes.NotEq;
+            case TOK.T_NAME:
+                if (n.value === "in")
+                    return astnodes.In_;
+                if (n.value === "is")
+                    return astnodes.Is;
+        }
+    } else if (NCH(n) === 2) {
+        if (CHILD(n, 0).type === TOK.T_NAME) {
+            if (CHILD(n, 1).value === "in")
+                return astnodes.NotIn;
+            if (CHILD(n, 0).value === "is")
+                return astnodes.IsNot;
+        }
+    }
+    asserts.fail("invalid comp_op");
+}
+
+function seqForTestlist(c, n) {
+    asserts.assert(n.type === SYM.testlist || n.type === SYM.listmaker || n.type === SYM.testlist_gexp || n.type === SYM.testlist_safe || n.type === SYM.testlist1);
+    var seq = [];
+    for (var i = 0; i < NCH(n); i += 2) {
+        asserts.assert(CHILD(n, i).type === SYM.IfExpr || CHILD(n, i).type === SYM.old_test);
+        seq[i / 2] = astForExpr(c, CHILD(n, i));
+    }
+    return seq;
+}
+
+function astForSuite(c, n) {
+    REQ(n, SYM.suite);
+    var seq = [];
+    var pos = 0;
+    var ch;
+    if (CHILD(n, 0).type === SYM.simple_stmt) {
+        n = CHILD(n, 0);
+        var end = NCH(n) - 1;
+        if (CHILD(n, end - 1).type === TOK.T_SEMI)
+            end -= 1;
+        for (var i = 0; i < end; i += 2)
+            seq[pos++] = astForStmt(c, CHILD(n, i));
+    } else {
+        for (var i = 2; i < NCH(n) - 1; ++i) {
+            ch = CHILD(n, i);
+            REQ(ch, SYM.stmt);
+            var num = numStmts(ch);
+            if (num === 1) {
+                seq[pos++] = astForStmt(c, ch);
+            } else {
+                ch = CHILD(ch, 0);
+                REQ(ch, SYM.simple_stmt);
+                for (var j = 0; j < NCH(ch); j += 2) {
+                    if (NCH(CHILD(ch, j)) === 0) {
+                        asserts.assert(j + 1 === NCH(ch));
+                        break;
+                    }
+                    seq[pos++] = astForStmt(c, CHILD(ch, j));
+                }
+            }
+        }
+    }
+    asserts.assert(pos === numStmts(n));
+    return seq;
+}
+
+function astForExceptClause(c, exc, body) {
+    REQ(exc, SYM.except_clause);
+    REQ(body, SYM.suite);
+    if (NCH(exc) === 1)
+        return new astnodes.ExceptHandler(null, null, astForSuite(c, body), exc.lineno, exc.col_offset);
+    else if (NCH(exc) === 2)
+        return new astnodes.ExceptHandler(astForExpr(c, CHILD(exc, 1)), null, astForSuite(c, body), exc.lineno, exc.col_offset);
+    else if (NCH(exc) === 4) {
+        var e = astForExpr(c, CHILD(exc, 3));
+        setContext(c, e, astnodes.Store, CHILD(exc, 3));
+        return new astnodes.ExceptHandler(astForExpr(c, CHILD(exc, 1)), e, astForSuite(c, body), exc.lineno, exc.col_offset);
+    }
+    asserts.fail("wrong number of children for except clause");
+}
+
+function astForTryStmt(c, n) {
+    var nc = NCH(n);
+    var nexcept = (nc - 3) / 3;
+    var body, orelse = [], finally_ = null;
+
+    REQ(n, SYM.try_stmt);
+    body = astForSuite(c, CHILD(n, 2));
+    if (CHILD(n, nc - 3).type === TOK.T_NAME) {
+        if (CHILD(n, nc - 3).value === "finally") {
+            if (nc >= 9 && CHILD(n, nc - 6).type === TOK.T_NAME) {
+                orelse = astForSuite(c, CHILD(n, nc - 4));
+                nexcept--;
+            }
+
+            finally_ = astForSuite(c, CHILD(n, nc - 1));
+            nexcept--;
+        } else {
+            orelse = astForSuite(c, CHILD(n, nc - 1));
+            nexcept--;
+        }
+    } else if (CHILD(n, nc - 3).type !== SYM.except_clause) {
+        throw syntaxError("malformed 'try' statement", c.c_filename, n.lineno);
+    }
+
+    if (nexcept > 0) {
+        var handlers = [];
+        for (var i = 0; i < nexcept; ++i)
+            handlers[i] = astForExceptClause(c, CHILD(n, 3 + i * 3), CHILD(n, 5 + i * 3));
+        var exceptSt = new astnodes.TryExcept(body, handlers, orelse, n.lineno, n.col_offset);
+
+        if (!finally_)
+            return exceptSt;
+        body = [exceptSt];
+    }
+
+    asserts.assert(finally_ !== null);
+    return new astnodes.TryFinally(body, finally_, n.lineno, n.col_offset);
+}
+
+function astForDottedName(c, n) {
+    REQ(n, SYM.dotted_name);
+    var lineno = n.lineno;
+    var col_offset = n.col_offset;
+    var id = strobj(CHILD(n, 0).value);
+    var e = new astnodes.Name(id, astnodes.Load, lineno, col_offset);
+    for (var i = 2; i < NCH(n); i += 2) {
+        id = strobj(CHILD(n, i).value);
+        e = new astnodes.Attribute(e, id, astnodes.Load, lineno, col_offset);
+    }
+    return e;
+}
+
+function astForDecorator(c, n) {
+    REQ(n, SYM.decorator);
+    REQ(CHILD(n, 0), TOK.T_AT);
+    REQ(CHILD(n, NCH(n) - 1), TOK.T_NEWLINE);
+    var nameExpr = astForDottedName(c, CHILD(n, 1));
+    var d;
+    if (NCH(n) === 3)
+        return nameExpr;
+    else if (NCH(n) === 5)
+        return new astnodes.Call(nameExpr, [], [], null, null, n.lineno, n.col_offset);
+    else
+        return astForCall(c, CHILD(n, 3), nameExpr);
+}
+
+function astForDecorators(c, n) {
+    REQ(n, SYM.decorators);
+    var decoratorSeq = [];
+    for (var i = 0; i < NCH(n); ++i)
+        decoratorSeq[i] = astForDecorator(c, CHILD(n, i));
+    return decoratorSeq;
+}
+
+function astForDecorated(c, n) {
+    REQ(n, SYM.decorated);
+    var decoratorSeq = astForDecorators(c, CHILD(n, 0));
+    asserts.assert(CHILD(n, 1).type === SYM.funcdef || CHILD(n, 1).type === SYM.classdef);
+
+    var thing = null;
+    if (CHILD(n, 1).type === SYM.funcdef)
+        thing = astForFuncdef(c, CHILD(n, 1), decoratorSeq);
+    else if (CHILD(n, 1).type === SYM.classdef)
+        thing = astForClassdef(c, CHILD(n, 1), decoratorSeq);
+    if (thing) {
+        thing.lineno = n.lineno;
+        thing.col_offset = n.col_offset;
+    }
+    return thing;
+}
+
+function astForWithVar(c, n) {
+    REQ(n, SYM.with_var);
+    return astForExpr(c, CHILD(n, 1));
+}
+
+function astForWithStmt(c, n) {
+    var suiteIndex = 3;
+    asserts.assert(n.type === SYM.with_stmt);
+    var contextExpr = astForExpr(c, CHILD(n, 1));
+    if (CHILD(n, 2).type === SYM.with_var) {
+        var optionalVars = astForWithVar(c, CHILD(n, 2));
+        setContext(c, optionalVars, astnodes.Store, n);
+        suiteIndex = 4;
+    }
+    return new astnodes.With_(contextExpr, optionalVars, astForSuite(c, CHILD(n, suiteIndex)), n.lineno, n.col_offset);
+}
+
+function astForExecStmt(c, n) {
+    var expr1;
+    var globals = null, locals = null;
+    var nchildren = NCH(n);
+    asserts.assert(nchildren === 2 || nchildren === 4 || nchildren === 6);
+    REQ(n, SYM.exec_stmt);
+    var expr1 = astForExpr(c, CHILD(n, 1));
+    if (nchildren >= 4)
+        globals = astForExpr(c, CHILD(n, 3));
+    if (nchildren === 6)
+        locals = astForExpr(c, CHILD(n, 5));
+    return new astnodes.Exec(expr1, globals, locals, n.lineno, n.col_offset);
+}
+
+function astForIfStmt(c, n) {
+    REQ(n, SYM.if_stmt);
+    if (NCH(n) === 4)
+        return new astnodes.If_(astForExpr(c, CHILD(n, 1)), astForSuite(c, CHILD(n, 3)), [], n.lineno, n.col_offset);
+
+    var s = CHILD(n, 4).value;
+    var decider = s.charAt(2);
+    if (decider === 's') {
+        return new astnodes.If_(astForExpr(c, CHILD(n, 1)), astForSuite(c, CHILD(n, 3)), astForSuite(c, CHILD(n, 6)), n.lineno, n.col_offset);
+    } else if (decider === 'i') {
+        var nElif = NCH(n) - 4;
+        var hasElse = false;
+        var orelse = [];
+        if (CHILD(n, nElif + 1).type === TOK.T_NAME && CHILD(n, nElif + 1).value.charAt(2) === 's') {
+            hasElse = true;
+            nElif -= 3;
+        }
+        nElif /= 4;
+
+        if (hasElse) {
+            orelse = [new astnodes.If_(astForExpr(c, CHILD(n, NCH(n) - 6)), astForSuite(c, CHILD(n, NCH(n) - 4)), astForSuite(c, CHILD(n, NCH(n) - 1)), CHILD(n, NCH(n) - 6).lineno, CHILD(n, NCH(n) - 6).col_offset)];
+            nElif--;
+        }
+
+        for (var i = 0; i < nElif; ++i) {
+            var off = 5 + (nElif - i - 1) * 4;
+            orelse = [new astnodes.If_(astForExpr(c, CHILD(n, off)), astForSuite(c, CHILD(n, off + 2)), orelse, CHILD(n, off).lineno, CHILD(n, off).col_offset)];
+        }
+        return new astnodes.If_(astForExpr(c, CHILD(n, 1)), astForSuite(c, CHILD(n, 3)), orelse, n.lineno, n.col_offset);
+    }
+    asserts.fail("unexpected token in 'if' statement");
+}
+
+function astForExprlist(c, n, context) {
+    REQ(n, SYM.ExprList);
+    var seq = [];
+    for (var i = 0; i < NCH(n); i += 2) {
+        var e = astForExpr(c, CHILD(n, i));
+        seq[i / 2] = e;
+        if (context)
+            setContext(c, e, context, CHILD(n, i));
+    }
+    return seq;
+}
+
+function astForDelStmt(c, n) {
+    REQ(n, SYM.del_stmt);
+    return new astnodes.Delete_(astForExprlist(c, CHILD(n, 1), astnodes.Del), n.lineno, n.col_offset);
+}
+
+function astForGlobalStmt(c, n) {
+    REQ(n, SYM.GlobalStmt);
+    var s = [];
+    for (var i = 1; i < NCH(n); i += 2) {
+        s[(i - 1) / 2] = strobj(CHILD(n, i).value);
+    }
+    return new astnodes.Global(s, n.lineno, n.col_offset);
+}
+
+function astForNonLocalStmt(c, n) {
+    REQ(n, SYM.NonLocalStmt);
+    var s = [];
+    for (var i = 1; i < NCH(n); i += 2) {
+        s[(i - 1) / 2] = strobj(CHILD(n, i).value);
+    }
+    return new astnodes.NonLocal(s, n.lineno, n.col_offset);
+}
+
+function astForAssertStmt(c, n) {
+    REQ(n, SYM.assert_stmt);
+    if (NCH(n) === 2)
+        return new astnodes.Assert(astForExpr(c, CHILD(n, 1)), null, n.lineno, n.col_offset);
+    else if (NCH(n) === 4)
+        return new astnodes.Assert(astForExpr(c, CHILD(n, 1)), astForExpr(c, CHILD(n, 3)), n.lineno, n.col_offset);
+    asserts.fail("improper number of parts to assert stmt");
+}
+
+function aliasForImportName(c, n) {
+    loop:
+    while (true) {
+        switch (n.type) {
+            case SYM.import_as_name:
+                var str = null;
+                var name = strobj(CHILD(n, 0).value);
+                if (NCH(n) === 3)
+                    str = CHILD(n, 2).value;
+                return new astnodes.Alias(name, str == null ? null : strobj(str));
+            case SYM.dotted_as_name:
+                if (NCH(n) === 1) {
+                    n = CHILD(n, 0);
+                    continue loop;
+                } else {
+                    var a = aliasForImportName(c, CHILD(n, 0));
+                    asserts.assert(!a.asname);
+                    a.asname = strobj(CHILD(n, 2).value);
+                    return a;
+                }
+            case SYM.dotted_name:
+                if (NCH(n) === 1)
+                    return new astnodes.Alias(strobj(CHILD(n, 0).value), null);
+                else {
+                    var str = '';
+                    for (var i = 0; i < NCH(n); i += 2)
+                        str += CHILD(n, i).value + ".";
+                    return new astnodes.Alias(strobj(str.substr(0, str.length - 1)), null);
+                }
+            case TOK.T_STAR:
+                return new astnodes.Alias(strobj("*"), null);
+            default:
+                throw syntaxError("unexpected import name", c.c_filename, n.lineno);
+        }
+        break;
+    }
+}
+
+function astForImportStmt(c, n) {
+    REQ(n, SYM.import_stmt);
+    var lineno = n.lineno;
+    var col_offset = n.col_offset;
+    n = CHILD(n, 0);
+    if (n.type === SYM.import_name) {
+        n = CHILD(n, 1);
+        REQ(n, SYM.dotted_as_names);
+        var aliases = [];
+        for (var i = 0; i < NCH(n); i += 2)
+            aliases[i / 2] = aliasForImportName(c, CHILD(n, i));
+        return new astnodes.Import_(aliases, lineno, col_offset);
+    } else if (n.type === SYM.import_from) {
+        var mod = null;
+        var ndots = 0;
+        var nchildren;
+
+        for (var idx = 1; idx < NCH(n); ++idx) {
+            if (CHILD(n, idx).type === SYM.dotted_name) {
+                mod = aliasForImportName(c, CHILD(n, idx));
+                idx++;
+                break;
+            } else if (CHILD(n, idx).type !== TOK.T_DOT)
+                break;
+            ndots++;
+        }
+        ++idx; // skip the import keyword
+        switch (CHILD(n, idx).type) {
+            case TOK.T_STAR:
+                n = CHILD(n, idx);
+                nchildren = 1;
+                break;
+            case TOK.T_LPAR:
+                n = CHILD(n, idx + 1);
+                nchildren = NCH(n);
+                break;
+            case SYM.import_as_names:
+                n = CHILD(n, idx);
+                nchildren = NCH(n);
+                if (nchildren % 2 === 0)
+                    throw syntaxError("trailing comma not allowed without surrounding parentheses", c.c_filename, n.lineno);
+                break;
+            default:
+                throw syntaxError("Unexpected node-type in from-import", c.c_filename, n.lineno);
+        }
+        var aliases = [];
+        if (n.type === TOK.T_STAR)
+            aliases[0] = aliasForImportName(c, n);
+        else
+            for (var i = 0; i < NCH(n); i += 2)
+                aliases[i / 2] = aliasForImportName(c, CHILD(n, i));
+        var modname = mod ? mod.name : "";
+        return new astnodes.ImportFrom(strobj(modname), aliases, ndots, lineno, col_offset);
+    }
+    throw syntaxError("unknown import statement", c.c_filename, n.lineno);
+}
+
+function astForTestlistGexp(c, n) {
+    asserts.assert(n.type === SYM.testlist_gexp || n.type === SYM.argument);
+    if (NCH(n) > 1 && CHILD(n, 1).type === SYM.gen_for)
+        return astForGenexp(c, n);
+    return astForTestlist(c, n);
+}
+
+function astForListcomp(c, n) {
+    function countListFors(c, n) {
+        var nfors = 0;
+        var ch = CHILD(n, 1);
+        count_list_for:
+        while (true) {
+            nfors++;
+            REQ(ch, SYM.list_for);
+            if (NCH(ch) === 5)
+                ch = CHILD(ch, 4);
+            else
+                return nfors;
+            count_list_iter:
+            while (true) {
+                REQ(ch, SYM.list_iter);
+                ch = CHILD(ch, 0);
+                if (ch.type === SYM.list_for)
+                    continue count_list_for;
+                else if (ch.type === SYM.list_if) {
+                    if (NCH(ch) === 3) {
+                        ch = CHILD(ch, 2);
+                        continue count_list_iter;
+                    } else
+                        return nfors;
+                }
+                break;
+            }
+            break;
+        }
+    }
+
+    function countListIfs(c, n) {
+        var nifs = 0;
+        while (true) {
+            REQ(n, SYM.list_iter);
+            if (CHILD(n, 0).type === SYM.list_for)
+                return nifs;
+            n = CHILD(n, 0);
+            REQ(n, SYM.list_if);
+            nifs++;
+            if (NCH(n) == 2)
+                return nifs;
+            n = CHILD(n, 2);
+        }
+    }
+
+    REQ(n, SYM.listmaker);
+    asserts.assert(NCH(n) > 1);
+    var elt = astForExpr(c, CHILD(n, 0));
+    var nfors = countListFors(c, n);
+    var listcomps = [];
+    var ch = CHILD(n, 1);
+    for (var i = 0; i < nfors; ++i) {
+        REQ(ch, SYM.list_for);
+        var forch = CHILD(ch, 1);
+        var t = astForExprlist(c, forch, astnodes.Store);
+        var expression = astForTestlist(c, CHILD(ch, 3));
+        var lc;
+        if (NCH(forch) === 1)
+            lc = new astnodes.Comprehension(t[0], expression, []);
+        else
+            lc = new astnodes.Comprehension(new astnodes.Tuple(t, astnodes.Store, ch.lineno, ch.col_offset), expression, []);
+
+        if (NCH(ch) === 5) {
+            ch = CHILD(ch, 4);
+            var nifs = countListIfs(c, ch);
+            var ifs = [];
+            for (var j = 0; j < nifs; ++j) {
+                REQ(ch, SYM.list_iter);
+                ch = CHILD(ch, 0);
+                REQ(ch, SYM.list_if);
+                ifs[j] = astForExpr(c, CHILD(ch, 1));
+                if (NCH(ch) === 3)
+                    ch = CHILD(ch, 2);
+            }
+            if (ch.type === SYM.list_iter)
+                ch = CHILD(ch, 0);
+            lc.ifs = ifs;
+        }
+        listcomps[i] = lc;
+    }
+    return new astnodes.ListComp(elt, listcomps, n.lineno, n.col_offset);
+}
+
+function astForUnaryExpr(c, n) {
+    if (CHILD(n, 0).type === TOK.T_MINUS && NCH(n) === 2) {
+        var pfactor = CHILD(n, 1);
+        if (pfactor.type === SYM.UnaryExpr && NCH(pfactor) === 1) {
+            var ppower = CHILD(pfactor, 0);
+            if (ppower.type === SYM.PowerExpr && NCH(ppower) === 1) {
+                var patom = CHILD(ppower, 0);
+                if (patom.type === SYM.AtomExpr) {
+                    var pnum = CHILD(patom, 0);
+                    if (pnum.type === TOK.T_NUMBER) {
+                        pnum.value = "-" + pnum.value;
+                        return astForAtomExpr(c, patom);
+                    }
+                }
+            }
+        }
+    }
+
+    var expression = astForExpr(c, CHILD(n, 1));
+    switch (CHILD(n, 0).type) {
+        case TOK.T_PLUS:
+            return new astnodes.UnaryOp(astnodes.UAdd, expression, n.lineno, n.col_offset);
+        case TOK.T_MINUS:
+            return new astnodes.UnaryOp(astnodes.USub, expression, n.lineno, n.col_offset);
+        case TOK.T_TILDE:
+            return new astnodes.UnaryOp(astnodes.Invert, expression, n.lineno, n.col_offset);
+    }
+
+    asserts.fail("unhandled UnaryExpr");
+}
+
+function astForForStmt(c, n) {
+    var seq = [];
+    REQ(n, SYM.for_stmt);
+    if (NCH(n) === 9)
+        seq = astForSuite(c, CHILD(n, 8));
+    var nodeTarget = CHILD(n, 1);
+    var _target = astForExprlist(c, nodeTarget, astnodes.Store);
+    var target;
+    if (NCH(nodeTarget) === 1)
+        target = _target[0];
+    else
+        target = new astnodes.Tuple(_target, astnodes.Store, n.lineno, n.col_offset);
+
+    return new astnodes.For_(target, astForTestlist(c, CHILD(n, 3)), astForSuite(c, CHILD(n, 5)), seq, n.lineno, n.col_offset);
+}
+
+function astForCall(c, n, func) {
+    REQ(n, SYM.arglist);
+    var nargs = 0;
+    var nkeywords = 0;
+    var ngens = 0;
+    for (var i = 0; i < NCH(n); ++i) {
+        var ch = CHILD(n, i);
+        if (ch.type === SYM.argument) {
+            if (NCH(ch) === 1)
+                nargs++;
+            else if (CHILD(ch, 1).type === SYM.gen_for)
+                ngens++;
+            else
+                nkeywords++;
+        }
+    }
+    if (ngens > 1 || (ngens && (nargs || nkeywords)))
+        throw syntaxError("Generator expression must be parenthesized if not sole argument", c.c_filename, n.lineno);
+    if (nargs + nkeywords + ngens > 255)
+        throw syntaxError("more than 255 arguments", c.c_filename, n.lineno);
+    var args = [];
+    var keywords = [];
+    nargs = 0;
+    nkeywords = 0;
+    var vararg = null;
+    var kwarg = null;
+    for (var i = 0; i < NCH(n); ++i) {
+        var ch = CHILD(n, i);
+        if (ch.type === SYM.argument) {
+            if (NCH(ch) === 1) {
+                if (nkeywords)
+                    throw syntaxError("non-keyword arg after keyword arg", c.c_filename, n.lineno);
+                if (vararg)
+                    throw syntaxError("only named arguments may follow *expression", c.c_filename, n.lineno);
+                args[nargs++] = astForExpr(c, CHILD(ch, 0));
+            } else if (CHILD(ch, 1).type === SYM.gen_for)
+                args[nargs++] = astForGenexp(c, ch);
+            else {
+                var e = astForExpr(c, CHILD(ch, 0));
+                if (e.constructor === astnodes.Lambda)
+                    throw syntaxError("lambda cannot contain assignment", c.c_filename, n.lineno);
+                else if (e.constructor !== astnodes.Name)
+                    throw syntaxError("keyword can't be an expression", c.c_filename, n.lineno);
+                var key = e.id;
+                forbiddenCheck(c, CHILD(ch, 0), key, n.lineno);
+                for (var k = 0; k < nkeywords; ++k) {
+                    var tmp = keywords[k].arg;
+                    if (tmp === key)
+                        throw syntaxError("keyword argument repeated", c.c_filename, n.lineno);
+                }
+                keywords[nkeywords++] = new astnodes.Keyword(key, astForExpr(c, CHILD(ch, 2)));
+            }
+        } else if (ch.type === TOK.T_STAR)
+            vararg = astForExpr(c, CHILD(n, ++i));
+        else if (ch.type === TOK.T_DOUBLESTAR)
+            kwarg = astForExpr(c, CHILD(n, ++i));
+    }
+    return new astnodes.Call(func, args, keywords, vararg, kwarg, func.lineno, func.col_offset);
+}
+
+function astForTrailer(c, n, leftExpr) {
+    REQ(n, SYM.trailer);
+    if (CHILD(n, 0).type === TOK.T_LPAR) {
+        if (NCH(n) === 2)
+            return new astnodes.Call(leftExpr, [], [], null, null, n.lineno, n.col_offset);
+        else
+            return astForCall(c, CHILD(n, 1), leftExpr);
+    } else if (CHILD(n, 0).type === TOK.T_DOT)
+        return new astnodes.Attribute(leftExpr, strobj(CHILD(n, 1).value), astnodes.Load, n.lineno, n.col_offset);
+    else {
+        REQ(CHILD(n, 0), TOK.T_LSQB);
+        REQ(CHILD(n, 2), TOK.T_RSQB);
+        n = CHILD(n, 1);
+        if (NCH(n) === 1)
+            return new astnodes.Subscript(leftExpr, astForSlice(c, CHILD(n, 0)), astnodes.Load, n.lineno, n.col_offset);
+        else {
+            var simple = true;
+            var slices = [];
+            for (var j = 0; j < NCH(n); j += 2) {
+                var slc = astForSlice(c, CHILD(n, j));
+                if (slc.constructor !== astnodes.Index)
+                    simple = false;
+                slices[j / 2] = slc;
+            }
+            if (!simple) {
+                return new astnodes.Subscript(leftExpr, new astnodes.ExtSlice(slices), astnodes.Load, n.lineno, n.col_offset);
+            }
+            var elts = [];
+            for (var j = 0; j < slices.length; ++j) {
+                var slc = slices[j];
+                asserts.assert(slc.constructor === astnodes.Index && slc.value !== null && slc.value !== undefined);
+                elts[j] = slc.value;
+            }
+            var e = new astnodes.Tuple(elts, astnodes.Load, n.lineno, n.col_offset);
+            return new astnodes.Subscript(leftExpr, new astnodes.Index(e), astnodes.Load, n.lineno, n.col_offset);
+        }
+    }
+}
+
+function astForFlowStmt(c, n) {
+    var ch;
+    REQ(n, SYM.flow_stmt);
+    ch = CHILD(n, 0);
+    switch (ch.type) {
+        case SYM.break_stmt:
+            return new astnodes.Break_(n.lineno, n.col_offset);
+        case SYM.continue_stmt:
+            return new astnodes.Continue_(n.lineno, n.col_offset);
+        case SYM.yield_stmt:
+            return new astnodes.Expr(astForExpr(c, CHILD(ch, 0)), n.lineno, n.col_offset);
+        case SYM.return_stmt:
+            if (NCH(ch) === 1)
+                return new astnodes.Return_(null, n.lineno, n.col_offset);
+            else
+                return new astnodes.Return_(astForTestlist(c, CHILD(ch, 1)), n.lineno, n.col_offset);
+        case SYM.raise_stmt:
+            if (NCH(ch) === 1)
+                return new astnodes.Raise(null, null, null, n.lineno, n.col_offset);
+            else if (NCH(ch) === 2)
+                return new astnodes.Raise(astForExpr(c, CHILD(ch, 1)), null, null, n.lineno, n.col_offset);
+            else if (NCH(ch) === 4)
+                return new astnodes.Raise(astForExpr(c, CHILD(ch, 1)), astForExpr(c, CHILD(ch, 3)), null, n.lineno, n.col_offset);
+            else if (NCH(ch) === 6)
+                return new astnodes.Raise(astForExpr(c, CHILD(ch, 1)), astForExpr(c, CHILD(ch, 3)), astForExpr(c, CHILD(ch, 5)), n.lineno, n.col_offset);
+        default:
+            asserts.fail("unexpected flow_stmt");
+    }
+    asserts.fail("unhandled flow statement");
+}
+
+function astForArguments(c, n) {
+    var ch;
+    var vararg = null;
+    var kwarg = null;
+    if (n.type === SYM.parameters) {
+        if (NCH(n) === 2)
+            return new astnodes.Arguments([], null, null, []);
+        n = CHILD(n, 1);
+    }
+    REQ(n, SYM.varargslist);
+
+    var args = [];
+    var defaults = [];
+    var foundDefault = false;
+    var i = 0;
+    var j = 0;
+    var k = 0;
+    while (i < NCH(n)) {
+        ch = CHILD(n, i);
+        switch (ch.type) {
+            case SYM.fpdef:
+                var complexArgs = 0;
+                var parenthesized = false;
+                handle_fpdef:
+                while (true) {
+                    if (i + 1 < NCH(n) && CHILD(n, i + 1).type === TOK.T_EQUAL) {
+                        defaults[j++] = astForExpr(c, CHILD(n, i + 2));
+                        i += 2;
+                        foundDefault = true;
+                    } else if (foundDefault) {
+                        if (parenthesized && !complexArgs)
+                            throw syntaxError("parenthesized arg with default", c.c_filename, n.lineno);
+                        throw syntaxError("non-default argument follows default argument", c.c_filename, n.lineno);
+                    }
+
+                    if (NCH(ch) === 3) {
+                        ch = CHILD(ch, 1);
+                        if (NCH(ch) !== 1) {
+                            throw syntaxError("tuple parameter unpacking has been removed", c.c_filename, n.lineno);
+                        } else {
+                            parenthesized = true;
+                            ch = CHILD(ch, 0);
+                            asserts.assert(ch.type === SYM.fpdef);
+                            continue handle_fpdef;
+                        }
+                    }
+                    if (CHILD(ch, 0).type === TOK.T_NAME) {
+                        forbiddenCheck(c, n, CHILD(ch, 0).value, n.lineno);
+                        var id = strobj(CHILD(ch, 0).value);
+                        args[k++] = new astnodes.Name(id, astnodes.Param, ch.lineno, ch.col_offset);
+                    }
+                    i += 2;
+                    if (parenthesized)
+                        throw syntaxError("parenthesized argument names are invalid", c.c_filename, n.lineno);
+                    break;
+                }
+                break;
+            case TOK.T_STAR:
+                forbiddenCheck(c, CHILD(n, i + 1), CHILD(n, i + 1).value, n.lineno);
+                vararg = strobj(CHILD(n, i + 1).value);
+                i += 3;
+                break;
+            case TOK.T_DOUBLESTAR:
+                forbiddenCheck(c, CHILD(n, i + 1), CHILD(n, i + 1).value, n.lineno);
+                kwarg = strobj(CHILD(n, i + 1).value);
+                i += 3;
+                break;
+            default:
+                asserts.fail("unexpected node in varargslist");
+        }
+    }
+    return new astnodes.Arguments(args, vararg, kwarg, defaults);
+}
+
+function astForFuncdef(c, n, decoratorSeq) {
+    REQ(n, SYM.funcdef);
+    var name = strobj(CHILD(n, 1).value);
+    forbiddenCheck(c, CHILD(n, 1), CHILD(n, 1).value, n.lineno);
+    var args = astForArguments(c, CHILD(n, 2));
+    var body = astForSuite(c, CHILD(n, 4));
+    return new astnodes.FunctionDef(name, args, body, decoratorSeq, n.lineno, n.col_offset);
+}
+
+function astForClassBases(c, n) {
+    asserts.assert(NCH(n) > 0);
+    REQ(n, SYM.testlist);
+    if (NCH(n) === 1)
+        return [astForExpr(c, CHILD(n, 0))];
+    return seqForTestlist(c, n);
+}
+
+function astForClassdef(c, n, decoratorSeq) {
+    REQ(n, SYM.classdef);
+    forbiddenCheck(c, n, CHILD(n, 1).value, n.lineno);
+    var classname = strobj(CHILD(n, 1).value);
+    if (NCH(n) === 4)
+        return new astnodes.ClassDef(classname, [], astForSuite(c, CHILD(n, 3)), decoratorSeq, n.lineno, n.col_offset);
+    if (CHILD(n, 3).type === TOK.T_RPAR)
+        return new astnodes.ClassDef(classname, [], astForSuite(c, CHILD(n, 5)), decoratorSeq, n.lineno, n.col_offset);
+
+    var bases = astForClassBases(c, CHILD(n, 3));
+    var s = astForSuite(c, CHILD(n, 6));
+    return new astnodes.ClassDef(classname, bases, s, decoratorSeq, n.lineno, n.col_offset);
+}
+
+function astForLambdef(c, n) {
+    var args;
+    var expression;
+    if (NCH(n) === 3) {
+        args = new astnodes.Arguments([], null, null, []);
+        expression = astForExpr(c, CHILD(n, 2));
+    } else {
+        args = astForArguments(c, CHILD(n, 1));
+        expression = astForExpr(c, CHILD(n, 3));
+    }
+    return new astnodes.Lambda(args, expression, n.lineno, n.col_offset);
+}
+
+function astForGenexp(c, n) {
+    asserts.assert(n.type === SYM.testlist_gexp || n.type === SYM.argument);
+    asserts.assert(NCH(n) > 1);
+
+    function countGenFors(c, n) {
+        var nfors = 0;
+        var ch = CHILD(n, 1);
+        count_gen_for:
+        while (true) {
+            nfors++;
+            REQ(ch, SYM.gen_for);
+            if (NCH(ch) === 5)
+                ch = CHILD(ch, 4);
+            else
+                return nfors;
+            count_gen_iter:
+            while (true) {
+                REQ(ch, SYM.gen_iter);
+                ch = CHILD(ch, 0);
+                if (ch.type === SYM.gen_for)
+                    continue count_gen_for;
+                else if (ch.type === SYM.gen_if) {
+                    if (NCH(ch) === 3) {
+                        ch = CHILD(ch, 2);
+                        continue count_gen_iter;
+                    } else
+                        return nfors;
+                }
+                break;
+            }
+            break;
+        }
+        asserts.fail("logic error in countGenFors");
+    }
+
+    function countGenIfs(c, n) {
+        var nifs = 0;
+        while (true) {
+            REQ(n, SYM.gen_iter);
+            if (CHILD(n, 0).type === SYM.gen_for)
+                return nifs;
+            n = CHILD(n, 0);
+            REQ(n, SYM.gen_if);
+            nifs++;
+            if (NCH(n) == 2)
+                return nifs;
+            n = CHILD(n, 2);
+        }
+    }
+
+    var elt = astForExpr(c, CHILD(n, 0));
+    var nfors = countGenFors(c, n);
+    var genexps = [];
+    var ch = CHILD(n, 1);
+    for (var i = 0; i < nfors; ++i) {
+        REQ(ch, SYM.gen_for);
+        var forch = CHILD(ch, 1);
+        var t = astForExprlist(c, forch, astnodes.Store);
+        var expression = astForExpr(c, CHILD(ch, 3));
+        var ge;
+        if (NCH(forch) === 1)
+            ge = new astnodes.Comprehension(t[0], expression, []);
+        else
+            ge = new astnodes.Comprehension(new astnodes.Tuple(t, astnodes.Store, ch.lineno, ch.col_offset), expression, []);
+        if (NCH(ch) === 5) {
+            ch = CHILD(ch, 4);
+            var nifs = countGenIfs(c, ch);
+            var ifs = [];
+            for (var j = 0; j < nifs; ++j) {
+                REQ(ch, SYM.gen_iter);
+                ch = CHILD(ch, 0);
+                REQ(ch, SYM.gen_if);
+                expression = astForExpr(c, CHILD(ch, 1));
+                ifs[j] = expression;
+                if (NCH(ch) === 3)
+                    ch = CHILD(ch, 2);
+            }
+            if (ch.type === SYM.gen_iter)
+                ch = CHILD(ch, 0);
+            ge.ifs = ifs;
+        }
+        genexps[i] = ge;
+    }
+    return new astnodes.GeneratorExp(elt, genexps, n.lineno, n.col_offset);
+}
+
+function astForWhileStmt(c, n) {
+    REQ(n, SYM.while_stmt);
+    if (NCH(n) === 4)
+        return new astnodes.While_(astForExpr(c, CHILD(n, 1)), astForSuite(c, CHILD(n, 3)), [], n.lineno, n.col_offset);
+    else if (NCH(n) === 7)
+        return new astnodes.While_(astForExpr(c, CHILD(n, 1)), astForSuite(c, CHILD(n, 3)), astForSuite(c, CHILD(n, 6)), n.lineno, n.col_offset);
+    asserts.fail("wrong number of tokens for 'while' stmt");
+}
+
+function astForAugassign(c, n) {
+    REQ(n, SYM.augassign);
+    n = CHILD(n, 0);
+    switch (n.value.charAt(0)) {
+        case '+':
+            return astnodes.Add;
+        case '-':
+            return astnodes.Sub;
+        case '/':
+            if (n.value.charAt(1) === '/')
+                return astnodes.FloorDiv;
+            return astnodes.Div;
+        case '%':
+            return astnodes.Mod;
+        case '<':
+            return astnodes.LShift;
+        case '>':
+            return astnodes.RShift;
+        case '&':
+            return astnodes.BitAnd;
+        case '^':
+            return astnodes.BitXor;
+        case '|':
+            return astnodes.BitOr;
+        case '*':
+            if (n.value.charAt(1) === '*')
+                return astnodes.Pow;
+            return astnodes.Mult;
+        default:
+            asserts.fail("invalid augassign");
+    }
+}
+
+function astForBinop(c, n) {
+    var result = new astnodes.BinOp(astForExpr(c, CHILD(n, 0)), getOperator(CHILD(n, 1)), astForExpr(c, CHILD(n, 2)), n.lineno, n.col_offset);
+    var nops = (NCH(n) - 1) / 2;
+    for (var i = 1; i < nops; ++i) {
+        var nextOper = CHILD(n, i * 2 + 1);
+        var newoperator = getOperator(nextOper);
+        var tmp = astForExpr(c, CHILD(n, i * 2 + 2));
+        result = new astnodes.BinOp(result, newoperator, tmp, nextOper.lineno, nextOper.col_offset);
+    }
+    return result;
+}
+
+function astForTestlist(c, n) {
+    asserts.assert(NCH(n) > 0);
+    if (n.type === SYM.testlist_gexp) {
+        if (NCH(n) > 1) {
+            asserts.assert(CHILD(n, 1).type !== SYM.gen_for);
+        }
+    } else {
+        asserts.assert(n.type === SYM.testlist || n.type === SYM.testlist_safe || n.type === SYM.testlist1);
+    }
+
+    if (NCH(n) === 1) {
+        return astForExpr(c, CHILD(n, 0));
+    } else {
+        return new astnodes.Tuple(seqForTestlist(c, n), astnodes.Load, n.lineno, n.col_offset);
+    }
+}
+
+function astForExprStmt(c, n) {
+    REQ(n, SYM.ExprStmt);
+    if (NCH(n) === 1)
+        return new astnodes.Expr(astForTestlist(c, CHILD(n, 0)), n.lineno, n.col_offset);
+    else if (CHILD(n, 1).type === SYM.augassign) {
+        var ch = CHILD(n, 0);
+        var expr1 = astForTestlist(c, ch);
+        switch (expr1.constructor) {
+            case astnodes.GeneratorExp:
+                throw syntaxError("augmented assignment to generator expression not possible", c.c_filename, n.lineno);
+            case astnodes.Yield:
+                throw syntaxError("augmented assignment to yield expression not possible", c.c_filename, n.lineno);
+            case astnodes.Name:
+                var varName = expr1.id;
+                forbiddenCheck(c, ch, varName, n.lineno);
+                break;
+            case astnodes.Attribute:
+            case astnodes.Subscript:
+                break;
+            default:
+                throw syntaxError("illegal expression for augmented assignment", c.c_filename, n.lineno);
+        }
+        setContext(c, expr1, astnodes.Store, ch);
+
+        ch = CHILD(n, 2);
+        var expr2;
+        if (ch.type === SYM.testlist)
+            expr2 = astForTestlist(c, ch);
+        else
+            expr2 = astForExpr(c, ch);
+
+        return new astnodes.AugAssign(expr1, astForAugassign(c, CHILD(n, 1)), expr2, n.lineno, n.col_offset);
+    } else {
+        REQ(CHILD(n, 1), TOK.T_EQUAL);
+        var targets = [];
+        for (var i = 0; i < NCH(n) - 2; i += 2) {
+            var ch = CHILD(n, i);
+            if (ch.type === SYM.YieldExpr)
+                throw syntaxError("assignment to yield expression not possible", c.c_filename, n.lineno);
+            var e = astForTestlist(c, ch);
+            setContext(c, e, astnodes.Store, CHILD(n, i));
+            targets[i / 2] = e;
+        }
+        var value = CHILD(n, NCH(n) - 1);
+        var expression;
+        if (value.type === SYM.testlist)
+            expression = astForTestlist(c, value);
+        else
+            expression = astForExpr(c, value);
+        return new astnodes.Assign(targets, expression, n.lineno, n.col_offset);
+    }
+}
+
+function astForIfexpr(c, n) {
+    asserts.assert(NCH(n) === 5);
+    return new astnodes.IfExp(astForExpr(c, CHILD(n, 2)), astForExpr(c, CHILD(n, 0)), astForExpr(c, CHILD(n, 4)), n.lineno, n.col_offset);
+}
+function parsestr(c, s) {
+    var decodeUtf8 = function (s) {
+        return decodeURI(s);
+    };
+    var decodeEscape = function (s, quote) {
+        var len = s.length;
+        var ret = '';
+        for (var i = 0; i < len; ++i) {
+            var c = s.charAt(i);
+            if (c === '\\') {
+                ++i;
+                c = s.charAt(i);
+                if (c === 'n')
+                    ret += "\n";
+                else if (c === '\\')
+                    ret += "\\";
+                else if (c === 't')
+                    ret += "\t";
+                else if (c === 'r')
+                    ret += "\r";
+                else if (c === 'b')
+                    ret += "\b";
+                else if (c === 'f')
+                    ret += "\f";
+                else if (c === 'v')
+                    ret += "\v";
+                else if (c === '0')
+                    ret += "\0";
+                else if (c === '"')
+                    ret += '"';
+                else if (c === '\'')
+                    ret += '\'';
+                else if (c === '\n') {
+                } else if (c === 'x') {
+                    var d0 = s.charAt(++i);
+                    var d1 = s.charAt(++i);
+                    ret += String.fromCharCode(parseInt(d0 + d1, 16));
+                } else if (c === 'u' || c === 'U') {
+                    var d0 = s.charAt(++i);
+                    var d1 = s.charAt(++i);
+                    var d2 = s.charAt(++i);
+                    var d3 = s.charAt(++i);
+                    ret += String.fromCharCode(parseInt(d0 + d1, 16), parseInt(d2 + d3, 16));
+                } else {
+                    ret += "\\" + c;
+                }
+            } else {
+                ret += c;
+            }
+        }
+        return ret;
+    };
+
+    var quote = s.charAt(0);
+    var rawmode = false;
+
+    if (quote === 'u' || quote === 'U') {
+        s = s.substr(1);
+        quote = s.charAt(0);
+    } else if (quote === 'r' || quote === 'R') {
+        s = s.substr(1);
+        quote = s.charAt(0);
+        rawmode = true;
+    }
+    asserts.assert(quote !== 'b' && quote !== 'B', "todo; haven't done b'' strings yet");
+
+    asserts.assert(quote === "'" || quote === '"' && s.charAt(s.length - 1) === quote);
+    s = s.substr(1, s.length - 2);
+
+    if (s.length >= 4 && s.charAt(0) === quote && s.charAt(1) === quote) {
+        asserts.assert(s.charAt(s.length - 1) === quote && s.charAt(s.length - 2) === quote);
+        s = s.substr(2, s.length - 4);
+    }
+
+    if (rawmode || s.indexOf('\\') === -1) {
+        return strobj(decodeUtf8(s));
+    }
+    return strobj(decodeEscape(s, quote));
+}
+function parsestrplus(c, n) {
+    REQ(CHILD(n, 0), TOK.T_STRING);
+    var ret = "";
+    for (var i = 0; i < NCH(n); ++i) {
+        var child = CHILD(n, i);
+        try  {
+            ret = ret + parsestr(c, child.value);
+        } catch (x) {
+            throw syntaxError("invalid string (possibly contains a unicode character)", c.c_filename, child.lineno);
+        }
+    }
+    return ret;
+}
+
+function parsenumber(c, s, lineno) {
+    var end = s.charAt(s.length - 1);
+
+    if (end === 'j' || end === 'J') {
+        throw syntaxError("complex numbers are currently unsupported", c.c_filename, lineno);
+    }
+
+    if (s.indexOf('.') !== -1) {
+        return numericLiteral.floatAST(s);
+    }
+    var tmp = s;
+    var value;
+    var radix = 10;
+    var neg = false;
+    if (s.charAt(0) === '-') {
+        tmp = s.substr(1);
+        neg = true;
+    }
+
+    if (tmp.charAt(0) === '0' && (tmp.charAt(1) === 'x' || tmp.charAt(1) === 'X')) {
+        tmp = tmp.substring(2);
+        value = parseInt(tmp, 16);
+        radix = 16;
+    } else if ((s.indexOf('e') !== -1) || (s.indexOf('E') !== -1)) {
+        return numericLiteral.floatAST(s);
+    } else if (tmp.charAt(0) === '0' && (tmp.charAt(1) === 'b' || tmp.charAt(1) === 'B')) {
+        tmp = tmp.substring(2);
+        value = parseInt(tmp, 2);
+        radix = 2;
+    } else if (tmp.charAt(0) === '0') {
+        if (tmp === "0") {
+            value = 0;
+        } else {
+            if (end === 'l' || end === 'L') {
+                return numericLiteral.longAST(s.substr(0, s.length - 1), 8);
+            } else {
+                radix = 8;
+                tmp = tmp.substring(1);
+                if ((tmp.charAt(0) === 'o') || (tmp.charAt(0) === 'O')) {
+                    tmp = tmp.substring(1);
+                }
+                value = parseInt(tmp, 8);
+            }
+        }
+    } else {
+        if (end === 'l' || end === 'L') {
+            return numericLiteral.longAST(s.substr(0, s.length - 1), radix);
+        } else {
+            value = parseInt(tmp, radix);
+        }
+    }
+    if (value > LONG_THRESHOLD && Math.floor(value) === value && (s.indexOf('e') === -1 && s.indexOf('E') === -1)) {
+        return numericLiteral.longAST(s, 0);
+    }
+
+    if (end === 'l' || end === 'L') {
+        return numericLiteral.longAST(s.substr(0, s.length - 1), radix);
+    } else {
+        if (neg) {
+            return numericLiteral.intAST(-value);
+        } else {
+            return numericLiteral.intAST(value);
+        }
+    }
+}
+
+function astForSlice(c, n) {
+    REQ(n, SYM.subscript);
+
+    var ch = CHILD(n, 0);
+    var lower = null;
+    var upper = null;
+    var step = null;
+    if (ch.type === TOK.T_DOT)
+        return new astnodes.Ellipsis();
+    if (NCH(n) === 1 && ch.type === SYM.IfExpr)
+        return new astnodes.Index(astForExpr(c, ch));
+    if (ch.type === SYM.IfExpr)
+        lower = astForExpr(c, ch);
+    if (ch.type === TOK.T_COLON) {
+        if (NCH(n) > 1) {
+            var n2 = CHILD(n, 1);
+            if (n2.type === SYM.IfExpr)
+                upper = astForExpr(c, n2);
+        }
+    } else if (NCH(n) > 2) {
+        var n2 = CHILD(n, 2);
+        if (n2.type === SYM.IfExpr)
+            upper = astForExpr(c, n2);
+    }
+
+    ch = CHILD(n, NCH(n) - 1);
+    if (ch.type === SYM.sliceop) {
+        if (NCH(ch) === 1) {
+            ch = CHILD(ch, 0);
+            step = new astnodes.Name(strobj("None"), astnodes.Load, ch.lineno, ch.col_offset);
+        } else {
+            ch = CHILD(ch, 1);
+            if (ch.type === SYM.IfExpr)
+                step = astForExpr(c, ch);
+        }
+    }
+    return new astnodes.Slice(lower, upper, step);
+}
+
+function astForAtomExpr(c, n) {
+    var ch = CHILD(n, 0);
+    switch (ch.type) {
+        case TOK.T_NAME:
+            return new astnodes.Name(strobj(ch.value), astnodes.Load, n.lineno, n.col_offset);
+        case TOK.T_STRING:
+            return new astnodes.Str(parsestrplus(c, n), n.lineno, n.col_offset);
+        case TOK.T_NUMBER:
+            return new astnodes.Num(parsenumber(c, ch.value, n.lineno), n.lineno, n.col_offset);
+        case TOK.T_LPAR:
+            ch = CHILD(n, 1);
+            if (ch.type === TOK.T_RPAR)
+                return new astnodes.Tuple([], astnodes.Load, n.lineno, n.col_offset);
+            if (ch.type === SYM.YieldExpr)
+                return astForExpr(c, ch);
+            if (NCH(ch) > 1 && CHILD(ch, 1).type === SYM.gen_for)
+                return astForGenexp(c, ch);
+            return astForTestlistGexp(c, ch);
+        case TOK.T_LSQB:
+            ch = CHILD(n, 1);
+            if (ch.type === TOK.T_RSQB)
+                return new astnodes.List([], astnodes.Load, n.lineno, n.col_offset);
+            REQ(ch, SYM.listmaker);
+            if (NCH(ch) === 1 || CHILD(ch, 1).type === TOK.T_COMMA)
+                return new astnodes.List(seqForTestlist(c, ch), astnodes.Load, n.lineno, n.col_offset);
+            else
+                return astForListcomp(c, ch);
+        case TOK.T_LBRACE:
+            ch = CHILD(n, 1);
+            var size = Math.floor((NCH(ch) + 1) / 4);
+            var keys = [];
+            var values = [];
+            for (var i = 0; i < NCH(ch); i += 4) {
+                keys[i / 4] = astForExpr(c, CHILD(ch, i));
+                values[i / 4] = astForExpr(c, CHILD(ch, i + 2));
+            }
+            return new astnodes.Dict(keys, values, n.lineno, n.col_offset);
+        case TOK.T_BACKQUOTE:
+            throw syntaxError("backquote not supported, use repr()", c.c_filename, n.lineno);
+        default:
+            asserts.fail("unhandled atom", ch.type);
+    }
+}
+
+function astForPowerExpr(c, n) {
+    REQ(n, SYM.PowerExpr);
+    var e = astForAtomExpr(c, CHILD(n, 0));
+    if (NCH(n) === 1)
+        return e;
+    for (var i = 1; i < NCH(n); ++i) {
+        var ch = CHILD(n, i);
+        if (ch.type !== SYM.trailer)
+            break;
+        var tmp = astForTrailer(c, ch, e);
+        tmp.lineno = e.lineno;
+        tmp.col_offset = e.col_offset;
+        e = tmp;
+    }
+    if (CHILD(n, NCH(n) - 1).type === SYM.UnaryExpr) {
+        var f = astForExpr(c, CHILD(n, NCH(n) - 1));
+        e = new astnodes.BinOp(e, astnodes.Pow, f, n.lineno, n.col_offset);
+    }
+    return e;
+}
+
+function astForExpr(c, n) {
+    LOOP:
+    while (true) {
+        switch (n.type) {
+            case SYM.IfExpr:
+            case SYM.old_test:
+                if (CHILD(n, 0).type === SYM.LambdaExpr || CHILD(n, 0).type === SYM.old_LambdaExpr)
+                    return astForLambdef(c, CHILD(n, 0));
+                else if (NCH(n) > 1)
+                    return astForIfexpr(c, n);
+
+            case SYM.OrExpr:
+            case SYM.AndExpr:
+                if (NCH(n) === 1) {
+                    n = CHILD(n, 0);
+                    continue LOOP;
+                }
+                var seq = [];
+                for (var i = 0; i < NCH(n); i += 2)
+                    seq[i / 2] = astForExpr(c, CHILD(n, i));
+                if (CHILD(n, 1).value === "and")
+                    return new astnodes.BoolOp(astnodes.And, seq, n.lineno, n.col_offset);
+                asserts.assert(CHILD(n, 1).value === "or");
+                return new astnodes.BoolOp(astnodes.Or, seq, n.lineno, n.col_offset);
+            case SYM.NotExpr:
+                if (NCH(n) === 1) {
+                    n = CHILD(n, 0);
+                    continue LOOP;
+                } else {
+                    return new astnodes.UnaryOp(astnodes.Not, astForExpr(c, CHILD(n, 1)), n.lineno, n.col_offset);
+                }
+            case SYM.ComparisonExpr:
+                if (NCH(n) === 1) {
+                    n = CHILD(n, 0);
+                    continue LOOP;
+                } else {
+                    var ops = [];
+                    var cmps = [];
+                    for (var i = 1; i < NCH(n); i += 2) {
+                        ops[(i - 1) / 2] = astForCompOp(c, CHILD(n, i));
+                        cmps[(i - 1) / 2] = astForExpr(c, CHILD(n, i + 1));
+                    }
+                    return new astnodes.Compare(astForExpr(c, CHILD(n, 0)), ops, cmps, n.lineno, n.col_offset);
+                }
+            case SYM.ArithmeticExpr:
+            case SYM.GeometricExpr:
+            case SYM.ShiftExpr:
+            case SYM.BitwiseOrExpr:
+            case SYM.BitwiseXorExpr:
+            case SYM.BitwiseAndExpr:
+                if (NCH(n) === 1) {
+                    n = CHILD(n, 0);
+                    continue LOOP;
+                }
+                return astForBinop(c, n);
+            case SYM.YieldExpr:
+                var exp = null;
+                if (NCH(n) === 2) {
+                    exp = astForTestlist(c, CHILD(n, 1));
+                }
+                return new astnodes.Yield(exp, n.lineno, n.col_offset);
+            case SYM.UnaryExpr:
+                if (NCH(n) === 1) {
+                    n = CHILD(n, 0);
+                    continue LOOP;
+                }
+                return astForUnaryExpr(c, n);
+            case SYM.PowerExpr:
+                return astForPowerExpr(c, n);
+            default:
+                asserts.fail("unhandled expr", "n.type: %d", n.type);
+        }
+        break;
+    }
+}
+
+function astForPrintStmt(c, n) {
+    var start = 1;
+    var dest = null;
+    REQ(n, SYM.print_stmt);
+    if (NCH(n) >= 2 && CHILD(n, 1).type === TOK.T_RIGHTSHIFT) {
+        dest = astForExpr(c, CHILD(n, 2));
+        start = 4;
+    }
+    var seq = [];
+    for (var i = start, j = 0; i < NCH(n); i += 2, ++j) {
+        seq[j] = astForExpr(c, CHILD(n, i));
+    }
+    var nl = (CHILD(n, NCH(n) - 1)).type === TOK.T_COMMA ? false : true;
+    return new astnodes.Print(dest, seq, nl, n.lineno, n.col_offset);
+}
+
+function astForStmt(c, n) {
+    if (n.type === SYM.stmt) {
+        asserts.assert(NCH(n) === 1);
+        n = CHILD(n, 0);
+    }
+    if (n.type === SYM.simple_stmt) {
+        asserts.assert(numStmts(n) === 1);
+        n = CHILD(n, 0);
+    }
+    if (n.type === SYM.small_stmt) {
+        REQ(n, SYM.small_stmt);
+        n = CHILD(n, 0);
+        switch (n.type) {
+            case SYM.ExprStmt:
+                return astForExprStmt(c, n);
+            case SYM.print_stmt:
+                return astForPrintStmt(c, n);
+            case SYM.del_stmt:
+                return astForDelStmt(c, n);
+            case SYM.pass_stmt:
+                return new astnodes.Pass(n.lineno, n.col_offset);
+            case SYM.flow_stmt:
+                return astForFlowStmt(c, n);
+            case SYM.import_stmt:
+                return astForImportStmt(c, n);
+            case SYM.GlobalStmt:
+                return astForGlobalStmt(c, n);
+            case SYM.NonLocalStmt:
+                return astForNonLocalStmt(c, n);
+            case SYM.exec_stmt:
+                return astForExecStmt(c, n);
+            case SYM.assert_stmt:
+                return astForAssertStmt(c, n);
+            default:
+                asserts.fail("unhandled small_stmt");
+        }
+    } else {
+        var ch = CHILD(n, 0);
+        REQ(n, SYM.compound_stmt);
+        switch (ch.type) {
+            case SYM.if_stmt:
+                return astForIfStmt(c, ch);
+            case SYM.while_stmt:
+                return astForWhileStmt(c, ch);
+            case SYM.for_stmt:
+                return astForForStmt(c, ch);
+            case SYM.try_stmt:
+                return astForTryStmt(c, ch);
+            case SYM.with_stmt:
+                return astForWithStmt(c, ch);
+            case SYM.funcdef:
+                return astForFuncdef(c, ch, []);
+            case SYM.classdef:
+                return astForClassdef(c, ch, []);
+            case SYM.decorated:
+                return astForDecorated(c, ch);
+            default:
+                asserts.assert("unhandled compound_stmt");
+        }
+    }
+}
+
+function astFromParse(n, filename) {
+    var c = new Compiling("utf-8", filename);
+
+    var stmts = [];
+    var ch;
+    var k = 0;
+    switch (n.type) {
+        case SYM.file_input:
+            for (var i = 0; i < NCH(n) - 1; ++i) {
+                var ch = CHILD(n, i);
+                if (n.type === TOK.T_NEWLINE)
+                    continue;
+                REQ(ch, SYM.stmt);
+                var num = numStmts(ch);
+                if (num === 1) {
+                    stmts[k++] = astForStmt(c, ch);
+                } else {
+                    ch = CHILD(ch, 0);
+                    REQ(ch, SYM.simple_stmt);
+                    for (var j = 0; j < num; ++j) {
+                        stmts[k++] = astForStmt(c, CHILD(ch, j * 2));
+                    }
+                }
+            }
+            return new astnodes.Module(stmts);
+        case SYM.eval_input:
+            asserts.fail("todo;");
+        case SYM.single_input:
+            asserts.fail("todo;");
+        default:
+            asserts.fail("todo;");
+    }
+}
+exports.astFromParse = astFromParse;
+function astDump(node) {
+    var _format = function (node) {
+        if (node === null) {
+            return "None";
+        } else if (node.prototype && node.prototype._astname !== undefined && node.prototype._isenum) {
+            return node.prototype._astname + "()";
+        } else if (node._astname !== undefined) {
+            var fields = [];
+            for (var i = 0; i < node._fields.length; i += 2) {
+                var a = node._fields[i];
+                var b = node._fields[i + 1](node);
+                fields.push([a, _format(b)]);
+            }
+            var attrs = [];
+            for (var i = 0; i < fields.length; ++i) {
+                var field = fields[i];
+                attrs.push(field[0] + "=" + field[1].replace(/^\s+/, ''));
+            }
+            var fieldstr = attrs.join(',');
+            return node._astname + "(" + fieldstr + ")";
+        } else if (base.isArrayLike(node)) {
+            var elems = [];
+            for (var i = 0; i < node.length; ++i) {
+                var x = node[i];
+                elems.push(_format(x));
+            }
+            var elemsstr = elems.join(',');
+            return "[" + elemsstr.replace(/^\s+/, '') + "]";
+        } else {
+            var ret;
+            if (node === true)
+                ret = "True";
+            else if (node === false)
+                ret = "False";
+            else
+                ret = "" + node;
+            return ret;
+        }
+    };
+
+    var visitNode = function (node) {
+        switch (node.constructor) {
+            case astnodes.Module:
+                 {
+                    var module = node;
+                    return "Module(body=" + visitStmts(module.body) + ")";
+                }
+                break;
+            default: {
+                console.log("node.constructor: " + node.constructor);
+            }
+        }
+    };
+
+    var visitStmts = function (stmts) {
+        return "[" + stmts.map(function (stmt) {
+            return visitStmt(stmt);
+        }).join(', ') + "]";
+    };
+
+    var visitStmt = function (stmt) {
+        switch (stmt.constructor) {
+            case astnodes.FunctionDef:
+                 {
+                    var functionDef = stmt;
+                    return "FunctionDef(name=" + functionDef.name + ", lineno=" + functionDef.lineno + ", col_offset=" + functionDef.col_offset + ", body=" + visitStmts(functionDef.body) + ")";
+                }
+                break;
+            case astnodes.Assign: {
+                var assign = stmt;
+                return "Assign(targets=" + visitExprs(assign.targets) + ", value=" + visitExpr(assign.value) + ", lineno=" + assign.lineno + ", col_offset=" + assign.col_offset + ")";
+            }
+            case astnodes.Pass:
+                 {
+                    var pass = stmt;
+                    return "Pass()";
+                }
+                break;
+            default: {
+                console.log("stmt.constructor: " + stmt.constructor);
+            }
+        }
+    };
+
+    var visitExprs = function (exprs) {
+        return "[" + exprs.map(function (expr) {
+            return visitExpr(expr);
+        }).join(', ') + "]";
+    };
+
+    var visitExpr = function (expr) {
+        switch (expr.constructor) {
+            case astnodes.Name:
+                 {
+                    var name = expr;
+                    return "Name(id=" + name.id + ", lineno=" + name.lineno + ", col_offset=" + name.col_offset + ")";
+                }
+                break;
+            case astnodes.Num:
+                 {
+                    var num = expr;
+                    return "Num()";
+                }
+                break;
+            default: {
+                console.log("expr.constructor: " + expr.constructor);
+            }
+        }
+    };
+
+    return visitNode(node);
+}
+exports.astDump = astDump;
+});
+
+define("ace/mode/python/symtable",["require","exports","module","ace/mode/python/astnodes","ace/mode/python/base","ace/mode/python/asserts"], function(require, exports, module) {
+"no use strict";
+var astnodes = require('./astnodes');
+var base = require('./base');
+var asserts = require('./asserts');
+var DEF_GLOBAL = 1;
+var DEF_LOCAL = 2;
+var DEF_PARAM = 2 << 1;
+var USE = 2 << 2;
+var DEF_STAR = 2 << 3;
+var DEF_DOUBLESTAR = 2 << 4;
+var DEF_INTUPLE = 2 << 5;
+var DEF_FREE = 2 << 6;
+var DEF_FREE_GLOBAL = 2 << 7;
+var DEF_FREE_CLASS = 2 << 8;
+var DEF_IMPORT = 2 << 9;
+
+var DEF_BOUND = (DEF_LOCAL | DEF_PARAM | DEF_IMPORT);
+var SCOPE_OFF = 11;
+var SCOPE_MASK = 7;
+
+exports.LOCAL = 1;
+exports.GLOBAL_EXPLICIT = 2;
+exports.GLOBAL_IMPLICIT = 3;
+exports.FREE = 4;
+exports.CELL = 5;
+var OPT_IMPORT_STAR = 1;
+var OPT_EXEC = 2;
+var OPT_BARE_EXEC = 4;
+var OPT_TOPLEVEL = 8;
+
+var GENERATOR = 2;
+var GENERATOR_EXPRESSION = 2;
+
+var ModuleBlock = 'module';
+exports.FunctionBlock = 'function';
+var ClassBlock = 'class';
+function syntaxError(message, fileName, lineNumber) {
+    asserts.assert(base.isString(message), "message must be a string");
+    asserts.assert(base.isString(fileName), "fileName must be a string");
+    if (base.isDef(lineNumber)) {
+        asserts.assert(base.isNumber(lineNumber), "lineNumber must be a number");
+    }
+    var e = new SyntaxError(message);
+    e['fileName'] = fileName;
+    if (typeof lineNumber === 'number') {
+        e['lineNumber'] = lineNumber;
+    }
+    return e;
+}
+function mangleName(priv, name) {
+    var strpriv = null;
+
+    if (priv === null || name === null || name.charAt(0) !== '_' || name.charAt(1) !== '_')
+        return name;
+    if (name.charAt(name.length - 1) === '_' && name.charAt(name.length - 2) === '_')
+        return name;
+    strpriv = priv;
+    strpriv.replace(/_/g, '');
+    if (strpriv === '')
+        return name;
+
+    strpriv = priv;
+    strpriv.replace(/^_*/, '');
+    strpriv = '_' + strpriv + name;
+    return strpriv;
+}
+exports.mangleName = mangleName;
+
+var Symbol = (function () {
+    function Symbol(name, flags, namespaces) {
+        this.__name = name;
+        this.__flags = flags;
+        this.__scope = (flags >> SCOPE_OFF) & SCOPE_MASK;
+        this.__namespaces = namespaces || [];
+    }
+    Symbol.prototype.get_name = function () {
+        return this.__name;
+    };
+
+    Symbol.prototype.is_referenced = function () {
+        return !!(this.__flags & USE);
+    };
+
+    Symbol.prototype.is_parameter = function () {
+        return !!(this.__flags & DEF_PARAM);
+    };
+
+    Symbol.prototype.is_global = function () {
+        return this.__scope === exports.GLOBAL_IMPLICIT || this.__scope == exports.GLOBAL_EXPLICIT;
+    };
+
+    Symbol.prototype.is_declared_global = function () {
+        return this.__scope == exports.GLOBAL_EXPLICIT;
+    };
+
+    Symbol.prototype.is_local = function () {
+        return !!(this.__flags & DEF_BOUND);
+    };
+
+    Symbol.prototype.is_free = function () {
+        return this.__scope == exports.FREE;
+    };
+
+    Symbol.prototype.is_imported = function () {
+        return !!(this.__flags & DEF_IMPORT);
+    };
+
+    Symbol.prototype.is_assigned = function () {
+        return !!(this.__flags & DEF_LOCAL);
+    };
+
+    Symbol.prototype.is_namespace = function () {
+        return this.__namespaces && this.__namespaces.length > 0;
+    };
+
+    Symbol.prototype.get_namespaces = function () {
+        return this.__namespaces;
+    };
+    return Symbol;
+})();
+
+var astScopeCounter = 0;
+
+var SymbolTableScope = (function () {
+    function SymbolTableScope(table, name, type, ast, lineno) {
+        this.symFlags = {};
+        this.name = name;
+        this.varnames = [];
+        this.children = [];
+        this.blockType = type;
+
+        this.isNested = false;
+        this.hasFree = false;
+        this.childHasFree = false; // true if child block has free vars including free refs to globals
+        this.generator = false;
+        this.varargs = false;
+        this.varkeywords = false;
+        this.returnsValue = false;
+
+        this.lineno = lineno;
+
+        this.table = table;
+
+        if (table.cur && (table.cur.is_nested() || table.cur.blockType === exports.FunctionBlock))
+            this.isNested = true;
+
+        ast.scopeId = astScopeCounter++;
+        table.stss[ast.scopeId] = this;
+        this.symbols = {};
+    }
+    SymbolTableScope.prototype.get_type = function () {
+        return this.blockType;
+    };
+
+    SymbolTableScope.prototype.get_name = function () {
+        return this.name;
+    };
+
+    SymbolTableScope.prototype.get_lineno = function () {
+        return this.lineno;
+    };
+
+    SymbolTableScope.prototype.is_nested = function () {
+        return this.isNested;
+    };
+
+    SymbolTableScope.prototype.has_children = function () {
+        return this.children.length > 0;
+    };
+
+    SymbolTableScope.prototype.get_identifiers = function () {
+        return this._identsMatching(function (x) {
+            return true;
+        });
+    };
+
+    SymbolTableScope.prototype.lookup = function (name) {
+        var sym;
+        if (!this.symbols.hasOwnProperty(name)) {
+            var flags = this.symFlags[name];
+            var namespaces = this.__check_children(name);
+            sym = this.symbols[name] = new Symbol(name, flags, namespaces);
+        } else {
+            sym = this.symbols[name];
+        }
+        return sym;
+    };
+
+    SymbolTableScope.prototype.__check_children = function (name) {
+        var ret = [];
+        for (var i = 0; i < this.children.length; ++i) {
+            var child = this.children[i];
+            if (child.name === name)
+                ret.push(child);
+        }
+        return ret;
+    };
+
+    SymbolTableScope.prototype._identsMatching = function (f) {
+        var ret = [];
+        for (var k in this.symFlags) {
+            if (this.symFlags.hasOwnProperty(k)) {
+                if (f(this.symFlags[k]))
+                    ret.push(k);
+            }
+        }
+        ret.sort();
+        return ret;
+    };
+
+    SymbolTableScope.prototype.get_parameters = function () {
+        asserts.assert(this.get_type() == 'function', "get_parameters only valid for function scopes");
+        if (!this._funcParams)
+            this._funcParams = this._identsMatching(function (x) {
+                return x & DEF_PARAM;
+            });
+        return this._funcParams;
+    };
+
+    SymbolTableScope.prototype.get_locals = function () {
+        asserts.assert(this.get_type() == 'function', "get_locals only valid for function scopes");
+        if (!this._funcLocals)
+            this._funcLocals = this._identsMatching(function (x) {
+                return x & DEF_BOUND;
+            });
+        return this._funcLocals;
+    };
+
+    SymbolTableScope.prototype.get_globals = function () {
+        asserts.assert(this.get_type() == 'function', "get_globals only valid for function scopes");
+        if (!this._funcGlobals) {
+            this._funcGlobals = this._identsMatching(function (x) {
+                var masked = (x >> SCOPE_OFF) & SCOPE_MASK;
+                return masked == exports.GLOBAL_IMPLICIT || masked == exports.GLOBAL_EXPLICIT;
+            });
+        }
+        return this._funcGlobals;
+    };
+
+    SymbolTableScope.prototype.get_frees = function () {
+        asserts.assert(this.get_type() == 'function', "get_frees only valid for function scopes");
+        if (!this._funcFrees) {
+            this._funcFrees = this._identsMatching(function (x) {
+                var masked = (x >> SCOPE_OFF) & SCOPE_MASK;
+                return masked == exports.FREE;
+            });
+        }
+        return this._funcFrees;
+    };
+
+    SymbolTableScope.prototype.get_methods = function () {
+        asserts.assert(this.get_type() == 'class', "get_methods only valid for class scopes");
+        if (!this._classMethods) {
+            var all = [];
+            for (var i = 0; i < this.children.length; ++i)
+                all.push(this.children[i].name);
+            all.sort();
+            this._classMethods = all;
+        }
+        return this._classMethods;
+    };
+
+    SymbolTableScope.prototype.getScope = function (name) {
+        var v = this.symFlags[name];
+        if (v === undefined)
+            return 0;
+        return (v >> SCOPE_OFF) & SCOPE_MASK;
+    };
+    return SymbolTableScope;
+})();
+exports.SymbolTableScope = SymbolTableScope;
+
+var SymbolTable = (function () {
+    function SymbolTable(fileName) {
+        this.cur = null;
+        this.top = null;
+        this.stack = [];
+        this.global = null;
+        this.curClass = null;
+        this.tmpname = 0;
+        this.stss = {};
+        this.fileName = fileName;
+    }
+    SymbolTable.prototype.getStsForAst = function (ast) {
+        asserts.assert(ast.scopeId !== undefined, "ast wasn't added to st?");
+        var v = this.stss[ast.scopeId];
+        asserts.assert(v !== undefined, "unknown sym tab entry");
+        return v;
+    };
+
+    SymbolTable.prototype.SEQStmt = function (nodes) {
+        var len = nodes.length;
+        for (var i = 0; i < len; ++i) {
+            var val = nodes[i];
+            if (val)
+                this.visitStmt(val);
+        }
+    };
+
+    SymbolTable.prototype.SEQExpr = function (nodes) {
+        var len = nodes.length;
+        for (var i = 0; i < len; ++i) {
+            var val = nodes[i];
+            if (val)
+                this.visitExpr(val);
+        }
+    };
+
+    SymbolTable.prototype.enterBlock = function (name, blockType, ast, lineno) {
+        var prev = null;
+        if (this.cur) {
+            prev = this.cur;
+            this.stack.push(this.cur);
+        }
+        this.cur = new SymbolTableScope(this, name, blockType, ast, lineno);
+        if (name === 'top') {
+            this.global = this.cur.symFlags;
+        }
+        if (prev) {
+            prev.children.push(this.cur);
+        }
+    };
+
+    SymbolTable.prototype.exitBlock = function () {
+        this.cur = null;
+        if (this.stack.length > 0)
+            this.cur = this.stack.pop();
+    };
+
+    SymbolTable.prototype.visitParams = function (args, toplevel) {
+        for (var i = 0; i < args.length; ++i) {
+            var arg = args[i];
+            if (arg.constructor === astnodes.Name) {
+                asserts.assert(arg.ctx === astnodes.Param || (arg.ctx === astnodes.Store && !toplevel));
+                this.addDef(arg.id, DEF_PARAM, arg.lineno);
+            } else {
+                throw syntaxError("invalid expression in parameter list", this.fileName);
+            }
+        }
+    };
+    SymbolTable.prototype.visitArguments = function (a, lineno) {
+        if (a.args)
+            this.visitParams(a.args, true);
+        if (a.vararg) {
+            this.addDef(a.vararg, DEF_PARAM, lineno);
+            this.cur.varargs = true;
+        }
+        if (a.kwarg) {
+            this.addDef(a.kwarg, DEF_PARAM, lineno);
+            this.cur.varkeywords = true;
+        }
+    };
+    SymbolTable.prototype.newTmpname = function (lineno) {
+        this.addDef("_[" + (++this.tmpname) + "]", DEF_LOCAL, lineno);
+    };
+    SymbolTable.prototype.addDef = function (name, flag, lineno) {
+        var mangled = exports.mangleName(this.curClass, name);
+        var val = this.cur.symFlags[mangled];
+        if (val !== undefined) {
+            if ((flag & DEF_PARAM) && (val & DEF_PARAM)) {
+                throw syntaxError("duplicate argument '" + name + "' in function definition", this.fileName, lineno);
+            }
+            val |= flag;
+        } else {
+            val = flag;
+        }
+        this.cur.symFlags[mangled] = val;
+        if (flag & DEF_PARAM) {
+            this.cur.varnames.push(mangled);
+        } else if (flag & DEF_GLOBAL) {
+            val = flag;
+            var fromGlobal = this.global[mangled];
+            if (fromGlobal !== undefined)
+                val |= fromGlobal;
+            this.global[mangled] = val;
+        }
+    };
+
+    SymbolTable.prototype.visitSlice = function (s) {
+        switch (s.constructor) {
+            case astnodes.Slice:
+                if (s.lower)
+                    this.visitExpr(s.lower);
+                if (s.upper)
+                    this.visitExpr(s.upper);
+                if (s.step)
+                    this.visitExpr(s.step);
+                break;
+            case astnodes.ExtSlice:
+                for (var i = 0; i < s.dims.length; ++i)
+                    this.visitSlice(s.dims[i]);
+                break;
+            case astnodes.Index:
+                this.visitExpr(s.value);
+                break;
+            case astnodes.Ellipsis:
+                break;
+        }
+    };
+    SymbolTable.prototype.visitStmt = function (s) {
+        asserts.assert(s !== undefined, "visitStmt called with undefined");
+        switch (s.constructor) {
+            case astnodes.FunctionDef:
+                this.addDef(s.name, DEF_LOCAL, s.lineno);
+                if (s.args.defaults)
+                    this.SEQExpr(s.args.defaults);
+                if (s.decorator_list)
+                    this.SEQExpr(s.decorator_list);
+                this.enterBlock(s.name, exports.FunctionBlock, s, s.lineno);
+                this.visitArguments(s.args, s.lineno);
+                this.SEQStmt(s.body);
+                this.exitBlock();
+                break;
+            case astnodes.ClassDef:
+                this.addDef(s.name, DEF_LOCAL, s.lineno);
+                this.SEQExpr(s.bases);
+                if (s.decorator_list)
+                    this.SEQExpr(s.decorator_list);
+                this.enterBlock(s.name, ClassBlock, s, s.lineno);
+                var tmp = this.curClass;
+                this.curClass = s.name;
+                this.SEQStmt(s.body);
+                this.curClass = tmp;
+                this.exitBlock();
+                break;
+            case astnodes.Return_:
+                if (s.value) {
+                    this.visitExpr(s.value);
+                    this.cur.returnsValue = true;
+                    if (this.cur.generator) {
+                        throw syntaxError("'return' with argument inside generator", this.fileName);
+                    }
+                }
+                break;
+            case astnodes.Delete_:
+                this.SEQExpr(s.targets);
+                break;
+            case astnodes.Assign:
+                this.SEQExpr(s.targets);
+                this.visitExpr(s.value);
+                break;
+            case astnodes.AugAssign:
+                this.visitExpr(s.target);
+                this.visitExpr(s.value);
+                break;
+            case astnodes.Print:
+                if (s.dest)
+                    this.visitExpr(s.dest);
+                this.SEQExpr(s.values);
+                break;
+            case astnodes.For_:
+                this.visitExpr(s.target);
+                this.visitExpr(s.iter);
+                this.SEQStmt(s.body);
+                if (s.orelse)
+                    this.SEQStmt(s.orelse);
+                break;
+            case astnodes.While_:
+                this.visitExpr(s.test);
+                this.SEQStmt(s.body);
+                if (s.orelse)
+                    this.SEQStmt(s.orelse);
+                break;
+            case astnodes.If_:
+                this.visitExpr(s.test);
+                this.SEQStmt(s.body);
+                if (s.orelse)
+                    this.SEQStmt(s.orelse);
+                break;
+            case astnodes.Raise:
+                if (s.type) {
+                    this.visitExpr(s.type);
+                    if (s.inst) {
+                        this.visitExpr(s.inst);
+                        if (s.tback)
+                            this.visitExpr(s.tback);
+                    }
+                }
+                break;
+            case astnodes.TryExcept:
+                this.SEQStmt(s.body);
+                this.SEQStmt(s.orelse);
+                this.visitExcepthandlers(s.handlers);
+                break;
+            case astnodes.TryFinally:
+                this.SEQStmt(s.body);
+                this.SEQStmt(s.finalbody);
+                break;
+            case astnodes.Assert:
+                this.visitExpr(s.test);
+                if (s.msg)
+                    this.visitExpr(s.msg);
+                break;
+            case astnodes.Import_:
+            case astnodes.ImportFrom:
+                this.visitAlias(s.names, s.lineno);
+                break;
+            case astnodes.Exec:
+                this.visitExpr(s.body);
+                if (s.globals) {
+                    this.visitExpr(s.globals);
+                    if (s.locals)
+                        this.visitExpr(s.locals);
+                }
+                break;
+            case astnodes.Global:
+                var nameslen = s.names.length;
+                for (var i = 0; i < nameslen; ++i) {
+                    var name = exports.mangleName(this.curClass, s.names[i]);
+                    var cur = this.cur.symFlags[name];
+                    if (cur & (DEF_LOCAL | USE)) {
+                        if (cur & DEF_LOCAL) {
+                            throw syntaxError("name '" + name + "' is assigned to before global declaration", this.fileName, s.lineno);
+                        } else {
+                            throw syntaxError("name '" + name + "' is used prior to global declaration", this.fileName, s.lineno);
+                        }
+                    }
+                    this.addDef(name, DEF_GLOBAL, s.lineno);
+                }
+                break;
+            case astnodes.Expr:
+                this.visitExpr(s.value);
+                break;
+            case astnodes.Pass:
+            case astnodes.Break_:
+            case astnodes.Continue_:
+                break;
+            case astnodes.With_:
+                this.newTmpname(s.lineno);
+                this.visitExpr(s.context_expr);
+                if (s.optional_vars) {
+                    this.newTmpname(s.lineno);
+                    this.visitExpr(s.optional_vars);
+                }
+                this.SEQStmt(s.body);
+                break;
+
+            default:
+                asserts.fail("Unhandled type " + s.constructor.name + " in visitStmt");
+        }
+    };
+
+    SymbolTable.prototype.visitExpr = function (e) {
+        asserts.assert(e !== undefined, "visitExpr called with undefined");
+
+        switch (e.constructor) {
+            case astnodes.BoolOp:
+                this.SEQExpr(e.values);
+                break;
+            case astnodes.BinOp:
+                this.visitExpr(e.left);
+                this.visitExpr(e.right);
+                break;
+            case astnodes.UnaryOp:
+                this.visitExpr(e.operand);
+                break;
+            case astnodes.Lambda:
+                this.addDef("lambda", DEF_LOCAL, e.lineno);
+                if (e.args.defaults)
+                    this.SEQExpr(e.args.defaults);
+                this.enterBlock("lambda", exports.FunctionBlock, e, e.lineno);
+                this.visitArguments(e.args, e.lineno);
+                this.visitExpr(e.body);
+                this.exitBlock();
+                break;
+            case astnodes.IfExp:
+                this.visitExpr(e.test);
+                this.visitExpr(e.body);
+                this.visitExpr(e.orelse);
+                break;
+            case astnodes.Dict:
+                this.SEQExpr(e.keys);
+                this.SEQExpr(e.values);
+                break;
+            case astnodes.ListComp:
+                this.newTmpname(e.lineno);
+                this.visitExpr(e.elt);
+                this.visitComprehension(e.generators, 0);
+                break;
+            case astnodes.GeneratorExp:
+                this.visitGenexp(e);
+                break;
+            case astnodes.Yield:
+                if (e.value)
+                    this.visitExpr(e.value);
+                this.cur.generator = true;
+                if (this.cur.returnsValue) {
+                    throw syntaxError("'return' with argument inside generator", this.fileName);
+                }
+                break;
+            case astnodes.Compare:
+                this.visitExpr(e.left);
+                this.SEQExpr(e.comparators);
+                break;
+            case astnodes.Call:
+                this.visitExpr(e.func);
+                this.SEQExpr(e.args);
+                for (var i = 0; i < e.keywords.length; ++i)
+                    this.visitExpr(e.keywords[i].value);
+                if (e.starargs)
+                    this.visitExpr(e.starargs);
+                if (e.kwargs)
+                    this.visitExpr(e.kwargs);
+                break;
+            case astnodes.Num:
+            case astnodes.Str:
+                break;
+            case astnodes.Attribute:
+                this.visitExpr(e.value);
+                break;
+            case astnodes.Subscript:
+                this.visitExpr(e.value);
+                this.visitSlice(e.slice);
+                break;
+            case astnodes.Name:
+                this.addDef(e.id, e.ctx === astnodes.Load ? USE : DEF_LOCAL, e.lineno);
+                break;
+            case astnodes.List:
+            case astnodes.Tuple:
+                this.SEQExpr(e.elts);
+                break;
+            default:
+                asserts.fail("Unhandled type " + e.constructor.name + " in visitExpr");
+        }
+    };
+
+    SymbolTable.prototype.visitComprehension = function (lcs, startAt) {
+        var len = lcs.length;
+        for (var i = startAt; i < len; ++i) {
+            var lc = lcs[i];
+            this.visitExpr(lc.target);
+            this.visitExpr(lc.iter);
+            this.SEQExpr(lc.ifs);
+        }
+    };
+    SymbolTable.prototype.visitAlias = function (names, lineno) {
+        for (var i = 0; i < names.length; ++i) {
+            var a = names[i];
+            var name = a.asname === null ? a.name : a.asname;
+            var storename = name;
+            var dot = name.indexOf('.');
+            if (dot !== -1)
+                storename = name.substr(0, dot);
+            if (name !== "*") {
+                this.addDef(storename, DEF_IMPORT, lineno);
+            } else {
+                if (this.cur.blockType !== ModuleBlock) {
+                    throw syntaxError("import * only allowed at module level", this.fileName);
+                }
+            }
+        }
+    };
+    SymbolTable.prototype.visitGenexp = function (e) {
+        var outermost = e.generators[0];
+        this.visitExpr(outermost.iter);
+        this.enterBlock("genexpr", exports.FunctionBlock, e, e.lineno);
+        this.cur.generator = true;
+        this.addDef(".0", DEF_PARAM, e.lineno);
+        this.visitExpr(outermost.target);
+        this.SEQExpr(outermost.ifs);
+        this.visitComprehension(e.generators, 1);
+        this.visitExpr(e.elt);
+        this.exitBlock();
+    };
+
+    SymbolTable.prototype.visitExcepthandlers = function (handlers) {
+        for (var i = 0, eh; eh = handlers[i]; ++i) {
+            if (eh.type)
+                this.visitExpr(eh.type);
+            if (eh.name)
+                this.visitExpr(eh.name);
+            this.SEQStmt(eh.body);
+        }
+    };
+    SymbolTable.prototype.analyzeBlock = function (ste, bound, free, global) {
+        var local = {};
+        var scope = {};
+        var newglobal = {};
+        var newbound = {};
+        var newfree = {};
+
+        if (ste.blockType == ClassBlock) {
+            _dictUpdate(newglobal, global);
+            if (bound)
+                _dictUpdate(newbound, bound);
+        }
+
+        for (var name in ste.symFlags) {
+            var flags = ste.symFlags[name];
+            this.analyzeName(ste, scope, name, flags, bound, local, free, global);
+        }
+
+        if (ste.blockType !== ClassBlock) {
+            if (ste.blockType === exports.FunctionBlock)
+                _dictUpdate(newbound, local);
+            if (bound)
+                _dictUpdate(newbound, bound);
+            _dictUpdate(newglobal, global);
+        }
+
+        var allfree = {};
+        var childlen = ste.children.length;
+        for (var i = 0; i < childlen; ++i) {
+            var c = ste.children[i];
+            this.analyzeChildBlock(c, newbound, newfree, newglobal, allfree);
+            if (c.hasFree || c.childHasFree)
+                ste.childHasFree = true;
+        }
+
+        _dictUpdate(newfree, allfree);
+
+        if (ste.blockType === exports.FunctionBlock)
+            this.analyzeCells(scope, newfree);
+
+        this.updateSymbols(ste.symFlags, scope, bound, newfree, ste.blockType === ClassBlock);
+
+        _dictUpdate(free, newfree);
+    };
+
+    SymbolTable.prototype.analyzeChildBlock = function (entry, bound, free, global, childFree) {
+        var tempBound = {};
+        _dictUpdate(tempBound, bound);
+        var tempFree = {};
+        _dictUpdate(tempFree, free);
+        var tempGlobal = {};
+        _dictUpdate(tempGlobal, global);
+
+        this.analyzeBlock(entry, tempBound, tempFree, tempGlobal);
+        _dictUpdate(childFree, tempFree);
+    };
+
+    SymbolTable.prototype.analyzeCells = function (scope, free) {
+        for (var name in scope) {
+            var flags = scope[name];
+            if (flags !== exports.LOCAL)
+                continue;
+            if (free[name] === undefined)
+                continue;
+            scope[name] = exports.CELL;
+            delete free[name];
+        }
+    };
+    SymbolTable.prototype.updateSymbols = function (symbols, scope, bound, free, classflag) {
+        for (var name in symbols) {
+            var flags = symbols[name];
+            var w = scope[name];
+            flags |= w << SCOPE_OFF;
+            symbols[name] = flags;
+        }
+
+        var freeValue = exports.FREE << SCOPE_OFF;
+        var pos = 0;
+        for (var name in free) {
+            var o = symbols[name];
+            if (o !== undefined) {
+                if (classflag && (o & (DEF_BOUND | DEF_GLOBAL))) {
+                    var i = o | DEF_FREE_CLASS;
+                    symbols[name] = i;
+                }
+
+                continue;
+            }
+            if (bound[name] === undefined)
+                continue;
+            symbols[name] = freeValue;
+        }
+    };
+    SymbolTable.prototype.analyzeName = function (ste, dict, name, flags, bound, local, free, global) {
+        if (flags & DEF_GLOBAL) {
+            if (flags & DEF_PARAM)
+                throw syntaxError("name '" + name + "' is local and global", this.fileName, ste.lineno);
+            dict[name] = exports.GLOBAL_EXPLICIT;
+            global[name] = null;
+            if (bound && bound[name] !== undefined)
+                delete bound[name];
+            return;
+        }
+        if (flags & DEF_BOUND) {
+            dict[name] = exports.LOCAL;
+            local[name] = null;
+            delete global[name];
+            return;
+        }
+
+        if (bound && bound[name] !== undefined) {
+            dict[name] = exports.FREE;
+            ste.hasFree = true;
+            free[name] = null;
+        } else if (global && global[name] !== undefined) {
+            dict[name] = exports.GLOBAL_IMPLICIT;
+        } else {
+            if (ste.isNested)
+                ste.hasFree = true;
+            dict[name] = exports.GLOBAL_IMPLICIT;
+        }
+    };
+
+    SymbolTable.prototype.analyze = function () {
+        var free = {};
+        var global = {};
+        this.analyzeBlock(this.top, null, free, global);
+    };
+    return SymbolTable;
+})();
+exports.SymbolTable = SymbolTable;
+
+function _dictUpdate(a, b) {
+    for (var kb in b) {
+        a[kb] = b[kb];
+    }
+}
+function symbolTable(module, fileName) {
+    var ret = new SymbolTable(fileName);
+
+    ret.enterBlock("top", ModuleBlock, module, 0);
+
+    ret.top = ret.cur;
+
+    for (var i = 0; i < module.body.length; ++i) {
+        ret.visitStmt(module.body[i]);
+    }
+
+    ret.exitBlock();
+
+    ret.analyze();
+
+    return ret;
+}
+exports.symbolTable = symbolTable;
+
+function dumpSymbolTable(st) {
+    var pyBoolStr = function (b) {
+        return b ? "True" : "False";
+    };
+
+    var pyList = function (l) {
+        var ret = [];
+        for (var i = 0; i < l.length; ++i) {
+            ret.push(l[i]);
+        }
+        return '[' + ret.join(', ') + ']';
+    };
+
+    var getIdents = function (obj, indent) {
+        if (indent === undefined)
+            indent = "";
+        var ret = "";
+        ret += indent + "Sym_type: " + obj.get_type() + "\n";
+        ret += indent + "Sym_name: " + obj.get_name() + "\n";
+        ret += indent + "Sym_lineno: " + obj.get_lineno() + "\n";
+        ret += indent + "Sym_nested: " + pyBoolStr(obj.is_nested()) + "\n";
+        ret += indent + "Sym_haschildren: " + pyBoolStr(obj.has_children()) + "\n";
+        if (obj.get_type() === "class") {
+            ret += indent + "Class_methods: " + pyList(obj.get_methods()) + "\n";
+        } else if (obj.get_type() === "function") {
+            ret += indent + "Func_params: " + pyList(obj.get_parameters()) + "\n";
+            ret += indent + "Func_locals: " + pyList(obj.get_locals()) + "\n";
+            ret += indent + "Func_globals: " + pyList(obj.get_globals()) + "\n";
+            ret += indent + "Func_frees: " + pyList(obj.get_frees()) + "\n";
+        }
+        ret += indent + "-- Identifiers --\n";
+        var objidents = obj.get_identifiers();
+        var objidentslen = objidents.length;
+        for (var i = 0; i < objidentslen; ++i) {
+            var info = obj.lookup(objidents[i]);
+            ret += indent + "name: " + info.get_name() + "\n";
+            ret += indent + "  is_referenced: " + pyBoolStr(info.is_referenced()) + "\n";
+            ret += indent + "  is_imported: " + pyBoolStr(info.is_imported()) + "\n";
+            ret += indent + "  is_parameter: " + pyBoolStr(info.is_parameter()) + "\n";
+            ret += indent + "  is_global: " + pyBoolStr(info.is_global()) + "\n";
+            ret += indent + "  is_declared_global: " + pyBoolStr(info.is_declared_global()) + "\n";
+            ret += indent + "  is_local: " + pyBoolStr(info.is_local()) + "\n";
+            ret += indent + "  is_free: " + pyBoolStr(info.is_free()) + "\n";
+            ret += indent + "  is_assigned: " + pyBoolStr(info.is_assigned()) + "\n";
+            ret += indent + "  is_namespace: " + pyBoolStr(info.is_namespace()) + "\n";
+            var nss = info.get_namespaces();
+            var nsslen = nss.length;
+            ret += indent + "  namespaces: [\n";
+            var sub = [];
+            for (var j = 0; j < nsslen; ++j) {
+                var ns = nss[j];
+                sub.push(getIdents(ns, indent + "    "));
+            }
+            ret += sub.join('\n');
+            ret += indent + '  ]\n';
+        }
+        return ret;
+    };
+    return getIdents(st.top, '');
+}
+exports.dumpSymbolTable = dumpSymbolTable;
+;
+});
+
+define("ace/mode/python/compiler",["require","exports","module","ace/mode/python/asserts","ace/mode/python/astnodes","ace/mode/python/builder","ace/mode/python/Parser","ace/mode/python/symtable"], function(require, exports, module) {
+"no use strict";
+var asserts = require('./asserts');
+var astnodes = require('./astnodes');
+var builder = require('./builder');
+var parser = require('./Parser');
+var symtable = require('./symtable');
+
+var LOCAL = symtable.LOCAL;
+var GLOBAL_EXPLICIT = symtable.GLOBAL_EXPLICIT;
+var GLOBAL_IMPLICIT = symtable.GLOBAL_IMPLICIT;
+var FREE = symtable.FREE;
+var CELL = symtable.CELL;
+var FunctionBlock = symtable.FunctionBlock;
+var out;
+
+var gensymcount = 0;
+
+var reservedWords_ = {
+    'abstract': true,
+    'as': true,
+    'boolean': true,
+    'break': true,
+    'byte': true,
+    'case': true,
+    'catch': true,
+    'char': true,
+    'class': true,
+    'continue': true,
+    'const': true,
+    'debugger': true,
+    'default': true,
+    'delete': true,
+    'do': true,
+    'double': true,
+    'else': true,
+    'enum': true,
+    'export': true,
+    'extends': true,
+    'false': true,
+    'final': true,
+    'finally': true,
+    'float': true,
+    'for': true,
+    'function': true,
+    'goto': true,
+    'if': true,
+    'implements': true,
+    'import': true,
+    'in': true,
+    'instanceof': true,
+    'int': true,
+    'interface': true,
+    'is': true,
+    'long': true,
+    'namespace': true,
+    'native': true,
+    'new': true,
+    'null': true,
+    'package': true,
+    'private': true,
+    'protected': true,
+    'public': true,
+    'return': true,
+    'short': true,
+    'static': true,
+    'super': false,
+    'switch': true,
+    'synchronized': true,
+    'this': true,
+    'throw': true,
+    'throws': true,
+    'transient': true,
+    'true': true,
+    'try': true,
+    'typeof': true,
+    'use': true,
+    'var': true,
+    'void': true,
+    'volatile': true,
+    'while': true,
+    'with': true
+};
+
+function fixReservedWords(name) {
+    if (reservedWords_[name] !== true) {
+        return name;
+    } else {
+        return name + "_$rw$";
+    }
+}
+
+var reservedNames_ = {
+    '__defineGetter__': true,
+    '__defineSetter__': true,
+    'apply': true,
+    'call': true,
+    'eval': true,
+    'hasOwnProperty': true,
+    'isPrototypeOf': true,
+    '__lookupGetter__': true,
+    '__lookupSetter__': true,
+    '__noSuchMethod__': true,
+    'propertyIsEnumerable': true,
+    'toSource': true,
+    'toLocaleString': true,
+    'toString': true,
+    'unwatch': true,
+    'valueOf': true,
+    'watch': true,
+    'length': true
+};
+
+function fixReservedNames(name) {
+    if (reservedNames_[name]) {
+        return name + "_$rn$";
+    } else {
+        return name;
+    }
+}
+function mangleName(priv, name) {
+    var strpriv = null;
+
+    if (priv === null || name === null || name.charAt(0) !== '_' || name.charAt(1) !== '_')
+        return name;
+    if (name.charAt(name.length - 1) === '_' && name.charAt(name.length - 2) === '_')
+        return name;
+    strpriv = priv;
+    strpriv.replace(/_/g, '');
+    if (strpriv === '')
+        return name;
+
+    strpriv = priv;
+    strpriv.replace(/^_*/, '');
+    return '_' + strpriv + name;
+}
+
+var toStringLiteralJS = function (value) {
+    var quote = "'";
+    if (value.indexOf("'") !== -1 && value.indexOf('"') === -1) {
+        quote = '"';
+    }
+    var len = value.length;
+    var ret = quote;
+    for (var i = 0; i < len; ++i) {
+        var c = value.charAt(i);
+        if (c === quote || c === '\\')
+            ret += '\\' + c;
+        else if (c === '\t')
+            ret += '\\t';
+        else if (c === '\n')
+            ret += '\\n';
+        else if (c === '\r')
+            ret += '\\r';
+        else if (c < ' ' || c >= 0x7f) {
+            var ashex = c.charCodeAt(0).toString(16);
+            if (ashex.length < 2)
+                ashex = "0" + ashex;
+            ret += "\\x" + ashex;
+        } else
+            ret += c;
+    }
+    ret += quote;
+    return ret;
+};
+
+var OP_FAST = 0;
+var OP_GLOBAL = 1;
+var OP_DEREF = 2;
+var OP_NAME = 3;
+var D_NAMES = 0;
+var D_FREEVARS = 1;
+var D_CELLVARS = 2;
+
+var CompilerUnit = (function () {
+    function CompilerUnit() {
+        this.ste = null;
+        this.name = null;
+        this.private_ = null;
+        this.firstlineno = 0;
+        this.lineno = 0;
+        this.linenoSet = false;
+        this.localnames = [];
+        this.blocknum = 0;
+        this.blocks = [];
+        this.curblock = 0;
+        this.scopename = null;
+        this.prefixCode = '';
+        this.varDeclsCode = '';
+        this.switchCode = '';
+        this.suffixCode = '';
+        this.breakBlocks = [];
+        this.continueBlocks = [];
+        this.exceptBlocks = [];
+        this.finallyBlocks = [];
+    }
+    CompilerUnit.prototype.activateScope = function () {
+        var self = this;
+
+        out = function () {
+            var b = self.blocks[self.curblock];
+            for (var i = 0; i < arguments.length; ++i)
+                b.push(arguments[i]);
+        };
+    };
+    return CompilerUnit;
+})();
+
+var Compiler = (function () {
+    function Compiler(fileName, st, flags, sourceCodeForAnnotation) {
+        this.interactive = false;
+        this.nestlevel = 0;
+        this.u = null;
+        this.stack = [];
+        this.result = [];
+        this.allUnits = [];
+        this._gr = function (hint) {
+            var rest = [];
+            for (var _i = 0; _i < (arguments.length - 1); _i++) {
+                rest[_i] = arguments[_i + 1];
+            }
+            var v = this.gensym(hint);
+            out("var ", v, "=");
+            for (var i = 1; i < arguments.length; ++i) {
+                out(arguments[i]);
+            }
+            out(";");
+            return v;
+        };
+        this.clistcompgen = function (tmpname, generators, genIndex, elt) {
+            var start = this.newBlock('list gen start');
+            var skip = this.newBlock('list gen skip');
+            var anchor = this.newBlock('list gen anchor');
+
+            var l = generators[genIndex];
+            var toiter = this.vexpr(l.iter);
+            var iter = this._gr("iter", "Sk.abstr.iter(", toiter, ")");
+            this._jump(start);
+            this.setBlock(start);
+            var nexti = this._gr('next', "Sk.abstr.iternext(", iter, ")");
+            this._jumpundef(nexti, anchor); // todo; this should be handled by StopIteration
+            var target = this.vexpr(l.target, nexti);
+
+            var n = l.ifs.length;
+            for (var i = 0; i < n; ++i) {
+                var ifres = this.vexpr(l.ifs[i]);
+                this._jumpfalse(ifres, start);
+            }
+
+            if (++genIndex < generators.length) {
+                this.clistcompgen(tmpname, generators, genIndex, elt);
+            }
+
+            if (genIndex >= generators.length) {
+                var velt = this.vexpr(elt);
+                out(tmpname, ".v.push(", velt, ");");
+                this._jump(skip);
+                this.setBlock(skip);
+            }
+
+            this._jump(start);
+
+            this.setBlock(anchor);
+
+            return tmpname;
+        };
+        this.fileName = fileName;
+        this.st = st;
+        this.flags = flags;
+        this.source = sourceCodeForAnnotation ? sourceCodeForAnnotation.split("\n") : false;
+    }
+    Compiler.prototype.getSourceLine = function (lineno) {
+        asserts.assert(this.source);
+        return this.source[lineno - 1];
+    };
+    Compiler.prototype.annotateSource = function (ast) {
+        if (this.source) {
+            out('\n//');
+            out('\n// line ', ast.lineno, ':');
+            out('\n// ', this.getSourceLine(ast.lineno));
+            out('\n// ');
+            for (var i = 0; i < ast.col_offset; ++i) {
+                out(" ");
+            }
+            out("^");
+
+            out("\n//");
+
+            out('\nSk.currLineNo = ', ast.lineno, ';Sk.currColNo = ', ast.col_offset, ';');
+            out("\nSk.currFilename = '", this.fileName, "';\n\n");
+        }
+    };
+
+    Compiler.prototype.gensym = function (hint) {
+        hint = hint || '';
+        hint = '$' + hint;
+        hint += gensymcount++;
+        return hint;
+    };
+
+    Compiler.prototype.niceName = function (roughName) {
+        return this.gensym(roughName.replace("<", "").replace(">", "").replace(" ", "_"));
+    };
+    Compiler.prototype._interruptTest = function () {
+        out("if (typeof Sk.execStart === 'undefined') {Sk.execStart=new Date()}");
+        out("if (Sk.execLimit !== null && new Date() - Sk.execStart > Sk.execLimit) {throw new Sk.builtin.TimeLimitError(Sk.timeoutMsg())}");
+    };
+
+    Compiler.prototype._jumpfalse = function (test, block) {
+        var cond = this._gr('jfalse', "(", test, "===false||!Sk.misceval.isTrue(", test, "))");
+        this._interruptTest();
+        out("if(", cond, "){/*test failed */$blk=", block, ";continue;}");
+    };
+
+    Compiler.prototype._jumpundef = function (test, block) {
+        this._interruptTest();
+        out("if(typeof ", test, " === 'undefined'){$blk=", block, ";continue;}");
+    };
+
+    Compiler.prototype._jumptrue = function (test, block) {
+        var cond = this._gr('jtrue', "(", test, "===true||Sk.misceval.isTrue(", test, "))");
+        this._interruptTest();
+        out("if(", cond, "){/*test passed */$blk=", block, ";continue;}");
+    };
+
+    Compiler.prototype._jump = function (block) {
+        this._interruptTest();
+        out("$blk=", block, ";continue;");
+    };
+
+    Compiler.prototype.ctupleorlist = function (e, data, tuporlist) {
+        asserts.assert(tuporlist === 'tuple' || tuporlist === 'list');
+        if (e.ctx === astnodes.Store) {
+            for (var i = 0; i < e.elts.length; ++i) {
+                this.vexpr(e.elts[i], "Sk.abstr.objectGetItem(" + data + "," + i + ")");
+            }
+        } else if (e.ctx === astnodes.Load) {
+            var items = [];
+            for (var i = 0; i < e.elts.length; ++i) {
+                items.push(this._gr('elem', this.vexpr(e.elts[i])));
+            }
+            return this._gr('load' + tuporlist, "new Sk.builtins['", tuporlist, "']([", items, "])");
+        }
+    };
+
+    Compiler.prototype.cdict = function (e) {
+        asserts.assert(e.values.length === e.keys.length);
+        var items = [];
+        for (var i = 0; i < e.values.length; ++i) {
+            var v = this.vexpr(e.values[i]);
+            items.push(this.vexpr(e.keys[i]));
+            items.push(v);
+        }
+        return this._gr('loaddict', "new Sk.builtins['dict']([", items, "])");
+    };
+
+    Compiler.prototype.clistcomp = function (e) {
+        asserts.assert(e instanceof astnodes.ListComp);
+        var tmp = this._gr("_compr", "new Sk.builtins['list']([])");
+        return this.clistcompgen(tmp, e.generators, 0, e.elt);
+    };
+
+    Compiler.prototype.cyield = function (e) {
+        if (this.u.ste.blockType !== FunctionBlock)
+            throw new SyntaxError("'yield' outside function");
+        var val = 'null';
+        if (e.value)
+            val = this.vexpr(e.value);
+        var nextBlock = this.newBlock('after yield');
+        out("return [/*resume*/", nextBlock, ",/*ret*/", val, "];");
+        this.setBlock(nextBlock);
+        return '$gen.gi$sentvalue';
+    };
+
+    Compiler.prototype.ccompare = function (e) {
+        asserts.assert(e.ops.length === e.comparators.length);
+        var cur = this.vexpr(e.left);
+        var n = e.ops.length;
+        var done = this.newBlock("done");
+        var fres = this._gr('compareres', 'null');
+
+        for (var i = 0; i < n; ++i) {
+            var rhs = this.vexpr(e.comparators[i]);
+            var res = this._gr('compare', "Sk.builtin.bool(Sk.misceval.richCompareBool(", cur, ",", rhs, ",'", e.ops[i].prototype._astname, "'))");
+            out(fres, '=', res, ';');
+            this._jumpfalse(res, done);
+            cur = rhs;
+        }
+        this._jump(done);
+        this.setBlock(done);
+        return fres;
+    };
+
+    Compiler.prototype.ccall = function (e) {
+        var func = this.vexpr(e.func);
+        var args = this.vseqexpr(e.args);
+
+        if (e.keywords.length > 0 || e.starargs || e.kwargs) {
+            var kwarray = [];
+            for (var i = 0; i < e.keywords.length; ++i) {
+                kwarray.push("'" + e.keywords[i].arg + "'");
+                kwarray.push(this.vexpr(e.keywords[i].value));
+            }
+            var keywords = "[" + kwarray.join(",") + "]";
+            var starargs = "undefined";
+            var kwargs = "undefined";
+            if (e.starargs)
+                starargs = this.vexpr(e.starargs);
+            if (e.kwargs)
+                kwargs = this.vexpr(e.kwargs);
+            return this._gr('call', "Sk.misceval.call(", func, ",", kwargs, ",", starargs, ",", keywords, args.length > 0 ? "," : "", args, ")");
+        } else {
+            return this._gr('call', "Sk.misceval.callsim(", func, args.length > 0 ? "," : "", args, ")");
+        }
+    };
+
+    Compiler.prototype.cslice = function (s) {
+        asserts.assert(s instanceof astnodes.Slice);
+        var low = s.lower ? this.vexpr(s.lower) : 'null';
+        var high = s.upper ? this.vexpr(s.upper) : 'null';
+        var step = s.step ? this.vexpr(s.step) : 'null';
+        return this._gr('slice', "new Sk.builtins['slice'](", low, ",", high, ",", step, ")");
+    };
+
+    Compiler.prototype.vslicesub = function (s) {
+        var subs;
+        switch (s.constructor) {
+            case Number:
+            case String:
+                subs = s;
+                break;
+            case astnodes.Index:
+                subs = this.vexpr(s.value);
+                break;
+            case astnodes.Slice:
+                subs = this.cslice(s);
+                break;
+            case astnodes.Ellipsis:
+            case astnodes.ExtSlice:
+                asserts.fail("todo;");
+                break;
+            default:
+                asserts.fail("invalid subscript kind");
+        }
+        return subs;
+    };
+
+    Compiler.prototype.vslice = function (s, ctx, obj, dataToStore) {
+        var subs = this.vslicesub(s);
+        return this.chandlesubscr(ctx, obj, subs, dataToStore);
+    };
+
+    Compiler.prototype.chandlesubscr = function (ctx, obj, subs, data) {
+        if (ctx === astnodes.Load || ctx === astnodes.AugLoad)
+            return this._gr('lsubscr', "Sk.abstr.objectGetItem(", obj, ",", subs, ")");
+        else if (ctx === astnodes.Store || ctx === astnodes.AugStore)
+            out("Sk.abstr.objectSetItem(", obj, ",", subs, ",", data, ");");
+        else if (ctx === astnodes.Del)
+            out("Sk.abstr.objectDelItem(", obj, ",", subs, ");");
+        else
+            asserts.fail("handlesubscr fail");
+    };
+
+    Compiler.prototype.cboolop = function (e) {
+        asserts.assert(e instanceof astnodes.BoolOp);
+        var jtype;
+        var ifFailed;
+        if (e.op === astnodes.And)
+            jtype = this._jumpfalse;
+        else
+            jtype = this._jumptrue;
+        var end = this.newBlock('end of boolop');
+        var s = e.values;
+        var n = s.length;
+        var retval;
+        for (var i = 0; i < n; ++i) {
+            var expres = this.vexpr(s[i]);
+            if (i === 0) {
+                retval = this._gr('boolopsucc', expres);
+            }
+            out(retval, "=", expres, ";");
+            jtype.call(this, expres, end);
+        }
+        this._jump(end);
+        this.setBlock(end);
+        return retval;
+    };
+    Compiler.prototype.vexpr = function (e, data, augstoreval) {
+        if (e.lineno > this.u.lineno) {
+            this.u.lineno = e.lineno;
+            this.u.linenoSet = false;
+        }
+
+        switch (e.constructor) {
+            case astnodes.BoolOp:
+                return this.cboolop(e);
+            case astnodes.BinOp:
+                return this._gr('binop', "Sk.abstr.numberBinOp(", this.vexpr(e.left), ",", this.vexpr(e.right), ",'", e.op.prototype._astname, "')");
+            case astnodes.UnaryOp:
+                return this._gr('unaryop', "Sk.abstr.numberUnaryOp(", this.vexpr(e.operand), ",'", e.op.prototype._astname, "')");
+            case astnodes.Lambda:
+                return this.clambda(e);
+            case astnodes.IfExp:
+                return this.cifexp(e);
+            case astnodes.Dict:
+                return this.cdict(e);
+            case astnodes.ListComp:
+                return this.clistcomp(e);
+            case astnodes.GeneratorExp:
+                return this.cgenexp(e);
+            case astnodes.Yield:
+                return this.cyield(e);
+            case astnodes.Compare:
+                return this.ccompare(e);
+            case astnodes.Call:
+                var result = this.ccall(e);
+                this.annotateSource(e);
+                return result;
+            case astnodes.Num: {
+                if (e.n.isFloat()) {
+                    return 'Sk.builtin.numberToPy(' + e.n.value + ')';
+                } else if (e.n.isInt()) {
+                    return "Sk.ffi.numberToIntPy(" + e.n.value + ")";
+                } else if (e.n.isLong()) {
+                    return "Sk.ffi.longFromString('" + e.n.text + "', " + e.n.radix + ")";
+                }
+                asserts.fail("unhandled Num type");
+            }
+            case astnodes.Str: {
+                return this._gr('str', 'Sk.builtin.stringToPy(', toStringLiteralJS(e.s), ')');
+            }
+            case astnodes.Attribute:
+                var val;
+                if (e.ctx !== astnodes.AugStore)
+                    val = this.vexpr(e.value);
+                var mangled = toStringLiteralJS(e.attr);
+                mangled = mangled.substring(1, mangled.length - 1);
+                mangled = mangleName(this.u.private_, mangled);
+                mangled = fixReservedWords(mangled);
+                mangled = fixReservedNames(mangled);
+                switch (e.ctx) {
+                    case astnodes.AugLoad:
+                    case astnodes.Load:
+                        return this._gr("lattr", "Sk.abstr.gattr(", val, ",'", mangled, "')");
+                    case astnodes.AugStore:
+                        out("if(typeof ", data, " !== 'undefined'){"); // special case to avoid re-store if inplace worked
+                        val = this.vexpr(augstoreval || null); // the || null can never happen, but closure thinks we can get here with it being undef
+                        out("Sk.abstr.sattr(", val, ",'", mangled, "',", data, ");");
+                        out("}");
+                        break;
+                    case astnodes.Store:
+                        out("Sk.abstr.sattr(", val, ",'", mangled, "',", data, ");");
+                        break;
+                    case astnodes.Del:
+                        asserts.fail("todo;");
+                        break;
+                    case astnodes.Param:
+                    default:
+                        asserts.fail("invalid attribute expression");
+                }
+                break;
+            case astnodes.Subscript:
+                var val;
+                switch (e.ctx) {
+                    case astnodes.AugLoad:
+                    case astnodes.Load:
+                    case astnodes.Store:
+                    case astnodes.Del:
+                        return this.vslice(e.slice, e.ctx, this.vexpr(e.value), data);
+                    case astnodes.AugStore:
+                        out("if(typeof ", data, " !== 'undefined'){"); // special case to avoid re-store if inplace worked
+                        val = this.vexpr(augstoreval || null); // the || null can never happen, but closure thinks we can get here with it being undef
+                        this.vslice(e.slice, e.ctx, val, data);
+                        out("}");
+                        break;
+                    case astnodes.Param:
+                    default:
+                        asserts.fail("invalid subscript expression");
+                }
+                break;
+            case astnodes.Name:
+                return this.nameop(e.id, e.ctx, data);
+            case astnodes.List:
+                return this.ctupleorlist(e, data, 'list');
+            case astnodes.Tuple:
+                return this.ctupleorlist(e, data, 'tuple');
+            default:
+                asserts.fail("unhandled case in vexpr");
+        }
+    };
+    Compiler.prototype.vseqexpr = function (exprs, data) {
+        var missingData = (typeof data === 'undefined');
+
+        asserts.assert(missingData || exprs.length === data.length);
+        var ret = [];
+        for (var i = 0; i < exprs.length; ++i) {
+            ret.push(this.vexpr(exprs[i], (missingData ? undefined : data[i])));
+        }
+        return ret;
+    };
+
+    Compiler.prototype.caugassign = function (s) {
+        asserts.assert(s instanceof astnodes.AugAssign);
+        var e = s.target;
+        var auge;
+        switch (e.constructor) {
+            case astnodes.Attribute:
+                auge = new astnodes.Attribute(e.value, e.attr, astnodes.AugLoad, e.lineno, e.col_offset);
+                var aug = this.vexpr(auge);
+                var val = this.vexpr(s.value);
+                var res = this._gr('inplbinopattr', "Sk.abstr.numberInplaceBinOp(", aug, ",", val, ",'", s.op.prototype._astname, "')");
+                auge.ctx = astnodes.AugStore;
+                return this.vexpr(auge, res, e.value);
+            case astnodes.Subscript:
+                var augsub = this.vslicesub(e.slice);
+                auge = new astnodes.Subscript(e.value, augsub, astnodes.AugLoad, e.lineno, e.col_offset);
+                var aug = this.vexpr(auge);
+                var val = this.vexpr(s.value);
+                var res = this._gr('inplbinopsubscr', "Sk.abstr.numberInplaceBinOp(", aug, ",", val, ",'", s.op.prototype._astname, "')");
+                auge.ctx = astnodes.AugStore;
+                return this.vexpr(auge, res, e.value);
+            case astnodes.Name:
+                var to = this.nameop(e.id, astnodes.Load);
+                var val = this.vexpr(s.value);
+                var res = this._gr('inplbinop', "Sk.abstr.numberInplaceBinOp(", to, ",", val, ",'", s.op.prototype._astname, "')");
+                return this.nameop(e.id, astnodes.Store, res);
+            default:
+                asserts.fail("unhandled case in augassign");
+        }
+    };
+    Compiler.prototype.exprConstant = function (e) {
+        switch (e.constructor) {
+            case astnodes.Name:
+
+            default:
+                return -1;
+        }
+    };
+
+    Compiler.prototype.newBlock = function (name) {
+        var ret = this.u.blocknum++;
+        this.u.blocks[ret] = [];
+        this.u.blocks[ret]._name = name || '<unnamed>';
+        return ret;
+    };
+
+    Compiler.prototype.setBlock = function (n) {
+        asserts.assert(n >= 0 && n < this.u.blocknum);
+        this.u.curblock = n;
+    };
+
+    Compiler.prototype.pushBreakBlock = function (n) {
+        asserts.assert(n >= 0 && n < this.u.blocknum);
+        this.u.breakBlocks.push(n);
+    };
+
+    Compiler.prototype.popBreakBlock = function () {
+        this.u.breakBlocks.pop();
+    };
+
+    Compiler.prototype.pushContinueBlock = function (n) {
+        asserts.assert(n >= 0 && n < this.u.blocknum);
+        this.u.continueBlocks.push(n);
+    };
+
+    Compiler.prototype.popContinueBlock = function () {
+        this.u.continueBlocks.pop();
+    };
+
+    Compiler.prototype.pushExceptBlock = function (n) {
+        asserts.assert(n >= 0 && n < this.u.blocknum);
+        this.u.exceptBlocks.push(n);
+    };
+
+    Compiler.prototype.popExceptBlock = function () {
+        this.u.exceptBlocks.pop();
+    };
+
+    Compiler.prototype.pushFinallyBlock = function (n) {
+        asserts.assert(n >= 0 && n < this.u.blocknum);
+        this.u.finallyBlocks.push(n);
+    };
+
+    Compiler.prototype.popFinallyBlock = function () {
+        this.u.finallyBlocks.pop();
+    };
+
+    Compiler.prototype.setupExcept = function (eb) {
+        out("$exc.push(", eb, ");");
+    };
+
+    Compiler.prototype.endExcept = function () {
+        out("$exc.pop();");
+    };
+
+    Compiler.prototype.outputLocals = function (unit) {
+        var have = {};
+        for (var i = 0; unit.argnames && i < unit.argnames.length; ++i)
+            have[unit.argnames[i]] = true;
+        unit.localnames.sort();
+        var output = [];
+        for (var i = 0; i < unit.localnames.length; ++i) {
+            var name = unit.localnames[i];
+            if (have[name] === undefined) {
+                output.push(name);
+                have[name] = true;
+            }
+        }
+        if (output.length > 0)
+            return "var " + output.join(",") + ";";
+        return "";
+    };
+
+    Compiler.prototype.outputAllUnits = function () {
+        var ret = '';
+        for (var j = 0; j < this.allUnits.length; ++j) {
+            var unit = this.allUnits[j];
+            ret += unit.prefixCode;
+            ret += this.outputLocals(unit);
+            ret += unit.varDeclsCode;
+            ret += unit.switchCode;
+            var blocks = unit.blocks;
+            for (var i = 0; i < blocks.length; ++i) {
+                ret += "case " + i + ": /* --- " + blocks[i]._name + " --- */";
+                ret += blocks[i].join('');
+            }
+            ret += unit.suffixCode;
+        }
+        return ret;
+    };
+
+    Compiler.prototype.cif = function (s) {
+        asserts.assert(s instanceof astnodes.If_);
+        var constant = this.exprConstant(s.test);
+        if (constant === 0) {
+            if (s.orelse)
+                this.vseqstmt(s.orelse);
+        } else if (constant === 1) {
+            this.vseqstmt(s.body);
+        } else {
+            var end = this.newBlock('end of if');
+            var next = this.newBlock('next branch of if');
+
+            var test = this.vexpr(s.test);
+            this._jumpfalse(test, next);
+            this.vseqstmt(s.body);
+            this._jump(end);
+
+            this.setBlock(next);
+            if (s.orelse)
+                this.vseqstmt(s.orelse);
+            this._jump(end);
+        }
+        this.setBlock(end);
+    };
+
+    Compiler.prototype.cwhile = function (s) {
+        var constant = this.exprConstant(s.test);
+        if (constant === 0) {
+            if (s.orelse)
+                this.vseqstmt(s.orelse);
+        } else {
+            var top = this.newBlock('while test');
+            this._jump(top);
+            this.setBlock(top);
+
+            var next = this.newBlock('after while');
+            var orelse = s.orelse.length > 0 ? this.newBlock('while orelse') : null;
+            var body = this.newBlock('while body');
+
+            this._jumpfalse(this.vexpr(s.test), orelse ? orelse : next);
+            this._jump(body);
+
+            this.pushBreakBlock(next);
+            this.pushContinueBlock(top);
+
+            this.setBlock(body);
+            this.vseqstmt(s.body);
+            this._jump(top);
+
+            this.popContinueBlock();
+            this.popBreakBlock();
+
+            if (s.orelse.length > 0) {
+                this.setBlock(orelse);
+                this.vseqstmt(s.orelse);
+                this._jump(next);
+            }
+
+            this.setBlock(next);
+        }
+    };
+
+    Compiler.prototype.cfor = function (s) {
+        var start = this.newBlock('for start');
+        var cleanup = this.newBlock('for cleanup');
+        var end = this.newBlock('for end');
+
+        this.pushBreakBlock(end);
+        this.pushContinueBlock(start);
+        var toiter = this.vexpr(s.iter);
+        var iter;
+        if (this.u.ste.generator) {
+            iter = "$loc." + this.gensym("iter");
+            out(iter, "=Sk.abstr.iter(", toiter, ");");
+        } else
+            iter = this._gr("iter", "Sk.abstr.iter(", toiter, ")");
+
+        this._jump(start);
+
+        this.setBlock(start);
+        var nexti = this._gr('next', "Sk.abstr.iternext(", iter, ")");
+        this._jumpundef(nexti, cleanup); // todo; this should be handled by StopIteration
+        var target = this.vexpr(s.target, nexti);
+        this.vseqstmt(s.body);
+        this._jump(start);
+
+        this.setBlock(cleanup);
+        this.popContinueBlock();
+        this.popBreakBlock();
+
+        this.vseqstmt(s.orelse);
+        this._jump(end);
+
+        this.setBlock(end);
+    };
+
+    Compiler.prototype.craise = function (s) {
+        if (s && s.type && s.type.id && (s.type.id === "StopIteration")) {
+            out("return undefined;");
+        } else {
+            var inst = '';
+            if (s.inst) {
+                inst = this.vexpr(s.inst);
+                out("throw ", this.vexpr(s.type), "(", inst, ");");
+            } else if (s.type) {
+                if (s.type.func) {
+                    out("throw ", this.vexpr(s.type), ";");
+                } else {
+                    out("throw ", this.vexpr(s.type), "('');");
+                }
+            } else {
+                out("throw $err;");
+            }
+        }
+    };
+
+    Compiler.prototype.ctryexcept = function (s) {
+        var n = s.handlers.length;
+        var handlers = [];
+        for (var i = 0; i < n; ++i) {
+            handlers.push(this.newBlock("except_" + i + "_"));
+        }
+
+        var unhandled = this.newBlock("unhandled");
+        var orelse = this.newBlock("orelse");
+        var end = this.newBlock("end");
+
+        this.setupExcept(handlers[0]);
+        this.vseqstmt(s.body);
+        this.endExcept();
+        this._jump(orelse);
+
+        for (var i = 0; i < n; ++i) {
+            this.setBlock(handlers[i]);
+            var handler = s.handlers[i];
+            if (!handler.type && i < n - 1) {
+                throw new SyntaxError("default 'except:' must be last");
+            }
+
+            if (handler.type) {
+                var handlertype = this.vexpr(handler.type);
+                var next = (i == n - 1) ? unhandled : handlers[i + 1];
+                var check = this._gr('instance', "$err instanceof ", handlertype);
+                this._jumpfalse(check, next);
+            }
+
+            if (handler.name) {
+                this.vexpr(handler.name, "$err");
+            }
+            this.vseqstmt(handler.body);
+            this._jump(end);
+        }
+        this.setBlock(unhandled);
+        out("throw $err;");
+
+        this.setBlock(orelse);
+        this.vseqstmt(s.orelse);
+        this._jump(end);
+        this.setBlock(end);
+    };
+
+    Compiler.prototype.ctryfinally = function (s) {
+        out("/*todo; tryfinally*/");
+        this.ctryexcept(s.body[0]);
+    };
+
+    Compiler.prototype.cassert = function (s) {
+        var test = this.vexpr(s.test);
+        var end = this.newBlock("end");
+        this._jumptrue(test, end);
+        out("throw new Sk.builtin.AssertionError(", s.msg ? this.vexpr(s.msg) : "", ");");
+        this.setBlock(end);
+    };
+    Compiler.prototype.cimportas = function (name, asname, mod) {
+        var src = name;
+        var dotLoc = src.indexOf(".");
+        var cur = mod;
+        if (dotLoc !== -1) {
+            src = src.substr(dotLoc + 1);
+            while (dotLoc !== -1) {
+                dotLoc = src.indexOf(".");
+                var attr = dotLoc !== -1 ? src.substr(0, dotLoc) : src;
+                cur = this._gr('lattr', "Sk.abstr.gattr(", cur, ",'", attr, "')");
+                src = src.substr(dotLoc + 1);
+            }
+        }
+        return this.nameop(asname, astnodes.Store, cur);
+    };
+
+    Compiler.prototype.cimport = function (s) {
+        var n = s.names.length;
+        for (var i = 0; i < n; ++i) {
+            var alias = s.names[i];
+            var mod = this._gr('module', 'Sk.builtin.__import__(', toStringLiteralJS(alias.name), ',$gbl,$loc,[])');
+
+            if (alias.asname) {
+                this.cimportas(alias.name, alias.asname, mod);
+            } else {
+                var lastDot = alias.name.indexOf('.');
+                if (lastDot !== -1) {
+                    this.nameop(alias.name.substr(0, lastDot), astnodes.Store, mod);
+                } else {
+                    this.nameop(alias.name, astnodes.Store, mod);
+                }
+            }
+        }
+    };
+
+    Compiler.prototype.cfromimport = function (s) {
+        var n = s.names.length;
+        var names = [];
+        for (var i = 0; i < n; ++i) {
+            names[i] = s.names[i].name;
+        }
+        var namesString = names.map(function (name) {
+            return toStringLiteralJS(name);
+        }).join(', ');
+        var mod = this._gr('module', 'Sk.builtin.__import__(', toStringLiteralJS(s.module), ',$gbl,$loc,[', namesString, '])');
+        for (var i = 0; i < n; ++i) {
+            var alias = s.names[i];
+            if (i === 0 && alias.name === "*") {
+                asserts.assert(n === 1);
+                out("Sk.importStar(", mod, ",$loc, $gbl);");
+                return;
+            }
+
+            var got = this._gr('item', 'Sk.abstr.gattr(', mod, ',', toStringLiteralJS(alias.name), ')');
+            var storeName = alias.name;
+            if (alias.asname)
+                storeName = alias.asname;
+            this.nameop(storeName, astnodes.Store, got);
+        }
+    };
+    Compiler.prototype.buildcodeobj = function (n, coname, decorator_list, args, callback) {
+        var decos = [];
+        var defaults = [];
+        var vararg = null;
+        var kwarg = null;
+        if (decorator_list)
+            decos = this.vseqexpr(decorator_list);
+        if (args && args.defaults)
+            defaults = this.vseqexpr(args.defaults);
+        if (args && args.vararg)
+            vararg = args.vararg;
+        if (args && args.kwarg)
+            kwarg = args.kwarg;
+        var containingHasFree = this.u.ste.hasFree;
+        var containingHasCell = this.u.ste.childHasFree;
+        var scopename = this.enterScope(coname, n, n.lineno);
+
+        var isGenerator = this.u.ste.generator;
+        var hasFree = this.u.ste.hasFree;
+        var hasCell = this.u.ste.childHasFree;
+        var descendantOrSelfHasFree = this.u.ste.hasFree;
+
+        var entryBlock = this.newBlock('codeobj entry');
+        this.u.prefixCode = "var " + scopename + "=(function " + this.niceName(coname) + "$(";
+
+        var funcArgs = [];
+        if (isGenerator) {
+            if (kwarg) {
+                throw new SyntaxError(coname + "(): keyword arguments in generators not supported");
+            }
+            if (vararg) {
+                throw new SyntaxError(coname + "(): variable number of arguments in generators not supported");
+            }
+            funcArgs.push("$gen");
+        } else {
+            if (kwarg)
+                funcArgs.push("$kwa");
+            for (var i = 0; args && i < args.args.length; ++i)
+                funcArgs.push(this.nameop(args.args[i].id, astnodes.Param));
+        }
+        if (descendantOrSelfHasFree) {
+            funcArgs.push("$free");
+        }
+        this.u.prefixCode += funcArgs.join(",");
+
+        this.u.prefixCode += "){";
+
+        if (isGenerator)
+            this.u.prefixCode += "\n// generator\n";
+        if (containingHasFree)
+            this.u.prefixCode += "\n// containing has free\n";
+        if (containingHasCell)
+            this.u.prefixCode += "\n// containing has cell\n";
+        if (hasFree)
+            this.u.prefixCode += "\n// has free\n";
+        if (hasCell)
+            this.u.prefixCode += "\n// has cell\n";
+        var locals = "{}";
+        if (isGenerator) {
+            entryBlock = "$gen.gi$resumeat";
+            locals = "$gen.gi$locals";
+        }
+        var cells = "";
+        if (hasCell)
+            cells = ",$cell={}";
+        this.u.varDeclsCode += "var $blk=" + entryBlock + ",$exc=[],$loc=" + locals + cells + ",$gbl=this,$err;";
+
+        for (var i = 0; args && i < args.args.length; ++i) {
+            var id = args.args[i].id;
+            if (this.isCell(id)) {
+                this.u.varDeclsCode += "$cell." + id + "=" + id + ";";
+            }
+        }
+        if (!isGenerator) {
+            var minargs = args ? args.args.length - defaults.length : 0;
+            var maxargs = vararg ? Infinity : (args ? args.args.length : 0);
+            var kw = kwarg ? true : false;
+            this.u.varDeclsCode += "Sk.builtin.pyCheckArgs(\"" + coname + "\", arguments, " + minargs + ", " + maxargs + ", " + kw + ", " + descendantOrSelfHasFree + ");";
+        }
+        if (defaults.length > 0) {
+            var offset = args.args.length - defaults.length;
+            for (var i = 0; i < defaults.length; ++i) {
+                var argname = this.nameop(args.args[i + offset].id, astnodes.Param);
+                this.u.varDeclsCode += "if(typeof " + argname + " === 'undefined')" + argname + "=" + scopename + ".$defaults[" + i + "];";
+            }
+        }
+        if (vararg) {
+            var start = funcArgs.length;
+            this.u.varDeclsCode += vararg + "=new Sk.builtins['tuple'](Array.prototype.slice.call(arguments," + start + "));";
+        }
+        if (kwarg) {
+            this.u.varDeclsCode += kwarg + "=new Sk.builtins['dict']($kwa);";
+        }
+        this.u.switchCode = "while(true){try{switch($blk){";
+        this.u.suffixCode = "}}catch(err){if ($exc.length>0) {$err=err;$blk=$exc.pop();continue;} else {throw err;}}}});";
+        callback.call(this, scopename);
+        var argnames;
+        if (args && args.args.length > 0) {
+            var argnamesarr = [];
+            for (var i = 0; i < args.args.length; ++i) {
+                argnamesarr.push(args.args[i].id);
+            }
+
+            argnames = argnamesarr.join("', '");
+            this.u.argnames = argnamesarr;
+        }
+        this.exitScope();
+        if (defaults.length > 0)
+            out(scopename, ".$defaults=[", defaults.join(','), "];");
+        if (argnames) {
+            out(scopename, ".co_varnames=['", argnames, "'];");
+        }
+        if (kwarg) {
+            out(scopename, ".co_kwargs=1;");
+        }
+        var frees = "";
+        if (hasFree) {
+            frees = ",$cell";
+            if (containingHasFree)
+                frees += ",$free";
+        }
+        if (isGenerator)
+            if (args && args.args.length > 0) {
+                return this._gr("gener", "new Sk.builtins['function']((function(){var $origargs=Array.prototype.slice.call(arguments);Sk.builtin.pyCheckArgs(\"", coname, "\",arguments,", args.args.length - defaults.length, ",", args.args.length, ");return new Sk.builtins['generator'](", scopename, ",$gbl,$origargs", frees, ");}))");
+            } else {
+                return this._gr("gener", "new Sk.builtins['function']((function(){Sk.builtin.pyCheckArgs(\"", coname, "\",arguments,0,0);return new Sk.builtins['generator'](", scopename, ",$gbl,[]", frees, ");}))");
+            }
+        else {
+            return this._gr("funcobj", "new Sk.builtins['function'](", scopename, ",$gbl", frees, ")");
+        }
+    };
+
+    Compiler.prototype.cfunction = function (s) {
+        asserts.assert(s instanceof astnodes.FunctionDef);
+        var funcorgen = this.buildcodeobj(s, s.name, s.decorator_list, s.args, function (scopename) {
+            this.vseqstmt(s.body);
+            out("return Sk.builtin.none.none$;"); // if we fall off the bottom, we want the ret to be None
+        });
+        this.nameop(s.name, astnodes.Store, funcorgen);
+    };
+
+    Compiler.prototype.clambda = function (e) {
+        asserts.assert(e instanceof astnodes.Lambda);
+        var func = this.buildcodeobj(e, "<lambda>", null, e.args, function (scopename) {
+            var val = this.vexpr(e.body);
+            out("return ", val, ";");
+        });
+        return func;
+    };
+
+    Compiler.prototype.cifexp = function (e) {
+        var next = this.newBlock('next of ifexp');
+        var end = this.newBlock('end of ifexp');
+        var ret = this._gr('res', 'null');
+
+        var test = this.vexpr(e.test);
+        this._jumpfalse(test, next);
+
+        out(ret, '=', this.vexpr(e.body), ';');
+        this._jump(end);
+
+        this.setBlock(next);
+        out(ret, '=', this.vexpr(e.orelse), ';');
+        this._jump(end);
+
+        this.setBlock(end);
+        return ret;
+    };
+
+    Compiler.prototype.cgenexpgen = function (generators, genIndex, elt) {
+        var start = this.newBlock('start for ' + genIndex);
+        var skip = this.newBlock('skip for ' + genIndex);
+        var ifCleanup = this.newBlock('if cleanup for ' + genIndex);
+        var end = this.newBlock('end for ' + genIndex);
+
+        var ge = generators[genIndex];
+
+        var iter;
+        if (genIndex === 0) {
+            iter = "$loc.$iter0";
+        } else {
+            var toiter = this.vexpr(ge.iter);
+            iter = "$loc." + this.gensym("iter");
+            out(iter, "=", "Sk.abstr.iter(", toiter, ");");
+        }
+        this._jump(start);
+        this.setBlock(start);
+        var nexti = this._gr('next', "Sk.abstr.iternext(", iter, ")");
+        this._jumpundef(nexti, end); // todo; this should be handled by StopIteration
+        var target = this.vexpr(ge.target, nexti);
+
+        var n = ge.ifs.length;
+        for (var i = 0; i < n; ++i) {
+            var ifres = this.vexpr(ge.ifs[i]);
+            this._jumpfalse(ifres, start);
+        }
+
+        if (++genIndex < generators.length) {
+            this.cgenexpgen(generators, genIndex, elt);
+        }
+
+        if (genIndex >= generators.length) {
+            var velt = this.vexpr(elt);
+            out("return [", skip, "/*resume*/,", velt, "/*ret*/];");
+            this.setBlock(skip);
+        }
+
+        this._jump(start);
+
+        this.setBlock(end);
+
+        if (genIndex === 1)
+            out("return null;");
+    };
+
+    Compiler.prototype.cgenexp = function (e) {
+        var gen = this.buildcodeobj(e, "<genexpr>", null, null, function (scopename) {
+            this.cgenexpgen(e.generators, 0, e.elt);
+        });
+        var gener = this._gr("gener", "Sk.misceval.callsim(", gen, ");");
+        out(gener, ".gi$locals.$iter0=Sk.abstr.iter(", this.vexpr(e.generators[0].iter), ");");
+        return gener;
+    };
+
+    Compiler.prototype.cclass = function (s) {
+        asserts.assert(s instanceof astnodes.ClassDef);
+        var decos = s.decorator_list;
+        var bases = this.vseqexpr(s.bases);
+        var scopename = this.enterScope(s.name, s, s.lineno);
+        var entryBlock = this.newBlock('class entry');
+
+        this.u.prefixCode = "var " + scopename + "=(function $" + s.name + "$class_outer($globals,$locals,$rest){var $gbl=$globals,$loc=$locals;";
+        this.u.switchCode += "return(function " + s.name + "(){";
+        this.u.switchCode += "var $blk=" + entryBlock + ",$exc=[];while(true){switch($blk){";
+        this.u.suffixCode = "}break;}}).apply(null,$rest);});";
+
+        this.u.private_ = s.name;
+
+        this.cbody(s.body);
+        out("break;");
+        this.exitScope();
+
+        var wrapped = this._gr('built', 'Sk.misceval.buildClass($gbl,', scopename, ',', toStringLiteralJS(s.name), ',[', bases, '])');
+        this.nameop(s.name, astnodes.Store, wrapped);
+    };
+
+    Compiler.prototype.ccontinue = function (s) {
+        if (this.u.continueBlocks.length === 0)
+            throw new SyntaxError("'continue' outside loop");
+        this._jump(this.u.continueBlocks[this.u.continueBlocks.length - 1]);
+    };
+    Compiler.prototype.vstmt = function (s) {
+        this.u.lineno = s.lineno;
+        this.u.linenoSet = false;
+
+        this.annotateSource(s);
+
+        switch (s.constructor) {
+            case astnodes.FunctionDef:
+                this.cfunction(s);
+                break;
+            case astnodes.ClassDef:
+                this.cclass(s);
+                break;
+            case astnodes.Return_:
+                if (this.u.ste.blockType !== FunctionBlock)
+                    throw new SyntaxError("'return' outside function");
+                if (s.value)
+                    out("return ", this.vexpr(s.value), ";");
+                else
+                    out("return null;");
+                break;
+            case astnodes.Delete_:
+                this.vseqexpr(s.targets);
+                break;
+            case astnodes.Assign:
+                var n = s.targets.length;
+                var val = this.vexpr(s.value);
+                for (var i = 0; i < n; ++i)
+                    this.vexpr(s.targets[i], val);
+                break;
+            case astnodes.AugAssign:
+                return this.caugassign(s);
+            case astnodes.Print:
+                this.cprint(s);
+                break;
+            case astnodes.For_:
+                return this.cfor(s);
+            case astnodes.While_:
+                return this.cwhile(s);
+            case astnodes.If_:
+                return this.cif(s);
+            case astnodes.Raise:
+                return this.craise(s);
+            case astnodes.TryExcept:
+                return this.ctryexcept(s);
+            case astnodes.TryFinally:
+                return this.ctryfinally(s);
+            case astnodes.Assert:
+                return this.cassert(s);
+            case astnodes.Import_:
+                return this.cimport(s);
+            case astnodes.ImportFrom:
+                return this.cfromimport(s);
+            case astnodes.Global:
+                break;
+            case astnodes.Expr:
+                this.vexpr(s.value);
+                break;
+            case astnodes.Pass:
+                break;
+            case astnodes.Break_:
+                if (this.u.breakBlocks.length === 0)
+                    throw new SyntaxError("'break' outside loop");
+                this._jump(this.u.breakBlocks[this.u.breakBlocks.length - 1]);
+                break;
+            case astnodes.Continue_:
+                this.ccontinue(s);
+                break;
+            default:
+                asserts.fail("unhandled case in vstmt");
+        }
+    };
+
+    Compiler.prototype.vseqstmt = function (stmts) {
+        for (var i = 0; i < stmts.length; ++i)
+            this.vstmt(stmts[i]);
+    };
+
+    Compiler.prototype.isCell = function (name) {
+        var mangled = mangleName(this.u.private_, name);
+        var scope = this.u.ste.getScope(mangled);
+        var dict = null;
+        if (scope === symtable.CELL)
+            return true;
+        return false;
+    };
+    Compiler.prototype.nameop = function (name, ctx, dataToStore) {
+        if ((ctx === astnodes.Store || ctx === astnodes.AugStore || ctx === astnodes.Del) && name === "__debug__") {
+            throw new SyntaxError("can not assign to __debug__");
+        }
+        if ((ctx === astnodes.Store || ctx === astnodes.AugStore || ctx === astnodes.Del) && name === "None") {
+            throw new SyntaxError("can not assign to None");
+        }
+
+        if (name === "None")
+            return "Sk.builtin.none.none$";
+        if (name === "True")
+            return "Sk.ffi.bool.True";
+        if (name === "False")
+            return "Sk.ffi.bool.False";
+        var mangled = mangleName(this.u.private_, name);
+        var op = 0;
+        var optype = OP_NAME;
+        var scope = this.u.ste.getScope(mangled);
+        var dict = null;
+        switch (scope) {
+            case FREE:
+                dict = "$free";
+                optype = OP_DEREF;
+                break;
+            case CELL:
+                dict = "$cell";
+                optype = OP_DEREF;
+                break;
+            case LOCAL:
+                if (this.u.ste.blockType === FunctionBlock && !this.u.ste.generator)
+                    optype = OP_FAST;
+                break;
+            case GLOBAL_IMPLICIT:
+                if (this.u.ste.blockType === FunctionBlock)
+                    optype = OP_GLOBAL;
+                break;
+            case GLOBAL_EXPLICIT:
+                optype = OP_GLOBAL;
+            default:
+                break;
+        }
+        mangled = fixReservedNames(mangled);
+        mangled = fixReservedWords(mangled);
+        asserts.assert(scope || name.charAt(1) === '_');
+        var mangledNoPre = mangled;
+        if (this.u.ste.generator || this.u.ste.blockType !== FunctionBlock)
+            mangled = "$loc." + mangled;
+        else if (optype === OP_FAST || optype === OP_NAME)
+            this.u.localnames.push(mangled);
+
+        switch (optype) {
+            case OP_FAST:
+                switch (ctx) {
+                    case astnodes.Load:
+                    case astnodes.Param:
+                        out("if (typeof ", mangled, " === 'undefined') { throw new Error('local variable \\\'", mangled, "\\\' referenced before assignment'); }\n");
+                        return mangled;
+                    case astnodes.Store:
+                        out(mangled, "=", dataToStore, ";");
+                        break;
+                    case astnodes.Del:
+                        out("delete ", mangled, ";");
+                        break;
+                    default:
+                        asserts.fail("unhandled");
+                }
+                break;
+            case OP_NAME:
+                switch (ctx) {
+                    case astnodes.Load:
+                        var v = this.gensym('loadname');
+                        out("var ", v, "=(typeof ", mangled, " !== 'undefined') ? ", mangled, ":Sk.misceval.loadname('", mangledNoPre, "',$gbl);");
+                        return v;
+                    case astnodes.Store:
+                        out(mangled, "=", dataToStore, ";");
+                        break;
+                    case astnodes.Del:
+                        out("delete ", mangled, ";");
+                        break;
+                    case astnodes.Param:
+                        return mangled;
+                    default:
+                        asserts.fail("unhandled");
+                }
+                break;
+            case OP_GLOBAL:
+                switch (ctx) {
+                    case astnodes.Load:
+                        return this._gr("loadgbl", "Sk.misceval.loadname('", mangledNoPre, "',$gbl)");
+                    case astnodes.Store:
+                        out("$gbl.", mangledNoPre, "=", dataToStore, ';');
+                        break;
+                    case astnodes.Del:
+                        out("delete $gbl.", mangledNoPre);
+                        break;
+                    default:
+                        asserts.fail("unhandled case in name op_global");
+                }
+                break;
+            case OP_DEREF:
+                switch (ctx) {
+                    case astnodes.Load:
+                        return dict + "." + mangledNoPre;
+                    case astnodes.Store:
+                        out(dict, ".", mangledNoPre, "=", dataToStore, ";");
+                        break;
+                    case astnodes.Param:
+                        return mangledNoPre;
+                    default:
+                        asserts.fail("unhandled case in name op_deref");
+                }
+                break;
+            default:
+                asserts.fail("unhandled case");
+        }
+    };
+    Compiler.prototype.enterScope = function (name, key, lineno) {
+        var u = new CompilerUnit();
+        u.ste = this.st.getStsForAst(key);
+        u.name = name;
+        u.firstlineno = lineno;
+
+        if (this.u && this.u.private_)
+            u.private_ = this.u.private_;
+
+        this.stack.push(this.u);
+        this.allUnits.push(u);
+        var scopeName = this.gensym('scope');
+        u.scopename = scopeName;
+
+        this.u = u;
+        this.u.activateScope();
+
+        this.nestlevel++;
+
+        return scopeName;
+    };
+
+    Compiler.prototype.exitScope = function () {
+        var prev = this.u;
+        this.nestlevel--;
+        if (this.stack.length - 1 >= 0)
+            this.u = this.stack.pop();
+        else
+            this.u = null;
+        if (this.u)
+            this.u.activateScope();
+
+        if (prev.name !== "<module>") {
+            var mangled = prev.name;
+            mangled = fixReservedWords(mangled);
+            mangled = fixReservedNames(mangled);
+            out(prev.scopename, ".co_name=Sk.builtin.stringToPy('", mangled, "');");
+        }
+    };
+
+    Compiler.prototype.cbody = function (stmts) {
+        for (var i = 0; i < stmts.length; ++i) {
+            this.vstmt(stmts[i]);
+        }
+    };
+
+    Compiler.prototype.cprint = function (s) {
+        asserts.assert(s instanceof astnodes.Print);
+        var dest = 'null';
+        if (s.dest) {
+            dest = this.vexpr(s.dest);
+        }
+
+        var n = s.values.length;
+        for (var i = 0; i < n; ++i) {
+            out("Sk.misceval.print_(Sk.ffi.remapToJs(new Sk.builtins.str(", this.vexpr(s.values[i]), ")));");
+        }
+        if (s.nl) {
+            out("Sk.misceval.print_('\\n');");
+        }
+    };
+
+    Compiler.prototype.cmod = function (mod) {
+        var modf = this.enterScope("<module>", mod, 0);
+
+        var entryBlock = this.newBlock('module entry');
+        this.u.prefixCode = "var " + modf + "=(function($modname){";
+        this.u.varDeclsCode = "var $blk=" + entryBlock + ",$exc=[],$gbl={},$loc=$gbl,$err;$gbl.__name__=$modname;Sk.globals=$gbl;";
+
+        this.u.switchCode = "try {while(true){try{switch($blk){";
+        this.u.suffixCode = "}}catch(err){if ($exc.length>0) {$err=err;$blk=$exc.pop();continue;} else {throw err;}}}}catch(err){if (err instanceof Sk.builtin.SystemExit && !Sk.throwSystemExit) { Sk.misceval.print_(err.toString() + '\\n'); return $loc; } else { throw err; } } });";
+
+        switch (mod.constructor) {
+            case astnodes.Module:
+                this.cbody(mod.body);
+                out("return $loc;");
+                break;
+            default:
+                asserts.fail("todo; unhandled case in compilerMod");
+        }
+        this.exitScope();
+
+        this.result.push(this.outputAllUnits());
+        return modf;
+    };
+    return Compiler;
+})();
+exports.Compiler = Compiler;
+function compile(source, fileName) {
+    var cst = parser.parse(fileName, source);
+    var ast = builder.astFromParse(cst, fileName);
+    var st = symtable.symbolTable(ast, fileName);
+    var c = new Compiler(fileName, st, 0, source);
+    return { 'funcname': c.cmod(ast), 'code': c.result.join('') };
+}
+exports.compile = compile;
+;
+
+function resetCompiler() {
+    gensymcount = 0;
+}
+exports.resetCompiler = resetCompiler;
+;
+});
+
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-define("ace/mode/python_worker",["require","exports","module","ace/lib/oop","ace/worker/mirror","ace/mode/python/Parser"], function(require, exports, module) {
+define("ace/mode/python_worker",["require","exports","module","ace/lib/oop","ace/worker/mirror","ace/mode/python/Parser","ace/mode/python/builder","ace/mode/python/compiler","ace/mode/python/symtable"], function(require, exports, module) {
 "no use strict";
 var oop = require('../lib/oop');
 var m = require('../worker/mirror');
 
-var Parser = require('../mode/python/Parser');
+var prsr = require('../mode/python/Parser');
+
+var bldr = require('../mode/python/builder');
+var cmplr = require('../mode/python/compiler');
+var symtbl = require('../mode/python/symtable');
 var INFO = 'info';
 var WARNING = 'warning';
 var ERROR = 'error';
@@ -3774,19 +8829,35 @@ var PythonWorker = (function (_super) {
     };
 
     PythonWorker.prototype.onUpdate = function () {
-        var value = this.doc.getValue();
+        var source = this.doc.getValue();
 
         var annotations = [];
 
         try  {
-            var node = Parser.parse('<stdin>', value);
+            var fileName = '<stdin>';
+
+            var node = prsr.parse(fileName, source);
+            var module = bldr.astFromParse(node, fileName);
+            var symbolTable = symtbl.symbolTable(module, fileName);
+
+            console.log("symbols:\n________\n" + symtbl.dumpSymbolTable(symbolTable));
+
+            var compiler = new cmplr.Compiler(fileName, symbolTable, 0, source);
+
+            var compiled = { 'funcname': compiler.cmod(module), 'code': compiler.result.join('') };
+
+            console.log(compiled.code);
         } catch (e) {
-            annotations.push({
-                row: e.lineNumber - 1,
-                column: e.columnNumber,
-                text: e.message,
-                type: ERROR
-            });
+            try  {
+                annotations.push({
+                    row: e.lineNumber - 1,
+                    column: e.columnNumber,
+                    text: e.message,
+                    type: ERROR
+                });
+            } catch (slippery) {
+                console.log(slippery);
+            }
         }
 
         this.sender.emit('syntax', annotations);

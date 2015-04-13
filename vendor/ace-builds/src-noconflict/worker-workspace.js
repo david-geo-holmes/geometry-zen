@@ -186,7 +186,7 @@ ace.define("ace/workspace/workspace_protocol",["require","exports","module"], fu
 exports.EVENT_NAME_COMPLETIONS = "completions";
 });
 
-ace.define("ace/workspace/typescriptServices",["require","exports","module","fs","path","module","os"], function(require, exports, module){
+ace.define("ace/workspace/typescriptServices",["require","exports","module","fs","path","module","os"], function(require, exports, module) {
 var TypeScript;
 (function (TypeScript) {
     TypeScript.DiagnosticCode = {
@@ -34634,7 +34634,7 @@ var TypeScript;
                 this.declFile.Write("import ");
                 this.declFile.Write(importDeclAST.identifier.text() + " = ");
                 if (importDeclAST.moduleReference.kind() === 245 /* ExternalModuleReference */) {
-                    this.declFile.WriteLine(['r', 'e', 'q', 'u', 'i', 'r', 'e'].join() + "(" + importDeclAST.moduleReference.stringLiteral.text() + ");");
+                    this.declFile.WriteLine(['r', 'e', 'q', 'u', 'i', 'r', 'e'].join('') + "(" + importDeclAST.moduleReference.stringLiteral.text() + ");");
                 } else {
                     this.declFile.WriteLine(TypeScript.ASTHelpers.getNameOfIdenfierOrQualifiedName(importDeclAST.moduleReference.moduleName) + ";");
                 }
@@ -43821,8 +43821,16 @@ var TypeScript;
             return this.semanticInfoChain.numberTypeSymbol;
         };
 
+        PullTypeResolver.prototype.isNumber = function (type) {
+            return type === this.semanticInfoChain.numberTypeSymbol;
+        };
+
+        PullTypeResolver.prototype.isEnum = function (type) {
+            return TypeScript.PullHelpers.symbolIsEnum(type);
+        };
+
         PullTypeResolver.prototype.isAnyOrNumberOrEnum = function (type) {
-            return this.isAnyOrEquivalent(type) || type === this.semanticInfoChain.numberTypeSymbol || TypeScript.PullHelpers.symbolIsEnum(type);
+            return this.isAnyOrEquivalent(type) || this.isNumber(type) || this.isEnum(type);
         };
 
         PullTypeResolver.prototype.typeCheckUnaryArithmeticOperation = function (unaryExpression, context) {
@@ -43870,7 +43878,17 @@ var TypeScript;
                 this.typeCheckBinaryArithmeticExpression(binaryExpression, context);
             }
 
-            return this.semanticInfoChain.numberTypeSymbol;
+            var lhsSymbol = this.resolveAST(binaryExpression.left, false, context);
+            var rhsSymbol = this.resolveAST(binaryExpression.right, false, context);
+            if (this.isAnyOrNumberOrEnum(lhsSymbol.type)) {
+                if (this.isAnyOrNumberOrEnum(rhsSymbol.type)) {
+                    return this.semanticInfoChain.numberTypeSymbol;
+                } else {
+                    return rhsSymbol;
+                }
+            } else {
+                return lhsSymbol;
+            }
         };
 
         PullTypeResolver.prototype.typeCheckBinaryArithmeticExpression = function (binaryExpression, context) {
@@ -43889,8 +43907,8 @@ var TypeScript;
                 rhsType = lhsType;
             }
 
-            var lhsIsFit = this.isAnyOrNumberOrEnum(lhsType);
-            var rhsIsFit = this.isAnyOrNumberOrEnum(rhsType);
+            var lhsIsFit = true;
+            var rhsIsFit = true;
 
             if (!rhsIsFit) {
                 context.postDiagnostic(this.semanticInfoChain.diagnosticFromAST(binaryExpression.right, TypeScript.DiagnosticCode.The_right_hand_side_of_an_arithmetic_operation_must_be_of_type_any_number_or_an_enum_type));
@@ -46763,8 +46781,20 @@ var TypeScript;
                 exprType = this.semanticInfoChain.stringTypeSymbol;
             } else if (this.isAnyOrEquivalent(lhsType) || this.isAnyOrEquivalent(rhsType)) {
                 exprType = this.semanticInfoChain.anyTypeSymbol;
-            } else if (rhsType === this.semanticInfoChain.numberTypeSymbol && lhsType === this.semanticInfoChain.numberTypeSymbol) {
-                exprType = this.semanticInfoChain.numberTypeSymbol;
+            } else {
+                if (lhsType === this.semanticInfoChain.numberTypeSymbol) {
+                    if (rhsType === this.semanticInfoChain.numberTypeSymbol) {
+                        exprType = this.semanticInfoChain.numberTypeSymbol;
+                    } else {
+                        exprType = rhsType;
+                    }
+                } else {
+                    if (rhsType === this.semanticInfoChain.numberTypeSymbol) {
+                        exprType = lhsType;
+                    } else {
+                        exprType = lhsType;
+                    }
+                }
             }
 
             if (this.canTypeCheckAST(binaryExpression, context)) {
