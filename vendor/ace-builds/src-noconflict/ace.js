@@ -10218,17 +10218,21 @@ var EditSession = (function (_super) {
     EditSession.prototype.moveText = function (fromRange, toPosition, copy) {
         var text = this.getTextRange(fromRange);
         var folds = this.getFoldsInRange(fromRange);
+        var rowDiff;
+        var colDiff;
 
         var toRange = rng.Range.fromPoints(toPosition, toPosition);
         if (!copy) {
             this.remove(fromRange);
-            var rowDiff = fromRange.start.row - fromRange.end.row;
-            var collDiff = rowDiff ? -fromRange.end.column : fromRange.start.column - fromRange.end.column;
-            if (collDiff) {
-                if (toRange.start.row == fromRange.end.row && toRange.start.column > fromRange.end.column)
-                    toRange.start.column += collDiff;
-                if (toRange.end.row == fromRange.end.row && toRange.end.column > fromRange.end.column)
-                    toRange.end.column += collDiff;
+            rowDiff = fromRange.start.row - fromRange.end.row;
+            colDiff = rowDiff ? -fromRange.end.column : fromRange.start.column - fromRange.end.column;
+            if (colDiff) {
+                if (toRange.start.row == fromRange.end.row && toRange.start.column > fromRange.end.column) {
+                    toRange.start.column += colDiff;
+                }
+                if (toRange.end.row == fromRange.end.row && toRange.end.column > fromRange.end.column) {
+                    toRange.end.column += colDiff;
+                }
             }
             if (rowDiff && toRange.start.row >= fromRange.end.row) {
                 toRange.start.row += rowDiff;
@@ -10240,14 +10244,16 @@ var EditSession = (function (_super) {
         if (folds.length) {
             var oldStart = fromRange.start;
             var newStart = toRange.start;
-            var rowDiff = newStart.row - oldStart.row;
-            var collDiff = newStart.column - oldStart.column;
+            rowDiff = newStart.row - oldStart.row;
+            colDiff = newStart.column - oldStart.column;
             this.addFolds(folds.map(function (x) {
                 x = x.clone();
-                if (x.start.row == oldStart.row)
-                    x.start.column += collDiff;
-                if (x.end.row == oldStart.row)
-                    x.end.column += collDiff;
+                if (x.start.row == oldStart.row) {
+                    x.start.column += colDiff;
+                }
+                if (x.end.row == oldStart.row) {
+                    x.end.column += colDiff;
+                }
                 x.start.row += rowDiff;
                 x.end.row += rowDiff;
                 return x;

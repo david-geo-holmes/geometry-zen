@@ -43805,12 +43805,13 @@ var TypeScript;
             return this.semanticInfoChain.booleanTypeSymbol;
         };
 
-        PullTypeResolver.prototype.resolveUnaryArithmeticOperation = function (ast, context) {
-            if (this.canTypeCheckAST(ast, context)) {
-                this.typeCheckUnaryArithmeticOperation(ast, context);
+        PullTypeResolver.prototype.resolveUnaryArithmeticOperation = function (unaryExpr, context) {
+            if (this.canTypeCheckAST(unaryExpr, context)) {
+                this.typeCheckUnaryArithmeticOperation(unaryExpr, context);
             }
 
-            return this.semanticInfoChain.numberTypeSymbol;
+            var expressionSymbol = this.resolveAST(unaryExpr.operand, false, context);
+            return expressionSymbol;
         };
 
         PullTypeResolver.prototype.resolvePostfixUnaryExpression = function (ast, context) {
