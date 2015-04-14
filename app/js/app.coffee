@@ -48,7 +48,7 @@ app.run(['$rootScope', '$window' , '$location', 'cookie', 'i18n', ($rootScope, $
 
   $rootScope.isHomePage = () -> true
 
-  $rootScope.jumpIcon = () -> if isMenuLocation() then "icon-edit" else "icon-home"
-  $rootScope.jumpText = () -> if isMenuLocation() then "Workbench" else "Home"
-  $rootScope.jumpHRef = () -> if isMenuLocation() then "/workbench" else "/"
+  $rootScope.jumpIcon = () -> if isMenuLocation() then "icon-home" else "icon-home"
+  $rootScope.jumpText = () -> if isMenuLocation() then "Home" else "Home"
+  $rootScope.jumpHRef = () -> if isMenuLocation() then "/" else "/"
 ])
