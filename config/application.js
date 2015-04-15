@@ -98,6 +98,7 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('application
         {src: "typings/d3/d3.d.ts",                                        dest: "generated/ts/d3.d.ts"},
         {src: "typings/easeljs/easeljs.d.ts",                              dest: "generated/ts/easeljs.d.ts"},
         {src: "typings/threejs/three.d.ts",                                dest: "generated/ts/three.d.ts"},
+        {src: "typings/jxg/jxg.d.ts",                                      dest: "generated/ts/jxg.d.ts"},
 
         {src: "vendor/font-awesome/font/FontAwesome.otf",                  dest: "generated/img/FontAwesome.otf"},
         {src: "vendor/font-awesome/font/fontawesome-webfont.eot",          dest: "generated/img/fontawesome-webfont.eot"},
@@ -131,6 +132,7 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('application
         {src: "typings/d3/d3.d.ts",                                        dest: "dist/ts/d3.d.ts"},
         {src: "typings/easeljs/easeljs.d.ts",                              dest: "dist/ts/easeljs.d.ts"},
         {src: "typings/threejs/three.d.ts",                                dest: "dist/ts/three.d.ts"},
+        {src: "typings/jxg/jxg.d.ts",                                      dest: "dist/ts/jxg.d.ts"},
 
         {src: "vendor/font-awesome/font/FontAwesome.otf",                  dest: "dist/img/FontAwesome.otf"},
         {src: "vendor/font-awesome/font/fontawesome-webfont.eot",          dest: "dist/img/fontawesome-webfont.eot"},
