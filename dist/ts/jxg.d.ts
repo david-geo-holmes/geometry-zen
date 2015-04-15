@@ -17,11 +17,15 @@ declare module JXG {
      * This is the basic class for geometry elements like points, circles and lines. 
      */
     export interface GeometryElement {
+        /**
+         * Hide the element. It will still exist but not visible on the board.
+         */
+        hideElement(): void;
     }
     /**
      *
      */
-    export interface CoordsElement {
+    export interface CoordsElement extends GeometryElement {
         /**
          * Getter method for x, this is used by for CAS-points to access point coordinates.
          */
@@ -65,6 +69,16 @@ declare module JXG {
      *
      */
     export interface Line extends GeometryElement {
+    }
+    /**
+     *
+     */
+    export interface Arrow extends Line {
+    }
+    /**
+     *
+     */
+    export interface Axis extends Line {
     }
     /**
      *
@@ -120,6 +134,14 @@ declare module JXG {
          *
          */
         create(elementType: "angle", parents: any[], attributes?: {}): Angle;
+        /**
+         *
+         */
+        create(elementType: "arrow", parents: any[], attributes?: {}): Arrow;
+        /**
+         *
+         */
+        create(elementType: "axis", parents: any[], attributes?: {}): Axis;
         /**
          *
          */
