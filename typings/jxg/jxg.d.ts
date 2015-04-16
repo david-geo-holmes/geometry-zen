@@ -18,9 +18,18 @@ declare module JXG {
      */
     export interface GeometryElement {
         /**
+         * Returns the element name.
+         */
+        getName(): string;
+        /**
          * Hide the element. It will still exist but not visible on the board.
          */
         hideElement(): void;
+        /**
+         * Updates the element's label text and the element's attribute "name", strips all html.
+         * @param name The element name.
+         */
+        setName(name: string): string;
         /**
          * Make the element visible.
          */
