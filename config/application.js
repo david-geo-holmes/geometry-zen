@@ -158,6 +158,10 @@ module.exports = require(process.env['LINEMAN_MAIN']).config.extend('application
       files: "app/templates/**/*.html",
       tasks: ["ngtemplates", "concat_sourcemap:js"]
     },
+    ts: {
+      files: ["typings/**/*.d.ts"],
+      tasks: ["copy:dev"]
+    },
     js: {
       files: ["<%= files.js.vendor %>", "<%= files.js.app %>"],
       tasks: ["concat_sourcemap:js"]

@@ -2,7 +2,7 @@
 // Copyright 2015 David Holmes, https://github.com/geometryzen
 //
 /**
- * JSXGraph namespace.
+ * JXG namespace.
  */
 declare module JXG {
     /**
@@ -21,6 +21,10 @@ declare module JXG {
          * Hide the element. It will still exist but not visible on the board.
          */
         hideElement(): void;
+        /**
+         * Make the element visible.
+         */
+        showElement(): void;
     }
     /**
      *
@@ -34,11 +38,50 @@ declare module JXG {
          * Getter method for y, this is used by for CAS-points to access point coordinates.
          */
         Y(): number;
+        /**
+         * Starts an animated point movement towards the given coordinates where.
+         * The animation is done after time milliseconds.
+         * If the second parameter is not given or is equal to 0, setPosition() is called, see #setPosition.
+         * @param where Array containing the x and y coordinate of the target location.
+         * @param time Number of milliseconds the animation should last.
+         * @param options
+         */
+        moveTo(where: number[], time?: number, options?: {callback?: ()=>void; effect?: string;}): Point;
+    }
+    /**
+     *
+     */
+    export interface Text extends CoordsElement {
+    }
+    /**
+     *
+     */
+    export interface Button extends Text {
+    }
+    /**
+     *
+     */
+    export interface Circle extends GeometryElement {
     }
     /**
      *
      */
     export interface Curve extends GeometryElement {
+    }
+    /**
+     * A grid is a set of vertical and horizontal lines to support the user with element placement.
+     */
+    export interface Grid extends Curve {
+    }
+    /**
+     * This element is used to provide a constructor for a generic conic section uniquely defined by five points.
+     */
+    export interface Conic extends Curve {
+    }
+    /**
+     * 
+     */
+    export interface Ellipse extends Conic {
     }
     /**
      *
@@ -64,6 +107,20 @@ declare module JXG {
      *
      */
     export interface Point extends CoordsElement {
+    }
+    /**
+     *
+     */
+    export interface Glider extends Point {
+    }
+    /**
+     *
+     */
+    export interface Slider extends Glider {
+        /**
+         * Returns the current slider value.
+         */
+        Value(): number;
     }
     /**
      *
@@ -145,7 +202,35 @@ declare module JXG {
         /**
          *
          */
+        create(elementType: "button", parents: any[], attributes?: {}): Button;
+        /**
+         *
+         */
+        create(elementType: "circle", parents: any[], attributes?: {}): Circle;
+        /**
+         *
+         */
+        create(elementType: "conic", parents: any[], attributes?: {}): Conic;
+        /**
+         *
+         */
         create(elementType: "curve", parents: any[], attributes?: {}): Curve;
+        /**
+         *
+         */
+        create(elementType: "ellipse", parents: any[], attributes?: {}): Ellipse;
+        /**
+         *
+         */
+        create(elementType: "functiongraph", parents?: any[], attributes?: {}): Functiongraph;
+        /**
+         *
+         */
+        create(elementType: "glider", parents: any[], attributes?: {}): Glider;
+        /**
+         *
+         */
+        create(elementType: "grid", parents: any[], attributes?: {}): Grid;
         /**
          *
          */
@@ -153,19 +238,23 @@ declare module JXG {
         /**
          *
          */
-        create(elementType: "point", parents: number[], attributes?: {}): Point;
+        create(elementType: "point", parents?: number[], attributes?: {}): Point;
         /**
          *
          */
-        create(elementType: "functiongraph", parents: any[], attributes?: {}): Functiongraph;
+        create(elementType: "slider", parents: any[], attributes?: {}): Slider;
         /**
          *
          */
-        create(elementType: "tapemeasure", parents?: [number[]], attributes?: {}): Tapemeasure;
+        create(elementType: "tapemeasure", parents?: any[], attributes?: {}): Tapemeasure;
         /**
          *
          */
-        create(elementType: "turtle", parents?: number[], attributes?: {}): Turtle;
+        create(elementType: "text", parents?: any[], attributes?: {}): Text;
+        /**
+         *
+         */
+        create(elementType: "turtle", parents?: any[], attributes?: {}): Turtle;
         /**
          * Stop updates of the board.
          * @return Reference to the board
@@ -187,7 +276,7 @@ declare module JXG {
          * @param attributes An object that sets some of the board properties. Most of these properties can be set via JXG.Options.
          * @returns Reference to the created board.
          */
-        initBoard(box: string, attributes: { axis?: boolean; boundingbox?: number[]; showCopyright?: boolean}): Board;
+        initBoard(box: string, attributes: { axis?: boolean; boundingbox?: number[]; showCopyright?: boolean; showNavigation?: boolean}): Board;
     }
     /**
      *
@@ -196,5 +285,26 @@ declare module JXG {
     /**
      *
      */
-    var VERSION: string;
+    export interface Math {
+        /**
+         * eps defines the closeness to zero.
+         * If the absolute value of a given number is smaller than eps, it is considered to be equal to zero.
+         */
+        eps: number;
+        /**
+         * Computes the binomial coefficient n over k.
+         * @param n
+         * @param k
+         */
+        binomial(n: number, k: number): number;
+        /**
+         * Computes the hyperbolic cosine of x.
+         * @param x
+         */
+        cosh(x: number): number;
+    }
+    /**
+     *
+     */
+    var Math: Math;
 }
