@@ -35,13 +35,13 @@ angular.module('jed', []).factory 'i18n', ['$window', (w) ->
           lang: "en"
           "plural-forms": "nplurals=2; plural=(n != 1);"
         "Create a New Gist": [null, "Create a New Gist"],
-        "Create gist": [null, "Create gist"],
+        "Create Gist": [null, "Create Gist"],
         "Gist": [null, "Gist", "Gists"],
         "Gist name": [null, "Gist name"],
         "My Gist": [null, "My Gist", "My Gists"],
-        "Great gist names are short and memorable.": [null, "Great gist names are short and memorable."],
-        "Initialize this gist with a README.md": [null, "Initialize this gist with a README.md"],
-        "This will allow you to clone the gist immediately in GitHub.": [null, "This will allow you to clone the gist immediately in GitHub."],
+        "Great Gist names are short and memorable.": [null, "Great Gist names are short and memorable."],
+        "Initialize this Gist with a README.md": [null, "Initialize this Gist with a README.md"],
+        "This will allow you to clone the Gist immediately in GitHub.": [null, "This will allow you to clone the Gist immediately in GitHub."],
 
         "Create a New Repo": [null, "Create a New Repository"],
         "Create repo": [null, "Create repository"],
