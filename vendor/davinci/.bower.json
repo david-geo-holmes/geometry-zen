@@ -42,6 +42,6 @@
     "commit": "1836295ef68607f0c6b109aec43fcb49063a3011"
   },
   "_source": "git://github.com/geometryzen/davinci.git",
-  "_target": "^0.9.250",
+  "_target": "*",
   "_originalSource": "davinci"
 }
