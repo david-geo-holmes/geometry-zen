@@ -26,6 +26,24 @@ declare module JXG {
          */
         hideElement(): void;
         /**
+         * Register a new event handler.
+         * For a list of possible events see documentation of the elements and objects implementing the EventEmitter interface. 
+         * @param event
+         * @param handler
+         * @param context The context the handler will be called in, default is the element itself.
+         */
+        on(event: string, handler: ()=>void, context?: {}): void;
+        /**
+         * Sets an arbitrary number of attributes.
+         * @param attributes An object with attributes.
+         */
+        setAttribute(attributes: {}): void;
+        /**
+         * Updates the element's label text, strips all html.
+         * @param text The element label text.
+         */
+        setLabelText(text: string): string;
+        /**
          * Updates the element's label text and the element's attribute "name", strips all html.
          * @param name The element name.
          */
@@ -199,19 +217,19 @@ declare module JXG {
         /**
          *
          */
-        create(elementType: "angle", parents: any[], attributes?: {}): Angle;
+        create(elementType: "angle", parents?: any[], attributes?: {}): Angle;
         /**
          *
          */
-        create(elementType: "arrow", parents: any[], attributes?: {}): Arrow;
+        create(elementType: "arrow", parents?: any[], attributes?: {}): Arrow;
         /**
          *
          */
-        create(elementType: "axis", parents: any[], attributes?: {}): Axis;
+        create(elementType: "axis", parents?: any[], attributes?: {}): Axis;
         /**
          *
          */
-        create(elementType: "button", parents: any[], attributes?: {}): Button;
+        create(elementType: "button", parents?: any[], attributes?: {}): Button;
         /**
          *
          */
@@ -247,7 +265,7 @@ declare module JXG {
         /**
          *
          */
-        create(elementType: "point", parents?: number[], attributes?: {}): Point;
+        create(elementType: "point", parents?: any[], attributes?: {}): Point;
         /**
          *
          */
@@ -274,6 +292,12 @@ declare module JXG {
          * @return Reference to the board
          */
         unsuspendUpdate(): Board;
+        /**
+         * Runs through most elements and calls their update() method and update the conditions.
+         * @param drag Element that caused the update.
+         * @return Reference to the board
+         */
+        update(drag?: GeometryElement): Board;
     }
     /**
      *
