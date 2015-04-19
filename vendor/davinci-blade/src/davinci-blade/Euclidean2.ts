@@ -390,10 +390,32 @@ class Euclidean2 {
     }
 
     add(rhs: Euclidean2): Euclidean2 {
-        var xs;
-
-        xs = Euclidean2.add(this.coordinates(), rhs.coordinates());
+        var xs = Euclidean2.add(this.coordinates(), rhs.coordinates());
         return new Euclidean2(xs[0], xs[1], xs[2], xs[3]);
+    }
+
+    __add__(other: any): Euclidean2 {
+        if (other instanceof Euclidean2) {
+            return this.add(other);
+        }
+        else if (typeof other === 'number') {
+            return this.add(new Euclidean2(other,0,0,0));
+        }
+        else {
+            return;
+        }
+    }
+
+    __radd__(other: any): Euclidean2 {
+        if (other instanceof Euclidean2) {
+            return other.add(this);
+        }
+        else if (typeof other === 'number') {
+            return new Euclidean2(other,0,0,0).add(this);
+        }
+        else {
+            return;
+        }
     }
 
     static sub(a: number[], b: number[]): number[] {
@@ -419,6 +441,30 @@ class Euclidean2 {
 
         xs = Euclidean2.sub(this.coordinates(), rhs.coordinates());
         return new Euclidean2(xs[0], xs[1], xs[2], xs[3]);
+    }
+
+    __sub__(other: any): Euclidean2 {
+        if (other instanceof Euclidean2) {
+            return this.sub(other);
+        }
+        else if (typeof other === 'number') {
+            return this.sub(new Euclidean2(other,0,0,0));
+        }
+        else {
+            return;
+        }
+    }
+
+    __rsub__(other: any): Euclidean2 {
+        if (other instanceof Euclidean2) {
+            return other.sub(this);
+        }
+        else if (typeof other === 'number') {
+            return new Euclidean2(other,0,0,0).sub(this);
+        }
+        else {
+            return;
+        }
     }
 
     static mul(a: number[], b: number[]): number[] {
@@ -450,6 +496,30 @@ class Euclidean2 {
         }
     }
 
+    __mul__(other: any): Euclidean2 {
+        if (other instanceof Euclidean2) {
+            return this.mul(other);
+        }
+        else if (typeof other === 'number') {
+            return this.mul(new Euclidean2(other,0,0,0));
+        }
+        else {
+            return;
+        }
+    }
+
+    __rmul__(other: any): Euclidean2 {
+        if (other instanceof Euclidean2) {
+            return other.mul(this);
+        }
+        else if (typeof other === 'number') {
+            return new Euclidean2(other,0,0,0).mul(this);
+        }
+        else {
+            return;
+        }
+    }
+
     scalarMultiply(rhs: number): Euclidean2 {
         return new Euclidean2(this.w * rhs, this.x * rhs, this.y * rhs, this.xy * rhs);
     }
@@ -460,6 +530,53 @@ class Euclidean2 {
         } else {
             return divide(this.w, this.x, this.y, this.xy, rhs.w, rhs.x, rhs.y, rhs.xy, void 0);
         }
+    }
+
+    __div__(other: any): Euclidean2 {
+        if (other instanceof Euclidean2) {
+            return this.div(other);
+        }
+        else if (typeof other === 'number') {
+            return this.div(new Euclidean2(other,0,0,0));
+        }
+        else {
+            return;
+        }
+    }
+
+    __rdiv__(other: any): Euclidean2 {
+        if (other instanceof Euclidean2) {
+            return other.div(this);
+        }
+        else if (typeof other === 'number') {
+            return new Euclidean2(other,0,0,0).div(this);
+        }
+        else {
+            return;
+        }
+    }
+
+    static splat(a: number[], b: number[]): number[] {
+        var a0, a1, a2, a3, b0, b1, b2, b3, x0, x1, x2, x3;
+
+        a0 = a[0];
+        a1 = a[1];
+        a2 = a[2];
+        a3 = a[3];
+        b0 = b[0];
+        b1 = b[1];
+        b2 = b[2];
+        b3 = b[3];
+        x0 = a0 * b0 + a1 * b1 + a2 * b2 - a3 * b3;
+        x1 = 0;
+        x2 = 0;
+        x3 = 0;
+        return [x0, x1, x2, x3];
+    }
+
+    splat(rhs: Euclidean2): Euclidean2 {
+        var xs = Euclidean2.splat(this.coordinates(), rhs.coordinates());
+        return new Euclidean2(xs[0], xs[1], xs[2], xs[3]);
     }
 
     static wedge(a: number[], b: number[]): number[] {
@@ -481,10 +598,32 @@ class Euclidean2 {
     }
 
     wedge(rhs: Euclidean2): Euclidean2 {
-        var xs;
-
-        xs = Euclidean2.wedge(this.coordinates(), rhs.coordinates());
+        var xs = Euclidean2.wedge(this.coordinates(), rhs.coordinates());
         return new Euclidean2(xs[0], xs[1], xs[2], xs[3]);
+    }
+
+    __wedge__(other: any): Euclidean2 {
+        if (other instanceof Euclidean2) {
+            return this.wedge(other);
+        }
+        else if (typeof other === 'number') {
+            return this.wedge(new Euclidean2(other,0,0,0));
+        }
+        else {
+            return;
+        }
+    }
+
+    __rwedge__(other: any): Euclidean2 {
+        if (other instanceof Euclidean2) {
+            return other.wedge(this);
+        }
+        else if (typeof other === 'number') {
+            return new Euclidean2(other,0,0,0).wedge(this);
+        }
+        else {
+            return;
+        }
     }
 
     static lshift(a: number[], b: number[]): number[] {
@@ -512,6 +651,30 @@ class Euclidean2 {
         return new Euclidean2(xs[0], xs[1], xs[2], xs[3]);
     }
 
+    __lshift__(other: any): Euclidean2 {
+        if (other instanceof Euclidean2) {
+            return this.lshift(other);
+        }
+        else if (typeof other === 'number') {
+            return this.lshift(new Euclidean2(other,0,0,0));
+        }
+        else {
+            return;
+        }
+    }
+
+    __rlshift__(other: any): Euclidean2 {
+        if (other instanceof Euclidean2) {
+            return other.lshift(this);
+        }
+        else if (typeof other === 'number') {
+            return new Euclidean2(other,0,0,0).lshift(this);
+        }
+        else {
+            return;
+        }
+    }
+
     static rshift(a: number[], b: number[]): number[] {
         var a0, a1, a2, a3, b0, b1, b2, b3, x0, x1, x2, x3;
 
@@ -535,6 +698,69 @@ class Euclidean2 {
 
         xs = Euclidean2.rshift(this.coordinates(), rhs.coordinates());
         return new Euclidean2(xs[0], xs[1], xs[2], xs[3]);
+    }
+
+    __rshift__(other: any): Euclidean2 {
+        if (other instanceof Euclidean2) {
+            return this.rshift(other);
+        }
+        else if (typeof other === 'number') {
+            return this.rshift(new Euclidean2(other,0,0,0));
+        }
+        else {
+            return;
+        }
+    }
+
+    __rrshift__(other: any): Euclidean2 {
+        if (other instanceof Euclidean2) {
+            return other.rshift(this);
+        }
+        else if (typeof other === 'number') {
+            return new Euclidean2(other,0,0,0).rshift(this);
+        }
+        else {
+            return;
+        }
+    }
+
+    __vbar__(other: any): Euclidean2 {
+        if (other instanceof Euclidean2) {
+            return this.splat(other);
+        }
+        else if (typeof other === 'number') {
+            return this.splat(new Euclidean2(other,0,0,0));
+        }
+        else {
+            return;
+        }
+    }
+
+    __rvbar__(other: any): Euclidean2 {
+        if (other instanceof Euclidean2) {
+            return other.splat(this);
+        }
+        else if (typeof other === 'number') {
+            return new Euclidean2(other,0,0,0).splat(this);
+        }
+        else {
+            return;
+        }
+    }
+
+    __pos__(): Euclidean2 {
+        return this;
+    }
+
+    __neg__(): Euclidean2 {
+        return new Euclidean2(-this.w, -this.x, -this.y, -this.xy);
+    }
+
+    /**
+     * ~ (tilde) produces reversion.
+     */
+    __tilde__(): Euclidean2 {
+        return new Euclidean2(this.w, this.x, this.y, -this.xy);
     }
 
     grade(index: number): Euclidean2 {
