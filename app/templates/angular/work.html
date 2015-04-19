@@ -50,7 +50,7 @@
       </div>
     </div>
   </div>
-  <div class="work-layout">
+  <div id="container">
     <!--div class="pane ui-layout-west">
       <div id="files">
         <table class="table table-condensed">
@@ -63,7 +63,7 @@
       </div>
     </div-->
     <div class="pane ui-layout-center ui-layout-code">
-      <div id="editor"></div>
+        <pre id="editor"></pre>
     </div>
     <div class="pane ui-layout-east ui-layout-printer">
       <div class="alert alert-block alert-{{message.severity}}" ng-repeat="message in messages" ng-show="messages.length &gt; 0">

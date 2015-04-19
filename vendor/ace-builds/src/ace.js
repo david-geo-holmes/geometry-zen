@@ -5064,6 +5064,9 @@ function wrap(editor, rootElement, workspace, doc) {
         moveCursorTo: function (row, column, animate) {
             return editor.moveCursorTo(row, column, animate);
         },
+        resize: function (force) {
+            return editor.resize(force);
+        },
         setAutoScrollEditorIntoView: function (enable) {
             return editor.setAutoScrollEditorIntoView(enable);
         },
@@ -20177,6 +20180,7 @@ function edit(source, workspace) {
         editor: editor,
         onResize: editor.resize.bind(editor, null)
     };
+
     if (oldNode)
         env['textarea'] = oldNode;
     event.addListener(window, "resize", env.onResize);

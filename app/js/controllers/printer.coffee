@@ -1,7 +1,7 @@
 angular.module("app").controller 'PrinterCtrl', ['$scope', ($scope) ->
 
   EVENT_CATEGORY = "printer"
-  ga('create', 'UA-41504069-1', 'geometryzen.org');
+  ga('create', 'UA-41504069-1', 'geometryzen.org')
   ga('set', 'page', '/printer')
   ga('send', 'pageview')
 

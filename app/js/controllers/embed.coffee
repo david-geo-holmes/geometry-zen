@@ -1,7 +1,11 @@
 angular.module("app").controller 'EmbedCtrl', ['$rootScope','$scope', '$location', '$window', '$routeParams', '$', '_', 'GitHub', 'Base64', 'cookie', 'GitHubAuthManager', ($rootScope, $scope, $location, $window, $routeParams, $, _, github, base64, cookie, authManager) ->
 
+  # Ensure that scrollbars are disabled.
+  # This is so that we don't get double scrollbars when using the editor.
+  $window.document.body.style.overflow = 'hidden'
+
   EVENT_CATEGORY = "embed"
-  ga('create', 'UA-41504069-1', 'geometryzen.org');
+  ga('create', 'UA-41504069-1', 'geometryzen.org')
   ga('set', 'page', '/embed')
   ga('send', 'pageview')
 

@@ -1,7 +1,7 @@
 angular.module("app").controller 'NewGistCtrl', ['$scope', 'GitHub', 'cookie', '$', '_', ($scope, github, cookie, $, _) ->
 
   EVENT_CATEGORY = "new-gist"
-  ga('create', 'UA-41504069-1', 'geometryzen.org');
+  ga('create', 'UA-41504069-1', 'geometryzen.org')
   ga('set', 'page', '/new-gist')
   ga('send', 'pageview')
 

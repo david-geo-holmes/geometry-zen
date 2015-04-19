@@ -1,7 +1,11 @@
-angular.module("app").controller 'UserCtrl', ['$rootScope','$scope', '$routeParams', 'GitHub', 'cookie', '$', '_', 'async', ($rootScope, $scope, $routeParams, github, cookie, $, _, async) ->
+angular.module("app").controller 'UserCtrl', ['$rootScope','$scope', '$window', '$routeParams', 'GitHub', 'cookie', '$', '_', 'async', ($rootScope, $scope, $window, $routeParams, github, cookie, $, _, async) ->
+
+  # Ensure that scrollbars are enabled.
+  # This is because we diable them for editing.
+  $window.document.body.style.overflow = 'auto'
 
   EVENT_CATEGORY = "user"
-  ga('create', 'UA-41504069-1', 'geometryzen.org');
+  ga('create', 'UA-41504069-1', 'geometryzen.org')
   ga('set', 'page', '/user')
   ga('send', 'pageview')
 

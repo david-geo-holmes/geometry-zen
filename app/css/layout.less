@@ -1,16 +1,37 @@
+//
+// This file was derived from the layout used in the jQuery-UI Layout examples.
+// The customization is first, followed by the boilerplate.
+//
 @import "variables.less";
+
+// This is a bit extreme considering we only want to affect the editing page!
+html, body {
+    background: @bodyBackground;;
+    width:      100%;
+    height:     100%;
+    padding:    0;
+    margin:     0;
+//  overflow:   auto; /* when page gets too small */
+  }
 
 #work-subnavbar
 {
   margin-bottom: 0em;
 }
 
-.work-layout
+#container
 {
-  background: @paneBackground;
-  height:   800px;
-  margin:   0 auto;
-  width:    100%;
+    width:    100%;
+    height:   100%;
+    // Setting position is essential in order to prevent the UI Layout Initialization Warning
+    // which happens because initially the div are empty (we're using Angular).
+    position: absolute;
+    left:     0px;
+    right:    0px;
+    top:      139px;
+    bottom:   0px;
+//  margin:   0 auto;
+    background: @paneBackground;
 }
 
 #embed-subnavbar
@@ -31,6 +52,9 @@
   display:  none; /* will appear when layout inits */
 }
 
+//
+// Below this point, the css is essentially that in the jQuery UI Layout examples.
+//
 
 /*
  *  PANES & CONTENT-DIVs

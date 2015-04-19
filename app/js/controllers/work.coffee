@@ -1,5 +1,16 @@
 angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$location', '$window', '$routeParams', '$', '_', 'GitHub', 'Base64', 'cookie', 'GitHubAuthManager', ($rootScope, $scope, $http, $location, $window, $routeParams, $, _, github, base64, cookie, authManager) ->
 
+  # Ensure that scrollbars are disabled.
+  # This is so that we don't get double scrollbars when using the editor.
+  $window.document.body.style.overflow = 'hidden'
+
+  $($window.document).ready(()-> $('#container').layout());
+
+  EVENT_CATEGORY = "work"
+  ga('create', 'UA-41504069-1', 'geometryzen.org')
+  ga('set', 'page', '/work')
+  ga('send', 'pageview')
+
   DOMAIN = "#{$location.protocol()}://#{$location.host()}:#{$location.port()}"
 
   endsWith = (str, suffix) ->
@@ -21,11 +32,6 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
   isPython = (path) -> return endsWith(path, '.py')
 
   isTypeScript = (path) -> return endsWith(path, '.ts')
-
-  EVENT_CATEGORY = "work"
-  ga('create', 'UA-41504069-1', 'geometryzen.org');
-  ga('set', 'page', '/work')
-  ga('send', 'pageview')
 
   authManager.handleLoginCallback (err, token) ->
     if err
@@ -49,10 +55,24 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
   # Keep the theme as textmate until the context sensitive popup is integrated.
   editor.setTheme("ace/theme/textmate")
   editor.getSession().setMode("ace/mode/typescript")
-  editor.getSession().setTabSize(2)
+  editor.getSession().setTabSize(4)
   editor.setShowInvisibles(true)
   editor.setFontSize('15px')
 # editor.setShowPrintMargin false
+
+  resizeHandler = () =>
+    h = $window.innerHeight
+    # 159 is the magic number that makes the editor resize correctly.
+    $('#editor').css('height', (h-159).toString()+'px')
+    # This final call forces a refresh of the editor.
+    # I wonder if supplying all the parameters would allow us to stop fiddling with CSS?
+    editor.resize(true)
+
+  # Hook the 'resize' event.
+  $($window).resize(resizeHandler)
+
+  # Force a resize when the page first loads.
+  resizeHandler()
 
   fileNames.forEach (fileName) =>
     readFile fileName, (err, content) =>

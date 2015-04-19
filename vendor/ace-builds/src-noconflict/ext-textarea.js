@@ -188,6 +188,7 @@ function edit(source, workspace) {
         editor: editor,
         onResize: editor.resize.bind(editor, null)
     };
+
     if (oldNode)
         env['textarea'] = oldNode;
     event.addListener(window, "resize", env.onResize);

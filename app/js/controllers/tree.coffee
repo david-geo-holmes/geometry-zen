@@ -1,7 +1,11 @@
 angular.module("app").controller 'TreeCtrl', ['$rootScope','$scope', '$location', '$window', '$routeParams', '$', '_', 'GitHub', 'Base64', 'cookie', ($rootScope, $scope, $location, $window, $routeParams, $, _, github, base64, cookie) ->
 
+  # Ensure that scrollbars are enabled.
+  # This is because we diable them for editing.
+  $window.document.body.style.overflow = 'auto'
+
   EVENT_CATEGORY = "tree"
-  ga('create', 'UA-41504069-1', 'geometryzen.org');
+  ga('create', 'UA-41504069-1', 'geometryzen.org')
   ga('set', 'page', '/tree')
   ga('send', 'pageview')
 
