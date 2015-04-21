@@ -4,12 +4,14 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
   # This is so that we don't get double scrollbars when using the editor.
   $window.document.body.style.overflow = 'hidden'
 
-  $($window.document).ready(()-> $('#container').layout());
+  # I'm not sure if this is actually doing anything.
+  # In any case, it will soon be removed.
+  # $($window.document).ready ()-> $('#container').layout()
 
   EVENT_CATEGORY = "work"
-  ga('create', 'UA-41504069-1', 'geometryzen.org')
-  ga('set', 'page', '/work')
-  ga('send', 'pageview')
+  ga 'create', 'UA-41504069-1', 'geometryzen.org'
+  ga 'set', 'page', '/work'
+  ga 'send', 'pageview'
 
   DOMAIN = "#{$location.protocol()}://#{$location.host()}:#{$location.port()}"
 
@@ -51,14 +53,15 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
       .error (data, status, headers, config) ->
         callback new Error "Unable to wrangle #{fileName}."
 
-  editor = ace.edit("editor", workspace)
+  editor = ace.edit "editor", workspace
   # Keep the theme as textmate until the context sensitive popup is integrated.
-  editor.setTheme("ace/theme/textmate")
-  editor.getSession().setMode("ace/mode/typescript")
-  editor.getSession().setTabSize(4)
-  editor.setShowInvisibles(true)
-  editor.setFontSize('15px')
-# editor.setShowPrintMargin false
+  editor.setTheme "ace/theme/chrome"
+  editor.getSession().setMode "ace/mode/typescript"
+  editor.getSession().setTabSize 2
+  editor.setShowInvisibles true
+  editor.setFontSize '18px'
+  editor.setShowPrintMargin false
+  editor.setDisplayIndentGuides false
 
   resizeHandler = () =>
     h = $window.innerHeight
@@ -66,10 +69,10 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
     $('#editor').css('height', (h-159).toString()+'px')
     # This final call forces a refresh of the editor.
     # I wonder if supplying all the parameters would allow us to stop fiddling with CSS?
-    editor.resize(true)
+    editor.resize true
 
   # Hook the 'resize' event.
-  $($window).resize(resizeHandler)
+  $($window).resize resizeHandler
 
   # Force a resize when the page first loads.
   resizeHandler()
@@ -172,7 +175,7 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
         editor.gotoLine(0, 0)
         return
       else
-        console.log(err)
+        console.log err
         return
   else
     $scope.contextItem.name = "Untitled"
@@ -193,17 +196,18 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
       Sk.python3 = false
       Sk.configure
         "output": (text) ->
-          $rootScope.$broadcast('print', text)
+          console.log text
+          # $rootScope.$broadcast('print', text)
         "debugout": (arg) ->
-          console.log(arg)
+          console.log arg
         "read": (searchPath) ->
           if Sk.builtinFiles is undefined or Sk.builtinFiles["files"][searchPath] is undefined
-            throw new Error("File not found: '#{searchPath}'")
+            throw new Error "File not found: '#{searchPath}'"
           else
             return Sk.builtinFiles["files"][searchPath]
       dumpJS = false
 
-      if isTypeScript($scope.contextItem.path)
+      if isTypeScript $scope.contextItem.path
         if $scope.outputFile
           prog = $scope.outputFile.text
           #console.log "js: #{prog}"
@@ -212,18 +216,18 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
           eval(prog)
         else
           alert "The program is not ready to be executed."
-      else if isJavaScript($scope.contextItem.path)
+      else if isJavaScript $scope.contextItem.path
         #console.log "js: #{prog}"
         prog = Ms.transpile(prog)
         #console.log "ms: #{prog}"
         eval(prog)
-      else if isCoffeeScript($scope.contextItem.path)
-        js = CoffeeScript.compile(prog)
+      else if isCoffeeScript $scope.contextItem.path
+        js = CoffeeScript.compile prog
         #console.log "js: #{js}"
-        ms = Ms.transpile(js)
+        ms = Ms.transpile js
         #console.log "ms: #{ms}"
         eval(ms)
-      else if isPython($scope.contextItem.path)
+      else if isPython $scope.contextItem.path
         Sk.importMainWithBody "<stdin>", dumpJS, prog
       else
         Sk.importMainWithBody "<stdin>", false, prog
@@ -253,14 +257,14 @@ angular.module("app").controller 'WorkCtrl', ['$rootScope','$scope','$http', '$l
   # This is the save event handler for an existing page, as evident by the provision of the SHA.
   $scope.saveFile = () ->
     ga('send', 'event', EVENT_CATEGORY, 'savePage')
-    content = base64.encode(editor.getValue())
+    content = base64.encode editor.getValue()
     if $scope.user
       github.putFile token, $scope.user.login, $scope.repo.name, $scope.contextItem.path, "Save file.", content, $scope.contextItem.sha, (err, response, status, headers, config) ->
         if not err
           $scope.contextItem.sha = response.content.sha
         else
           # The cause given by the err is really for developer use only.
-          alert("Error saving file to repository. Cause: #{err.message}")
+          alert "Error saving file to repository. Cause: #{err.message}"
     else
       if $scope.contextGist.id
         description = $scope.contextGist.description

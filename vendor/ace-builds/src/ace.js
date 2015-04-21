@@ -5100,6 +5100,18 @@ function wrap(editor, rootElement, workspace, doc) {
         set onTextInput(value) {
             editor.onTextInput = value;
         },
+        getDisplayIndentGuides: function () {
+            return editor.getDisplayIndentGuides();
+        },
+        setDisplayIndentGuides: function (displayIndentGuides) {
+            return editor.setDisplayIndentGuides(displayIndentGuides);
+        },
+        getShowPrintMargin: function () {
+            return editor.getShowPrintMargin();
+        },
+        setShowPrintMargin: function (showPrintMargin) {
+            return editor.setShowPrintMargin(showPrintMargin);
+        },
         changeFile: changeFile
     };
 
@@ -13829,8 +13841,8 @@ var Editor = (function (_super) {
         return this.renderer.getShowInvisibles();
     };
 
-    Editor.prototype.setDisplayIndentGuides = function (display) {
-        this.renderer.setDisplayIndentGuides(display);
+    Editor.prototype.setDisplayIndentGuides = function (displayIndentGuides) {
+        this.renderer.setDisplayIndentGuides(displayIndentGuides);
     };
 
     Editor.prototype.getDisplayIndentGuides = function () {
@@ -15644,13 +15656,14 @@ var Text = (function (_super) {
         return true;
     };
 
-    Text.prototype.setDisplayIndentGuides = function (display) {
-        if (this.displayIndentGuides == display)
+    Text.prototype.setDisplayIndentGuides = function (displayIndentGuides) {
+        if (this.displayIndentGuides === displayIndentGuides) {
             return false;
-
-        this.displayIndentGuides = display;
-        this.$computeTabString();
-        return true;
+        } else {
+            this.displayIndentGuides = displayIndentGuides;
+            this.$computeTabString();
+            return true;
+        }
     };
     Text.prototype.$computeTabString = function () {
         var tabSize = this.session.getTabSize();
@@ -17316,8 +17329,8 @@ var VirtualRenderer = (function (_super) {
         return this.getOption("displayIndentGuides");
     };
 
-    VirtualRenderer.prototype.setDisplayIndentGuides = function (display) {
-        this.setOption("displayIndentGuides", display);
+    VirtualRenderer.prototype.setDisplayIndentGuides = function (displayIndentGuides) {
+        this.setOption("displayIndentGuides", displayIndentGuides);
     };
     VirtualRenderer.prototype.setShowPrintMargin = function (showPrintMargin) {
         this.setOption("showPrintMargin", showPrintMargin);
